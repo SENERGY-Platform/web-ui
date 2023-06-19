@@ -47,12 +47,15 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
     ready = false;
     offset = 0;
     totalCount = 0;
+    userHasCreateAuthorization: boolean = false
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<ProcessIoVariable>(true, []);
 
     dataSource = new MatTableDataSource<ProcessIoVariable>();
-    displayedColumns: string[] = ['select', 'unix_timestamp_in_s', 'key', 'process_instance_id', 'process_definition_id', 'value', 'edit', 'delete'];
+    displayedColumns: string[] = ['select', 'unix_timestamp_in_s', 'key', 'process_instance_id', 'process_definition_id', 'value'];
     sortBy: string = "unix_timestamp_in_s"
     sortDirection: SortDirection = "desc"
     
@@ -66,6 +69,20 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
         private searchbarService: SearchbarService,
         public utilsService: UtilService
     ) {
+        this.processIoService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasCreateAuthorization = hasAuth)
+        this.processIoService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.processIoService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
+
         this.updateTotal();
     }
 

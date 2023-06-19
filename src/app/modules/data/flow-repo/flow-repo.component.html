@@ -69,20 +69,20 @@
                                     <mat-icon>update</mat-icon>{{item.dateUpdated| date:"medium"}}
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="end center" class="footer-buttons">
-                                    <button *ngIf="item.share.read || item.userId === userId" mat-icon-button routerLink="/data/flow-repo/deploy/{{item._id}}">
+                                    <button *ngIf="userHasPipelineCreateAuthorization && (item.share.read || item.userId === userId)" mat-icon-button routerLink="/data/flow-repo/deploy/{{item._id}}">
                                         <mat-icon color="accent">
                                             start
                                         </mat-icon>
                                     </button>
-                                    <button *ngIf="item.share.write ||  item.share.read || item.userId === userId" mat-icon-button routerLink="/data/designer/{{item._id}}">
-                                        <mat-icon *ngIf="item.share.write || item.userId === userId" color="accent">
+                                    <button *ngIf="userHasUpdateAuthorization && (item.share.write ||  item.share.read || item.userId === userId)" mat-icon-button routerLink="/data/designer/{{item._id}}">
+                                        <mat-icon *ngIf="(item.share.write || item.userId === userId)" color="accent">
                                             edit
                                         </mat-icon>
                                         <mat-icon *ngIf="!(item.share.write || item.userId === userId)" color="accent">
                                             visibility
                                         </mat-icon>
                                     </button>
-                                    <button *ngIf="item.share.write || item.userId === userId" mat-icon-button (click)="deleteFlow(item)">
+                                    <button *ngIf="userHasDeleteAuthorization && (item.share.write || item.userId === userId)" mat-icon-button (click)="deleteFlow(item)">
                                         <mat-icon color="warn">
                                             delete
                                         </mat-icon>

@@ -34,6 +34,8 @@ import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {UtilService} from '../../../../core/services/util.service';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
@@ -42,15 +44,15 @@ export class DeviceInstancesService {
     private getDeviceHistoryObservable7d: Observable<DeviceInstancesHistoryModel[]> | null = null;
     private getDeviceHistoryObservable1h: Observable<DeviceInstancesHistoryModel[]> | null = null;
     nicknameAttributeKey = 'shared/nickname';
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
 
     constructor(
-        private dialog: MatDialog,
-        private http: HttpClient,
+        private http: HttpClient, 
         private errorHandlerService: ErrorHandlerService,
-        private deviceTypeService: DeviceTypeService,
-        private snackBar: MatSnackBar,
-        private utilService: UtilService,
+        private ladonService: LadonService,
+        private utilService: UtilService
     ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "DELETE", "POST", "PUT"])
     }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
@@ -423,5 +425,30 @@ export class DeviceInstancesService {
                 ),
             ),
         );
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

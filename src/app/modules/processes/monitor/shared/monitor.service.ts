@@ -27,19 +27,25 @@ import { MonitorProcessTotalModel } from './monitor-process-total.model';
 import { ProcessIncidentsService } from '../../incidents/shared/process-incidents.service';
 import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.model';
 import { DeviceInstancesUpdateModel } from '../../../devices/device-instances/shared/device-instances-update.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class MonitorService {
     private getAllHistoryInstancesObservable: Observable<MonitorProcessModel[]> | null = null;
-
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()    
+    
     constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
+        private http: HttpClient, 
+        private errorHandlerService: ErrorHandlerService, 
         private dialog: MatDialog,
         private processIncidentsService: ProcessIncidentsService,
-    ) {}
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.processServiceUrl, ["GET"])
+    }
 
     getAllHistoryInstances(): Observable<MonitorProcessModel[]> {
         if (this.getAllHistoryInstancesObservable === null) {
@@ -137,5 +143,18 @@ export class MonitorService {
             };
             this.dialog.open(MonitorDetailsDialogComponent, dialogConfig);
         });
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

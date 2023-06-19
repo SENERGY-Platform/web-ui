@@ -16,7 +16,7 @@
  *
  */
 
-import {PermissionModel} from '../permission.model';
+import {PermissionModel} from '../shared/permission.model';
 
 export interface PermissionImportModel {
     policies: PermissionModel[];

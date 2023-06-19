@@ -11,15 +11,15 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute} from '@angular/router';
 import {of} from 'rxjs';
 import { AuthorizationServiceMock } from 'src/app/core/services/authorization.service.mock';
-import { LadonService } from '../services/ladom.service';
-import { PermissionModel } from '../permission.model';
+import { LadonService } from '../shared/services/ladom.service';
+import { PermissionModel } from '../shared/permission.model';
 
 import {PermissionsEditComponent} from './permissions-edit.component';
-import { LadomServiceMock } from '../services/ladom.service.mock';
+import { LadomServiceMock } from '../shared/services/ladom.service.mock';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
-import { KongServiceMock } from '../services/kong.service.mock';
-import { KongService } from '../services/kong.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { KongService } from '../shared/services/kong.service';
+import { KongServiceMock } from '../shared/services/kong.service.mock';
 
 describe('PermissionsEditComponent', () => {
     let component: PermissionsEditComponent;

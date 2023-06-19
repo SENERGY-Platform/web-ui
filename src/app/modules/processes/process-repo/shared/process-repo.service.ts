@@ -24,12 +24,23 @@ import { ProcessModel } from './process.model';
 import { DesignerProcessModel } from '../../designer/shared/designer.model';
 import { ProcessRepoConditionsModel } from './process-repo-conditions.model';
 import { DeviceTypeBaseModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ProcessRepoService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
+    constructor(
+        private http: HttpClient, 
+        private errorHandlerService: ErrorHandlerService, 
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.processRepoUrl, ["GET", "DELETE", "POST", "PUT"])
+
+    }
 
     list(kind: string, right: string) {
         return this.http.get<any[]>(environment.permissionSearchUrl + '/v3/resources/' + kind + '?limit=9999&rights=' + right).pipe(
@@ -123,5 +134,30 @@ export class ProcessRepoService {
             ),
             catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'checkForProcessModelWithRetries', !shouldIdExists)),
         );
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")    
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

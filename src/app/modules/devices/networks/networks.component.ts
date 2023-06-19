@@ -41,6 +41,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
     styleUrls: ['./networks.component.css'],
 })
 export class NetworksComponent implements OnInit, OnDestroy {
+    displayedColumns = ['select', 'connection', 'name', 'number_devices', 'show', 'clear']
     pageSize = 20;
     dataSource = new MatTableDataSource<NetworksModel>();
     sortBy: string = "name"
@@ -51,6 +52,8 @@ export class NetworksComponent implements OnInit, OnDestroy {
     offset = 0;
     ready = false;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
 
     private searchSub: Subscription = new Subscription();
 
@@ -67,10 +70,26 @@ export class NetworksComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.networksService.getTotalCountOfNetworks().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
+        this.checkAuthorization();
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+    }
+
+    checkAuthorization() {
+        this.networksService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.networksService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
     }
 
     private initSearch() {

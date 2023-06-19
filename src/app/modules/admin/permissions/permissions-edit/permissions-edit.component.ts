@@ -24,9 +24,9 @@ import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
-import { KongService } from '../services/kong.service';
-import { LadonService } from '../services/ladom.service';
-import { PermissionModel } from '../permission.model';
+import { KongService } from '../shared/services/kong.service';
+import { LadonService } from '../shared/services/ladom.service';
+import { PermissionModel } from '../shared/permission.model';
 
 @Component({
     selector: 'senergy-permissions-edit',

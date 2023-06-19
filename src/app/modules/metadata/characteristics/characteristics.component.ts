@@ -37,6 +37,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./characteristics.component.css'],
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy {
+    displayedColumns = ['select', 'name', 'info']
     pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<CharacteristicsPermSearchModel>();
@@ -50,6 +51,9 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     searchText: string = ""
     sortBy: string = "name"
     sortDirection: SortDirection = "asc"
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization: boolean = false
 
     constructor(
         private dialog: MatDialog,
@@ -65,6 +69,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.characteristicsService.getTotalCountOfCharacteristics().subscribe(totalCount => {this.totalCount = totalCount})
         this.initSearch();
+        this.checkAuthorization()
     }
 
     ngOnDestroy() {
@@ -75,6 +80,25 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.sortBy = $event.active 
         this.sortDirection = $event.direction;
         this.reload();
+    }
+
+
+    checkAuthorization() {
+        this.characteristicsService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.characteristicsService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
+        this.characteristicsService.userHasCreateAuthorization().subscribe(hasAuth => {
+            this.userHasCreateAuthorization = hasAuth
+        })
     }
 
     ngAfterViewInit(): void {

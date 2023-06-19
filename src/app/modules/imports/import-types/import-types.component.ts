@@ -36,6 +36,7 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./import-types.component.css'],
 })
 export class ImportTypesComponent implements OnInit {
+    displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share']
     pageSize = 20;
     dataSource = new MatTableDataSource<ImportTypePermissionSearchModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -46,6 +47,9 @@ export class ImportTypesComponent implements OnInit {
     searchSub: Subscription = new Subscription()
     totalCount = 200;
     offset = 0;
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization: boolean = false
 
     constructor(
         private importTypesService: ImportTypesService,
@@ -59,6 +63,7 @@ export class ImportTypesComponent implements OnInit {
 
     ngOnInit(): void {
         this.initSearch();
+        this.checkAuthorization()
     }
 
     ngAfterViewInit(): void {
@@ -67,6 +72,24 @@ export class ImportTypesComponent implements OnInit {
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load();
         });
+    }
+
+    checkAuthorization() {
+        this.importTypesService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.importTypesService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
+        this.importTypesService.userHasCreateAuthorization().subscribe(hasAuth => {
+            this.userHasCreateAuthorization = hasAuth
+        })
     }
 
     private initSearch() {

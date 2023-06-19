@@ -93,6 +93,10 @@ export class AuthorizationService {
         return this.keycloakService.isUserInRole('developer');
     }
 
+    getUserRoles(): string[] {
+        return this.keycloakService.getUserRoles(true)
+    }
+
     loadAllUsers() {
         return this.http
             .get<any | { error: string }>(environment.keycloakUrl + '/auth/admin/realms/master/users')

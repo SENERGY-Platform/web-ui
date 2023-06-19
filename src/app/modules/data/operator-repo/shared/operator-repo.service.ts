@@ -22,12 +22,18 @@ import { catchError, map } from 'rxjs/operators';
 import { OperatorModel } from './operator.model';
 import { Observable } from 'rxjs';
 import { ExportService } from '../../../exports/shared/export.service';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class OperatorRepoService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.operatorRepoUrl, ["GET", "DELETE", "POST", "PUT"])
+    }
 
     getOperators(
         search: string,
@@ -98,5 +104,30 @@ export class OperatorRepoService {
                 map((resp) => ({ status: resp.status })),
                 catchError(this.errorHandlerService.handleError(ExportService.name, 'deleteOperators: Error', { status: 404 })),
             );
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

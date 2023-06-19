@@ -87,6 +87,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     ) {
         this.getRouterParams();
     }
+    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'device_type', 'info', 'share', 'duplicate']
     pageSize = 20;
     dataSource = new MatTableDataSource<DeviceInstancesModel>();
     selection = new SelectionModel<DeviceInstancesModel>(true, []);
@@ -108,12 +109,16 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     routerLocation: LocationModel | null = null;
     private searchSub: Subscription = new Subscription();
     sortBy: string = "display_name"
-    sortDirection: SortDirection = "asc"    
+    sortDirection: SortDirection = "asc"  
+    
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
 
     ngOnInit(): void {
         this.deviceInstancesService.getTotalCountOfDevices().subscribe(totalCount => this.totalCount = totalCount);
         this.loadFilterOptions();
         this.initSearch(); // does automatically load data on first page load
+        this.checkAuthorization()
     }
 
     ngAfterViewInit(): void {
@@ -122,6 +127,21 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load();
         });
+    }
+
+    checkAuthorization() {
+        this.deviceInstancesService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.deviceInstancesService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
     }
 
     private initSearch() {

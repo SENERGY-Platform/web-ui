@@ -80,7 +80,7 @@
                     </td>
                 </ng-container>
 
-                <ng-container matColumnDef="edit">
+                <ng-container matColumnDef="edit" *ngIf="userHasUpdateAuthorization">
                     <th mat-header-cell *matHeaderCellDef class="button-column">Edit</th>
                     <td mat-cell *matCellDef="let element;"
                         matTooltip="{{isEditable(element) ? 'edit' : 'Can\'t edit legacy pipelines'}}">
@@ -91,31 +91,34 @@
                     </td>
                 </ng-container>
 
-                <ng-container matColumnDef="delete">
-                    <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
-                    <td mat-cell *matCellDef="let element;">
-                        <button class="margin" mat-icon-button color="accent" (click)="deletePipeline(element)"
-                            matTooltip="delete">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="header-delete-all">
-                    <th mat-header-cell *matHeaderCellDef colspan="10">
-                        <div fxLayout="row">
-                            <div fxLayoutAlign="center center">You have
-                                selected {{selection.selected.length}} items
-                            </div>
-                            <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
+                <span *ngIf="userHasDeleteAuthorization">
+                    <ng-container matColumnDef="delete">
+                        <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
+                        <td mat-cell *matCellDef="let element;">
+                            <button class="margin" mat-icon-button color="accent" (click)="deletePipeline(element)"
+                                matTooltip="delete">
                                 <mat-icon>delete</mat-icon>
                             </button>
-                        </div>
-                    </th>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
-                </tr>
+                        </td>
+                    </ng-container>
+    
+                    <ng-container matColumnDef="header-delete-all">
+                        <th mat-header-cell *matHeaderCellDef colspan="10">
+                            <div fxLayout="row">
+                                <div fxLayoutAlign="center center">You have
+                                    selected {{selection.selected.length}} items
+                                </div>
+                                <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
+                        </th>
+                    </ng-container>
+    
+                    <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
+                    </tr>
+                </span>
+                
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             </table>

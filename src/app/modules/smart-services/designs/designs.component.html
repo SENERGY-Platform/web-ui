@@ -38,7 +38,7 @@
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
                                     <div fxFlex></div>
-                                    <button mat-icon-button color="accent" matTooltip="Edit"
+                                    <button *ngIf="userHasUpdateAuthorization" mat-icon-button color="accent" matTooltip="Edit"
                                         routerLink="/smart-services/designer/{{item.value.id}}">
                                         <mat-icon>edit</mat-icon>
                                     </button>
@@ -46,7 +46,7 @@
                                         (click)="releaseDesign(item.value)">
                                         <mat-icon>publish</mat-icon>
                                     </button>
-                                    <button mat-icon-button matTooltip="Delete" color="accent"
+                                    <button *ngIf="userHasDeleteAuthorization" mat-icon-button matTooltip="Delete" color="accent"
                                         (click)="deleteDesign(item.value)" [disabled]="selectedItems.length > 0">
                                         <mat-icon>delete</mat-icon>
                                     </button>
@@ -75,6 +75,6 @@
             </div>
         </div>
 </div>
-<button mat-fab class="fab" matTooltip="Create new Design" routerLink="/smart-services/designer">
+<button *ngIf="userHasCreateAuthorization" mat-fab class="fab" matTooltip="Create new Design" routerLink="/smart-services/designer">
     <mat-icon>add</mat-icon>
 </button>

@@ -21,6 +21,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { delay } from 'rxjs/operators';
 import { ExportValueModel } from '../../../exports/shared/export.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
@@ -35,8 +37,14 @@ export class ImportTypesService {
     STRUCTURE = 'https://schema.org/StructuredValue';
     LIST = 'https://schema.org/ItemList';
     types: Map<string, string> = new Map();
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
 
-    constructor(private http: HttpClient) {}
+    constructor(
+        private http: HttpClient, 
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.importRepoUrl, ["GET", "DELETE", "POST", "PUT"])
+    }
 
     listImportTypes(
         search: string,
@@ -140,5 +148,30 @@ export class ImportTypesService {
             const path = parentPath === '' ? content.name : parentPath + '.' + content.name;
             content.sub_content_variables?.forEach((sub) => this.fillValuesAndTags(values, sub, path, includeComplex));
         }
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

@@ -21,14 +21,23 @@ import {environment} from '../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
 import {ExportModel, ExportResponseModel} from './export.model';
+import { AllowedMethods, PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
+import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class BrokerExportService {
     static ID_PREFIX = 'urn:infai:ses:broker-export:';
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    constructor(
+        private http: HttpClient, 
+        private errorHandlerService: ErrorHandlerService, 
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.brokerExportServiceUrl, ["GET"])
+    }
 
     getExports(
         search?: string,
@@ -114,5 +123,18 @@ export class BrokerExportService {
                 map((resp) => ({ status: resp.status })),
                 catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'stopPipelines: Error', { status: 404 })),
             );
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

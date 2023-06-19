@@ -59,7 +59,7 @@
                                         warning
                                     </mat-icon>
                                     <div fxFlex></div>
-                                    <button mat-icon-button matTooltip="Delete" color="accent"
+                                    <button *ngIf="userHasDeleteAuthorization" mat-icon-button matTooltip="Delete" color="accent"
                                             (click)="deleteRelease(item.value)"
                                             [disabled]="item.value.permissions.a === false">
                                         <mat-icon>delete</mat-icon>

@@ -37,6 +37,7 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./import-instances.component.css'],
 })
 export class ImportInstancesComponent implements OnInit {
+    displayedColumns = ['select', 'name', 'image', 'created_at', 'updated_at', 'export']
     dataSource = new MatTableDataSource<ImportInstancesModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
@@ -59,6 +60,9 @@ export class ImportInstancesComponent implements OnInit {
     sort = 'updated_at.desc';
     offset = 0;
     excludeGenerated = localStorage.getItem('import.instances.excludeGenerated') === 'true';
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization: boolean = false
 
     ngOnInit(): void {
         this.initSearch();
@@ -69,6 +73,7 @@ export class ImportInstancesComponent implements OnInit {
             this.searchText = searchText;
             this.reload();
         });
+        this.checkAuthorization()
     }
 
     ngAfterViewInit(): void {
@@ -77,6 +82,24 @@ export class ImportInstancesComponent implements OnInit {
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load();
         });
+    }
+
+    checkAuthorization() {
+        this.importInstancesService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.importInstancesService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
+        this.importInstancesService.userHasCreateAuthorization().subscribe(hasAuth => {
+            this.userHasCreateAuthorization = hasAuth
+        })
     }
 
     edit(m: ImportInstancesModel) {

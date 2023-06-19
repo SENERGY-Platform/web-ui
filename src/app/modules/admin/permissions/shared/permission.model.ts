@@ -67,3 +67,23 @@ export function permissionToPermissionApi(model: PermissionModel): PermissionApi
         meta: 'e30=', // why?
     } as PermissionApiModel;
 }
+
+export interface PermissionTestResponse {
+    GET: boolean; 
+    POST: boolean; 
+    PUT: boolean; 
+    PATCH: boolean; 
+    DELETE: boolean; 
+    HEAD: boolean;
+}
+
+export type AllowedMethods = "GET" | "DELETE" | "POST" | "PATCH" | "PUT" | "HEAD"
+
+export interface AuthorizationRequest {
+    method: string;
+    endpoint: string;
+}
+
+export interface AuthorizationRequestResponse {
+    allowed: boolean[];
+}

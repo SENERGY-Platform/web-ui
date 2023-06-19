@@ -21,12 +21,22 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { PipelineRequestModel } from '../deploy-flow/shared/pipeline-request.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class FlowEngineService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
+    constructor(
+        private http: HttpClient, 
+        private errorHandlerService: ErrorHandlerService,
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.flowEngineUrl, ["DELETE", "POST", "PUT"])
+    }
 
     startPipeline(data: PipelineRequestModel): Observable<unknown> {
         return this.http.post<unknown>(environment.flowEngineUrl + '/pipeline', data).pipe(
@@ -45,5 +55,26 @@ export class FlowEngineService {
         return this.http
             .put<void>(environment.flowEngineUrl + '/pipeline', data)
             .pipe(catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'updatePipeline: Error', undefined)));
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

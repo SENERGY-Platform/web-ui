@@ -42,6 +42,7 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./device-classes.component.css'],
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy {
+    displayedColumns = ['select', 'name']
     pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<DeviceClassesPermSearchModel>();
@@ -54,7 +55,10 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     sortBy: string = "name"
     sortDirection: SortDirection = "asc"
-
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization: boolean = false 
+    
     constructor(
         private dialog: MatDialog,
         private responsiveService: ResponsiveService,
@@ -70,6 +74,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         this.userIsAdmin = this.authService.userIsAdmin();
         this.deviceClassesService.getTotalCountOfDevicesClasses().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
+        this.checkAuthorization();
     }
 
     ngAfterViewInit(): void {
@@ -82,6 +87,24 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+    }
+
+    checkAuthorization() {
+        this.deviceClassesService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.deviceClassesService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
+        this.deviceClassesService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasCreateAuthorization = hasAuth
+        })
     }
 
     private initSearch() {

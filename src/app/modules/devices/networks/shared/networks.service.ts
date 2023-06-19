@@ -26,17 +26,24 @@ import { NetworksEditDialogComponent } from '../dialogs/networks-edit-dialog.com
 import { NetworksHistoryModel } from './networks-history.model';
 import { NetworksClearDialogComponent } from '../dialogs/networks-clear-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class NetworksService {
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
     constructor(
-        private http: HttpClient,
+        private http: HttpClient, 
         private errorHandlerService: ErrorHandlerService,
+        private ladonService: LadonService,
         private dialog: MatDialog,
         public snackBar: MatSnackBar,
-    ) {}
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "POST", "DELETE", "PUT"])
+    }
 
     getNetworksWithLogState(
         searchText: string,
@@ -175,7 +182,6 @@ export class NetworksService {
         });
     }
 
-
     getTotalCountOfNetworks(): Observable<any> {
         return this.http
         .get(environment.permissionSearchUrl + '/v3/total/hubs')
@@ -187,5 +193,30 @@ export class NetworksService {
                 ),
             ),
         );
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")      
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

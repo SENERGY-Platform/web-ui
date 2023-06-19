@@ -21,13 +21,19 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { PipelineModel } from './pipeline.model';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class PipelineRegistryService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
 
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.pipelineRegistryUrl, ["GET"])
+    }
+    
     getPipelines(order: string = 'id:asc'): Observable<PipelineModel[]> {
         return this.http.get<PipelineModel[]>(environment.pipelineRegistryUrl + '/pipeline?order=' + order).pipe(
             map((resp) => resp || []),
@@ -69,16 +75,30 @@ export class PipelineRegistryService {
     }
 
     private fixMaps(pipe: PipelineModel) {
-        pipe.operators.forEach((op) => {
-            if (op.config !== undefined) {
-                const m = new Map<string, string>();
-                // @ts-ignore this is ok, api gives object not map
-                for (const key of Object.keys(op.config)) {
+        if(!!pipe.operators) {
+            pipe.operators.forEach((op) => {
+                if (op.config !== undefined) {
+                    const m = new Map<string, string>();
                     // @ts-ignore this is ok, api gives object not map
-                    m.set(key, op.config[key]);
+                    for (const key of Object.keys(op.config)) {
+                        // @ts-ignore this is ok, api gives object not map
+                        m.set(key, op.config[key]);
+                    }
+                    op.config = m;
                 }
-                op.config = m;
-            }
-        });
+            });
+        }
+    }
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

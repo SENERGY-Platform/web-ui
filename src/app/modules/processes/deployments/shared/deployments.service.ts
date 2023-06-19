@@ -30,12 +30,18 @@ import {
     V2DeploymentsPreparedModel
 } from './deployments-prepared-v2.model';
 import { MatDialog } from '@angular/material/dialog';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class DeploymentsService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.processServiceUrl, ["GET", "DELETE"])
+    }
 
     getStartParameter(modelId: string): Observable<ProcessStartParameter[]> {
         return this.http
@@ -238,5 +244,22 @@ export class DeploymentsService {
             ),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'checkForProcessModelWithRetries', true)),
         );
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+    
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

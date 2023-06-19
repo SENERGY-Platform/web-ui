@@ -48,11 +48,12 @@ export class ExportComponent implements OnInit, OnDestroy {
         'description',
         'created_at',
         'updated_at',
-        'info',
-        'edit',
-        'delete',
+        'info'
     ];
     totalCount = 0;
+    userHasCreateAuthorization: boolean = false
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
 
     exports: ExportModel[] = [] as ExportModel[];
     exportsDataSource = new MatTableDataSource<ExportModel>();
@@ -97,8 +98,6 @@ export class ExportComponent implements OnInit, OnDestroy {
                     'created_at',
                     'updated_at',
                     'info',
-                    'edit',
-                    'delete',
                 ];
             }
             if (localStorage.getItem('data.exports.search') !== null) {
@@ -109,12 +108,30 @@ export class ExportComponent implements OnInit, OnDestroy {
             }
 
             this.initSearchAndGetExports();
+
+            this.checkAuthorization()
         });
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
         this.exportSub.unsubscribe();
+    }
+
+    checkAuthorization() {
+        this.exportService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasCreateAuthorization = hasAuth)
+        this.exportService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.exportService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
     }
 
     deleteExport(exp: ExportModel) {

@@ -33,6 +33,8 @@ import { DeviceInstancesModel } from '../../devices/device-instances/shared/devi
 import { DeviceInstancesUpdateModel } from '../../devices/device-instances/shared/device-instances-update.model';
 import { PathOption } from '../../data/flow-repo/shared/path-options.service';
 import {DeviceInstancesService} from '../../devices/device-instances/shared/device-instances.service';
+import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
+import { AllowedMethods, PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
@@ -44,8 +46,16 @@ export class ExportService {
     typeBoolean = 'https://schema.org/Boolean';
     typeStructure = 'https://schema.org/StructuredValue';
     typeList = 'https://schema.org/ItemList';
-
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private deviceService: DeviceInstancesService) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()    
+    
+    constructor(
+        private http: HttpClient, 
+        private errorHandlerService: ErrorHandlerService, 
+        private ladonService: LadonService,
+        private deviceService: DeviceInstancesService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.exportService, ["GET", "DELETE", "POST", "PUT"])
+    }
 
     getExports(
         internalOnly: boolean,
@@ -258,5 +268,30 @@ export class ExportService {
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(ExportService.name, 'getExportDatabases: Error', [])),
         );
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

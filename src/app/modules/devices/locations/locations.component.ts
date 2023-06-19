@@ -40,6 +40,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./locations.component.css'],
 })
 export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
+    displayedColumns = ['select', 'name', 'show']
     pageSize = 20;
     ready = false;
     instances = [];
@@ -52,6 +53,9 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     searchText: string = ""
     sortBy: string = "name"
     sortDirection: SortDirection = "asc"    
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization: boolean = false
 
     constructor(
         private locationsService: LocationsService,
@@ -76,6 +80,22 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getLocations()
         });
+    }
+
+    checkAuthorization() {
+        this.locationsService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasCreateAuthorization = hasAuth) 
+        this.locationsService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.locationsService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
     }
 
     matSortChange($event: Sort) {

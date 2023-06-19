@@ -28,13 +28,24 @@ import { catchError, map } from 'rxjs/operators';
 import { ConceptsPermSearchModel } from './concepts-perm-search.model';
 import { ConceptsCharacteristicsModel } from './concepts-characteristics.model';
 import { forkJoin } from 'rxjs';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ConceptsService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
 
+    constructor(
+        private http: HttpClient, 
+        private errorHandlerService: ErrorHandlerService,
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "DELETE", "POST", "PUT"])
+    
+    }
+    
     tryConverterExtension(extensionTryRequest: ConverterExtensionTryRequest): Observable<ConverterExtensionTryResult | null> {
         return this.http
             .post<ConverterExtensionTryResult>(environment.marshallerUrl + '/converter/extension-call', extensionTryRequest)
@@ -133,5 +144,30 @@ export class ConceptsService {
                 ),
             ),
         );
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")     
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

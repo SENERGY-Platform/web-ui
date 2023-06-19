@@ -56,7 +56,7 @@
                                                 class="color-sidenav info-icon">share
                                             </mat-icon>
                                             <div fxFlex></div>
-                                            <button mat-icon-button color="accent" matTooltip="Edit"
+                                            <button *ngIf="userHasUpdateAuthorization" mat-icon-button color="accent" matTooltip="Edit"
                                                 routerLink="/processes/designer/{{item.value.id}}">
                                                 <mat-icon>edit</mat-icon>
                                             </button>
@@ -65,7 +65,7 @@
                                                 [disabled]="item.value.permissions.x === false">
                                                 <mat-icon>publish</mat-icon>
                                             </button>
-                                            <button mat-icon-button matTooltip="Delete" color="accent"
+                                            <button *ngIf="userHasDeleteAuthorization" mat-icon-button matTooltip="Delete" color="accent"
                                                 (click)="deleteProcess(item.value)"
                                                 [disabled]="selectedItems.length > 0">
                                                 <mat-icon>delete</mat-icon>
@@ -108,6 +108,6 @@
     </mat-tab-group>
 </div>
 <senergy-spinner [elementCount]="0" [show]="!animationDone"></senergy-spinner>
-<button mat-fab class="fab" matTooltip="Create new process model" routerLink="/processes/designer">
+<button *ngIf="userHasCreateAuthorization" mat-fab class="fab" matTooltip="Create new process model" routerLink="/processes/designer">
     <mat-icon>add</mat-icon>
 </button>

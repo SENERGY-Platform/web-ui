@@ -39,6 +39,7 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./device-types-overview.component.css'],
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
+    displayedColumns = ['select', 'name', 'info', 'edit', 'copy', 'new', 'show']
     pageSize = 20;
     deviceTypes: DeviceTypePermSearchModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
@@ -53,7 +54,10 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     searchText: string = ""
     sortBy: string = "name"
     sortDirection: SortDirection = "asc"
-
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization: boolean = false 
+    
     constructor(
         private searchbarService: SearchbarService,
         private deviceTypeService: DeviceTypeService,
@@ -67,6 +71,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.deviceTypeService.getTotalCountOfDevicesTypes().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
         this.loadDeviceClasses();
+        this.checkAuthorization()
     }
 
     ngOnDestroy() {
@@ -77,6 +82,24 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.sortBy = $event.active 
         this.sortDirection = $event.direction;
         this.reload();
+    }
+
+    checkAuthorization() {
+        this.deviceTypeService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.deviceTypeService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
+        this.deviceTypeService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasCreateAuthorization = hasAuth
+        })
     }
 
     ngAfterViewInit(): void {

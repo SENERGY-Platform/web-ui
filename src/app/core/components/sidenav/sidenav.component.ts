@@ -36,6 +36,7 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     sections: SidenavSectionModel[] = [];
     openSection: null | string = null;
     zIndex = -1;
+    ready: boolean = false
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -108,7 +109,10 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     }
 
     private getSections(): void {
-        this.sections = this.sidenavService.getSections();
+        this.sidenavService.getSections().subscribe(sections => {
+            this.sections = sections;
+            this.ready = true;
+        });
     }
 
     private getActiveSection() {

@@ -20,10 +20,10 @@ import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/c
 import {FormControl, UntypedFormControl, Validators} from '@angular/forms';
 import {MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import { PermissionModel } from '../permission.model';
 import {PermissionImportModel} from './permissions-dialog-import.model';
 import {MatPaginator} from "@angular/material/paginator";
 import {Subscription} from "rxjs";
+import { PermissionModel } from '../shared/permission.model';
 
 @Component({
     selector: 'senergy-permissions-dialog-import',

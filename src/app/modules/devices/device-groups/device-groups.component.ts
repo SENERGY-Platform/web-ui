@@ -36,6 +36,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./device-groups.component.css'],
 })
 export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
+    displayedColumns = ['select', 'name']
     pageSize = 20;
     selection = new SelectionModel<DeviceGroupsPermSearchModel>(true, []);
     totalCount = 200;
@@ -47,6 +48,9 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     searchText: string = ""
     sortBy: string = "name"
     sortDirection: SortDirection = "asc"   
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization: boolean = false
 
     private searchSub: Subscription = new Subscription();
 
@@ -64,6 +68,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     ngOnInit() {
         this.deviceGroupsService.getTotalCountOfDeviceGroups().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
+        this.checkAuthorization()
     }
 
     ngAfterViewInit(): void {
@@ -72,6 +77,22 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceGroups()
         });
+    }
+
+    checkAuthorization() {
+        this.deviceGroupsService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasCreateAuthorization = hasAuth)
+        this.deviceGroupsService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.deviceGroupsService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
     }
 
     matSortChange($event: Sort) {

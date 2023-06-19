@@ -22,12 +22,22 @@ import { Observable } from 'rxjs';
 import { LocationModel } from './locations.model';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class LocationsService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private snackBar: MatSnackBar) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
+    constructor(
+        private http: HttpClient, 
+        private errorHandlerService: ErrorHandlerService,
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "DELETE", "POST", "PUT"])
+    }
 
     searchLocations(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<LocationModel[]> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
@@ -101,5 +111,30 @@ export class LocationsService {
                 ),
             ),
         );
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")      
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

@@ -38,12 +38,15 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     offset = 0;
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
     ready = false;
-    displayedColumns: string[] = ['select', 'id', 'name', 'createdat', 'updatedat', 'info', 'edit', 'delete'];
+    displayedColumns: string[] = ['select', 'id', 'name', 'createdat', 'updatedat', 'info'];
     selection = new SelectionModel<PipelineModel>(true, []);
     totalCount = 200;
     searchSub: Subscription = new Subscription();
     sortBy: string = "createdat"
     sortDirection: SortDirection = "desc"
+
+    userHasDeleteAuthorization: boolean = false
+    userHasUpdateAuthorization: boolean = false
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
@@ -57,12 +60,27 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     ) {}
 
     ngOnInit() {
+        this.flowEngineService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push('delete')
+            }
+        
+        })
+        this.flowEngineService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push('edit')
+            }
+        })
         this.initSearch();
     }
 
     initSearch() {
+        console.log(1)
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
+                console.log(resp)
                 if(searchText != ""){
                     resp = resp.filter(pipeline => (pipeline.name.search(searchText) != -1))
                 }

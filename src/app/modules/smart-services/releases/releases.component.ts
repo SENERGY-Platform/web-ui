@@ -54,6 +54,8 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     rowHeight = 282;
     latest = true;
 
+    userHasDeleteAuthorization: boolean = false
+
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;
@@ -79,6 +81,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     }
 
     ngOnInit() {
+        this.releasesService.userHasDeleteAuthorization().subscribe(hasAuth => this.userHasDeleteAuthorization = hasAuth)
         this.initGridCols();
     }
 

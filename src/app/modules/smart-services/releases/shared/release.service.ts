@@ -21,13 +21,18 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import {SmartServiceReleaseCreateModel, SmartServiceReleaseModel, SmartServiceExtendedReleaseModel} from './release.model';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class SmartServiceReleasesService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
 
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.smartServiceRepoUrl, ["DELETE"])
+    }
 
     getExtendedReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean): Observable<SmartServiceExtendedReleaseModel[]> {
         const params = ['limit=' + limit, 'offset=' + offset, 'rights='+rights];
@@ -86,6 +91,18 @@ export class SmartServiceReleasesService {
         return this.http
             .post<SmartServiceReleaseModel>(environment.smartServiceRepoUrl+'/releases', model)
             .pipe(catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'saveProcess', null)));
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 
 }

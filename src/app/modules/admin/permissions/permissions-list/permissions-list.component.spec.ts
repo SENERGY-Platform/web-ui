@@ -31,10 +31,10 @@ import {MatTableModule} from '@angular/material/table';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { AuthorizationServiceMock } from 'src/app/core/services/authorization.service.mock';
-import { KongService } from '../services/kong.service';
-import { KongServiceMock } from '../services/kong.service.mock';
-import { LadonService } from '../services/ladom.service';
-import { LadomServiceMock } from '../services/ladom.service.mock';
+import { KongService } from '../shared/services/kong.service';
+import { KongServiceMock } from '../shared/services/kong.service.mock';
+import { LadonService } from '../shared/services/ladom.service';
+import { LadomServiceMock } from '../shared/services/ladom.service.mock';
 import {PermissionsListComponent} from './permissions-list.component';
 
 describe('PermissionsListComponent', () => {

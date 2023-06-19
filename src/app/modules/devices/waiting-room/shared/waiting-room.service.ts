@@ -38,16 +38,23 @@ import {
 import { AuthorizationService } from '../../../../core/services/authorization.service';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { NotificationModel } from '../../../../core/components/toolbar/notification/shared/notification.model';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class WaitingRoomService {
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
     constructor(
         private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
         private authorizationService: AuthorizationService,
-    ) {}
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.waitingRoomUrl, ["GET"])
+    }
 
     updateDevice(device: WaitingDeviceModel): Observable<WaitingDeviceModel | null> {
         const url = environment.waitingRoomUrl + '/devices/' + encodeURIComponent(device.local_id);
@@ -236,5 +243,18 @@ export class WaitingRoomService {
 
     eventIsUpdate(msg: WaitingRoomEvent) {
         return msg.type === WaitingRoomEventTypeSet || msg.type === WaitingRoomEventTypeDelete || msg.type === WaitingRoomEventTypeUse;
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

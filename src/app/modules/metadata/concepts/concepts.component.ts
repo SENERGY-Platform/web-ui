@@ -27,8 +27,6 @@ import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-typ
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatSort, Sort, SortDirection} from '@angular/material/sort';
-import {UntypedFormControl} from '@angular/forms';
-import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -39,6 +37,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./concepts.component.css'],
 })
 export class ConceptsComponent implements OnInit, OnDestroy {
+    displayedColumns = ['select', 'name', 'info', 'characteristic']
     pageSize = 20;
     concepts: ConceptsPermSearchModel[] = [];
     ready = false;
@@ -51,6 +50,9 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     searchText: string = ""
     sortBy: string = "name"
     sortDirection: SortDirection = "asc"
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization: boolean = false 
 
     constructor(
         private dialog: MatDialog,
@@ -64,10 +66,30 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.conceptsService.getTotalCountOfConcepts().subscribe(totalCount => {this.totalCount = totalCount})
         this.initSearch();
+        this.checkAuthorization()
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+    }
+
+
+    checkAuthorization() {
+        this.conceptsService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.conceptsService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
+        this.conceptsService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasCreateAuthorization = hasAuth
+        })
     }
 
     ngAfterViewInit(): void {

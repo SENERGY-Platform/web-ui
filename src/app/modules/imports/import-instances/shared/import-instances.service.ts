@@ -19,12 +19,21 @@ import { environment } from '../../../../../environments/environment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ImportInstancesModel } from './import-instances.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ImportInstancesService {
-    constructor(private http: HttpClient) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
+    constructor(
+        private http: HttpClient, 
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.importDeployUrl, ["GET", "DELETE", "PUT", "POST"])
+    }
 
     listImportInstances(
         search: string,
@@ -62,5 +71,30 @@ export class ImportInstancesService {
         } else {
             return this.http.post<ImportInstancesModel>(environment.importDeployUrl + '/instances', importInstance);
         }
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

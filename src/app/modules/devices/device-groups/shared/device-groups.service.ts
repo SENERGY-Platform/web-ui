@@ -26,12 +26,22 @@ import {DeviceTypeFunctionModel} from '../../../metadata/device-types-overview/s
 import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
 import {DeviceClassesPermSearchModel} from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
 import {AspectsPermSearchModel} from '../../../metadata/aspects/shared/aspects-perm-search.model';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class DeviceGroupsService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
+    constructor(
+        private http: HttpClient, 
+        private errorHandlerService: ErrorHandlerService,
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "DELETE", "POST", "PUT"])
+    }
 
     getDeviceGroupsWithoutGenerated(
         query: string,
@@ -247,5 +257,30 @@ export class DeviceGroupsService {
                 ),
             ),
         );
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

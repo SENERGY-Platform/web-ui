@@ -19,6 +19,8 @@
 import { HttpClient } from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { environment } from 'src/environments/environment';
 import {SwaggerModel} from './swagger.model';
 
@@ -30,8 +32,14 @@ export class SwaggerService {
     private invalidAfter: Date = new Date();
 
     public baseUrl: string = environment.swaggerUrl;
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
 
-    constructor(private http: HttpClient) {
+    constructor(
+        private http: HttpClient, 
+        private ladonService: LadonService
+    ) {
+        // Load in constructor to only load permissions once and not for each request as services are singletons in root
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.swaggerUrl, ["GET"])
     }
 
     public getSwagger(): Observable<SwaggerModel[]> {
@@ -78,5 +86,18 @@ export class SwaggerService {
             }
         }
         return {} as SwaggerModel;
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

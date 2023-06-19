@@ -39,7 +39,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
     selection = new SelectionModel<OperatorModel>(true, []);
-    displayedColumns: string[] = ['select', 'pub', 'name', 'image', 'details', 'edit', 'delete'];
+    displayedColumns: string[] = ['select', 'pub', 'name', 'image', 'details'];
     totalCount = 0;
 
     operators = [] as OperatorModel[];
@@ -48,6 +48,10 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
 
     userId: string | Error = '';
     shareUser = '';
+
+    userHasDeleteAuthorization: boolean = false
+    userHasUpdateAuthorization: boolean = false
+    userHasCreateAuthorization: boolean = false
 
     private searchText = '';
     private searchSub: Subscription = new Subscription();
@@ -63,8 +67,23 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
+        this.operatorRepoService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasCreateAuthorization = hasAuth)
+
         this.userId = this.auth.getUserId();
         this.initSearchAndGetOperators();
+
+        this.operatorRepoService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push('delete')
+            }
+        })
+        this.operatorRepoService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push('edit')
+            }
+        })
     }
 
     ngOnDestroy() {

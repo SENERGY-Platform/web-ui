@@ -27,12 +27,12 @@ import {
 } from './designer-element.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { forkJoin, Observable } from 'rxjs';
-import { DeviceTypeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class DesignerHelperService {
+
     constructor(private deviceTypeService: DeviceTypeService) {}
 
     getIncomingOutputs(element: BpmnElement, done: BpmnElement[] = []): BpmnParameter[] {

@@ -62,6 +62,10 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     selectedItems: ProcessModel[] = [];
     rowHeight = 282;
 
+    userHasCreateAuthorization: boolean = false
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
+
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;
@@ -91,6 +95,10 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.processRepoService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasCreateAuthorization = hasAuth)
+        this.processRepoService.userHasUpdateAuthorization().subscribe(hasAuth => this.userHasUpdateAuthorization = hasAuth)
+        this.processRepoService.userHasDeleteAuthorization().subscribe(hasAuth => this.userHasDeleteAuthorization = hasAuth)
+
         this.initGridCols();
     }
 

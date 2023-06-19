@@ -21,12 +21,22 @@ import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError} from 'rxjs/operators';
 import {DeviceTypeAspectModel} from '../../device-types-overview/shared/device-type.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AspectsService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
+    constructor(
+        private http: HttpClient, 
+        private errorHandlerService: ErrorHandlerService,
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "DELETE", "POST", "PUT"])
+    }
 
     updateAspects(aspect: DeviceTypeAspectModel): Observable<DeviceTypeAspectModel | null> {
         return this.http
@@ -44,5 +54,18 @@ export class AspectsService {
         return this.http
             .post<DeviceTypeAspectModel>(environment.deviceManagerUrl + '/aspects', aspect)
             .pipe(catchError(this.errorHandlerService.handleError(AspectsService.name, 'createAspect', null)));
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

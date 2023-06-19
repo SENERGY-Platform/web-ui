@@ -31,6 +31,8 @@ import { DashboardManipulationModel } from './dashboard-manipulation.model';
 import { DashboardManipulationEnum } from './dashboard-manipulation.enum';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DashboardEditDialogComponent } from '../dialogs/dashboard-edit-dialog.component';
+import { AllowedMethods, PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
+import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
@@ -44,12 +46,18 @@ export class DashboardService {
     dashboardWidgetObservable = this.widgetSubject.asObservable();
     initWidgetObservable = this.animationDoneSubject.asObservable();
 
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
     constructor(
         private dialog: MatDialog,
         private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
         private dialogsService: DialogsService,
-    ) {}
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl, ["GET", "DELETE", "POST", "PUT"])
+    }
+
 
     /** REST Services */
 
@@ -183,5 +191,30 @@ export class DashboardService {
 
     initWidget(widgetId: string) {
         this.animationDoneSubject.next(widgetId);
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

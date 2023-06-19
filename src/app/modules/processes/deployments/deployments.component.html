@@ -79,8 +79,9 @@
                                         (click)="copyDeployment(item.value.id)">
                                         <mat-icon>content_copy</mat-icon>
                                     </button>
-                                    <button mat-icon-button matTooltip="Delete" color="accent"
-                                        (click)="deleteDeployment(item.value)" [disabled]="selectedItems.length > 0">
+                                    <button *ngIf="userHasDeleteAuthorization" mat-icon-button matTooltip="Delete" color="accent"
+                                            (click)="deleteDeployment(item.value)"
+                                            [disabled]="selectedItems.length > 0">
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                     <button mat-icon-button [matMenuTriggerFor]="deploymentMenu" color="accent"

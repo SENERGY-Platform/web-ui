@@ -126,7 +126,7 @@
                     </td>
                 </ng-container>
 
-                <ng-container matColumnDef="edit">
+                <ng-container matColumnDef="edit" *ngIf="userHasUpdateAuthorization">
                     <th mat-header-cell *matHeaderCellDef>Edit</th>
                     <td mat-cell *matCellDef="let element">
                         <button mat-icon-button color="accent" matTooltip="Edit"
@@ -136,30 +136,33 @@
                     </td>
                 </ng-container>
 
-                <ng-container matColumnDef="delete">
-                    <th mat-header-cell *matHeaderCellDef>Delete</th>
-                    <td mat-cell *matCellDef="let element">
-                        <button matTooltip="Delete" mat-icon-button color="warn" (click)="deleteExport(element)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="header-delete-all">
-                    <th mat-header-cell *matHeaderCellDef colspan="10">
-                        <div fxLayout="row">
-                            <div fxLayoutAlign="center center">You have
-                                selected {{selection.selected.length}} items
-                            </div>
-                            <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
+                <span *ngIf="userHasDeleteAuthorization">
+                    <ng-container matColumnDef="delete">
+                        <th mat-header-cell *matHeaderCellDef>Delete</th>
+                        <td mat-cell *matCellDef="let element">
+                            <button matTooltip="Delete" mat-icon-button color="warn" (click)="deleteExport(element)">
                                 <mat-icon>delete</mat-icon>
                             </button>
-                        </div>
-                    </th>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
-                </tr>
+                        </td>
+                    </ng-container>
+    
+                    <ng-container matColumnDef="header-delete-all">
+                        <th mat-header-cell *matHeaderCellDef colspan="10">
+                            <div fxLayout="row">
+                                <div fxLayoutAlign="center center">You have
+                                    selected {{selection.selected.length}} items
+                                </div>
+                                <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
+                        </th>
+                    </ng-container>
+    
+                    <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
+                    </tr>
+                </span>
+              
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             </table>
@@ -168,7 +171,8 @@
             (page)="selectionClear()" showFirstLastButtons></mat-paginator>
     </div>
     <div *ngIf="exports.length === 0 && ready">No export instances found.</div>
-    <button mat-fab class="fab" routerLink="/exports/new" matTooltip="Start new Export">
+    
+    <button *ngIf="userHasCreateAuthorization"mat-fab class="fab" routerLink="/exports/new" matTooltip="Start new Export">
         <mat-icon>add</mat-icon>
     </button>
     <senergy-spinner [show]="!ready"></senergy-spinner>

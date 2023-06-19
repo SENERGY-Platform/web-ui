@@ -40,6 +40,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./functions.component.css'],
 })
 export class FunctionsComponent implements OnInit, OnDestroy {
+    displayedColumns = ['select', 'name', 'info']
     pageSize = 20;
     dataSource = new MatTableDataSource<FunctionsPermSearchModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -52,6 +53,8 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     searchText: string = ""
     sortBy: string = "name"
     sortDirection: SortDirection = "asc"
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
 
     constructor(
         private dialog: MatDialog,
@@ -66,6 +69,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         this.functionsService.getTotalCountOfFunctions().subscribe(totalCount => this.totalCount = totalCount)
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initSearch();
+        this.checkAuthorization();
     }
 
     ngAfterViewInit(): void {
@@ -78,6 +82,21 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+    }
+
+    checkAuthorization() {
+        this.functionsService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("edit")
+            }
+        })
+        this.functionsService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+            if(hasAuth) {
+                this.displayedColumns.push("delete")
+            }
+        })
     }
 
     private initSearch() {

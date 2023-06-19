@@ -25,10 +25,10 @@ import {MatTableDataSource} from '@angular/material/table';
 import {DomSanitizer} from '@angular/platform-browser';
 import {interval, Observable, Subscription} from 'rxjs';
 import {debounce, map, startWith} from 'rxjs/operators';
-import {AuthorizationService} from 'src/app/core/services/authorization.service';
-import {KongService} from '../services/kong.service';
-import {LadonService} from '../services/ladom.service';
-import {PermissionModel} from '../permission.model';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import { KongService } from '../shared/services/kong.service';
+import { LadonService } from '../shared/services/ladom.service';
+import { PermissionModel, PermissionTestResponse } from '../shared/permission.model';
 import {PermissionsDialogImportComponent} from '../permissions-dialog-import/permissions-dialog-import.component';
 import {PermissionImportModel} from '../permissions-dialog-import/permissions-dialog-import.model';
 import {PermissionsEditComponent} from '../permissions-edit/permissions-edit.component';
@@ -73,7 +73,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
             target_method: '',
             target_uri: ''
         };
-    public testResult: { GET: boolean; POST: boolean; PUT: boolean; PATCH: boolean; DELETE: boolean; HEAD: boolean } = {
+    public testResult: PermissionTestResponse = {
         GET: false,
         POST: false,
         PUT: false,

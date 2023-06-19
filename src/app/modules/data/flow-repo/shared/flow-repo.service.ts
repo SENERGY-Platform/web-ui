@@ -19,14 +19,24 @@ import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { FlowModel } from './flow.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class FlowRepoService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
+    constructor(
+        private http: HttpClient, 
+        private errorHandlerService: ErrorHandlerService,
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.flowRepoUrl, ["GET", "DELETE", "POST", "PUT"])
+    }
 
     getFlows(search: string, limit: number, offset: number, feature: string, order: string, shared?: boolean): Observable<{ flows: FlowModel[] }> {
         return this.http
@@ -74,5 +84,30 @@ export class FlowRepoService {
         return this.http
             .delete(environment.flowRepoUrl + '/flow/' + flow._id + '/')
             .pipe(catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'deleteFlow: Error', {})));
+    }
+
+    userHasDeleteAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("DELETE")      
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("POST")      
+    }
+
+    userHasCreateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")   
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")   
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }
