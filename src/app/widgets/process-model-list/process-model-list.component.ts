@@ -20,6 +20,7 @@ import { ProcessModelListService } from './shared/process-model-list.service';
 import { ProcessModelListModel } from './shared/process-model-list.model';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { ProcessRepoService } from 'src/app/modules/processes/process-repo/shared/process-repo.service';
 
 @Component({
     selector: 'senergy-process-model-list',
@@ -36,11 +37,17 @@ export class ProcessModelListComponent implements OnInit, OnDestroy {
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdateAuthorization = false;
+    userHasProcessRepoUpdateAuthorization = false;
 
-    constructor(private processModelListService: ProcessModelListService, private dashboardService: DashboardService) {}
+    constructor(
+        private processModelListService: ProcessModelListService, 
+        private dashboardService: DashboardService,
+        private processRepoService: ProcessRepoService
+    ) {}
 
     ngOnInit() {
         this.getProcesses();
+        this.processRepoService.userHasUpdateAuthorization().subscribe(hasAuth => this.userHasProcessRepoUpdateAuthorization = hasAuth)
     }
 
     ngOnDestroy() {

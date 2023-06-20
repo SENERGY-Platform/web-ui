@@ -15,7 +15,7 @@
   -->
 
 
-<div class="dashboard-container">
+<div class="dashboard-container" [ngClass]="{'dashboard-container-with-button': userHasCreateAuthorization, 'dashboard-container-without-button': !userHasCreateAuthorization}">
     <mat-tab-group backgroundColor="accent" color="primary" (animationDone)="initAllWidgets()"
                    (selectedIndexChange)="setTabIndex($event)" [(selectedIndex)]="activeTabIndex"
                    dynamicHeight="true" headerPosition="above" mat-stretch-tabs="false">
@@ -29,7 +29,7 @@
             <div fxFill fxLayout="column" *ngIf="dashboard === dashboards[activeTabIndex]">
 
                 <div *ngIf="zoomedWidgetIndex === null" fxLayout="row" fxLayoutAlign="end center">
-                    <button mat-icon-button [matMenuTriggerFor]="refresh" color="accent"
+                    <button *ngIf="userHasUpdateAuthorization" mat-icon-button [matMenuTriggerFor]="refresh" color="accent"
                             matTooltip="set widget refresh time">
                         <mat-icon>refresh</mat-icon>
                     </button>
@@ -51,17 +51,17 @@
                                 [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh
                         </button>
                     </mat-menu>
-                    <button (click)="moveDashboard(true)" mat-icon-button color="accent"
+                    <button *ngIf="userHasUpdateAuthorization" (click)="moveDashboard(true)" mat-icon-button color="accent"
                             [disabled]="activeTabIndex === 0"
                             matTooltip="move dashboard left">
                         <mat-icon>keyboard_arrow_left</mat-icon>
                     </button>
-                    <button (click)="moveDashboard(false)" mat-icon-button color="accent"
+                    <button *ngIf="userHasUpdateAuthorization" (click)="moveDashboard(false)" mat-icon-button color="accent"
                             [disabled]="activeTabIndex === dashboards.length - 1"
                             matTooltip="move dashboard right">
                         <mat-icon>keyboard_arrow_right</mat-icon>
                     </button>
-                    <button (click)="toggleDragMode()" mat-icon-button [color]="inDragMode ? 'warn' : 'accent'"
+                    <button *ngIf="userHasUpdateAuthorization" (click)="toggleDragMode()" mat-icon-button [color]="inDragMode ? 'warn' : 'accent'"
                             [disabled]="dragModeDisabled"
                             matTooltip="reorder widgets">
                         <mat-icon>open_with</mat-icon>
@@ -98,7 +98,7 @@
 
         </mat-tab>
 
-        <mat-tab disabled *ngIf="dashboardsRetrieved">
+        <mat-tab disabled *ngIf="dashboardsRetrieved && userHasCreateAuthorization">
             <ng-template mat-tab-label>
                 <button (click)="openAddDashboardDialog()" mat-icon-button>
                     <mat-icon>add</mat-icon>

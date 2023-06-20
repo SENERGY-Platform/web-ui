@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-.layout-margin {
-  margin: 8px;
-}
-
 gridster {
   background-color: #fafafa;
   height: calc(100% - 120px);
@@ -67,8 +63,12 @@ gridster-item {
   z-index: 100;
 }
 
-.dashboard-container ::ng-deep .mat-mdc-tab-body-wrapper {
+.dashboard-container-with-button ::ng-deep .mat-mdc-tab-body-wrapper {
   height: calc(100vh - 118px);
+}
+
+.dashboard-container-without-button ::ng-deep .mat-mdc-tab-body-wrapper {
+  height: calc(100vh);
 }
 
 .zoomed-widget {

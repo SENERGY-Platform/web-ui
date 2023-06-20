@@ -24,7 +24,7 @@
                     <div matListItemTitle class="drag-handler">{{process.name}}</div>
                     <div matListItemLine class="drag-handler">{{process.date | date:'dd.MM.yyyy, HH:mm'}}</div>
                     <div matListItemMeta>
-                        <button mat-icon-button color="accent" matTooltip="edit process model"
+                        <button *ngIf="userHasProcessRepoUpdateAuthorization" mat-icon-button color="accent" matTooltip="edit process model"
                                 routerLink="/processes/designer/{{process.id}}" disableRipple (click)="void()">
                             <mat-icon>edit</mat-icon>
                         </button>
