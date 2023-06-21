@@ -37,12 +37,6 @@
             <senergy-single-value-value [sv]="sv" [widget]="widget"></senergy-single-value-value>
         </div>
 
-        <div *ngIf="zoom" class="datepick">
-            <mat-form-field appearance="fill" fxFlex color="accent">
-                <mat-label>Select a date</mat-label>
-                <input type="datetime-local" matInput [formControl]="dateControl">
-            </mat-form-field>
-        </div>
         <div *ngIf="zoom && svListIndex > 0" class="content-box arrow-left">
             <button mat-icon-button (click)="left()">
                 <mat-icon>arrow_circle_left</mat-icon>
@@ -52,6 +46,12 @@
             <button mat-icon-button (click)="right()">
                 <mat-icon>arrow_circle_right</mat-icon>
             </button>
+        </div>
+        <div *ngIf="zoom" class="datepick">
+            <mat-form-field appearance="fill" fxFlex color="accent">
+                <mat-label>Select a date</mat-label>
+                <input type="datetime-local" matInput [formControl]="dateControl">
+            </mat-form-field>
         </div>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()" [optionZoom]="widget.properties.group?.type === undefined"
