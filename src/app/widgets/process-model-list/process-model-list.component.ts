@@ -30,6 +30,7 @@ import { ProcessRepoService } from 'src/app/modules/processes/process-repo/share
 export class ProcessModelListComponent implements OnInit, OnDestroy {
     processes: ProcessModelListModel[] = [];
     ready = false;
+    refreshing = false;
     destroy = new Subscription();
 
     @Input() dashboardId = '';
@@ -61,10 +62,11 @@ export class ProcessModelListComponent implements OnInit, OnDestroy {
     private getProcesses() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
+                this.refreshing = true;
                 this.processModelListService.getProcesses().subscribe((processes: ProcessModelListModel[]) => {
                     this.processes = processes;
                     this.ready = true;
+                    this.refreshing = false;
                 });
             }
         });

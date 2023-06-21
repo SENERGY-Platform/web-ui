@@ -31,8 +31,10 @@
         </button>
     </div>
     <div *ngIf="zoom">
-        <button mat-icon-button color="accent" (click)="refresh()" matTooltip="refresh">
-            <mat-icon>refresh</mat-icon>
+        <button mat-icon-button color="accent" (click)="refresh()" matTooltip="refresh" [disabled]="refreshing">
+            <mat-icon *ngIf="!refreshing">refresh</mat-icon>
+            <mat-icon *ngIf="refreshing">sync</mat-icon>
+            <!--<senergy-widget-spinner [show]="refreshing"></senergy-widget-spinner>-->
         </button>
     </div>
     <div *ngIf="zoom">

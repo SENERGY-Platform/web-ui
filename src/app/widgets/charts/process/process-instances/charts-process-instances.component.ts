@@ -32,6 +32,7 @@ import { ChartsService } from '../../shared/charts.service';
 export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
     processInstancesStatus = {} as ChartsModel;
     ready = false;
+    refreshing = false;
     destroy = new Subscription();
 
     private resizeTimeout = 0;
@@ -76,13 +77,14 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
     private getProcessInstances() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
-                this.chartsService.releaseResources(this.processInstancesStatusChart);
+                this.refreshing = true;
                 this.chartsProcessInstancesService
                     .getProcessInstancesStatus(this.widget.id)
                     .subscribe((processInstancesStatus: ChartsModel) => {
                         this.processInstancesStatus = processInstancesStatus;
+                        setTimeout(() => this.processInstancesStatusChart?.draw(), 0);
                         this.ready = true;
+                        this.refreshing = false;
                     });
             }
         });

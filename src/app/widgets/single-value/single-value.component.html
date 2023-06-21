@@ -15,15 +15,15 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [zoom]="zoom"></senergy-widget-header>
+    <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"></senergy-widget-header>
     <mat-card-content class="content-size drag-handler">
         <div *ngIf="!configured" fxFill fxLayout="row" fxLayoutAlign="center center">
             Please configure widget!
         </div>
         <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
-        <senergy-fit-text *ngIf="configured && ready && !dataReady" [txt]="'Problem fetching data! Check config'">
+        <senergy-fit-text *ngIf="configured && ready && error" [txt]="'Problem fetching data! Check config'">
         </senergy-fit-text>
-        <div class="content-box" *ngIf="configured && ready && dataReady && zoom" fxLayout="row"
+        <div class="content-box" *ngIf="configured && ready && !error && zoom" fxLayout="row"
              [@animate]="{value: animationState, params: {marginLeft: marginLeft}}">
             <div *ngFor="let sv of svList; let i = index" fxLayout="column"
                  [ngClass]="{'side-value': i !== svListIndex}"
@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        <div class="content-box" *ngIf="configured && ready && dataReady && !zoom">
+        <div class="content-box" *ngIf="configured && ready && !zoom">
             <senergy-single-value-value [sv]="sv" [widget]="widget"></senergy-single-value-value>
         </div>
 
@@ -54,7 +54,7 @@
             </mat-form-field>
         </div>
     </mat-card-content>
-    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()" [optionZoom]="widget.properties.group?.type === undefined"
+    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()" [optionZoom]="widget.properties.group?.type === undefined"  [refreshing]="refreshing"
                            [zoom]="zoom" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization"></senergy-widget-footer>
 </mat-card>
 

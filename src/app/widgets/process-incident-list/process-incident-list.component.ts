@@ -32,6 +32,7 @@ import { Router } from '@angular/router';
 export class ProcessIncidentListComponent implements OnInit, OnDestroy {
     incidents: ProcessIncidentsModel[] = [];
     ready = false;
+    refreshing = false;
     destroy = new Subscription();
 
     @Input() dashboardId = '';
@@ -74,12 +75,13 @@ export class ProcessIncidentListComponent implements OnInit, OnDestroy {
     private getIncidents() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
+                this.refreshing = true;
                 this.processIncidentsService
                     .getProcessIncidents(this.widget.properties.limit || 0)
                     .subscribe((incidents: ProcessIncidentsModel[]) => {
                         this.incidents = incidents;
                         this.ready = true;
+                        this.refreshing = false;
                     });
             }
         });

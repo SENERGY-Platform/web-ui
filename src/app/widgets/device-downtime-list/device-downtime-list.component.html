@@ -15,7 +15,7 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget"></senergy-widget-header>
+    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
     <mat-card-content class="mat-card-image content-size drag-handler">
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
         <div *ngIf="ready && devices.length !== 0" fxLayout="column" fxFill>
@@ -29,6 +29,6 @@
         </div>
         <senergy-no-data [showIf]="ready && devices.length === 0"></senergy-no-data>
     </mat-card-content>
-    <senergy-widget-footer [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+    <senergy-widget-footer [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

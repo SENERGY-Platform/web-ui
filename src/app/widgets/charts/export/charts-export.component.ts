@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ChartSelectEvent, GoogleChartComponent,} from 'ng2-google-charts';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {ElementSizeService} from '../../../core/services/element-size.service';
@@ -34,6 +34,7 @@ import {ChartsService} from '../shared/charts.service';
 export class ChartsExportComponent implements OnInit, OnDestroy {
     chartExportData = {} as ChartsModel;
     ready = false;
+    refreshing = true;
     destroy = new Subscription();
     configureWidget = false;
     errorHasOccured = false;
@@ -121,8 +122,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     }
 
     private refresh() {
-        this.ready = false;
-        this.chartsService.releaseResources(this.chartExport);
+        this.refreshing = true;
         this.checkConfiguration();
         if (this.configureWidget === false) {
             let lastOverride: string | undefined;
@@ -137,6 +137,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                     this.errorMessage = 'No data';
                     this.errorHandlerService.logError('Chart Export', 'getChartData', resp);
                     this.ready = true;
+                    this.refreshing = false;
                 } else {
                     this.errorHasOccured = false;
                     this.chartExportData = resp;
@@ -150,14 +151,16 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                         this.chartExportData.options.displayZoomButtons = false;
                         this.chartExportData.options.displayAnnotations = false;
                         this.chartExportData.options.displayLegendValues = true;
-                        if (lastOverride !== undefined) {
+                        if (lastOverride !== undefined && !this.ready) {
                             const start = (this.chartExportData.dataTable[1][0] as Date).valueOf();
                             const end = (this.chartExportData.dataTable[this.chartExportData.dataTable.length-1][0] as Date).valueOf();
                             const range = end - start;
                             this.chartExportData.options.zoomStartTime = new Date(end - (range / (this.widget.properties.zoomTimeFactor || 2)));
                         }
                     }
+                    setTimeout(() => this.chartExport?.draw(), 0);
                     this.ready = true;
+                    this.refreshing = false;
                 }
                 this.size = (this.chartExportData?.dataTable?.length || 0) * ((this.chartExportData?.dataTable?.[0]?.length || 0) - 1);
                 if (this.size > this.sizeLimit) {
@@ -166,6 +169,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             });
         } else {
             this.ready = true;
+            this.refreshing = false;
         }
     }
 
@@ -174,6 +178,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
 
         if (this.widget.properties.chartType === 'ColumnChart' && this.widget.properties.group?.type !== undefined
             && this.widget.properties.group?.type !== '' && rgxRes?.length === 3 && Number(rgxRes[1]) === 1 && this.widget.properties.time?.last !== null && this.widget.properties.time?.last !== '') {
+            this.ready = false;
             this.from = ($event.selectedRowValues[0] as Date);
             this.to = new Date(this.from.valueOf());
 
@@ -228,6 +233,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         if (rgxRes === null) {
             return;
         }
+        this.ready = false;
         if (this.from === null) {
             this.from = this.chartExportData.dataTable[1][0] as Date;
         }
@@ -370,6 +376,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         if ($event.icon === 'zoom_out') {
             this.drillUp();
         } else if ($event.icon === 'undo') {
+            this.ready = false;
             this.chartsService.cleanup(this.widget);
             this.refresh();
         }

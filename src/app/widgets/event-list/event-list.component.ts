@@ -29,6 +29,7 @@ import { Subscription } from 'rxjs';
 export class EventListComponent implements OnInit, OnDestroy {
     events: EventListModel[] = [];
     ready = false;
+    refreshing = false;
     destroy = new Subscription();
 
     @Input() dashboardId = '';
@@ -54,7 +55,7 @@ export class EventListComponent implements OnInit, OnDestroy {
     private initMockup() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
+                this.refreshing = true;
                 const date = new Date().getTime();
                 this.events = [];
                 this.events.push({ icon: 'meeting_room', time: new Date(), event: 'Küche: Fenster geschlossen' });
@@ -67,6 +68,7 @@ export class EventListComponent implements OnInit, OnDestroy {
                     event: 'Wohnzimmer: Temperatur erreicht',
                 });
                 this.ready = true;
+                this.refreshing = false;
             }
         });
     }

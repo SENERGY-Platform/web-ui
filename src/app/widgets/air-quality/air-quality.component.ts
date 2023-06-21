@@ -32,6 +32,7 @@ import { map } from 'rxjs/operators';
 })
 export class AirQualityComponent implements OnInit, OnDestroy {
     ready = false;
+    refreshing = false;
     destroy = new Subscription();
     pollenWarnings = 0;
     pollenCriticals = 0;
@@ -77,10 +78,11 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     private update() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe(async (event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
+                this.refreshing = true;
                 this.updateMeasurements().subscribe((_) => {
                     this.createAdvice();
                     this.ready = true;
+                    this.refreshing = false;
                 });
             }
         });

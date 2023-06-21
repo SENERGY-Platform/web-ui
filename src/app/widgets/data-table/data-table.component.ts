@@ -59,6 +59,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
     destroy = new Subscription();
     configured = false;
     dataReady = false;
+    refreshing = false;
     items: DataTableComponentItem[] = [];
     matSortActive = '';
     matSortDirection: SortDirection = '';
@@ -166,7 +167,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
     private update() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.dataReady = false;
+                this.refreshing = true;
 
                 const elements = this.widget.properties.dataTable?.elements;
                 if (elements) {
@@ -321,9 +322,11 @@ export class DataTableComponent implements OnInit, OnDestroy {
                         });
                         this.orderItems();
                         this.dataReady = true;
+                        this.refreshing = false;
                     });
                 } else {
                     this.dataReady = true;
+                    this.refreshing = false;
                 }
             }
         });

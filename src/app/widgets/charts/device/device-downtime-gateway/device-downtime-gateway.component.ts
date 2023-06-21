@@ -32,6 +32,7 @@ import { ChartsService } from '../../shared/charts.service';
 export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
     deviceDowntimeGateway = {} as ChartsModel;
     ready = false;
+    refreshing = false;
     destroy = new Subscription();
 
     private resizeTimeout = 0;
@@ -76,13 +77,14 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
     private getProcessInstances() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
-                this.chartsService.releaseResources(this.deviceDowntimeGatewayChart);
+                this.refreshing = true;
                 this.deviceDowntimeGatewayService
                     .getDevicesDowntimePerGateway(this.widget)
                     .subscribe((processDeploymentsHistory: ChartsModel) => {
                         this.deviceDowntimeGateway = processDeploymentsHistory;
+                        setTimeout(() => this.deviceDowntimeGatewayChart?.draw(), 0);
                         this.ready = true;
+                        this.refreshing = false;
                     });
             }
         });

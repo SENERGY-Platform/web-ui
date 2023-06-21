@@ -31,6 +31,7 @@ import { DeviceInstancesRouterState, DeviceInstancesRouterStateTabEnum } from 's
 export class DevicesStateComponent implements OnInit, OnDestroy {
     devicesStatus: DevicesStateModel = { count: 0, connected: 0, disconnected: 0, unknown: 0 };
     ready = false;
+    refreshing = false;
     destroy = new Subscription();
 
     @Input() dashboardId = '';
@@ -56,12 +57,14 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
     private setDeviceStatus() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
+                this.refreshing = true;
                 this.devicesStateService.getDevicesStatus().subscribe((devicesStatus: DevicesStateModel) => {
                     this.devicesStatus = devicesStatus;
                     this.ready = true;
+                    this.refreshing = false;
                 }, () => {}, () => {
                     this.ready = true;
+                    this.refreshing = false;
                 });
             }
         });

@@ -48,8 +48,7 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
-                this.ready = true;
+                // nop
             }
         });
     }

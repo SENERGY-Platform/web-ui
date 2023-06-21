@@ -15,7 +15,7 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget"></senergy-widget-header>
+    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
     <mat-card-content class="drag-handler">
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
         <div *ngIf="ready" fxLayout="column" fxFill>
@@ -59,6 +59,6 @@
             </div>
         </div>
     </mat-card-content>
-    <senergy-widget-footer [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+    <senergy-widget-footer [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

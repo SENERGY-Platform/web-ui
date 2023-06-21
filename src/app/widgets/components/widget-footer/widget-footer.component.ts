@@ -36,6 +36,7 @@ export class WidgetFooterComponent implements OnInit {
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdateAuthorization = false;
+    @Input() refreshing = false;
 
     @Output() editEvent = new EventEmitter<boolean>();
     @Output() addEvent = new EventEmitter<boolean>();

@@ -32,7 +32,8 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
     predictionModel: EnergyPredictionModel = { prediction: 0, predictionTotal: 0, timestamp: '' };
     ready = false;
     configured = false;
-    dataReady = false;
+    error = false;
+    refreshing = false;
     destroy = new Subscription();
     thresholdActive = false;
     price = 0;
@@ -79,8 +80,7 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
         this.setConfigured();
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
-                this.dataReady = false;
+                this.refreshing = true;
                 const prediction = this.predictionService.getPrediction(this.widget);
                 prediction.subscribe(
                     (devicesStatus: EnergyPredictionModel) => {
@@ -94,11 +94,14 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
                             this.thresholdActive = this.price > (this.widget.properties.threshold || -Infinity);
                             break;
                         }
-                        this.dataReady = true;
+                        this.error = false;
+                        this.refreshing = false;
                         this.ready = true;
                     },
                     () => {
                         this.ready = true;
+                        this.error = true;
+                        this.refreshing = false;
                     },
                 );
             }

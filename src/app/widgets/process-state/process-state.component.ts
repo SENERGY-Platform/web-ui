@@ -33,6 +33,7 @@ import { HttpClient } from '@angular/common/http';
 export class ProcessStateComponent implements OnInit, OnDestroy {
     processStatus: ProcessStateModel = { available: 0, executable: 0 };
     ready = false;
+    refreshing = false;
     destroy = new Subscription();
 
     @Input() dashboardId = '';
@@ -63,10 +64,11 @@ export class ProcessStateComponent implements OnInit, OnDestroy {
     private setDeviceStatus() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
+                this.refreshing = true;
                 this.processStateService.getProcessStatus().subscribe((processStatus: ProcessStateModel) => {
                     this.processStatus = processStatus;
                     this.ready = true;
+                    this.refreshing = false;
                 });
             }
         });

@@ -15,7 +15,7 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [zoom]="zoom"
+    <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"
                            [optionCustomIcon]="getCustomIcons(true).icons" [optionCustomTooltip]="getCustomIcons(true).tooltips"
                            (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(true).disabled"
                            [warnText]="(chartExportData?.dataTable?.length || 0) > 0 &&
@@ -41,7 +41,7 @@
         </div>
     </mat-card-content>
     <senergy-widget-footer [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom"
-                           (editEvent)="edit()"
+                           (editEvent)="edit()" [refreshing]="refreshing"
                            [optionCustomIcon]="getCustomIcons(false).icons" [optionCustomTooltip]="getCustomIcons(false).tooltips"
                            (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(false).disabled"></senergy-widget-footer>
 </mat-card>

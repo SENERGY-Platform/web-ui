@@ -27,8 +27,9 @@
     </div>
     <div fxFlex class="drag-handler"></div>
     <div>
-        <button mat-icon-button color="accent" (click)="refresh()" matTooltip="refresh widget">
-            <mat-icon>refresh</mat-icon>
+        <button mat-icon-button color="accent" (click)="refresh()" matTooltip="refresh widget" [disabled]="refreshing">
+            <mat-icon *ngIf="!refreshing">refresh</mat-icon>
+            <mat-icon *ngIf="refreshing">sync</mat-icon>
         </button>
     </div>
     <div *ngIf="optionZoom">

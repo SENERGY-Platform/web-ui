@@ -29,6 +29,7 @@ import { DashboardService } from '../../modules/dashboard/shared/dashboard.servi
 export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     devices: DeviceDowntimeListModel[] = [];
     ready = false;
+    refreshing = false;
     destroy = new Subscription();
 
     @Input() dashboardId = '';
@@ -58,10 +59,11 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     private getProcesses() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
+                this.refreshing = true;
                 this.processModelListService.getDevicesDowntime().subscribe((devices: DeviceDowntimeListModel[]) => {
                     this.devices = devices;
                     this.ready = true;
+                    this.refreshing = false;
                 }, () => {}, () => this.ready = true);
             }
         });

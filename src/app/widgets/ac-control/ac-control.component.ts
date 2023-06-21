@@ -38,6 +38,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateAuthorization = false;
 
     ready = false;
+    refreshing = false;
     destroy = new Subscription();
 
 
@@ -82,7 +83,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
     }
 
     private refresh() {
-        this.ready = false;
+        this.refreshing = true;
         const m: Map<DeviceCommandModel, AcControlElementModel> = new Map();
         if (this.widget.properties.acControl?.getCleaningRequired !== undefined) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -123,6 +124,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
 
         if (m.size === 0) {
             this.ready = true;
+            this.refreshing = false;
             return;
         }
         const keys = Array.from(m.keys());
@@ -146,6 +148,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
                 }
             });
             this.ready = true;
+            this.refreshing = false;
         });
     }
 

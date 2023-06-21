@@ -15,7 +15,7 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [zoom]="zoom"></senergy-widget-header>
+    <senergy-widget-header [refreshing]="refeshing" [widget]="widget" [zoom]="zoom"></senergy-widget-header>
     <mat-card-content>
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
@@ -23,6 +23,6 @@
             <senergy-no-data [showIf]="ready && deviceTotalDowntime === undefined"></senergy-no-data>
         </div>
     </mat-card-content>
-    <senergy-widget-footer [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()"></senergy-widget-footer>
+    <senergy-widget-footer [refreshing]="refeshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

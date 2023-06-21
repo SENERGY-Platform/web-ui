@@ -32,6 +32,7 @@ import { ChartsService } from '../../shared/charts.service';
 export class DeviceGatewayComponent implements OnInit, OnDestroy {
     deviceGateway = {} as ChartsModel;
     ready = false;
+    refreshing = false;
     destroy = new Subscription();
 
     private resizeTimeout = 0;
@@ -76,11 +77,12 @@ export class DeviceGatewayComponent implements OnInit, OnDestroy {
     private getProcessInstances() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
-                this.chartsService.releaseResources(this.deviceGatewayChart);
+                this.refreshing = true;
                 this.deviceGatewayService.getDevicesPerGateway(this.widget.id).subscribe((processDeploymentsHistory: ChartsModel) => {
                     this.deviceGateway = processDeploymentsHistory;
+                    setTimeout(() => this.deviceGatewayChart?.draw(), 0);
                     this.ready = true;
+                    this.refreshing = false;
                 });
             }
         });

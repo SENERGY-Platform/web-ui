@@ -60,8 +60,9 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     svList: SingleValueModel[] = [];
     sv: SingleValueModel = {} as SingleValueModel;
     ready = false;
+    refreshing = false;
     configured = false;
-    dataReady = false;
+    error = false;
     destroy = new Subscription();
     marginLeft = '0';
     private _svListIndex = 4; // TODO
@@ -135,8 +136,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     }
 
     private refresh(localDateString?: string) {
-        this.ready = false;
-        this.dataReady = false;
+        this.refreshing = true;
         this.sv = {} as SingleValueModel;
         this.svList = [];
         if (this.zoom && localDateString === undefined) {
@@ -165,10 +165,13 @@ export class SingleValueComponent implements OnInit, OnDestroy {
                     }
                 }
                 this.ready = true;
-                this.dataReady = true;
+                this.refreshing = false;
+                this.error = false;
             },
             () => {
                 this.ready = true;
+                this.refreshing = false;
+                this.error = true;
             },
         );
     }

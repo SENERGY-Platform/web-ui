@@ -15,16 +15,16 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget"></senergy-widget-header>
+    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
     <mat-card-content class="drag-handler">
         <div *ngIf="!configured" fxFill fxLayout="row" fxLayoutAlign="center center">
             Please configure widget!
         </div>
         <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
-        <div *ngIf="configured && ready && !dataReady" fxFill fxLayout="row" fxLayoutAlign="center center">
+        <div *ngIf="configured && ready && error" fxFill fxLayout="row" fxLayoutAlign="center center">
             <div class="center-text">Problem fetching data: Operator might have not received data for selected time frame. Check config otherwise.</div>
         </div>
-        <div *ngIf="configured && ready && dataReady" fxLayout="column" fxFill>
+        <div *ngIf="configured && ready && !error" fxLayout="column" fxFill>
             <div>
                 <div class="widget-icon" fxFill fxFlex="20" fxLayoutAlign="center center">
                     <mat-icon class="mat-32">trending_up</mat-icon>
@@ -89,7 +89,7 @@
         </div>
     </mat-card-content>
     <div>
-        <senergy-widget-footer [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+        <senergy-widget-footer [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
     </div>
 </mat-card>
 
