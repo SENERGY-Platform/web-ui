@@ -65,7 +65,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     error = false;
     destroy = new Subscription();
     marginLeft = '0';
-    private _svListIndex = 4; // TODO
+    private _svListIndex = 0;
     animationState = false;
 
     @Input() dashboardId = '';
@@ -99,7 +99,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         this.scheduleRefresh();
         this.registerIcons();
         this.setConfigured();
-        this.dateControl.valueChanges.pipe(debounceTime(300)).subscribe((localDateString) => {
+        this.dateControl.valueChanges.pipe(debounceTime(1000)).subscribe((localDateString) => {
             if (localDateString === null) {
                 return;
             }
