@@ -29,6 +29,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { NotificationService } from './notification/shared/notification.service';
+import { of } from 'rxjs';
+import { SettingsDialogService } from 'src/app/modules/settings/shared/settings-dialog.service';
 
 describe('ToolbarComponent', () => {
     let component: ToolbarComponent;
@@ -37,6 +39,9 @@ describe('ToolbarComponent', () => {
     const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService, {
         observablePropsToSpyOn: ['notificationEmitter']
     });
+    notificationServiceSpy.userHasReadAuthorization.and.returnValue(of(true))
+    const settingsDialogServiceSpy: Spy<SettingsDialogService> = createSpyFromClass(SettingsDialogService)
+    settingsDialogServiceSpy.userHasUpdateAuthorization.and.returnValue(of(true))
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -54,6 +59,7 @@ describe('ToolbarComponent', () => {
             providers: [
                 { provide: AuthorizationService, useClass: AuthorizationServiceMock },
                 { provide: NotificationService, useValue: notificationServiceSpy },
+                { provide: SettingsDialogService, useValue: settingsDialogServiceSpy }
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(ToolbarComponent);

@@ -61,6 +61,9 @@ describe('ImportTypesComponent', () => {
     importTypesServiceSpy.listImportTypes.and.returnValue(of([permSearchModelExample] as ImportTypePermissionSearchModel[]));
 
     importTypesServiceSpy.deleteImportInstance.and.returnValue(of());
+    importTypesServiceSpy.userHasUpdateAuthorization.and.returnValue(of(true))
+    importTypesServiceSpy.userHasDeleteAuthorization.and.returnValue(of(true))
+    importTypesServiceSpy.userHasCreateAuthorization.and.returnValue(of(true))
 
     const deleteDialogServiceSpy: Spy<DialogsService> = createSpyFromClass(DialogsService);
     deleteDialogServiceSpy.openDeleteDialog.and.returnValue({afterClosed: () => of(true)});

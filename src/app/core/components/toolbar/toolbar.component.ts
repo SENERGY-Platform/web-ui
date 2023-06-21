@@ -55,6 +55,10 @@ export class ToolbarComponent implements OnInit {
             this.notifications = n;
             this.notifications.forEach((no) => (!no.isRead ? this.unreadCounter++ : null));
         });
+        this.checkAuthorization()
+    }
+
+    checkAuthorization() {
         this.settingsDialogService.userHasUpdateAuthorization().subscribe(hasAuth => {
             this.userHasSettingsUpdateAuthorization = hasAuth
         })

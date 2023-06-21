@@ -20,7 +20,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -48,6 +48,9 @@ describe('DashboardComponent', () => {
     const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService, {
         observablePropsToSpyOn: ['dashboardObservable', 'dashboardWidgetObservable']
     });
+    dashboardServiceSpy.userHasCreateAuthorization.and.returnValue(of(true))
+    dashboardServiceSpy.userHasUpdateAuthorization.and.returnValue(of(true))
+    dashboardServiceSpy.userHasDeleteAuthorization.and.returnValue(of(true))
     const deviceStatusServiceSpy: Spy<DeviceStatusService> = createSpyFromClass<DeviceStatusService>(DeviceStatusService);
 
     beforeEach(

@@ -62,6 +62,9 @@ describe('ImportInstancesComponent', () => {
     const importInstancesServiceSpy: Spy<ImportInstancesService> = createSpyFromClass(ImportInstancesService);
     importInstancesServiceSpy.listImportInstances.and.returnValue(of([testInstance]));
     importInstancesServiceSpy.deleteImportInstance.and.returnValue(of());
+    importInstancesServiceSpy.userHasUpdateAuthorization.and.returnValue(of(true))
+    importInstancesServiceSpy.userHasDeleteAuthorization.and.returnValue(of(true))
+    importInstancesServiceSpy.userHasCreateAuthorization.and.returnValue(of(true))
 
     const deleteDialogServiceSpy: Spy<DialogsService> = createSpyFromClass(DialogsService);
     deleteDialogServiceSpy.openDeleteDialog.and.returnValue({afterClosed: () => of(true)});
