@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ResponsiveService } from '../../core/services/responsive.service';
-import { DashboardService } from './shared/dashboard.service';
-import { DashboardModel } from './shared/dashboard.model';
-import { WidgetModel } from './shared/dashboard-widget.model';
-import { DashboardWidgetManipulationModel } from './shared/dashboard-widget-manipulation.model';
-import { DashboardManipulationEnum } from './shared/dashboard-manipulation.enum';
-import { DashboardManipulationModel } from './shared/dashboard-manipulation.model';
-import { DisplayGrid, GridsterConfig, GridsterItem, GridType } from 'angular-gridster2';
-import { forkJoin, Observable, of, Subscription } from 'rxjs';
-import { DashboardTypesEnum } from './shared/dashboard-types.enum';
-import { DeviceStatusService } from '../../widgets/device-status/shared/device-status.service';
-import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { DialogsService } from '../../core/services/dialogs.service';
-import { ProcessSchedulerService } from '../../widgets/process-scheduler/shared/process-scheduler.service';
-import { DataTableService } from '../../widgets/data-table/shared/data-table.service';
-import { AirQualityService } from '../../widgets/air-quality/shared/air-quality.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { MatTabGroup } from '@angular/material/tabs';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ResponsiveService} from '../../core/services/responsive.service';
+import {DashboardService} from './shared/dashboard.service';
+import {DashboardModel} from './shared/dashboard.model';
+import {WidgetModel} from './shared/dashboard-widget.model';
+import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
+import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
+import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
+import {DisplayGrid, GridsterConfig, GridsterItem, GridType} from 'angular-gridster2';
+import {forkJoin, Observable, of, Subscription} from 'rxjs';
+import {DashboardTypesEnum} from './shared/dashboard-types.enum';
+import {DeviceStatusService} from '../../widgets/device-status/shared/device-status.service';
+import {moveItemInArray} from '@angular/cdk/drag-drop';
+import {DialogsService} from '../../core/services/dialogs.service';
+import {ProcessSchedulerService} from '../../widgets/process-scheduler/shared/process-scheduler.service';
+import {DataTableService} from '../../widgets/data-table/shared/data-table.service';
+import {AirQualityService} from '../../widgets/air-quality/shared/air-quality.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {MatTabGroup} from '@angular/material/tabs';
 import {ChartsService} from "../../widgets/charts/shared/charts.service";
 
 const grids = new Map([
@@ -136,14 +136,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     setTabIndex(index: number): void {
         this.zoomedWidgetIndex = null;
-        if (index !== this.activeTabIndex) {
-            let url = '/dashboard/';
-            if (index !== 0) {
-                url += this.dashboards[index].id;
-            }
-            this.router.navigateByUrl(url);
+        if (this.activeTabIndex !== index) {
+            this.activeTabIndex = index;
+            this.navigate();
         }
-        this.activeTabIndex = index;
         if (this.options.api === undefined) {
             this.initDragAndDropOptions();
             this.initDragAndDrop();
@@ -267,6 +263,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     this.setTabIndex(0);
                 } else {
                     this.setTabIndex(idx);
+                    const widgetId = this.route.snapshot.queryParams['zoomed_widget'];
+                    if (widgetId) {
+                        const widgetIndex = this.dashboards[idx].widgets.findIndex(w => w.id === widgetId);
+                        if (widgetIndex !== -1 && widgetIndex !== this.zoomedWidgetIndex) {
+                            setTimeout(() => this.zoomWidget({widgetId, widget: this.dashboards[idx].widgets[widgetIndex], manipulation: DashboardManipulationEnum.Zoom}), 0);
+                        }
+                    }
                 }
             });
         });
@@ -451,6 +454,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.zoomedWidgetIndex = null;
             setTimeout(() => this.dashboardService.reloadAllWidgets(), 0);
         }
+        this.navigate();
     }
 
     moveWidgetToDashboard(id: string, toIndex: number): Observable<any> {
@@ -512,5 +516,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     mouseLeaveHeader() {
         this.mouseHoverHeaderIndex = -1;
+    }
+
+    private navigate() {
+        const url = '/dashboard/' + this.dashboards[this.activeTabIndex].id;
+        if (this.zoomedWidgetIndex !== null) {
+            this.router.navigate([url], {queryParams: {zoomed_widget: this.dashboards[this.activeTabIndex].widgets[this.zoomedWidgetIndex].id}});
+        } else {
+            this.router.navigateByUrl(url);
+        }
     }
 }
