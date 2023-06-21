@@ -69,6 +69,14 @@ export class ChartsModel {
             legend?: { position: string; textStyle?: { color: string; fontSize: 16 }; alignment?: string } | string;
             is3D?: boolean;
             pieHole?: number;
+            dateFormat?: string;
+            displayExactValues?: boolean;
+            thickness?: number;
+            displayZoomButtons?: boolean;
+            displayAnnotations?: boolean;
+            displayLegendValues?: boolean;
+            zoomStartTime?: Date;
+            zoomEndTime?: Date;
         },
     ) {
     }

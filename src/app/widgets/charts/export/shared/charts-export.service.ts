@@ -77,7 +77,7 @@ export class ChartsExportService {
         });
     }
 
-    getData(properties: WidgetPropertiesModels, from: string | undefined = undefined, to: string | undefined = undefined, groupInterval: string | undefined = undefined): Observable<any[][] | null | ErrorModel> {
+    getData(properties: WidgetPropertiesModels, from?: string, to?: string, groupInterval?: string, lastOverride?: string): Observable<any[][] | null | ErrorModel> {
         const widgetProperties = properties as ChartsExportPropertiesModel;
         const time: QueriesRequestTimeModel = {};
         const limit = properties.chartType === 'PieChart' && properties.calculateIntervals !== true ? 1 : undefined;
@@ -100,7 +100,7 @@ export class ChartsExportService {
             time.start = new Date(widgetProperties.time.start as string).toISOString();
             time.end = new Date(widgetProperties.time.end as string).toISOString();
         } else if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Relative && widgetProperties.time) {
-            time.last = widgetProperties.time.last;
+            time.last = lastOverride || widgetProperties.time.last;
         } else if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.RelativeAhead && widgetProperties.time) {
             time.ahead = widgetProperties.time.ahead;
         }
@@ -122,6 +122,8 @@ export class ChartsExportService {
                 groupTime: group?.time !== '' ? group?.time : undefined,
                 limit,
                 time,
+                orderColumnIndex: 0,
+                orderDirection: 'desc',
             };
             const filters: QueriesRequestFilterModel[] = [];
             vAxis.tagSelection?.forEach((tagFilter) => {
@@ -208,9 +210,9 @@ export class ChartsExportService {
         }));
     }
 
-    getChartData(widget: WidgetModel, from?: string, to?: string, groupInterval?: string, hAxisFormat?: string): Observable<ChartsModel | ErrorModel> {
+    getChartData(widget: WidgetModel, from?: string, to?: string, groupInterval?: string, hAxisFormat?: string, lastOverride?: string): Observable<ChartsModel | ErrorModel> {
         return new Observable<ChartsModel | ErrorModel>((observer) => {
-            this.getData(widget.properties, from, to, groupInterval).subscribe((resp: any[][] | null | ErrorModel) => {
+            this.getData(widget.properties, from, to, groupInterval, lastOverride).subscribe((resp: any[][] | null | ErrorModel) => {
                 if (resp === null) {
                     // no data
                     observer.next(this.setProcessInstancesStatusValues(widget, new ChartDataTableModel([[]])));

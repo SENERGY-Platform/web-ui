@@ -29,6 +29,7 @@
                 <tr>
                     <td>
                         <mat-form-field color="accent" class="full-width">
+                            <mat-label>Chart Type</mat-label>
                             <mat-select formControlName="chartType" placeholder="Chart Type" required>
                                 <mat-option *ngFor="let chartType of chartTypes" [value]="chartType">
                                     {{chartType}}
@@ -42,6 +43,11 @@
                     <td *ngIf="chartType.value === 'LineChart'">
                         <mat-slide-toggle formControlName="curvedFunction"> Curved?
                         </mat-slide-toggle>
+                        <mat-form-field color="accent" style="width: 140px">
+                            <mat-label>Zoom Time Factor</mat-label>
+                            <input type="number" matInput
+                                   formControlName="zoomTimeFactor">
+                        </mat-form-field>
                     </td>
                     <td *ngIf="chartType.value === 'PieChart'">
                         <mat-slide-toggle formControlName="calculateIntervals"> Calculate Intervals?

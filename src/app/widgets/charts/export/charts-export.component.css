@@ -25,3 +25,11 @@
     margin: 0;
     overflow: hidden;
 }
+
+:host ::ng-deep .google-visualization-atl .legend {
+    font-size: 16px;
+}
+
+:host ::ng-deep .google-visualization-atl .legend-dot {
+    height: 12px;
+}

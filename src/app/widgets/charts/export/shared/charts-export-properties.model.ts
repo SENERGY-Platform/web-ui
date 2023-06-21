@@ -36,6 +36,7 @@ export interface ChartsExportPropertiesModel {
     time?: ChartsExportRequestPayloadTimeModel;
     group?: ChartsExportRequestPayloadGroupModel;
     breakInterval?: string;
+    zoomTimeFactor?: number;
 }
 
 export interface ChartsExportMeasurementModel {

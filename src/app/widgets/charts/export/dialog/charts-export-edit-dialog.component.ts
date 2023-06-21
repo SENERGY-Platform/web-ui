@@ -147,6 +147,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 vAxisLabel: widget.properties.vAxisLabel,
                 secondVAxisLabel: widget.properties.secondVAxisLabel,
                 vAxes: [widget.properties.vAxes || []],
+                zoomTimeFactor: widget.properties.zoomTimeFactor || 2,
             }),
         });
         this.groupTypeIsDifference = widget.properties.group?.type?.startsWith('difference') || false;

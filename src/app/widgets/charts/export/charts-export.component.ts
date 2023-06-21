@@ -15,7 +15,7 @@
  */
 
 import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ChartSelectEvent, GoogleChartComponent} from 'ng2-google-charts';
+import {ChartSelectEvent, GoogleChartComponent,} from 'ng2-google-charts';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {ElementSizeService} from '../../../core/services/element-size.service';
 import {ChartsModel} from '../shared/charts.model';
@@ -125,7 +125,13 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         this.chartsService.releaseResources(this.chartExport);
         this.checkConfiguration();
         if (this.configureWidget === false) {
-            this.chartsExportService.getChartData(this.widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined).subscribe((resp: ChartsModel | ErrorModel) => {
+            let lastOverride: string | undefined;
+            const rgxRes = this.timeRgx.exec(this.widget.properties.time?.last || '');
+            if (this.zoom && this.widget.properties.chartType === 'LineChart' && this.from === null && this.to === null && rgxRes?.length === 3) {
+                lastOverride = Number(rgxRes[1]) * (this.widget.properties.zoomTimeFactor || 2) + rgxRes[2];
+            }
+
+            this.chartsExportService.getChartData(this.widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride).subscribe((resp: ChartsModel | ErrorModel) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     this.errorHasOccured = true;
                     this.errorMessage = 'No data';
@@ -134,6 +140,23 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                 } else {
                     this.errorHasOccured = false;
                     this.chartExportData = resp;
+                    this.chartExportData.dataTable.sort((a, b) => (a[0] as Date).valueOf() - (b[0] as Date).valueOf());
+
+                    if (this.zoom && this.chartExportData.chartType === 'LineChart' && this.chartExportData.options !== undefined) {
+                        this.chartExportData.chartType = 'AnnotationChart';
+                        this.chartExportData.options.dateFormat = 'dd.MM.yyyy HH:mm:ss';
+                        this.chartExportData.options.displayExactValues = true;
+                        this.chartExportData.options.thickness = 2;
+                        this.chartExportData.options.displayZoomButtons = false;
+                        this.chartExportData.options.displayAnnotations = false;
+                        this.chartExportData.options.displayLegendValues = true;
+                        if (lastOverride !== undefined) {
+                            const start = (this.chartExportData.dataTable[1][0] as Date).valueOf();
+                            const end = (this.chartExportData.dataTable[this.chartExportData.dataTable.length-1][0] as Date).valueOf();
+                            const range = end - start;
+                            this.chartExportData.options.zoomStartTime = new Date(end - (range / (this.widget.properties.zoomTimeFactor || 2)));
+                        }
+                    }
                     this.ready = true;
                 }
                 this.size = (this.chartExportData?.dataTable?.length || 0) * ((this.chartExportData?.dataTable?.[0]?.length || 0) - 1);
@@ -321,7 +344,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         }
     }
 
-    getCustomIcons(header: boolean): {icons: string[]; disabled: boolean[]; tooltips: string[]} {
+    getCustomIcons(header: boolean): { icons: string[]; disabled: boolean[]; tooltips: string[] } {
         const res = {icons: [] as string[], disabled: [] as boolean[], tooltips: [] as string[]};
 
         if (this.zoomOutEnabled() && ((this.zoom && header) || (!this.zoom && !header))) {
@@ -343,7 +366,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         return res;
     }
 
-    customEvent($event: {index: number; icon: string}) {
+    customEvent($event: { index: number; icon: string }) {
         if ($event.icon === 'zoom_out') {
             this.drillUp();
         } else if ($event.icon === 'undo') {
