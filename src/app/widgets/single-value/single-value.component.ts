@@ -151,9 +151,17 @@ export class SingleValueComponent implements OnInit, OnDestroy {
                     if (localDateString !== undefined) {
                         let found = false;
                         for (let i = 1; i < sv.length; i++) {
-                            if (sv[i].date > new Date(localDateString)) {
-                                this.dateControl.setValue(sv[i - 1].date.toLocaleString('sv').replace(' ', 'T'), {emitEvent: false});
-                                this.svListIndex = i - 1;
+                            const d = new Date(localDateString);
+                            if (sv[i].date > d) {
+                                if (sv[i - 1].date.getDate() === d.getDate() && sv[i].date.getDate() !== d.getDate()) {
+                                    i -= 1;
+                                } else if (sv[i - 1].date.getDate() !== d.getDate() && sv[i].date.getDate() === d.getDate()) {
+                                    // nop
+                                } else if (Math.abs(sv[i - 1].date.valueOf() - d.valueOf()) < Math.abs(sv[i].date.valueOf() - d.valueOf())) {
+                                    i -= 1;
+                                }
+                                this.dateControl.setValue(sv[i].date.toLocaleString('sv').replace(' ', 'T'), {emitEvent: false});
+                                this.svListIndex = i;
                                 found = true;
                                 break;
                             }
