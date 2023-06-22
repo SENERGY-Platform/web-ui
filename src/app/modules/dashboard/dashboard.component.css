@@ -16,7 +16,14 @@
 
 gridster {
   background-color: #fafafa;
+}
+
+.gridster-with-button {
   height: calc(100% - 120px);
+}
+
+.gridster-without-button {
+  height: calc(100%);
 }
 
 gridster-item {
@@ -63,12 +70,9 @@ gridster-item {
   z-index: 100;
 }
 
-.dashboard-container-with-button ::ng-deep .mat-mdc-tab-body-wrapper {
+/* 100vh makes it scrollable because of the page header */
+.dashboard-container ::ng-deep .mat-mdc-tab-body-wrapper {
   height: calc(100vh - 118px);
-}
-
-.dashboard-container-without-button ::ng-deep .mat-mdc-tab-body-wrapper {
-  height: calc(100vh);
 }
 
 .zoomed-widget {

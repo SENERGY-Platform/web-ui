@@ -15,7 +15,7 @@
   -->
 
 
-<div class="dashboard-container" [ngClass]="{'dashboard-container-with-button': userHasCreateAuthorization, 'dashboard-container-without-button': !userHasCreateAuthorization}">
+<div class="dashboard-container">
     <mat-tab-group backgroundColor="accent" color="primary" (animationDone)="initAllWidgets()"
                    (selectedIndexChange)="setTabIndex($event)" [(selectedIndex)]="activeTabIndex"
                    dynamicHeight="true" headerPosition="above" mat-stretch-tabs="false">
@@ -87,7 +87,7 @@
 
                 </div>
 
-                <gridster *ngIf="zoomedWidgetIndex === null" [options]="options" id="gridster">
+                <gridster *ngIf="zoomedWidgetIndex === null" [options]="options" id="gridster" [ngClass]="{'gridster-with-button': userHasCreateAuthorization, 'gridster-without-button': !userHasCreateAuthorization}">
                     <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets"
                                    [ngClass]="inDragMode ? 'highlight color-sidenav' : ''"
                                    class="mat-elevation-z1">

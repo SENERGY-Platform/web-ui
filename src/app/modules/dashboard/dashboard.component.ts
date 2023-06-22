@@ -248,7 +248,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             },
             resizable: {
                 enabled: false,
-            },
+            }
         };
     }
 
