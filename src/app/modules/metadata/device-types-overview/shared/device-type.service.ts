@@ -62,7 +62,7 @@ export class DeviceTypeService {
 
     getDeviceTypeListByIds(ids: string[]): Observable<DeviceTypeBaseModel[]> {
         return this.http
-            .post<DeviceTypeBaseModel[]>(environment.permissionSearchUrl + '/v3/query', {
+            .post<DeviceTypeBaseModel[]>(environment.permissionSearchUrl + '/v3/query/device-types', {
                 resource: 'device-types',
                 list_ids: {
                     ids,

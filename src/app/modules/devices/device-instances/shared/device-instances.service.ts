@@ -57,7 +57,7 @@ export class DeviceInstancesService {
 
     listUsedDeviceTypeIds(): Observable<string[]> {
         return this.http
-            .post<{ term: string }[]>(environment.permissionSearchUrl + '/v3/query', {
+            .post<{ term: string }[]>(environment.permissionSearchUrl + '/v3/query/devices', {
                 resource: 'devices',
                 term_aggregate: 'features.device_type_id',
             })
@@ -70,7 +70,7 @@ export class DeviceInstancesService {
 
     getDeviceListByIds(ids: string[]): Observable<DeviceInstancesBaseModel[]> {
         return this.http
-            .post<DeviceInstancesBaseModel[]>(environment.permissionSearchUrl + '/v3/query', {
+            .post<DeviceInstancesBaseModel[]>(environment.permissionSearchUrl + '/v3/query/devices', {
                 resource: 'devices',
                 list_ids: {
                     ids,
@@ -238,7 +238,7 @@ export class DeviceInstancesService {
 
     getDeviceInstancesByDeviceTypes(
         ids: string[], limit: number, offset: number): Observable<DeviceInstancesPermSearchModel[]> {
-        return this.http.post<DeviceInstancesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query', {
+        return this.http.post<DeviceInstancesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/devices', {
             resource: 'devices', find: {
                 filter: {
                     limit, offset, condition: {
@@ -407,7 +407,7 @@ export class DeviceInstancesService {
 
     getDeviceInstancesByIds(ids: string[]): Observable<DeviceInstancesPermSearchModel[]> {
         return this.http
-            .post<DeviceInstancesPermSearchModel[] | null>(environment.permissionSearchUrl + '/v3/query', {
+            .post<DeviceInstancesPermSearchModel[] | null>(environment.permissionSearchUrl + '/v3/query/devices', {
                 resource: 'devices',
                 list_ids: {ids},
             })

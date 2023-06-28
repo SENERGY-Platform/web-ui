@@ -51,7 +51,7 @@ export class DeviceGroupsService {
         order: string,
     ): Observable<DeviceGroupsPermSearchModel[]> {
         return this.http
-            .post<DeviceGroupsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query', {
+            .post<DeviceGroupsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/device-groups', {
                 resource: 'device-groups',
                 find: {
                     search: query,
@@ -133,7 +133,7 @@ export class DeviceGroupsService {
 
     getDeviceListByIds(ids: string[]): Observable<DeviceInstancesBaseModel[]> {
         return this.http
-            .post<DeviceInstancesBaseModel[]>(environment.permissionSearchUrl + '/v3/query', {
+            .post<DeviceInstancesBaseModel[]>(environment.permissionSearchUrl + '/v3/query/devices', {
                 resource: 'devices',
                 list_ids: {
                     ids,
@@ -152,7 +152,7 @@ export class DeviceGroupsService {
 
     getDeviceGroupListByIds(ids: string[]): Observable<DeviceGroupModel[]> {
         return this.http
-            .post<DeviceGroupModel[]>(environment.permissionSearchUrl + '/v3/query', {
+            .post<DeviceGroupModel[]>(environment.permissionSearchUrl + '/v3/query/device-groups', {
                 resource: 'device-groups',
                 list_ids: {
                     ids,
@@ -171,7 +171,7 @@ export class DeviceGroupsService {
 
     getFunctionListByIds(ids: string[]): Observable<DeviceTypeFunctionModel[]> {
         return this.http
-            .post<DeviceTypeFunctionModel[]>(environment.permissionSearchUrl + '/v3/query', {
+            .post<DeviceTypeFunctionModel[]>(environment.permissionSearchUrl + '/v3/query/functions', {
                 resource: 'functions',
                 list_ids: {
                     ids,
@@ -190,7 +190,7 @@ export class DeviceGroupsService {
 
     getAspectListByIds(ids: string[]): Observable<AspectsPermSearchModel[]> {
         return this.http
-            .post<AspectsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query', {
+            .post<AspectsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/aspects', {
                 resource: 'aspects',
                 list_ids: {
                     ids,
@@ -209,7 +209,7 @@ export class DeviceGroupsService {
 
     getDeviceClassListByIds(ids: string[]): Observable<DeviceClassesPermSearchModel[]> {
         return this.http
-            .post<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query', {
+            .post<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/device-classes', {
                 resource: 'device-classes',
                 list_ids: {
                     ids,

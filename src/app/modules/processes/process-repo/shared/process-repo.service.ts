@@ -58,7 +58,7 @@ export class ProcessRepoService {
         conditions: ProcessRepoConditionsModel | null,
     ): Observable<ProcessModel[]> {
         return this.http
-            .post<ProcessModel[]>(environment.permissionSearchUrl + '/v3/query', {
+            .post<ProcessModel[]>(environment.permissionSearchUrl + '/v3/query/processmodel', {
                 resource: 'processmodel',
                 find: {
                     search: query,
