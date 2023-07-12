@@ -122,7 +122,6 @@ export class ChartsExportService {
                 groupTime: group?.time !== '' ? group?.time : undefined,
                 limit,
                 time,
-                orderColumnIndex: 0,
                 orderDirection: 'desc',
             };
             const filters: QueriesRequestFilterModel[] = [];
@@ -144,12 +143,14 @@ export class ChartsExportService {
             if (exp !== undefined &&
                 ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb)) {
                 (newField as QueriesRequestElementInfluxModel).measurement = vAxis.instanceId;
+                (newField as QueriesRequestElementInfluxModel).orderColumnIndex = 1;
                 influxElements.push(newField);
                 influxResultMapper.push(index);
             } else {
                 (newField as QueriesRequestElementTimescaleModel).exportId = vAxis.instanceId;
                 (newField as QueriesRequestElementTimescaleModel).serviceId = vAxis.serviceId;
                 (newField as QueriesRequestElementTimescaleModel).deviceId = vAxis.deviceId;
+                (newField as QueriesRequestElementInfluxModel).orderColumnIndex = 0;
                 newField.columns[0].name = vAxis.valuePath || vAxis.valueName || '';
                 timescaleElements.push(newField);
                 timescaleResultMapper.push(index);
