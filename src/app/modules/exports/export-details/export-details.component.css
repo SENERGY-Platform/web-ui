@@ -93,3 +93,16 @@ mat-grid-list {
     max-width: fit-content;
     min-width: 145px;
 }
+
+p, h4 {
+    margin: 0;
+    color: black;
+}
+
+h4 {
+    font-weight: 500;
+}
+
+.icon {
+    color: black!important;
+}

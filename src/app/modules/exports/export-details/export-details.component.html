@@ -27,49 +27,49 @@
             <mat-card-content>
                 <mat-list>
                     <mat-list-item>
-                        <mat-icon *ngIf="export.FilterType === 'deviceId'" mat-list-icon>
+                        <mat-icon *ngIf="export.FilterType === 'deviceId'" matListItemIcon class="icon">
                             router
                         </mat-icon>
-                        <mat-icon *ngIf="export.FilterType === 'pipeId' || export.FilterType === 'operatorId'" mat-list-icon>
+                        <mat-icon *ngIf="export.FilterType === 'pipeId' || export.FilterType === 'operatorId'" matListItemIcon class="icon">
                             timeline
                         </mat-icon>
-                        <mat-icon *ngIf="export.FilterType === 'import_id'" mat-list-icon>
+                        <mat-icon *ngIf="export.FilterType === 'import_id'" matListItemIcon class="icon">
                             play_circle_outline
                         </mat-icon>
-                        <h4 mat-line *ngIf="export.FilterType === 'deviceId'">Device</h4>
-                        <h4 mat-line *ngIf="export.FilterType === 'pipeId'">Pipeline</h4>
-                        <h4 mat-line *ngIf="export.FilterType === 'import_id'">Import</h4>
-                        <p mat-line>{{export.EntityName}} </p>
+                        <h4 matListItemLine *ngIf="export.FilterType === 'deviceId'">Device</h4>
+                        <h4 matListItemLine *ngIf="export.FilterType === 'pipeId'">Pipeline</h4>
+                        <h4 matListItemLine *ngIf="export.FilterType === 'import_id'">Import</h4>
+                        <p matListItemLine>{{export.EntityName}} </p>
                         <mat-divider></mat-divider>
                     </mat-list-item>
                     <mat-list-item *ngIf="!brokerMode">
-                        <mat-icon mat-list-icon>storage</mat-icon>
-                        <h4 mat-line>Database</h4>
-                        <p mat-line>{{export.ExportDatabase?.Name}} </p>
+                        <mat-icon matListItemIcon class="icon">storage</mat-icon>
+                        <h4 matListItemLine>Database</h4>
+                        <p matListItemLine>{{export.ExportDatabase?.Name}} </p>
                         <mat-divider></mat-divider>
                     </mat-list-item>
                     <mat-list-item *ngIf="!brokerMode">
-                        <mat-icon mat-list-icon>alarm</mat-icon>
-                        <h4 mat-line>TimePath</h4>
-                        <p mat-line>{{export.TimePath}}</p>
+                        <mat-icon matListItemIcon class="icon">alarm</mat-icon>
+                        <h4 matListItemLine>TimePath</h4>
+                        <p matListItemLine>{{export.TimePath}}</p>
                         <mat-divider></mat-divider>
                     </mat-list-item>
                     <mat-list-item *ngIf="brokerMode">
-                        <mat-icon mat-list-icon>topic</mat-icon>
-                        <h4 mat-line>Topic</h4>
-                        <p mat-line>{{baseTopic}}/#</p>
+                        <mat-icon matListItemIcon class="icon">topic</mat-icon>
+                        <h4 matListItemLine>Topic</h4>
+                        <p matListItemLine>{{baseTopic}}/#</p>
                         <mat-divider></mat-divider>
                     </mat-list-item>
                     <mat-list-item *ngIf="brokerMode">
-                        <mat-icon mat-list-icon>call_split</mat-icon>
-                        <h4 mat-line>Broker</h4>
-                        <p mat-line>{{export?.CustomMqttBroker || brokerUrl}}</p>
+                        <mat-icon matListItemIcon class="icon">call_split</mat-icon>
+                        <h4 matListItemLine>Broker</h4>
+                        <p matListItemLine>{{export?.CustomMqttBroker || brokerUrl}}</p>
                         <mat-divider></mat-divider>
                     </mat-list-item>
                     <mat-list-item *ngIf="brokerMode">
-                        <mat-icon mat-list-icon>vpn_key</mat-icon>
-                        <h4 mat-line>Credentials</h4>
-                        <div mat-line>
+                        <mat-icon matListItemIcon class="icon">vpn_key</mat-icon>
+                        <h4 matListItemLine>Credentials</h4>
+                        <div matListItemLine>
                         <div>Username: {{export?.CustomMqttUser !== undefined ? export?.CustomMqttUser : userName}}</div>
                         <div class="pw" (mouseenter)="togglePasswordVisibility()" (mouseleave)="togglePasswordVisibility()">
                             Password: {{password}}
@@ -79,9 +79,9 @@
                         <mat-divider></mat-divider>
                     </mat-list-item>
                     <mat-list-item>
-                        <mat-icon mat-list-icon>date_range</mat-icon>
-                        <h4 mat-line>CreatedAt</h4>
-                        <p mat-line>{{export.CreatedAt | date:'dd.MM.yyyy - HH:mm' }}</p>
+                        <mat-icon matListItemIcon class="icon">date_range</mat-icon>
+                        <h4 matListItemLine>CreatedAt</h4>
+                        <p matListItemLine>{{export.CreatedAt | date:'dd.MM.yyyy - HH:mm' }}</p>
                     </mat-list-item>
                 </mat-list>
             </mat-card-content>
