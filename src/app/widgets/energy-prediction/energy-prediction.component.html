@@ -24,7 +24,7 @@
         <div *ngIf="configured && ready && error" fxFill fxLayout="row" fxLayoutAlign="center center">
             <div class="center-text">Problem fetching data: Operator might have not received data for selected time frame. Check config otherwise.</div>
         </div>
-        <div *ngIf="configured && ready && !error" fxLayout="column" fxFill>
+        <div *ngIf="configured && ready && !error" fxLayout="column" fxFill fxLayoutAlign="space-around">
             <div>
                 <div class="widget-icon" fxFill fxFlex="20" fxLayoutAlign="center center">
                     <mat-icon class="mat-32">trending_up</mat-icon>

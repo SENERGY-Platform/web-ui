@@ -229,7 +229,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private initDragAndDropOptions() {
         this.options = {
             gridType: GridType.VerticalFixed,
-            fixedRowHeight: 270,
+            fixedRowHeight: 350,
             //outerMarginBottom: 100,
             displayGrid: DisplayGrid.None,
             minCols: this.gridCols,
