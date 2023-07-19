@@ -246,8 +246,37 @@ export class ChartsExportService {
             });
         }
         const dataTable = new ChartDataTableModel([header]);
+        
+        var series2: any = []
+        if(series[0].length > 2 && properties.chartType === 'ColumnChart') {
+            /* Grouped Column -> all values for on x tick value need to be in one list
+            series = [
+                ["2023-07-18T00:00:00Z", 2.7930317029043543, 5, 3]
+            ]
+            */
+            var tmp: any = {}
+            series.forEach((item: any[]) => {
+                var date: string = item[0] 
+                item.slice(1).forEach((element, index) => {
+                    if(!!element) {
+                        if(!tmp[date]) {
+                            tmp[date] = []
+                        }
+                        tmp[date][index] = element
+                    }
+                });
+            })
 
-        series.forEach((item: (string | number | boolean)[]) => {
+
+            for (const [date, list] of Object.entries(tmp)) {
+                series2.push([date].concat(<any[]>list))
+            }
+
+        } else {
+            series2 = series
+        }
+
+        series2.forEach((item: (string | number | boolean)[]) => {
             const dataPoint: (Date | number | string | null)[] = [new Date(item[0] as string)];
             indices.forEach((resp) => {
                 let value = item[resp.index] as any;
@@ -265,6 +294,7 @@ export class ChartsExportService {
             });
             dataTable.data.push(dataPoint);
         });
+        
         if (properties.chartType === 'PieChart') {
             if (properties.calculateIntervals !== true) {
                 const transposed: any[] = [['', '']];

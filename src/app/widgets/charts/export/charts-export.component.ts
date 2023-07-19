@@ -222,6 +222,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             case 'ms':
                 return; // cant go smaller
             }
+
             this.groupTime = '1' + timeUnit;
 
             this.refresh();
