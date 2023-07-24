@@ -32,6 +32,7 @@ import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { textChangeRangeIsUnchanged } from 'typescript';
 
 
 @Component({
@@ -68,6 +69,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     ngOnInit() {
         this.locationsService.getTotalCountOfLocations().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
+        this.checkAuthorization()
     }
 
     ngOnDestroy() {
@@ -83,7 +85,11 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     checkAuthorization() {
-        this.locationsService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasCreateAuthorization = hasAuth) 
+        this.locationsService.userHasCreateAuthorization().subscribe(hasAuth => {
+            console.log(hasAuth)
+            this.userHasCreateAuthorization = hasAuth
+        })
+
         this.locationsService.userHasUpdateAuthorization().subscribe(hasAuth => {
             this.userHasUpdateAuthorization = hasAuth
             if(hasAuth) {
