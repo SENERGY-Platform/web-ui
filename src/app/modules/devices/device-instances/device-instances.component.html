@@ -75,7 +75,7 @@
                 <ng-container matColumnDef="device_type">
                     <th mat-header-cell mat-sort-header *matHeaderCellDef>Type</th>
                     <td mat-cell *matCellDef="let device">
-                        <a [routerLink]="'/metadata/devicetypesoverview/devicetypes/' + device.device_type.id" [queryParams]="{'function': 'details'}">{{device.device_type.name}}</a>
+                        <a [routerLink]="'/metadata/devicetypesoverview/devicetypes/' + device.device_type_id" [queryParams]="{'function': 'details'}">{{device.device_type.name}}</a>
                     </td>
                 </ng-container>
 

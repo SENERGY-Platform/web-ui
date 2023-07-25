@@ -26,13 +26,10 @@ import {
     DeviceInstancesRouterStateTypesEnum
 } from '../device-instances/device-instances.component';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatSort, Sort, SortDirection} from '@angular/material/sort';
-import {UntypedFormControl} from '@angular/forms';
-import {debounceTime} from 'rxjs/operators';
+import { Sort, SortDirection } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { textChangeRangeIsUnchanged } from 'typescript';
 
 
 @Component({

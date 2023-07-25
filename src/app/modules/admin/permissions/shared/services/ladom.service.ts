@@ -107,7 +107,7 @@ export class LadonService {
             });
             this.userIsAuthorized(requests).subscribe((authResponse: AuthorizationRequestResponse) => {
                 var result: PermissionTestResponse = {
-                    "GET": true,
+                    "GET": false,
                     "POST": false,
                     "DELETE": false,
                     "PUT": false,

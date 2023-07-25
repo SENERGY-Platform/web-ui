@@ -87,7 +87,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     ) {
         this.getRouterParams();
     }
-    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'device_type', 'info', 'share', 'duplicate']
+    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'info', 'share', 'duplicate']
     pageSize = 20;
     dataSource = new MatTableDataSource<DeviceInstancesModel>();
     selection = new SelectionModel<DeviceInstancesModel>(true, []);
@@ -140,6 +140,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             this.userHasDeleteAuthorization = hasAuth
             if(hasAuth) {
                 this.displayedColumns.push("delete")
+            }
+        })
+        this.deviceTypesService.userHasReadAuthorization().subscribe(hasAuth => {
+            if(hasAuth) {
+                this.displayedColumns.splice(4, 0, 'device_type')
             }
         })
     }
