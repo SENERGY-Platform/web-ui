@@ -42,12 +42,13 @@ export class SidenavComponent implements OnInit, AfterViewInit {
         private router: Router,
         private sidenavService: SidenavService,
         private responsiveService: ResponsiveService,
-    ) {}
+    ) {
+    }
 
     ngOnInit() {
         this.getActiveSection();
-        this.sections = this.sidenavService.getSections();
         this.showOrHideSidenav();
+        this.sidenavService.getSections().subscribe(sections => this.sections = sections);
     }
 
     ngAfterViewInit() {

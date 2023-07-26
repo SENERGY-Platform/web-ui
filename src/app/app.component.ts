@@ -16,6 +16,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { KeycloakService } from 'keycloak-angular';
+import { forkJoin } from 'rxjs';
 import { SidenavService } from './core/components/sidenav/shared/sidenav.service';
 import { ThemingService } from './core/services/theming.service';
 
@@ -26,18 +27,31 @@ import { ThemingService } from './core/services/theming.service';
 })
 export class AppComponent implements OnInit {
     ready: boolean = false
-    constructor(protected keycloak: KeycloakService, private themingService: ThemingService, private sidenavService: SidenavService) {}
+    constructor(
+        protected keycloak: KeycloakService, 
+        private themingService: ThemingService, 
+        private sidenavService: SidenavService,
+    ) {}
 
-    ngOnInit() {
-        this.sidenavService.loadSections().then(_ => {
-            this.ready = true
+
+    ngOnInit(): void {
+        this.storeSubject()
+        this.themingService.applyTheme();
+
+        var obs = []
+        obs.push(this.sidenavService.loadSections())
+
+        forkJoin(obs).subscribe(results => {
+            if(results.every(v => !!v)) {
+                this.ready = true
+            }
         })
+    }
 
+    storeSubject() {
         const sub = this.keycloak.getKeycloakInstance().subject;
         if (sub !== undefined) {
             localStorage.setItem('sub', sub);
         }
-        this.themingService.applyTheme();
-
     }
 }

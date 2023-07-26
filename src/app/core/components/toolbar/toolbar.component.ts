@@ -94,14 +94,6 @@ export class ToolbarComponent implements OnInit {
                 filter((event) => event instanceof NavigationEnd),
                 map(() => {
                     const route = this.activatedRoute.firstChild;
-                    let child = route;
-                    while (child) {
-                        if (child.firstChild) {
-                            child = child.firstChild;
-                        } else {
-                            child = null;
-                        }
-                    }
                     return route;
                 }),
                 mergeMap((route: any) => route.data),

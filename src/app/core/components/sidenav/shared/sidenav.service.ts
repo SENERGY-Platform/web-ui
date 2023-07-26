@@ -24,7 +24,7 @@ import {WaitingRoomEventTypeAuthOk} from '../../../../modules/devices/waiting-ro
 import {environment} from '../../../../../environments/environment';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { SwaggerService } from 'src/app/modules/api-doc/shared/swagger/swagger.service';
-import { forkJoin, Observable } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, Subject, Subscriber } from 'rxjs';
 import { FlowRepoService } from 'src/app/modules/data/flow-repo/shared/flow-repo.service';
 import { OperatorRepoService } from 'src/app/modules/data/operator-repo/shared/operator-repo.service';
 import { PipelineRegistryService } from 'src/app/modules/data/pipeline-registry/shared/pipeline-registry.service';
@@ -61,6 +61,7 @@ export class SidenavService implements OnDestroy {
     private section = '';
     private waitingRoomEventCloser?: () => void;
     private sections: SidenavSectionModel[] = []
+    private sectionsSubject: Subject<SidenavSectionModel[]> = new Subject()
 
     constructor(
         private waitingRoomService: WaitingRoomService, 
@@ -352,12 +353,12 @@ export class SidenavService implements OnDestroy {
         })
     }
 
-    getSections(): SidenavSectionModel[] {
-        return this.sections
+    getSections(): Observable<SidenavSectionModel[]> {
+        return this.sectionsSubject.asObservable()
     }
 
-    loadSections(): Promise<SidenavSectionModel[]> {
-        return new Promise((resolve, _) => {
+    loadSections(): Observable<SidenavSectionModel[]> {
+        return new Observable((obs) => {
             var allObs: Observable<SidenavSectionModel>[] = []
             var sections: SidenavSectionModel[] = [];
 
@@ -404,7 +405,11 @@ export class SidenavService implements OnDestroy {
                 })
 
                 this.sections = sections
-                resolve(sections)
+                obs.next(sections)
+                obs.complete()
+
+                this.sectionsSubject.next(sections)
+                this.sectionsSubject.complete()
             })
         })
     }
