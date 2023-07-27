@@ -84,6 +84,10 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
     private subscriptions: Subscription[] = [];
     total = 0;
+    selectedUser: string = ""
+    selectedRole: string = ""
+    selectedClientID: string = ""
+    selectedEndpoint: string = ""
 
     constructor(private authService: AuthorizationService,
                 private ladonService: LadonService,
@@ -129,7 +133,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
 
     ngAfterViewInit() {
         this.subscriptions.push(this.paginator.page.subscribe((e) => {
-            this.sortData(this.sort, this.filter(), e);
+            this.sortData(this.sort, this.policies, e);
         }));
     }
 
@@ -316,29 +320,35 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
         });
     }
 
-    filter(): PermissionModel[] {
+    filter(_: any) {
         const filtered: PermissionModel[] = [];
         const query = new RegExp(this.query, 'i');
         this.policies.forEach((policy) => {
             try {
-                if (query.test(policy.subject)
-                    || query.test(policy.actions.join())
-                    || query.test(policy.resource)) {
-                    filtered.push(policy);
+                if(
+                    !(
+                        (this.selectedEndpoint && !policy.resource.startsWith(this.selectedEndpoint)) ||
+                        (this.query && (!(query.test(policy.subject) || query.test(policy.actions.join()) || query.test(policy.resource)))) ||
+                        (this.selectedUser && policy.subject != this.selectedUser) ||
+                        (this.selectedRole && policy.subject != this.selectedRole) ||
+                        (this.selectedClientID && policy.subject != this.selectedClientID)
+                    )
+                ) {
+                    filtered.push(policy)
                 }
             } catch (e) {
-                // Probably invalid regex, ignore in prod mode
-                if (isDevMode()) {
-                    console.error('Error filtering policies',
-                        'This is most likely due to an invalid regex and you can ignore this error', e);
-                }
+                    // Probably invalid regex, ignore in prod mode
+                    if (isDevMode()) {
+                        console.error('Error filtering policies',
+                            'This is most likely due to an invalid regex and you can ignore this error', e);
+                    }
             }
-        });
-        return filtered;
-    }
+            
 
-    public search() {
-        this.sortData(this.sort, this.filter());
+            
+        });
+        
+        this.sortData(this.sort, filtered)
     }
 
     public clearSearch() {
