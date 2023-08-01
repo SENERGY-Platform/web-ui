@@ -32,7 +32,6 @@ import {
 } from './device-type.model';
 import { DeviceTypePermSearchModel } from './device-type-perm-search.model';
 import { BpmnSkeletonModel } from './device-type-selection.model';
-import { MatDialog } from '@angular/material/dialog';
 import { flatMap } from 'rxjs/operators';
 import {flatten} from 'lodash';
 import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
@@ -42,17 +41,11 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class DeviceTypeService { 
-    authorizationObs: Observable<PermissionTestResponse> = new Observable()
-
     constructor(
         private http: HttpClient, 
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
-    ) {
-        var permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-types'
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(permSearchURL, ["GET", "DELETE", "POST", "PUT"])
-    
-    }
+    ) {}
 
     getDeviceType(id: string): Observable<DeviceTypeModel | null> {
         return this.http
@@ -300,24 +293,35 @@ export class DeviceTypeService {
     }
 
     userHasDeleteAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("DELETE")      
+        return this.userHasDeviceManagerAuthorization("DELETE")      
     }
 
     userHasUpdateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("PUT")      
+        return this.userHasDeviceManagerAuthorization("PUT")      
     }
 
     userHasCreateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("POST")   
+        return this.userHasDeviceManagerAuthorization("POST")   
     }
 
     userHasReadAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("GET")  
+        return this.userHasPermSearchAuthorization("GET")  
     }
 
-    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+    userHasPermSearchAuthorization(method: AllowedMethods): Observable<boolean> {
         return new Observable(obs => {
-            this.authorizationObs.subscribe(result => {
+            var permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-types'
+            this.ladonService.getUserAuthorizationsForURI(permSearchURL, ["GET"]).subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
+    }
+
+    userHasDeviceManagerAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            var deviceManagerUrl = environment.deviceManagerUrl + '/device-types'
+            this.ladonService.getUserAuthorizationsForURI(deviceManagerUrl, ["DELETE", "POST", "PUT"]).subscribe(result => {
                 obs.next(result[method])
                 obs.complete()
             })

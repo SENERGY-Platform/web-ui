@@ -97,7 +97,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
                 this.displayedColumns.push("delete")
             }
         })
-        this.deviceTypeService.userHasDeleteAuthorization().subscribe(hasAuth => {
+        this.deviceTypeService.userHasCreateAuthorization().subscribe(hasAuth => {
             this.userHasCreateAuthorization = hasAuth
         })
     }
