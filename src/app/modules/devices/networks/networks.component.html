@@ -76,6 +76,15 @@
                     </td>
                 </ng-container>
 
+                <ng-container matColumnDef="share">
+                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
+                    <td mat-cell *matCellDef="let network">
+                        <button mat-icon-button color="accent" matTooltip="Share" (click)="shareNetwork(network)">
+                            <mat-icon>share</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
                 <ng-container matColumnDef="clear">
                     <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Clear</th>
                     <td mat-cell *matCellDef="let network">

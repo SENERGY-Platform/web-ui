@@ -64,12 +64,18 @@ export class PermissionsDialogService {
                 });
             });
 
-            this.getUserNames(permissionsIn.filter((x) => x.isRole !== true)).subscribe((users: PermissionsUserModel[]) => {
-                users.forEach((user: PermissionsUserModel, index: number) => {
-                    permissionsIn[index].userName = user.username;
-                });
+            const users = permissionsIn.filter((x) => x.isRole !== true)
+
+            if (users.length === 0) {
                 this.openPermDialog(name, permissionsIn, kind, id, key);
-            });
+            } else {
+                this.getUserNames(permissionsIn.filter((x) => x.isRole !== true)).subscribe((users: PermissionsUserModel[]) => {
+                    users.forEach((user: PermissionsUserModel, index: number) => {
+                        permissionsIn[index].userName = user.username;
+                    });
+                    this.openPermDialog(name, permissionsIn, kind, id, key);
+                });
+            }
         });
     }
 

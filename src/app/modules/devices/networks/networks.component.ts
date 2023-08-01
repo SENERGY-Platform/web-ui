@@ -34,6 +34,9 @@ import {MatPaginator} from '@angular/material/paginator';
 import {DialogsService} from 'src/app/core/services/dialogs.service';
 import {SearchbarService} from 'src/app/core/components/searchbar/shared/searchbar.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {DeviceInstancesModel} from '../device-instances/shared/device-instances.model';
+import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
+import {AuthorizationService} from '../../../core/services/authorization.service';
 
 @Component({
     selector: 'senergy-networks',
@@ -65,6 +68,8 @@ export class NetworksComponent implements OnInit, OnDestroy {
         private deviceInstancesService: DeviceInstancesService,
         private dialogsService: DialogsService,
         private snackBar: MatSnackBar,
+        private permissionsDialogService: PermissionsDialogService,
+        private authService: AuthorizationService,
     ) {}
 
     ngOnInit() {
@@ -90,6 +95,9 @@ export class NetworksComponent implements OnInit, OnDestroy {
                 this.displayedColumns.push("delete")
             }
         })
+        if (this.authService.userIsAdmin()) {
+            this.displayedColumns.push('share')
+        }
     }
 
     private initSearch() {
@@ -222,5 +230,9 @@ export class NetworksComponent implements OnInit, OnDestroy {
                     });
                 }
             });
+    }
+
+    shareNetwork(network: NetworksModel): void {
+        this.permissionsDialogService.openPermissionDialog('hubs', network.id, network.name );
     }
 }
