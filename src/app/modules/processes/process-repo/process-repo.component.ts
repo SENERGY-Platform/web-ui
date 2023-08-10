@@ -19,7 +19,6 @@ import { AuthorizationService } from '../../../core/services/authorization.servi
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { forkJoin, Observable, Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { KeycloakService } from 'keycloak-angular';
 import { ResponsiveService } from '../../../core/services/responsive.service';
 import { ProcessModel } from './shared/process.model';
 import { ProcessRepoService } from './shared/process-repo.service';
@@ -84,14 +83,19 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         private processRepoService: ProcessRepoService,
         private responsiveService: ResponsiveService,
         protected auth: AuthorizationService,
-        private keycloakService: KeycloakService,
+        private authorizationService: AuthorizationService,
         private permissionsDialogService: PermissionsDialogService,
         private dialogsService: DialogsService,
         private snackBar: MatSnackBar,
         private router: Router,
         private _formBuilder: FormBuilder,
     ) {
-        this.userID = this.keycloakService.getKeycloakInstance().subject || '';
+        const sub = this.authorizationService.getUserId();
+        if (typeof sub === 'string') {
+            this.userID = sub;
+        } else {
+            this.userID = '';
+        }
     }
 
     ngOnInit() {

@@ -15,11 +15,26 @@
  */
 
 import { AppRoutingModule } from './app-routing.module';
+import {TestBed} from "@angular/core/testing";
+import {CoreModule, keycloakServiceToken} from "./core/core.module";
+import {RouterTestingModule} from "@angular/router/testing";
+import {HttpClientTestingModule} from "@angular/common/http/testing";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {AppComponent} from "./app.component";
+import {MockKeycloakService} from "./core/services/keycloak.mock";
+import {AuthorizationServiceMock} from "./core/services/authorization.service.mock";
+import {KeycloakService} from "keycloak-angular";
 
 describe('AppRoutingModule', () => {
     let appRoutingModule: AppRoutingModule;
 
     beforeEach(() => {
+
+        TestBed.configureTestingModule({
+            imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule],
+            declarations: [AppComponent],
+            providers: [{ provide: KeycloakService, useClass: MockKeycloakService }, { provide: AuthorizationServiceMock, useClass: AuthorizationServiceMock }],
+        }).compileComponents();
         appRoutingModule = new AppRoutingModule();
     });
 

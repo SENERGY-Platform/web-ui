@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { KeycloakService } from 'keycloak-angular';
-import { forkJoin } from 'rxjs';
-import { SidenavService } from './core/components/sidenav/shared/sidenav.service';
-import { ThemingService } from './core/services/theming.service';
+import {Component, OnInit} from '@angular/core';
+import {forkJoin} from 'rxjs';
+import {SidenavService} from './core/components/sidenav/shared/sidenav.service';
+import {ThemingService} from './core/services/theming.service';
+import {AuthorizationService} from './core/services/authorization.service';
 
 @Component({
     selector: 'senergy-root',
@@ -27,11 +27,13 @@ import { ThemingService } from './core/services/theming.service';
 })
 export class AppComponent implements OnInit {
     ready: boolean = false
+
     constructor(
-        protected keycloak: KeycloakService, 
-        private themingService: ThemingService, 
+        protected authorizationService: AuthorizationService,
+        private themingService: ThemingService,
         private sidenavService: SidenavService,
-    ) {}
+    ) {
+    }
 
 
     ngOnInit(): void {
@@ -42,16 +44,16 @@ export class AppComponent implements OnInit {
         obs.push(this.sidenavService.loadSections())
 
         forkJoin(obs).subscribe(results => {
-            if(results.every(v => !!v)) {
+            if (results.every(v => !!v)) {
                 this.ready = true
             }
         })
     }
 
     storeSubject() {
-        const sub = this.keycloak.getKeycloakInstance().subject;
-        if (sub !== undefined) {
-            localStorage.setItem('sub', sub);
+        const sub = this.authorizationService.getUserId();
+        if (typeof sub === 'string') {
+            localStorage.setItem('sub', sub as string);
         }
     }
 }

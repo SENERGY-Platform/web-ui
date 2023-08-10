@@ -39,9 +39,13 @@ export class AuthorizationServiceMock {
         } as AuthorizationProfileModel;
     }
 
-    /*
-     getToken(): Promise<string> {
-    }*/
+    getToken(): Promise<string> {
+        return new Promise<string>(
+            () =>
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkw' +
+                 'IiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+        ); // John Doe
+    }
 
     updateToken(): void {
     }

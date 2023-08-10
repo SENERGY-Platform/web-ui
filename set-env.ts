@@ -33,6 +33,7 @@ export const environment = {
   production: ${isProd},
   keyCloakRealm: '${process.env.KEYCLOACK_REALM}',
   keyCloakClientId: '${process.env.KEYCLOACK_CLIENT_ID}',
+  keyConfidential: '${process.env.KEYCLOACK_CONFIDENTIAL}',
   keycloakUrl: '${process.env.KEYCLOACK_URL}',
   processIoUrl: '${process.env.PROCESS_IO_URL}',
   smartServiceRepoUrl: '${process.env.SMART_SERVICE_REPO_URL}',

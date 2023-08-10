@@ -24,6 +24,7 @@ export const environment = {
     production: false,
     keyCloakRealm: env.keyCloakRealm || 'master',
     keyCloakClientId: env.keyCloakClientId || 'frontend',
+    keyCloakConfidential: env.keyCloakConfidential || 'false',
     keycloakUrl: env.keycloakUrl || 'http://localhost',
     configUrl: env.configUrl || 'http://localhost',
     theme: env.theme || 'senergy',

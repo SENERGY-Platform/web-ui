@@ -110,4 +110,6 @@ export class ToolbarComponent implements OnInit {
     getLogoUrl(): string {
         return this.themingService.getToolbarLogoUrl();
     }
+
+    usingConfidentialClient = AuthorizationService.usingConfidentialClient;
 }

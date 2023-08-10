@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { KeycloakService } from 'keycloak-angular';
 import { environment } from '../../../environments/environment';
+import {AuthorizationService} from './authorization.service';
 
-export function initializerService(keycloak: KeycloakService): () => Promise<any> {
+export function initializerService(authorizationService: AuthorizationService): () => Promise<any> {
     return (): Promise<any> =>
-        keycloak
+        authorizationService
             .init({
                 config: {
                     url: environment.keycloakUrl + '/auth',
@@ -34,9 +34,9 @@ export function initializerService(keycloak: KeycloakService): () => Promise<any
                 bearerPrefix: 'Bearer',
             })
             .then(() =>
-                loadEnv(keycloak, environment.configUrl).then(() => {
+                loadEnv(authorizationService, environment.configUrl).then(() => {
                     if (!environment.production) {
-                        return loadEnv(keycloak, '/assets/env.json');
+                        return loadEnv(authorizationService, '/assets/env.json');
                     } else {
                         return null;
                     }
@@ -44,10 +44,10 @@ export function initializerService(keycloak: KeycloakService): () => Promise<any
             );
 }
 
-export function loadEnv(keycloak: KeycloakService, url: string): Promise<unknown> {
-    return keycloak.getToken().then((token) => {
+export function loadEnv(authorizationService: AuthorizationService, url: string): Promise<unknown> {
+    return authorizationService.getToken().then((token) => {
         const headers = new Headers();
-        headers.set('Authorization', 'Bearer ' + token);
+        headers.set('Authorization', token);
         const request = new Request(url, {
             headers,
         });

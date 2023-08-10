@@ -1,0 +1,199 @@
+/*!
+ * Copyright 2020 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@use '@angular/material' as mat;
+
+@include mat.all-component-typographies();
+@include mat.core();
+
+/* generated: http://mcg.mbitson.com/#!?customcolor=%232e7d32&themename=mcgtheme */
+
+$md-custom-color: (
+        50 : #ffffff,
+        100 : #ffffff,
+        200 : #ffffff,
+        300 : #ffffff,
+        400 : #ffffff,
+        500 : #ffffff,
+        600 : #ffffff,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #ffffff,
+        A200 : #ffffff,
+        A400 : #ffffff,
+        A700 : #ffffff,
+        contrast: (
+                50 : #000000,
+                100 : #000000,
+                200 : #000000,
+                300 : #000000,
+                400 : #000000,
+                500 : #000000,
+                600 : #000000,
+                700 : #000000,
+                800 : #000000,
+                900 : #000000,
+                A100 : #000000,
+                A200 : #000000,
+                A400 : #000000,
+                A700 : #000000,
+        )
+);
+
+$md-custom-color-accent: (
+        50 : #e9f0f9,
+        100 : #c7daf0,
+        200 : #a2c2e7,
+        300 : #7ca9dd,
+        400 : #6096d5,
+        500 : #4484ce,
+        600 : #3e7cc9,
+        700 : #3571c2,
+        800 : #2d67bc,
+        900 : #1f54b0,
+        A100 : #e9f0ff,
+        A200 : #b6cfff,
+        A400 : #83adff,
+        A700 : #699cff,
+        contrast: (
+                50 : #000000,
+                100 : #000000,
+                200 : #000000,
+                300 : #000000,
+                400 : #000000,
+                500 : #ffffff,
+                600 : #ffffff,
+                700 : #ffffff,
+                800 : #ffffff,
+                900 : #ffffff,
+                A100 : #000000,
+                A200 : #000000,
+                A400 : #000000,
+                A700 : #000000,
+        )
+);
+
+$md-custom-color-warn: (
+        50 : #f9ece6,
+        100 : #f0d0c0,
+        200 : #e7b097,
+        300 : #dd906d,
+        400 : #d5794d,
+        500 : #ce612e,
+        600 : #c95929,
+        700 : #c24f23,
+        800 : #bc451d,
+        900 : #b03312,
+        A100 : #ffe6e0,
+        A200 : #ffbcad,
+        A400 : #ff927a,
+        A700 : #ff7d61,
+        contrast: (
+                50 : #000000,
+                100 : #000000,
+                200 : #000000,
+                300 : #000000,
+                400 : #000000,
+                500 : #ffffff,
+                600 : #ffffff,
+                700 : #ffffff,
+                800 : #ffffff,
+                900 : #ffffff,
+                A100 : #000000,
+                A200 : #000000,
+                A400 : #000000,
+                A700 : #000000,
+        )
+);
+
+$md-custom-color-sidenav: (
+        50 : #fdf3ea,
+        100 : #fbe2ca,
+        200 : #f8cfa6,
+        300 : #f5bc82,
+        400 : #f3ad68,
+        500 : #f19f4d,
+        600 : #ef9746,
+        700 : #ed8d3d,
+        800 : #eb8334,
+        900 : #e77225,
+        A100 : #ffffff,
+        A200 : #fff4ee,
+        A400 : #ffd4bb,
+        A700 : #ffc4a1,
+        contrast: (
+                50 : #000000,
+                100 : #000000,
+                200 : #000000,
+                300 : #000000,
+                400 : #000000,
+                500 : #000000,
+                600 : #000000,
+                700 : #000000,
+                800 : #000000,
+                900 : #000000,
+                A100 : #000000,
+                A200 : #000000,
+                A400 : #000000,
+                A700 : #000000,
+        )
+);
+
+$my-app-primary: mat.define-palette($md-custom-color);
+$my-app-accent: mat.define-palette($md-custom-color-accent, 500, 900, A100);
+$my-app-warn: mat.define-palette($md-custom-color-warn);
+$my-app-sidenav: mat.define-palette($md-custom-color-sidenav);
+
+$my-app-theme: mat.define-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
+
+@include mat.all-component-themes($my-app-theme);
+
+.background-color-accent {
+  color: white !important;
+  background-color: mat.get-color-from-palette($my-app-accent) !important;
+}
+
+.background-color-sidenav {
+  color: white !important;
+  background-color: mat.get-color-from-palette($my-app-sidenav) !important;
+}
+
+.color-accent {
+  color: mat.get-color-from-palette($my-app-accent) !important;
+}
+
+.color-warn {
+  color: mat.get-color-from-palette($my-app-warn) !important;
+}
+
+.color-sidenav {
+  color: mat.get-color-from-palette($my-app-sidenav) !important;
+}
+
+.snack-bar-error {
+    background-color: darkred !important;
+    font-weight: bold;
+}
+
+.snack-bar-error button{
+    color: white;
+    font-family: "Material Icons";
+    font-weight: bold;
+}
+
+.mdc-list-item--selected .mdc-list-item__primary-text, .mdc-list-item--activated .mdc-list-item__primary-text {
+  color: mat.get-color-from-palette($my-app-accent) !important;
+}

@@ -20,8 +20,8 @@ import { APP_INITIALIZER, LOCALE_ID, NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { AppRoutingModule } from './app-routing.module';
-import { HttpClientModule } from '@angular/common/http';
-import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
+import {KeycloakAngularModule, KeycloakBearerInterceptor} from 'keycloak-angular';
 import { initializerService } from './core/services/initializer.service';
 import { DevicesModule } from './modules/devices/devices.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
@@ -41,6 +41,8 @@ import {SmartServicesModule} from './modules/smart-services/smart-services.modul
 import { AdminModule } from './modules/./admin/admin.module';
 import { ApiDocModule } from './modules/api-doc/api-doc.module';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import {AuthorizationService} from './core/services/authorization.service';
+import {KeycloakConfidentialService} from './core/services/keycloak-confidential.service';
 
 registerLocaleData(localeDe);
 
@@ -78,11 +80,16 @@ registerLocaleData(localeDe);
             provide: APP_INITIALIZER,
             useFactory: initializerService,
             multi: true,
-            deps: [KeycloakService],
+            deps: [AuthorizationService],
         },
         {
             provide: LOCALE_ID,
             useValue: 'de',
+        },
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: AuthorizationService,
+            multi: true,
         },
     ],
     bootstrap: [AppComponent],

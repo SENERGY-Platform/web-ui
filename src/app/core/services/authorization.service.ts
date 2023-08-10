@@ -14,28 +14,54 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { KeycloakService } from 'keycloak-angular';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { catchError } from 'rxjs/operators';
-import { ErrorHandlerService } from './error-handler.service';
-import { HttpClient } from '@angular/common/http';
-import { AuthorizationProfileModel } from '../model/authorization/authorization-profile.model';
-import { AuthorizationUserProfileModel } from '../model/authorization/authorization-user-profile.model';
+import {Inject, Injectable} from '@angular/core';
+import {KeycloakService} from 'keycloak-angular';
+import {from, mergeMap, Observable} from 'rxjs';
+import {environment} from '../../../environments/environment';
+import {catchError, map} from 'rxjs/operators';
+import {ErrorHandlerService} from './error-handler.service';
+import {HttpClient, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
+import {AuthorizationProfileModel} from '../model/authorization/authorization-profile.model';
+import {AuthorizationUserProfileModel} from '../model/authorization/authorization-user-profile.model';
+import {keycloakServiceToken} from '../core.module';
+import {KeycloakConfidentialService} from './keycloak-confidential.service';
+import {KeycloakOptions} from 'keycloak-angular/lib/core/interfaces/keycloak-options';
 
 @Injectable({
     providedIn: 'root',
 })
-export class AuthorizationService {
-    constructor(private keycloakService: KeycloakService, private errorHandlerService: ErrorHandlerService, private http: HttpClient) {}
+export class AuthorizationService implements HttpInterceptor {
+    private keycloakService: KeycloakService;
+    private options?: KeycloakOptions;
+
+    constructor(@Inject(keycloakServiceToken) private keycloakServices: KeycloakService[], private errorHandlerService: ErrorHandlerService, private http: HttpClient) {
+        if (AuthorizationService.usingConfidentialClient()) {
+            this.keycloakService = this.keycloakServices.find(s => s instanceof KeycloakConfidentialService) as KeycloakService;
+        } else {
+            this.keycloakService = this.keycloakServices.find(s => s instanceof KeycloakService) as KeycloakService;
+        }
+    }
+
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        if (this.options?.shouldAddToken && !this.options.shouldAddToken(req)) {
+            return next.handle(req);
+        }
+        return from(this.keycloakService.getToken()).pipe(map(token => req.clone({
+            headers: req.headers.set('Authorization', 'Bearer ' + token),
+        })), mergeMap(r => next.handle(r)));
+    }
+
+    init(options?: KeycloakOptions): Promise<boolean> {
+        this.options = options;
+        return this.keycloakService.init(options);
+    }
 
     getUserId(): string | Error {
         const sub = localStorage.getItem('sub');
         if (sub !== null) {
             return sub;
         } else {
-            return Error('Could not load sub');
+            return this.keycloakService.getKeycloakInstance().subject || Error('Could not load sub');
         }
     }
 
@@ -48,24 +74,21 @@ export class AuthorizationService {
         });
     }
 
-    getProfile(): AuthorizationProfileModel {
-        const returnProfile: AuthorizationProfileModel = { email: '', firstName: '', lastName: '', username: '' };
-        const profile = this.keycloakService.getKeycloakInstance().profile;
-        if (profile) {
-            returnProfile.email = profile.email || '';
-            returnProfile.firstName = profile.firstName || '';
-            returnProfile.lastName = profile.lastName || '';
-            returnProfile.username = profile.username || '';
-        }
-        return returnProfile;
+    getProfile(): Promise<AuthorizationProfileModel> {
+        const returnProfile: AuthorizationProfileModel = {email: '', firstName: '', lastName: '', username: ''};
+        return this.keycloakService.loadUserProfile().then(profile => {
+            if (profile) {
+                returnProfile.email = profile.email || '';
+                returnProfile.firstName = profile.firstName || '';
+                returnProfile.lastName = profile.lastName || '';
+                returnProfile.username = profile.username || '';
+            }
+            return returnProfile;
+        });
     }
 
     getToken(): Promise<string> {
-        return this.keycloakService.getToken().then((resp) => 'bearer ' + resp);
-    }
-
-    updateToken(): void {
-        this.keycloakService.getKeycloakInstance().loadUserProfile();
+        return this.keycloakService.getToken().then((resp) => 'Bearer ' + resp);
     }
 
     logout() {
@@ -75,14 +98,14 @@ export class AuthorizationService {
 
     changePasswort(password: string): Observable<null | { error: string }> {
         return this.http
-            .put<null | { error: string }>(environment.usersServiceUrl + '/password', { password })
-            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changePasswort', { error: 'error' })));
+            .put<null | { error: string }>(environment.usersServiceUrl + '/password', {password})
+            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changePasswort', {error: 'error'})));
     }
 
     changeUserProfile(userProfile: AuthorizationUserProfileModel): Observable<null | { error: string }> {
         return this.http
             .put<null>(environment.usersServiceUrl + '/info', userProfile)
-            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changeUserProfile', { error: 'error' })));
+            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changeUserProfile', {error: 'error'})));
     }
 
     userIsAdmin(): boolean {
@@ -100,18 +123,22 @@ export class AuthorizationService {
     loadAllUsers() {
         return this.http
             .get<any | { error: string }>(environment.keycloakUrl + '/auth/admin/realms/master/users')
-            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllUsers', { error: 'error' })));
+            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllUsers', {error: 'error'})));
     }
 
     loadAllRoles() {
         return this.http
             .get<any | { error: string }>(environment.keycloakUrl + '/auth/admin/realms/master/roles')
-            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllRoles', { error: 'error' })));
+            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllRoles', {error: 'error'})));
     }
 
     loadAllClients() {
         return this.http
             .get<any | { error: string }>(environment.keycloakUrl + '/auth/admin/realms/master/clients')
-            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllClients', { error: 'error' })));
+            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllClients', {error: 'error'})));
+    }
+
+    static usingConfidentialClient(): boolean {
+        return environment.keyCloakConfidential === 'true';
     }
 }

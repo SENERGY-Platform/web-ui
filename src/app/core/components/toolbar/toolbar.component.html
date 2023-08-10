@@ -35,7 +35,7 @@
     <mat-menu #user="matMenu" [overlapTrigger]="false">
         <button disabled mat-menu-item>
             <mat-icon>face</mat-icon>
-            {{userName}}
+            {{userName}}{{usingConfidentialClient() ? ' (impersonated)' : ''}}
         </button>
         <mat-divider></mat-divider>
         <button *ngIf="userHasSettingsUpdateAuthorization" mat-menu-item (click)="settings()">

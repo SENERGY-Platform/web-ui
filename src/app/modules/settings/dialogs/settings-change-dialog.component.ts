@@ -49,7 +49,7 @@ export class SettingsChangeDialogComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.profile = this.authorizationService.getProfile();
+        this.authorizationService.getProfile().then(profile => this.profile = profile);
         this.passwordNew.valueChanges.subscribe(() => {
             this.passwordConfirm.updateValueAndValidity();
         });
@@ -73,7 +73,6 @@ export class SettingsChangeDialogComponent implements OnInit {
             })
             .subscribe((resp: null | { error: string }) => {
                 if (resp === null) {
-                    this.authorizationService.updateToken();
                     if (this.passwordConfirm.value !== '') {
                         this.updatePassword();
                     } else {

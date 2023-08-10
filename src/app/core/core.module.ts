@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {NgModule, Optional, SkipSelf} from '@angular/core';
+import {InjectionToken, NgModule, Optional, SkipSelf} from '@angular/core';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {throwIfAlreadyLoaded} from './module-import-guard';
 import {SidenavComponent} from './components/sidenav/sidenav.component';
@@ -59,7 +59,12 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {InputDialogComponent} from './dialogs/input-dialog.component';
 import {IsJsonValidatorDirective} from './validators/is-json-validator.directive';
 import {GenericValidator} from './validators/generc-validator.directive';
-import { FitTextComponent } from './components/fit-text/fit-text.component';
+import {FitTextComponent} from './components/fit-text/fit-text.component';
+import {KeycloakService} from 'keycloak-angular';
+import {KeycloakConfidentialService} from './services/keycloak-confidential.service';
+
+export const keycloakServiceToken = new InjectionToken<KeycloakService>('KeycloakService');
+
 
 @NgModule({
     imports: [
@@ -128,8 +133,20 @@ import { FitTextComponent } from './components/fit-text/fit-text.component';
         ClosableSnackBarComponent,
         IsJsonValidatorDirective,
         GenericValidator,
-        FitTextComponent
+        FitTextComponent,
     ],
+    providers: [
+        {
+            provide: keycloakServiceToken,
+            useClass: KeycloakConfidentialService,
+            multi: true,
+        },
+        {
+            provide: keycloakServiceToken,
+            useClass: KeycloakService,
+            multi: true,
+        },
+    ]
 })
 export class CoreModule {
     constructor(@Optional() @SkipSelf() parentModule: CoreModule) {
