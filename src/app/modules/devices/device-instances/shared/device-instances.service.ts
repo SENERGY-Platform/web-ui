@@ -27,18 +27,16 @@ import {
     DeviceSelectablesFullModel,
     DeviceSelectablesModel,
 } from './device-instances.model';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {DeviceInstancesHistoryModel, DeviceInstancesHistoryModelWithId} from './device-instances-history.model';
-import {MatDialog} from '@angular/material/dialog';
-import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {UtilService} from '../../../../core/services/util.service';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
-import { DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypePermSearchModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type-perm-search.model';
 import { PermissionQueryRequest } from 'src/app/core/model/permissions/permissions';
+import { LocationsService } from '../../locations/shared/locations.service';
+import { NetworksService } from '../../networks/shared/networks.service';
 
 @Injectable({
     providedIn: 'root',
@@ -53,7 +51,9 @@ export class DeviceInstancesService {
         private http: HttpClient, 
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService,
-        private utilService: UtilService
+        private utilService: UtilService,
+        private locationService: LocationsService,
+        private networkService: NetworksService
     ) {
         this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "DELETE", "POST", "PUT"])
     }
@@ -148,113 +148,82 @@ export class DeviceInstancesService {
     getDeviceInstances(
         limit: number,
         offset: number,
-        feature: string,
-        order: string,
-        searchText?: string,
-        tagType?: string,
-        tag?: string,
-        connectionState?: null | 'connected' | 'disconnected' | 'unknown',
+        sortBy: string = "name",
+        sortDesc: boolean = false,
+        searchText?: string
     ): Observable<DeviceInstancesModel[]> {
-        const params: any = {
-            sort: feature + '.' + order,
-            limit,
-            offset
-        };
-
-        if(connectionState) {
-            params['state'] = connectionState;
+        var queryRequest: PermissionQueryRequest = {
+            resource: 'devices', 
+            find: {
+                search: searchText,
+                limit,
+                offset,
+                sort_desc: sortDesc,
+                sort_by: sortBy
+            }
         }
-        if(tagType) {
-            params[tagType] = tag;
-        }
-        if(searchText && searchText !== '') {
-            params['search'] = searchText;
-        }
-
-        return this.http
-            .get<DeviceInstancesModel[]>(environment.apiAggregatorUrl + '/devices', {
-                params
-            })
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByTagAndState', [])),
-            );
-    }
-
-    getDeviceInstancesByHubId(
-        limit: number,
-        offset: number,
-        value: string,
-        order: string,
-        id: string,
-        state: null | 'connected' | 'disconnected' | 'unknown',
-    ): Observable<DeviceInstancesModel[]> {
-        let url =
-            environment.apiAggregatorUrl +
-            '/hubs/' +
-            encodeURIComponent(id) +
-            '/devices?limit=' +
-            limit +
-            '&offset=' +
-            offset +
-            '&sort=' +
-            value +
-            '.' +
-            order;
-        if (!!state) {
-            url += '&state=' + state;
-        }
-        return this.http.get<DeviceInstancesModel[]>(url).pipe(
-            map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByHubId', [])),
+        return this.queryPermissionSearch(queryRequest).pipe(
+                map((resp) => <DeviceInstancesPermSearchModel[]>resp || []),
+                concatMap(devices => this.addDeviceType(devices)),
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances', [])),
         );
     }
 
-    getDeviceInstancesByDeviceType(
-        id: string,
-        limit: number,
+    getDeviceInstancesByLocation(
+        locationId: string, 
+        limit: number, 
         offset: number,
-        orderfeature: string,
-        direction: 'asc' | 'desc',
-        state: null | 'connected' | 'disconnected' | 'unknown',
+        sortBy: string,
+        sortDesc: boolean
     ): Observable<DeviceInstancesModel[]> {
-        let url =
-            environment.apiAggregatorUrl +
-            '/device-types/' +
-            id +
-            '/devices?sort=' +
-            orderfeature +
-            '.' +
-            direction +
-            '&limit=' +
-            limit +
-            '&offset=' +
-            offset;
-        if (!!state) {
-            url += '&state=' + state;
-        }
-        return this.http.get<DeviceInstancesModel[]>(url).pipe(
-            map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByDeviceType', [])),
-        );
+        return this.locationService.getLocation(locationId).pipe(
+            map(location => location ? location.device_ids : []),
+            concatMap(deviceIds => deviceIds ? this.getDeviceInstancesByIds(deviceIds, limit, offset, sortBy, sortDesc) : of([])),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByLocation', [])),
+        )
+    }
+
+    getDeviceInstancesByHub(
+        hubId: string, 
+        limit: number, 
+        offset: number, 
+        sortBy: string, 
+        sortDesc: boolean
+    ): Observable<DeviceInstancesModel[]> {
+        return this.networkService.getNetwork(hubId).pipe(
+            map(networks => {
+                return networks ? networks.device_ids : []
+            }),
+            concatMap(deviceIds => {
+                return this.getDeviceInstancesByIds(deviceIds, limit, offset, sortBy, sortDesc)}
+            ),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDevicesFromHub', [])),
+        )
     }
 
     getDeviceInstancesByDeviceTypes(
-        ids: string[], limit: number, offset: number): Observable<DeviceInstancesPermSearchModel[]> {
-        return this.http.post<DeviceInstancesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/devices', {
+        ids: string[], 
+        limit: number, 
+        offset: number,
+        sort_by: string,
+        sort_desc: boolean
+    ): Observable<DeviceInstancesModel[]> {
+        var queryRequest: PermissionQueryRequest = {
             resource: 'devices', find: {
+                limit, 
+                offset, 
+                sort_by,
+                sort_desc,
                 filter: {
-                    limit, offset, condition: {
+                    condition: {
                         feature: 'features.device_type_id', operation: 'any_value_in_feature', value: ids
                     }
                 }
             }
-        }).pipe(
-            map((resp) => resp || []),
-            map(resp => {
-                this.addDisplayNames(resp);
-                return resp;
-            }),
+        }
+        return this.queryPermissionSearch(queryRequest).pipe(
+            map((resp) => <DeviceInstancesPermSearchModel[]>resp || []),
+            concatMap(devices => this.addDeviceType(devices)),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByDeviceType', [])),
         );
     }
@@ -298,19 +267,26 @@ export class DeviceInstancesService {
     }
 
     getDeviceInstancesByIds(
-        ids: string[], limit: number, offset: number): Observable<DeviceInstancesModel[]> {
-            var queryRequest: PermissionQueryRequest = {
-                resource: 'devices', list_ids: {
-                    ids,
-                    limit,
-                    offset
-                }
+        ids: string[], 
+        limit: number, 
+        offset: number,
+        sortBy: string = "name",
+        sortDesc: boolean = false
+    ): Observable<DeviceInstancesModel[]> {
+        var queryRequest: PermissionQueryRequest = {
+            resource: 'devices', list_ids: {
+                ids,
+                limit,
+                offset,
+                sort_by: sortBy,
+                sort_desc: sortDesc
             }
-            return this.queryPermissionSearch(queryRequest).pipe(
-                    map((resp) => <DeviceInstancesPermSearchModel[]>resp || []),
-                    concatMap(devices => this.addDeviceType(devices)),
-                    catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByIds', [])),
-                );
+        }
+        return this.queryPermissionSearch(queryRequest).pipe(
+                map((resp) => <DeviceInstancesPermSearchModel[]>resp || []),
+                concatMap(devices => this.addDeviceType(devices)),
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByIds', [])),
+        );
     }
 
     getDeviceSelections(

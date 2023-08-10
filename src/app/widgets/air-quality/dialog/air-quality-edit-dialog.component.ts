@@ -403,7 +403,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         );
 
         obs.push(
-            this.deviceInstancesService.getDeviceInstances(9999, 0, 'name', 'asc').pipe(
+            this.deviceInstancesService.getDeviceInstances(9999, 0).pipe(
                 map((resp) => {
                     this.devices = resp;
                 }),

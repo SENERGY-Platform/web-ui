@@ -20,7 +20,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { ApiAggregatorNetworksModel, HubModel, NetworksModel } from './networks.model';
+import { ApiAggregatorNetworksModel, HubModel, NetworksModel, NetworksPermModel } from './networks.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { NetworksEditDialogComponent } from '../dialogs/networks-edit-dialog.component';
 import { NetworksHistoryModel } from './networks-history.model';
@@ -69,6 +69,12 @@ export class NetworksService {
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworks', [])),
             );
+    }
+
+    getNetwork(id: string): Observable<NetworksPermModel> {
+        return this.http.get<NetworksPermModel[]>(environment.permissionSearchUrl + '/v3/resources/hubs?ids=' + id).pipe(
+            map(networks => networks[0])
+        )
     }
 
     searchNetworks(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksModel[]> {
