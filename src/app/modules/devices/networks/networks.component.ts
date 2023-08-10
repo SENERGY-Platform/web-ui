@@ -143,7 +143,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     delete(network: NetworksModel) {
-        this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, this.sortBy, this.sortDirection, network.id, null).subscribe((devices) => {
+        this.deviceInstancesService.getDeviceInstancesByHub(network.id, 9999, 0, this.sortBy, this.sortDirection == "desc").subscribe((devices) => {
             this.dialog
                 .open(NetworksDeleteDialogComponent, { data: { networkId: network.id, devices }, minWidth: '300px' })
                 .afterClosed()
@@ -204,7 +204,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
                     let allDeviceIds: string[] = [];
 
                     this.selection.selected.forEach((network: NetworksModel) => {
-                        this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, this.sortBy, this.sortDirection, network.id, null).subscribe((devices) => {
+                        this.deviceInstancesService.getDeviceInstancesByHub(network.id, 9999, 0, this.sortBy, this.sortDirection == "desc").subscribe((devices) => {
                             const deviceIds = devices.map((p) => p.id);
                             allDeviceIds = allDeviceIds.concat(deviceIds);
 

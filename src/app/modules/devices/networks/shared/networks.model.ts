@@ -21,6 +21,10 @@ export interface NetworksModel {
     annotations?: HubAnnotations;
 }
 
+export interface NetworksPermModel extends NetworksModel {
+    device_ids: string[];
+}
+
 export interface HubAnnotations {
     connected?: boolean;
 }

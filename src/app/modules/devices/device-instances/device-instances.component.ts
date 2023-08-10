@@ -96,7 +96,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     selectedTag = '';
     selectedTagTransformed = '';
-    selectedTagType = '';
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
     locationOptions: LocationModel[] = [];
@@ -171,13 +170,12 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             this.selectedTag = this.routerNetwork.name;
             this.selectedTagTransformed = this.routerNetwork.name;
             this.deviceInstancesService
-                .getDeviceInstancesByHubId(
+                .getDeviceInstancesByHub(
+                    this.routerNetwork.id,
                     this.pageSize,
                     this.offset,
                     this.sortBy, 
-                    this.sortDirection,
-                    this.routerNetwork.id,
-                    null,
+                    this.sortDirection == "desc",
                 )
                 .subscribe((deviceInstances: DeviceInstancesModel[]) => {
                     this.setDevices(deviceInstances);
@@ -189,9 +187,14 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         if(this.routerDeviceType) {
             this.selectedTag = this.routerDeviceType.name;
             this.selectedTagTransformed = this.routerDeviceType.name;
-            var sortDirection: "asc" | "desc" = this.sortDirection == "" ? "asc" : "desc"
             this.deviceInstancesService
-                .getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.pageSize, this.offset, this.sortBy, sortDirection, null)
+                .getDeviceInstancesByDeviceTypes(
+                    [this.routerDeviceType.id], 
+                    this.pageSize, 
+                    this.offset, 
+                    this.sortBy, 
+                    this.sortDirection == "desc"
+                )
                 .subscribe((deviceInstances) => {
                     this.setDevices(deviceInstances);
                 });
@@ -206,6 +209,16 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         }
     }
 
+    private loadDevicesByLocation() {
+        if(this.routerLocation !== null) {
+            this.selectedTag = this.routerLocation.id;
+            this.selectedTagTransformed = this.routerLocation.name;
+            this.deviceInstancesService.getDeviceInstancesByLocation(this.routerLocation.id, this.pageSize, this.offset, this.sortBy, this.sortDirection == "desc").subscribe((deviceInstances) => {
+                this.setDevices(deviceInstances);
+            });
+        }
+    }
+
     private load() {
         this.ready = false;
 
@@ -215,23 +228,16 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             this.loadDevicesOfDeviceType()
         } else if (this.routerDeviceIds !== null) {
             this.loadDevicesByIds()
+        } else if (this.routerLocation !== null) {
+            this.loadDevicesByLocation()
         } else {
-            if (this.routerLocation !== null) {
-                this.selectedTag = this.routerLocation.id;
-                this.selectedTagTransformed = this.routerLocation.name;
-                this.selectedTagType = 'location';
-            }
-
             this.deviceInstancesService
                 .getDeviceInstances(
                     this.pageSize,
                     this.offset,
                     this.sortBy,
-                    this.sortDirection,
+                    this.sortDirection == "desc",
                     this.searchText,
-                    this.selectedTagType,
-                    this.selectedTag,
-                    null,
                 )
                 .subscribe((deviceInstances: DeviceInstancesModel[]) => {
                     this.setDevices(deviceInstances);
@@ -255,7 +261,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     private resetTag() {
         this.selectedTag = '';
         this.selectedTagTransformed = '';
-        this.selectedTagType = '';
     }
 
     private loadFilterOptions() {

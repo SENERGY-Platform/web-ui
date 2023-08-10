@@ -21,7 +21,7 @@ interface Condition {
     feature: string;
     operation: "==" | "!=" | "any_value_in_feature"
     value: any;
-    ref: string;
+    ref?: string;
 }
 
 interface Selection {
@@ -32,7 +32,7 @@ interface Selection {
 }
 
 interface QueryFind extends QueryListCommons {
-    search: string;
+    search?: string;
     filter?: Selection;
 }
 

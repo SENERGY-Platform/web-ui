@@ -173,7 +173,7 @@ export class DeployFlowComponent implements OnInit {
 
                     this.parserService.getInputs(id).subscribe((parseModels: ParseModel[]) => {
                         this.deviceInstanceService
-                            .getDeviceInstances(9999, 0, 'name', 'asc')
+                            .getDeviceInstances(9999, 0)
                             .subscribe((devices: DeviceInstancesModel[]) => {
                                 this.allDevices = devices;
                                 const observables: Observable<any>[] = [];
@@ -191,7 +191,7 @@ export class DeployFlowComponent implements OnInit {
                 this.flowId = id || '';
                 this.parserService.getInputs(this.flowId).subscribe((resp: ParseModel[]) => {
                     this.deviceInstanceService
-                        .getDeviceInstances(9999, 0, 'name', 'asc')
+                        .getDeviceInstances(9999, 0)
                         .subscribe((devices: DeviceInstancesModel[]) => {
                             this.allDevices = devices;
                             resp.forEach((input) => {

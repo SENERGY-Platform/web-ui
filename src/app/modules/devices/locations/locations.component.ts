@@ -83,7 +83,6 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     checkAuthorization() {
         this.locationsService.userHasCreateAuthorization().subscribe(hasAuth => {
-            console.log(hasAuth)
             this.userHasCreateAuthorization = hasAuth
         })
 
