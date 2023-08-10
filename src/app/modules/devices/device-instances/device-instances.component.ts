@@ -54,6 +54,7 @@ export enum DeviceInstancesRouterStateTypesEnum {
     NETWORK,
     DEVICE_TYPE,
     LOCATION,
+    DEVICE_GROUP
 }
 
 // eslint-disable-next-line no-shadow
@@ -77,12 +78,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         private snackBar: MatSnackBar,
         private permissionsDialogService: PermissionsDialogService,
         private dialogsService: DialogsService,
-        private deviceTypeService: DeviceTypeService,
-        private exportService: ExportService,
         private locationsService: LocationsService,
         private networksService: NetworksService,
         private deviceTypesService: DeviceTypeService,
-        private dialog: MatDialog,
         private searchbarService: SearchbarService
     ) {
         this.getRouterParams();
@@ -107,6 +105,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     routerNetwork: NetworksModel | null = null;
     routerDeviceType: DeviceTypeBaseModel | null = null;
     routerLocation: LocationModel | null = null;
+    routerDeviceIds: string[] | null = null;
+
     private searchSub: Subscription = new Subscription();
     sortBy: string = "display_name"
     sortDirection: SortDirection = "asc"  
@@ -166,16 +166,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.reload();
     }
 
-    private load() {
-        this.ready = false;
-
-        if (this.routerLocation !== null) {
-            this.selectedTag = this.routerLocation.id;
-            this.selectedTagTransformed = this.routerLocation.name;
-            this.selectedTagType = 'location';
-        }
-
-        if (this.routerNetwork !== null) {
+    private loadDevicesOfNetwork() {
+        if(this.routerNetwork) {
             this.selectedTag = this.routerNetwork.name;
             this.selectedTagTransformed = this.routerNetwork.name;
             this.deviceInstancesService
@@ -190,7 +182,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                 .subscribe((deviceInstances: DeviceInstancesModel[]) => {
                     this.setDevices(deviceInstances);
                 });
-        } else if (this.routerDeviceType !== null) {
+        }
+    }
+
+    private loadDevicesOfDeviceType() {
+        if(this.routerDeviceType) {
             this.selectedTag = this.routerDeviceType.name;
             this.selectedTagTransformed = this.routerDeviceType.name;
             var sortDirection: "asc" | "desc" = this.sortDirection == "" ? "asc" : "desc"
@@ -199,8 +195,33 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                 .subscribe((deviceInstances) => {
                     this.setDevices(deviceInstances);
                 });
+        }
+    }
 
+    private loadDevicesByIds() {
+        if(this.routerDeviceIds) {
+            this.deviceInstancesService.getDeviceInstancesByIds(this.routerDeviceIds, this.pageSize, this.offset).subscribe((deviceInstances) => {
+                this.setDevices(deviceInstances);
+            });
+        }
+    }
+
+    private load() {
+        this.ready = false;
+
+        if (this.routerNetwork !== null) {
+            this.loadDevicesOfNetwork()
+        } else if (this.routerDeviceType !== null) {
+            this.loadDevicesOfDeviceType()
+        } else if (this.routerDeviceIds !== null) {
+            this.loadDevicesByIds()
         } else {
+            if (this.routerLocation !== null) {
+                this.selectedTag = this.routerLocation.id;
+                this.selectedTagTransformed = this.routerLocation.name;
+                this.selectedTagType = 'location';
+            }
+
             this.deviceInstancesService
                 .getDeviceInstances(
                     this.pageSize,
@@ -335,6 +356,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     break;
                 case DeviceInstancesRouterStateTypesEnum.LOCATION:
                     this.routerLocation = state.value as LocationModel;
+                    break;
+                case DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP:
+                    this.routerDeviceIds = state.value as string[];
                     break;
                 }
             }
