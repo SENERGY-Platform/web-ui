@@ -20,7 +20,7 @@
 
 <div class="layout-margin">
     <div class="mat-elevation-z1" [hidden]="!ready || (operators.length === 0 && ready)">
-        <div class="table-container-with-button table-container">
+        <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
             <table #sort="matSort" mat-table [dataSource]="operatorsDataSource" matSort
                    matSortActive="name"
                    matSortDirection="asc" matSortDisableClear>

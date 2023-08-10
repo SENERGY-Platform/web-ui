@@ -21,7 +21,7 @@
     <div *ngIf="dataReady && dataSource.data.length === 0">No import types found.</div>
 
     <div class="mat-elevation-z1" [hidden]="!dataReady || (dataSource.data.length === 0 && dataReady)">
-        <div class="table-container table-container-with-button">
+        <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
             <table mat-table matSortDisableClear [dataSource]="dataSource" matSort
                 (matSortChange)="matSortChange($event)" matSortActive="name" matSortDirection="asc">
                 <ng-container matColumnDef="select">

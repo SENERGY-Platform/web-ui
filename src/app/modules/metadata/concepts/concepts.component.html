@@ -23,7 +23,7 @@
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 
     <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
-        <div class="table-container table-container-with-button">
+        <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
             <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)"
                 [matSortActive]="sortBy" [matSortDirection]="sortDirection">
                 <ng-container matColumnDef="select">

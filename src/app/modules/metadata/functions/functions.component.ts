@@ -55,6 +55,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     sortDirection: SortDirection = "asc"
     userHasUpdateAuthorization: boolean = false
     userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization: boolean = false
 
     constructor(
         private dialog: MatDialog,
@@ -96,6 +97,9 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             if(hasAuth) {
                 this.displayedColumns.push("delete")
             }
+        })
+        this.functionsService.userHasCreateAuthorization().subscribe(hasAuth => {
+            this.userHasCreateAuthorization = hasAuth
         })
     }
 
