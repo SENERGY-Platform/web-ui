@@ -18,7 +18,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
-import {catchError, map, reduce, share} from 'rxjs/operators';
+import {catchError, map, reduce, share, concatMap} from 'rxjs/operators';
 import {
     DeviceFilterCriteriaModel,
     DeviceInstancesBaseModel,
@@ -36,6 +36,9 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {UtilService} from '../../../../core/services/util.service';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypePermSearchModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type-perm-search.model';
+import { PermissionQueryRequest } from 'src/app/core/model/permissions/permissions';
 
 @Injectable({
     providedIn: 'root',
@@ -256,6 +259,60 @@ export class DeviceInstancesService {
         );
     }
 
+    addDeviceType(devices: DeviceInstancesPermSearchModel[]): Observable<DeviceInstancesModel[]> {
+        var allDeviceTypeIds = devices.map((device) => device.device_type_id)
+
+        var queryRequest: PermissionQueryRequest = {
+            resource: 'device-types', list_ids: {
+                ids: allDeviceTypeIds
+            }
+        }
+
+        return this.queryPermissionSearch(queryRequest).pipe(
+                map((resp) => <DeviceTypePermSearchModel[]>resp || []),
+                map((deviceTypes: DeviceTypePermSearchModel[]) => {
+                    var devicesWithDeviceType: DeviceInstancesModel[] = []
+
+                    var deviceTypeIdToType: Record<string, DeviceTypePermSearchModel> = {}
+                    deviceTypes.forEach(deviceType => {
+                        deviceTypeIdToType[deviceType.id] = deviceType
+                    });
+
+                    devices.forEach(device => {
+                       var deviceWithDeviceType: DeviceInstancesModel = {
+                           ...device,
+                           'device_type': deviceTypeIdToType[device.device_type_id],
+                           'log_state': device.annotations ? device.annotations.connected : undefined
+                       } 
+                       devicesWithDeviceType.push(deviceWithDeviceType)
+                    });
+
+                    return devicesWithDeviceType
+                }),
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'addDeviceType', [])),
+            );
+    }
+
+    queryPermissionSearch(queryRequest: PermissionQueryRequest): Observable<DeviceInstancesPermSearchModel[] | DeviceTypePermSearchModel[]> {
+        return this.http.post<DeviceInstancesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query', queryRequest)
+    }
+
+    getDeviceInstancesByIds(
+        ids: string[], limit: number, offset: number): Observable<DeviceInstancesModel[]> {
+            var queryRequest: PermissionQueryRequest = {
+                resource: 'devices', list_ids: {
+                    ids,
+                    limit,
+                    offset
+                }
+            }
+            return this.queryPermissionSearch(queryRequest).pipe(
+                    map((resp) => <DeviceInstancesPermSearchModel[]>resp || []),
+                    concatMap(devices => this.addDeviceType(devices)),
+                    catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByIds', [])),
+                );
+    }
+
     getDeviceSelections(
         criteria: DeviceFilterCriteriaModel[],
         completeServices: boolean,
@@ -403,15 +460,6 @@ export class DeviceInstancesService {
         } else {
             throw new Error('expected urn:infai:ses:device as prefix');
         }
-    }
-
-    getDeviceInstancesByIds(ids: string[]): Observable<DeviceInstancesPermSearchModel[]> {
-        return this.http
-            .post<DeviceInstancesPermSearchModel[] | null>(environment.permissionSearchUrl + '/v3/query/devices', {
-                resource: 'devices',
-                list_ids: {ids},
-            })
-            .pipe(map((res) => res || []));
     }
 
     getTotalCountOfDevices(): Observable<any> {

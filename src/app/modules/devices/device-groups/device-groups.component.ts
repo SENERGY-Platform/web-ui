@@ -28,6 +28,8 @@ import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../device-instances/device-instances.component';
+import { DeviceGroupModel } from './shared/device-groups.model';
 
 
 @Component({
@@ -36,7 +38,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./device-groups.component.css'],
 })
 export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
-    displayedColumns = ['select', 'name']
+    displayedColumns = ['select', 'name', 'show']
     pageSize = 20;
     selection = new SelectionModel<DeviceGroupsPermSearchModel>(true, []);
     totalCount = 200;
@@ -208,5 +210,21 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.reload()
             })
         });
+    }
+
+    showDevices(group: DeviceGroupsPermSearchModel) {
+        this.deviceGroupsService.getDeviceGroup(group.id).subscribe((deviceGroup: DeviceGroupModel | null) => {
+            if(!deviceGroup?.device_ids || deviceGroup.device_ids.length == 0) {
+                this.snackBar.open('Device group has no devices', 'close', {panelClass: 'snack-bar-error'});
+                return
+            }
+
+            this.router.navigate(['devices/deviceinstances'], {
+                state: { 
+                    type: DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP, 
+                    value: deviceGroup?.device_ids 
+                } as DeviceInstancesRouterState,
+            });
+        })
     }
 }
