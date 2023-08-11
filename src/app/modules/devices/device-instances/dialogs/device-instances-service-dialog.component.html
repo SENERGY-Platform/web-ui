@@ -25,32 +25,33 @@
     <mat-accordion multi>
         <mat-expansion-panel *ngFor="let service of services; let i = index" [expanded]="services.length === 1">
             <mat-expansion-panel-header>
-                {{service.name}}
+                <mat-panel-title fxFlex>{{service.name}}</mat-panel-title>
+                <mat-panel-description>
+                    {{service.description}}
+                    <span *ngIf="lastValueArray[i] !== undefined && lastValueArray[i].length > 0">{{lastValueArray[i][0].response.time |  date:'dd.MM.yyyy - HH:mm:ss'}}</span>
+                </mat-panel-description>
             </mat-expansion-panel-header>
-            <mat-panel-description>
-                {{service.description}}
-            </mat-panel-description>
             <ng-template matExpansionPanelContent>
-                <table mat-table *ngIf="lastValueArray[i].length > 0" [dataSource]="lastValueArray[i]">
+                <table mat-table *ngIf="lastValueArray[i] !== undefined && lastValueArray[i].length > 0" [dataSource]="lastValueArray[i]">
                     <ng-container matColumnDef="field">
-                        <th mat-header-cell *matHeaderCellDef> Field</th>
+                        <th mat-header-cell *matHeaderCellDef>Field</th>
                         <td mat-cell *matCellDef="let element"> {{element.request.columnName}} </td>
                     </ng-container>
 
                     <ng-container matColumnDef="value">
-                        <th mat-header-cell *matHeaderCellDef> Value</th>
+                        <th mat-header-cell *matHeaderCellDef>Value</th>
                         <td mat-cell
                             *matCellDef="let element"> {{element.response.value !== null ? element.response.value : 'N/A'}} </td>
                     </ng-container>
 
-                    <ng-container matColumnDef="time">
-                        <th mat-header-cell *matHeaderCellDef> Time</th>
+                    <ng-container matColumnDef="description">
+                        <th mat-header-cell *matHeaderCellDef>Description</th>
                         <td mat-cell
-                            *matCellDef="let element"> {{element.response.time !== null ? (element.response.time |  date:'dd.MM.yyyy - HH:mm:ss') : 'N/A'}} </td>
+                            *matCellDef="let element"> {{element.description !== undefined ? (element.description) : 'N/A'}} </td>
                     </ng-container>
 
-                    <tr mat-header-row *matHeaderRowDef="['field', 'value', 'time']"></tr>
-                    <tr mat-row *matRowDef="let row; columns: ['field', 'value', 'time'];"></tr>
+                    <tr mat-header-row *matHeaderRowDef="['field', 'value', 'description']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['field', 'value', 'description'];"></tr>
                 </table>
                 <span *ngIf="lastValueArray[i].length === 0">Service does not provide data</span>
                 <div *ngIf="lastValueArray[i].length > 0">

@@ -20,7 +20,11 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {DeviceInstancesModel} from './device-instances.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
-import {DeviceTypeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeAspectModel, DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel,
+    DeviceTypeFunctionModel,
+    DeviceTypeModel
+} from '../../../metadata/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-edit-dialog.component';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
@@ -28,9 +32,11 @@ import {DeviceTypePermSearchModel} from '../../../metadata/device-types-overview
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesService} from './device-instances.service';
 import {DeviceInstancesSelectDialogComponent} from '../dialogs/device-instances-select-dialog.component';
-import {Observable} from 'rxjs';
+import {forkJoin, mergeMap, Observable} from 'rxjs';
 import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../../../widgets/shared/export-data.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
+import {environment} from "../../../../../environments/environment";
+import {catchError, map} from "rxjs/operators";
 
 @Injectable({
     providedIn: 'root',
@@ -55,24 +61,56 @@ export class DeviceInstancesDialogService {
     }
 
     openDeviceServiceDialog(deviceTypeId: string, deviceId: string): void {
-        this.deviceTypeService.getDeviceType(deviceTypeId).subscribe((deviceType: DeviceTypeModel | null) => {
+        const obs: Observable<any>[] = [];
+        obs.push(this.deviceTypeService.getMeasuringFunctions());
+        obs.push(this.deviceTypeService.getAspectNodesWithMeasuringFunction());
+        obs.push(this.deviceTypeService.getLeafCharacteristics());
+        obs.push(this.deviceTypeService.getDeviceType(deviceTypeId));
+
+        forkJoin(obs).subscribe((results) => {
+            const functions: DeviceTypeFunctionModel[] = results[0]; // forkJoin preserves order
+            const aspects: DeviceTypeAspectNodeModel[] = results[1];
+            const characteristics: DeviceTypeCharacteristicsModel[] = results[2];
+            const deviceType: DeviceTypeModel | null = results[3];
+
             const lastValueElements: LastValuesRequestElementTimescaleModel[] = [];
             const serviceOutputCounts: number[] = [];
+            const descriptions: string[][] = [];
             deviceType?.services.forEach((service, serviceIndex) => {
                 serviceOutputCounts[serviceIndex] = 0;
+                const serviceDescriptions: string[] = [];
                 service.outputs?.forEach(output => {
-                    this.deviceTypeService.getValuePaths(output.content_variable).forEach(path => {
+                    const paths = this.deviceTypeService.getValuePathsAndContentVariables(output.content_variable);
+                    paths.forEach((path) => {
                         lastValueElements.push({
                             deviceId,
                             serviceId: service.id,
-                            columnName: path,
+                            columnName: path.path,
                         });
+                        let description = '';
+                        if (path.contentVariable.aspect_id !== undefined && path.contentVariable.aspect_id.length > 0 && paths.filter(p => p.contentVariable.function_id === path.contentVariable.function_id).length > 1) {
+                            description += aspects.find(a => a.id === path.contentVariable.aspect_id)?.name;
+                        }
+                        if (path.contentVariable.function_id !== undefined && path.contentVariable.function_id.length > 0) {
+                            if (description.length > 0) {
+                                description += ', ';
+                            }
+                            description += functions.find(a => a.id === path.contentVariable.function_id)?.display_name;
+                        }
+                        if (path.contentVariable.characteristic_id !== undefined && path.contentVariable.characteristic_id.length > 0) {
+                            if (description.length > 0) {
+                                description += ', ';
+                            }
+                            description += characteristics.find(a => a.id === path.contentVariable.characteristic_id)?.name;
+                        }
+                        serviceDescriptions.push(description);
                         if (serviceOutputCounts.length <= serviceIndex) {
                             serviceOutputCounts.push(0);
                         }
                         serviceOutputCounts[serviceIndex]++;
                     });
                 });
+                descriptions.push(serviceDescriptions);
             });
             const dialogConfig = new MatDialogConfig();
             dialogConfig.disableClose = false;
@@ -84,6 +122,7 @@ export class DeviceInstancesDialogService {
                     lastValueElements,
                     deviceType,
                     serviceOutputCounts,
+                    descriptions,
                 };
             }
             this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
