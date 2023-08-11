@@ -256,7 +256,13 @@ export class DeviceTypeService {
         return paths;
     }
 
-    private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel, paths: { path: string; type: string }[]) {
+    getValuePathsAndContentVariables(field: DeviceTypeContentVariableModel): { path: string;  contentVariable: DeviceTypeContentVariableModel }[] {
+        const paths: { path: string; type: string; contentVariable: DeviceTypeContentVariableModel }[] = [];
+        this.traverseDataStructure('', field, paths);
+        return paths;
+    }
+
+    private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel, paths: { path: string; type: string; contentVariable?: DeviceTypeContentVariableModel }[]) {
         if (field.type === 'https://schema.org/StructuredValue' && field.type !== undefined && field.type !== null) {
             if (pathString !== '') {
                 pathString += '.' + field.name;
@@ -275,7 +281,7 @@ export class DeviceTypeService {
             if (pathString.length > 0) {
                 name = pathString + '.' + name;
             }
-            paths.push({path: name, type: field.type || ''});
+            paths.push({path: name, type: field.type || '', contentVariable: field});
         }
     }
 

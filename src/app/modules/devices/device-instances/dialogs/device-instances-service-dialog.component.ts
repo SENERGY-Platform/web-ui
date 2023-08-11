@@ -38,7 +38,7 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 export class DeviceInstancesServiceDialogComponent implements OnInit {
     services: DeviceTypeServiceModel[] = [];
     lastValueElements: LastValuesRequestElementTimescaleModel[] = [];
-    lastValueArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[][] = [];
+    lastValueArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel; description?: string }[][] = [];
     deviceType: DeviceTypeModel;
     serviceOutputCounts: number[] = [];
     timeControl: FormGroup = this.fb.group({
@@ -46,7 +46,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         to: [{value: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)), disabled: true}],
     });
     deviceId = '';
-
+    descriptions: string[][];
 
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesServiceDialogComponent>,
@@ -56,6 +56,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
             lastValueElements: LastValuesRequestElementTimescaleModel[];
             deviceType: DeviceTypeModel;
             serviceOutputCounts: number[];
+            descriptions: string[][];
         },
         private exportDataService: ExportDataService,
         private fb: FormBuilder,
@@ -67,6 +68,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         this.deviceType = data.deviceType;
         this.serviceOutputCounts = data.serviceOutputCounts;
         this.deviceId = data.deviceId;
+        this.descriptions = data.descriptions;
     }
 
     ngOnInit() {
@@ -81,9 +83,10 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
                 const subArray: {
                     request: LastValuesRequestElementTimescaleModel;
                     response: TimeValuePairModel;
+                    description?: string;
                 }[] = [];
                 lastValues.slice(counter, counter + this.serviceOutputCounts[serviceIndex]).forEach((response, responseIndex) => {
-                    subArray.push({request: this.lastValueElements[counter + responseIndex], response});
+                    subArray.push({request: this.lastValueElements[counter + responseIndex], response, description: this.descriptions[serviceIndex][responseIndex]});
                 });
                 this.lastValueArray.push(subArray);
                 counter += this.serviceOutputCounts[serviceIndex];
