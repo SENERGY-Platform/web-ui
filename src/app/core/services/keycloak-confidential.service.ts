@@ -27,7 +27,7 @@ export interface TokenResponse {
     access_token: string;
     expires_in: number;
     refresh_expires_in: number;
-    refresh_token: string;
+    refresh_token?: string;
     token_type: string;
     'not-before-policy': number;
     session_state: string;
@@ -128,13 +128,13 @@ export class KeycloakConfidentialService implements OnDestroy {
         this.options = options;
         const now = new Date().valueOf();
 
-        if (this.isUserToken && this.tokenResponse?.access_token && this.tokenExpires > now) {
+        if (this.isUserToken && this.tokenResponse?.access_token !== undefined && this.tokenResponse.access_token.length > 0 && this.tokenExpires > now - 10000) {
             clearTimeout(this.timeout);
-            this.timeout = setTimeout(() => this.refreshToken(), now - this.tokenExpires - 60000);
+            this.timeout = setTimeout(() => this.refreshToken().subscribe(), this.tokenExpires - now - 10000);
             const p = Promise<boolean>;
             return p.resolve(true);
         }
-        if (this.tokenResponse?.refresh_token && this.refreshTokenExpires < now) {
+        if (this.isUserToken && this.tokenResponse?.refresh_token !== undefined && this.tokenResponse.refresh_token.length > 0 && this.refreshTokenExpires > now) {
             return lastValueFrom(this.refreshToken());
         }
 
@@ -144,11 +144,17 @@ export class KeycloakConfidentialService implements OnDestroy {
         }
 
         return lastValueFrom(this.getFreshTokenServiceAccount().pipe(
+            catchError((err) => {
+                sessionStorage.clear();
+                window.alert('Failed to get service account token, client secret correct?');
+                location.reload();
+                throw err;
+            }),
             mergeMap((_) => {
                 const username = window.prompt('Username') || '';
                 return this.getUserInfo(username);
             }), catchError((err) => {
-                window.alert('Failed to login!');
+                window.alert('Failed to get user info, username correct?');
                 location.reload();
                 throw err;
             }), mergeMap((userInfo, __) => {
@@ -160,7 +166,7 @@ export class KeycloakConfidentialService implements OnDestroy {
                 }
                 return this.getFreshTokenExchanged(userInfo.id);
             }), catchError((err) => {
-                window.alert('Failed to login!');
+                window.alert('Failed to exchange token, client correctly configured?');
                 location.reload();
                 throw err;
             })));
@@ -215,9 +221,14 @@ export class KeycloakConfidentialService implements OnDestroy {
             this.tokenResponse = resp;
             const now = new Date().valueOf();
             this.tokenExpires = now + (resp.expires_in * 1000);
-            this.refreshTokenExpires = now + (resp.refresh_expires_in * 1000);
+            const userId = this.userInfo?.id;
             if (isUserToken === true) {
-                this.timeout = setTimeout(() => this.refreshToken(), (resp.expires_in - 60) * 1000);
+                if (resp.refresh_token !== undefined) {
+                    this.refreshTokenExpires = now + (resp.refresh_expires_in * 1000);
+                    this.timeout = setTimeout(() => this.refreshToken().subscribe(), (resp.expires_in - 10) * 1000);
+                } else if (userId !== undefined) {
+                    this.timeout = setTimeout(() => this.getFreshTokenExchanged(userId).subscribe(), (resp.expires_in - 10) * 1000);
+                }
                 this.isUserToken = true;
             } else {
                 this.isUserToken = false;
