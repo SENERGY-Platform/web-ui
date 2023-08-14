@@ -211,6 +211,14 @@ export class KeycloakConfidentialService implements OnDestroy {
         return {subject: this.userInfo?.id};
     }
 
+    isTokenExpired(minValidity?: number): boolean {
+        return this.isUserToken && this.tokenExpires - new Date().valueOf() > (minValidity ?? 0) * 1000;
+    }
+
+    updateToken(_?: number): Promise<boolean> {
+        return lastValueFrom(this.refreshToken());
+    }
+
 
     private requestToken(body: any, options?: {
         headers?: HttpHeaders | { [p: string]: string | string[] } | undefined;

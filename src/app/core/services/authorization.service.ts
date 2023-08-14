@@ -46,9 +46,19 @@ export class AuthorizationService implements HttpInterceptor {
         if (this.options?.shouldAddToken && !this.options.shouldAddToken(req)) {
             return next.handle(req);
         }
-        return from(this.keycloakService.getToken()).pipe(map(token => req.clone({
-            headers: req.headers.set('Authorization', 'Bearer ' + token),
-        })), mergeMap(r => next.handle(r)));
+        let p: Promise<boolean>;
+        if (this.keycloakService.isTokenExpired()) {
+            p = this.keycloakService.updateToken();
+        } else {
+            const pConst = Promise<boolean>;
+            p = pConst.resolve(true);
+        }
+        return from(p).pipe(
+            mergeMap(() => from(this.keycloakService.getToken())),
+            map(token => req.clone({
+                headers: req.headers.set('Authorization', 'Bearer ' + token),
+            })),
+            mergeMap(r => next.handle(r)));
     }
 
     init(options?: KeycloakOptions): Promise<boolean> {
