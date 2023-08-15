@@ -26,7 +26,7 @@ import {
     TimeValuePairModel
 } from '../../../../widgets/shared/export-data.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {environment} from '../../../../../environments/environment';
 import {AuthorizationService} from '../../../../core/services/authorization.service';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
@@ -38,7 +38,11 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 export class DeviceInstancesServiceDialogComponent implements OnInit {
     services: DeviceTypeServiceModel[] = [];
     lastValueElements: LastValuesRequestElementTimescaleModel[] = [];
-    lastValueArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel; description?: string }[][] = [];
+    lastValueArray: {
+        request: LastValuesRequestElementTimescaleModel;
+        response: TimeValuePairModel;
+        description?: string;
+    }[][] = [];
     deviceType: DeviceTypeModel;
     serviceOutputCounts: number[] = [];
     timeControl: FormGroup = this.fb.group({
@@ -47,6 +51,11 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
     });
     deviceId = '';
     descriptions: string[][];
+    availability: { serviceId: string; from?: Date; to?: Date; groupType?: string; groupTime?: string }[] = [];
+    availabilityControl = new FormControl<{
+        groupType?: string;
+        groupTime?: string;
+    }>({});
 
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesServiceDialogComponent>,
@@ -86,11 +95,18 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
                     description?: string;
                 }[] = [];
                 lastValues.slice(counter, counter + this.serviceOutputCounts[serviceIndex]).forEach((response, responseIndex) => {
-                    subArray.push({request: this.lastValueElements[counter + responseIndex], response, description: this.descriptions[serviceIndex][responseIndex]});
+                    subArray.push({
+                        request: this.lastValueElements[counter + responseIndex],
+                        response,
+                        description: this.descriptions[serviceIndex][responseIndex]
+                    });
                 });
                 this.lastValueArray.push(subArray);
                 counter += this.serviceOutputCounts[serviceIndex];
             });
+        });
+        this.exportDataService.getTimescaleDataAvailability(this.deviceId).subscribe(availability => {
+            this.availability = availability;
         });
     }
 
@@ -102,7 +118,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         const fromIso = this.timeControl.get('from')?.value.toISOString();
         const toIso = new Date((this.timeControl.get('to')?.value as Date).valueOf() + 86400000).toISOString();
         const columns: QueriesRequestColumnModel[] = [];
-        this.lastValueArray[i].forEach(c => columns.push({name: c.request.columnName}));
+        this.lastValueArray[i].forEach(c => columns.push({name: c.request.columnName, groupType: this.availabilityControl.value?.groupType}));
 
         const token = await this.authorizationService.getToken();
         const f = await fetch(environment.timescaleAPIURL + '/prepare-download?query=' + JSON.stringify({
@@ -112,7 +128,8 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
             time: {
                 start: fromIso,
                 end: toIso,
-            }
+            },
+            groupTime: this.availabilityControl.value?.groupTime,
         }), {headers: {Authorization: token}});
         if (!f.ok) {
             throw f.statusText;
@@ -138,5 +155,53 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         dlink.click(); // this will trigger the dialog window
         dlink.remove();
         console.log(url);
+    }
+
+    getMin(i: number, groupType?: string, groupTime?: string): Date | undefined {
+        return this.availability.find(a => a.serviceId === this.services[i].id && a.groupType === groupType && a.groupTime === groupTime)?.from;
+    }
+
+    getMax(i: number, groupType?: string, groupTime?: string): Date | undefined {
+        return this.availability.find(a => a.serviceId === this.services[i].id && a.groupType === groupType && a.groupTime === groupTime)?.to;
+    }
+
+    filterAvailability(i: number) {
+        return this.availability.filter(a => a.serviceId === this.services[i].id);
+    }
+
+    formatAvailability(a: {
+        serviceId: string;
+        from?: Date;
+        to?: Date;
+        groupType?: string;
+        groupTime?: string;
+    }): string {
+        if (a.groupType === undefined) {
+            return 'Raw Data';
+        }
+        return a.groupType + ' (' + a.groupTime + ')';
+    }
+
+    valueAvailability(a: {
+        serviceId: string;
+        from?: Date;
+        to?: Date;
+        groupType?: string;
+        groupTime?: string;
+    }) {
+        return {
+            groupType: a.groupType,
+            groupTime: a.groupTime
+        };
+    }
+
+    compareAvailabilityValue(a: {
+        groupType?: string;
+        groupTime?: string;
+    }, b: {
+        groupType?: string;
+        groupTime?: string;
+    }): boolean {
+        return a.groupTime === b.groupTime && a.groupType === b.groupType;
     }
 }

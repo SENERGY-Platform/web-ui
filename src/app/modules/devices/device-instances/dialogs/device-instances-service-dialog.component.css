@@ -21,3 +21,7 @@
 .mat-mdc-dialog-title {
     padding-top: 8px;
 }
+
+::ng-deep .example-custom-date-class {
+    background:rgba(0,0,0,.38)!important;
+}

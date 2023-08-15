@@ -25,13 +25,15 @@ import {
     TimeValuePairModel
 } from './export-data.model';
 import {HttpClient} from '@angular/common/http';
+import {map} from 'rxjs/operators';
 
 
 @Injectable({
     providedIn: 'root',
 })
 export class ExportDataService {
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) {
+    }
 
     getLastValuesInflux(requestElements: LastValuesRequestElementInfluxModel[]): Observable<TimeValuePairModel[]> {
         return this.http.post<TimeValuePairModel[]>(environment.influxAPIURL + '/v2/last-values', requestElements);
@@ -56,10 +58,10 @@ export class ExportDataService {
     ): Observable<any[][] | null> {
         return this.http.post<any[][] | null>(
             environment.influxAPIURL +
-                '/v2/queries?format=table&order_column_index=' +
-                orderColumnIndex +
-                '&order_direction=' +
-                orderDirection,
+            '/v2/queries?format=table&order_column_index=' +
+            orderColumnIndex +
+            '&order_direction=' +
+            orderDirection,
             query,
         );
     }
@@ -81,7 +83,41 @@ export class ExportDataService {
 
     queryTimescaleCsv(query: QueriesRequestElementTimescaleModel[]): Observable<string> {
         const headers = {Accept: 'text/csv'};
-        return this.http.post(environment.timescaleAPIURL + '/queries?format=per_query', query, {headers, responseType: 'text'});
+        return this.http.post(environment.timescaleAPIURL + '/queries?format=per_query', query, {
+            headers,
+            responseType: 'text'
+        });
     }
 
+    getTimescaleDataAvailability(deviceId: string): Observable<{
+        serviceId: string;
+        from?: Date;
+        to?: Date;
+        groupType?: string;
+        groupTime?: string;
+    }[]> {
+        return this.http.get<{
+            serviceId: string;
+            from?: string;
+            to?: string;
+            groupType?: string;
+            groupTime?: string;
+        }[]>(environment.timescaleAPIURL + '/data-availability?device_id=' + deviceId).pipe(map(a => {
+            const res: {
+                serviceId: string;
+                from?: Date;
+                to?: Date;
+                groupType?: string;
+                groupTime?: string;
+            }[] = [];
+            a.forEach(elem => res.push({
+                serviceId: elem.serviceId,
+                from: elem.from === undefined ? undefined : new Date(elem.from),
+                to: elem.to === undefined ? undefined : new Date(elem.to),
+                groupType: elem.groupType,
+                groupTime: elem.groupTime,
+            }));
+            return res;
+        }));
+    }
 }
