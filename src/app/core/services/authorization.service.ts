@@ -43,7 +43,7 @@ export class AuthorizationService implements HttpInterceptor {
     }
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        if (this.options?.shouldAddToken && !this.options.shouldAddToken(req)) {
+        if (!this.keycloakService.shouldAddToken(req)) {
             return next.handle(req);
         }
         let p: Promise<boolean>;

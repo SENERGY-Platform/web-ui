@@ -32,6 +32,7 @@ export function initializerService(authorizationService: AuthorizationService): 
                     // token: token,
                 },
                 bearerPrefix: 'Bearer',
+                shouldAddToken: request => !request.url.startsWith(environment.keycloakUrl + '/auth/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token')
             })
             .then(() =>
                 loadEnv(authorizationService, environment.configUrl).then(() => {

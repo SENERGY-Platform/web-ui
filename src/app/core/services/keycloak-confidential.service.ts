@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpRequest} from '@angular/common/http';
 import {KeycloakOptions} from 'keycloak-angular/lib/core/interfaces/keycloak-options';
 import {lastValueFrom, mergeMap, Observable} from 'rxjs';
 import {KeycloakConfig, KeycloakProfile} from 'keycloak-js';
@@ -69,6 +69,7 @@ export class KeycloakConfidentialService implements OnDestroy {
     private timeout?: any;
     private options?: KeycloakOptions;
     private decodedToken?: DecodedToken;
+    private refreshing?: Observable<boolean>;
 
     private clientSecret: string | null = sessionStorage.getItem('KeycloakConfidentialService_clientSecret');
 
@@ -116,6 +117,8 @@ export class KeycloakConfidentialService implements OnDestroy {
         return ((this.options?.config as KeycloakConfig).url || '') + '/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token';
     }
 
+    shouldAddToken: (request: HttpRequest<unknown>) => boolean = (request) => !request.url.startsWith(environment.keycloakUrl + '/auth/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token');
+
     constructor(private httpClient: HttpClient) {
 
     }
@@ -126,6 +129,9 @@ export class KeycloakConfidentialService implements OnDestroy {
 
     init(options?: KeycloakOptions): Promise<boolean> {
         this.options = options;
+        if (this.options !== undefined && this.options.shouldAddToken !== undefined) {
+            this.shouldAddToken = this.options.shouldAddToken;
+        }
         const now = new Date().valueOf();
 
         if (this.isUserToken && this.tokenResponse?.access_token !== undefined && this.tokenResponse.access_token.length > 0 && this.tokenExpires > now - 10000) {
@@ -212,13 +218,12 @@ export class KeycloakConfidentialService implements OnDestroy {
     }
 
     isTokenExpired(minValidity?: number): boolean {
-        return this.isUserToken && this.tokenExpires - new Date().valueOf() > (minValidity ?? 0) * 1000;
+        return this.isUserToken && this.tokenExpires - new Date().valueOf() < (minValidity ?? 0) * 1000;
     }
 
     updateToken(_?: number): Promise<boolean> {
         return lastValueFrom(this.refreshToken());
     }
-
 
     private requestToken(body: any, options?: {
         headers?: HttpHeaders | { [p: string]: string | string[] } | undefined;
@@ -275,6 +280,9 @@ export class KeycloakConfidentialService implements OnDestroy {
     }
 
     private refreshToken(): Observable<boolean> {
+        if (this.refreshing !== undefined) {
+            return this.refreshing;
+        }
         const headers = new HttpHeaders().set(
             'Content-Type',
             'application/x-www-form-urlencoded;'
@@ -282,7 +290,11 @@ export class KeycloakConfidentialService implements OnDestroy {
 
         const body = 'grant_type=refresh_token&client_id=' + environment.keyCloakClientId + '&client_secret=' + this.clientSecret + '&refresh_token=' + this.tokenResponse?.refresh_token;
 
-        return this.requestToken(body, {headers}, true);
+        this.refreshing = this.requestToken(body, {headers}, true).pipe(map((v) => {
+            this.refreshing = undefined;
+            return v;
+        }));
+        return this.refreshing;
     }
 
     private decodeToken(): DecodedToken | undefined {
