@@ -39,6 +39,7 @@ describe('ImportTypesService', () => {
         description: 'test',
         image: 'test-image',
         default_restart: true,
+        cost: 5,
         configs: [
             {
                 name: 'test-config',

@@ -91,6 +91,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
         default_restart: true,
         configs: this.fb.array([]),
         owner: '',
+        cost: [0, Validators.min(0)],
     });
 
     timeAspect = this.fb.control(null);

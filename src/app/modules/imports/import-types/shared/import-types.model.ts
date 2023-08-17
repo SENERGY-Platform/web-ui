@@ -23,6 +23,7 @@ export interface ImportTypeModel {
     configs: ImportTypeConfigModel[];
     output: ImportTypeContentVariableModel;
     owner: string;
+    cost: number;
 }
 
 export interface ImportTypeConfigModel {
