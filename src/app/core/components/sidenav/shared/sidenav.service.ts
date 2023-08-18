@@ -171,6 +171,7 @@ export class SidenavService implements OnDestroy {
                 var adminSection = new SidenavSectionModel('Admin', 'toggle', 'admin_panel_settings', '/admin', [
                         new SidenavPageModel('Authorization', 'link', 'security', '/admin/authorization'),
                         new SidenavPageModel('Timescale Rules', 'link', 'rule', '/admin/timescale-rules'),
+                        new SidenavPageModel('Budgets', 'link', 'savings', '/admin/budgets'),
                 ])
                 obs.next(adminSection)
             } else {

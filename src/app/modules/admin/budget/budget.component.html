@@ -1,0 +1,89 @@
+<!--
+  ~
+  ~   Copyright 2023 InfAI (CC SES)
+  ~
+  ~   Licensed under the Apache License, Version 2.0 (the "License");
+  ~   you may not use this file except in compliance with the License.
+  ~   You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~   Unless required by applicable law or agreed to in writing, software
+  ~   distributed under the License is distributed on an "AS IS" BASIS,
+  ~   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~   See the License for the specific language governing permissions and
+  ~   limitations under the License.
+  ~
+  -->
+
+
+<div class="container">
+    <span fxLayout="row" class="search-button-container">
+        <span fxFlex></span>
+        <button mat-icon-button (click)="reload()" color="accent" class="refresh">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </span>
+    <senergy-spinner [show]="!dataReady"></senergy-spinner>
+
+    <div *ngIf="dataReady" class="mat-elevation-z1" fxLayout="column"
+         infiniteScroll
+         [infiniteScrollDistance]="1"
+         [infiniteScrollThrottle]="50"
+         [infiniteScrollContainer]="'.container'"
+         [fromRoot]="true"
+         (scrolled)="onScroll()">
+
+        <table mat-table [dataSource]="budgets">
+            <ng-container matColumnDef="budget_identifier">
+                <th mat-header-cell *matHeaderCellDef>Budget</th>
+                <td mat-cell *matCellDef="let m">{{m.budget_identifier}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="user">
+                <th mat-header-cell *matHeaderCellDef>User/Role</th>
+                <td mat-cell *matCellDef="let m">{{getUsername(m.user_id)}}{{m.role}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="value">
+                <th mat-header-cell *matHeaderCellDef>Value</th>
+                <td mat-cell *matCellDef="let m">{{m.value}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="details">
+                <th mat-header-cell *matHeaderCellDef>Details</th>
+                <td mat-cell *matCellDef="let m">
+                    <button mat-icon-button (click)="details(m)" color="accent">
+                        <mat-icon>info</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="edit">
+                <th mat-header-cell *matHeaderCellDef>Edit</th>
+                <td mat-cell *matCellDef="let m">
+                    <button mat-icon-button (click)="edit(m)" color="accent">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="delete">
+                <th mat-header-cell *matHeaderCellDef>Delete</th>
+                <td mat-cell *matCellDef="let m">
+                    <button mat-icon-button (click)="delete(m)" color="accent">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+
+            <tr mat-header-row
+                *matHeaderRowDef="['budget_identifier', 'user', 'value', 'details', 'edit', 'delete']; sticky: true"></tr>
+            <tr mat-row
+                *matRowDef="let m; columns: ['budget_identifier', 'user', 'value', 'details', 'edit', 'delete'];"></tr>
+        </table>
+    </div>
+
+    <button mat-fab class="fab" (click)="add()" matTooltip="Add new budget">
+        <mat-icon>add</mat-icon>
+    </button>
+</div>

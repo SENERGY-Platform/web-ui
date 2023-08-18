@@ -115,6 +115,7 @@ export const environment = {
     kongAdminProxyUrl: 'http://localhost',
     swaggerUrl: 'http://localhost',
     timescaleRuleManagerUrl: 'http://localhost',
+    budgetApiUrl: 'http://localhost',
 };
 
 /*

@@ -31,6 +31,8 @@ import {
     TimescaleRulesCreateEditComponent
 } from './timescale-rules/timescale-rules-create-edit/timescale-rules-create-edit.component';
 import {MatPaginatorModule} from '@angular/material/paginator';
+import { BudgetComponent } from './budget/budget.component';
+import { BudgetCreateEditComponent } from './budget/budget-create-edit/budget-create-edit.component';
 
 const listRules: Route[] = [
     {
@@ -44,6 +46,12 @@ const listRules: Route[] = [
         pathMatch: 'full',
         component: TimescaleRulesComponent,
         data: {header: 'Timescale Rules'},
+    },
+    {
+        path: 'admin/budgets',
+        pathMatch: 'full',
+        component: BudgetComponent,
+        data: {header: 'Budgets'},
     }];
 
 @NgModule({
@@ -52,7 +60,9 @@ const listRules: Route[] = [
         PermissionsEditComponent,
         PermissionsDialogImportComponent,
         TimescaleRulesComponent,
-        TimescaleRulesCreateEditComponent
+        TimescaleRulesCreateEditComponent,
+        BudgetComponent,
+        BudgetCreateEditComponent
     ],
     imports: [
         CommonModule,
