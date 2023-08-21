@@ -184,14 +184,15 @@ $my-app-theme: mat.define-light-theme($my-app-primary, $my-app-accent, $my-app-w
 }
 
 .snack-bar-error {
+  .mdc-snackbar__surface {
     background-color: darkred !important;
-    font-weight: bold;
-}
-
-.snack-bar-error button{
-    color: white;
-    font-family: "Material Icons";
-    font-weight: bold;
+    font-weight: bold!important;
+  }
+  .mat-mdc-snack-bar-actions .mdc-button__label {
+    color: white!important;
+    font-family: "Material Icons"!important;
+    font-weight: bold!important;
+  }
 }
 
 .mdc-list-item--selected .mdc-list-item__primary-text, .mdc-list-item--activated .mdc-list-item__primary-text {

@@ -22,6 +22,7 @@ import { ImportTypeConfigModel, ImportTypeModel } from '../import-types/shared/i
 import {FormArray, FormBuilder, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { typeValueValidator } from '../validators/type-value-validator';
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
     selector: 'senergy-import-deploy-dialog',
@@ -154,8 +155,12 @@ export class ImportDeployEditDialogComponent implements OnInit {
         this.importInstancesService.saveImportInstance(instance).subscribe(
             () => this.dialogRef.close(true),
             (err) => {
-                console.error(err);
-                this.snackBar.open('Error saving', 'close', { panelClass: 'snack-bar-error' });
+                if (err !== undefined && err !== null && err.status !== undefined && err.status === 402) {
+                    this.snackBar.open('Insufficient budget', 'close', {panelClass: 'snack-bar-error'});
+                } else {
+                    console.error(err);
+                    this.snackBar.open('Error saving', 'close', {panelClass: 'snack-bar-error'});
+                }
             },
         );
     }
