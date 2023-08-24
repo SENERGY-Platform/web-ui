@@ -164,11 +164,6 @@ export class LadonService {
                   })
               
                   this.authorizationsPerURL = allRules
-                  
-                  setTimeout(function() {
-                    resolve(true)
-                  }, 10000)
-
                 })
         }) 
     }
