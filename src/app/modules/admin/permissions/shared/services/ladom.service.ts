@@ -164,6 +164,7 @@ export class LadonService {
                   })
               
                   this.authorizationsPerURL = allRules
+                  resolve(true)
                 })
         }) 
     }
