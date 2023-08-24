@@ -75,21 +75,17 @@ export class ImportTypesComponent implements OnInit {
     }
 
     checkAuthorization() {
-        this.importTypesService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.importTypesService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
-        this.importTypesService.userHasCreateAuthorization().subscribe(hasAuth => {
-            this.userHasCreateAuthorization = hasAuth
-        })
+        this.userHasUpdateAuthorization = this.importTypesService.userHasUpdateAuthorization()
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push("edit")
+        }
+    
+        this.userHasDeleteAuthorization = this.importTypesService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
+
+        this.userHasCreateAuthorization = this.importTypesService.userHasCreateAuthorization()
     }
 
     private initSearch() {

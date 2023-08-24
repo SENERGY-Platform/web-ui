@@ -29,14 +29,14 @@ import { LadonService } from '../../admin/permissions/shared/services/ladom.serv
 })
 export class BrokerExportService {
     static ID_PREFIX = 'urn:infai:ses:broker-export:';
-    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+    authorizations:PermissionTestResponse
 
     constructor(
         private http: HttpClient, 
         private errorHandlerService: ErrorHandlerService, 
         private ladonService: LadonService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.brokerExportServiceUrl, ["GET"])
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.brokerExportServiceUrl)
     }
 
     getExports(
@@ -125,16 +125,7 @@ export class BrokerExportService {
             );
     }
 
-    userHasReadAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("GET")   
-    }
-
-    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            this.authorizationObs.subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
+    userHasReadAuthorization(): boolean {
+        return this.authorizations["GET"]   
     }
 }

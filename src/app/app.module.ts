@@ -43,6 +43,7 @@ import { ApiDocModule } from './modules/api-doc/api-doc.module';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {AuthorizationService} from './core/services/authorization.service';
 import {KeycloakConfidentialService} from './core/services/keycloak-confidential.service';
+import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 
 registerLocaleData(localeDe);
 
@@ -80,7 +81,7 @@ registerLocaleData(localeDe);
             provide: APP_INITIALIZER,
             useFactory: initializerService,
             multi: true,
-            deps: [AuthorizationService],
+            deps: [AuthorizationService, LadonService],
         },
         {
             provide: LOCALE_ID,

@@ -129,23 +129,19 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     checkAuthorization() {
-        this.deviceInstancesService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.deviceInstancesService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
-        this.deviceTypesService.userHasReadAuthorization().subscribe(hasAuth => {
-            if(hasAuth) {
-                this.displayedColumns.splice(4, 0, 'device_type')
-            }
-        })
+        this.userHasUpdateAuthorization = this.deviceInstancesService.userHasUpdateAuthorization() 
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push("edit")
+        }
+        
+        this.userHasDeleteAuthorization = this.deviceInstancesService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
+        
+        if(this.deviceTypesService.userHasReadAuthorization()) {
+            this.displayedColumns.splice(4, 0, 'device_type')
+        }
     }
 
     private initSearch() {

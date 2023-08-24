@@ -84,21 +84,17 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
 
     checkAuthorization() {
-        this.characteristicsService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.characteristicsService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
-        this.characteristicsService.userHasCreateAuthorization().subscribe(hasAuth => {
-            this.userHasCreateAuthorization = hasAuth
-        })
+        this.userHasUpdateAuthorization = this.characteristicsService.userHasUpdateAuthorization()
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push("edit")
+        }
+    
+        this.userHasDeleteAuthorization = this.characteristicsService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
+    
+        this.userHasCreateAuthorization = this.characteristicsService.userHasCreateAuthorization()
     }
 
     ngAfterViewInit(): void {

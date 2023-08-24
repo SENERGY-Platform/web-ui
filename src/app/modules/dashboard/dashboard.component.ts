@@ -94,15 +94,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.dashboardService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-        })
-        this.dashboardService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-        })
-        this.dashboardService.userHasCreateAuthorization().subscribe(hasAuth => {
-            this.userHasCreateAuthorization = hasAuth
-        })
+        this.userHasUpdateAuthorization = this.dashboardService.userHasUpdateAuthorization()
+        this.userHasDeleteAuthorization = this.dashboardService.userHasDeleteAuthorization()
+        this.userHasCreateAuthorization = this.dashboardService.userHasCreateAuthorization()
     }
 
     initAllWidgets() {

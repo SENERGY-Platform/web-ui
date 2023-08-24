@@ -112,7 +112,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     ngOnInit() {
-        this.platformDeploymentsService.userHasDeleteAuthorization().subscribe(hasAuth => this.userHasDeleteAuthorization = hasAuth)
+        this.userHasDeleteAuthorization = this.platformDeploymentsService.userHasDeleteAuthorization()
 
         this.hubsService.listSyncNetworks().subscribe((result) => {
             this.hubList = result;

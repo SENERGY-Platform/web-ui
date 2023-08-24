@@ -17,7 +17,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable, ReplaySubject} from 'rxjs';
+import {BehaviorSubject, map, Observable, of, ReplaySubject} from 'rxjs';
 import { AllowedMethods, AuthorizationRequest, AuthorizationRequestResponse, PermissionApiModel, permissionApiToPermission, PermissionModel, PermissionTestResponse, permissionToPermissionApi } from '../permission.model';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
@@ -28,6 +28,7 @@ import { HttpClient } from '@angular/common/http';
 export class LadonService {
 
     public baseUrl: string = environment.ladonUrl;
+    private authorizationsPerURL: Record<string, PermissionTestResponse> = {}
 
     constructor(
         private http: HttpClient
@@ -82,84 +83,27 @@ export class LadonService {
         return this.http.post<AuthorizationRequestResponse>(this.baseUrl + '/allowed', requests);
     }
 
-
-
-    public checkUserHasReadAuthorization(targetURI: string): Observable<boolean> {
-        return new Observable(obs => {
-            var request: AuthorizationRequest = {'endpoint': targetURI, 'method': "GET"}
-            this.userIsAuthorized([request]).subscribe((authResponse: AuthorizationRequestResponse) => {
-                if(authResponse.allowed[0]) {
-                    obs.next(true)
-                } else {
-                    obs.next(false)
-                }
-                obs.complete()
-            })
-        })
+    public getUserAuthorizationsForURI(targetURI: string): PermissionTestResponse {
+        return this.authorizationsPerURL[targetURI]
     }
 
-    public getUserAuthorizationsForURI(targetURI: string, methods: AllowedMethods[]): Observable<PermissionTestResponse> {
-        return new Observable(obs => {
-            var requests: AuthorizationRequest[] = []
-            methods.forEach(method => {
-                var endpoint = new URL(targetURI).pathname
-                requests.push({'endpoint': endpoint, 'method': method})
-            });
-            this.userIsAuthorized(requests).subscribe((authResponse: AuthorizationRequestResponse) => {
-                var result: PermissionTestResponse = {
-                    "GET": false,
-                    "POST": false,
-                    "DELETE": false,
-                    "PUT": false,
-                    "PATCH": false,
-                    "HEAD": true,
-                }
+    public checkAllServiceEndpointAuthorizations(ladonUrl: string): Promise<boolean> {
+        this.baseUrl = ladonUrl
 
-                methods.forEach(function(method, methodIndex) {
-                    result[method] = authResponse.allowed[methodIndex]
-                });
-                obs.next(result)
-                obs.complete()
-            })
-        })
-    }
-
-    
-    /*
-
-    USE THIS IN A SERVICE TO WAIT FOR PERMISSIONS 
-    THEN ACCESS allPermissions TO GET RULES PER METHOD FOR A URL
-
-    authorizationForMethodsOfURI: PermissionTestResponse = {"GET": true, "DELETE": false, "HEAD": true, "PATCH": false, "POST": false, "PUT": false} 
-    authorizationObs: Observable<Record<string, PermissionTestResponse>> = new Observable()
-
-    constructor(
-        private http: HttpClient, 
-        private ladonService: LadonService
-    ) {
-        this.authorizationObs = this.ladonService.checkAllServiceEndpoints()
-        this.authorizationObs.subscribe((allPermissions: Record<string, PermissionTestResponse>) => {
-            this.authorizationForMethodsOfURI = allPermissions[environment.swaggerUrl]
-        })
-    }
-
-    USE THIS HERE TO LOAD ALL PERMISSIONS AT ONCE 
-
-    private allServiceEndpointsObservable: ReplaySubject<Record<string, PermissionTestResponse>> = new ReplaySubject()
-
-    public checkAllServiceEndpoints(): Observable<Record<string, PermissionTestResponse>> {
-        return this.allServiceEndpointsObservable.asObservable();
-    }
-
-    private checkAllServiceEndpointAuthorizations(){
         var requests: AuthorizationRequest[] = []
         var methods: AllowedMethods[] = ["GET", "DELETE", "POST", "PUT", "PATCH"]
-            
         var serviceEndpoints = [
                 environment.flowRepoUrl,
                 environment.flowEngineUrl,
                 environment.flowParserUrl,
+
                 environment.permissionSearchUrl,
+                environment.permissionSearchUrl + '/v3/resources/characteristics',
+                environment.permissionSearchUrl + '/v3/resources/device-classes',
+                environment.permissionSearchUrl + '/v3/resources/functions',
+                environment.permissionSearchUrl + '/v3/resources/concepts',
+                environment.permissionSearchUrl + '/v3/resources/device-types',
+
                 environment.apiAggregatorUrl,
                 environment.deviceRepoUrl,
                 environment.iotRepoUrl,
@@ -178,10 +122,18 @@ export class LadonService {
                 environment.swaggerUrl,
                 environment.importDeployUrl,
                 environment.importRepoUrl,
+
                 environment.deviceRepoUrl,
+                environment.deviceRepoUrl + '/aspects',
+
                 environment.deviceManagerUrl,
+                environment.deviceManagerUrl + '/device-types',
+
                 environment.processIoUrl,
-                environment.dashboardServiceUrl
+                environment.dashboardServiceUrl,
+                environment.usersServiceUrl,
+                environment.notificationsUrl,
+                environment.waitingRoomUrl
         ]
             
         serviceEndpoints.forEach(endpointURL => {
@@ -192,28 +144,33 @@ export class LadonService {
                 });
         })
 
-        this.userIsAuthorized(requests).subscribe((authResponse: AuthorizationRequestResponse) => {
-                var allRules: Record<string, PermissionTestResponse> = {}
-                serviceEndpoints.forEach((endpointURL, endpointIndex) => {
-                    allRules[endpointURL] = {
-                        "GET": true,
-                        "POST": false,
-                        "DELETE": false,
-                        "PUT": false,
-                        "PATCH": false,
-                        "HEAD": true,
-                    }
+        return new Promise((resolve, _) => {
+            this.userIsAuthorized(requests).subscribe(authResponse => {
+                  var allRules: Record<string, PermissionTestResponse> = {}
+                  serviceEndpoints.forEach((endpointURL, endpointIndex) => {
+                      allRules[endpointURL] = {
+                          "GET": true,
+                          "POST": false,
+                          "DELETE": false,
+                          "PUT": false,
+                          "PATCH": false,
+                          "HEAD": true,
+                      }
+              
+                      methods.forEach(function(method, methodIndex) {
+                          var indexOfEndpointMethodRule = endpointIndex * 5 + methodIndex
+                          allRules[endpointURL][method] = authResponse.allowed[indexOfEndpointMethodRule]
+                      });
+                  })
+              
+                  this.authorizationsPerURL = allRules
+                  
+                  setTimeout(function() {
+                    resolve(true)
+                  }, 10000)
 
-                    methods.forEach(function(method, methodIndex) {
-                        var indexOfEndpointMethodRule = endpointIndex * 6 + methodIndex
-                        allRules[endpointURL][method] = authResponse.allowed[indexOfEndpointMethodRule]
-                    });
                 })
-
-                console.log(allRules)
-                this.allServiceEndpointsObservable.next(allRules)
-                this.allServiceEndpointsObservable.complete()
-        })
+        }) 
     }
-    */
+    
 }

@@ -90,21 +90,17 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.deviceClassesService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.deviceClassesService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
-        this.deviceClassesService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasCreateAuthorization = hasAuth
-        })
+        this.userHasUpdateAuthorization = this.deviceClassesService.userHasUpdateAuthorization()
+        if( this.userHasUpdateAuthorization) {
+             this.displayedColumns.push("edit")
+        }
+        
+        this.userHasDeleteAuthorization = this.deviceClassesService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
+    
+        this.userHasCreateAuthorization = this.deviceClassesService.userHasDeleteAuthorization()
     }
 
     private initSearch() {

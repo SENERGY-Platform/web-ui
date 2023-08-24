@@ -69,19 +69,17 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
         private searchbarService: SearchbarService,
         public utilsService: UtilService
     ) {
-        this.processIoService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasCreateAuthorization = hasAuth)
-        this.processIoService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.processIoService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
+        this.userHasCreateAuthorization = this.processIoService.userHasCreateAuthorization()
+        
+        this.userHasUpdateAuthorization = this.processIoService.userHasUpdateAuthorization()
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push("edit")
+        }
+
+        this.userHasDeleteAuthorization = this.processIoService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
 
         this.updateTotal();
     }

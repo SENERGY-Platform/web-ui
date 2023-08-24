@@ -60,27 +60,22 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     ) {}
 
     ngOnInit() {
-        this.flowEngineService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push('delete')
-            }
-        
-        })
-        this.flowEngineService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push('edit')
-            }
-        })
+        this.userHasDeleteAuthorization = this.flowEngineService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push('delete')
+        }
+
+        this.userHasUpdateAuthorization = this.flowEngineService.userHasUpdateAuthorization()
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push('edit')
+        }
+    
         this.initSearch();
     }
 
     initSearch() {
-        console.log(1)
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
-                console.log(resp)
                 if(searchText != ""){
                     resp = resp.filter(pipeline => (pipeline.name.search(searchText) != -1))
                 }

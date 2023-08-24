@@ -82,19 +82,16 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     checkAuthorization() {
-        this.deviceGroupsService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasCreateAuthorization = hasAuth)
-        this.deviceGroupsService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.deviceGroupsService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
+        this.userHasCreateAuthorization = this.deviceGroupsService.userHasCreateAuthorization()
+        this.userHasUpdateAuthorization = this.deviceGroupsService.userHasUpdateAuthorization()
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push("edit")
+        }
+
+        this.userHasDeleteAuthorization = this.deviceGroupsService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
     }
 
     matSortChange($event: Sort) {

@@ -298,39 +298,29 @@ export class DeviceTypeService {
         );
     }
 
-    userHasDeleteAuthorization(): Observable<boolean> {
+    userHasDeleteAuthorization():boolean {
         return this.userHasDeviceManagerAuthorization("DELETE")      
     }
 
-    userHasUpdateAuthorization(): Observable<boolean> {
+    userHasUpdateAuthorization():boolean {
         return this.userHasDeviceManagerAuthorization("PUT")      
     }
 
-    userHasCreateAuthorization(): Observable<boolean> {
+    userHasCreateAuthorization(): boolean {
         return this.userHasDeviceManagerAuthorization("POST")   
     }
 
-    userHasReadAuthorization(): Observable<boolean> {
+    userHasReadAuthorization(): boolean {
         return this.userHasPermSearchAuthorization("GET")  
     }
 
-    userHasPermSearchAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            var permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-types'
-            this.ladonService.getUserAuthorizationsForURI(permSearchURL, ["GET"]).subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
+    userHasPermSearchAuthorization(method: AllowedMethods): boolean {
+        var permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-types'
+        return this.ladonService.getUserAuthorizationsForURI(permSearchURL)[method]
     }
 
-    userHasDeviceManagerAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            var deviceManagerUrl = environment.deviceManagerUrl + '/device-types'
-            this.ladonService.getUserAuthorizationsForURI(deviceManagerUrl, ["DELETE", "POST", "PUT"]).subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
+    userHasDeviceManagerAuthorization(method: AllowedMethods): boolean {
+        var deviceManagerUrl = environment.deviceManagerUrl + '/device-types'
+        return this.ladonService.getUserAuthorizationsForURI(deviceManagerUrl)[method] 
     }
 }

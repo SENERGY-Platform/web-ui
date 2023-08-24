@@ -32,7 +32,57 @@
   
 </head>
 <body class="mat-typography">
-    <senergy-root></senergy-root>
+  <senergy-root>
+    <style>
+      .loader {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        border: 8px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 8px solid #3498db;
+        width: 50px;
+        height: 50px;
+        -webkit-animation: spin 1s linear infinite; /* Safari */
+        animation: spin 1s linear infinite;
+      }
+      
+      /* Safari */
+      @-webkit-keyframes spin {
+        0% { -webkit-transform: rotate(0deg); }
+        100% { -webkit-transform: rotate(360deg); }
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* Error Message Box */
+      .alert {
+        padding: 20px;
+        background-color: #f44336;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        display: none
+      }
+      .alert.warning {background-color: #ff9800;}
+
+      .show {
+        display: block
+      }
+
+      </style>
+            
+      <div class="loader"></div>
+
+      <div class="alert warning">
+        <strong>Warning!</strong> There was a problem loading this page. Please reload!
+      </div>
+      
+  </senergy-root>
   <noscript>Please enable JavaScript to continue using this application.</noscript>
 </body>
 </html>

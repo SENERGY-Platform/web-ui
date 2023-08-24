@@ -15,8 +15,6 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {forkJoin} from 'rxjs';
-import {SidenavService} from './core/components/sidenav/shared/sidenav.service';
 import {ThemingService} from './core/services/theming.service';
 import {AuthorizationService} from './core/services/authorization.service';
 
@@ -26,28 +24,16 @@ import {AuthorizationService} from './core/services/authorization.service';
     styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-    ready: boolean = false
 
     constructor(
         protected authorizationService: AuthorizationService,
-        private themingService: ThemingService,
-        private sidenavService: SidenavService,
+        private themingService: ThemingService
     ) {
     }
-
 
     ngOnInit(): void {
         this.storeSubject()
         this.themingService.applyTheme();
-
-        var obs = []
-        obs.push(this.sidenavService.loadSections())
-
-        forkJoin(obs).subscribe(results => {
-            if (results.every(v => !!v)) {
-                this.ready = true
-            }
-        })
     }
 
     storeSubject() {

@@ -28,14 +28,14 @@ import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/pe
     providedIn: 'root',
 })
 export class FlowRepoService {
-    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+    authorizations: PermissionTestResponse
 
     constructor(
         private http: HttpClient, 
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.flowRepoUrl, ["GET", "DELETE", "POST", "PUT"])
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.flowRepoUrl)
     }
 
     getFlows(search: string, limit: number, offset: number, feature: string, order: string, shared?: boolean): Observable<{ flows: FlowModel[] }> {
@@ -86,28 +86,19 @@ export class FlowRepoService {
             .pipe(catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'deleteFlow: Error', {})));
     }
 
-    userHasDeleteAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("DELETE")      
+    userHasDeleteAuthorization(): boolean {
+        return this.authorizations["DELETE"]
     }
 
-    userHasUpdateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("POST")      
+    userHasUpdateAuthorization(): boolean {
+        return this.authorizations["POST"]    
     }
 
-    userHasCreateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("PUT")   
+    userHasCreateAuthorization(): boolean {
+        return this.authorizations["PUT"]  
     }
 
-    userHasReadAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("GET")   
-    }
-
-    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            this.authorizationObs.subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
+    userHasReadAuthorization(): boolean {
+        return this.authorizations["GET"]   
     }
 }

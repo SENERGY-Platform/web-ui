@@ -59,13 +59,9 @@ export class ToolbarComponent implements OnInit {
     }
 
     checkAuthorization() {
-        this.settingsDialogService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasSettingsUpdateAuthorization = hasAuth
-        })
+        this.userHasSettingsUpdateAuthorization = this.settingsDialogService.userHasUpdateAuthorization()
 
-        this.notificationService.userHasReadAuthorization().subscribe(hasAuth => {
-            this.userHasNotificationsReadAuthorization = hasAuth
-        })
+        this.userHasNotificationsReadAuthorization = this.notificationService.userHasReadAuthorization()
     }
 
     toggle(sidenavOpen: boolean): void {

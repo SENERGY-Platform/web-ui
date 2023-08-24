@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../environments/environment';
 import {AuthorizationService} from './authorization.service';
 
-export function initializerService(authorizationService: AuthorizationService): () => Promise<any> {
+function showErrorBox() {
+    document?.getElementById("error")?.classList.add("show")
+}
+
+export function initializerService(authorizationService: AuthorizationService, ladonService: LadonService): () => Promise<any> {
     return (): Promise<any> =>
         authorizationService
             .init({
@@ -34,15 +39,24 @@ export function initializerService(authorizationService: AuthorizationService): 
                 bearerPrefix: 'Bearer',
                 shouldAddToken: request => !request.url.startsWith(environment.keycloakUrl + '/auth/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token')
             })
-            .then(() =>
-                loadEnv(authorizationService, environment.configUrl).then(() => {
-                    if (!environment.production) {
-                        return loadEnv(authorizationService, '/assets/env.json');
-                    } else {
-                        return null;
-                    }
-                }),
-            );
+            .then(() => {
+                return loadEnv(authorizationService, environment.configUrl)
+                            .then(() => {
+                                if (!environment.production) {
+                                    return loadEnv(authorizationService, '/assets/env.json').then(_ => ladonService.checkAllServiceEndpointAuthorizations(environment.ladonUrl));
+                                } else {
+                                    return ladonService.checkAllServiceEndpointAuthorizations(environment.ladonUrl);
+                                }
+                            })
+                            .catch(err => {
+                                console.log(err)
+                                showErrorBox()
+                            })
+                })
+            .catch(err => {
+                console.log(err)
+                showErrorBox()
+            });
 }
 
 export function loadEnv(authorizationService: AuthorizationService, url: string): Promise<unknown> {

@@ -85,21 +85,17 @@ export class ImportInstancesComponent implements OnInit {
     }
 
     checkAuthorization() {
-        this.importInstancesService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.importInstancesService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
-        this.importInstancesService.userHasCreateAuthorization().subscribe(hasAuth => {
-            this.userHasCreateAuthorization = hasAuth
-        })
+        this.userHasUpdateAuthorization = this.importInstancesService.userHasUpdateAuthorization()
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push("edit")
+        }
+        
+        this.userHasDeleteAuthorization = this.importInstancesService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
+        
+        this.userHasCreateAuthorization = this.importInstancesService.userHasCreateAuthorization()
     }
 
     edit(m: ImportInstancesModel) {
@@ -150,7 +146,6 @@ export class ImportInstancesComponent implements OnInit {
             .listImportInstances(this.searchText, this.pageSize, this.offset, this.sort, this.excludeGenerated)
             .subscribe((inst) => {
                 this.dataSource.data = inst;
-                console.log(inst)
                 this.dataReady = true;
             });
     }

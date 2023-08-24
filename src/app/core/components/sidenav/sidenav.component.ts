@@ -48,7 +48,7 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         this.getActiveSection();
         this.showOrHideSidenav();
-        this.sidenavService.getSections().subscribe(sections => this.sections = sections);
+        this.sections = this.sidenavService.loadSections()
     }
 
     ngAfterViewInit() {

@@ -35,7 +35,7 @@ import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/pe
 })
 export class MonitorService {
     private getAllHistoryInstancesObservable: Observable<MonitorProcessModel[]> | null = null;
-    authorizationObs: Observable<PermissionTestResponse> = new Observable()    
+    authorizations: PermissionTestResponse 
     
     constructor(
         private http: HttpClient, 
@@ -44,7 +44,7 @@ export class MonitorService {
         private processIncidentsService: ProcessIncidentsService,
         private ladonService: LadonService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.processServiceUrl, ["GET"])
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.processServiceUrl)
     }
 
     getAllHistoryInstances(): Observable<MonitorProcessModel[]> {
@@ -145,16 +145,7 @@ export class MonitorService {
         });
     }
 
-    userHasReadAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("GET")   
-    }
-
-    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            this.authorizationObs.subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
+    userHasReadAuthorization(): boolean {
+        return this.authorizations["GET"]   
     }
 }

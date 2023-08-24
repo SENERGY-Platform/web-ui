@@ -46,7 +46,7 @@ export class ExportService {
     typeBoolean = 'https://schema.org/Boolean';
     typeStructure = 'https://schema.org/StructuredValue';
     typeList = 'https://schema.org/ItemList';
-    authorizationObs: Observable<PermissionTestResponse> = new Observable()    
+    authorizations: PermissionTestResponse  
     
     constructor(
         private http: HttpClient, 
@@ -54,7 +54,7 @@ export class ExportService {
         private ladonService: LadonService,
         private deviceService: DeviceInstancesService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.exportService, ["GET", "DELETE", "POST", "PUT"])
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.exportService)
     }
 
     getExports(
@@ -270,28 +270,19 @@ export class ExportService {
         );
     }
 
-    userHasDeleteAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("DELETE")      
+    userHasDeleteAuthorization(): boolean {
+        return this.authorizations["DELETE"]      
     }
 
-    userHasUpdateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("PUT")      
+    userHasUpdateAuthorization(): boolean {
+        return this.authorizations["PUT"]     
     }
 
-    userHasCreateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("POST")   
+    userHasCreateAuthorization(): boolean {
+        return this.authorizations["POST"]   
     }
 
-    userHasReadAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("GET")   
-    }
-
-    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            this.authorizationObs.subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
+    userHasReadAuthorization(): boolean {
+        return this.authorizations["GET"]  
     }
 }

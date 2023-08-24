@@ -29,7 +29,7 @@ import {environment} from '../../../../environments/environment';
     providedIn: 'root',
 })
 export class SettingsDialogService {
-    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+    authorizations: PermissionTestResponse
 
     constructor(
         private http: HttpClient,
@@ -38,7 +38,7 @@ export class SettingsDialogService {
         public snackBar: MatSnackBar,
         private ladonService: LadonService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.usersServiceUrl, ["GET", "DELETE", "POST", "PUT"])
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.usersServiceUrl)
     }
 
     openSettingsDialog() {
@@ -53,16 +53,7 @@ export class SettingsDialogService {
         editDialogRef.afterClosed().subscribe(() => {});
     }
 
-    userHasUpdateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("PUT")      
-    }
-
-    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            this.authorizationObs.subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
+    userHasUpdateAuthorization(): boolean {
+        return this.authorizations["PUT"]   
     }
 }

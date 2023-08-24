@@ -28,14 +28,14 @@ import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/pe
     providedIn: 'root',
 })
 export class FlowEngineService {
-    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+    authorizations: PermissionTestResponse
 
     constructor(
         private http: HttpClient, 
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.flowEngineUrl, ["DELETE", "POST", "PUT"])
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.flowEngineUrl)
     }
 
     startPipeline(data: PipelineRequestModel): Observable<unknown> {
@@ -57,24 +57,15 @@ export class FlowEngineService {
             .pipe(catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'updatePipeline: Error', undefined)));
     }
 
-    userHasDeleteAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("DELETE")      
+    userHasDeleteAuthorization(): boolean {
+        return this.authorizations["DELETE"]      
     }
 
-    userHasUpdateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("POST")      
+    userHasUpdateAuthorization(): boolean {
+        return this.authorizations["POST"]     
     }
 
-    userHasCreateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("PUT")   
-    }
-
-    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            this.authorizationObs.subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
+    userHasCreateAuthorization(): boolean {
+        return this.authorizations["PUT"]  
     }
 }

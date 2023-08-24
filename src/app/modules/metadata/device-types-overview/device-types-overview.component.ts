@@ -85,21 +85,15 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.deviceTypeService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.deviceTypeService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
-        this.deviceTypeService.userHasCreateAuthorization().subscribe(hasAuth => {
-            this.userHasCreateAuthorization = hasAuth
-        })
+        this.userHasUpdateAuthorization = this.deviceTypeService.userHasUpdateAuthorization()
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push("edit")
+        }
+        this.userHasDeleteAuthorization = this.deviceTypeService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
+        this.userHasCreateAuthorization = this.deviceTypeService.userHasCreateAuthorization()
     }
 
     ngAfterViewInit(): void {

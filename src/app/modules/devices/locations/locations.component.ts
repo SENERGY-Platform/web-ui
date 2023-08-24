@@ -82,22 +82,17 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     checkAuthorization() {
-        this.locationsService.userHasCreateAuthorization().subscribe(hasAuth => {
-            this.userHasCreateAuthorization = hasAuth
-        })
+        this.userHasCreateAuthorization = this.locationsService.userHasCreateAuthorization()
 
-        this.locationsService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.locationsService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
+        this.userHasUpdateAuthorization = this.locationsService.userHasUpdateAuthorization()
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push("edit")
+        }
+    
+        this.userHasDeleteAuthorization = this.locationsService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
     }
 
     matSortChange($event: Sort) {

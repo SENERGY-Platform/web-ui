@@ -29,10 +29,10 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class OperatorRepoService {
-    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+    authorizations: PermissionTestResponse
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.operatorRepoUrl, ["GET", "DELETE", "POST", "PUT"])
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.operatorRepoUrl)
     }
 
     getOperators(
@@ -106,28 +106,19 @@ export class OperatorRepoService {
             );
     }
 
-    userHasDeleteAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("DELETE")      
+    userHasDeleteAuthorization(): boolean {
+        return this.authorizations["DELETE"]      
     }
 
-    userHasUpdateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("POST")      
+    userHasUpdateAuthorization(): boolean {
+        return this.authorizations["POST"]    
     }
 
-    userHasCreateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("POST")   
+    userHasCreateAuthorization(): boolean {
+        return this.authorizations["POST"]   
     }
 
-    userHasReadAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("GET")   
-    }
-
-    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            this.authorizationObs.subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
+    userHasReadAuthorization(): boolean {
+        return this.authorizations["GET"]  
     }
 }

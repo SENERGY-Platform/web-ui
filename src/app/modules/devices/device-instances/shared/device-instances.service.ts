@@ -45,7 +45,7 @@ export class DeviceInstancesService {
     private getDeviceHistoryObservable7d: Observable<DeviceInstancesHistoryModel[]> | null = null;
     private getDeviceHistoryObservable1h: Observable<DeviceInstancesHistoryModel[]> | null = null;
     nicknameAttributeKey = 'shared/nickname';
-    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+    authorizations: PermissionTestResponse
 
     constructor(
         private http: HttpClient, 
@@ -55,7 +55,7 @@ export class DeviceInstancesService {
         private locationService: LocationsService,
         private networkService: NetworksService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "DELETE", "POST", "PUT"])
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl)
     }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
@@ -451,28 +451,19 @@ export class DeviceInstancesService {
         );
     }
 
-    userHasDeleteAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("DELETE")      
+    userHasDeleteAuthorization(): boolean {
+        return this.authorizations["DELETE"]      
     }
 
-    userHasUpdateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("PUT")      
+    userHasUpdateAuthorization(): boolean {
+        return this.authorizations["PUT"]      
     }
 
-    userHasCreateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("POST")   
+    userHasCreateAuthorization(): boolean {
+        return this.authorizations["POST"]   
     }
 
-    userHasReadAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("GET")   
-    }
-
-    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            this.authorizationObs.subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
+    userHasReadAuthorization(): boolean {
+        return this.authorizations["GET"]  
     }
 }

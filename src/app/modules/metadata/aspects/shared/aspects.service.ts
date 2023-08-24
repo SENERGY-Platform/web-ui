@@ -28,7 +28,7 @@ import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/pe
     providedIn: 'root',
 })
 export class AspectsService {
-    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+    authorizations: PermissionTestResponse
 
     constructor(
         private http: HttpClient, 
@@ -36,7 +36,7 @@ export class AspectsService {
         private ladonService: LadonService
     ) {
         var deviceRepoUrl = environment.deviceRepoUrl + '/aspects'
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(deviceRepoUrl, ["GET", "DELETE", "POST", "PUT"])
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(deviceRepoUrl)
     }
 
     updateAspects(aspect: DeviceTypeAspectModel): Observable<DeviceTypeAspectModel | null> {
@@ -57,16 +57,7 @@ export class AspectsService {
             .pipe(catchError(this.errorHandlerService.handleError(AspectsService.name, 'createAspect', null)));
     }
 
-    userHasReadAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("GET")   
-    }
-
-    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            this.authorizationObs.subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
+    userHasReadAuthorization(): boolean {
+        return this.authorizations["GET"]
     }
 }

@@ -81,7 +81,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     }
 
     ngOnInit() {
-        this.releasesService.userHasDeleteAuthorization().subscribe(hasAuth => this.userHasDeleteAuthorization = hasAuth)
+        this.userHasDeleteAuthorization = this.releasesService.userHasDeleteAuthorization()
         this.initGridCols();
     }
 

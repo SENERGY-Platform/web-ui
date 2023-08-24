@@ -108,161 +108,107 @@ export class SidenavService implements OnDestroy {
         this.sectionChanged.emit(this.section);
     }
 
-    checkPermissionForSidenavPage(checkFunction: any, sidenavPageModel: any, thisArg: any) {
-        var obs: Observable<SidenavPageModel> = new Observable(obs => {
-            checkFunction.call(thisArg).subscribe((hasAuth: boolean) => {
-                if(hasAuth) {
-                    obs.next(sidenavPageModel)
-                } else {
-                    obs.next(undefined)
-                }
-                obs.complete()
-            })
-        })
-        return obs;
-    }
+    checkAuthorizationForSections(checks: any): SidenavPageModel[] {
+        var sectionsWithAuthorization: SidenavPageModel[] = []
 
-    setupAnalyticsSection(): Observable<SidenavSectionModel> {
-        return new Observable(obs => {
-            var allObs = []
-            allObs.push(this.checkPermissionForSidenavPage(this.operatorRepoService.userHasReadAuthorization, new SidenavPageModel('Operators', 'link', 'code', '/data/operator-repo'), this.operatorRepoService))
-            allObs.push(this.checkPermissionForSidenavPage(this.flowRepoService.userHasCreateAuthorization, new SidenavPageModel('Designer', 'link', 'create', '/data/designer'), this.flowRepoService))
-            allObs.push(this.checkPermissionForSidenavPage(this.flowRepoService.userHasReadAuthorization, new SidenavPageModel('Flows', 'link', 'insights', '/data/flow-repo'), this.flowRepoService))
-            allObs.push(this.checkPermissionForSidenavPage(this.pipelineService.userHasReadAuthorization, new SidenavPageModel('Pipelines', 'link', 'analytics', '/data/pipelines'), this.pipelineService))
+        checks.forEach((check: any) => {
+            var checkFunction = check[0]
+            var section = check[1]
+            var thisArg = check[2]
 
-            forkJoin(allObs).subscribe((sections) => {
-                sections = sections.filter(section => !!section)
-                var analyticsSection = new SidenavSectionModel('Analytics', 'toggle', 'bar_chart', '/data', sections)
-                obs.next(analyticsSection)
-                obs.complete()
-            })
-        })
-    }
-
-    setupDevSection(): Observable<SidenavSectionModel> {
-        return new Observable(obs => {
-            var allObs = []
-
-            var swaggerObs: Observable<SidenavPageModel> = new Observable(obs => {
-                this.swaggerService.userHasReadAuthorization().subscribe((hasPerm: boolean) => {
-                    if(hasPerm) {
-                        var section = new SidenavPageModel('API', 'link', 'api', '/dev/api')
-                        obs.next(section)
-                    } else {
-                        obs.next(undefined)
-                    }
-                    obs.complete()
-                })
-            })
-            allObs.push(swaggerObs)
-    
-            forkJoin(allObs).subscribe((sections) => {
-                sections = sections.filter(section => !!section)
-                var devSection = new SidenavSectionModel('Developer', 'toggle', 'engineering', '/dev', sections)
-                obs.next(devSection)
-                obs.complete()
-            })
-        })
-    }
-
-    setupAdminSection(): Observable<SidenavSectionModel> {
-        return new Observable(obs => {
-            if(this.authService.userIsAdmin()) {
-                var adminSection = new SidenavSectionModel('Admin', 'toggle', 'admin_panel_settings', '/admin', [
-                        new SidenavPageModel('Authorization', 'link', 'security', '/admin/authorization'),
-                        new SidenavPageModel('Timescale Rules', 'link', 'rule', '/admin/timescale-rules'),
-                        new SidenavPageModel('Budgets', 'link', 'savings', '/admin/budgets'),
-                ])
-                obs.next(adminSection)
-            } else {
-                obs.next(undefined)
+            if(checkFunction.call(thisArg)) {
+                sectionsWithAuthorization.push(section)
             }
-            obs.complete()
-        })
-        
+        });
+
+        return sectionsWithAuthorization
     }
 
-    setupProcessSection(): Observable<SidenavSectionModel> {
-        var self = this;
-        return new Observable(obs => {
-            var allObs = []
-            allObs.push(this.checkPermissionForSidenavPage(this.processRepoService.userHasCreateAuthorization, new SidenavPageModel('Designer', 'link', 'create', '/processes/designer'), this.processRepoService))
-            allObs.push(this.checkPermissionForSidenavPage(this.processRepoService.userHasReadAuthorization, new SidenavPageModel('Repository', 'link', 'storage', '/processes/repository'), this.processRepoService))
-            allObs.push(this.checkPermissionForSidenavPage(this.processDeploymentService.userHasReadAuthorization, new SidenavPageModel('Deployments', 'link', 'publish', '/processes/deployments'), this.processDeploymentService))
-            allObs.push(this.checkPermissionForSidenavPage(this.processMonitorService.userHasReadAuthorization, new SidenavPageModel('Monitor', 'link', 'search', '/processes/monitor'), this.processMonitorService))
-            if(environment.processIoUrl){
-                allObs.push(this.checkPermissionForSidenavPage(this.processIOService.userHasReadAuthorization, new SidenavPageModel('IO', 'link', 'table_chart', '/processes/io'), this.processIOService))
-            }
-
-            forkJoin(allObs).subscribe((sections) => {
-                sections = sections.filter(section => !!section)                
-                var processSection = new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', sections)
-                obs.next(processSection)
-                obs.complete()
-            })
-        })
+    setupAnalyticsSection(): SidenavSectionModel {
+        var sections = this.checkAuthorizationForSections([
+            [this.operatorRepoService.userHasReadAuthorization, new SidenavPageModel('Operators', 'link', 'code', '/data/operator-repo'), this.operatorRepoService],
+            [this.flowRepoService.userHasCreateAuthorization, new SidenavPageModel('Designer', 'link', 'create', '/data/designer'), this.flowRepoService],
+            [this.flowRepoService.userHasReadAuthorization, new SidenavPageModel('Flows', 'link', 'insights', '/data/flow-repo'), this.flowRepoService],
+            [this.pipelineService.userHasReadAuthorization, new SidenavPageModel('Pipelines', 'link', 'analytics', '/data/pipelines'), this.pipelineService]
+        ])
+        var analyticsSection = new SidenavSectionModel('Analytics', 'toggle', 'bar_chart', '/data', sections)
+        return analyticsSection     
     }
 
-    setupSmartServiceSection(): Observable<SidenavSectionModel> {
-        return new Observable(obs => {
-            if(environment.smartServiceRepoUrl){
-                var allObs = []
-                allObs.push(this.checkPermissionForSidenavPage(this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Designs', 'link', 'create', '/smart-services/designs'), this.smartServiceDesignService))
-                allObs.push(this.checkPermissionForSidenavPage( this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Releases', 'link', 'storage', '/smart-services/releases'), this.smartServiceDesignService))
+    setupDevSection(): SidenavSectionModel {
+        var sections: SidenavPageModel[] = []
+        if(this.swaggerService.userHasReadAuthorization()) {
+            sections.push(new SidenavPageModel('API', 'link', 'api', '/dev/api'))
+        }
 
-                forkJoin(allObs).subscribe((sections) => {
-                    sections = sections.filter(section => !!section)
-                    var smartServiceSection = new SidenavSectionModel('Smart Services', 'toggle', 'design_services', '/smart-services', sections)
-                    obs.next(smartServiceSection)
-                    obs.complete()
-                })    
-            
-            } else {
-                obs.next(undefined)
-                obs.complete()
-            }
-        })
+        var devSection = new SidenavSectionModel('Developer', 'toggle', 'engineering', '/dev', sections)
+        return devSection
+    }
+
+    setupAdminSection(): SidenavSectionModel {
+        var sections: SidenavPageModel[] = []
+        if(this.authService.userIsAdmin()) {
+            sections = [
+                new SidenavPageModel('Authorization', 'link', 'security', '/admin/authorization'),
+                new SidenavPageModel('Timescale Rules', 'link', 'rule', '/admin/timescale-rules'),
+                new SidenavPageModel('Budgets', 'link', 'savings', '/admin/budgets'),
+            ]
+        } 
+
+        var adminSection = new SidenavSectionModel('Admin', 'toggle', 'admin_panel_settings', '/admin', sections)
+        return adminSection
+    }
+
+    setupProcessSection(): SidenavSectionModel {
+        var checks: any = [
+            [this.processRepoService.userHasCreateAuthorization, new SidenavPageModel('Designer', 'link', 'create', '/processes/designer'), this.processRepoService],
+            [this.processRepoService.userHasReadAuthorization, new SidenavPageModel('Repository', 'link', 'storage', '/processes/repository'), this.processRepoService],
+            [this.processDeploymentService.userHasReadAuthorization, new SidenavPageModel('Deployments', 'link', 'publish', '/processes/deployments'), this.processDeploymentService],
+            [this.processMonitorService.userHasReadAuthorization, new SidenavPageModel('Monitor', 'link', 'search', '/processes/monitor'), this.processMonitorService]
+        ]
+
+        if(environment.processIoUrl) {
+            checks.push([this.processIOService.userHasReadAuthorization, new SidenavPageModel('IO', 'link', 'table_chart', '/processes/io'), this.processIOService])
+        }
+
+        var sections = this.checkAuthorizationForSections(checks)
+        var processSection = new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', sections)
+        return processSection
+    }
+
+    setupSmartServiceSection(): SidenavSectionModel {
+        var sections = this.checkAuthorizationForSections([
+            [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Designs', 'link', 'create', '/smart-services/designs'), this.smartServiceDesignService],
+            [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Releases', 'link', 'storage', '/smart-services/releases'), this.smartServiceDesignService]
+        ])
+
+        var smartServiceSection = new SidenavSectionModel('Smart Services', 'toggle', 'design_services', '/smart-services', sections)
+        return smartServiceSection
     }
     
-    setupExportSection(): Observable<SidenavSectionModel> {
-        return new Observable(obs => {
-                var allObs = []
-                allObs.push(this.checkPermissionForSidenavPage(this.exportService.userHasReadAuthorization, new SidenavPageModel('Database', 'link', 'table_chart', '/exports/db'), this.exportService))
-                allObs.push(this.checkPermissionForSidenavPage(this.exportBrokerService.userHasReadAuthorization, new SidenavPageModel('Broker', 'link', 'call_split', '/exports/broker'), this.exportBrokerService))
-
-                forkJoin(allObs).subscribe((sections) => {
-                    sections = sections.filter(section => !!section)
-                    var exportSection = new SidenavSectionModel('Exports', 'toggle', 'west', '/exports', sections)
-                    obs.next(exportSection)
-                    obs.complete()
-                })    
-            
-        })
+    setupExportSection(): SidenavSectionModel {
+        var sections = this.checkAuthorizationForSections([
+            [this.exportService.userHasReadAuthorization, new SidenavPageModel('Database', 'link', 'table_chart', '/exports/db'), this.exportService],
+            [this.exportBrokerService.userHasReadAuthorization, new SidenavPageModel('Broker', 'link', 'call_split', '/exports/broker'), this.exportBrokerService]
+        ])
+        var exportSection = new SidenavSectionModel('Exports', 'toggle', 'west', '/exports', sections)
+        return exportSection
     }
 
-    setupImportSection(): Observable<SidenavSectionModel> {
-        return new Observable(obs => {
-            var allObs = []
-            allObs.push(this.checkPermissionForSidenavPage(this.importTypeService.userHasReadAuthorization, new SidenavPageModel('Types', 'link', 'api', '/imports/types/list'), this.importTypeService))
-            allObs.push(this.checkPermissionForSidenavPage(this.importInstanceSercice.userHasReadAuthorization, new SidenavPageModel('Instances', 'link', 'double_arrow', '/imports/instances'), this.importInstanceSercice))
-
-            forkJoin(allObs).subscribe((sections) => {
-                sections = sections.filter(section => !!section)
-                var exportSection = new SidenavSectionModel('Imports', 'toggle', 'east', '/imports', sections)
-                obs.next(exportSection)
-                obs.complete()
-            })    
-        })
+    setupImportSection(): SidenavSectionModel {
+        var sections = this.checkAuthorizationForSections([
+            [this.importTypeService.userHasReadAuthorization, new SidenavPageModel('Types', 'link', 'api', '/imports/types/list'), this.importTypeService],
+            [this.importInstanceSercice.userHasReadAuthorization, new SidenavPageModel('Instances', 'link', 'double_arrow', '/imports/instances'), this.importInstanceSercice]
+        ])
+        var importSection = new SidenavSectionModel('Imports', 'toggle', 'east', '/imports', sections)
+        return importSection
     }
 
     
-    setupWaitingRoom(): Observable<SidenavPageModel> {
-        return new Observable(obs => {
-            this.waitingRoomService.userHasReadAuthorization().subscribe(hasAuth => {
-                if(hasAuth) {
-                    const waitingRoom = new SidenavPageModel('Waiting Room', 'link', 'chair', '/devices/waiting-room', '');
+    setupWaitingRoom(): SidenavPageModel {
+        const waitingRoom = new SidenavPageModel('Waiting Room', 'link', 'chair', '/devices/waiting-room', '');
 
-                    const refreshWaitingRoom = () => {
+        const refreshWaitingRoom = () => {
                         this.waitingRoomService.searchDevices('', 1, 0, 'name', 'asc', false).subscribe((value) => {
                             if (value && value.total > 0) {
                                 waitingRoom.badge = String(value.total);
@@ -271,9 +217,9 @@ export class SidenavService implements OnDestroy {
                                 waitingRoom.badge = '';
                             }
                         });
-                    };
+        };
             
-                    this.waitingRoomService
+        this.waitingRoomService
                         .events(
                             (closer) => {
                                 this.waitingRoomEventCloser = closer;
@@ -289,129 +235,64 @@ export class SidenavService implements OnDestroy {
                             }
                         });
 
-                    obs.next(waitingRoom)
-                    obs.complete()
-                } else {
-                    obs.next(undefined)
-                    obs.complete()
-                }
-            })
-        })
+        return waitingRoom
     }
 
-    setupDeviceManagementSection(): Observable<SidenavSectionModel> {
-        return new Observable(obs => {
-            var allObs = []
+    setupDeviceManagementSection(): SidenavSectionModel {
+        var sections = this.checkAuthorizationForSections([
+            [this.networkService.userHasReadAuthorization, new SidenavPageModel('Networks', 'link', 'device_hub', '/devices/networks'), this.networkService],
+            [this.deviceInstanceService.userHasReadAuthorization, new SidenavPageModel('Devices', 'link', 'sensors', '/devices/deviceinstances'), this.deviceInstanceService],
+            [this.deviceGroupService.userHasReadAuthorization, new SidenavPageModel('Groups', 'link', 'group_work', '/devices/devicegroups'), this.deviceGroupService],
+            [this.locationService.userHasReadAuthorization, new SidenavPageModel('Locations', 'link', 'place', '/devices/locations'), this.locationService]
+        ])
 
-            allObs.push(this.checkPermissionForSidenavPage(this.networkService.userHasReadAuthorization, new SidenavPageModel('Networks', 'link', 'device_hub', '/devices/networks'), this.networkService))
-            allObs.push(this.setupWaitingRoom())
-            allObs.push(this.checkPermissionForSidenavPage(this.deviceInstanceService.userHasReadAuthorization, new SidenavPageModel('Devices', 'link', 'sensors', '/devices/deviceinstances'), this.deviceInstanceService))
-            allObs.push(this.checkPermissionForSidenavPage(this.deviceGroupService.userHasReadAuthorization, new SidenavPageModel('Groups', 'link', 'group_work', '/devices/devicegroups'), this.deviceGroupService))
-            allObs.push(this.checkPermissionForSidenavPage(this.locationService.userHasReadAuthorization, new SidenavPageModel('Locations', 'link', 'place', '/devices/locations'), this.locationService))
-
-            forkJoin(allObs).subscribe((sections) => {
-                    sections = sections.filter(section => !!section)
-                    var exportSection = new SidenavSectionModel('Device Management', 'toggle', 'devices', '/devices', sections)
-                    obs.next(exportSection)
-                    obs.complete()
-            }) 
-            
-        })
-    }
-
-    setupDashboard(): Observable<SidenavSectionModel> {
-        return new Observable(obs => {
-            this.dashboardService.userHasReadAuthorization().subscribe(hasAuth => {
-                if(hasAuth) {
-                    var dashboardSection = new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', [])
-                    obs.next(dashboardSection)
-                    obs.complete()
-                } else {
-                    obs.next(undefined)
-                    obs.complete()
-                }
-            })
-        })
+        if(this.waitingRoomService.userHasReadAuthorization()) {
+            sections.push(this.setupWaitingRoom())
+        }
+        var deviceSection = new SidenavSectionModel('Device Management', 'toggle', 'devices', '/devices', sections)
+        return deviceSection
     }
     
-
-    setupMetadataSection(): Observable<SidenavSectionModel> {
-        return new Observable(obs => {
-            var allObs: Observable<SidenavPageModel>[] = []
-            allObs.push(this.checkPermissionForSidenavPage(this.deviceClassService.userHasReadAuthorization, new SidenavPageModel('Device Classes', 'link', 'devices_other', '/metadata/deviceclasses'), this.deviceClassService))
-            allObs.push(this.checkPermissionForSidenavPage(this.functionService.userHasReadAuthorization, new SidenavPageModel('Functions', 'link', 'functions', '/metadata/functions'), this.functionService))
-            allObs.push(this.checkPermissionForSidenavPage(this.aspectsService.userHasReadAuthorization, new SidenavPageModel('Aspects', 'link', 'wallpaper', '/metadata/aspects'), this.aspectsService))
-            allObs.push(this.checkPermissionForSidenavPage(this.conceptsService.userHasReadAuthorization, new SidenavPageModel('Concepts', 'link', 'category', '/metadata/concepts'), this.conceptsService))
-            allObs.push(this.checkPermissionForSidenavPage(this.characteristicsService.userHasReadAuthorization, new SidenavPageModel('Characteristics', 'link', 'scatter_plot', '/metadata/characteristics'), this.characteristicsService))
-            allObs.push(this.checkPermissionForSidenavPage(this.deviceTypeService.userHasReadAuthorization, new SidenavPageModel('Device Types', 'link', 'important_devices', '/metadata/devicetypesoverview'), this.deviceTypeService))
-
-            forkJoin(allObs).subscribe((sections) => {
-                sections = sections.filter(section => !!section)
-                var exportSection = new SidenavSectionModel('Metadata', 'toggle', 'web_asset', '/metadata', sections)
-                obs.next(exportSection)
-                obs.complete()
-            })
-        })
+    setupMetadataSection(): SidenavSectionModel {
+        var sections = this.checkAuthorizationForSections([
+            [this.deviceClassService.userHasReadAuthorization, new SidenavPageModel('Device Classes', 'link', 'devices_other', '/metadata/deviceclasses'), this.deviceClassService],
+            [this.functionService.userHasReadAuthorization, new SidenavPageModel('Functions', 'link', 'functions', '/metadata/functions'), this.functionService],
+            [this.aspectsService.userHasReadAuthorization, new SidenavPageModel('Aspects', 'link', 'wallpaper', '/metadata/aspects'), this.aspectsService],
+            [this.conceptsService.userHasReadAuthorization, new SidenavPageModel('Concepts', 'link', 'category', '/metadata/concepts'), this.conceptsService],
+            [this.characteristicsService.userHasReadAuthorization, new SidenavPageModel('Characteristics', 'link', 'scatter_plot', '/metadata/characteristics'), this.characteristicsService],
+            [this.deviceTypeService.userHasReadAuthorization, new SidenavPageModel('Device Types', 'link', 'important_devices', '/metadata/devicetypesoverview'), this.deviceTypeService]
+        ])
+    
+        var metadataSection = new SidenavSectionModel('Metadata', 'toggle', 'web_asset', '/metadata', sections)
+        return metadataSection  
     }
 
-    getSections(): Observable<SidenavSectionModel[]> {
-        return this.sectionsSubject.asObservable()
-    }
+    loadSections(): SidenavSectionModel[] {
+            var sections: SidenavSectionModel[] = [
+                this.setupAnalyticsSection(),
+                this.setupDevSection(),
+                this.setupAdminSection(),
+                this.setupProcessSection(),
+                this.setupExportSection(),
+                this.setupImportSection(),
+                this.setupDeviceManagementSection(),
+                this.setupMetadataSection(),
+                this.setupSmartServiceSection()
+            ];
 
-    loadSections(): Observable<SidenavSectionModel[]> {
-        return new Observable((obs) => {
-            var allObs: Observable<SidenavSectionModel>[] = []
-            var sections: SidenavSectionModel[] = [];
-
-            var dashbaordObs: Observable<SidenavSectionModel> = this.setupDashboard() 
-            allObs.push(dashbaordObs)
-
-            var analyticsObs: Observable<SidenavSectionModel> = this.setupAnalyticsSection()
-            allObs.push(analyticsObs)
+            if(this.dashboardService.userHasReadAuthorization()) {
+                sections.push(new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', []))
+            }
             
-            var devObs: Observable<SidenavSectionModel> = this.setupDevSection()
-            allObs.push(devObs)
+            // Just keep Main sections that have at least one subsection
+            sections = sections.filter(section => section.pages.length > 0 || section.name == "Dashboard")
 
-            var adminObs: Observable<SidenavSectionModel> = this.setupAdminSection()
-            allObs.push(adminObs)
-
-            var processObs: Observable<SidenavSectionModel> = this.setupProcessSection()
-            allObs.push(processObs)
-
-            var exportObs: Observable<SidenavSectionModel> = this.setupExportSection()
-            allObs.push(exportObs)
-
-            var importObs: Observable<SidenavSectionModel> = this.setupImportSection()
-            allObs.push(importObs)
-
-            var devicesObs: Observable<SidenavSectionModel> = this.setupDeviceManagementSection()
-            allObs.push(devicesObs)
-
-            var metaObs: Observable<SidenavSectionModel> = this.setupMetadataSection()
-            allObs.push(metaObs)
-            
-            var smartObs: Observable<SidenavSectionModel> = this.setupSmartServiceSection()
-            allObs.push(smartObs)
-            
-            forkJoin(allObs).subscribe(sections2 => {
-                sections2 = sections2.filter(section => !!section)
-
-                // Just keep Main sections that have at least one subsection
-                sections2 = sections2.filter(section => section.pages.length > 0 || section.name == "Dashboard")
-
-                sections = sections.concat(sections2)
-                var sortedSectionTitles = ["Dashboard", "Smart Services", "Processes", "Exports", "Analytics", "Device Management", "Imports", "Metadata", "Admin", "Developer"]
-                sections.sort(function(section1, section2) {
-                    return sortedSectionTitles.indexOf(section1.name) - sortedSectionTitles.indexOf(section2.name)
-                })
-
-                this.sections = sections
-                obs.next(sections)
-                obs.complete()
-
-                this.sectionsSubject.next(sections)
-                this.sectionsSubject.complete()
+            var sortedSectionTitles = ["Dashboard", "Smart Services", "Processes", "Exports", "Analytics", "Device Management", "Imports", "Metadata", "Admin", "Developer"]
+            sections.sort(function(section1, section2) {
+                return sortedSectionTitles.indexOf(section1.name) - sortedSectionTitles.indexOf(section2.name)
             })
-        })
+
+            this.sections = sections
+            return sections
     }
 }

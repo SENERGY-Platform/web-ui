@@ -75,21 +75,16 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
 
     checkAuthorization() {
-        this.conceptsService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.conceptsService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
-        this.conceptsService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasCreateAuthorization = hasAuth
-        })
+        this.userHasUpdateAuthorization = this.conceptsService.userHasUpdateAuthorization()
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push("edit")
+        }
+    
+        this.userHasDeleteAuthorization = this.conceptsService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
+        this.userHasCreateAuthorization = this.conceptsService.userHasDeleteAuthorization()
     }
 
     ngAfterViewInit(): void {

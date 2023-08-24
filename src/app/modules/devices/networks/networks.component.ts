@@ -83,18 +83,16 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.networksService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.networksService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
+        this.userHasUpdateAuthorization = this.networksService.userHasUpdateAuthorization()
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push("edit")
+        }
+        
+        this.userHasDeleteAuthorization = this.networksService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
+        
         if (this.authService.userIsAdmin()) {
             this.displayedColumns.push('share')
         }

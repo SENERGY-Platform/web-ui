@@ -67,23 +67,21 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.operatorRepoService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasCreateAuthorization = hasAuth)
+        this.userHasCreateAuthorization = this.operatorRepoService.userHasCreateAuthorization()
 
         this.userId = this.auth.getUserId();
         this.initSearchAndGetOperators();
 
-        this.operatorRepoService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push('delete')
-            }
-        })
-        this.operatorRepoService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push('edit')
-            }
-        })
+        this.userHasDeleteAuthorization = this.operatorRepoService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push('delete')
+        }
+    
+
+        this.userHasUpdateAuthorization = this.operatorRepoService.userHasUpdateAuthorization()        
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push('edit')
+        }
     }
 
     ngOnDestroy() {

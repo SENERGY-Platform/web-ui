@@ -48,7 +48,7 @@ export class ProcessModelListComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.getProcesses();
-        this.processRepoService.userHasUpdateAuthorization().subscribe(hasAuth => this.userHasProcessRepoUpdateAuthorization = hasAuth)
+        this.userHasProcessRepoUpdateAuthorization = this.processRepoService.userHasUpdateAuthorization()
     }
 
     ngOnDestroy() {

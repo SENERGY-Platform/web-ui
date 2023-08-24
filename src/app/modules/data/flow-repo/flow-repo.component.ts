@@ -76,9 +76,9 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         this.initGridCols();
         this.initSearchAndGetFlows();
         this.userId = this.authService.getUserId();
-        this.flowRepoService.userHasDeleteAuthorization().subscribe(hasAuth => this.userHasDeleteAuthorization = hasAuth)
-        this.flowRepoService.userHasUpdateAuthorization().subscribe(hasAuth => this.userHasUpdateAuthorization = hasAuth)
-        this.flowEngineService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasPipelineCreateAuthorization = hasAuth)
+        this.userHasDeleteAuthorization = this.flowRepoService.userHasDeleteAuthorization()
+        this.userHasUpdateAuthorization = this.flowRepoService.userHasUpdateAuthorization()
+        this.userHasPipelineCreateAuthorization = this.flowEngineService.userHasCreateAuthorization()
     }
 
     ngOnDestroy() {

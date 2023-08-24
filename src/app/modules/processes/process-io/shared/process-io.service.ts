@@ -30,14 +30,14 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class ProcessIoService {
-    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+    authorizations: PermissionTestResponse
 
     constructor(
         private http: HttpClient, 
         private errorHandlerService: ErrorHandlerService, 
         private ladonService: LadonService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.processIoUrl, ["GET", "DELETE", "POST", "PUT"])
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.processIoUrl)
     }
 
     listVariables(limit: number, offset: number, sort: string, keyRegex: string): Observable<ProcessIoVariable[] | null> {
@@ -98,28 +98,19 @@ export class ProcessIoService {
             .get<ProcessIoVariable>(environment.processIoUrl + '/variables/'+encodeURIComponent(key))
             .pipe(catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'get', null)));
     }
-    userHasDeleteAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("DELETE")      
+    userHasDeleteAuthorization(): boolean {
+        return this.authorizations["DELETE"]      
     }
 
-    userHasUpdateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("PUT")      
+    userHasUpdateAuthorization(): boolean {
+        return this.authorizations["PUT"]   
     }
 
-    userHasCreateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("PUT")   
+    userHasCreateAuthorization(): boolean {
+        return this.authorizations["PUT"]   
     }
 
-    userHasReadAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("GET")   
+    userHasReadAuthorization(): boolean {
+        return this.authorizations["GET"]   
     }
-
-    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
-        return new Observable(obs => {
-            this.authorizationObs.subscribe(result => {
-                obs.next(result[method])
-                obs.complete()
-            })
-        })    
-    } 
 }

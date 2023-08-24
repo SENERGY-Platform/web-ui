@@ -119,19 +119,18 @@ export class ExportComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.exportService.userHasCreateAuthorization().subscribe(hasAuth => this.userHasCreateAuthorization = hasAuth)
-        this.exportService.userHasUpdateAuthorization().subscribe(hasAuth => {
-            this.userHasUpdateAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("edit")
-            }
-        })
-        this.exportService.userHasDeleteAuthorization().subscribe(hasAuth => {
-            this.userHasDeleteAuthorization = hasAuth
-            if(hasAuth) {
-                this.displayedColumns.push("delete")
-            }
-        })
+        this.userHasCreateAuthorization = this.exportService.userHasCreateAuthorization()
+
+        this.userHasUpdateAuthorization = this.exportService.userHasUpdateAuthorization()
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push("edit")
+        }
+
+        this.userHasDeleteAuthorization = this.exportService.userHasDeleteAuthorization()
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push("delete")
+        }
+    
     }
 
     deleteExport(exp: ExportModel) {
