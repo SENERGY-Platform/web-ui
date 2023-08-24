@@ -24,17 +24,34 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { AuthorizationServiceMock } from '../../../core/services/authorization.service.mock';
 import { CoreModule } from '../../../core/core.module';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { FlowRepoService } from './shared/flow-repo.service';
+import { FlowEngineService } from './shared/flow-engine.service';
+import { By } from '@angular/platform-browser';
 
 describe('FlowRepoComponent', () => {
     let component: FlowRepoComponent;
     let fixture: ComponentFixture<FlowRepoComponent>;
+    const flowRepoServiceSpy: Spy<FlowRepoService> = createSpyFromClass(FlowRepoService);
+    const flowEngineServiceSpy: Spy<FlowEngineService> = createSpyFromClass(FlowEngineService);
+    flowRepoServiceSpy.userHasDeleteAuthorization.and.returnValue(true);
+    flowRepoServiceSpy.userHasUpdateAuthorization.and.returnValue(true);
+    flowRepoServiceSpy.userHasReadAuthorization.and.returnValue(true);
+    flowEngineServiceSpy.userHasCreateAuthorization.and.returnValue(true);
+    flowEngineServiceSpy.userHasDeleteAuthorization.and.returnValue(true);
+    flowEngineServiceSpy.userHasUpdateAuthorization.and.returnValue(true);
 
     beforeEach(
         waitForAsync(() => {
             TestBed.configureTestingModule({
                 imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule],
                 declarations: [FlowRepoComponent],
-                providers: [{ provide: AuthorizationService, useClass: AuthorizationServiceMock }, DialogsService],
+                providers: [
+                    { provide: AuthorizationService, useClass: AuthorizationServiceMock }, 
+                    { provide: FlowRepoService, useValue: flowRepoServiceSpy },
+                    { provide: FlowEngineService, useValue: flowEngineServiceSpy },
+                    DialogsService
+                ],
             }).compileComponents();
         }),
     );
@@ -48,4 +65,9 @@ describe('FlowRepoComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    it('should hide delete button when not authorized', () => {
+        flowRepoServiceSpy.userHasDeleteAuthorization.and.returnValue(false);
+        expect(fixture.debugElement.query(By.css('.header'))).toBeNull();
+    })
 });

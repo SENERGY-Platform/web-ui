@@ -27,10 +27,19 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { DevicesModule } from '../devices.module';
 import { Router } from '@angular/router';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { DeviceInstancesService } from './shared/device-instances.service';
+import { of } from 'rxjs';
 
 describe('DeviceInstancesComponent', () => {
     let component: DeviceInstancesComponent;
     let fixture: ComponentFixture<DeviceInstancesComponent>;
+    const deviceInstanceServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass(DeviceInstancesService);
+    deviceInstanceServiceSpy.userHasUpdateAuthorization.and.returnValue(true);
+    deviceInstanceServiceSpy.userHasDeleteAuthorization.and.returnValue(true);
+    deviceInstanceServiceSpy.userHasReadAuthorization.and.returnValue(true);
+    deviceInstanceServiceSpy.userHasCreateAuthorization.and.returnValue(true);
+    deviceInstanceServiceSpy.getTotalCountOfDevices.and.returnValue(of(10));
 
     beforeEach(
         waitForAsync(() => {
@@ -48,6 +57,7 @@ describe('DeviceInstancesComponent', () => {
                 providers: [
                     { provide: KeycloakService, useClass: MockKeycloakService },
                     { provide: Router, useClass: RouterStub },
+                    { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy }
                 ],
             }).compileComponents();
         }),

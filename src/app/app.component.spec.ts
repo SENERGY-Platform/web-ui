@@ -24,16 +24,24 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MockKeycloakService } from './core/services/keycloak.mock';
 import { AuthorizationServiceMock } from './core/services/authorization.service.mock';
 import {AuthorizationService} from "./core/services/authorization.service";
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { SettingsDialogService } from './modules/settings/shared/settings-dialog.service';
 
 describe('AppComponent', () => {
     let component: AppComponent;
     let fixture: ComponentFixture<AppComponent>;
+    const settingsServiceSpy: Spy<SettingsDialogService> = createSpyFromClass(SettingsDialogService);
+    settingsServiceSpy.userHasUpdateAuthorization.and.returnValue(true);
 
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule],
             declarations: [AppComponent],
-            providers: [{ provide: KeycloakService, useClass: MockKeycloakService }, { provide: AuthorizationService, useClass: AuthorizationServiceMock }],
+            providers: [
+                { provide: KeycloakService, useClass: MockKeycloakService }, 
+                { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+                { provide: SettingsDialogService, useValue: settingsServiceSpy}
+            ],
         }).compileComponents();
         fixture = TestBed.createComponent(AppComponent);
         component = fixture.componentInstance;
