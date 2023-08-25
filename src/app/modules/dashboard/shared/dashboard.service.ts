@@ -24,7 +24,7 @@ import { environment } from '../../../../environments/environment';
 import { DashboardModel } from './dashboard.model';
 import { Observable, Subject } from 'rxjs';
 import { DashboardResponseMessageModel } from './dashboard-response-message.model';
-import { WidgetModel } from './dashboard-widget.model';
+import { WidgetModel, WidgetUpdatePosition } from './dashboard-widget.model';
 import { DashboardNewWidgetDialogComponent } from '../dialogs/dashboard-new-widget-dialog.component';
 import { DashboardWidgetManipulationModel } from './dashboard-widget-manipulation.model';
 import { DashboardManipulationModel } from './dashboard-manipulation.model';
@@ -71,20 +71,20 @@ export class DashboardService {
     createDashboard(dashboardName: string, index: number): Observable<DashboardModel> {
         const dash: DashboardModel = { name: dashboardName, id: '', user_id: '', widgets: [], refresh_time: 0, index };
         return this.http
-            .put<DashboardModel>(environment.dashboardServiceUrl + '/dashboard', dash)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {} as DashboardModel)));
+            .post<DashboardModel>(environment.dashboardServiceUrl + '/dashboards', dash)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'createDashboard', {} as DashboardModel)));
     }
 
     deleteDashboard(dashboardId: string): Observable<DashboardResponseMessageModel> {
         return this.http
-            .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', { message: 'error delete' })));
+            .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboards/' + dashboardId)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteDashboard', { message: 'error delete' })));
     }
 
     updateDashboard(dashboard: DashboardModel): Observable<DashboardModel> {
         return this.http
-            .post<DashboardModel>(environment.dashboardServiceUrl + '/dashboard', dashboard)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {} as DashboardModel)));
+            .put<DashboardModel>(environment.dashboardServiceUrl + '/dashboards/' + dashboard.id, dashboard)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateDashboard', {} as DashboardModel)));
     }
 
     getWidget(dashboardId: string, widgetId: string): Observable<WidgetModel> {
@@ -95,20 +95,26 @@ export class DashboardService {
 
     createWidget(dashboardId: string, widget: WidgetModel): Observable<WidgetModel> {
         return this.http
-            .put<WidgetModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget', widget)
+            .post<WidgetModel>(environment.dashboardServiceUrl + '/widgets/' + dashboardId, widget)
             .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'createWidget', {} as WidgetModel)));
     }
 
     deleteWidget(dashboardId: string, widgetId: string): Observable<DashboardResponseMessageModel> {
         return this.http
-            .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget/' + widgetId)
+            .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/' + dashboardId + '/' + widgetId)
             .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteWidget', { message: 'error delete' })));
     }
 
     updateWidget(dashboardId: string, widget: WidgetModel): Observable<DashboardResponseMessageModel> {
         return this.http
-            .post<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget', widget)
+            .put<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/' + dashboardId  + '/' + widget.id, widget)
             .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidget', { message: 'error update' })));
+    }
+
+    updateWidgetPosition(dashboardId: string, widgetPositions: WidgetUpdatePosition[]): Observable<DashboardResponseMessageModel> {
+        return this.http
+            .patch<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/positions/' + dashboardId, widgetPositions)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' })));
     }
 
     /** Dialog Services */
