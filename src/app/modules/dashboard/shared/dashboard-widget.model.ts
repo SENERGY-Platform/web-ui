@@ -39,6 +39,11 @@ export interface WidgetModel {
     rows: number;
 }
 
+export interface WidgetUpdatePosition {
+    index: number;
+    id: string;
+}
+
 export interface WidgetPropertiesModels
     extends SwitchPropertiesModel,
         AcControlPropertiesModel,

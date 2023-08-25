@@ -18,12 +18,12 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ResponsiveService} from '../../core/services/responsive.service';
 import {DashboardService} from './shared/dashboard.service';
 import {DashboardModel} from './shared/dashboard.model';
-import {WidgetModel} from './shared/dashboard-widget.model';
+import {WidgetModel, WidgetUpdatePosition} from './shared/dashboard-widget.model';
 import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
 import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
 import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
 import {DisplayGrid, GridsterConfig, GridsterItem, GridType} from 'angular-gridster2';
-import {forkJoin, Observable, of, Subscription} from 'rxjs';
+import {catchError, forkJoin, Observable, of, Subscription} from 'rxjs';
 import {DashboardTypesEnum} from './shared/dashboard-types.enum';
 import {DeviceStatusService} from '../../widgets/device-status/shared/device-status.service';
 import {moveItemInArray} from '@angular/cdk/drag-drop';
@@ -34,6 +34,7 @@ import {AirQualityService} from '../../widgets/air-quality/shared/air-quality.se
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatTabGroup} from '@angular/material/tabs';
 import {ChartsService} from "../../widgets/charts/shared/charts.service";
+import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -78,6 +79,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private chartsService: ChartsService,
         private route: ActivatedRoute,
         private router: Router,
+        private errorHandlerService: ErrorHandlerService
     ) {}
 
     ngOnInit() {
@@ -193,6 +195,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     let reorder = false;
                     let swapIndex1 = 0;
                     let swapIndex2 = 0;
+
+                    var widgetPositionUpdates: WidgetUpdatePosition[] = []
+
                     this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
                         if (reorder === false) {
                             if (widget.x !== undefined && widget.y !== undefined) {
@@ -203,17 +208,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
                                 if (gridIndex !== index) {
                                     swapIndex1 = gridIndex;
                                     swapIndex2 = index;
+
+                                    widgetPositionUpdates.push({
+                                        "id": widget.id,
+                                        "index": index
+                                    })
                                 }
                             }
                         }
                     });
+
                     if (reorder) {
                         this.reorderWidgets();
                     } else {
-                        const swap = this.dashboards[this.activeTabIndex].widgets[swapIndex1];
-                        this.dashboards[this.activeTabIndex].widgets[swapIndex1] = this.dashboards[this.activeTabIndex].widgets[swapIndex2];
-                        this.dashboards[this.activeTabIndex].widgets[swapIndex2] = swap;
-                        this.dashboardService.updateDashboard(this.dashboards[this.activeTabIndex]).subscribe();
+                        var dashboard = this.dashboards[this.activeTabIndex]
+
+                        const swap = dashboard.widgets[swapIndex1];
+                        dashboard.widgets[swapIndex1] = dashboard.widgets[swapIndex2];
+                        dashboard.widgets[swapIndex2] = swap;
+                        
+                        this.dashboardService.updateWidgetPosition(dashboard.id, widgetPositionUpdates).pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' })));
                     }
                 }, 0);
             };
