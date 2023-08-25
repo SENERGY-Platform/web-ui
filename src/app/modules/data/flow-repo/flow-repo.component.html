@@ -82,7 +82,7 @@
                                             visibility
                                         </mat-icon>
                                     </button>
-                                    <button *ngIf="userHasDeleteAuthorization && (item.share.write || item.userId === userId)" mat-icon-button (click)="deleteFlow(item)">
+                                    <button class="delete-button" *ngIf="userHasDeleteAuthorization && (item.share.write || item.userId === userId)" mat-icon-button (click)="deleteFlow(item)">
                                         <mat-icon color="warn">
                                             delete
                                         </mat-icon>

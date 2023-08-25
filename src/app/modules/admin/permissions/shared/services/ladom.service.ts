@@ -17,10 +17,54 @@
  */
 
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, map, Observable, of, ReplaySubject} from 'rxjs';
+import {Observable} from 'rxjs';
 import { AllowedMethods, AuthorizationRequest, AuthorizationRequestResponse, PermissionApiModel, permissionApiToPermission, PermissionModel, PermissionTestResponse, permissionToPermissionApi } from '../permission.model';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
+
+export var ServiceEndpoints = [
+    environment.flowRepoUrl,
+    environment.flowEngineUrl,
+    environment.flowParserUrl,
+
+    environment.permissionSearchUrl,
+    environment.permissionSearchUrl + '/v3/resources/characteristics',
+    environment.permissionSearchUrl + '/v3/resources/device-classes',
+    environment.permissionSearchUrl + '/v3/resources/functions',
+    environment.permissionSearchUrl + '/v3/resources/concepts',
+    environment.permissionSearchUrl + '/v3/resources/device-types',
+
+    environment.apiAggregatorUrl,
+    environment.deviceRepoUrl,
+    environment.iotRepoUrl,
+    environment.permissionCommandUrl,
+    environment.operatorRepoUrl,
+    environment.smartServiceRepoUrl,
+    environment.processDeploymentUrl,
+    environment.processServiceUrl,
+    environment.processRepoUrl,
+    environment.processIncidentApiUrl,
+    environment.processSchedulerUrl,
+    environment.operatorRepoUrl,
+    environment.exportService,
+    environment.brokerExportServiceUrl,
+    environment.pipelineRegistryUrl,
+    environment.swaggerUrl,
+    environment.importDeployUrl,
+    environment.importRepoUrl,
+
+    environment.deviceRepoUrl,
+    environment.deviceRepoUrl + '/aspects',
+
+    environment.deviceManagerUrl,
+    environment.deviceManagerUrl + '/device-types',
+
+    environment.processIoUrl,
+    environment.dashboardServiceUrl,
+    environment.usersServiceUrl,
+    environment.notificationsUrl,
+    environment.waitingRoomUrl
+]
 
 @Injectable({
     providedIn: 'root',
@@ -92,51 +136,8 @@ export class LadonService {
 
         var requests: AuthorizationRequest[] = []
         var methods: AllowedMethods[] = ["GET", "DELETE", "POST", "PUT", "PATCH"]
-        var serviceEndpoints = [
-                environment.flowRepoUrl,
-                environment.flowEngineUrl,
-                environment.flowParserUrl,
-
-                environment.permissionSearchUrl,
-                environment.permissionSearchUrl + '/v3/resources/characteristics',
-                environment.permissionSearchUrl + '/v3/resources/device-classes',
-                environment.permissionSearchUrl + '/v3/resources/functions',
-                environment.permissionSearchUrl + '/v3/resources/concepts',
-                environment.permissionSearchUrl + '/v3/resources/device-types',
-
-                environment.apiAggregatorUrl,
-                environment.deviceRepoUrl,
-                environment.iotRepoUrl,
-                environment.permissionCommandUrl,
-                environment.operatorRepoUrl,
-                environment.smartServiceRepoUrl,
-                environment.processDeploymentUrl,
-                environment.processServiceUrl,
-                environment.processRepoUrl,
-                environment.processIncidentApiUrl,
-                environment.processSchedulerUrl,
-                environment.operatorRepoUrl,
-                environment.exportService,
-                environment.brokerExportServiceUrl,
-                environment.pipelineRegistryUrl,
-                environment.swaggerUrl,
-                environment.importDeployUrl,
-                environment.importRepoUrl,
-
-                environment.deviceRepoUrl,
-                environment.deviceRepoUrl + '/aspects',
-
-                environment.deviceManagerUrl,
-                environment.deviceManagerUrl + '/device-types',
-
-                environment.processIoUrl,
-                environment.dashboardServiceUrl,
-                environment.usersServiceUrl,
-                environment.notificationsUrl,
-                environment.waitingRoomUrl
-        ]
             
-        serviceEndpoints.forEach(endpointURL => {
+        ServiceEndpoints.forEach(endpointURL => {
                 var endpoint = new URL(endpointURL).pathname
 
                 methods.forEach(method => {
@@ -147,7 +148,7 @@ export class LadonService {
         return new Promise((resolve, _) => {
             this.userIsAuthorized(requests).subscribe(authResponse => {
                   var allRules: Record<string, PermissionTestResponse> = {}
-                  serviceEndpoints.forEach((endpointURL, endpointIndex) => {
+                  ServiceEndpoints.forEach((endpointURL, endpointIndex) => {
                       allRules[endpointURL] = {
                           "GET": true,
                           "POST": false,

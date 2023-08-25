@@ -124,7 +124,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         this.getFlows(true);
     }
 
-    private getFlows(reset: boolean) {
+    getFlows(reset: boolean) {
         if (reset) {
             this.setRepoItemsParams(this.limitInit);
             this.reset();

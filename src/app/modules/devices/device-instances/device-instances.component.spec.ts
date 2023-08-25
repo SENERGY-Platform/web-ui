@@ -30,6 +30,7 @@ import { Router } from '@angular/router';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { DeviceInstancesService } from './shared/device-instances.service';
 import { of } from 'rxjs';
+import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 
 describe('DeviceInstancesComponent', () => {
     let component: DeviceInstancesComponent;
@@ -40,6 +41,9 @@ describe('DeviceInstancesComponent', () => {
     deviceInstanceServiceSpy.userHasReadAuthorization.and.returnValue(true);
     deviceInstanceServiceSpy.userHasCreateAuthorization.and.returnValue(true);
     deviceInstanceServiceSpy.getTotalCountOfDevices.and.returnValue(of(10));
+    deviceInstanceServiceSpy.listUsedDeviceTypeIds.and.returnValue(of())
+    const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass(DeviceTypeService)
+    deviceTypeServiceSpy.userHasPermSearchAuthorization.and.returnValue(true)
 
     beforeEach(
         waitForAsync(() => {
@@ -57,7 +61,8 @@ describe('DeviceInstancesComponent', () => {
                 providers: [
                     { provide: KeycloakService, useClass: MockKeycloakService },
                     { provide: Router, useClass: RouterStub },
-                    { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy }
+                    { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
+                    { provide: DeviceTypeService, useValue: deviceTypeServiceSpy }
                 ],
             }).compileComponents();
         }),

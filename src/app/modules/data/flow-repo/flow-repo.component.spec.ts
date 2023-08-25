@@ -28,6 +28,8 @@ import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { FlowRepoService } from './shared/flow-repo.service';
 import { FlowEngineService } from './shared/flow-engine.service';
 import { By } from '@angular/platform-browser';
+import { FlowModel } from './shared/flow.model';
+import { of } from 'rxjs';
 
 describe('FlowRepoComponent', () => {
     let component: FlowRepoComponent;
@@ -37,6 +39,20 @@ describe('FlowRepoComponent', () => {
     flowRepoServiceSpy.userHasDeleteAuthorization.and.returnValue(true);
     flowRepoServiceSpy.userHasUpdateAuthorization.and.returnValue(true);
     flowRepoServiceSpy.userHasReadAuthorization.and.returnValue(true);
+
+    var testFlow: FlowModel = {
+        _id: 'string',
+        name: "string",
+        description: "string",
+        model: {'cells': []},
+        image: "string",
+        share: {"list": true,"read": true, "write": true},
+        userId: "string",
+        dateCreated: 1,
+        dateUpdated: 1
+    }
+    flowRepoServiceSpy.getFlows.and.returnValue(of({'flows': [testFlow]}))
+
     flowEngineServiceSpy.userHasCreateAuthorization.and.returnValue(true);
     flowEngineServiceSpy.userHasDeleteAuthorization.and.returnValue(true);
     flowEngineServiceSpy.userHasUpdateAuthorization.and.returnValue(true);
@@ -67,7 +83,20 @@ describe('FlowRepoComponent', () => {
     });
 
     it('should hide delete button when not authorized', () => {
+        fixture = TestBed.createComponent(FlowRepoComponent);
         flowRepoServiceSpy.userHasDeleteAuthorization.and.returnValue(false);
-        expect(fixture.debugElement.query(By.css('.header'))).toBeNull();
+        component = fixture.componentInstance;
+        component.getFlows(true)
+        fixture.detectChanges();
+        expect(fixture.debugElement.query(By.css('.delete-button'))).toBeNull();
+    })
+
+    it('should show delete button when authorized', () => {
+        fixture = TestBed.createComponent(FlowRepoComponent);
+        flowRepoServiceSpy.userHasDeleteAuthorization.and.returnValue(true);
+        component = fixture.componentInstance;
+        component.getFlows(true)
+        fixture.detectChanges();
+        expect(fixture.debugElement.query(By.css('.delete-button'))).toBeTruthy();
     })
 });

@@ -26,12 +26,25 @@ import { AuthorizationServiceMock } from './core/services/authorization.service.
 import {AuthorizationService} from "./core/services/authorization.service";
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { SettingsDialogService } from './modules/settings/shared/settings-dialog.service';
+import { NotificationService } from './core/components/toolbar/notification/shared/notification.service';
+import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 
 describe('AppComponent', () => {
     let component: AppComponent;
     let fixture: ComponentFixture<AppComponent>;
-    const settingsServiceSpy: Spy<SettingsDialogService> = createSpyFromClass(SettingsDialogService);
-    settingsServiceSpy.userHasUpdateAuthorization.and.returnValue(true);
+    const ladonServiceSpy: Spy<LadonService> = createSpyFromClass(LadonService);
+    ladonServiceSpy.getUserAuthorizationsForURI.and.returnValue({
+        "GET": true,
+        "POST": false,
+        "DELETE": false,
+        "PUT": false,
+        "PATCH": false,
+        "HEAD": true,
+    })
+
+    const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService, {
+        observablePropsToSpyOn: ['notificationEmitter']
+    })
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -40,7 +53,8 @@ describe('AppComponent', () => {
             providers: [
                 { provide: KeycloakService, useClass: MockKeycloakService }, 
                 { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-                { provide: SettingsDialogService, useValue: settingsServiceSpy}
+                { provide: LadonService, useValue: ladonServiceSpy},
+                { provide: NotificationService, useValue: notificationServiceSpy}
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(AppComponent);
