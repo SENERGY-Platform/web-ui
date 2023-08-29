@@ -23,7 +23,7 @@ import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipu
 import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
 import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
 import {DisplayGrid, GridsterConfig, GridsterItem, GridType} from 'angular-gridster2';
-import {catchError, forkJoin, Observable, of, Subscription} from 'rxjs';
+import {catchError, forkJoin, map, Observable, of, Subscription} from 'rxjs';
 import {DashboardTypesEnum} from './shared/dashboard-types.enum';
 import {DeviceStatusService} from '../../widgets/device-status/shared/device-status.service';
 import {moveItemInArray} from '@angular/cdk/drag-drop';
@@ -218,6 +218,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         }
                     });
 
+
                     if (reorder) {
                         this.reorderWidgets();
                     } else {
@@ -227,7 +228,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         dashboard.widgets[swapIndex1] = dashboard.widgets[swapIndex2];
                         dashboard.widgets[swapIndex2] = swap;
                         
-                        this.dashboardService.updateWidgetPosition(dashboard.id, widgetPositionUpdates).pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' })));
+                        this.dashboardService.updateWidgetPosition(dashboard.id, widgetPositionUpdates).pipe(
+                            catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' }))
+                        ).subscribe();
                     }
                 }, 0);
             };
