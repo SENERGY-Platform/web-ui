@@ -211,7 +211,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
                                     widgetPositionUpdates.push({
                                         "id": widget.id,
-                                        "index": index
+                                        "index": gridIndex
                                     })
                                 }
                             }
