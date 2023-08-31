@@ -64,9 +64,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     dragging = false;
     mouseHoverHeaderIndex = -1;
     @ViewChild(MatTabGroup, { static: false }) matTabGroup!: MatTabGroup;
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false
+
+    // Authorization
+    userHasUpdateDashboardAuthorization: boolean = false
+    userHasDeleteDashboardAuthorization: boolean = false
+    userHasCreateDashboardAuthorization: boolean = false
+    userHasUpdateWidgetAuthorization: boolean = false
+    userHasDeleteWidgetAuthorization: boolean = false
+    userHasCreateWidgetAuthorization: boolean = false
+    userHasMoveWidgetAuthorization: boolean = false
 
     constructor(
         private responsiveService: ResponsiveService,
@@ -96,9 +102,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.userHasUpdateAuthorization = this.dashboardService.userHasUpdateAuthorization()
-        this.userHasDeleteAuthorization = this.dashboardService.userHasDeleteAuthorization()
-        this.userHasCreateAuthorization = this.dashboardService.userHasCreateAuthorization()
+        this.userHasUpdateDashboardAuthorization = this.dashboardService.userHasUpdateDashboardAuthorization()
+        this.userHasDeleteDashboardAuthorization = this.dashboardService.userHasDeleteDashboardAuthorization()
+        this.userHasCreateDashboardAuthorization = this.dashboardService.userHasCreateDashboardAuthorization()
+
+        this.userHasUpdateWidgetAuthorization = this.dashboardService.userHasUpdateWidgetAuthorization()
+        this.userHasDeleteWidgetAuthorization = this.dashboardService.userHasDeleteWidgetAuthorization()
+        this.userHasCreateWidgetAuthorization = this.dashboardService.userHasCreateWidgetAuthorization()
+        this.userHasMoveWidgetAuthorization = this.dashboardService.userHasMoveWidgetAuthorization()
     }
 
     initAllWidgets() {
