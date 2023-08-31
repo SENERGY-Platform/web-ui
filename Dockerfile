@@ -16,6 +16,8 @@ RUN node --max_old_space_size=8192 $(npm bin)/ng build --configuration productio
 
 ## STAGE 2: Run nginx to serve application ##
 FROM nginx
+ARG COMMIT="no commit provided"
+ENV COMMIT=${COMMIT}
 RUN apt-get update && apt-get install -y curl
 ADD build-env.sh /
 COPY --from=builder /tmp/workspace/dist/senergy-web-ui/ /usr/share/nginx/html/

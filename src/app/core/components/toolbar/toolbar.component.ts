@@ -23,6 +23,7 @@ import { SettingsDialogService } from '../../../modules/settings/shared/settings
 import { NotificationService } from './notification/shared/notification.service';
 import { NotificationModel } from './notification/shared/notification.model';
 import { ThemingService } from '../../services/theming.service';
+import { InfoService } from 'src/app/modules/info/shared/info.service';
 
 @Component({
     selector: 'senergy-toolbar',
@@ -45,6 +46,7 @@ export class ToolbarComponent implements OnInit {
         private settingsDialogService: SettingsDialogService,
         private themingService: ThemingService,
         private notificationService: NotificationService,
+        private infoService: InfoService
     ) {}
 
     ngOnInit() {
@@ -78,6 +80,10 @@ export class ToolbarComponent implements OnInit {
 
     settings(): void {
         this.settingsDialogService.openSettingsDialog();
+    }
+
+    info(): void {
+        this.infoService.openInfoDialog();
     }
 
     private initUser() {

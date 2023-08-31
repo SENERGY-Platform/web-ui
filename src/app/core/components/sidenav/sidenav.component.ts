@@ -23,6 +23,7 @@ import { SidenavService } from './shared/sidenav.service';
 import { SidenavSectionModel } from './shared/sidenav-section.model';
 import { ResponsiveService } from '../../services/responsive.service';
 import { fadeInAnimation } from '../../../animations/fade-in.animation';
+import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'senergy-sidenav',

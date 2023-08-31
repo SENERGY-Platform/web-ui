@@ -29,6 +29,7 @@ export const environment = {
     configUrl: env.configUrl || 'http://localhost',
     theme: env.theme || 'senergy',
     title: env.title || 'SENERGY',
+    commit: env.commit || '',
     /** URLs **/
     processIoUrl: '',
     smartServiceRepoUrl: '',
