@@ -46,7 +46,8 @@ export class DashboardService {
     dashboardWidgetObservable = this.widgetSubject.asObservable();
     initWidgetObservable = this.animationDoneSubject.asObservable();
 
-    authorizations: PermissionTestResponse
+    dashboardAuthorizations: PermissionTestResponse
+    widgetAuthorizations: PermissionTestResponse
 
     constructor(
         private dialog: MatDialog,
@@ -55,7 +56,8 @@ export class DashboardService {
         private dialogsService: DialogsService,
         private ladonService: LadonService
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl)
+        this.dashboardAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/dashboards')
+        this.widgetAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets')
     }
 
 
@@ -199,20 +201,35 @@ export class DashboardService {
         this.animationDoneSubject.next(widgetId);
     }
 
-    userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]      
+    userHasDeleteDashboardAuthorization(): boolean {
+        return this.dashboardAuthorizations["DELETE"]      
     }
 
-    userHasUpdateAuthorization(): boolean {
-        return this.authorizations["POST"]      
+    userHasUpdateDashboardAuthorization(): boolean {
+        return this.dashboardAuthorizations["PUT"]      
     }
 
-    userHasCreateAuthorization(): boolean {
-        return this.authorizations["PUT"]   
+    userHasCreateDashboardAuthorization(): boolean {
+        return this.dashboardAuthorizations["POST"]   
     }
 
-    userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]   
+    userHasReadDashboardAuthorization(): boolean {
+        return this.dashboardAuthorizations["GET"]   
     }
 
+    userHasDeleteWidgetAuthorization(): boolean {
+        return this.widgetAuthorizations["DELETE"]      
+    }
+
+    userHasUpdateWidgetAuthorization(): boolean {
+        return this.widgetAuthorizations["PUT"]      
+    }
+
+    userHasCreateWidgetAuthorization(): boolean {
+        return this.widgetAuthorizations["POST"]   
+    }
+
+    userHasMoveWidgetAuthorization(): boolean {
+        return this.widgetAuthorizations["PATCH"]
+    }
 }

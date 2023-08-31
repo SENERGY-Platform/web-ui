@@ -132,7 +132,8 @@ export class LadonService {
             environment.deviceManagerUrl + '/device-types',
         
             environment.processIoUrl,
-            environment.dashboardServiceUrl,
+            environment.dashboardServiceUrl + '/dashboards',
+            environment.dashboardServiceUrl + '/widgets',
             environment.usersServiceUrl,
             environment.notificationsUrl,
             environment.waitingRoomUrl

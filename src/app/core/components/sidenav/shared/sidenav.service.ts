@@ -280,7 +280,7 @@ export class SidenavService implements OnDestroy {
                 this.setupSmartServiceSection()
             ];
 
-            if(this.dashboardService.userHasReadAuthorization()) {
+            if(this.dashboardService.userHasReadDashboardAuthorization()) {
                 sections.push(new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', []))
             }
             

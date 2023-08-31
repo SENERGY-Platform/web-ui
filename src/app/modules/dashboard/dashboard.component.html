@@ -29,7 +29,7 @@
             <div fxFill fxLayout="column" *ngIf="dashboard === dashboards[activeTabIndex]">
 
                 <div *ngIf="zoomedWidgetIndex === null" fxLayout="row" fxLayoutAlign="end center">
-                    <button *ngIf="userHasUpdateAuthorization" mat-icon-button [matMenuTriggerFor]="refresh" color="accent"
+                    <button *ngIf="userHasUpdateDashboardAuthorization" mat-icon-button [matMenuTriggerFor]="refresh" color="accent"
                             matTooltip="set widget refresh time">
                         <mat-icon>refresh</mat-icon>
                     </button>
@@ -51,26 +51,26 @@
                                 [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh
                         </button>
                     </mat-menu>
-                    <button *ngIf="userHasUpdateAuthorization" (click)="moveDashboard(true)" mat-icon-button color="accent"
+                    <button *ngIf="userHasUpdateDashboardAuthorization" (click)="moveDashboard(true)" mat-icon-button color="accent"
                             [disabled]="activeTabIndex === 0"
                             matTooltip="move dashboard left">
                         <mat-icon>keyboard_arrow_left</mat-icon>
                     </button>
-                    <button *ngIf="userHasUpdateAuthorization" (click)="moveDashboard(false)" mat-icon-button color="accent"
+                    <button *ngIf="userHasUpdateDashboardAuthorization" (click)="moveDashboard(false)" mat-icon-button color="accent"
                             [disabled]="activeTabIndex === dashboards.length - 1"
                             matTooltip="move dashboard right">
                         <mat-icon>keyboard_arrow_right</mat-icon>
                     </button>
-                    <button *ngIf="userHasUpdateAuthorization" (click)="toggleDragMode()" mat-icon-button [color]="inDragMode ? 'warn' : 'accent'"
+                    <button *ngIf="userHasMoveWidgetAuthorization" (click)="toggleDragMode()" mat-icon-button [color]="inDragMode ? 'warn' : 'accent'"
                             [disabled]="dragModeDisabled"
                             matTooltip="reorder widgets">
                         <mat-icon>open_with</mat-icon>
                     </button>
-                    <button *ngIf="userHasUpdateAuthorization" (click)="openEditDashboardDialog()" mat-icon-button color="accent"
+                    <button *ngIf="userHasUpdateDashboardAuthorization" (click)="openEditDashboardDialog()" mat-icon-button color="accent"
                             matTooltip="edit dashboard">
                         <mat-icon>edit</mat-icon>
                     </button>
-                    <button *ngIf="userHasDeleteAuthorization" (click)="openDeleteDashboardDialog()" mat-icon-button color="accent"
+                    <button *ngIf="userHasDeleteDashboardAuthorization" (click)="openDeleteDashboardDialog()" mat-icon-button color="accent"
                             [disabled]="dashboards.length <= 1"
                             matTooltip="delete dashboard">
                         <mat-icon>delete</mat-icon>
@@ -79,7 +79,7 @@
 
                 <div *ngIf="zoomedWidgetIndex !== null">
                     <div class="zoomed-widget">
-                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization"
+                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization" [userHasUpdateAuthorization]="userHasUpdateWidgetAuthorization"
                                         [dashboardId]="dashboard.id"
                                         [widget]="dashboards[activeTabIndex].widgets[zoomedWidgetIndex]"
                                         [zoom]="true"></senergy-widget>
@@ -87,18 +87,18 @@
 
                 </div>
 
-                <gridster *ngIf="zoomedWidgetIndex === null" [options]="options" id="gridster" [ngClass]="{'gridster-with-button': userHasCreateAuthorization, 'gridster-without-button': !userHasCreateAuthorization}">
+                <gridster *ngIf="zoomedWidgetIndex === null" [options]="options" id="gridster" [ngClass]="{'gridster-with-button': userHasCreateWidgetAuthorization, 'gridster-without-button': !userHasCreateWidgetAuthorization}">
                     <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets"
                                    [ngClass]="inDragMode ? 'highlight color-sidenav' : ''"
                                    class="mat-elevation-z1">
-                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboard.id" [widget]="widget" [zoom]="false"></senergy-widget>
+                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization" [userHasUpdateAuthorization]="userHasUpdateWidgetAuthorization" [dashboardId]="dashboard.id" [widget]="widget" [zoom]="false"></senergy-widget>
                     </gridster-item>
                 </gridster>
             </div>
 
         </mat-tab>
 
-        <mat-tab disabled *ngIf="dashboardsRetrieved && userHasCreateAuthorization">
+        <mat-tab disabled *ngIf="dashboardsRetrieved && userHasCreateDashboardAuthorization">
             <ng-template mat-tab-label>
                 <button (click)="openAddDashboardDialog()" mat-icon-button>
                     <mat-icon>add</mat-icon>
@@ -109,7 +109,7 @@
     </mat-tab-group>
 </div>
 
-<button *ngIf="zoomedWidgetIndex === null && userHasCreateAuthorization" mat-fab class="fab" matTooltip="Add new widget"
+<button *ngIf="zoomedWidgetIndex === null && userHasCreateWidgetAuthorization" mat-fab class="fab" matTooltip="Add new widget"
         (click)="openAddWidgetDialog()">
     <mat-icon>add</mat-icon>
 </button>
