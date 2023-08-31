@@ -1,0 +1,14 @@
+<div id="container">
+    <h2 mat-dialog-title>Info</h2>
+
+    <mat-dialog-content>
+        <mat-form-field class="full-width" color="accent">
+            <mat-label>Version</mat-label>
+            <input type="text" matInput placeholder="Version" [value]="commit" readonly>
+        </mat-form-field>
+    </mat-dialog-content>
+    
+    <mat-dialog-actions fxLayoutAlign="end center">
+        <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+    </mat-dialog-actions>
+</div>

@@ -33,6 +33,8 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64
+          build-args: |
+            COMMIT=${{ github.sha }}
           push: true
           tags: |
             smartenergyplatform/web-ui:prod

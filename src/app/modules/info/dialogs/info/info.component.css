@@ -1,0 +1,7 @@
+#container {
+    min-width: 500px;
+}
+
+mat-form-field {
+    width: 100%
+}
