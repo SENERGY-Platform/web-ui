@@ -89,7 +89,7 @@ export class DashboardService {
 
     getWidget(dashboardId: string, widgetId: string): Observable<WidgetModel> {
         return this.http
-            .get<WidgetModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget/' + widgetId)
+            .get<WidgetModel>(environment.dashboardServiceUrl + '/widgets/' + dashboardId + '/' + widgetId)
             .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'getWidget', {} as WidgetModel)));
     }
 
