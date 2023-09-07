@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ChartSelectEvent, GoogleChartComponent,} from 'ng2-google-charts';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {ElementSizeService} from '../../../core/services/element-size.service';
@@ -45,7 +45,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     private resizeTimeout = 0;
     private timeRgx = /(\d+)(ms|s|months|m|h|d|w|y)/;
 
-    @ViewChild('chartExport', {static: false}) chartExport!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -56,10 +55,22 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     onResize() {
         if (this.resizeTimeout === 0) {
             this.resizeTimeout = window.setTimeout(() => {
-                this.resizeProcessInstancesStatusChart();
+                this.resizeChart()
+                if (this.chartExportData.dataTable[0].length > 0) {
+                    this.chartExport.draw();
+                }
                 this.resizeTimeout = 0;
             }, 500);
         }
+    }
+
+    // Use a setter for the chart which will get called when then ngif from ready evaluates to true
+    // This is needed so the element is not undefined when called later to draw
+    private chartExport!: GoogleChartComponent;
+    @ViewChild('chartExport', {static: false}) set content(content: GoogleChartComponent) {
+       if(content) { // initially setter gets called with undefined
+           this.chartExport = content;
+       }
     }
 
     constructor(
@@ -67,17 +78,17 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         private chartsExportService: ChartsExportService,
         private elementSizeService: ElementSizeService,
         private dashboardService: DashboardService,
-        private errorHandlerService: ErrorHandlerService,
+        private errorHandlerService: ErrorHandlerService
     ) {
-    }
-
-    ngOnInit() {
-        this.scheduleRefresh();
     }
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
         this.chartsService.releaseResources(this.chartExport);
+    }
+
+    ngOnInit(): void {
+        this.scheduleRefresh();
     }
 
     edit() {
@@ -106,18 +117,47 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         }
     }
 
-    private resizeProcessInstancesStatusChart() {
+    private calculateWidthOfLeftChartArea(): number {
+        // The width of the left area of the chart must increase when the number of digits on the y axis increase
+        var maxValue = this.chartExportData.dataTable[1][1]
+        var numberOfDigits = (''+maxValue).split(".")[0].length
+        
+        if(this.chartExportData.options?.vAxes?.[0]?.title == null) {
+            // No Y Axis
+            if(numberOfDigits == 1) {
+                return 0
+            } else if(numberOfDigits <= 4) {
+                return 10
+            } else {
+                return 15
+            }
+        } else {
+            if(numberOfDigits == 1) {
+                return 15
+            } else if(numberOfDigits <= 4) {
+                return 20
+            } else {
+                return 25
+            }
+        }
+    }
+    
+    private resizeChart() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5);
+        var leftAreaWidth = this.calculateWidthOfLeftChartArea() / 100 * element.width
+
         if (this.chartExportData.options !== undefined) {
             this.chartExportData.options.height = element.height;
             this.chartExportData.options.width = element.width;
             if (this.chartExportData.options.chartArea) {
                 this.chartExportData.options.chartArea.height = element.heightPercentage;
-                this.chartExportData.options.chartArea.width = element.widthPercentage;
+                this.chartExportData.options.chartArea.width = (element.width - leftAreaWidth);
             }
-            if (this.chartExportData.dataTable[0].length > 0) {
-                this.chartExport.draw();
+
+            if(leftAreaWidth != 0) {
+                this.chartExportData.options.chartArea!.left = leftAreaWidth
             }
+            //console.log(this.chartExportData.options.chartArea)
         }
     }
 
@@ -158,9 +198,10 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                             this.chartExportData.options.zoomStartTime = new Date(end - (range / (this.widget.properties.zoomTimeFactor || 2)));
                         }
                     }
-                    setTimeout(() => this.chartExport?.draw(), 0);
                     this.ready = true;
                     this.refreshing = false;
+                    this.resizeChart()
+                    this.chartExport?.draw()
                 }
                 this.size = (this.chartExportData?.dataTable?.length || 0) * ((this.chartExportData?.dataTable?.[0]?.length || 0) - 1);
                 if (this.size > this.sizeLimit) {
