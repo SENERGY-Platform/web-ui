@@ -15,6 +15,7 @@ var entryFactory = require('bpmn-js-properties-panel/lib/factory/EntryFactory');
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
 var extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper');
 var ImplementationTypeHelper = require('bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper');
+var panelUtils =  require('bpmn-js-properties-panel/lib/Utils');
 const {property} = require("lodash");
 const typeString = "https://schema.org/Text";
 const typeInteger = "https://schema.org/Integer";
@@ -23,12 +24,12 @@ const typeBoolean = "https://schema.org/Boolean";
 const typeList = "https://schema.org/ItemList";
 const typeStructure = "https://schema.org/StructuredValue";
 
-function SmartServicePropertiesProvider(eventBus, canvas, bpmnFactory, elementRegistry, elementTemplates, bpmnjs, replace, selection, modeling, translate) {
+function SmartServicePropertiesProvider(eventBus, canvas, bpmnFactory, elementFactory, autoPlace, elementRegistry, elementTemplates, bpmnjs, replace, selection, modeling, translate) {
     this.getTabs = function(element) {
         var camunda = new CamundaProvider(eventBus, canvas, bpmnFactory, elementRegistry, elementTemplates, translate);
         var camundaTabs = camunda.getTabs(element);
         camundaTabs[0].groups.unshift(createDescriptionGroup(element));
-        camundaTabs[0].groups.unshift(createTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
+        camundaTabs[0].groups.unshift(createTaskGroup(element, bpmnjs, eventBus, bpmnFactory, elementFactory, autoPlace, replace, selection));
         camundaTabs[0].groups.unshift(createSmartServiceInputsGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
         return camundaTabs;
     };
@@ -80,14 +81,14 @@ function createDescriptionGroup(){
     return descGroup;
 }
 
-function createTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection){
+function createTaskGroup(element, bpmnjs, eventBus, bpmnFactory, elementFactory, autoPlace, replace, selection){
     var group = {
         id: 'task',
         label: 'Smart-Service Task',
         entries: [],
         enabled: isTask
     };
-    createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, elementFactory, autoPlace, replace, selection);
     return group;
 }
 
@@ -128,7 +129,7 @@ function createSmartServiceInputEntries(group, element, bpmnjs, eventBus, bpmnFa
     });
 }
 
-function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
+function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, elementFactory, autoPlace, replace, selection) {
     var refresh = function () {
         eventBus.fire('elements.changed', {elements: [element]});
     };
@@ -138,6 +139,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
         html: "<button class='bpmn-iot-button' data-action='editSmartServiceTask'>Edit Smart-Service Task</button>",
         editSmartServiceTask: function (element, node) {
             const taskId = element.id;
+
             bpmnjs.designerCallbacks.openTaskEditDialog(getTaskInfoFromElement(element), element, function (taskInfo) {
                 //set smart-service inputs
                 var startElement = findStartElement(element);
@@ -152,9 +154,16 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                     setExtentionsElement(bpmnjs, startElement.businessObject, formData);
                 }
 
+                let processDeploymentDoneEventName = taskId+"_done_event";
+                let processDeploymentDoneEventNameRef = "${"+processDeploymentDoneEventName+"}";
+                let processDeploymentDoneEvent = findMessageEventElement(element, processDeploymentDoneEventNameRef);
+                if (taskInfo.topic === "process_deployment" && !processDeploymentDoneEvent){
+                    createIntermediateCatchMessageEvent(bpmnFactory, elementFactory, autoPlace, replace, element, processDeploymentDoneEventNameRef)
+                }
+
                 toExternalServiceTask(bpmnFactory, replace, selection, element, function (serviceTask, element) {
                     serviceTask.topic = taskInfo.topic;
-                    serviceTask.name = taskInfo.name
+                    serviceTask.name = taskInfo.name;
 
                     var inputs = [];
                     taskInfo.inputs?.forEach(input => {
@@ -183,7 +192,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                     switch (serviceTask.topic){
                         case "process_deployment":
                             outputs.push(createTextOutputParameter(bpmnjs, taskId+"_process_deployment_id", "${process_deployment_id}"));
-                            outputs.push(createTextOutputParameter(bpmnjs, taskId+"_done_event", "${done_event}"));
+                            outputs.push(createTextOutputParameter(bpmnjs, processDeploymentDoneEventName, "${done_event}"));
                             let fogInput = inputs.find(value => value.name === "process_deployment.prefer_fog_deployment");
                             if(fogInput && fogInput.value === "true") {
                                 outputs.push(createTextOutputParameter(bpmnjs, taskId+"_is_fog_deployment", "${is_fog_deployment}"));
@@ -469,6 +478,35 @@ var findStartElement = function (element, done){
     return null;
 }
 
+function findMessageEventElement(element, msgRefName, done) {
+    if(!done) {
+        done = [];
+    }
+    if (done.indexOf(element) !== -1) {
+        return null;
+    }
+    done.push(element);
+    if(element.outgoing && element.outgoing.length) {
+        for (let index = 0; index < element.outgoing.length; index++) {
+            const outgoing = element.outgoing[index].target;
+            if (outgoing.businessObject.$type === "bpmn:IntermediateCatchEvent" &&
+                outgoing.businessObject.eventDefinitions &&
+                outgoing.businessObject.eventDefinitions[0] &&
+                outgoing.businessObject.eventDefinitions[0].messageRef &&
+                outgoing.businessObject.eventDefinitions[0].messageRef.name === msgRefName) {
+                return outgoing
+            }
+
+            var sub = findMessageEventElement(outgoing, msgRefName, done);
+            if(sub) {
+                return sub;
+            }
+        }
+    }
+
+    return null;
+}
+
 var setExtentionsElement = function (bpmnjs, parent, child) {
     var moddle = bpmnjs.get('moddle');
     parent.extensionElements = moddle.create('bpmn:ExtensionElements', {
@@ -576,10 +614,38 @@ var createProperties = function (bpmnjs, properties) {
     });
 }
 
+function createIntermediateCatchMessageEvent(bpmnFactory, elementFactory, autoPlace, replace, parent, topic){
+    let element = elementFactory.createShape(assign({ type: "bpmn:IntermediateCatchEvent", eventDefinitionType: 'bpmn:MessageEventDefinition'}));
+
+    //find existing msg ref
+    let msgRef = null
+    parent.businessObject.$parent.$parent.rootElements.forEach(function (e) {
+        if(e.name === topic) {
+            msgRef = e;
+        }
+    })
+
+    //create msgRef if none exist
+    if (!msgRef) {
+        msgRef = bpmnFactory.create("bpmn:Message")
+        msgRef.name = topic;
+        msgRef.id = panelUtils.nextId("Message_");
+        parent.businessObject.$parent.$parent.rootElements.push(msgRef);
+    }
+
+    element.businessObject.eventDefinitions[0].messageRef = msgRef;
+
+    autoPlace.append(parent, element);
+}
+
+
+
 SmartServicePropertiesProvider.$inject = [
     'eventBus',
     'canvas',
     'bpmnFactory',
+    'elementFactory',
+    'autoPlace',
     'elementRegistry',
     'elementTemplates',
     'bpmnjs',
