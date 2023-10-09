@@ -299,7 +299,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             editor.getSession().setMode('ace/mode/javascript');
             editor.setOptions({
                 enableBasicAutocompletion: true,
-                enableLiveAutocompletion: true
+                enableLiveAutocompletion: true,
+                minLines: 20,
+                maxLines: Infinity
             });
             editor.setValue(this.getChunkedDataFromInputs(inputNamePrefix, this.result.inputs, ''));
         } else {
@@ -313,7 +315,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             editor.getSession().setMode('ace/mode/json');
             editor.setOptions({
                 enableBasicAutocompletion: true,
-                enableLiveAutocompletion: true
+                enableLiveAutocompletion: true,
+                minLines: 20,
+                maxLines: Infinity
             });
             editor.setValue(this.getModuleDataFromInputs( this.result.inputs));
         } else {

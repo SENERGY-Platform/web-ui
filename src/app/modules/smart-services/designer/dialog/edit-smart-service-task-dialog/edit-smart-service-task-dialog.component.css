@@ -33,6 +33,8 @@
 
 .edit-smart-service-task-dialog {
     padding-bottom: 15px;
+    width: 100vw;
+    max-width: 100%;
 }
 
 .process-start-input-delete {
