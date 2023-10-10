@@ -249,7 +249,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                         that.setAceJsonCompleter(callback);
                         return;
                     case 'ace/mode/javascript':
-                        completer.getCompletions(_, session, pos, ___, callback);
+                        that.setAceJsCompleter(session, pos, callback);
                         return;
                     default:
                         console.error('unknown ace editor mode:', session.$modeId);
@@ -292,6 +292,65 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         );
         callback(null, completers);
     }
+
+    private setAceJsCompleter(session: any, pos: any, callback: any){
+        let that = this;
+        completer.getCompletions(null, session, pos, null, function (_: any, completers: { caption: string, value: string, meta: string }[]) {
+            if (!completers) {
+                completers = [];
+            }
+
+            completers.push({
+                caption: 'filter criteria struct',
+                value: 'var criteria = '+JSON.stringify({
+                    aspect_id: "",
+                    device_class_id: "",
+                    function_id: "",
+                    interaction: ""
+                } as Criteria)+'/*remove unused fields*/',
+                meta: 'static'
+            })
+
+            that.functions.forEach(value => {
+                completers.push({
+                    caption: 'function: '+value.name,
+                    value: `"${value.id}"/*${value.name}*/`,
+                    meta: 'static'
+                })
+            })
+
+            that.deviceClasses.forEach(value => {
+                completers.push({
+                    caption: 'device-class: '+value.name,
+                    value: `"${value.id}"/*${value.name}*/`,
+                    meta: 'static'
+                })
+            })
+
+            that.nestedAspects.forEach((list, _) => {
+                list.forEach(value => {
+                    completers.push({
+                        caption: 'aspect: '+value.name,
+                        value: `"${value.id}"/*${value.name}*/`,
+                        meta: 'static'
+                    })
+                })
+            })
+
+            let interactions: String[] = ["event", "request", "event+request"];
+            interactions.forEach(value => {
+                completers.push({
+                    caption: 'interaction: '+value,
+                    value: `"${value}"`,
+                    meta: 'static'
+                })
+            })
+
+
+            callback(null, completers);
+        });
+    }
+
 
     private setAceJsEditor(element: ElementRef<HTMLElement>, inputNamePrefix: string){
         if(element) {
