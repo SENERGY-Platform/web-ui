@@ -35,6 +35,10 @@
             <mat-label>Description</mat-label>
             <input matInput [(ngModel)]="operator.description" placeholder="Description" [disabled]="!operator.editable">
         </mat-form-field>
+        <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-label>Cost</mat-label>
+            <input matInput [(ngModel)]="operator.cost" placeholder="0" [disabled]="!operator.editable" type="number" [min]="0">
+        </mat-form-field>
         <mat-form-field fxFlex color="accent" appearance="outline">
             <mat-select placeholder="Deployment type" [(ngModel)]="operator.deploymentType" [disabled]="!operator.editable">
                 <mat-option  value="cloud">cloud</mat-option>

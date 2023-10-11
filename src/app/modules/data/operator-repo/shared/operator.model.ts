@@ -26,6 +26,7 @@ export interface OperatorModel {
     outputs: IOModel[] | undefined;
     config_values: IOModel[] | undefined;
     editable: boolean | undefined;
+    cost?: number;
 }
 
 export interface IOModel {
