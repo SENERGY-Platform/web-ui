@@ -20,7 +20,7 @@ import {Router, RouterModule} from '@angular/router';
 import {ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FlexModule} from '@angular/flex-layout';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -65,7 +65,8 @@ describe('ImportInstancesComponent', () => {
     importInstancesServiceSpy.userHasUpdateAuthorization.and.returnValue(of(true))
     importInstancesServiceSpy.userHasDeleteAuthorization.and.returnValue(of(true))
     importInstancesServiceSpy.userHasCreateAuthorization.and.returnValue(of(true))
-
+    importInstancesServiceSpy.getTotalCountOfInstances.and.returnValue(of(0))
+    
     const deleteDialogServiceSpy: Spy<DialogsService> = createSpyFromClass(DialogsService);
     deleteDialogServiceSpy.openDeleteDialog.and.returnValue({afterClosed: () => of(true)});
 
@@ -110,7 +111,7 @@ describe('ImportInstancesComponent', () => {
                 {provide: DialogsService, useValue: deleteDialogServiceSpy},
                 {provide: Router, useValue: routerSpy},
                 {provide: SearchbarService, useValue: searchbarSpy},
-                {provide: MatDialog, useValue: dialogSpy},
+                {provide: MatDialog, useValue: dialogSpy}
             ],
         }).compileComponents();
     });

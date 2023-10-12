@@ -21,7 +21,7 @@ import {Router, RouterModule} from '@angular/router';
 import {ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
 import {FlexModule} from '@angular/flex-layout';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatButtonModule} from '@angular/material/button';
@@ -64,7 +64,8 @@ describe('ImportTypesComponent', () => {
     importTypesServiceSpy.userHasUpdateAuthorization.and.returnValue(of(true))
     importTypesServiceSpy.userHasDeleteAuthorization.and.returnValue(of(true))
     importTypesServiceSpy.userHasCreateAuthorization.and.returnValue(of(true))
-
+    importTypesServiceSpy.getTotalCountOfTypes.and.returnValue(of(0))
+    
     const deleteDialogServiceSpy: Spy<DialogsService> = createSpyFromClass(DialogsService);
     deleteDialogServiceSpy.openDeleteDialog.and.returnValue({afterClosed: () => of(true)});
 
@@ -115,7 +116,7 @@ describe('ImportTypesComponent', () => {
                 {provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy},
                 {provide: SearchbarService, useValue: searchbarSpy},
                 {provide: Router, useValue: routerSpy},
-                {provide: MatDialog, useValue: dialogSpy},
+                {provide: MatDialog, useValue: dialogSpy}
             ],
         }).compileComponents();
     });
