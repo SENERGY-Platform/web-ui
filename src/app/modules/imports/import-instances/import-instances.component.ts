@@ -66,6 +66,11 @@ export class ImportInstancesComponent implements OnInit {
 
     ngOnInit(): void {
         this.initSearch();
+        this.getTotalNumberOfTypes();
+    }
+
+    getTotalNumberOfTypes() {
+        this.importInstancesService.getTotalCountOfInstances().subscribe(totalCount => this.totalCount = totalCount);
     }
 
     private initSearch() {

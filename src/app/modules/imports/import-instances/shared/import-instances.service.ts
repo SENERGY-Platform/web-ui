@@ -16,11 +16,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ImportInstancesModel } from './import-instances.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 
 @Injectable({
     providedIn: 'root',
@@ -30,7 +31,8 @@ export class ImportInstancesService {
 
     constructor(
         private http: HttpClient, 
-        private ladonService: LadonService
+        private ladonService: LadonService,
+        private errorHandlerService: ErrorHandlerService
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.importDeployUrl)
     }
@@ -87,5 +89,18 @@ export class ImportInstancesService {
 
     userHasReadAuthorization(): boolean {
         return this.authorizations["GET"]   
+    }
+
+    getTotalCountOfInstances(): Observable<any> {
+        return this.http
+        .get(environment.importDeployUrl + '/total/instances')
+        .pipe(
+            catchError(
+                this.errorHandlerService.handleError(
+                    ImportInstancesService.name,
+                    'getTotalCountOfInstances',
+                ),
+            ),
+        );
     }
 }

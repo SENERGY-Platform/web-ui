@@ -17,12 +17,13 @@ import { Injectable, OnInit } from '@angular/core';
 import { ImportTypeContentVariableModel, ImportTypeModel, ImportTypePermissionSearchModel } from './import-types.model';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { delay } from 'rxjs/operators';
 import { ExportValueModel } from '../../../exports/shared/export.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 
 @Injectable({
     providedIn: 'root',
@@ -41,7 +42,8 @@ export class ImportTypesService {
 
     constructor(
         private http: HttpClient, 
-        private ladonService: LadonService
+        private ladonService: LadonService,
+        private errorHandlerService: ErrorHandlerService
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.importRepoUrl)
     }
@@ -165,4 +167,17 @@ export class ImportTypesService {
     userHasReadAuthorization(): boolean {
         return this.authorizations["GET"]   
     } 
+
+    getTotalCountOfTypes(): Observable<any> {
+        return this.http
+        .get(environment.permissionSearchUrl + '/v3/total/import-types')
+        .pipe(
+            catchError(
+                this.errorHandlerService.handleError(
+                    ImportTypesService.name,
+                    'getTotalCountOfTypes',
+                ),
+            ),
+        );
+    }
 }

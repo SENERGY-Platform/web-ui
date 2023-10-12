@@ -63,7 +63,12 @@ export class ImportTypesComponent implements OnInit {
 
     ngOnInit(): void {
         this.initSearch();
-        this.checkAuthorization()
+        this.checkAuthorization();
+        this.getTotalNumberOfTypes();
+    }
+
+    getTotalNumberOfTypes() {
+        this.importTypesService.getTotalCountOfTypes().subscribe(totalCount => this.totalCount = totalCount);
     }
 
     ngAfterViewInit(): void {
