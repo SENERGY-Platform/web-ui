@@ -154,11 +154,14 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, elemen
                     setExtentionsElement(bpmnjs, startElement.businessObject, formData);
                 }
 
-                let processDeploymentDoneEventName = taskId+"_done_event";
-                let processDeploymentDoneEventNameRef = "${"+processDeploymentDoneEventName+"}";
-                let processDeploymentDoneEvent = findMessageEventElement(element, processDeploymentDoneEventNameRef);
-                if (taskInfo.topic === "process_deployment" && !processDeploymentDoneEvent){
-                    createIntermediateCatchMessageEvent(bpmnFactory, elementFactory, autoPlace, replace, element, processDeploymentDoneEventNameRef)
+                let doneEventName = taskId+"_done_event";
+                let doneEventNameRef = "${"+doneEventName+"}";
+                let doneEvent = findMessageEventElement(element, doneEventNameRef);
+                if (taskInfo.topic === "process_deployment" && !doneEvent){
+                    createIntermediateCatchMessageEvent(bpmnFactory, elementFactory, autoPlace, replace, element, doneEventNameRef)
+                }
+                if (taskInfo.topic === "device_repository" && !doneEvent){
+                    createIntermediateCatchMessageEvent(bpmnFactory, elementFactory, autoPlace, replace, element, doneEventNameRef)
                 }
 
                 toExternalServiceTask(bpmnFactory, replace, selection, element, function (serviceTask, element) {
@@ -192,7 +195,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, elemen
                     switch (serviceTask.topic){
                         case "process_deployment":
                             outputs.push(createTextOutputParameter(bpmnjs, taskId+"_process_deployment_id", "${process_deployment_id}"));
-                            outputs.push(createTextOutputParameter(bpmnjs, processDeploymentDoneEventName, "${done_event}"));
+                            outputs.push(createTextOutputParameter(bpmnjs, doneEventName, "${done_event}"));
                             let fogInput = inputs.find(value => value.name === "process_deployment.prefer_fog_deployment");
                             if(fogInput && fogInput.value === "true") {
                                 outputs.push(createTextOutputParameter(bpmnjs, taskId+"_is_fog_deployment", "${is_fog_deployment}"));
@@ -211,6 +214,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, elemen
                         case "device_repository":
                             outputs.push(createTextOutputParameter(bpmnjs, taskId+"_device_group_id", "${device_group_id}"));
                             outputs.push(createTextOutputParameter(bpmnjs, taskId+"_device_group_selection", "${device_group_iot_option}"));
+                            outputs.push(createTextOutputParameter(bpmnjs, doneEventName, "${done_event}"));
                             break;
                     }
 
