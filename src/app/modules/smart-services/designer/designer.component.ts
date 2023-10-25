@@ -252,14 +252,18 @@ export class SmartServiceDesignerComponent implements OnInit {
         this.dialogService.openInputDialog('Release Name and Description', {name: design.name, description: design.description}, ['name'])
             .afterClosed()
             .subscribe((result: {name: string; description: string}) => {
-                this.releaseService.createRelease({design_id: design.id, name: result.name, description: result.description}).subscribe(value => {
-                    if(value) {
-                        this.snackBar.open('Release created.', undefined, { duration: 2000 });
-                    } else {
-                        this.snackBar.open('Error while creating a release !', 'close', { panelClass: 'snack-bar-error' });
-                    }
+                if (result) {
+                    this.releaseService.createRelease({design_id: design.id, name: result.name, description: result.description}).subscribe(value => {
+                        if(value) {
+                            this.snackBar.open('Release created.', undefined, { duration: 2000 });
+                        } else {
+                            this.snackBar.open('Error while creating a release !', 'close', { panelClass: 'snack-bar-error' });
+                        }
+                        then();
+                    });
+                } else {
                     then();
-                });
+                }
             });
     }
 
