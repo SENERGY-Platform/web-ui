@@ -18,7 +18,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {TimescaleRuleModel} from './timescale-rule.model';
+import {TimescaleRuleModel, TimescaleRuleTemplateModel} from './timescale-rule.model';
 import {catchError, map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
@@ -50,10 +50,40 @@ export class TimescaleRulesService {
         );
     }
 
+    createRuleFromTemplate(r: TimescaleRuleModel): Observable<TimescaleRuleModel | null> {
+        return this.http.post<TimescaleRuleModel>(environment.timescaleRuleManagerUrl + '/template-rules', r).pipe(
+            catchError((error: HttpErrorResponse) => this.errorHandlerService.handleErrorWithSnackBar('Error creating rule: ' + this.formatErr(error.error), TimescaleRulesService.name, 'createRule()', null)(error)),
+        );
+    }
+
     updateRule(r: TimescaleRuleModel): Observable<boolean> {
         return this.http.put(environment.timescaleRuleManagerUrl + '/rules/' + r.id, r).pipe(
             map((_) => true),
             catchError((error: HttpErrorResponse) => this.errorHandlerService.handleErrorWithSnackBar('Error updating rule: ' + this.formatErr(error.error), TimescaleRulesService.name, 'updateRule()', false)(error)),
+        );
+    }
+
+    updateRuleFromTemplate(r: TimescaleRuleModel): Observable<boolean> {
+        return this.http.put(environment.timescaleRuleManagerUrl + '/template-rules/' + r.id, r).pipe(
+            map((_) => true),
+            catchError((error: HttpErrorResponse) => this.errorHandlerService.handleErrorWithSnackBar('Error updating rule: ' + this.formatErr(error.error), TimescaleRulesService.name, 'updateRule()', false)(error)),
+        );
+    }
+
+    getTemplates(): Observable<TimescaleRuleTemplateModel[]> {
+        return this.http.get<any>(environment.timescaleRuleManagerUrl + '/templates').pipe(
+            map((resp) => {
+                const arr: TimescaleRuleTemplateModel[] = [];
+                Object.keys(resp).forEach((k) => {
+                    const v = resp[k];
+                    if (v !== undefined) {
+                        v.name = k;
+                        arr.push(v);
+                    }
+                });
+                return arr;
+            }),
+            catchError(this.errorHandlerService.handleErrorWithSnackBar('Error loading templates', TimescaleRulesService.name, 'getTemplates()', [])),
         );
     }
 

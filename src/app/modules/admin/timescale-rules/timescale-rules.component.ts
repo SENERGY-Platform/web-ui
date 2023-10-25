@@ -16,7 +16,7 @@
 
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {TimescaleRulesService} from './shared/timescale-rules.service';
-import {TimescaleRuleModel} from './shared/timescale-rule.model';
+import {TimescaleRuleModel, TimescaleRuleTemplateModel} from './shared/timescale-rule.model';
 import {MatTable} from '@angular/material/table';
 import {ImportTypePermissionSearchModel} from '../../imports/import-types/shared/import-types.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
@@ -25,6 +25,9 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {forkJoin, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {
+    TimescaleRulesCreateEditTemplateComponent
+} from "./timescale-rules-create-edit-template/timescale-rules-create-edit-template.component";
 
 @Component({
     selector: 'senergy-timescale-rules',
@@ -50,6 +53,7 @@ export class TimescaleRulesComponent implements OnInit {
     dialogWidth = 700;
     roles: string[] = [];
     users: any[] = [];
+    templates: TimescaleRuleTemplateModel[] = [];
 
     ngOnInit(): void {
         forkJoin([
@@ -68,6 +72,7 @@ export class TimescaleRulesComponent implements OnInit {
                     console.error('Could not load users from Keycloak. Reason was : ', users.error);
                 }
             })),
+            this.timescaleRuleService.getTemplates().pipe(map(r => this.templates = r)),
         ]).subscribe(_ => {
             this.dataReady = true;
         });
@@ -120,6 +125,28 @@ export class TimescaleRulesComponent implements OnInit {
             });
     }
 
+    addFromTemplate() {
+        const config: MatDialogConfig = {
+            data: {
+                rule: undefined,
+                editable: true,
+                roles: this.roles,
+                users: this.users,
+                templates: this.templates,
+            },
+            minWidth: '' + this.dialogWidth + 'px',
+        };
+        this.dialog
+            .open(TimescaleRulesCreateEditTemplateComponent, config)
+            .afterClosed()
+            .subscribe((rule) => {
+                if (rule !== undefined) {
+                    this.rules.push(rule);
+                    this.table.renderRows();
+                }
+            });
+    }
+
     details(r: TimescaleRuleModel) {
         const config: MatDialogConfig = {
             data: {
@@ -128,10 +155,13 @@ export class TimescaleRulesComponent implements OnInit {
                 roles: this.roles,
                 users: this.users,
             },
-            minHeight: '65vh',
             minWidth: '' + this.dialogWidth + 'px',
         };
-        this.dialog.open(TimescaleRulesCreateEditComponent, config);
+        if (r.type === 'template') {
+            this.dialog.open(TimescaleRulesCreateEditTemplateComponent, config);
+        } else {
+            this.dialog.open(TimescaleRulesCreateEditComponent, config);
+        }
     }
 
     edit(r: TimescaleRuleModel) {
@@ -141,20 +171,32 @@ export class TimescaleRulesComponent implements OnInit {
                 editable: true,
                 roles: this.roles,
                 users: this.users,
+                templates: this.templates,
             },
-            minHeight: '65vh',
             minWidth: '' + this.dialogWidth + 'px',
         };
-        this.dialog
-            .open(TimescaleRulesCreateEditComponent, config)
-            .afterClosed()
-            .subscribe((rule) => {
-                if (rule !== undefined) {
-                    this.rules[this.rules.indexOf(r)] = rule;
-                    this.table.renderRows();
+        if (r.type === 'template') {
+            this.dialog
+                .open(TimescaleRulesCreateEditTemplateComponent, config)
+                .afterClosed()
+                .subscribe((rule) => {
+                    if (rule !== undefined) {
+                        this.rules[this.rules.indexOf(r)] = rule;
+                        this.table.renderRows();
 
-                }
-            });
+                    }
+                });
+        } else {
+            this.dialog
+                .open(TimescaleRulesCreateEditComponent, config)
+                .afterClosed()
+                .subscribe((rule) => {
+                    if (rule !== undefined) {
+                        this.rules[this.rules.indexOf(r)] = rule;
+                        this.table.renderRows();
+                    }
+                });
+        }
     }
 
     delete(r: TimescaleRuleModel) {
@@ -169,5 +211,9 @@ export class TimescaleRulesComponent implements OnInit {
                     });
                 }
             });
+    }
+
+    usernames(ids: string[] | undefined): string {
+        return ids?.map(userid => this.users.find(u => u.id === userid)?.username).join(', ') || '';
     }
 }

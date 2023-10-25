@@ -50,6 +50,17 @@
                 <td mat-cell *matCellDef="let m">{{m.priority}}</td>
             </ng-container>
 
+            <ng-container matColumnDef="users">
+                <th mat-header-cell *matHeaderCellDef>Users</th>
+                <td mat-cell *matCellDef="let m">{{usernames(m.users)}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="roles">
+                <th mat-header-cell *matHeaderCellDef>Roles</th>
+                <td mat-cell *matCellDef="let m">{{m.roles}}</td>
+            </ng-container>
+
+
             <ng-container matColumnDef="errors">
                 <th mat-header-cell *matHeaderCellDef>Errors</th>
                 <td mat-cell *matCellDef="let m">
@@ -86,13 +97,18 @@
 
 
             <tr mat-header-row
-                *matHeaderRowDef="['description', 'group', 'priority', 'errors', 'details', 'edit', 'delete']; sticky: true"></tr>
+                *matHeaderRowDef="['description', 'group', 'priority', 'users', 'roles', 'errors', 'details', 'edit', 'delete']; sticky: true"></tr>
             <tr mat-row
-                *matRowDef="let m; columns: ['description', 'group', 'priority', 'errors', 'details', 'edit', 'delete'];"></tr>
+                *matRowDef="let m; columns: ['description', 'group', 'priority', 'users', 'roles', 'errors', 'details', 'edit', 'delete'];"></tr>
         </table>
     </div>
 
-    <button mat-fab class="fab" (click)="add()" matTooltip="Add new import type">
+    <button mat-fab class="fab" (click)="addFromTemplate()" matTooltip="Add new rule from template">
         <mat-icon>add</mat-icon>
     </button>
+    <!--
+    <button mat-fab class="fab" (click)="add()" matTooltip="Add new custom rule">
+        <mat-icon>add</mat-icon>
+    </button>
+    -->
 </div>

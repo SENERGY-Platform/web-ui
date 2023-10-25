@@ -14,29 +14,6 @@
  * limitations under the License.
  */
 
-
-export interface TimescaleRuleModel {
-    id: string;
-    description: string;
-    priority: number;
-    group: string;
-    table_reg_ex: string;
-    users: string[];
-    roles: string[];
-    command_template: string;
-    delete_template: string;
-    errors?: string[];
-    completed_run: boolean;
-    type: string;
-    template?: string;
+.mat-mdc-dialog-content {
+    padding-top: 8px;
 }
-
-export interface TimescaleRuleTemplateModel {
-    name: string;
-    description: string;
-    priority: number;
-    group: string;
-    command_template: string;
-    delete_template: string;
-}
-

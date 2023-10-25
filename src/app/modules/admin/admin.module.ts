@@ -33,6 +33,10 @@ import {
 import {MatPaginatorModule} from '@angular/material/paginator';
 import { BudgetComponent } from './budget/budget.component';
 import { BudgetCreateEditComponent } from './budget/budget-create-edit/budget-create-edit.component';
+import {
+    TimescaleRulesCreateEditTemplateComponent
+} from "./timescale-rules/timescale-rules-create-edit-template/timescale-rules-create-edit-template.component";
+import {MatExpansionModule} from "@angular/material/expansion";
 
 const listRules: Route[] = [
     {
@@ -61,6 +65,7 @@ const listRules: Route[] = [
         PermissionsDialogImportComponent,
         TimescaleRulesComponent,
         TimescaleRulesCreateEditComponent,
+        TimescaleRulesCreateEditTemplateComponent,
         BudgetComponent,
         BudgetCreateEditComponent
     ],
@@ -89,7 +94,8 @@ const listRules: Route[] = [
         InfiniteScrollModule,
         WidgetModule,
         MatPaginatorModule,
-        FlexLayoutModule
+        FlexLayoutModule,
+        MatExpansionModule
     ]
 })
 export class AdminModule {
