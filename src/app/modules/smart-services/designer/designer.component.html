@@ -24,6 +24,9 @@
             <button mat-icon-button matTooltip="Save" (click)="save()">
                 <mat-icon>save</mat-icon>
             </button>
+            <button mat-icon-button matTooltip="Save and Release" (click)="saveAndRelease()">
+                <mat-icon>save_as</mat-icon>
+            </button>
         </div>
         <div fxLayout="row" fxFlex [fxShow]="ready">
             <div class="canvas" id="js-canvas" fxFlex></div>

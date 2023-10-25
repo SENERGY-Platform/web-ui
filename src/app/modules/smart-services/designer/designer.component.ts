@@ -199,7 +199,31 @@ export class SmartServiceDesignerComponent implements OnInit {
             }, this.handleError);
     }
 
+    saveAndRelease(): void {
+        this.saveThen((design: SmartServiceDesignModel | null) => {
+            if (design) {
+                this.snackBar.open('Model saved.', undefined, { duration: 2000 });
+                this.releaseDesign(design, ()=>{
+                    if(this.id === '') {
+                        this.router.navigate(['/smart-services/designer/'+design.id]);
+                    }
+                })
+            }
+        })
+    }
+
     save(): void {
+        this.saveThen((design: SmartServiceDesignModel | null) => {
+            if (design) {
+                this.snackBar.open('Model saved.', undefined, { duration: 2000 });
+                if(this.id === '') {
+                    this.router.navigate(['/smart-services/designer/'+design.id]);
+                }
+            }
+        })
+    }
+
+    saveThen(then: ((design: SmartServiceDesignModel | null)=>void)): void {
         this.saveXML((errXML, processXML) => {
             if (errXML) {
                 this.snackBar.open('Error XML! ' + errXML, 'close', { panelClass: 'snack-bar-error' });
@@ -215,20 +239,28 @@ export class SmartServiceDesignerComponent implements OnInit {
                                     this.name = result.name;
                                     this.description = result.description;
                                     const model = { id: this.id, svg_xml: svgXML, bpmn_xml: processXML, name: result.name, description: result.description, user_id: '' };
-                                    this.designsService.saveDesign(model).subscribe((result2: SmartServiceDesignModel | null) => {
-                                        if (result2) {
-                                            this.snackBar.open('Model saved.', undefined, { duration: 2000 });
-                                            if(this.id === '') {
-                                                this.router.navigate(['/smart-services/designer/'+result2.id]);
-                                            }
-                                        }
-                                    });
+                                    this.designsService.saveDesign(model).subscribe(then);
                                 }
                             });
                     }
                 });
             }
         });
+    }
+
+    releaseDesign(design: SmartServiceDesignModel, then: ()=>void): void {
+        this.dialogService.openInputDialog('Release Name and Description', {name: design.name, description: design.description}, ['name'])
+            .afterClosed()
+            .subscribe((result: {name: string; description: string}) => {
+                this.releaseService.createRelease({design_id: design.id, name: result.name, description: result.description}).subscribe(value => {
+                    if(value) {
+                        this.snackBar.open('Release created.', undefined, { duration: 2000 });
+                    } else {
+                        this.snackBar.open('Error while creating a release !', 'close', { panelClass: 'snack-bar-error' });
+                    }
+                    then();
+                });
+            });
     }
 
     importBPMN(event: any): void {
