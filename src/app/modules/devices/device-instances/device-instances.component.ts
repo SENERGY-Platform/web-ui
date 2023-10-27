@@ -27,17 +27,11 @@ import {DeviceTypeBaseModel, DeviceTypeModel} from '../../metadata/device-types-
 import {LocationModel} from '../locations/shared/locations.model';
 import {MatTableDataSource} from '@angular/material/table';
 import {DeviceInstancesDialogService} from './shared/device-instances-dialog.service';
-import {ExportService} from '../../exports/shared/export.service';
 import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesUpdateModel} from './shared/device-instances-update.model';
-import {ExportModel} from '../../exports/shared/export.model';
 import {LocationsService} from '../locations/shared/locations.service';
 import {NetworksService} from '../networks/shared/networks.service';
-import {debounceTime} from 'rxjs/operators';
 import {MatSort, Sort, SortDirection} from '@angular/material/sort';
-import {UntypedFormControl} from '@angular/forms';
-import {MatDialog} from '@angular/material/dialog';
-import {MatDialogConfig} from '@angular/material/dialog';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { forkJoin, Observable, Subscription } from 'rxjs';
@@ -85,7 +79,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     ) {
         this.getRouterParams();
     }
-    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'info', 'share', 'duplicate']
+    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'info', 'share']
     pageSize = 20;
     dataSource = new MatTableDataSource<DeviceInstancesModel>();
     selection = new SelectionModel<DeviceInstancesModel>(true, []);
@@ -141,6 +135,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         
         if(this.deviceTypesService.userHasReadAuthorization()) {
             this.displayedColumns.splice(4, 0, 'device_type')
+        }
+
+        if(this.deviceInstancesService.userHasCreateAuthorization()) {
+            this.displayedColumns.push("duplicate")
         }
     }
 
