@@ -34,21 +34,21 @@
                         <mat-icon>refresh</mat-icon>
                     </button>
                     <mat-menu #refresh="matMenu" [overlapTrigger]="false" xPosition="before">
-                        <button mat-menu-item (click)="refreshTime(5)"
-                                [ngClass]="{'color-accent': dashboard.refresh_time === 5}">5 seconds
+                        <button mat-menu-item (click)="refreshTime(5)">
+                                <p [ngClass]="{'color-accent': dashboard.refresh_time === 5}">5 seconds</p>
                         </button>
-                        <button mat-menu-item (click)="refreshTime(15)"
-                                [ngClass]="{'color-accent': dashboard.refresh_time === 15}">15 seconds
+                        <button mat-menu-item (click)="refreshTime(15)">
+                                <p [ngClass]="{'color-accent': dashboard.refresh_time === 15}">15 seconds</p>
                         </button>
-                        <button mat-menu-item (click)="refreshTime(30)"
-                                [ngClass]="{'color-accent': dashboard.refresh_time === 30}">30 seconds
+                        <button mat-menu-item (click)="refreshTime(30)">
+                                <p [ngClass]="{'color-accent': dashboard.refresh_time === 30}">30 seconds</p>
                         </button>
-                        <button mat-menu-item (click)="refreshTime(60)"
-                                [ngClass]="{'color-accent': dashboard.refresh_time === 60}">1 minute
+                        <button mat-menu-item (click)="refreshTime(60)">
+                                <p [ngClass]="{'color-accent': dashboard.refresh_time === 60}">1 minute</p>                       
                         </button>
                         <mat-divider></mat-divider>
-                        <button mat-menu-item (click)="refreshTime(0)"
-                                [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh
+                        <button mat-menu-item (click)="refreshTime(0)">
+                                <p [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh</p>
                         </button>
                     </mat-menu>
                     <button *ngIf="userHasUpdateDashboardAuthorization" (click)="moveDashboard(true)" mat-icon-button color="accent"
