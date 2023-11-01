@@ -15,7 +15,7 @@
  */
 
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {forkJoin, Observable, Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {MatDialogConfig} from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -28,8 +28,6 @@ import {FunctionsCreateDialogComponent} from './dialog/functions-create-dialog.c
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatSort, Sort, SortDirection} from '@angular/material/sort';
-import {UntypedFormControl} from '@angular/forms';
-import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -67,10 +65,18 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.functionsService.getTotalCountOfFunctions().subscribe(totalCount => this.totalCount = totalCount)
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initSearch();
         this.checkAuthorization();
+    }
+
+    getTotalCounts() {
+        return this.functionsService.getTotalCountOfFunctions(this.searchText).pipe(
+            map((totalCount: number) => {
+                this.totalCount = totalCount
+                return totalCount
+            })
+        )
     }
 
     ngAfterViewInit(): void {
@@ -176,21 +182,23 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             });
     }
 
-    private getFunctions() {
+    private getFunctions(): Observable<FunctionsPermSearchModel[]> {
         this.ready = false;
-        this.functionsService
+        return this.functionsService
                 .getFunctions(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
-                .subscribe((functions: FunctionsPermSearchModel[]) => {
-                    this.dataSource = new MatTableDataSource(functions);
-                    this.ready = true;
-        });
+                .pipe(
+                    map((functions: FunctionsPermSearchModel[]) => {
+                        this.dataSource = new MatTableDataSource(functions);
+                        return functions
+                    })
+                )
     }
 
     reload() {
         this.ready = false;
         this.offset = 0;
         this.selectionClear();
-        this.getFunctions();
+        forkJoin([this.getFunctions(), this.getTotalCounts()]).subscribe(_ => {this.ready = true;})
     }
 
     matSortChange($event: Sort) {

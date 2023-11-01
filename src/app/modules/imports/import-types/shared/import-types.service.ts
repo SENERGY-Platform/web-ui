@@ -15,7 +15,7 @@
  */
 import { Injectable, OnInit } from '@angular/core';
 import { ImportTypeContentVariableModel, ImportTypeModel, ImportTypePermissionSearchModel } from './import-types.model';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { Observable, catchError } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -166,8 +166,11 @@ export class ImportTypesService {
         return this.authorizations["GET"]   
     } 
 
-    getTotalCountOfTypes(): Observable<any> {
+    getTotalCountOfTypes(searchText: string): Observable<any> {
+        const options = searchText ?
+        { params: new HttpParams().set('search', searchText) } : {};
+
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/import-types')
+        .get(environment.permissionSearchUrl + '/v3/total/import-types', options)
     }
 }

@@ -24,7 +24,7 @@ import {ImportDeployEditDialogComponent} from '../import-deploy-edit-dialog/impo
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import { forkJoin, Observable, ObservableNotification, Subscription } from 'rxjs';
+import { forkJoin, Observable, map, Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -64,11 +64,12 @@ export class ImportTypesComponent implements OnInit {
     ngOnInit(): void {
         this.initSearch();
         this.checkAuthorization();
-        this.getTotalNumberOfTypes();
     }
 
-    getTotalNumberOfTypes() {
-        this.importTypesService.getTotalCountOfTypes().subscribe(totalCount => this.totalCount = totalCount);
+    getTotalNumberOfTypes(): Observable<number> {
+        return this.importTypesService.getTotalCountOfTypes(this.searchText).pipe(
+            map((totalCount: number) => this.totalCount = totalCount)
+        )
     }
 
     ngAfterViewInit(): void {
@@ -157,12 +158,14 @@ export class ImportTypesComponent implements OnInit {
         this.reload();
     }
 
-    load() {
+    load(): Observable<ImportTypePermissionSearchModel[]> {
         this.dataReady = false;
-        this.importTypesService.listImportTypes(this.searchText, this.pageSize, this.offset, this.sort).subscribe((types) => {
-            this.dataSource.data = types
-            this.dataReady = true;
-        });
+        return this.importTypesService.listImportTypes(this.searchText, this.pageSize, this.offset, this.sort).pipe(
+            map(types => {
+                this.dataSource.data = types
+                return types
+            })
+        )
     }
 
     reload() {
@@ -170,7 +173,10 @@ export class ImportTypesComponent implements OnInit {
         this.pageSize = 20;
         this.dataReady = false;
         this.selectionClear();
-        this.load();
+        
+        forkJoin([this.load(), this.getTotalNumberOfTypes()]).subscribe(_ => {
+            this.dataReady = true;
+        })
     }
 
     add() {

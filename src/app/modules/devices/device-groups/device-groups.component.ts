@@ -15,7 +15,7 @@
  */
 
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {forkJoin, Observable, Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
@@ -23,8 +23,6 @@ import {DeviceGroupsPermSearchModel} from './shared/device-groups-perm-search.mo
 import {DeviceGroupsService} from './shared/device-groups.service';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatSort, Sort, SortDirection} from '@angular/material/sort';
-import {UntypedFormControl} from '@angular/forms';
-import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -68,9 +66,14 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     ) {}
 
     ngOnInit() {
-        this.deviceGroupsService.getTotalCountOfDeviceGroups().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
         this.checkAuthorization()
+    }
+
+    getTotalCount(): Observable<number> {
+        return this.deviceGroupsService.getTotalCountOfDeviceGroups(this.searchText).pipe(
+            map(totalCount => this.totalCount = totalCount)
+        )
     }
 
     ngAfterViewInit(): void {
@@ -107,7 +110,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     private initSearch() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.reload();
+            this.reload()
         });
     }
 
@@ -163,16 +166,19 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.getDeviceGroups();
     }
 
-    private getDeviceGroups() {
+    private getDeviceGroups(): Observable<DeviceGroupsPermSearchModel[]> {
         let query =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection);
         if(this.hideGenerated) {
             query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection);
         }
 
-        query.subscribe((deviceGroups: DeviceGroupsPermSearchModel[]) => {
-            this.dataSource.data = deviceGroups;
-            this.ready = true;
-        });
+        return query.pipe(
+            map((deviceGroups: DeviceGroupsPermSearchModel[]) => {
+                this.dataSource.data = deviceGroups;
+                return deviceGroups
+                }
+            )
+        )
     }
 
     public reload() {
@@ -180,7 +186,11 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.pageSize = 20;
         this.ready = false;
         this.selectionClear();
-        this.getDeviceGroups();
+
+        var jobs = [this.getDeviceGroups(), this.getTotalCount()]
+        forkJoin(jobs).subscribe(_ => {
+            this.ready = true;
+        })
     }
 
     deleteMultipleItems() {

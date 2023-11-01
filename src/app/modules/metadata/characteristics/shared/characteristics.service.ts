@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { DeviceTypeCharacteristicsModel } from '../../device-types-overview/shared/device-type.model';
 import { Observable } from 'rxjs';
@@ -110,9 +110,12 @@ export class CharacteristicsService {
             );
     }
 
-    getTotalCountOfCharacteristics(): Observable<any> {
+    getTotalCountOfCharacteristics(searchText: string): Observable<any> {
+        const options = searchText ?
+        { params: new HttpParams().set('search', searchText) } : {};
+
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/characteristics')
+        .get(environment.permissionSearchUrl + '/v3/total/characteristics', options)
         .pipe(
             catchError(
                 this.errorHandlerService.handleError(

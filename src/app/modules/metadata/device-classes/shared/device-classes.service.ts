@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
@@ -85,9 +85,12 @@ export class DeviceClassesService {
             .pipe(catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'createDeviceClass', null)));
     }
 
-    getTotalCountOfDevicesClasses(): Observable<any> {
+    getTotalCountOfDevicesClasses(searchText: string): Observable<any> {
+        const options = searchText ?
+        { params: new HttpParams().set('search', searchText) } : {};
+
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/device-classes')
+        .get(environment.permissionSearchUrl + '/v3/total/device-classes', options)
         .pipe(
             catchError(
                 this.errorHandlerService.handleError(

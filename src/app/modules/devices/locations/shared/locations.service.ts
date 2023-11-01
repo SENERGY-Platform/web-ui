@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
@@ -100,9 +100,12 @@ export class LocationsService {
             .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'updateLocation', null)));
     }
 
-    getTotalCountOfLocations(): Observable<any> {
+    getTotalCountOfLocations(searchText: string): Observable<any> {
+        const options = searchText ?
+        { params: new HttpParams().set('search', searchText) } : {};
+
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/locations')
+        .get(environment.permissionSearchUrl + '/v3/total/locations', options)
         .pipe(
             catchError(
                 this.errorHandlerService.handleError(

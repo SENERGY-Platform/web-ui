@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
@@ -131,9 +131,12 @@ export class FunctionsService {
     }
 
 
-    getTotalCountOfFunctions(): Observable<any> {
+    getTotalCountOfFunctions(searchText: string): Observable<any> {
+        const options = searchText ?
+        { params: new HttpParams().set('search', searchText) } : {};
+
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/functions')
+        .get(environment.permissionSearchUrl + '/v3/total/functions', options)
         .pipe(
             catchError(
                 this.errorHandlerService.handleError(

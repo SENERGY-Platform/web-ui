@@ -19,7 +19,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {Router} from '@angular/router';
 import {ConceptsService} from './shared/concepts.service';
-import {forkJoin, Observable, Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ConceptsEditDialogComponent} from './dialogs/concepts-edit-dialog.component';
 import {ConceptsPermSearchModel} from './shared/concepts-perm-search.model';
@@ -64,7 +64,6 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.conceptsService.getTotalCountOfConcepts().subscribe(totalCount => {this.totalCount = totalCount})
         this.initSearch();
         this.checkAuthorization()
     }
@@ -73,6 +72,14 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.searchSub.unsubscribe();
     }
 
+    getTotalCounts() {
+        return this.conceptsService.getTotalCountOfConcepts(this.searchText).pipe(
+            map((totalCount: number) => {
+                this.totalCount = totalCount
+                return totalCount
+            })
+        )
+    }
 
     checkAuthorization() {
         this.userHasUpdateAuthorization = this.conceptsService.userHasUpdateAuthorization()
@@ -190,13 +197,15 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.router.navigateByUrl('/metadata/characteristics', { state: concept });
     }
 
-    private getConcepts() {
-        this.conceptsService
+    private getConcepts(): Observable<ConceptsPermSearchModel[]> {
+        return this.conceptsService
             .getConcepts(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
-            .subscribe((concepts: ConceptsPermSearchModel[]) => {
-                this.dataSource.data = concepts;
-                this.ready = true;
-            });
+            .pipe(
+                map((concepts: ConceptsPermSearchModel[]) => {
+                    this.dataSource.data = concepts;
+                    return concepts
+                })
+            )
     }
 
     reload() {
@@ -204,7 +213,10 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.pageSize = 20;
         this.offset = 0;
         this.selectionClear();
-        this.getConcepts();
+
+        forkJoin([this.getConcepts(), this.getTotalCounts()]).subscribe(_ => {
+            this.ready = true;
+        })
     }
 
     matSortChange($event: Sort) {

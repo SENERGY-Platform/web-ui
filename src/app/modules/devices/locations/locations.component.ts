@@ -15,7 +15,7 @@
  */
 
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {forkJoin, Observable, Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
@@ -64,13 +64,18 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     ) {}
 
     ngOnInit() {
-        this.locationsService.getTotalCountOfLocations().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
         this.checkAuthorization()
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+    }
+
+    getTotalCounts(): Observable<number> {
+        return this.locationsService.getTotalCountOfLocations(this.searchText).pipe(
+            map((totalCount: number) => this.totalCount = totalCount)
+        )
     }
 
     ngAfterViewInit(): void {
@@ -145,13 +150,15 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         return false;
     }
 
-    private getLocations() {
-        this.locationsService
+    private getLocations(): Observable<LocationModel[]> {
+        return this.locationsService
             .searchLocations(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
-            .subscribe((locations: LocationModel[]) => {
-                this.dataSource.data = locations;
-                this.ready = true;
-            });
+            .pipe(
+                map((locations: LocationModel[]) => {
+                    this.dataSource.data = locations;
+                    return locations
+                })
+            )
     }
 
     private reloadLocations() {
@@ -165,7 +172,10 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.pageSize = 20;
         this.ready = false;
         this.selectionClear()
-        this.getLocations();
+
+        forkJoin([this.getLocations(), this.getTotalCounts()]).subscribe(_ => {
+            this.ready = true;
+        })
     }
 
     isAllSelected() {

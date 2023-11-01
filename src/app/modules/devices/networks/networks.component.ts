@@ -18,7 +18,7 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {NetworksService} from './shared/networks.service';
 import {NetworksModel} from './shared/networks.model';
-import {forkJoin, Observable, Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {Router} from '@angular/router';
 import {
     DeviceInstancesRouterState,
@@ -34,7 +34,6 @@ import {MatPaginator} from '@angular/material/paginator';
 import {DialogsService} from 'src/app/core/services/dialogs.service';
 import {SearchbarService} from 'src/app/core/components/searchbar/shared/searchbar.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {DeviceInstancesModel} from '../device-instances/shared/device-instances.model';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 
@@ -73,13 +72,18 @@ export class NetworksComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.networksService.getTotalCountOfNetworks().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
         this.checkAuthorization();
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+    }
+
+    getTotalCount(): Observable<number> {
+        return this.networksService.getTotalCountOfNetworks(this.searchText).pipe(
+            map((totalCount: number) => this.totalCount = totalCount)
+        )
     }
 
     checkAuthorization() {
@@ -155,15 +159,17 @@ export class NetworksComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getNetworks() {
+    private getNetworks(): Observable<NetworksModel[]> {
         this.ready = false;
 
-        this.networksService
+        return this.networksService
             .searchNetworks(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
-            .subscribe((networks: NetworksModel[]) => {
-                this.dataSource.data = networks;
-                this.ready = true;
-            });
+            .pipe(
+                map((networks: NetworksModel[]) => {
+                    this.dataSource.data = networks;
+                    return networks
+                })
+            )
     }
 
     reload() {
@@ -171,7 +177,10 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.pageSize = 20;
         this.ready = false;
         this.selectionClear();
-        this.getNetworks();
+        
+        forkJoin([this.getNetworks(), this.getTotalCount()]).subscribe(_ => {
+            this.ready = true;
+        })
     }
 
     isAllSelected() {

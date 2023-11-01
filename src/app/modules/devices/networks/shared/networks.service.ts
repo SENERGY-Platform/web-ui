@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
@@ -188,9 +188,12 @@ export class NetworksService {
         });
     }
 
-    getTotalCountOfNetworks(): Observable<any> {
+    getTotalCountOfNetworks(searchText: string): Observable<any> {
+        const options = searchText ?
+        { params: new HttpParams().set('search', searchText) } : {};
+
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/hubs')
+        .get(environment.permissionSearchUrl + '/v3/total/hubs', options)
         .pipe(
             catchError(
                 this.errorHandlerService.handleError(

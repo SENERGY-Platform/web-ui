@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { Observable, catchError } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -89,8 +89,14 @@ export class ImportInstancesService {
         return this.authorizations["GET"]   
     }
 
-    getTotalCountOfInstances(): Observable<any> {
+    getTotalCountOfInstances(searchText: string, excludeGenerated: boolean): Observable<any> {
+        const options = {"params": {}}
+        var params = new HttpParams().set('exclude_generated', excludeGenerated)
+        if(searchText) {
+            params = params.set('search', searchText)
+        }
+        options["params"] = params
         return this.http
-        .get(environment.importDeployUrl + '/total/instances')
+        .get(environment.importDeployUrl + '/total/instances', options)
     }
 }

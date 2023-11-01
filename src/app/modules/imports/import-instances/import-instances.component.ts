@@ -24,7 +24,7 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
 import { Router } from '@angular/router';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -69,8 +69,13 @@ export class ImportInstancesComponent implements OnInit {
         this.getTotalNumberOfTypes();
     }
 
-    getTotalNumberOfTypes() {
-        this.importInstancesService.getTotalCountOfInstances().subscribe(totalCount => this.totalCount = totalCount);
+    getTotalNumberOfTypes(): Observable<number> {
+        return this.importInstancesService.getTotalCountOfInstances(this.searchText, this.excludeGenerated).pipe(
+            map((totalCount: number) => {
+                this.totalCount = totalCount
+                return totalCount
+            })
+        )
     }
 
     private initSearch() {
@@ -145,14 +150,16 @@ export class ImportInstancesComponent implements OnInit {
         this.reload();
     }
 
-    load() {
+    load(): Observable<ImportInstancesModel[]> {
         this.dataReady = false;
-        this.importInstancesService
+        return this.importInstancesService
             .listImportInstances(this.searchText, this.pageSize, this.offset, this.sort, this.excludeGenerated)
-            .subscribe((inst) => {
+            .pipe(
+                map((inst: ImportInstancesModel[]) => {
                 this.dataSource.data = inst;
-                this.dataReady = true;
-            });
+                return inst
+                })
+            )
     }
 
     reload() {
@@ -160,7 +167,8 @@ export class ImportInstancesComponent implements OnInit {
         this.pageSize = 20;
         this.selectionClear();
         this.dataReady = false;
-        this.load();
+        
+        forkJoin([this.load(), this.getTotalNumberOfTypes()]).subscribe(_ => {this.dataReady = true})
     }
 
 

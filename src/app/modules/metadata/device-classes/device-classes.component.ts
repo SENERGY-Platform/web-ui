@@ -16,7 +16,7 @@
 
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { debounceTime, forkJoin, Observable, Subscription } from 'rxjs';
+import { debounceTime, forkJoin, Observable, Subscription, map } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ResponsiveService } from '../../../core/services/responsive.service';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
@@ -72,9 +72,17 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
-        this.deviceClassesService.getTotalCountOfDevicesClasses().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
         this.checkAuthorization();
+    }
+
+    getTotalCounts() {
+        return this.deviceClassesService.getTotalCountOfDevicesClasses(this.searchText).pipe(
+            map((totalCount: number) => {
+                this.totalCount = totalCount
+                return totalCount
+            })
+        )
     }
 
     ngAfterViewInit(): void {
@@ -171,13 +179,15 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getDeviceClasses() {
-        this.deviceClassesService
+    private getDeviceClasses(): Observable<DeviceClassesPermSearchModel[]> {
+        return this.deviceClassesService
             .getDeviceClasses(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
-            .subscribe((deviceClasses: DeviceClassesPermSearchModel[]) => {
-                this.dataSource = new MatTableDataSource(deviceClasses);
-                this.ready = true;
-            });
+            .pipe(
+                map((deviceClasses: DeviceClassesPermSearchModel[]) => {
+                    this.dataSource = new MatTableDataSource(deviceClasses);
+                    return deviceClasses
+                })
+            )
     }
 
     reload() {
@@ -185,7 +195,8 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         this.pageSize = 20;
         this.ready = false;
         this.selectionClear();
-        this.getDeviceClasses()
+        
+        forkJoin([this.getDeviceClasses(), this.getTotalCounts()]).subscribe(_ => {this.ready = true;})       
     }
 
     matSortChange($event: Sort) {

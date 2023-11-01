@@ -15,13 +15,11 @@
  */
 
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { ResponsiveService } from '../../../core/services/responsive.service';
 import { DeviceTypeService } from './shared/device-type.service';
 import { DeviceTypePermSearchModel } from './shared/device-type-perm-search.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { Router } from '@angular/router';
 import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../../devices/device-instances/device-instances.component';
@@ -68,10 +66,18 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.deviceTypeService.getTotalCountOfDevicesTypes().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
         this.loadDeviceClasses();
         this.checkAuthorization()
+    }
+
+    getTotalCounts() {
+        return this.deviceTypeService.getTotalCountOfDevicesTypes(this.searchText).pipe(
+            map((totalCount: number) => {
+                this.totalCount = totalCount
+                return totalCount
+            })
+        )
     }
 
     ngOnDestroy() {
@@ -176,14 +182,16 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getDeviceTypes() {
+    private getDeviceTypes(): Observable<DeviceTypePermSearchModel[]> {
         this.ready = false;
-        this.deviceTypeService
+        return this.deviceTypeService
             .getDeviceTypes(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
-            .subscribe((deviceTypes: DeviceTypePermSearchModel[]) => {
-                this.dataSource.data = deviceTypes;
-                this.ready = true;
-            });
+            .pipe(
+                map((deviceTypes: DeviceTypePermSearchModel[]) => {
+                    this.dataSource.data = deviceTypes;
+                    return deviceTypes
+                })
+            )
     }
 
 
@@ -191,7 +199,8 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.ready = false;
         this.selectionClear();
-        this.getDeviceTypes();
+        
+        forkJoin([this.getDeviceTypes(), this.getTotalCounts()]).subscribe(_ => {this.ready = true;})
     }
 
     private loadDeviceClasses(): void {

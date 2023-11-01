@@ -34,7 +34,7 @@ import {NetworksService} from '../networks/shared/networks.service';
 import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { forkJoin, Observable, map, Subscription, of } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 export interface DeviceInstancesRouterState {
@@ -108,10 +108,15 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     userHasDeleteAuthorization: boolean = false
 
     ngOnInit(): void {
-        this.deviceInstancesService.getTotalCountOfDevices().subscribe(totalCount => this.totalCount = totalCount);
         this.loadFilterOptions();
         this.initSearch(); // does automatically load data on first page load
         this.checkAuthorization()
+    }
+
+    getTotalCount(): Observable<number> {
+        return this.deviceInstancesService.getTotalCountOfDevices(this.searchText).pipe(
+            map(totalCount => this.totalCount = totalCount)
+        )
     }
 
     ngAfterViewInit(): void {
@@ -159,11 +164,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.reload();
     }
 
-    private loadDevicesOfNetwork() {
+    private loadDevicesOfNetwork(): Observable<DeviceInstancesModel[]> {
         if(this.routerNetwork) {
             this.selectedTag = this.routerNetwork.name;
             this.selectedTagTransformed = this.routerNetwork.name;
-            this.deviceInstancesService
+            return this.deviceInstancesService
                 .getDeviceInstancesByHub(
                     this.routerNetwork.id,
                     this.pageSize,
@@ -171,17 +176,22 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     this.sortBy, 
                     this.sortDirection == "desc",
                 )
-                .subscribe((deviceInstances: DeviceInstancesModel[]) => {
-                    this.setDevices(deviceInstances);
-                });
+                .pipe(
+                    map((deviceInstances: DeviceInstancesModel[]) => {
+                        this.setDevices(deviceInstances)
+                        return deviceInstances
+                    })
+                )
         }
+        return of([])
+
     }
 
-    private loadDevicesOfDeviceType() {
+    private loadDevicesOfDeviceType(): Observable<DeviceInstancesModel[]> {
         if(this.routerDeviceType) {
             this.selectedTag = this.routerDeviceType.name;
             this.selectedTagTransformed = this.routerDeviceType.name;
-            this.deviceInstancesService
+            return this.deviceInstancesService
                 .getDeviceInstancesByDeviceTypes(
                     [this.routerDeviceType.id], 
                     this.pageSize, 
@@ -189,43 +199,55 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     this.sortBy, 
                     this.sortDirection == "desc"
                 )
-                .subscribe((deviceInstances) => {
-                    this.setDevices(deviceInstances);
-                });
+                .pipe(
+                    map(deviceInstances => {
+                        this.setDevices(deviceInstances);
+                        return deviceInstances
+                    })
+                )
         }
+        return of([])
+
     }
 
-    private loadDevicesByIds() {
+    private loadDevicesByIds(): Observable<DeviceInstancesModel[]> {
         if(this.routerDeviceIds) {
-            this.deviceInstancesService.getDeviceInstancesByIds(this.routerDeviceIds, this.pageSize, this.offset).subscribe((deviceInstances) => {
-                this.setDevices(deviceInstances);
-            });
+            return this.deviceInstancesService.getDeviceInstancesByIds(this.routerDeviceIds, this.pageSize, this.offset).pipe(
+                map(deviceInstances => {
+                    this.setDevices(deviceInstances);
+                    return deviceInstances
+                })
+            )
         }
+        return of([])
+
     }
 
-    private loadDevicesByLocation() {
+    private loadDevicesByLocation(): Observable<DeviceInstancesModel[]> {
         if(this.routerLocation !== null) {
             this.selectedTag = this.routerLocation.id;
             this.selectedTagTransformed = this.routerLocation.name;
-            this.deviceInstancesService.getDeviceInstancesByLocation(this.routerLocation.id, this.pageSize, this.offset, this.sortBy, this.sortDirection == "desc").subscribe((deviceInstances) => {
-                this.setDevices(deviceInstances);
-            });
+            return this.deviceInstancesService.getDeviceInstancesByLocation(this.routerLocation.id, this.pageSize, this.offset, this.sortBy, this.sortDirection == "desc").pipe(
+                map(deviceInstances => {
+                    this.setDevices(deviceInstances);
+                    return deviceInstances
+                })
+            )
         }
+        return of([])
     }
 
-    private load() {
-        this.ready = false;
-
+    private load(): Observable<DeviceInstancesModel[]> {
         if (this.routerNetwork !== null) {
-            this.loadDevicesOfNetwork()
+            return this.loadDevicesOfNetwork()
         } else if (this.routerDeviceType !== null) {
-            this.loadDevicesOfDeviceType()
+            return this.loadDevicesOfDeviceType()
         } else if (this.routerDeviceIds !== null) {
-            this.loadDevicesByIds()
+            return this.loadDevicesByIds()
         } else if (this.routerLocation !== null) {
-            this.loadDevicesByLocation()
+            return this.loadDevicesByLocation()
         } else {
-            this.deviceInstancesService
+            return this.deviceInstancesService
                 .getDeviceInstances(
                     this.pageSize,
                     this.offset,
@@ -233,15 +255,17 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     this.sortDirection == "desc",
                     this.searchText,
                 )
-                .subscribe((deviceInstances: DeviceInstancesModel[]) => {
-                    this.setDevices(deviceInstances);
-                });
+                .pipe(
+                    map((deviceInstances: DeviceInstancesModel[]) => {
+                        this.setDevices(deviceInstances);
+                        return deviceInstances
+                    })
+                );
         }
     }
 
     private setDevices(instances: DeviceInstancesModel[]) {
         this.dataSource.data = instances;
-        this.ready = true;
     }
 
     tagRemoved(): void {
@@ -303,7 +327,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.ready = false;
         this.pageSize = 20;
         this.selectionClear();
-        this.load();
+
+        forkJoin(this.load(), this.getTotalCount()).subscribe(_ => this.ready = true)
     }
 
     showInfoOfDevice(device: DeviceInstancesModel): void {

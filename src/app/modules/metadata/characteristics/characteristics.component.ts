@@ -19,7 +19,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeCharacteristicsModel} from '../device-types-overview/shared/device-type.model';
 import {Navigation, Router} from '@angular/router';
 import {CharacteristicsService} from './shared/characteristics.service';
-import {forkJoin, Observable, Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-search.model';
 import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
@@ -67,9 +67,17 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.characteristicsService.getTotalCountOfCharacteristics().subscribe(totalCount => {this.totalCount = totalCount})
         this.initSearch();
         this.checkAuthorization()
+    }
+
+    getTotalCounts(): Observable<number> {
+        return this.characteristicsService.getTotalCountOfCharacteristics(this.searchText).pipe(
+            map((totalCount: number) => {
+                this.totalCount = totalCount
+                return totalCount
+            })
+        )
     }
 
     ngOnDestroy() {
@@ -217,20 +225,22 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getCharacteristics() {
+    private getCharacteristics(): Observable<CharacteristicsPermSearchModel[]> {
         if (this.routerConcept !== null) {
             this.selectedTag = this.routerConcept.name;
         }
-        this.characteristicsService
+        return this.characteristicsService
             .getCharacteristics(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection, this.routerConcept?.characteristic_ids || [])
-            .subscribe((characteristics: CharacteristicsPermSearchModel[]) => {
-                this.setCharacteristics(characteristics);
-            });
+            .pipe(
+                map((characteristics: CharacteristicsPermSearchModel[]) => {
+                    this.setCharacteristics(characteristics);
+                    return characteristics
+                })
+            )
     }
 
     private setCharacteristics(characteristics: CharacteristicsPermSearchModel[]) {
         this.dataSource.data = characteristics;
-        this.ready = true;
     }
 
     private getRouterParams(): void {
@@ -248,7 +258,10 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.pageSize = 20;
         this.selectionClear();
-        this.getCharacteristics();
+        
+        forkJoin([this.getCharacteristics(), this.getTotalCounts()]).subscribe(_ => {
+            this.ready = true;
+        })
     }
 
     isAllSelected() {
