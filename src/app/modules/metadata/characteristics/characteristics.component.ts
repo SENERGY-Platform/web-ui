@@ -109,7 +109,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getCharacteristics()
+            this.getCharacteristics().subscribe()
         });
     }
 

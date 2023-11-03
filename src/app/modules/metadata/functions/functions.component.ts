@@ -83,7 +83,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=> {
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getFunctions()
+            this.getFunctions().subscribe()
         });
     }
 
@@ -183,7 +183,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     }
 
     private getFunctions(): Observable<FunctionsPermSearchModel[]> {
-        this.ready = false;
         return this.functionsService
                 .getFunctions(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
                 .pipe(

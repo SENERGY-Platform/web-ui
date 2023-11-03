@@ -80,7 +80,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getDeviceGroups()
+            this.getDeviceGroups().subscribe()
         });
     }
 
@@ -163,7 +163,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     setHideGenerated(hide: boolean){
         this.hideGenerated = hide;
-        this.getDeviceGroups();
+        this.getDeviceGroups().subscribe();
     }
 
     private getDeviceGroups(): Observable<DeviceGroupsPermSearchModel[]> {

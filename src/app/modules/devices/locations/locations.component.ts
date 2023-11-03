@@ -82,7 +82,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getLocations()
+            this.getLocations().subscribe()
         });
     }
 

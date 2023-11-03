@@ -123,7 +123,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.load();
+            this.load().subscribe();
         });
     }
 
@@ -273,7 +273,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.routerDeviceType = null;
         this.routerLocation = null;
         this.resetTag();
-        this.load();
+        this.load().subscribe();
     }
 
     private resetTag() {

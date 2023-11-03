@@ -89,7 +89,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getDeviceClasses()
+            this.getDeviceClasses().subscribe()
         });
     }
 

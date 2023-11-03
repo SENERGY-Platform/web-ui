@@ -126,7 +126,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getNetworks();
+            this.getNetworks().subscribe();
         });
     }
 
@@ -152,7 +152,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
                 .subscribe((deleteNetwork: boolean) => {
                     if (deleteNetwork) {
                         setTimeout(() => {
-                            this.getNetworks();
+                            this.getNetworks().subscribe();
                         }, 1000);
                     }
                 });

@@ -106,7 +106,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getDeviceTypes()
+            this.getDeviceTypes().subscribe()
         });
     }
 
@@ -183,7 +183,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     }
 
     private getDeviceTypes(): Observable<DeviceTypePermSearchModel[]> {
-        this.ready = false;
         return this.deviceTypeService
             .getDeviceTypes(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .pipe(

@@ -76,7 +76,7 @@ export class ImportTypesComponent implements OnInit {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.load();
+            this.load().subscribe();
         });
     }
 
