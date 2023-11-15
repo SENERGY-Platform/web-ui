@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {forkJoin, Observable} from 'rxjs';
+import {forkJoin, Observable, of} from 'rxjs';
 import {ChartsModel} from '../../shared/charts.model';
 import {ElementSizeService} from '../../../../core/services/element-size.service';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
@@ -40,10 +40,8 @@ import {
     QueriesRequestFilterModel,
     QueriesRequestTimeModel,
 } from '../../../shared/export-data.model';
-import {map} from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
 import {environment} from '../../../../../environments/environment';
-import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -152,7 +150,7 @@ export class ChartsExportService {
                 (newField as QueriesRequestElementInfluxModel).orderColumnIndex = 0;
                 newField.columns[0].name = vAxis.valuePath || vAxis.valueName || '';
                 if (filters.length > 0) {
-                    filters.forEach(f => f.column =  vAxis.valuePath || vAxis.valueName || '');
+                    filters.forEach(f => f.column = vAxis.valuePath || vAxis.valueName || '');
                     newField.filters = filters;
                 }
                 timescaleElements.push(newField);
@@ -181,12 +179,12 @@ export class ChartsExportService {
             let mapper: number[] = [];
             res.forEach(r => {
                 switch (r.source) {
-                case 'influx':
-                    mapper = influxResultMapper;
-                    break;
-                case 'timescale':
-                    mapper = timescaleResultMapper;
-                    break;
+                    case 'influx':
+                        mapper = influxResultMapper;
+                        break;
+                    case 'timescale':
+                        mapper = timescaleResultMapper;
+                        break;
                 }
                 r.res.forEach((series, index) => {
                     series?.forEach(row => {
@@ -209,7 +207,7 @@ export class ChartsExportService {
             });
             return table.length === 0 ? null : table;
         }), catchError(err => {
-            const error: ErrorModel = { error: err.message};
+            const error: ErrorModel = {error: err.message};
             return of(error);
         }));
     }
@@ -231,9 +229,17 @@ export class ChartsExportService {
         });
     }
 
-    private setData(series: any[][], properties: WidgetPropertiesModels): { table: ChartDataTableModel; colors?: string[] } {
+    private setData(series: any[][], properties: WidgetPropertiesModels): {
+        table: ChartDataTableModel;
+        colors?: string[]
+    } {
         const vAxes = properties.vAxes || [];
-        const indices: { index: number; conversions: { from: any; to: any }[]; conversionDefault?: number; type: string }[] = [];
+        const indices: {
+            index: number;
+            conversions: { from: any; to: any }[];
+            conversionDefault?: number;
+            type: string
+        }[] = [];
         const header: string[] = ['time'];
         if (vAxes) {
             vAxes.forEach((vAxis: ChartsExportVAxesModel, index) => {
@@ -249,9 +255,9 @@ export class ChartsExportService {
             });
         }
         const dataTable = new ChartDataTableModel([header]);
-        
+
         var series2: any = []
-        if(series[0].length > 2 && properties.chartType === 'ColumnChart') {
+        if (series[0].length > 2 && properties.chartType === 'ColumnChart') {
             /* Grouped Column -> all values for on x tick value need to be in one list
             series = [
                 ["2023-07-18T00:00:00Z", 2.7930317029043543, 5, 3]
@@ -259,10 +265,10 @@ export class ChartsExportService {
             */
             var tmp: any = {}
             series.forEach((item: any[]) => {
-                var date: string = item[0] 
+                var date: string = item[0]
                 item.slice(1).forEach((element, index) => {
-                    if(!!element) {
-                        if(!tmp[date]) {
+                    if (!!element) {
+                        if (!tmp[date]) {
                             tmp[date] = []
                         }
                         tmp[date][index] = element
@@ -297,7 +303,7 @@ export class ChartsExportService {
             });
             dataTable.data.push(dataPoint);
         });
-        
+
         if (properties.chartType === 'PieChart') {
             if (properties.calculateIntervals !== true) {
                 const transposed: any[] = [['', '']];
@@ -317,7 +323,7 @@ export class ChartsExportService {
                         dataTable.data.push([r[1], val]);
                     }
                 });
-                return  {table: dataTable, colors: res.colors.slice(1)};
+                return {table: dataTable, colors: res.colors.slice(1)};
             }
         } else if (properties.chartType === 'Timeline') {
             let breakInterval = -1;
@@ -431,7 +437,10 @@ export class ChartsExportService {
         return array;
     }
 
-    private transformTableForTimeline(dat: any[][], vAxes: ChartsExportVAxesModel[], breakInterval: number = -1, breakValue: number = 0, breakUnit: string = ''): {table: any[][]; colors: string[]} {
+    private transformTableForTimeline(dat: any[][], vAxes: ChartsExportVAxesModel[], breakInterval: number = -1, breakValue: number = 0, breakUnit: string = ''): {
+        table: any[][];
+        colors: string[]
+    } {
         const allSlices: any[][] = [];
         const offset = 60 * 1000 * (new Date(0).getTimezoneOffset());
         const colors: string[] = [customColor];
