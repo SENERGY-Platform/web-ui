@@ -135,15 +135,14 @@ export class ChartsExportService {
                     value: vAxis.valueType === 'string' ? vAxis.filterValue : Number(vAxis.filterValue),
                 });
             }
-            if (filters.length > 0) {
-                newField.filters = filters;
-            }
-
             const exp = widgetProperties.exports?.find(x => x.id === vAxis.instanceId);
             if (exp !== undefined &&
                 ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb)) {
                 (newField as QueriesRequestElementInfluxModel).measurement = vAxis.instanceId;
                 (newField as QueriesRequestElementInfluxModel).orderColumnIndex = 1;
+                if (filters.length > 0) {
+                    newField.filters = filters;
+                }
                 influxElements.push(newField);
                 influxResultMapper.push(index);
             } else {
@@ -152,6 +151,10 @@ export class ChartsExportService {
                 (newField as QueriesRequestElementTimescaleModel).deviceId = vAxis.deviceId;
                 (newField as QueriesRequestElementInfluxModel).orderColumnIndex = 0;
                 newField.columns[0].name = vAxis.valuePath || vAxis.valueName || '';
+                if (filters.length > 0) {
+                    filters.forEach(f => f.column =  vAxis.valuePath || vAxis.valueName || '');
+                    newField.filters = filters;
+                }
                 timescaleElements.push(newField);
                 timescaleResultMapper.push(index);
             }
