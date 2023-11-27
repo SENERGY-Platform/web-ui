@@ -48,6 +48,9 @@ export class DashboardService {
 
     dashboardAuthorizations: PermissionTestResponse
     widgetAuthorizations: PermissionTestResponse
+    widgetNameAuthorizations: PermissionTestResponse
+    widgetPositionAuthorizations: PermissionTestResponse
+    widgetPropertiesAuthorizations: PermissionTestResponse
 
     constructor(
         private dialog: MatDialog,
@@ -58,6 +61,9 @@ export class DashboardService {
     ) {
         this.dashboardAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/dashboards')
         this.widgetAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets')
+        this.widgetNameAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets/name')
+        this.widgetPositionAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets/position')
+        this.widgetPropertiesAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets/properties')
     }
 
 
@@ -107,10 +113,21 @@ export class DashboardService {
             .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteWidget', { message: 'error delete' })));
     }
 
-    updateWidget(dashboardId: string, widget: WidgetModel): Observable<DashboardResponseMessageModel> {
+    updateWidgetProperty(dashboardId: string, widgetId: string, pathToProperty: string[], newValue: any): Observable<DashboardResponseMessageModel> {
+        var url = environment.dashboardServiceUrl + '/widgets/properties' 
+        if(pathToProperty.length > 0) {
+            var pathToPropertyString = pathToProperty.join(".")
+            url += pathToPropertyString
+        }
         return this.http
-            .put<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/' + dashboardId  + '/' + widget.id, widget)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidget', { message: 'error update' })));
+            .patch<DashboardResponseMessageModel>(url + '/' + dashboardId  + '/' + widgetId, newValue)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetProperty', { message: 'error update' })));
+    }
+
+    updateWidgetName(dashboardId: string, widgetId: string, name: any): Observable<DashboardResponseMessageModel> {
+        return this.http
+            .patch<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/name/' + dashboardId  + '/' + widgetId, name)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetName', { message: 'error update' })));
     }
 
     updateWidgetPosition(dashboardId: string, widgetPositions: WidgetUpdatePosition[]): Observable<DashboardResponseMessageModel> {
@@ -221,8 +238,8 @@ export class DashboardService {
         return this.widgetAuthorizations["DELETE"]      
     }
 
-    userHasUpdateWidgetAuthorization(): boolean {
-        return this.widgetAuthorizations["PUT"]      
+    userHasUpdateWidgetPropertiesAuthorization(): boolean {
+        return this.widgetPropertiesAuthorizations["PATCH"]      
     }
 
     userHasCreateWidgetAuthorization(): boolean {
@@ -231,5 +248,9 @@ export class DashboardService {
 
     userHasMoveWidgetAuthorization(): boolean {
         return this.widgetAuthorizations["PATCH"]
+    }
+
+    userHasUpdateWidgetNameAuthorization(): boolean {
+        return this.widgetNameAuthorizations["PATCH"]
     }
 }

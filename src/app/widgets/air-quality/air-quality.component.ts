@@ -44,7 +44,8 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     constructor(
         private iconRegistry: MatIconRegistry,
@@ -72,7 +73,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.airRecommendationService.openEditDialog(this.dashboardId, this.widget.id);
+        this.airRecommendationService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     private update() {

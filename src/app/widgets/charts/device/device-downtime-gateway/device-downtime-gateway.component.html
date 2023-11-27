@@ -23,6 +23,6 @@
             <senergy-no-data [showIf]="ready && deviceDowntimeGateway.dataTable[0].length === 0"></senergy-no-data>
         </div>
     </mat-card-content>
-    <senergy-widget-footer [refreshing]="false" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()"></senergy-widget-footer>
+    <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="false" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

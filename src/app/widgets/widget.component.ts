@@ -27,7 +27,8 @@ export class WidgetComponent implements OnInit {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     constructor() {}
 

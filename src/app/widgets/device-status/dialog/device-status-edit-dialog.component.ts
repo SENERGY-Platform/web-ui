@@ -84,6 +84,9 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         convertRules: this.fb.array([]),
     });
 
+    userHasUpdateNameAuthorization: boolean = false
+    userHasUpdatePropertiesAuthorization: boolean = false
+
     constructor(
         private dialogRef: MatDialogRef<DeviceStatusEditDialogComponent>,
         private deploymentsService: DeploymentsService,
@@ -94,10 +97,17 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         private deviceStatusService: DeviceStatusService,
         private processSchedulerService: ProcessSchedulerService,
         private deviceInstanceService: DeviceInstancesService,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+        @Inject(MAT_DIALOG_DATA) data: { 
+            dashboardId: string; 
+            widgetId: string; 
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean
+        },
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
+        this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
+        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization
     }
 
     ngOnInit() {
@@ -405,17 +415,35 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return scheduleArray;
     }
 
-    private saveWidget() {
-        this.widgetNew.name = this.widgetName;
+
+    updateName(): Observable<DashboardResponseMessageModel> {
+        var newName = this.widgetName;
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widgetId, newName)
+    }
+    
+    updateProperties(): Observable<DashboardResponseMessageModel> {
         this.widgetNew.properties = {};
         this.widgetNew.properties.refreshTime = (this.formGroup.get('refreshTime') as FormControl).value;
         this.widgetNew.properties.elements = this.elements;
         this.widgetNew.properties.convertRules = this.convertRulesControl.value;
-        this.dashboardService.updateWidget(this.dashboardId, this.widgetNew).subscribe((resp: DashboardResponseMessageModel) => {
-            if (resp.message === 'OK') {
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widgetId, [], this.widgetNew.properties)
+    }
+    
+    saveWidget(): void {
+        var obs = []
+        if(this.userHasUpdateNameAuthorization) {
+            obs.push(this.updateName())
+        }
+        if(this.userHasUpdatePropertiesAuthorization) {
+            obs.push(this.updateProperties())
+        }
+
+        forkJoin(obs).subscribe(responses => {
+            var errorOccured = responses.find((response) => response.message != "OK")
+            if(!errorOccured) {
                 this.dialogRef.close(this.widgetNew);
             }
-        });
+        })
     }
 
     private cleanExportModel(exportModel: ExportModel, exportValue: ExportValueCharacteristicModel) {

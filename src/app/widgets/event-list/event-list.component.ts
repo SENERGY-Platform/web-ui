@@ -36,7 +36,8 @@ export class EventListComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     constructor(private eventListService: EventListService, private dashboardService: DashboardService) {}
 
@@ -49,7 +50,7 @@ export class EventListComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.eventListService.openEditDialog(this.dashboardId, this.widget.id);
+        this.eventListService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization);
     }
 
     private initMockup() {

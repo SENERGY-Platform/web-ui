@@ -20,6 +20,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { forkJoin, Observable } from 'rxjs';
 
 @Component({
     templateUrl: './process-scheduler-schedule-edit-dialog.component.html',
@@ -30,15 +31,24 @@ export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
     readAll = false;
+    userHasUpdateNameAuthorization: boolean = false
+    userHasUpdatePropertiesAuthorization: boolean = false 
 
     constructor(
         private dialogRef: MatDialogRef<ProcessSchedulerScheduleEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+        @Inject(MAT_DIALOG_DATA) data: { 
+            dashboardId: string; 
+            widgetId: string, 
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean
+        },
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
+        this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
+        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization
     }
 
     ngOnInit() {
@@ -56,12 +66,28 @@ export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    save(): void {
+    updateName(): Observable<DashboardResponseMessageModel> {
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.widget.name)
+    }
+
+    updateProperties(): Observable<DashboardResponseMessageModel> {
         this.widget.properties.readAll = this.readAll;
-        this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
-            if (resp.message === 'OK') {
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+    }
+
+    save(): void {
+        var obs = []
+        if(this.userHasUpdateNameAuthorization) {
+            obs.push(this.updateName())
+        }
+        if(this.userHasUpdatePropertiesAuthorization) {
+            obs.push(this.updateProperties())
+        }        
+        forkJoin(obs).subscribe(responses => {
+            var errorOccured = responses.find((response) => response.message != "OK")
+            if(!errorOccured) {
                 this.dialogRef.close(this.widget);
             }
-        });
+        })
     }
 }

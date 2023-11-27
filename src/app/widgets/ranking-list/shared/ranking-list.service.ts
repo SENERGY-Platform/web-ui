@@ -27,12 +27,14 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 export class RankingListService {
     constructor(private dialog: MatDialog, private dashboardService: DashboardService) {}
 
-    openEditDialog(dashboardId: string, widgetId: string): void {
+    openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             widgetId,
             dashboardId,
+            userHasUpdateNameAuthorization,
+            userHasUpdatePropertiesAuthorization
         };
         const editDialogRef = this.dialog.open(RankingListEditDialogComponent, dialogConfig);
 

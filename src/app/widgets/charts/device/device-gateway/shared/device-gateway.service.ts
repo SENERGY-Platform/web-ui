@@ -47,12 +47,13 @@ export class DeviceGatewayService {
         private networksService: NetworksService,
     ) {}
 
-    openEditDialog(dashboardId: string, widgetId: string): void {
+    openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             widgetId,
             dashboardId,
+            userHasUpdateNameAuthorization
         };
         const editDialogRef = this.dialog.open(DeviceGatewayEditDialogComponent, dialogConfig);
 

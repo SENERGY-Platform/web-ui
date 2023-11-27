@@ -29,7 +29,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 export class RangeSliderService {
     constructor(private dialog: MatDialog, private http: HttpClient, private dashboardService: DashboardService) {}
 
-    openEditDialog(dashboardId: string, widgetId: string): void {
+    openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
         // dialogConfig.autoFocus = true;
         dialogConfig.disableClose = false;
@@ -38,6 +38,8 @@ export class RangeSliderService {
         dialogConfig.data = {
             widgetId,
             dashboardId,
+            userHasUpdateNameAuthorization,
+            userHasUpdatePropertiesAuthorization
         };
         const editDialogRef = this.dialog.open(RangeSliderEditDialogComponent, dialogConfig);
 

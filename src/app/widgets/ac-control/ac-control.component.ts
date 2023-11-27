@@ -35,7 +35,8 @@ export class AcControlComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     ready = false;
     refreshing = false;
@@ -62,6 +63,8 @@ export class AcControlComponent implements OnInit, OnDestroy {
         dialogConfig.data = {
             widget: this.widget,
             dashboardId: this.dashboardId,
+            userHasUpdateNameAuth: this.userHasUpdateNameAuthorization,
+            userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization
         };
         dialogConfig.minWidth = '350px';
         const editDialogRef = this.dialog.open(AcControlEditDialogComponent, dialogConfig);

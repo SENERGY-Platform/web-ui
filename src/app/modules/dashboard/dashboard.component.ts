@@ -69,10 +69,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     userHasUpdateDashboardAuthorization: boolean = false
     userHasDeleteDashboardAuthorization: boolean = false
     userHasCreateDashboardAuthorization: boolean = false
-    userHasUpdateWidgetAuthorization: boolean = false
+    userHasUpdateWidgetPropertiesAuthorization: boolean = false
     userHasDeleteWidgetAuthorization: boolean = false
     userHasCreateWidgetAuthorization: boolean = false
     userHasMoveWidgetAuthorization: boolean = false
+    userHasUpdateWidgetNameAuthorization: boolean = false 
 
     constructor(
         private responsiveService: ResponsiveService,
@@ -106,7 +107,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.userHasDeleteDashboardAuthorization = this.dashboardService.userHasDeleteDashboardAuthorization()
         this.userHasCreateDashboardAuthorization = this.dashboardService.userHasCreateDashboardAuthorization()
 
-        this.userHasUpdateWidgetAuthorization = this.dashboardService.userHasUpdateWidgetAuthorization()
+        this.userHasUpdateWidgetPropertiesAuthorization = this.dashboardService.userHasUpdateWidgetPropertiesAuthorization()
+        this.userHasUpdateWidgetNameAuthorization = this.dashboardService.userHasUpdateWidgetNameAuthorization()
+
         this.userHasDeleteWidgetAuthorization = this.dashboardService.userHasDeleteWidgetAuthorization()
         this.userHasCreateWidgetAuthorization = this.dashboardService.userHasCreateWidgetAuthorization()
         this.userHasMoveWidgetAuthorization = this.dashboardService.userHasMoveWidgetAuthorization()

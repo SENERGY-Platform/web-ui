@@ -49,7 +49,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     @HostListener('window:resize')
     onResize() {
@@ -92,7 +93,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.chartsExportService.openEditDialog(this.dashboardId, this.widget.id);
+        this.chartsExportService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     private scheduleRefresh() {

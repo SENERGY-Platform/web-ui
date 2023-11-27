@@ -27,12 +27,14 @@ import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/das
 export class DeviceStatusDialogService {
     constructor(private dialog: MatDialog, private dashboardService: DashboardService) {}
 
-    openEditDialog(dashboardId: string, widgetId: string): void {
+    openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             widgetId,
             dashboardId,
+            userHasUpdateNameAuthorization,
+            userHasUpdatePropertiesAuthorization
         };
         dialogConfig.minWidth = '675px';
         const editDialogRef = this.dialog.open(DeviceStatusEditDialogComponent, dialogConfig);

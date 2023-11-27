@@ -16,7 +16,7 @@
 
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import {filter, map, startWith} from 'rxjs/operators';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -51,15 +51,24 @@ export class SwitchEditDialogComponent implements OnInit {
     widgetId: string;
     widget: WidgetModel = { properties: { imgUrl: '' } } as WidgetModel;
     newTrigger = 'on';
+    userHasUpdateNameAuthorization: boolean = false
+    userHasUpdatePropertiesAuthorization: boolean = false
 
     constructor(
         private dialogRef: MatDialogRef<SwitchEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+        @Inject(MAT_DIALOG_DATA) data: { 
+            dashboardId: string; 
+            widgetId: string, 
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean
+        },
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
+        this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
+        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization
     }
 
     ngOnInit() {
@@ -95,17 +104,34 @@ export class SwitchEditDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    save(): void {
+    updateName(): Observable<DashboardResponseMessageModel> {
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.widget.name)
+    }
+
+    updateSwitchProperties(): Observable<DashboardResponseMessageModel> {
         const deploymentsArray: SwitchPropertiesDeploymentsModel[] = [];
         this.data.forEach((deployments: SwitchPropertiesDeploymentsModel) => {
             deploymentsArray.push(deployments);
         });
         this.widget.properties.deployments = deploymentsArray;
-        this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
-            if (resp.message === 'OK') {
-                this.dialogRef.close(this.widget);
-            }
-        });
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+    }
+
+    save(): void {
+        var obs = []
+        if(this.userHasUpdateNameAuthorization) {
+            obs.push(this.updateName())
+        }
+        if(this.userHasUpdatePropertiesAuthorization) {
+            obs.push(this.updateSwitchProperties())
+        }       
+        
+        forkJoin(obs).subscribe(responses => {
+           var errorOccured = responses.find((response) => response.message != "OK")
+           if(!errorOccured) {
+               this.dialogRef.close(this.widget);
+           } 
+       })
     }
 
     private _filter(value: string): DeploymentsModel[] {

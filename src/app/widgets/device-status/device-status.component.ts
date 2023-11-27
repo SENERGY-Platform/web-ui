@@ -47,7 +47,9 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
+
     @ViewChild(MatTable, { static: false }) table!: MatTable<any>;
 
     constructor(
@@ -69,7 +71,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.deviceStatusDialogService.openEditDialog(this.dashboardId, this.widget.id);
+        this.deviceStatusDialogService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     private update() {

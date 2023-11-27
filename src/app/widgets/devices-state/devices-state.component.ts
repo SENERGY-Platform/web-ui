@@ -38,7 +38,8 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     constructor(private devicesStateService: DevicesStateService, private dashboardService: DashboardService, private router: Router) {}
 
@@ -51,7 +52,7 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.devicesStateService.openEditDialog(this.dashboardId, this.widget.id);
+        this.devicesStateService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization);
     }
 
     private setDeviceStatus() {

@@ -18,7 +18,7 @@
 
 <mat-dialog-content>
     <div fxLayout="column">
-        <mat-form-field color="accent">
+        <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
             <mat-label>Name</mat-label>
             <label>
                 <input matInput placeholder="Name" [(ngModel)]="widget.name">

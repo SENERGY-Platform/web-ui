@@ -23,6 +23,6 @@
             <senergy-no-data [showIf]="ready && processDeploymentsHistory.dataTable[0].length === 0"></senergy-no-data>
         </div>
     </mat-card-content>
-    <senergy-widget-footer [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()"></senergy-widget-footer>
+    <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

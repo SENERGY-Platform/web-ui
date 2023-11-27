@@ -36,7 +36,8 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     constructor(
         private eventListService: DeviceDowntimeListService,
@@ -53,7 +54,7 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.processModelListService.openEditDialog(this.dashboardId, this.widget.id);
+        this.processModelListService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     private getProcesses() {

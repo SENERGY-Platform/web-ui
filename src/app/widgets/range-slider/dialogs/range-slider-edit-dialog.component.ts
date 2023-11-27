@@ -28,6 +28,7 @@ import {DeploymentsService} from '../../../modules/processes/deployments/shared/
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {CamundaVariable} from '../../../modules/processes/deployments/shared/deployments-definition.model';
 import {checkValueValidator} from './range-slider-edit-dialog.validators';
+import { forkJoin, Observable } from 'rxjs';
 
 @Component({
     templateUrl: './range-slider-edit-dialog.component.html',
@@ -55,15 +56,25 @@ export class RangeSliderEditDialogComponent implements OnInit {
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
 
+    userHasUpdateNameAuthorization: boolean = false
+    userHasUpdatePropertiesAuthorization: boolean = false 
+
     constructor(
         private dialogRef: MatDialogRef<RangeSliderEditDialogComponent>,
         private dashboardService: DashboardService,
         private deploymentsService: DeploymentsService,
         private formBuilder: UntypedFormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+        @Inject(MAT_DIALOG_DATA) data: { 
+            dashboardId: string; 
+            widgetId: string, 
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean 
+        },
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
+        this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
+        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
     }
 
     ngOnInit() {
@@ -101,18 +112,36 @@ export class RangeSliderEditDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    save(): void {
+    updateName(): Observable<DashboardResponseMessageModel> {
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.widget.name)
+    }
+
+    updateProperties(): Observable<DashboardResponseMessageModel> {
         this.widget.properties.deployment = this.formGroup.get('deployment')?.value;
         this.widget.properties.selectedParameter = this.formGroup.get('parameter')?.value;
         this.widget.properties.selectedMinValue = this.formGroup.get('minValue')?.value;
         this.widget.properties.selectedMaxValue = this.formGroup.get('maxValue')?.value;
         this.widget.properties.selectedUnit = this.formGroup.get('unit')?.value;
         this.widget.properties.selectedParameterModel = this.parametersMap.get(this.formGroup.get('parameter')?.value);
-        this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
-            if (resp.message === 'OK') {
+       
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+    }
+
+    save(): void {
+        var obs = []
+        if(this.userHasUpdateNameAuthorization) {
+            obs.push(this.updateName())
+        }
+        if(this.userHasUpdatePropertiesAuthorization) {
+            obs.push(this.updateProperties())
+        }        
+        
+        forkJoin(obs).subscribe(responses => {
+            var errorOccured = responses.find((response) => response.message != "OK")
+            if(!errorOccured) {
                 this.dialogRef.close(this.widget);
             }
-        });
+        })
     }
 
     initDeployments() {

@@ -45,7 +45,8 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     constructor(
         private processSchedulerService: ProcessSchedulerService,
@@ -66,7 +67,7 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.processSchedulerService.openEditDialog(this.dashboardId, this.widget.id);
+        this.processSchedulerService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     delete(scheduleId: string) {

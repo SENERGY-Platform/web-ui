@@ -15,14 +15,14 @@
   -->
 
 <mat-card appearance="outlined" class="switch-container">
-    <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <img mat-card-image class="drag-handler"
-         src="{{widget.properties.imgUrl}}" alt="">
-    <div>
-        <mat-slide-toggle [(ngModel)]="widget.properties.active" (change)="toggle()" class="padding" mat-button
-                          color="accent"></mat-slide-toggle>
-        <div fxFlex class="drag-handler"></div>
-    </div>
-    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+  <senergy-widget-header [widget]="widget"></senergy-widget-header>
+  <img mat-card-image class="drag-handler" src="{{widget.properties.imgUrl}}" alt="">
+  <div>
+    <mat-slide-toggle [(ngModel)]="widget.properties.active" (change)="toggle()" class="padding" mat-button
+      color="accent"></mat-slide-toggle>
+    <div fxFlex class="drag-handler"></div>
+  </div>
+  <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasDeleteAuthorization]="userHasDeleteAuthorization"
+    [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [dashboardId]="dashboardId" [widget]="widget"
+    (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
-

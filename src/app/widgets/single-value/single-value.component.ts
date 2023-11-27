@@ -73,7 +73,9 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     @Input() zoom = false;
     @ViewChild('content', {static: false}) contentBox!: ElementRef;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
+
     dateControl: FormControl<string | null> = new FormControl<string>('');
 
     constructor(
@@ -115,7 +117,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.singleValueService.openEditDialog(this.dashboardId, this.widget.id);
+        this.singleValueService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     width(): number {

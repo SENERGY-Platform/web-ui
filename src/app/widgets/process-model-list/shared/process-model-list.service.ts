@@ -31,12 +31,13 @@ import { ProcessRepoService } from '../../../modules/processes/process-repo/shar
 export class ProcessModelListService {
     constructor(private dialog: MatDialog, private dashboardService: DashboardService, private processRepoService: ProcessRepoService) {}
 
-    openEditDialog(dashboardId: string, widgetId: string): void {
+    openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             widgetId,
             dashboardId,
+            userHasUpdateNameAuthorization
         };
         const editDialogRef = this.dialog.open(ProcessModelListEditDialogComponent, dialogConfig);
 

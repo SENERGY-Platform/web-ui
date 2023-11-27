@@ -56,6 +56,7 @@ import {boundaryValidator, elementDetailsValidator, exportValidator} from './dat
 import {util} from 'jointjs';
 import {environment} from '../../../../environments/environment';
 import uuid = util.uuid;
+import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
 
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
@@ -117,6 +118,8 @@ export class DataTableEditDialogComponent implements OnInit {
         convertRules: this.fb.array([]),
         valuesPerElement: [1, Validators.min(1)],
     });
+    userHasUpdateNameAuthorization: boolean = false
+    userHasUpdatePropertiesAuthorization: boolean = false 
 
     constructor(
         private dialogRef: MatDialogRef<DataTableEditDialogComponent>,
@@ -128,10 +131,17 @@ export class DataTableEditDialogComponent implements OnInit {
         private fb: UntypedFormBuilder,
         private processSchedulerService: ProcessSchedulerService,
         private cdref: ChangeDetectorRef,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+        @Inject(MAT_DIALOG_DATA) data: { 
+            dashboardId: string; 
+            widgetId: string; 
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean 
+        },
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
+        this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
+        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization
     }
 
     get convertRulesControl(): FormArray {
@@ -388,29 +398,46 @@ export class DataTableEditDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
+    updateName(): Observable<DashboardResponseMessageModel> {
+        var newName = this.formGroup.get('name')?.value;
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widgetId, newName)
+    }
+
     save(): void {
         this.saving = true;
         this.ensureCorrectExportCreatedByWidget();
-        this.widget.name = this.formGroup.get('name')?.value;
-        const observables: Observable<any>[] = [];
-        observables.push(...this.createDeploymentsAndSchedules());
-        observables.push(...this.dataTableService.deleteElementsAndObserve(this.widget.properties.dataTable?.elements));
-        observables.push(...this.createExports());
+        var updateObs: Observable<any>[] = []
 
-        forkJoin(observables)
+        if(this.userHasUpdateNameAuthorization) {
+            updateObs.push(this.updateName())
+        }
+
+        if(this.userHasUpdatePropertiesAuthorization) {
+            var observables: Observable<any>[] = [];
+
+            observables.push(...this.createDeploymentsAndSchedules());
+            observables.push(...this.dataTableService.deleteElementsAndObserve(this.widget.properties.dataTable?.elements));
+            observables.push(...this.createExports());
+
+            var obs = forkJoin(observables)
             .pipe(
                 flatMap(() => {
                     this.widget.properties.dataTable = this.formGroup.value;
-                    return this.dashboardService.updateWidget(this.dashboardId, this.widget);
+                    return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widgetId, [], this.widget.properties);
                 }),
             )
-            .subscribe((resp) => {
-                if (resp.message === 'OK') {
-                    this.dialogRef.close(this.widget);
-                } else {
-                    this.saving = false;
-                }
-            });
+
+            updateObs.push(obs)
+        }
+
+        forkJoin(updateObs).subscribe((responses) => {
+            var errorOccured = responses.find((response) => response.message != "OK")
+            if(!errorOccured) {
+                this.dialogRef.close(this.widget);
+            } else {
+                this.saving = false;
+            }
+        });
     }
 
     addNewMeasurement() {

@@ -119,7 +119,8 @@ describe('DataTableEditDialogComponent', () => {
             );
 
             dashboardServiceSpy.getWidget.and.returnValue(of({ name: 'test', properties: {} } as WidgetModel));
-            dashboardServiceSpy.updateWidget.and.returnValue(of({ message: 'OK' }));
+            dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'OK' }));
+            dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'OK' }));
 
             dataTableHelperServiceSpy.initialize.and.returnValue(of(null));
             dataTableHelperServiceSpy.preloadExports.and.returnValue(of([]));
@@ -317,8 +318,8 @@ describe('DataTableEditDialogComponent', () => {
             expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
             expect(element?.get('exportId')?.value).toBe(null);
 
-            expect(dashboardServiceSpy.updateWidget.calls.count()).toBe(1);
-            expect(dashboardServiceSpy.updateWidget.calls.mostRecent().args).toEqual([
+            expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
+            expect(dashboardServiceSpy.updateWidgetProperty.calls.mostRecent().args).toEqual([
                 'dashboardId-1',
                 {
                     name: 'test',

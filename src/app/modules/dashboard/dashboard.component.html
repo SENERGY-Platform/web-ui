@@ -79,7 +79,9 @@
 
                 <div *ngIf="zoomedWidgetIndex !== null">
                     <div class="zoomed-widget">
-                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization" [userHasUpdateAuthorization]="userHasUpdateWidgetAuthorization"
+                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization" 
+                                        [userHasUpdatePropertiesAuthorization]="userHasUpdateWidgetPropertiesAuthorization"
+                                        [userHasUpdateNameAuthorization]="userHasUpdateWidgetNameAuthorization"
                                         [dashboardId]="dashboard.id"
                                         [widget]="dashboards[activeTabIndex].widgets[zoomedWidgetIndex]"
                                         [zoom]="true"></senergy-widget>
@@ -91,7 +93,12 @@
                     <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets"
                                    [ngClass]="inDragMode ? 'highlight color-sidenav' : ''"
                                    class="mat-elevation-z1">
-                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization" [userHasUpdateAuthorization]="userHasUpdateWidgetAuthorization" [dashboardId]="dashboard.id" [widget]="widget" [zoom]="false"></senergy-widget>
+                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization" 
+                                        [userHasUpdatePropertiesAuthorization]="userHasUpdateWidgetPropertiesAuthorization" 
+                                        [userHasUpdateNameAuthorization]="userHasUpdateWidgetNameAuthorization"
+                                        [dashboardId]="dashboard.id" 
+                                        [widget]="widget" 
+                                        [zoom]="false"></senergy-widget>
                     </gridster-item>
                 </gridster>
             </div>

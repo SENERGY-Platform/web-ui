@@ -21,7 +21,7 @@
         <table>
             <tr>
                 <td>
-                    <mat-form-field color="accent">
+                    <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
                         <mat-label>Widget Name</mat-label>
                         <input type="text" matInput placeholder="Widget Name" formControlName="name">
                     </mat-form-field>

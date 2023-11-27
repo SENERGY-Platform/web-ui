@@ -128,7 +128,9 @@ describe('DeviceStatusEditDialogComponent', () => {
             );
 
             dashboardServiceSpy.getWidget.and.returnValue(of({ name: 'test', properties: {} } as WidgetModel));
-            dashboardServiceSpy.updateWidget.and.returnValue(of({ message: 'OK' }));
+            dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'OK' }));
+            dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'OK' }));
+
             deviceTypeServiceeSpy.getAspectNodesWithMeasuringFunction.and.returnValue(
                 of([
                     {

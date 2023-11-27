@@ -42,7 +42,8 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     @HostListener('window:resize')
     onResize() {
@@ -71,7 +72,7 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.deviceDowntimeGatewayService.openEditDialog(this.dashboardId, this.widget.id);
+        this.deviceDowntimeGatewayService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     private getProcessInstances() {

@@ -31,7 +31,7 @@ import { GeonamesService } from '../shared/geonames.service';
 import { Geoname } from '../shared/geonames.model';
 import { FormControl } from '@angular/forms';
 import { debounceTime, map } from 'rxjs/operators';
-import { forkJoin, from, Observable, of, Subscriber } from 'rxjs';
+import { forkJoin, from, Observable, of, Subscriber, concatMap } from 'rxjs';
 import { NameValuePair } from '../shared/dwd-pollen.model';
 import { ImportInstancesService } from '../../../modules/imports/import-instances/shared/import-instances.service';
 import { ImportInstancesModel } from '../../../modules/imports/import-instances/shared/import-instances.model';
@@ -65,14 +65,23 @@ export class AirQualityEditDialogComponent implements OnInit {
         private importTypesService: ImportTypesService,
         private deviceInstancesService: DeviceInstancesService,
         private deviceTypeService: DeviceTypeService,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+        @Inject(MAT_DIALOG_DATA) data: { 
+            dashboardId: string; 
+            widgetId: string; 
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean
+        },
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
+        this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
+        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
         this.geonamesSearchResults = from([]);
         this.pollenLevel = dwdPollenService.getNameValuePairs();
     }
 
+    userHasUpdateNameAuthorization: boolean = false
+    userHasUpdatePropertiesAuthorization: boolean = false
     exports: ExportModel[] = [];
     dashboardId: string;
     widgetId: string;
@@ -461,28 +470,43 @@ export class AirQualityEditDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    save(): void {
-        this.ready = false;
+    updateName(): Observable<DashboardResponseMessageModel> {
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.name)
+    }
+    
+    updateProperties(): Observable<DashboardResponseMessageModel> {
         const observables: Observable<any>[] = [];
         observables.push(this.prepareDWDSave());
         observables.push(this.prepareUbaSave());
         observables.push(this.prepareYrSave());
-        forkJoin(observables).subscribe((_) => {
-            this.widget.properties.version = 4; // can use devices and queries timescale
-            this.widget.properties.measurements = this.measurements;
-            this.widget.properties.location = this.location;
-            this.widget.properties.formatted_address = this.formatted_address;
-            this.widget.name = this.name;
-            this.widget.properties.pollen = this.pollen;
+        return forkJoin(observables).pipe(
+            concatMap((_) => {
+                this.widget.properties.version = 4; // can use devices and queries timescale
+                this.widget.properties.measurements = this.measurements;
+                this.widget.properties.location = this.location;
+                this.widget.properties.formatted_address = this.formatted_address;
+                this.widget.properties.pollen = this.pollen;
+                return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+            })
+        );
+    }
+    
+    save(): void {
+        this.ready = false;
+        var obs = []
+        if(this.userHasUpdateNameAuthorization) {
+            obs.push(this.updateName())
+        }
 
-            this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
-                if (resp.message === 'OK') {
-                    this.dialogRef.close(this.widget);
-                } else {
-                    this.ready = true;
-                }
-            });
-        });
+        if(this.userHasUpdatePropertiesAuthorization) {
+            obs.push(this.updateProperties())
+        }
+        forkJoin(obs).subscribe(responses => {
+            var errorOccured = responses.find((response) => response.message != "OK")
+            if(!errorOccured) {
+                this.dialogRef.close(this.widget);
+            }
+        })
     }
 
     displayFn(input?: ChartsExportMeasurementModel): string | undefined {

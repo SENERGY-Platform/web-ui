@@ -39,7 +39,7 @@ export class SwitchService {
         private errorHandlerService: ErrorHandlerService,
     ) {}
 
-    openEditDialog(dashboardId: string, widgetId: string): void {
+    openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
         // dialogConfig.autoFocus = true;
         dialogConfig.disableClose = false;
@@ -48,6 +48,8 @@ export class SwitchService {
         dialogConfig.data = {
             widgetId,
             dashboardId,
+            userHasUpdateNameAuthorization,
+            userHasUpdatePropertiesAuthorization
         };
         const editDialogRef = this.dialog.open(SwitchEditDialogComponent, dialogConfig);
 

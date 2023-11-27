@@ -134,6 +134,8 @@ export class LadonService {
             environment.processIoUrl,
             environment.dashboardServiceUrl + '/dashboards',
             environment.dashboardServiceUrl + '/widgets',
+            environment.dashboardServiceUrl + '/widgets/name',
+            environment.dashboardServiceUrl + '/widgets/properties',
             environment.usersServiceUrl,
             environment.notificationsUrl,
             environment.waitingRoomUrl

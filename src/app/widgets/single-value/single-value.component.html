@@ -54,7 +54,7 @@
             </mat-form-field>
         </div>
     </mat-card-content>
-    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()" [optionZoom]="widget.properties.group?.type === undefined"  [refreshing]="refreshing"
-                           [zoom]="zoom" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization"></senergy-widget-footer>
+    <senergy-widget-footer [widgetHasUpdateableProperties]="true" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()" [optionZoom]="widget.properties.group?.type === undefined"  [refreshing]="refreshing"
+                           [zoom]="zoom" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"></senergy-widget-footer>
 </mat-card>
 

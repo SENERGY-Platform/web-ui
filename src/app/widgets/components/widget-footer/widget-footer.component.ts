@@ -19,6 +19,8 @@ import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { WidgetFooterService } from './shared/widget-footer.service';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Component({
     selector: 'senergy-widget-footer',
@@ -35,14 +37,21 @@ export class WidgetFooterComponent implements OnInit {
     @Input() optionCustomTooltip: string[] = [];
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
+    @Input() widgetHasUpdateableProperties = false;
     @Input() refreshing = false;
 
     @Output() editEvent = new EventEmitter<boolean>();
     @Output() addEvent = new EventEmitter<boolean>();
     @Output() customEvent = new EventEmitter<{index: number; icon: string}>();
 
-    constructor(private widgetHeaderService: WidgetFooterService, private dashboardService: DashboardService) {}
+    constructor(
+        private widgetHeaderService: WidgetFooterService, 
+        private dashboardService: DashboardService,
+    ) {
+        
+    }
 
     ngOnInit() {}
 

@@ -36,7 +36,8 @@ export class RankingListComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     constructor(private rankingListService: RankingListService, private dashboardService: DashboardService) {}
 
@@ -55,7 +56,7 @@ export class RankingListComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.rankingListService.openEditDialog(this.dashboardId, this.widget.id);
+        this.rankingListService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     initMockup() {

@@ -35,7 +35,8 @@ export class SwitchComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = { properties: {} as WidgetPropertiesModels } as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     constructor(private switchService: SwitchService, private dashboardService: DashboardService) {}
 
@@ -53,7 +54,7 @@ export class SwitchComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.switchService.openEditDialog(this.dashboardId, this.widget.id);
+        this.switchService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     toggle() {
@@ -77,11 +78,11 @@ export class SwitchComponent implements OnInit, OnDestroy {
             if (deploymentsArray.length > 0) {
                 this.switchService.startMultipleDeployments(deploymentsArray).subscribe((instances: SwitchPropertiesInstancesModel[]) => {
                     this.widget.properties.instances = instances;
-                    this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe();
+                    this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties).subscribe();
                 });
             } else {
                 this.widget.properties.instances = [];
-                this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe();
+                this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties).subscribe();
             }
         }
     }

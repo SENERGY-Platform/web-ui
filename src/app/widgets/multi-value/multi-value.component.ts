@@ -40,7 +40,9 @@ export class MultiValueComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
+
     @ViewChild(MatTable, { static: false }) table!: MatTable<any>;
 
     constructor(
@@ -65,7 +67,7 @@ export class MultiValueComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.multiValueService.openEditDialog(this.dashboardId, this.widget.id);
+        this.multiValueService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     checkWarning(m: MultiValueMeasurement): boolean {

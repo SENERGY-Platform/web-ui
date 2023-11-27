@@ -19,7 +19,7 @@
 <mat-dialog-content >
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <form *ngIf="ready" [formGroup]="form" fxLayout="column">
-        <mat-form-field color="accent">
+        <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
             <mat-label>Widget Name</mat-label>
             <input type="text" matInput placeholder="Widget Name" formControlName="name" required>
         </mat-form-field>

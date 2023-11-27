@@ -42,13 +42,15 @@ export class ProcessSchedulerService {
         private snackBar: MatSnackBar,
     ) {}
 
-    openEditDialog(dashboardId: string, widgetId: string): void {
+    openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.minHeight = '235px';
         dialogConfig.data = {
             widgetId,
             dashboardId,
+            userHasUpdateNameAuthorization,
+            userHasUpdatePropertiesAuthorization
         };
         const editDialogRef = this.dialog.open(ProcessSchedulerScheduleEditDialogComponent, dialogConfig);
 

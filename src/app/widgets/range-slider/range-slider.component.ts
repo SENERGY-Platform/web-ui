@@ -37,7 +37,8 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = { properties: {} as WidgetPropertiesModels } as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     constructor(
         private rangeSliderService: RangeSliderService,
@@ -58,7 +59,7 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.rangeSliderService.openEditDialog(this.dashboardId, this.widget.id);
+        this.rangeSliderService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     sliderRange(event: MatSliderChange) {
@@ -76,7 +77,7 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
                         ]),
                     )
                     .subscribe();
-                this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe();
+                this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties).subscribe();
             }
         }
     }

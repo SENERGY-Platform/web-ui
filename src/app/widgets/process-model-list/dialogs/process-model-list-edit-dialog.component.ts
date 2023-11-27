@@ -29,15 +29,17 @@ export class ProcessModelListEditDialogComponent implements OnInit {
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
+    userHasUpdateNameAuthorization: boolean = false
 
     constructor(
         private dialogRef: MatDialogRef<ProcessModelListEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string, userHasUpdateNameAuthorization: boolean},
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
+        this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
     }
 
     ngOnInit() {
@@ -55,7 +57,7 @@ export class ProcessModelListEditDialogComponent implements OnInit {
     }
 
     save(): void {
-        this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
+        this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.widget.name).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widget);
             }

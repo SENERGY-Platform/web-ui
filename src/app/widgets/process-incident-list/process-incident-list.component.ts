@@ -39,7 +39,8 @@ export class ProcessIncidentListComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     constructor(
         private processIncidentListService: ProcessIncidentListService,
@@ -57,7 +58,7 @@ export class ProcessIncidentListComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.processIncidentListService.openEditDialog(this.dashboardId, this.widget.id);
+        this.processIncidentListService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     navigateToMonitorSection(incident: ProcessIncidentsModel) {

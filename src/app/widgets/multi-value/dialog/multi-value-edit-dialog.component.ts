@@ -26,6 +26,7 @@ import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared
 import { MultiValueMeasurement, MultiValueOrderEnum } from '../shared/multi-value.model';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { emptyObjectValidator } from '../../../core/validators/empty-object.validator';
+import { forkJoin, Observable } from 'rxjs';
 
 @Component({
     templateUrl: './multi-value-edit-dialog.component.html',
@@ -46,16 +47,26 @@ export class MultiValueEditDialogComponent implements OnInit {
         measurements: this.fb.array([]),
     });
 
+    userHasUpdateNameAuthorization: boolean = false
+    userHasUpdatePropertiesAuthorization: boolean = false 
+
     constructor(
         private dialogRef: MatDialogRef<MultiValueEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
         private exportService: ExportService,
         private fb: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+        @Inject(MAT_DIALOG_DATA) data: { 
+            dashboardId: string; 
+            widgetId: string, 
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean 
+        },
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
+        this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
+        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization
     }
 
     ngOnInit() {
@@ -255,7 +266,12 @@ export class MultiValueEditDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    save(): void {
+    updateName(): Observable<DashboardResponseMessageModel> {
+        var newName = (this.formGroup.get('name') as FormControl).value;
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName)
+    }
+
+    updateProperties(): Observable<DashboardResponseMessageModel> {
         const measurements: MultiValueMeasurement[] = [];
         this.getMeasurements().controls.forEach((control, index) => {
             const warnGroup = this.getWarningGroup(index);
@@ -274,14 +290,26 @@ export class MultiValueEditDialogComponent implements OnInit {
             measurements.push(m);
         });
         this.widget.properties.multivaluemeasurements = measurements;
-        this.widget.name = (this.formGroup.get('name') as FormControl).value;
         this.widget.properties.order = (this.formGroup.get('order') as FormControl).value;
         this.widget.properties.valueAlias = (this.formGroup.get('valueAlias') as FormControl).value;
-        this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
-            if (resp.message === 'OK') {
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+    }
+
+    save(): void {
+        var obs = []
+        if(this.userHasUpdateNameAuthorization) {
+            obs.push(this.updateName())
+        }
+        if(this.userHasUpdatePropertiesAuthorization) {
+            obs.push(this.updateProperties())
+        }        
+        
+        forkJoin(obs).subscribe(responses => {
+            var errorOccured = responses.find((response) => response.message != "OK")
+            if(!errorOccured) {
                 this.dialogRef.close(this.widget);
             }
-        });
+        })
     }
 
     addNewMeasurement() {

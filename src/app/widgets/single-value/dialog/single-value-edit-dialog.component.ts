@@ -32,6 +32,7 @@ import {DeviceTypeServiceModel} from '../../../modules/metadata/device-types-ove
 import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 import {ChartsExportRequestPayloadGroupModel} from '../../charts/export/shared/charts-export-request-payload.model';
+import { forkJoin, Observable } from 'rxjs';
 
 @Component({
     templateUrl: './single-value-edit-dialog.component.html',
@@ -85,6 +86,9 @@ export class SingleValueEditDialogComponent implements OnInit {
         service: {},
     });
 
+    userHasUpdateNameAuthorization: boolean = false 
+    userHasUpdatePropertiesAuthorization: boolean = false 
+
     constructor(
         private dialogRef: MatDialogRef<SingleValueEditDialogComponent>,
         private deploymentsService: DeploymentsService,
@@ -93,10 +97,17 @@ export class SingleValueEditDialogComponent implements OnInit {
         private fb: UntypedFormBuilder,
         private deviceTypeService: DeviceTypeService,
         private deviceInstancesService: DeviceInstancesService,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+        @Inject(MAT_DIALOG_DATA) data: { 
+            dashboardId: string; 
+            widgetId: string, 
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean
+        },
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
+        this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
+        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
     }
 
     ngOnInit() {
@@ -184,7 +195,12 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    save(): void {
+    updateName(): Observable<DashboardResponseMessageModel> {
+        var newName = this.form.get('name')?.value || '';
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName)
+    }
+
+    updateProperties(): Observable<DashboardResponseMessageModel> {
         const measurement = this.form.get('measurement')?.value as ChartsExportMeasurementModel || undefined;
         this.widget.properties.measurement = {
             id: this.form.get('measurement')?.value?.id,
@@ -194,7 +210,6 @@ export class SingleValueEditDialogComponent implements OnInit {
         };
         this.widget.properties.vAxis = this.form.get('vAxis')?.value as ExportValueModel || undefined;
         this.widget.properties.vAxisLabel = this.form.get('vAxisLabel')?.value || undefined;
-        this.widget.name = this.form.get('name')?.value || '';
         this.widget.properties.type = this.form.get('type')?.value || undefined;
         this.widget.properties.format = this.form.get('format')?.value || undefined;
         this.widget.properties.threshold = this.form.get('threshold')?.value || undefined;
@@ -205,11 +220,24 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.widget.properties.sourceType = this.form.get('sourceType')?.value || undefined;
 
 
-        this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
-            if (resp.message === 'OK') {
-                this.dialogRef.close(this.widget);
-            }
-        });
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+    }
+
+    save(): void {
+        var obs = []
+        if(this.userHasUpdateNameAuthorization) {
+            obs.push(this.updateName())
+        }
+        if(this.userHasUpdatePropertiesAuthorization) {
+            obs.push(this.updateProperties())
+        }
+        
+        forkJoin(obs).subscribe(responses => {
+           var errorOccured = responses.find((response) => response.message != "OK")
+           if(!errorOccured) {
+               this.dialogRef.close(this.widget);
+           } 
+       })
     }
 
     displayFn(input?: ChartsExportMeasurementModel): string {

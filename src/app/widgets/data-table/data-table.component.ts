@@ -64,7 +64,8 @@ export class DataTableComponent implements OnInit, OnDestroy {
     matSortActive = '';
     matSortDirection: SortDirection = '';
     @Input() userHasDeleteAuthorization = false;
-    @Input() userHasUpdateAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
 
     constructor(
         private dashboardService: DashboardService,
@@ -121,7 +122,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
     edit() {
         const config: MatDialogConfig = {};
-        config.data = {dashboardId: this.dashboardId, widgetId: this.widget.id};
+        config.data = {dashboardId: this.dashboardId, widgetId: this.widget.id, userHasUpdateNameAuthorization: this.userHasUpdateNameAuthorization, userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization};
         config.minWidth = '800px';
         this.dialog
             .open(DataTableEditDialogComponent, config)
@@ -160,7 +161,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
             }
             break;
         }
-        this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe();
+        this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties).subscribe();
         this.orderItems();
     }
 

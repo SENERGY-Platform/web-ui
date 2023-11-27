@@ -17,7 +17,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {AbstractControl, FormBuilder, FormControl, UntypedFormBuilder, ValidatorFn, Validators} from '@angular/forms';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
@@ -55,6 +55,9 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         threshold: ['', Validators.required],
     });
 
+    userHasUpdateNameAuthorization: boolean = false
+    userHasUpdatePropertiesAuthorization: boolean = false
+
     private static estimationExportValidator(): ValidatorFn {
         return (control: AbstractControl): { [key: string]: any } | null => {
             const values: ExportValueModel[] = control.value.values;
@@ -70,10 +73,17 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         private dashboardService: DashboardService,
         private exportService: ExportService,
         private formBuilder: UntypedFormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+        @Inject(MAT_DIALOG_DATA) data: { 
+            dashboardId: string; 
+            widgetId: string, 
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean 
+        },
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
+        this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
+        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization
     }
 
     ngOnInit() {
@@ -124,8 +134,13 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    save(): void {
-        this.widget.name = this.form.get('name')?.value;
+
+    updateName(): Observable<DashboardResponseMessageModel> {
+        var newName =  this.form.get('name')?.value;
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName)
+    }
+    
+    updateProperties(): Observable<DashboardResponseMessageModel> {
         this.widget.properties.selectedOption = this.form.get('predictionType')?.value;
         this.widget.properties.thresholdOption = this.form.get('thresholdOption')?.value;
         if (this.widget.properties.columns === undefined) {
@@ -142,11 +157,23 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         this.widget.properties.threshold = this.form.get('threshold')?.value;
         this.widget.properties.measurement = this.form.get('export')?.value;
 
-        this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
-            if (resp.message === 'OK') {
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+    }
+    
+    save(): void {
+        var obs = []
+        if(this.userHasUpdateNameAuthorization) {
+            obs.push(this.updateName())
+        }
+        if(this.userHasUpdatePropertiesAuthorization) {
+            obs.push(this.updateProperties())
+        }
+        forkJoin(obs).subscribe(responses => {
+            var errorOccured = responses.find((response) => response.message != "OK")
+            if(!errorOccured) {
                 this.dialogRef.close(this.widget);
             }
-        });
+        })
     }
 
     private _filter(value: string): ChartsExportMeasurementModel[] {

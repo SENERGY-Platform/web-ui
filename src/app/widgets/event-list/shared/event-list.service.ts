@@ -27,12 +27,13 @@ import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/das
 export class EventListService {
     constructor(private dialog: MatDialog, private dashboardService: DashboardService) {}
 
-    openEditDialog(dashboardId: string, widgetId: string): void {
+    openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             widgetId,
             dashboardId,
+            userHasUpdateNameAuthorization
         };
         const editDialogRef = this.dialog.open(EventListEditDialogComponent, dialogConfig);
 

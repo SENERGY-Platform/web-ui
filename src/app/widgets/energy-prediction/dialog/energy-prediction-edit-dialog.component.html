@@ -19,7 +19,7 @@
 <mat-dialog-content>
     <form fxLayout="column" [formGroup]="form">
         <div fxLayout="row" fxLayoutAlign="space-between">
-            <mat-form-field color="accent" fxFlex="47">
+            <mat-form-field color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
                 <mat-label>Name</mat-label>
                 <input type="text" matInput placeholder="Name" formControlName="name">
             </mat-form-field>
