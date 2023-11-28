@@ -121,7 +121,7 @@ describe('DataTableEditDialogComponent', () => {
             dashboardServiceSpy.getWidget.and.returnValue(of({ name: 'test', properties: {} } as WidgetModel));
             dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'OK' }));
             dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'OK' }));
-
+            
             dataTableHelperServiceSpy.initialize.and.returnValue(of(null));
             dataTableHelperServiceSpy.preloadExports.and.returnValue(of([]));
             dataTableHelperServiceSpy.getExportsForDeviceAndValue.and.returnValue([]);
@@ -210,7 +210,13 @@ describe('DataTableEditDialogComponent', () => {
                     { provide: MatDialogRef, useValue: matDialogRefSpy },
                     { provide: DataTableHelperService, useValue: dataTableHelperServiceSpy },
                     { provide: ProcessSchedulerService, useValue: processSchedulerServiceSpy },
-                    { provide: MAT_DIALOG_DATA, useValue: { widgetId: 'widgetId-1', dashboardId: 'dashboardId-1' } },
+                    { provide: MAT_DIALOG_DATA, useValue: { 
+                        widgetId: 'widgetId-1', 
+                        dashboardId: 'dashboardId-1',
+                        userHasUpdateNameAuthorization: true,
+                        userHasUpdatePropertiesAuthorization: true
+                        } 
+                    },
                 ],
             }).compileComponents();
         }),
