@@ -48,6 +48,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        console.log(this.userHasUpdateNameAuthorization)
         this.update();
         this.refresh();
     }
@@ -63,7 +64,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
         dialogConfig.data = {
             widget: this.widget,
             dashboardId: this.dashboardId,
-            userHasUpdateNameAuth: this.userHasUpdateNameAuthorization,
+            userHasUpdateNameAuthorization: this.userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization
         };
         dialogConfig.minWidth = '350px';

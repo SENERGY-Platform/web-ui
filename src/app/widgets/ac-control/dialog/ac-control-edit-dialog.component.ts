@@ -72,6 +72,7 @@ export class AcControlEditDialogComponent implements OnInit {
         this.dashboardId = data.dashboardId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
         this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
+        console.log(this.userHasUpdateNameAuthorization)
     }
 
     ngOnInit(): void {
