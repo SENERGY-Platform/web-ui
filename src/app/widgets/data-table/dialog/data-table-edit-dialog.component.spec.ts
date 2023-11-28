@@ -327,10 +327,10 @@ describe('DataTableEditDialogComponent', () => {
             expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
             expect(dashboardServiceSpy.updateWidgetProperty.calls.mostRecent().args).toEqual([
                 'dashboardId-1',
+                'widgetId-1',
+                [],
                 {
-                    name: 'test',
-                    properties: {
-                        dataTable: {
+                    dataTable: {
                             name: 'test',
                             order: DataTableOrderEnum.TimeAsc,
                             valueAlias: 'alias',
@@ -373,9 +373,8 @@ describe('DataTableEditDialogComponent', () => {
                                 },
                             ],
                             convertRules: [],
-                        },
-                    },
-                },
+                        }
+                    }
             ]);
         }),
     );
