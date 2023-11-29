@@ -196,7 +196,7 @@
 
     </div>
 
-    <table *ngIf="ready" mat-table [dataSource]="dataSource" *ngIf="userHasUpdatePropertiesAuthorization">
+    <table *ngIf="ready && userHasUpdatePropertiesAuthorization" mat-table [dataSource]="dataSource">
 
         <ng-container matColumnDef="exportName">
             <th mat-header-cell *matHeaderCellDef>Export</th>
