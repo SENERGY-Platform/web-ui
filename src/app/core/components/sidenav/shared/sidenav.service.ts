@@ -49,6 +49,7 @@ import { DeviceInstancesService } from 'src/app/modules/devices/device-instances
 import { NetworksService } from 'src/app/modules/devices/networks/shared/networks.service';
 import { ProcessIoService } from 'src/app/modules/processes/process-io/shared/process-io.service';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
+import { CostService } from 'src/app/modules/cost/shared/cost.service';
 
 @Injectable({
     providedIn: 'root',
@@ -90,7 +91,8 @@ export class SidenavService implements OnDestroy {
         private deviceInstanceService: DeviceInstancesService,
         private networkService: NetworksService,
         private processIOService: ProcessIoService,
-        private dashboardService: DashboardService
+        private dashboardService: DashboardService,
+        private costService: CostService,
     ) {}
 
     ngOnDestroy() {
@@ -267,6 +269,16 @@ export class SidenavService implements OnDestroy {
         return metadataSection  
     }
 
+    setupCostSection(): SidenavSectionModel {
+        var sections = this.checkAuthorizationForSections([
+            [this.costService.userHasReadAuthorization, new SidenavPageModel('Overview', 'link', 'list', '/costs/overview'), this.costService],
+        ])
+    
+        var costSection = new SidenavSectionModel('Cost', 'toggle', 'savings', '/costs', sections)
+        return costSection  
+    }
+
+
     loadSections(): SidenavSectionModel[] {
             var sections: SidenavSectionModel[] = [
                 this.setupAnalyticsSection(),
@@ -277,7 +289,8 @@ export class SidenavService implements OnDestroy {
                 this.setupImportSection(),
                 this.setupDeviceManagementSection(),
                 this.setupMetadataSection(),
-                this.setupSmartServiceSection()
+                this.setupSmartServiceSection(),
+                this.setupCostSection(),
             ];
 
             if(this.dashboardService.userHasReadDashboardAuthorization()) {
@@ -287,7 +300,7 @@ export class SidenavService implements OnDestroy {
             // Just keep Main sections that have at least one subsection
             sections = sections.filter(section => section.pages.length > 0 || section.name == "Dashboard")
 
-            var sortedSectionTitles = ["Dashboard", "Smart Services", "Processes", "Exports", "Analytics", "Device Management", "Imports", "Metadata", "Admin", "Developer"]
+            var sortedSectionTitles = ["Dashboard", "Smart Services", "Processes", "Exports", "Analytics", "Device Management", "Imports", "Cost", "Metadata", "Admin", "Developer"]
             sections.sort(function(section1, section2) {
                 return sortedSectionTitles.indexOf(section1.name) - sortedSectionTitles.indexOf(section2.name)
             })

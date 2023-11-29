@@ -44,6 +44,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {AuthorizationService} from './core/services/authorization.service';
 import {KeycloakConfidentialService} from './core/services/keycloak-confidential.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
+import { CostModule } from './modules/cost/cost.module';
 
 registerLocaleData(localeDe);
 
@@ -69,6 +70,7 @@ registerLocaleData(localeDe);
         PermissionsModule,
         SettingsModule,
         ClipboardModule,
+        CostModule,
         ServiceWorkerModule.register('ngsw-worker.js', {
             enabled: environment.production,
             // Register the ServiceWorker as soon as the app is stable

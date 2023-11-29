@@ -138,7 +138,8 @@ export class LadonService {
             environment.dashboardServiceUrl + '/widgets/properties',
             environment.usersServiceUrl,
             environment.notificationsUrl,
-            environment.waitingRoomUrl
+            environment.waitingRoomUrl,
+            environment.costApiUrl,
         ]
         
         ServiceEndpoints.forEach(endpointURL => {

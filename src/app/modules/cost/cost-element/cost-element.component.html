@@ -1,0 +1,53 @@
+<!--
+  ~ Copyright 2023 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<mat-expansion-panel>
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            {{name}}
+        </mat-panel-title>
+        <mat-panel-description>
+            Total: {{sum(element.month) | currency:'EUR'}}, Estimation: {{sum(element.estimation_month) |
+            currency:'EUR'}}
+        </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <ng-template matExpansionPanelContent>
+        <table>
+            <tr>
+                <td>Current:</td>
+                <td><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon></td>
+                <td>{{element.month.cpu | currency:'EUR'}}</td>
+                <td><mat-icon matTooltip="ram" class="inline-icon">memory</mat-icon></td>
+                <td>{{element.month.ram | currency:'EUR'}}</td>
+                <td><mat-icon matTooltip="Sotrage" class="inline-icon">storage</mat-icon></td>
+                <td>{{element.month.storage | currency:'EUR'}}</td>
+            </tr>
+            <tr>
+                <td>Estimation:</td>
+                <td><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon> </td>
+                <td>{{element.estimation_month.cpu | currency:'EUR'}}</td>
+                <td><mat-icon matTooltip="ram" class="inline-icon">memory</mat-icon></td>
+                <td>{{element.estimation_month.ram | currency:'EUR'}}</td>
+                <td><mat-icon matTooltip="Sotrage" class="inline-icon">storage</mat-icon></td>
+                <td>{{element.estimation_month.storage | currency:'EUR'}}</td>
+            </tr>
+        </table>
+
+        <senergy-cost-element *ngFor="let child of element.children  | keyvalue: expensiveFirst" [name]="child.key"
+            [element]="child.value"></senergy-cost-element>
+    </ng-template>
+</mat-expansion-panel>

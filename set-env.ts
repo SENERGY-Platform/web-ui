@@ -88,6 +88,7 @@ export const environment = {
   processFogDeploymentUrl: '${process.env.PROCESS_FOG_DEPLOYMENT_URL}',
   processSyncUrl: '${process.env.PROCESS_SYNC_URL}',
   equivalentProtocolSegments: '${process.env.EQUIVALENT_PROTOCOL_SEGMENTS}'
+  costApiUrl: '${process.env.COST_API_URL}'
 };
 `;
 

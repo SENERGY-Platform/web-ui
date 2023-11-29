@@ -117,6 +117,7 @@ export const environment = {
     swaggerUrl: 'http://localhost',
     timescaleRuleManagerUrl: 'http://localhost',
     budgetApiUrl: 'http://localhost',
+    costApiUrl: 'http://localhost',
 };
 
 /*
