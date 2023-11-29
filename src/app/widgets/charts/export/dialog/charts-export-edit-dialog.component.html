@@ -74,6 +74,7 @@
                     Please make a selection!
                 </mat-error>
             </mat-form-field>
+
             <mat-form-field color="accent">
                 <mat-label>Choose Fields</mat-label>
                 <senergy-select-search [required]="true" [multiple]="true"
@@ -84,6 +85,7 @@
                     Please make a selection!
                 </mat-error>
             </mat-form-field>
+
             <table>
                 <tr>
                     <td fxFlex="33%">
@@ -194,7 +196,7 @@
 
     </div>
 
-    <table *ngIf="ready" mat-table [dataSource]="dataSource">
+    <table *ngIf="ready" mat-table [dataSource]="dataSource" *ngIf="userHasUpdatePropertiesAuthorization">
 
         <ng-container matColumnDef="exportName">
             <th mat-header-cell *matHeaderCellDef>Export</th>
