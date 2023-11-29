@@ -24,7 +24,7 @@
             <input type="text" matInput placeholder="Name" formControlName="name">
         </mat-form-field>
 
-        <div formGroupName="properties">
+        <div formGroupName="properties" *ngIf="userHasUpdatePropertiesAuthorization">
             <table class="full-width">
                 <tr>
                     <td>

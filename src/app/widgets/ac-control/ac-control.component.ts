@@ -48,7 +48,6 @@ export class AcControlComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        console.log(this.userHasUpdateNameAuthorization)
         this.update();
         this.refresh();
     }

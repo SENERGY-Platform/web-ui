@@ -20,13 +20,13 @@
     <form [formGroup]="formGroup">
         <table>
             <tr>
-                <td>
-                    <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
+                <td *ngIf="userHasUpdateNameAuthorization">
+                    <mat-form-field color="accent">
                         <mat-label>Widget Name</mat-label>
                         <input type="text" matInput placeholder="Widget Name" formControlName="name">
                     </mat-form-field>
                 </td>
-                <td>
+                <td *ngIf="userHasUpdatePropertiesAuthorization">
                     <mat-form-field color="accent">
                         <mat-label>Refresh time</mat-label>
                         <input type="number" matInput placeholder="Refresh Time" formControlName="refreshTime">
@@ -34,6 +34,8 @@
                 </td>
             </tr>
         </table>
+
+        <span *ngIf="userHasUpdatePropertiesAuthorization">
         <div class="margin-add-convert-button">
             <button mat-stroked-button color="accent" (click)="addConvertRule()">add Convert Rule</button>
         </div>
@@ -170,6 +172,7 @@
         <button (click)="add()" mat-icon-button>
             <mat-icon>add</mat-icon>
         </button>
+    </span>
     </form>
 </mat-dialog-content>
 

@@ -23,104 +23,109 @@
             <input type="text" matInput placeholder="Name" formControlName="name">
         </mat-form-field>
 
-        <mat-radio-group formControlName="sourceType">
-            <mat-radio-button value="export">Export</mat-radio-button>
-            <mat-radio-button value="device">Device</mat-radio-button>
-        </mat-radio-group>
+        <span *ngIf="userHasUpdatePropertiesAuthorization">
+            <mat-radio-group formControlName="sourceType">
+                <mat-radio-button value="export">Export</mat-radio-button>
+                <mat-radio-button value="device">Device</mat-radio-button>
+            </mat-radio-group>
 
-        <mat-form-field color="accent" [fxHide]="form.get('sourceType')?.value !== 'export'">
-            <mat-label>Choose Export</mat-label>
-            <senergy-select-search [options]="exports" formControlName="measurement" useOptionViewProperty="name" [compareWith]="compareIds">
-            </senergy-select-search>
-        </mat-form-field>
+            <mat-form-field color="accent" [fxHide]="form.get('sourceType')?.value !== 'export'">
+                <mat-label>Choose Export</mat-label>
+                <senergy-select-search [options]="exports" formControlName="measurement" useOptionViewProperty="name"
+                    [compareWith]="compareIds">
+                </senergy-select-search>
+            </mat-form-field>
 
-        <mat-form-field color="accent" [fxHide]="form.get('sourceType')?.value !== 'device'">
-            <mat-label>Choose Device</mat-label>
-            <senergy-select-search [options]="devices" formControlName="device" useOptionViewProperty="display_name" [compareWith]="compareIds">
-            </senergy-select-search>
-        </mat-form-field>
+            <mat-form-field color="accent" [fxHide]="form.get('sourceType')?.value !== 'device'">
+                <mat-label>Choose Device</mat-label>
+                <senergy-select-search [options]="devices" formControlName="device" useOptionViewProperty="display_name"
+                    [compareWith]="compareIds">
+                </senergy-select-search>
+            </mat-form-field>
 
-        <mat-form-field color="accent" [fxHide]="form.get('sourceType')?.value !== 'device'">
-            <mat-label>Choose Service</mat-label>
-            <senergy-select-search [options]="services" formControlName="service" useOptionViewProperty="name" [compareWith]="compareIds">
-            </senergy-select-search>
-        </mat-form-field>
+            <mat-form-field color="accent" [fxHide]="form.get('sourceType')?.value !== 'device'">
+                <mat-label>Choose Service</mat-label>
+                <senergy-select-search [options]="services" formControlName="service" useOptionViewProperty="name"
+                    [compareWith]="compareIds">
+                </senergy-select-search>
+            </mat-form-field>
 
-        <table>
-            <tr>
-                <td *ngIf="form.get('sourceType')?.value === 'export'">
-                    <mat-form-field color="accent">
-                        <senergy-select-search placeholder="Value"
-                            [options]="vAxisValues" [compareWith]="compareValues" useOptionViewProperty="Name" formControlName="vAxis">
-                        </senergy-select-search>
-                    </mat-form-field>
-                </td>
-                <td *ngIf="form.get('sourceType')?.value === 'device'">
-                    <mat-form-field color="accent">
-                        <senergy-select-search placeholder="Value" useOptionViewProperty="Name"
-                                               [options]="paths" formControlName="vAxis" [compareWith]="compareNames">
-                        </senergy-select-search>
-                    </mat-form-field>
-                </td>
-                <td>
-                    <mat-form-field color="accent">
-                        <mat-label>Unit</mat-label>
-                        <input type="text" matInput placeholder="Unit" formControlName="vAxisLabel">
-                    </mat-form-field>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <mat-form-field color="accent">
-                        <mat-select formControlName="type" placeholder="Type" [compareWith]="compareStrings">
-                            <mat-option [value]="'String'">String</mat-option>
-                            <mat-option [value]="'Number'">Number</mat-option>
-                            <mat-option [value]="'Date'">Date</mat-option>
-                            <mat-option [value]="'Currency'">Currency</mat-option>
-                            <mat-option [value]="'Percent'">Percent</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                </td>
-                <td>
-                    <mat-form-field color="accent" hintLabel="For use in Angular pipes">
-                        <mat-label>Format</mat-label>
-                        <input type="text" matInput placeholder="Format" formControlName="format">
-                    </mat-form-field>
-                </td>
-            </tr>
-            <tr formGroupName="group">
-                <td>
-                    <mat-form-field color="accent">
-                        <mat-select placeholder="Group Type" formControlName="type">
-                            <mat-option [value]="">none</mat-option>
-                            <mat-option *ngFor="let t of groupTypes" [value]="t">
-                                {{t}}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                </td>
-                <td>
-                    <mat-form-field color="accent">
-                        <mat-label>Group time</mat-label>
-                        <input type="string" matInput formControlName="time">
-                    </mat-form-field>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <mat-form-field color="accent">
-                        <mat-label>Math</mat-label>
-                        <input type="text" matInput formControlName="math">
-                    </mat-form-field>
-                </td>
-                <td>
-                    <mat-form-field color="accent">
-                        <mat-label>Max. font size (px)</mat-label>
-                        <input type="number" matInput formControlName="threshold">
-                    </mat-form-field>
-                </td>
-            </tr>
-        </table>
+            <table>
+                <tr>
+                    <td *ngIf="form.get('sourceType')?.value === 'export'">
+                        <mat-form-field color="accent">
+                            <senergy-select-search placeholder="Value" [options]="vAxisValues"
+                                [compareWith]="compareValues" useOptionViewProperty="Name" formControlName="vAxis">
+                            </senergy-select-search>
+                        </mat-form-field>
+                    </td>
+                    <td *ngIf="form.get('sourceType')?.value === 'device'">
+                        <mat-form-field color="accent">
+                            <senergy-select-search placeholder="Value" useOptionViewProperty="Name" [options]="paths"
+                                formControlName="vAxis" [compareWith]="compareNames">
+                            </senergy-select-search>
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Unit</mat-label>
+                            <input type="text" matInput placeholder="Unit" formControlName="vAxisLabel">
+                        </mat-form-field>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-select formControlName="type" placeholder="Type" [compareWith]="compareStrings">
+                                <mat-option [value]="'String'">String</mat-option>
+                                <mat-option [value]="'Number'">Number</mat-option>
+                                <mat-option [value]="'Date'">Date</mat-option>
+                                <mat-option [value]="'Currency'">Currency</mat-option>
+                                <mat-option [value]="'Percent'">Percent</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent" hintLabel="For use in Angular pipes">
+                            <mat-label>Format</mat-label>
+                            <input type="text" matInput placeholder="Format" formControlName="format">
+                        </mat-form-field>
+                    </td>
+                </tr>
+                <tr formGroupName="group">
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-select placeholder="Group Type" formControlName="type">
+                                <mat-option [value]="">none</mat-option>
+                                <mat-option *ngFor="let t of groupTypes" [value]="t">
+                                    {{t}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Group time</mat-label>
+                            <input type="string" matInput formControlName="time">
+                        </mat-form-field>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Math</mat-label>
+                            <input type="text" matInput formControlName="math">
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Max. font size (px)</mat-label>
+                            <input type="number" matInput formControlName="threshold">
+                        </mat-form-field>
+                    </td>
+                </tr>
+            </table>
+        </span>
     </div>
 </mat-dialog-content>
 

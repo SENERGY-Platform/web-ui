@@ -27,6 +27,7 @@
                 <button mat-button matStepperNext>Next</button>
             </div>
         </mat-step>
+        <span *ngIf="userHasUpdatePropertiesAuthorization">
         <mat-step label="Select your location">
             <div *ngIf="!changeLocation">
                 {{formatted_address}}
@@ -353,6 +354,7 @@
                 <button mat-button matStepperPrevious>Back</button>
             </div>
         </mat-step>
+        </span>
     </mat-vertical-stepper>
 </mat-dialog-content>
 

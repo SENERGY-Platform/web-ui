@@ -22,7 +22,9 @@
             <mat-label>Name</mat-label>
             <input matInput placeholder="Name" [(ngModel)]="widget.name">
         </mat-form-field>
-        <mat-checkbox [(ngModel)]="widget.properties.hideZeroPercentage">Hide 0%</mat-checkbox>
+        <span *ngIf="userHasUpdatePropertiesAuthorization">
+            <mat-checkbox [(ngModel)]="widget.properties.hideZeroPercentage">Hide 0%</mat-checkbox>
+        </span>
     </div>
 </mat-dialog-content>
 

@@ -18,11 +18,13 @@
 
 <mat-dialog-content>
     <div fxLayout="column">
-       <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
+        <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
             <mat-label>Name</mat-label>
             <input matInput placeholder="Name" [(ngModel)]="widget.name">
         </mat-form-field>
-        <mat-checkbox class="checkbox-padding" [(ngModel)]="readAll">Show all schedules</mat-checkbox>
+        <span *ngIf="userHasUpdatePropertiesAuthorization">
+            <mat-checkbox class="checkbox-padding" [(ngModel)]="readAll">Show all schedules</mat-checkbox>
+        </span>
     </div>
 </mat-dialog-content>
 
@@ -30,4 +32,3 @@
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="save()">Save</button>
 </mat-dialog-actions>
-
