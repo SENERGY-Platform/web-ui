@@ -17,7 +17,7 @@
 <mat-expansion-panel>
     <mat-expansion-panel-header>
         <mat-panel-title>
-            {{name}}
+            {{element.displayName || name}}
         </mat-panel-title>
         <mat-panel-description>
             Total: {{sum(element.month) | currency:'EUR'}}, Estimation: {{sum(element.estimation_month) |
@@ -28,26 +28,28 @@
     <ng-template matExpansionPanelContent>
         <table>
             <tr>
-                <td>Current:</td>
+                <td>This month:</td>
                 <td><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon></td>
                 <td>{{element.month.cpu | currency:'EUR'}}</td>
-                <td><mat-icon matTooltip="ram" class="inline-icon">memory</mat-icon></td>
+                <td><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
                 <td>{{element.month.ram | currency:'EUR'}}</td>
-                <td><mat-icon matTooltip="Sotrage" class="inline-icon">storage</mat-icon></td>
+                <td><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
                 <td>{{element.month.storage | currency:'EUR'}}</td>
             </tr>
             <tr>
-                <td>Estimation:</td>
+                <td>Estimation (month):</td>
                 <td><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon> </td>
                 <td>{{element.estimation_month.cpu | currency:'EUR'}}</td>
-                <td><mat-icon matTooltip="ram" class="inline-icon">memory</mat-icon></td>
+                <td><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
                 <td>{{element.estimation_month.ram | currency:'EUR'}}</td>
-                <td><mat-icon matTooltip="Sotrage" class="inline-icon">storage</mat-icon></td>
+                <td><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
                 <td>{{element.estimation_month.storage | currency:'EUR'}}</td>
             </tr>
         </table>
 
-        <senergy-cost-element *ngFor="let child of element.children  | keyvalue: expensiveFirst" [name]="child.key"
-            [element]="child.value"></senergy-cost-element>
+        <mat-accordion multi *ngIf="ready">
+            <senergy-cost-element *ngFor="let child of element.children  | keyvalue: expensiveFirst"
+                [name]="child.key" [element]="child.value"></senergy-cost-element>
+        </mat-accordion>
     </ng-template>
 </mat-expansion-panel>

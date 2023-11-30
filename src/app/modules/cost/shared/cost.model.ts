@@ -24,6 +24,7 @@ export interface CostWithEstimationModel  {
 	month: CostEntryModel,
 	estimation_month: CostEntryModel,
 	children: Map<string, CostWithEstimationModel>,
+	displayName?: string,
 }
 
 const CostTypeAnalytics = "analytics"

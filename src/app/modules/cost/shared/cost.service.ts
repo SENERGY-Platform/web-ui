@@ -52,10 +52,10 @@ export class CostService {
 
     getTree(): Observable<Map<string, CostWithEstimationModel>> {
         return this.http.get<Map<string, CostWithEstimationModel>>(environment.costApiUrl+'/tree').pipe(
-            map((resp) => resp || new Map()),
             catchError(
-                this.errorHandlerService.handleError(CostService.name, 'getOverview: Error', new Map()),
+                this.errorHandlerService.handleError(CostService.name, 'getTree: Error', new Map()),
             ),
+            map((resp) => resp || new Map()),            
         );
     }
 }
