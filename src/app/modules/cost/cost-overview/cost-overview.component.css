@@ -18,3 +18,14 @@
     height: calc(100% - 78px);
     overflow-y: auto;
 }
+
+.inline-icon {
+    vertical-align: bottom;
+ }
+
+ .help {
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: end;
+    margin-right: 20px;
+ }

@@ -13,10 +13,15 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-  
+
 <div class="container layout-margin">
-    <senergy-spinner [show]="!dataReady"></senergy-spinner>
-    <mat-accordion multi *ngIf="dataReady">
-        <senergy-cost-element *ngFor="let cat of tree | keyvalue: originalOrder" [name]="cat.key" [element]="cat.value"/>
+  <senergy-spinner [show]="!dataReady"></senergy-spinner>
+  <div class="help color-accent">
+    <span matTooltip="Estimations are based on the consumption in the month so far and consumption over the last 24 hours carried forward till the end of the month. Therefore, it takes a day for changes to be accounted for in the estimations.">About estimations <mat-icon class="inline-icon" color="accent">help</mat-icon></span>
+  </div>
+  <div *ngIf="dataReady">
+    <mat-accordion multi>
+      <senergy-cost-element *ngFor="let cat of tree | keyvalue: originalOrder" [name]="cat.key" [element]="cat.value" />
     </mat-accordion>
+  </div>  
 </div>
