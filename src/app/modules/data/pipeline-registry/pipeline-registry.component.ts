@@ -24,7 +24,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { forkJoin, Observable, pipe, Subscription } from 'rxjs';
+import { forkJoin, Observable, pipe, Subscription, concatMap, of, map} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
 
@@ -122,18 +122,23 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('pipeline')
             .afterClosed()
-            .subscribe((deletePipeline: boolean) => {
-                if (deletePipeline) {
-                    this.ready = false;
-                    this.flowEngineService.deletePipeline(pipe.id).subscribe();
-                    const index = this.dataSource.data.indexOf(pipe);
-                    if (index > -1) {
-                        this.dataSource.data.splice(index, 1);
+            .pipe(
+                concatMap((deletePipeline: boolean) => {
+                    if (deletePipeline) {
+                        return this.flowEngineService.deletePipeline(pipe.id);
                     }
-                    this.ready = true;
+                    return of()
+                })
+            ).subscribe({
+                next: (_) => {
+                    this.reload()
                     this.snackBar.open('Pipeline deleted', undefined, {
                         duration: 2000,
                     });
+                },
+                error: (err) => {
+                    this.snackBar.open('Error while deleting pipeline!: ' + err, 'close', {panelClass: 'snack-bar-error'});
+                    this.reload()
                 }
             });
     }
@@ -175,14 +180,16 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
                 });
             }
 
-            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                if (ok) {
+            forkJoin(deletionJobs).subscribe(
+            {
+                next: (_) => {
                     this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
-                } else {
-                    this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                    this.reload()
+                },
+                error: (err) => {
+                    this.snackBar.open('Error while deleting ' + text + '!: ' + err, 'close', {panelClass: 'snack-bar-error'});
+                    this.reload()
                 }
-                this.reload()
             })
         });
     }
