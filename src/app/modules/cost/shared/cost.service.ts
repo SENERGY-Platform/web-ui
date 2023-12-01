@@ -21,7 +21,7 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import {environment} from "src/environments/environment";
 import { Observable, catchError, map } from 'rxjs';
-import { CostWithEstimationModel } from './cost.model';
+import { CostEstimationModel, CostWithEstimationModel } from './cost.model';
 
 
 @Injectable({
@@ -29,9 +29,11 @@ import { CostWithEstimationModel } from './cost.model';
 })
 export class CostService {
     authorizations: PermissionTestResponse
+    estimationFlowAuthorizations: PermissionTestResponse
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.costApiUrl)
+        this.estimationFlowAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.costApiUrl + '/estimation/flow')
     }
 
     userHasDeleteAuthorization(): boolean {
@@ -56,6 +58,18 @@ export class CostService {
                 this.errorHandlerService.handleError(CostService.name, 'getTree: Error', new Map()),
             ),
             map((resp) => resp || new Map()),            
+        );
+    }
+
+
+    userMayGetFlowCostEstimations(): boolean {
+        return this.estimationFlowAuthorizations["POST"];
+    }
+    getFlowCostEstimations(flowIds: string[]): Observable<CostEstimationModel[]> {
+        return this.http.post<CostEstimationModel[]>(environment.costApiUrl+'/estimation/flow', flowIds).pipe(
+            catchError(
+                this.errorHandlerService.handleError(CostService.name, 'getFlowCostEstimations: Error', []),
+            )
         );
     }
 }

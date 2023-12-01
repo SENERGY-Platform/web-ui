@@ -45,6 +45,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatOptionModule} from '@angular/material/core';
 import {MatSelectModule} from '@angular/material/select';
 import {MatPaginatorModule} from '@angular/material/paginator';
+import { CostModule } from '../cost/cost.module';
 
 const operatorRepo: Route = { path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Operators' } };
 const designer: Route = { path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
@@ -79,6 +80,7 @@ const pipelineRegistry: Route = { path: 'data/pipelines', pathMatch: 'full', com
         MatCheckboxModule,
         MatOptionModule,
         MatSelectModule,
+        CostModule,
     ],
     declarations: [OperatorRepoComponent, FlowDesignerComponent, FlowRepoComponent, PipelineRegistryComponent],
 })

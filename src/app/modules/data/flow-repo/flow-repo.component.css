@@ -63,7 +63,8 @@ mat-grid-tile-footer {
     min-height: 20px;
     margin-top: -4px;
     padding: 5px;
-    margin-bottom: 16px;
+    justify-content: flex-end;
+    text-align: right;
 }
 
 mat-grid-list {
@@ -85,3 +86,7 @@ mat-grid-list {
 .share-icon {
     font-size: 18px !important;
 }
+
+.multiline-tooltip{
+    white-space: pre-line;
+  }

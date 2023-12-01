@@ -28,3 +28,11 @@ export interface CostWithEstimationModel  {
 }
 
 const CostTypeAnalytics = "analytics"
+
+
+export interface CostEstimationModel {
+	min: number;
+	max: number;
+	mean: number;
+	median: number;	
+}

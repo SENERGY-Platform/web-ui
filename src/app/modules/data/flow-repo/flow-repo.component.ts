@@ -26,6 +26,8 @@ import { Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { FlowEngineService } from './shared/flow-engine.service';
+import { CostEstimationModel } from '../../cost/shared/cost.model';
+import { CostService } from '../../cost/shared/cost.service';
 
 const GRIDS = new Map([
     ['xs', 1],
@@ -42,6 +44,7 @@ const GRIDS = new Map([
 })
 export class FlowRepoComponent implements OnInit, OnDestroy {
     flows: FlowModel[] = [];
+    flowEstimations: CostEstimationModel[] = [];
     ready = false;
     gridCols = 0;
     sortAttributes = [new SortModel('Name', 'name', 'asc')];
@@ -69,7 +72,8 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         private sanitizer: DomSanitizer,
         private authService: AuthorizationService,
         private searchbarService: SearchbarService,
-        private flowEngineService: FlowEngineService
+        private flowEngineService: FlowEngineService,
+        public costService: CostService,
     ) {}
 
     ngOnInit() {
@@ -101,6 +105,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
                     const index = this.flows.indexOf(flow);
                     if (index > -1) {
                         this.flows.splice(index, 1);
+                        this.flowEstimations.slice(index, 1);
                     }
                     this.flowRepoService.deleteFlow(flow).subscribe(() => {
                         this.snackBar.open('Flow deleted', undefined, {
@@ -142,7 +147,14 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
                     }
                     this.flows.push(flow);
                 });
+                if (this.costService.userMayGetFlowCostEstimations()) {
+                this.costService.getFlowCostEstimations(this.flows.map(f => f._id || '')).subscribe(estimations => {
+                    this.flowEstimations.push(...estimations);
+                    this.ready = true;
+                })
+            } else {
                 this.ready = true;
+            }
             });
     }
 
@@ -168,6 +180,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
 
     private reset() {
         this.flows = [];
+        this.flowEstimations = [];
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;

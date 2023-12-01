@@ -140,6 +140,7 @@ export class LadonService {
             environment.notificationsUrl,
             environment.waitingRoomUrl,
             environment.costApiUrl,
+            environment.costApiUrl + '/estimation/flow',
         ]
         
         ServiceEndpoints.forEach(endpointURL => {

@@ -15,30 +15,25 @@
   -->
 
 <div class="flow-repo-container layout-margin">
-        <div fxLayout="row" class="search-button-container">
-            <senergy-searchbar fxFlex></senergy-searchbar>
-            <button matTooltip="Show shared" mat-icon-button (click)="showSharedChanged()" color="accent" class="suffix"
-                    *ngIf="!this.showShared">
-                <mat-icon>share</mat-icon>
-            </button>
-            <button matTooltip="Hide shared" mat-icon-button color="accent" (click)="showSharedChanged()" class="suffix"
-                    *ngIf="this.showShared">
-                <mat-icon>share</mat-icon>
-            </button>
-            <senergy-sort [sortAttributes]="sortAttributes" class="suffix-sort"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
+    <div fxLayout="row" class="search-button-container">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+        <button matTooltip="Show shared" mat-icon-button (click)="showSharedChanged()" color="accent" class="suffix"
+            *ngIf="!this.showShared">
+            <mat-icon>share</mat-icon>
+        </button>
+        <button matTooltip="Hide shared" mat-icon-button color="accent" (click)="showSharedChanged()" class="suffix"
+            *ngIf="this.showShared">
+            <mat-icon>share</mat-icon>
+        </button>
+        <senergy-sort [sortAttributes]="sortAttributes" class="suffix-sort"
+            (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+    </div>
     <div class="flow-repo-scroll">
-        <div infiniteScroll
-             [infiniteScrollDistance]="1"
-             [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.flow-repo-scroll'"
-             [fromRoot]="true"
-             (scrolled)="onScroll()">
+        <div infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
+            [infiniteScrollContainer]="'.flow-repo-scroll'" [fromRoot]="true" (scrolled)="onScroll()">
             <div fxLayout="column">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="302px" gutterSize="16px"
-                               *ngIf="flows.length > 0">
-                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of flows">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="302px" gutterSize="16px" *ngIf="flows.length > 0">
+                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of flows; let i = index">
                         <div fxFill>
                             <div fxFill>
                                 <div class="widget-image" [innerHtml]="item.image"></div>
@@ -46,7 +41,8 @@
                         </div>
                         <mat-grid-tile-footer>
                             <div fxLayout="column" fxFill>
-                                <div *ngIf="item.description !== null" class="truncate footer-item-header" matTooltip="{{item.name + ' - ' + item.description}}">
+                                <div *ngIf="item.description !== null" class="truncate footer-item-header"
+                                    matTooltip="{{item.name + ' - ' + item.description}}">
                                     <p>{{item.name}}</p>
                                     <mat-icon class="share-icon" *ngIf="item.share.list && item.userId === userId">
                                         public
@@ -55,7 +51,8 @@
                                         share
                                     </mat-icon>
                                 </div>
-                                <div *ngIf="item.description === null" class="truncate footer-item-header" matTooltip="{{item.name}}">
+                                <div *ngIf="item.description === null" class="truncate footer-item-header"
+                                    matTooltip="{{item.name}}">
                                     <p>{{item.name}}</p>
                                     <mat-icon class="share-icon" *ngIf="item.share.list && item.userId === userId">
                                         public
@@ -64,17 +61,29 @@
                                         share
                                     </mat-icon>
                                 </div>
-                                <div class="truncate footer-item-subtitle" fxLayoutAlign="start center"
-                                     matTooltip="last updated">
-                                    <mat-icon>update</mat-icon>{{item.dateUpdated| date:"medium"}}
+                                <div class="truncate footer-item-subtitle" fxLayout="column">
+                                    <div *ngIf="costService.userMayGetFlowCostEstimations()">
+                                        <div *ngIf=" flowEstimations[i].max > 0" matTooltipClass="multiline-tooltip" matTooltip="Median: {{flowEstimations[i].median | currency:'EUR'}}; Mean: {{flowEstimations[i].mean | currency:'EUR'}}">
+                                            {{flowEstimations[i].min | currency:'EUR'}} - {{flowEstimations[i].max |
+                                            currency:'EUR'}}
+                                        </div>
+                                        <div *ngIf=" flowEstimations[i].max === 0">
+                                            Unknown cost
+                                        </div>
+                                    </div>
+                                    <div matTooltip="last updated">{{item.dateUpdated| date:"medium"}}</div>
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="end center" class="footer-buttons">
-                                    <button *ngIf="userHasPipelineCreateAuthorization && (item.share.read || item.userId === userId)" mat-icon-button routerLink="/data/flow-repo/deploy/{{item._id}}">
+                                    <button
+                                        *ngIf="userHasPipelineCreateAuthorization && (item.share.read || item.userId === userId)"
+                                        mat-icon-button routerLink="/data/flow-repo/deploy/{{item._id}}">
                                         <mat-icon color="accent">
                                             start
                                         </mat-icon>
                                     </button>
-                                    <button *ngIf="userHasUpdateAuthorization && (item.share.write ||  item.share.read || item.userId === userId)" mat-icon-button routerLink="/data/designer/{{item._id}}">
+                                    <button
+                                        *ngIf="userHasUpdateAuthorization && (item.share.write ||  item.share.read || item.userId === userId)"
+                                        mat-icon-button routerLink="/data/designer/{{item._id}}">
                                         <mat-icon *ngIf="(item.share.write || item.userId === userId)" color="accent">
                                             edit
                                         </mat-icon>
@@ -82,7 +91,9 @@
                                             visibility
                                         </mat-icon>
                                     </button>
-                                    <button class="delete-button" *ngIf="userHasDeleteAuthorization && (item.share.write || item.userId === userId)" mat-icon-button (click)="deleteFlow(item)">
+                                    <button class="delete-button"
+                                        *ngIf="userHasDeleteAuthorization && (item.share.write || item.userId === userId)"
+                                        mat-icon-button (click)="deleteFlow(item)">
                                         <mat-icon color="warn">
                                             delete
                                         </mat-icon>
