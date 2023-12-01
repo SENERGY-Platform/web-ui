@@ -126,7 +126,14 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getNetworks().subscribe();
+            this.getNetworks().subscribe({
+                next: (_) => {
+                    this.ready = true
+                },
+                error: (_) => {
+                    this.ready = true
+                }
+            });
         });
     }
 
@@ -152,7 +159,14 @@ export class NetworksComponent implements OnInit, OnDestroy {
                 .subscribe((deleteNetwork: boolean) => {
                     if (deleteNetwork) {
                         setTimeout(() => {
-                            this.getNetworks().subscribe();
+                            this.getNetworks().subscribe({
+                                next: (_) => {
+                                    this.ready = true
+                                },
+                                error: (_) => {
+                                    this.ready = true
+                                }
+                            });
                         }, 1000);
                     }
                 });
@@ -160,8 +174,6 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     private getNetworks(): Observable<NetworksModel[]> {
-        this.ready = false;
-
         return this.networksService
             .searchNetworks(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .pipe(
@@ -178,9 +190,14 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.selectionClear();
         
-        forkJoin([this.getNetworks(), this.getTotalCount()]).subscribe(_ => {
-            this.ready = true;
-        })
+        forkJoin([this.getNetworks(), this.getTotalCount()]).subscribe({
+            next: (_) => {
+                this.ready = true
+            },
+            error: (_) => {
+                this.ready = true
+            }
+        });
     }
 
     isAllSelected() {
