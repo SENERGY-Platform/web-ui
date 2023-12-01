@@ -75,7 +75,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
 
     initSearch() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
+            var order = this.sortBy + ':' + this.sortDirection
+            this.pipelineRegistryService.getPipelines(order).subscribe((resp: PipelineModel[]) => {
                 if(searchText != ""){
                     resp = resp.filter(pipeline => (pipeline.name.search(searchText) != -1))
                 }

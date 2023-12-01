@@ -62,7 +62,7 @@
                                     </mat-icon>
                                 </div>
                                 <div class="truncate footer-item-subtitle" fxLayout="column">
-                                    <div *ngIf="costService.userMayGetFlowCostEstimations()">
+                                    <div *ngIf="costService.userMayGetFlowCostEstimations() && flowEstimations.length>0">
                                         <div *ngIf=" flowEstimations[i].max > 0" matTooltipClass="multiline-tooltip" matTooltip="Median: {{flowEstimations[i].median | currency:'EUR'}}; Mean: {{flowEstimations[i].mean | currency:'EUR'}}">
                                             {{flowEstimations[i].min | currency:'EUR'}} - {{flowEstimations[i].max |
                                             currency:'EUR'}}
