@@ -30,6 +30,7 @@ import { FlowEngineService } from './shared/flow-engine.service';
 import { By } from '@angular/platform-browser';
 import { FlowModel } from './shared/flow.model';
 import { of } from 'rxjs';
+import { CostService } from '../../cost/shared/cost.service';
 
 describe('FlowRepoComponent', () => {
     let component: FlowRepoComponent;
@@ -39,6 +40,9 @@ describe('FlowRepoComponent', () => {
     flowRepoServiceSpy.userHasDeleteAuthorization.and.returnValue(true);
     flowRepoServiceSpy.userHasUpdateAuthorization.and.returnValue(true);
     flowRepoServiceSpy.userHasReadAuthorization.and.returnValue(true);
+
+    const costServiceSpy: Spy<CostService> = createSpyFromClass(CostService);
+    costServiceSpy.userMayGetFlowCostEstimations.and.returnValue(false);
 
     var testFlow: FlowModel = {
         _id: 'string',
@@ -66,6 +70,7 @@ describe('FlowRepoComponent', () => {
                     { provide: AuthorizationService, useClass: AuthorizationServiceMock }, 
                     { provide: FlowRepoService, useValue: flowRepoServiceSpy },
                     { provide: FlowEngineService, useValue: flowEngineServiceSpy },
+                    { provide: CostService, useValue: costServiceSpy },
                     DialogsService
                 ],
             }).compileComponents();
