@@ -24,11 +24,11 @@ interface Condition {
     ref?: string;
 }
 
-interface Selection {
+export interface Selection {
     and?: Selection[];
     or?: Selection[];
     not?: Selection;
-    condition: Condition;
+    condition?: Condition;
 }
 
 interface QueryFind extends QueryListCommons {

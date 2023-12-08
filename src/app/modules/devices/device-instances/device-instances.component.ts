@@ -17,7 +17,7 @@
 import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 
 import {DeviceInstancesService} from './shared/device-instances.service';
-import {DeviceInstancesModel} from './shared/device-instances.model';
+import {DeviceConnectionState, DeviceInstancesModel, FilterSelection, SelectedTag} from './shared/device-instances.model';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -88,17 +88,13 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     ready = false;
     searchText = '';
 
-    selectedTag = '';
-    selectedTagTransformed = '';
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
-    locationOptions: LocationModel[] = [];
-    networkOptions: NetworksModel[] = [];
-    deviceTypeOptions: DeviceTypeBaseModel[] = [];
-    routerNetwork: NetworksModel | null = null;
-    routerDeviceType: DeviceTypeBaseModel | null = null;
-    routerLocation: LocationModel | null = null;
-    routerDeviceIds: string[] | null = null;
+    routerNetwork: string | undefined = undefined;
+    routerDeviceType: string[] | undefined = undefined;
+    routerLocation: string | undefined = undefined;
+    routerDeviceIds: string[] | undefined = undefined;
+    routerConnectionState: boolean | undefined = undefined;
 
     private searchSub: Subscription = new Subscription();
     sortBy: string = "display_name"
@@ -108,7 +104,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     userHasDeleteAuthorization: boolean = false
 
     ngOnInit(): void {
-        this.loadFilterOptions();
         this.initSearch(); // does automatically load data on first page load
         this.checkAuthorization()
     }
@@ -164,53 +159,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.reload();
     }
 
-    private loadDevicesOfNetwork(): Observable<DeviceInstancesModel[]> {
-        if(this.routerNetwork) {
-            this.selectedTag = this.routerNetwork.name;
-            this.selectedTagTransformed = this.routerNetwork.name;
-            return this.deviceInstancesService
-                .getDeviceInstancesByHub(
-                    this.routerNetwork.id,
-                    this.pageSize,
-                    this.offset,
-                    this.sortBy, 
-                    this.sortDirection == "desc",
-                )
-                .pipe(
-                    map((deviceInstances: DeviceInstancesModel[]) => {
-                        this.setDevices(deviceInstances)
-                        return deviceInstances
-                    })
-                )
-        }
-        return of([])
-
-    }
-
-    private loadDevicesOfDeviceType(): Observable<DeviceInstancesModel[]> {
-        if(this.routerDeviceType) {
-            this.selectedTag = this.routerDeviceType.name;
-            this.selectedTagTransformed = this.routerDeviceType.name;
-            return this.deviceInstancesService
-                .getDeviceInstancesByDeviceTypes(
-                    [this.routerDeviceType.id], 
-                    this.pageSize, 
-                    this.offset, 
-                    this.sortBy, 
-                    this.sortDirection == "desc"
-                )
-                .pipe(
-                    map(deviceInstances => {
-                        this.setDevices(deviceInstances);
-                        return deviceInstances
-                    })
-                )
-        }
-        return of([])
-
-    }
-
     private loadDevicesByIds(): Observable<DeviceInstancesModel[]> {
+        // Only called when beeing redirected from device group page
         if(this.routerDeviceIds) {
             return this.deviceInstancesService.getDeviceInstancesByIds(this.routerDeviceIds, this.pageSize, this.offset).pipe(
                 map(deviceInstances => {
@@ -223,29 +173,30 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     }
 
-    private loadDevicesByLocation(): Observable<DeviceInstancesModel[]> {
-        if(this.routerLocation !== null) {
-            this.selectedTag = this.routerLocation.id;
-            this.selectedTagTransformed = this.routerLocation.name;
-            return this.deviceInstancesService.getDeviceInstancesByLocation(this.routerLocation.id, this.pageSize, this.offset, this.sortBy, this.sortDirection == "desc").pipe(
-                map(deviceInstances => {
-                    this.setDevices(deviceInstances);
-                    return deviceInstances
-                })
-            )
+    openFilterDialog() {
+        var filterSelection: FilterSelection = {
+            connectionState: this.routerConnectionState,
+            network: this.routerNetwork,
+            deviceTypes: this.routerDeviceType,
+            location: this.routerLocation
         }
-        return of([])
-    }
 
+        this.deviceInstancesService.openFilterDialog(filterSelection).subscribe({
+            next: (filterSelection: FilterSelection) => {
+                if(filterSelection != null) {
+                    this.routerConnectionState = filterSelection.connectionState
+                    this.routerDeviceType = filterSelection.deviceTypes
+                    this.routerNetwork = filterSelection.network
+                    this.routerLocation = filterSelection.location
+                }
+                this.reload()
+            }
+        })
+    }
+   
     private load(): Observable<DeviceInstancesModel[]> {
-        if (this.routerNetwork !== null) {
-            return this.loadDevicesOfNetwork()
-        } else if (this.routerDeviceType !== null) {
-            return this.loadDevicesOfDeviceType()
-        } else if (this.routerDeviceIds !== null) {
+        if (this.routerDeviceIds !== undefined) {
             return this.loadDevicesByIds()
-        } else if (this.routerLocation !== null) {
-            return this.loadDevicesByLocation()
         } else {
             return this.deviceInstancesService
                 .getDeviceInstances(
@@ -254,6 +205,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     this.sortBy,
                     this.sortDirection == "desc",
                     this.searchText,
+                    this.routerLocation,
+                    this.routerNetwork,
+                    this.routerDeviceType,
+                    this.routerConnectionState
                 )
                 .pipe(
                     map((deviceInstances: DeviceInstancesModel[]) => {
@@ -268,67 +223,18 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.dataSource.data = instances;
     }
 
-    tagRemoved(): void {
-        this.routerNetwork = null;
-        this.routerDeviceType = null;
-        this.routerLocation = null;
-        this.resetTag();
-        this.load().subscribe();
-    }
-
-    private resetTag() {
-        this.selectedTag = '';
-        this.selectedTagTransformed = '';
-    }
-
-    private loadFilterOptions() {
-        this.locationsService.listLocations(100, 0, "name", this.sortDirection).subscribe((value) => {
-            this.locationOptions = value;
-        });
-        this.networksService.listNetworks(100, 0, "name", this.sortDirection).subscribe((value) => {
-            this.networkOptions = value;
-        });
-        this.deviceInstancesService.listUsedDeviceTypeIds().subscribe((deviceTypeIds) => {
-            this.deviceTypesService.getDeviceTypeListByIds(deviceTypeIds).subscribe((deviceTypes) => {
-                this.deviceTypeOptions = deviceTypes;
-            });
-        });
-    }
-
-    filterByDeviceType(dt: DeviceTypeBaseModel) {
-        this.routerLocation = null;
-        this.routerNetwork = null;
-        this.routerDeviceType = null;
-
-        this.routerDeviceType = dt;
-        this.reload();
-    }
-
-    filterByLocation(location: LocationModel) {
-        this.routerLocation = null;
-        this.routerNetwork = null;
-        this.routerDeviceType = null;
-
-        this.routerLocation = location;
-        this.reload();
-    }
-
-    filterByNetwork(network: NetworksModel) {
-        this.routerLocation = null;
-        this.routerNetwork = null;
-        this.routerDeviceType = null;
-
-        this.routerNetwork = network;
-        this.reload();
-    }
-
     reload() {
         this.offset = 0;
         this.ready = false;
         this.pageSize = 20;
         this.selectionClear();
 
-        forkJoin(this.load(), this.getTotalCount()).subscribe(_ => this.ready = true)
+        forkJoin(this.load(), this.getTotalCount()).subscribe({
+            next: (_) => this.ready = true,
+            error: (err) => {
+                console.log(err)
+            }
+        })
     }
 
     showInfoOfDevice(device: DeviceInstancesModel): void {
@@ -373,13 +279,13 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                 const state = navigation.extras.state as DeviceInstancesRouterState;
                 switch (state.type) {
                 case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
-                    this.routerDeviceType = state.value as DeviceTypeBaseModel;
+                    this.routerDeviceType = [(state.value as DeviceTypeBaseModel).id];
                     break;
                 case DeviceInstancesRouterStateTypesEnum.NETWORK:
-                    this.routerNetwork = state.value as NetworksModel;
+                    this.routerNetwork = (state.value as NetworksModel).id;
                     break;
                 case DeviceInstancesRouterStateTypesEnum.LOCATION:
-                    this.routerLocation = state.value as LocationModel;
+                    this.routerLocation = (state.value as LocationModel).id;
                     break;
                 case DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP:
                     this.routerDeviceIds = state.value as string[];

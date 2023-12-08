@@ -62,8 +62,8 @@
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-icon-button *ngIf="operator.editable">
-                <mat-icon (click)="deleteInput(item)" color="warn">
+            <button mat-icon-button *ngIf="operator.editable" (click)="deleteInput(item)">
+                <mat-icon color="warn">
                     delete
                 </mat-icon>
             </button>
@@ -83,8 +83,8 @@
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-icon-button *ngIf="operator.editable">
-                <mat-icon (click)="deleteOutput(item)" color="warn">
+            <button mat-icon-button *ngIf="operator.editable" (click)="deleteOutput(item)">
+                <mat-icon color="warn">
                     delete
                 </mat-icon>
             </button>
@@ -104,8 +104,8 @@
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-icon-button *ngIf="operator.editable">
-                <mat-icon (click)="deleteConfig(item)" color="warn">
+            <button mat-icon-button *ngIf="operator.editable" (click)="deleteConfig(item)">
+                <mat-icon color="warn">
                     delete
                 </mat-icon>
             </button>

@@ -26,17 +26,20 @@ import {
     DeviceInstancesPermSearchModel,
     DeviceSelectablesFullModel,
     DeviceSelectablesModel,
+    FilterSelection,
 } from './device-instances.model';
-import {Observable, of} from 'rxjs';
+import {forkJoin, Observable, of} from 'rxjs';
 import {DeviceInstancesHistoryModel, DeviceInstancesHistoryModelWithId} from './device-instances-history.model';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {UtilService} from '../../../../core/services/util.service';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { DeviceTypePermSearchModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type-perm-search.model';
-import { PermissionQueryRequest } from 'src/app/core/model/permissions/permissions';
+import { PermissionQueryRequest, Selection } from 'src/app/core/model/permissions/permissions';
 import { LocationsService } from '../../locations/shared/locations.service';
 import { NetworksService } from '../../networks/shared/networks.service';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DeviceInstancesFilterDialogComponent } from '../dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -53,9 +56,18 @@ export class DeviceInstancesService {
         private ladonService: LadonService,
         private utilService: UtilService,
         private locationService: LocationsService,
-        private networkService: NetworksService
+        private networkService: NetworksService,
+        private dialog: MatDialog
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl)
+    }
+
+    openFilterDialog(filterSelection: FilterSelection | undefined): Observable<FilterSelection> {
+        const editDialogRef = this.dialog.open(DeviceInstancesFilterDialogComponent, {
+            data: filterSelection
+        });
+
+        return editDialogRef.afterClosed()
     }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
@@ -145,22 +157,96 @@ export class DeviceInstancesService {
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstances', null)));
     }
 
-    getDeviceInstances(
+    getDeviceIds(hubId?: string, locationId?: string): Observable<string[]> {
+        var deviceIDs: string[] = []
+        var obs = []
+        if(hubId != null) {
+            obs.push(this.networkService.getNetwork(hubId))
+        }
+
+        if(locationId != null) {
+            obs.push(this.locationService.getLocation(locationId))
+        }
+
+        if(obs.length > 0) {
+            return forkJoin(obs).pipe(
+                map((results) => {
+                    results.forEach((result, i) => {
+                        if(!!result) {
+                            if(i == 0) {
+                                deviceIDs = result.device_ids || []
+                            } else {
+                                deviceIDs = deviceIDs.filter((deviceID) => result.device_ids.includes(deviceID))
+                            }
+                        }
+                    });
+                    return deviceIDs
+                })
+            )
+        }
+
+        return of([])
+    }
+
+    getDeviceInstancesBySearch(
         limit: number,
         offset: number,
         sortBy: string = "name",
         sortDesc: boolean = false,
-        searchText?: string
+        searchText?: string,
+        deviceTypeIds?: string[], 
+        connectionState?: boolean, 
+        deviceIds?: string[],
     ): Observable<DeviceInstancesModel[]> {
         var queryRequest: PermissionQueryRequest = {
             resource: 'devices', 
             find: {
-                search: searchText,
                 limit,
                 offset,
                 sort_desc: sortDesc,
-                sort_by: sortBy
+                sort_by: sortBy,
             }
+        }
+        var optionalFilters: Selection[] = [] 
+
+        if(searchText != null) {
+            if(queryRequest.find) {
+                queryRequest.find.search = searchText
+            }
+        }
+
+        if(connectionState != null) {
+            optionalFilters.push(
+                {
+                    condition: {
+                        feature: 'annotations.connected', operation: '==', value: connectionState
+                    }
+                }
+            )
+        }
+
+        if(deviceTypeIds != null && deviceTypeIds.length > 0) {
+            optionalFilters.push(
+                {
+                    condition: {
+                        feature: 'features.device_type_id', operation: 'any_value_in_feature', value: deviceTypeIds
+                    }
+                }
+            )
+        }
+
+        if(deviceIds != null && deviceIds.length > 0) {
+            optionalFilters.push(
+                {
+                    condition: {
+                        feature: 'id', operation: 'any_value_in_feature', value: deviceIds
+                    }
+                }
+            )
+        }
+
+        if(optionalFilters.length > 0 && queryRequest.find) {
+            queryRequest.find.filter = {"and": optionalFilters}
         }
         return this.queryPermissionSearch(queryRequest).pipe(
                 map((resp) => <DeviceInstancesPermSearchModel[]>resp || []),
@@ -169,63 +255,35 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceInstancesByLocation(
-        locationId: string, 
-        limit: number, 
+    getDeviceInstances(
+        limit: number,
         offset: number,
-        sortBy: string,
-        sortDesc: boolean
+        sortBy: string = "name",
+        sortDesc: boolean = false,
+        searchText?: string,
+        locationId?: string,
+        hubId?: string,
+        deviceTypeIds?: string[], 
+        connectionState?: boolean,
     ): Observable<DeviceInstancesModel[]> {
-        return this.locationService.getLocation(locationId).pipe(
-            map(location => location ? location.device_ids : []),
-            concatMap(deviceIds => deviceIds ? this.getDeviceInstancesByIds(deviceIds, limit, offset, sortBy, sortDesc) : of([])),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByLocation', [])),
-        )
-    }
-
-    getDeviceInstancesByHub(
-        hubId: string, 
-        limit: number, 
-        offset: number, 
-        sortBy: string, 
-        sortDesc: boolean
-    ): Observable<DeviceInstancesModel[]> {
-        return this.networkService.getNetwork(hubId).pipe(
-            map(networks => {
-                return networks ? networks.device_ids : []
-            }),
-            concatMap(deviceIds => {
-                return this.getDeviceInstancesByIds(deviceIds, limit, offset, sortBy, sortDesc)}
-            ),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDevicesFromHub', [])),
-        )
-    }
-
-    getDeviceInstancesByDeviceTypes(
-        ids: string[], 
-        limit: number, 
-        offset: number,
-        sort_by: string,
-        sort_desc: boolean
-    ): Observable<DeviceInstancesModel[]> {
-        var queryRequest: PermissionQueryRequest = {
-            resource: 'devices', find: {
-                limit, 
-                offset, 
-                sort_by,
-                sort_desc,
-                filter: {
-                    condition: {
-                        feature: 'features.device_type_id', operation: 'any_value_in_feature', value: ids
+        if(hubId != null || locationId != null) {
+            return this.getDeviceIds(hubId, locationId).pipe(
+                concatMap((deviceIds) => {
+                    if(deviceIds.length == 0) {
+                        return of([])
                     }
-                }
-            }
+
+                    if((searchText == null || searchText == "") && (deviceTypeIds == null || deviceTypeIds.length == 0) && connectionState == null) {
+                        // If only location or network filter are used, then use less expensive non-search method
+                        return this.getDeviceInstancesByIds(deviceIds, limit, offset, sortBy, sortDesc)
+                    }
+    
+                    return this.getDeviceInstancesBySearch(limit, offset, sortBy, sortDesc, searchText, deviceTypeIds, connectionState, deviceIds)
+                })
+            )
         }
-        return this.queryPermissionSearch(queryRequest).pipe(
-            map((resp) => <DeviceInstancesPermSearchModel[]>resp || []),
-            concatMap(devices => this.addDeviceType(devices)),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByDeviceType', [])),
-        );
+
+        return this.getDeviceInstancesBySearch(limit, offset, sortBy, sortDesc, searchText, deviceTypeIds, connectionState, undefined)
     }
 
     addDeviceType(devices: DeviceInstancesPermSearchModel[]): Observable<DeviceInstancesModel[]> {

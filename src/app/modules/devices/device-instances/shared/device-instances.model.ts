@@ -72,3 +72,21 @@ export interface DeviceSelectablesFullModel {
     };
     servicePathOptions?: Map<string, { path: string; characteristicId: string }>;
 }
+
+export interface DeviceConnectionState {
+    value: boolean;
+    name: string;
+}
+
+export interface SelectedTag {
+    value: boolean | string | string[];
+    name: string;
+    type: string;
+}
+
+export interface FilterSelection {
+    connectionState: boolean | undefined;
+    deviceTypes: string[] | undefined;
+    location: string | undefined;
+    network: string | undefined;
+}
