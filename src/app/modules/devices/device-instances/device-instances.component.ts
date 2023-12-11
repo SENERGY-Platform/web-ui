@@ -36,6 +36,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { forkJoin, Observable, map, Subscription, of } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { DeviceInstancesFilterDialogComponent } from './dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -72,10 +74,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         private snackBar: MatSnackBar,
         private permissionsDialogService: PermissionsDialogService,
         private dialogsService: DialogsService,
-        private locationsService: LocationsService,
-        private networksService: NetworksService,
         private deviceTypesService: DeviceTypeService,
-        private searchbarService: SearchbarService
+        private searchbarService: SearchbarService,
+        private dialog: MatDialog
     ) {
         this.getRouterParams();
     }
@@ -181,7 +182,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             location: this.routerLocation
         }
 
-        this.deviceInstancesService.openFilterDialog(filterSelection).subscribe({
+        const editDialogRef = this.dialog.open(DeviceInstancesFilterDialogComponent, {
+            data: filterSelection
+        });
+        editDialogRef.afterClosed().subscribe({
             next: (filterSelection: FilterSelection) => {
                 if(filterSelection != null) {
                     this.routerConnectionState = filterSelection.connectionState

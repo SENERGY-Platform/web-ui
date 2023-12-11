@@ -38,8 +38,6 @@ import { DeviceTypePermSearchModel } from 'src/app/modules/metadata/device-types
 import { PermissionQueryRequest, Selection } from 'src/app/core/model/permissions/permissions';
 import { LocationsService } from '../../locations/shared/locations.service';
 import { NetworksService } from '../../networks/shared/networks.service';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { DeviceInstancesFilterDialogComponent } from '../dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -57,17 +55,8 @@ export class DeviceInstancesService {
         private utilService: UtilService,
         private locationService: LocationsService,
         private networkService: NetworksService,
-        private dialog: MatDialog
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl)
-    }
-
-    openFilterDialog(filterSelection: FilterSelection | undefined): Observable<FilterSelection> {
-        const editDialogRef = this.dialog.open(DeviceInstancesFilterDialogComponent, {
-            data: filterSelection
-        });
-
-        return editDialogRef.afterClosed()
     }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
