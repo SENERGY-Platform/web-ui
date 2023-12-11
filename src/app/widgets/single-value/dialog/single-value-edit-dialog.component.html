@@ -29,28 +29,37 @@
                 <mat-radio-button value="device">Device</mat-radio-button>
             </mat-radio-group>
 
-            <mat-form-field color="accent" [fxHide]="form.get('sourceType')?.value !== 'export'">
-                <mat-label>Choose Export</mat-label>
-                <senergy-select-search [options]="exports" formControlName="measurement" useOptionViewProperty="name"
-                    [compareWith]="compareIds">
-                </senergy-select-search>
-            </mat-form-field>
-
-            <mat-form-field color="accent" [fxHide]="form.get('sourceType')?.value !== 'device'">
-                <mat-label>Choose Device</mat-label>
-                <senergy-select-search [options]="devices" formControlName="device" useOptionViewProperty="display_name"
-                    [compareWith]="compareIds">
-                </senergy-select-search>
-            </mat-form-field>
-
-            <mat-form-field color="accent" [fxHide]="form.get('sourceType')?.value !== 'device'">
-                <mat-label>Choose Service</mat-label>
-                <senergy-select-search [options]="services" formControlName="service" useOptionViewProperty="name"
-                    [compareWith]="compareIds">
-                </senergy-select-search>
-            </mat-form-field>
-
             <table>
+                <tr *ngIf="form.get('sourceType')?.value === 'device'">
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Choose Device</mat-label>
+                            <senergy-select-search [options]="devices" formControlName="device" useOptionViewProperty="display_name"
+                                [compareWith]="compareIds">
+                            </senergy-select-search>
+                        </mat-form-field>
+            
+                    </td>
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Choose Service</mat-label>
+                            <senergy-select-search [options]="services" formControlName="service" useOptionViewProperty="name"
+                                [compareWith]="compareIds">
+                            </senergy-select-search>
+                        </mat-form-field>
+                    </td>
+                </tr>
+                <tr *ngIf="form.get('sourceType')?.value === 'export'">
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Choose Export</mat-label>
+                            <senergy-select-search [options]="exports" formControlName="measurement" useOptionViewProperty="name"
+                                [compareWith]="compareIds">
+                            </senergy-select-search>
+                        </mat-form-field>
+            
+                    </td>
+                </tr>
                 <tr>
                     <td *ngIf="form.get('sourceType')?.value === 'export'">
                         <mat-form-field color="accent">
