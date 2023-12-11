@@ -14,18 +14,29 @@
  * limitations under the License.
  */
 
- .container {
-    height: calc(100% - 78px);
-    overflow-y: auto;
+.container {
+   height: calc(100% - 78px);
+   overflow-y: auto;
 }
 
 .inline-icon {
-    vertical-align: bottom;
- }
+   vertical-align: bottom;
+}
 
- .help {
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: end;
-    margin-right: 20px;
- }
+.right {
+   margin-top: 12px;
+   display: flex;
+   justify-content: end;
+   margin-right: 20px;
+}
+
+.spacer-w20 {
+   width: 20px;
+}
+
+.help {
+   margin-bottom: 12px;
+   display: flex;
+   justify-content: end;
+   margin-right: 20px;
+}

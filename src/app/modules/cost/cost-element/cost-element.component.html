@@ -19,9 +19,12 @@
         <mat-panel-title>
             {{element.displayName || name}}
         </mat-panel-title>
-        <mat-panel-description>
+        <mat-panel-description *ngIf="element.estimation_month !== undefined">
             Total: {{sum(element.month) | currency:'EUR'}}, Estimation: {{sum(element.estimation_month) |
             currency:'EUR'}}
+        </mat-panel-description>
+        <mat-panel-description *ngIf="element.estimation_month === undefined">
+            {{sum(element.month) | currency:'EUR'}}
         </mat-panel-description>
     </mat-expansion-panel-header>
 
@@ -36,7 +39,7 @@
                 <td><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
                 <td>{{element.month.storage | currency:'EUR'}}</td>
             </tr>
-            <tr>
+            <tr *ngIf="element.estimation_month !== undefined">
                 <td>Estimation (month):</td>
                 <td><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon> </td>
                 <td>{{element.estimation_month.cpu | currency:'EUR'}}</td>

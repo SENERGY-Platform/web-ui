@@ -23,6 +23,11 @@ import { CoreModule } from 'src/app/core/core.module';
 import { CostElementComponent } from './cost-element/cost-element.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 
 
@@ -38,6 +43,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     CoreModule,
     MatIconModule,
     MatTooltipModule,
+    MatFormFieldModule,
+    MatDatepickerModule,
+    ReactiveFormsModule,
+    MatInputModule,
+    MatSelectModule,
   ]
 })
 export class CostModule { }

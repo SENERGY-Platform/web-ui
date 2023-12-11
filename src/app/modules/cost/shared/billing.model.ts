@@ -14,25 +14,11 @@
  * limitations under the License.
  */
 
-export interface CostEntryModel  {
-	cpu: number,
-	ram: number,
-	storage: number,
-}
+import { CostModel } from "./cost.model";
 
-export interface CostModel  {
-	month: CostEntryModel,
-	estimation_month?: CostEntryModel,
-	children: Map<string, CostModel>,
-	displayName?: string,
-}
-
-const CostTypeAnalytics = "analytics"
-
-
-export interface CostEstimationModel {
-	min: number;
-	max: number;
-	mean: number;
-	median: number;	
+export interface BillingInformationModel {
+	from: Date,
+	to: Date,
+	created_at: Date,
+	tree: Map<string, CostModel>
 }

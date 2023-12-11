@@ -16,12 +16,37 @@
 
 <div class="container layout-margin">
   <senergy-spinner [show]="!dataReady"></senergy-spinner>
-  <div class="help color-accent">
-    <span matTooltip="Estimations are based on the consumption in the month so far and consumption over the last 24 hours carried forward till the end of the month. Therefore, it takes a day for changes to be accounted for in the estimations.">About estimations <mat-icon class="inline-icon" color="accent">help</mat-icon></span>
-  </div>
+
   <div *ngIf="dataReady">
-    <mat-accordion multi>
+    <div class="right color-accent">
+
+      <mat-form-field color="accent" appearance="outline" *ngIf="options.length > 0">
+        <mat-label>Bill Creation Date</mat-label>
+        <mat-select [formControl]="selectedBill">
+          <mat-option *ngFor="let o of options" [value]="o.tree">
+            {{o.created_at| date:'dd.MM.yy HH:mm:ss'}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div class="spacer-w20"></div>
+      <mat-form-field color="accent" (click)="dp.open()" *ngIf="dates.length > 0">
+        <mat-label>Month and Year</mat-label>
+        <input matInput [matDatepicker]="dp" [formControl]="date" [min]="dates[0]" [max]="now">
+        <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
+        <mat-datepicker #dp startView="multi-year" (monthSelected)="setMonthAndYear($event, dp)">
+        </mat-datepicker>
+      </mat-form-field>
+    </div>
+    <div class="help">
+      <span matTooltip=" Estimations are based on the consumption in the month so far and consumption over the last 24
+      hours carried forward till the end of the month. Therefore, it takes a day for changes to be accounted for in the
+      estimations.">About
+        estimations <mat-icon class="inline-icon" color="accent">help</mat-icon></span>
+
+    </div>
+
+    <mat-accordion multi *ngIf="tree !== undefined">
       <senergy-cost-element *ngFor="let cat of tree | keyvalue: originalOrder" [name]="cat.key" [element]="cat.value" />
     </mat-accordion>
-  </div>  
+  </div>
 </div>

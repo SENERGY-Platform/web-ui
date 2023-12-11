@@ -21,19 +21,17 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import {environment} from "src/environments/environment";
 import { Observable, catchError, map } from 'rxjs';
-import { CostEstimationModel, CostModel } from './cost.model';
+import { BillingInformationModel } from './billing.model';
 
 
 @Injectable({
     providedIn: 'root',
 })
-export class CostService {
+export class BillingService {
     authorizations: PermissionTestResponse
-    estimationFlowAuthorizations: PermissionTestResponse
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.costApiUrl)
-        this.estimationFlowAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.costApiUrl + '/estimation/flow')
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.billingApiUrl + '/billing-components')
     }
 
     userHasDeleteAuthorization(): boolean {
@@ -52,24 +50,28 @@ export class CostService {
         return this.authorizations["GET"]  
     }
 
-    getTree(): Observable<Map<string, CostModel>> {
-        return this.http.get<Map<string, CostModel>>(environment.costApiUrl+'/tree').pipe(
+    getAvailable(): Observable<Date[]> {
+        return this.http.get<string[]>(environment.billingApiUrl+'/billing-components').pipe(
             catchError(
-                this.errorHandlerService.handleError(CostService.name, 'getTree: Error', new Map()),
+                this.errorHandlerService.handleError(BillingService.name, 'getAvailable: Error', []),
             ),
-            map((resp) => resp || new Map()),            
+            map((resp) => resp.map(x => new Date(x))),            
         );
     }
 
-
-    userMayGetFlowCostEstimations(): boolean {
-        return this.estimationFlowAuthorizations["POST"];
-    }
-    getFlowCostEstimations(flowIds: string[]): Observable<CostEstimationModel[]> {
-        return this.http.post<CostEstimationModel[]>(environment.costApiUrl+'/estimation/flow', flowIds).pipe(
+    getForMonth(year: number, month: number): Observable<BillingInformationModel[]> {
+        return this.http.get<BillingInformationModel[]>(environment.billingApiUrl+'/billing-components/'+year+'/'+month).pipe(
             catchError(
-                this.errorHandlerService.handleError(CostService.name, 'getFlowCostEstimations: Error', []),
-            )
+                this.errorHandlerService.handleError(BillingService.name, 'getForMonth: Error', []),
+            ),
+            map(res => {
+                res.forEach(r => {
+                    r.created_at = new Date(r.created_at);
+                    r.from = new Date(r.from);
+                    r.to = new Date(r.to);
+                });
+                return res;
+            })
         );
     }
 }

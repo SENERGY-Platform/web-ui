@@ -118,6 +118,7 @@ export const environment = {
     timescaleRuleManagerUrl: 'http://localhost',
     budgetApiUrl: 'http://localhost',
     costApiUrl: 'http://localhost',
+    billingApiUrl: 'http://localhost',
 };
 
 /*

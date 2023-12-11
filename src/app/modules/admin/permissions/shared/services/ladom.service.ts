@@ -141,6 +141,7 @@ export class LadonService {
             environment.waitingRoomUrl,
             environment.costApiUrl,
             environment.costApiUrl + '/estimation/flow',
+            environment.billingApiUrl + '/billing-components',
         ]
         
         ServiceEndpoints.forEach(endpointURL => {
