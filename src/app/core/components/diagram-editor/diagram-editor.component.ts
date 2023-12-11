@@ -369,9 +369,11 @@ export class DiagramEditorComponent implements AfterViewInit {
         return [x,y]
     }
 
-    calculateNodeSize(outPorts: any[]) {
+    calculateNodeSize(inPorts: any[], outPorts: any[]) {
         var outCircleradius = 20
-        var height = outCircleradius * outPorts.length + 30
+        var heightBasedOnOut = outCircleradius * outPorts.length + 30
+        var heightBasedOnIn = outCircleradius * inPorts.length + 30
+        var height = heightBasedOnIn > heightBasedOnOut ? heightBasedOnIn : heightBasedOnOut
         height = height > 100 ? height : 100
         var size = {'height': height, "width": 150}
         return size
@@ -396,7 +398,7 @@ export class DiagramEditorComponent implements AfterViewInit {
             }
         }
 
-        var size = this.calculateNodeSize(outPorts)
+        var size = this.calculateNodeSize(inPorts, outPorts)
         
         const node = new this.NodeElement({
             type: 'senergy.NodeElement',

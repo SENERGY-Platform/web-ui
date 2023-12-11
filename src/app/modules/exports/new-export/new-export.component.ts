@@ -748,7 +748,7 @@ export class NewExportComponent implements OnInit {
     }
 
     selectOperator($event: MouseEvent) {
-        for (const operatorNode of ($event.target as any)?.nearestViewportElement?.childNodes[0]?.childNodes[1]?.childNodes || []) {
+        for (const operatorNode of ($event.target as any)?.nearestViewportElement?.getElementsByClassName("joint-cells-layer")[0].childNodes || []) {
             if (
                 operatorNode.attributes['data-type'] !== undefined &&
                 operatorNode.attributes['data-type'].value === 'senergy.NodeElement'
