@@ -36,7 +36,7 @@ export class ExportDataService {
     usageAuthorizations: PermissionTestResponse
    
     constructor(private http: HttpClient,  private ladonService: LadonService) {
-        this.usageAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.billingApiUrl + '/billing-components')
+        this.usageAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.timescaleAPIURL + '/usage')
 
     }
 
