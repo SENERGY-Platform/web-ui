@@ -31,6 +31,7 @@ import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { DeviceInstancesService } from './shared/device-instances.service';
 import { of } from 'rxjs';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
+import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 
 describe('DeviceInstancesComponent', () => {
     let component: DeviceInstancesComponent;
@@ -44,6 +45,9 @@ describe('DeviceInstancesComponent', () => {
     deviceInstanceServiceSpy.listUsedDeviceTypeIds.and.returnValue(of())
     const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass(DeviceTypeService)
     deviceTypeServiceSpy.userHasPermSearchAuthorization.and.returnValue(true)
+
+    const exportDataServiceSpy: Spy<ExportDataService> = createSpyFromClass(ExportDataService);
+    exportDataServiceSpy.userHasUsageAuthroization.and.returnValue(false)
 
     beforeEach(
         waitForAsync(() => {
@@ -62,7 +66,8 @@ describe('DeviceInstancesComponent', () => {
                     { provide: KeycloakService, useClass: MockKeycloakService },
                     { provide: Router, useClass: RouterStub },
                     { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
-                    { provide: DeviceTypeService, useValue: deviceTypeServiceSpy }
+                    { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
+                    { provide: ExportDataService, useValue: exportDataServiceSpy },
                 ],
             }).compileComponents();
         }),

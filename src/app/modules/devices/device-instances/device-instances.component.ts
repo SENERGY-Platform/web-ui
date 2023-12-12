@@ -38,6 +38,7 @@ import { forkJoin, Observable, map, Subscription, of } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { DeviceInstancesFilterDialogComponent } from './dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -76,7 +77,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         private dialogsService: DialogsService,
         private deviceTypesService: DeviceTypeService,
         private searchbarService: SearchbarService,
-        private dialog: MatDialog
+        private dialog: MatDialog,
+        private exportDataService: ExportDataService,
     ) {
         this.getRouterParams();
     }
@@ -88,6 +90,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     offset = 0;
     ready = false;
     searchText = '';
+    usage : {
+        deviceId: string;
+        updateAt: Date;
+        bytes: number;
+    }[] = [];
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
@@ -124,6 +131,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     checkAuthorization() {
+        if (this.exportDataService.userHasUsageAuthroization()){
+            this.displayedColumns.splice(4, 0, 'usage')
+        }
+
         this.userHasUpdateAuthorization = this.deviceInstancesService.userHasUpdateAuthorization() 
         if(this.userHasUpdateAuthorization) {
             this.displayedColumns.push("edit")
@@ -218,6 +229,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     map((deviceInstances: DeviceInstancesModel[]) => {
                         this.setDevices(deviceInstances);
                         return deviceInstances
+                    }),
+                    map(d => {
+                        this.exportDataService.getTimescaleDeviceUsage(d.map(di => di.id)).subscribe(r => this.usage.push(...r))
+                        return d
                     })
                 );
         }
@@ -232,6 +247,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.ready = false;
         this.pageSize = 20;
         this.selectionClear();
+        this.usage = [];
 
         forkJoin(this.load(), this.getTotalCount()).subscribe({
             next: (_) => this.ready = true,
@@ -341,5 +357,21 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     this.reload();
                 });
             });
+    }
+
+    getUsage(d: DeviceInstancesModel) {
+        return this.usage.find(u => u.deviceId === d.id);
+    }
+
+    formatBytes(bytes: number, decimals = 2) {
+        if (!+bytes) return '0 Bytes'
+    
+        const k = 1024
+        const dm = decimals < 0 ? 0 : decimals
+        const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+    
+        const i = Math.floor(Math.log(bytes) / Math.log(k))
+    
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
     }
 }

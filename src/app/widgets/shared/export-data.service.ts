@@ -26,13 +26,18 @@ import {
 } from './export-data.model';
 import {HttpClient} from '@angular/common/http';
 import {map} from 'rxjs/operators';
-
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ExportDataService {
-    constructor(private http: HttpClient) {
+    usageAuthorizations: PermissionTestResponse
+   
+    constructor(private http: HttpClient,  private ladonService: LadonService) {
+        this.usageAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.billingApiUrl + '/billing-components')
+
     }
 
     getLastValuesInflux(requestElements: LastValuesRequestElementInfluxModel[]): Observable<TimeValuePairModel[]> {
@@ -119,5 +124,24 @@ export class ExportDataService {
             }));
             return res;
         }));
+    }
+
+    userHasUsageAuthroization(): boolean {
+        return this.usageAuthorizations["POST"]      
+    }
+
+    getTimescaleDeviceUsage(deviceIds: string[]): Observable<{
+        deviceId: string;
+        updateAt: Date;
+        bytes: number;
+    }[]> {
+        return this.http.post<{
+            deviceId: string;
+            updateAt: Date;
+            bytes: number;
+        }[]>(environment.timescaleAPIURL + '/usage/devices', deviceIds).pipe(map(res => {
+            res.forEach(r => r.updateAt = new Date(r.updateAt))
+            return res;
+        }))
     }
 }

@@ -142,6 +142,7 @@ export class LadonService {
             environment.costApiUrl,
             environment.costApiUrl + '/estimation/flow',
             environment.billingApiUrl + '/billing-components',
+            environment.timescaleAPIURL + '/usage'
         ]
         
         ServiceEndpoints.forEach(endpointURL => {

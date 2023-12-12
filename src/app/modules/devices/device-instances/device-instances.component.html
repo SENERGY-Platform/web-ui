@@ -63,6 +63,15 @@
                         <senergy-state-icon [state]="device.log_state"></senergy-state-icon>
                     </td>
                 </ng-container>
+
+                <ng-container matColumnDef="usage">
+                    <th mat-header-cell *matHeaderCellDef>Storage
+                    </th>
+                    <td mat-cell *matCellDef="let device">
+                        {{formatBytes(getUsage(device)?.bytes || 0)}}
+                    </td>
+                </ng-container>
+
                 <ng-container matColumnDef="shared">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Shared</th>
                     <td mat-cell *matCellDef="let device">
