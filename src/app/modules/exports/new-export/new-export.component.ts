@@ -156,6 +156,7 @@ export class NewExportComponent implements OnInit {
         forkJoin(array).subscribe((response) => {
             this.devices = response[0] as DeviceInstancesModel[];
             this.pipelines = response[1] as PipelineModel[];
+            console.log(this.pipelines)
             this.imports = response[2] as ImportInstancesModel[];
             this.exportDatabases = response[3] as ExportDatabaseModel[];
             this.exportForm.patchValue({exportDatabaseId: environment.exportDatabaseIdInternalTimescaleDb});

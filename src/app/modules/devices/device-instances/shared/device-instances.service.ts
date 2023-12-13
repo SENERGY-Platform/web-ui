@@ -184,7 +184,6 @@ export class DeviceInstancesService {
         offset: number,
         sortBy: string = "name",
         sortDesc: boolean = false,
-        withTotal: boolean = false,
         searchText?: string,
         deviceTypeIds?: string[], 
         connectionState?: boolean, 
@@ -195,7 +194,7 @@ export class DeviceInstancesService {
             find: {
                 limit,
                 offset,
-                with_total: withTotal,
+                with_total: true,
                 sort_desc: sortDesc,
                 sort_by: sortBy,
             }
@@ -243,7 +242,16 @@ export class DeviceInstancesService {
         }
         return this.queryPermissionSearch(queryRequest).pipe(
                 map((resp) => <DeviceInstancesPermSearchTotalModel>resp || []),
-                concatMap(devices => this.addDeviceType(devices)),
+                concatMap(result => {
+                    return this.addDeviceType(result.result).pipe(
+                        map((devicesWithType) => {
+                            return {
+                                "result": devicesWithType,
+                                "total": result.total
+                            } as DeviceInstancesTotalModel
+                        })
+                    )
+                }),
                 catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances', {"result": [], "total": 0})),
         );
     }
@@ -253,35 +261,30 @@ export class DeviceInstancesService {
         offset: number,
         sortBy: string = "name",
         sortDesc: boolean = false,
-        withTotal: boolean = false,
         searchText?: string,
         locationId?: string,
         hubId?: string,
         deviceTypeIds?: string[], 
         connectionState?: boolean,
-    ): Observable<DeviceInstancesTotalModel | DeviceInstancesModel[]> {
+    ): Observable<DeviceInstancesTotalModel> {
         if(hubId != null || locationId != null) {
             return this.getDeviceIds(hubId, locationId).pipe(
                 concatMap((deviceIds) => {
                     if(deviceIds.length == 0) {
-                        if(withTotal) {
-                            return of({"result": [], "total": 0})
-                        } else {
-                            return of([])
-                        }
+                        return of({"result": [], "total": 0})
                     }
 
                     if((searchText == null || searchText == "") && (deviceTypeIds == null || deviceTypeIds.length == 0) && connectionState == null) {
                         // If only location or network filter are used, then use less expensive non-search method
-                        return this.getDeviceInstancesByIds(deviceIds, limit, offset, sortBy, sortDesc, withTotal)
+                        return this.getDeviceInstancesByIds(deviceIds, limit, offset, sortBy, sortDesc)
                     }
     
-                    return this.getDeviceInstancesBySearch(limit, offset, sortBy, sortDesc, withTotal, searchText, deviceTypeIds, connectionState, deviceIds)
+                    return this.getDeviceInstancesBySearch(limit, offset, sortBy, sortDesc, searchText, deviceTypeIds, connectionState, deviceIds)
                 })
             )
         }
 
-        return this.getDeviceInstancesBySearch(limit, offset, sortBy, sortDesc, withTotal, searchText, deviceTypeIds, connectionState, undefined)
+        return this.getDeviceInstancesBySearch(limit, offset, sortBy, sortDesc, searchText, deviceTypeIds, connectionState, undefined)
     }
 
     getDeviceInstancesWithTotal(
@@ -295,7 +298,7 @@ export class DeviceInstancesService {
         deviceTypeIds?: string[], 
         connectionState?: boolean,
     ): Observable<DeviceInstancesTotalModel>  {
-        return this.loadDeviceInstances(limit, offset, sortBy, sortDesc, true, searchText, locationId, hubId, deviceTypeIds, connectionState) as Observable<DeviceInstancesTotalModel>
+        return this.loadDeviceInstances(limit, offset, sortBy, sortDesc, searchText, locationId, hubId, deviceTypeIds, connectionState)
     }
 
     getDeviceInstances(
@@ -309,11 +312,12 @@ export class DeviceInstancesService {
         deviceTypeIds?: string[], 
         connectionState?: boolean,
     ): Observable<DeviceInstancesModel[]> {
-        return this.loadDeviceInstances(limit, offset, sortBy, sortDesc, false, searchText, locationId, hubId, deviceTypeIds, connectionState) as Observable<DeviceInstancesModel[]>
+        return this.loadDeviceInstances(limit, offset, sortBy, sortDesc, searchText, locationId, hubId, deviceTypeIds, connectionState).pipe(
+            map((result) => result.result)
+        )
     }
 
-    addDeviceType(result: DeviceInstancesPermSearchTotalModel): Observable<DeviceInstancesTotalModel> {
-        var devices = result.result
+    addDeviceType(devices: DeviceInstancesPermSearchModel[]): Observable<DeviceInstancesModel[]> {
         var allDeviceTypeIds = devices.map((device) => device.device_type_id)
 
         var queryRequest: PermissionQueryRequest = {
@@ -341,13 +345,9 @@ export class DeviceInstancesService {
                        devicesWithDeviceType.push(deviceWithDeviceType)
                     });
                     
-                    var a: DeviceInstancesTotalModel = {
-                        "result": devicesWithDeviceType,
-                        "total": result.total,
-                    }
-                    return a 
+                    return devicesWithDeviceType 
                 }),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'addDeviceType', {"result": [], "total": 0})),
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'addDeviceType', [])),
             );
     }
 
@@ -361,13 +361,12 @@ export class DeviceInstancesService {
         offset: number,
         sortBy: string = "name",
         sortDesc: boolean = false,
-        withTotal: boolean = false
     ): Observable<DeviceInstancesTotalModel> {
         var queryRequest: PermissionQueryRequest = {
             resource: 'devices', list_ids: {
                 ids,
                 limit,
-                with_total: withTotal,
+                with_total: true,
                 offset,
                 sort_by: sortBy,
                 sort_desc: sortDesc
@@ -375,7 +374,17 @@ export class DeviceInstancesService {
         }
         return this.queryPermissionSearch(queryRequest).pipe(
                 map((resp) => <DeviceInstancesPermSearchTotalModel>resp || []),
-                concatMap(devices => this.addDeviceType(devices)),
+                concatMap(result => {
+                    return this.addDeviceType(result.result).pipe(
+                        map((devicesWithType) => {
+                            return {
+                                "result": devicesWithType,
+                                "total": result.total
+                            }
+                        })
+                    )
+                    
+                }),
                 catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByIds', {"result": [], "total": 0})),
         );
     }
