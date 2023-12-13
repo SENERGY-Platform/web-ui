@@ -34,10 +34,12 @@ export interface Selection {
 interface QueryFind extends QueryListCommons {
     search?: string;
     filter?: Selection;
+    with_total?: boolean;
 }
 
 interface QueryListIds extends QueryListCommons {
     ids: string[];
+    with_total?: boolean;
 }
 
 interface QueryCheckIds {

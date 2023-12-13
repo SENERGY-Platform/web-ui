@@ -17,7 +17,7 @@
 import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 
 import {DeviceInstancesService} from './shared/device-instances.service';
-import {DeviceConnectionState, DeviceInstancesModel, FilterSelection, SelectedTag} from './shared/device-instances.model';
+import {DeviceConnectionState, DeviceInstancesModel, DeviceInstancesTotalModel, FilterSelection, SelectedTag} from './shared/device-instances.model';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -116,12 +116,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.checkAuthorization()
     }
 
-    getTotalCount(): Observable<number> {
-        return this.deviceInstancesService.getTotalCountOfDevices(this.searchText).pipe(
-            map(totalCount => this.totalCount = totalCount)
-        )
-    }
-
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize;
@@ -175,9 +169,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         // Only called when beeing redirected from device group page
         if(this.routerDeviceIds) {
             return this.deviceInstancesService.getDeviceInstancesByIds(this.routerDeviceIds, this.pageSize, this.offset).pipe(
-                map(deviceInstances => {
-                    this.setDevices(deviceInstances);
-                    return deviceInstances
+                map(result => {
+                    this.setDevicesAndTotal(result);
+                    return result.result
                 })
             )
         }
@@ -209,12 +203,12 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         })
     }
    
-    private load(): Observable<DeviceInstancesModel[]> {
+    private load(): Observable<any> {
         if (this.routerDeviceIds !== undefined) {
             return this.loadDevicesByIds()
         } else {
             return this.deviceInstancesService
-                .getDeviceInstances(
+                .getDeviceInstancesWithTotal(
                     this.pageSize,
                     this.offset,
                     this.sortBy,
@@ -226,20 +220,20 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     this.routerConnectionState
                 )
                 .pipe(
-                    map((deviceInstances: DeviceInstancesModel[]) => {
-                        this.setDevices(deviceInstances);
-                        return deviceInstances
+                    map((deviceInstancesWithTotal: DeviceInstancesTotalModel) => {
+                        this.setDevicesAndTotal(deviceInstancesWithTotal);
+                        return deviceInstancesWithTotal
                     }),
-                    map(d => {
-                        this.exportDataService.getTimescaleDeviceUsage(d.map(di => di.id)).subscribe(r => this.usage.push(...r))
-                        return d
+                    map(deviceInstancesWithTotal => {
+                        this.exportDataService.getTimescaleDeviceUsage(deviceInstancesWithTotal.result.map(di => di.id)).subscribe(r => this.usage.push(...r))
                     })
                 );
         }
     }
 
-    private setDevices(instances: DeviceInstancesModel[]) {
-        this.dataSource.data = instances;
+    private setDevicesAndTotal(result: DeviceInstancesTotalModel) {
+        this.dataSource.data = result.result
+        this.totalCount = result.total
     }
 
     reload() {
@@ -249,7 +243,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.selectionClear();
         this.usage = [];
 
-        forkJoin(this.load(), this.getTotalCount()).subscribe({
+        forkJoin(this.load()).subscribe({
             next: (_) => this.ready = true,
             error: (err) => {
                 console.log(err)

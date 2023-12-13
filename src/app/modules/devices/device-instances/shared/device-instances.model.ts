@@ -44,9 +44,19 @@ export interface DeviceInstancesPermSearchModel extends DeviceInstancesIntermedi
     annotations: any;
 }
 
+export interface DeviceInstancesPermSearchTotalModel {
+    result: DeviceInstancesPermSearchModel[];
+    total: number;
+}
+
 export interface DeviceInstancesModel extends DeviceInstancesIntermediateModel {
     device_type: DeviceTypePermSearchModel;
     log_state: boolean;
+}
+
+export interface DeviceInstancesTotalModel {
+    result: DeviceInstancesModel[];
+    total: number;
 }
 
 export interface DeviceFilterCriteriaModel {
