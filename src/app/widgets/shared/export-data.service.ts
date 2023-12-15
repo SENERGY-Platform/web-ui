@@ -134,11 +134,13 @@ export class ExportDataService {
         deviceId: string;
         updateAt: Date;
         bytes: number;
+        bytesPerDay: number;
     }[]> {
         return this.http.post<{
             deviceId: string;
             updateAt: Date;
             bytes: number;
+            bytesPerDay: number;
         }[]>(environment.timescaleAPIURL + '/usage/devices', deviceIds).pipe(map(res => {
             res.forEach(r => r.updateAt = new Date(r.updateAt))
             return res;

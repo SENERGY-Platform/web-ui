@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 
 import {DeviceInstancesService} from './shared/device-instances.service';
 import {DeviceConnectionState, DeviceInstancesModel, DeviceInstancesTotalModel, FilterSelection, SelectedTag} from './shared/device-instances.model';
@@ -39,7 +39,6 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 import { DeviceInstancesFilterDialogComponent } from './dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
-
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
     tab: DeviceInstancesRouterStateTabEnum | undefined | null;
@@ -90,10 +89,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     offset = 0;
     ready = false;
     searchText = '';
-    usage : {
+    usage: {
         deviceId: string;
         updateAt: Date;
         bytes: number;
+        bytesPerDay: number;
     }[] = [];
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -106,8 +106,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     private searchSub: Subscription = new Subscription();
     sortBy: string = "display_name"
-    sortDirection: SortDirection = "asc"  
-    
+    sortDirection: SortDirection = "asc"
+
     userHasUpdateAuthorization: boolean = false
     userHasDeleteAuthorization: boolean = false
 
@@ -117,7 +117,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe(() => {
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load().subscribe();
@@ -125,25 +125,25 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     checkAuthorization() {
-        if (this.exportDataService.userHasUsageAuthroization()){
+        if (this.exportDataService.userHasUsageAuthroization()) {
             this.displayedColumns.splice(4, 0, 'usage')
         }
 
-        this.userHasUpdateAuthorization = this.deviceInstancesService.userHasUpdateAuthorization() 
-        if(this.userHasUpdateAuthorization) {
+        this.userHasUpdateAuthorization = this.deviceInstancesService.userHasUpdateAuthorization()
+        if (this.userHasUpdateAuthorization) {
             this.displayedColumns.push("edit")
         }
-        
+
         this.userHasDeleteAuthorization = this.deviceInstancesService.userHasDeleteAuthorization()
-        if(this.userHasDeleteAuthorization) {
+        if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push("delete")
         }
-        
-        if(this.deviceTypesService.userHasReadAuthorization()) {
+
+        if (this.deviceTypesService.userHasReadAuthorization()) {
             this.displayedColumns.splice(4, 0, 'device_type')
         }
 
-        if(this.deviceInstancesService.userHasCreateAuthorization()) {
+        if (this.deviceInstancesService.userHasCreateAuthorization()) {
             this.displayedColumns.push("duplicate")
         }
     }
@@ -156,9 +156,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active 
+        this.sortBy = $event.active
 
-        if(this.sortBy == 'log_state') {
+        if (this.sortBy == 'log_state') {
             this.sortBy = "annotations.connected"
         }
         this.sortDirection = $event.direction;
@@ -167,7 +167,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     private loadDevicesByIds(): Observable<DeviceInstancesModel[]> {
         // Only called when beeing redirected from device group page
-        if(this.routerDeviceIds) {
+        if (this.routerDeviceIds) {
             return this.deviceInstancesService.getDeviceInstancesByIds(this.routerDeviceIds, this.pageSize, this.offset).pipe(
                 map(result => {
                     this.setDevicesAndTotal(result);
@@ -192,7 +192,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         });
         editDialogRef.afterClosed().subscribe({
             next: (filterSelection: FilterSelection) => {
-                if(filterSelection != null) {
+                if (filterSelection != null) {
                     this.routerConnectionState = filterSelection.connectionState
                     this.routerDeviceType = filterSelection.deviceTypes
                     this.routerNetwork = filterSelection.network
@@ -202,7 +202,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             }
         })
     }
-   
+
     private load(): Observable<any> {
         if (this.routerDeviceIds !== undefined) {
             return this.loadDevicesByIds()
@@ -292,18 +292,18 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             if (navigation.extras.state !== undefined) {
                 const state = navigation.extras.state as DeviceInstancesRouterState;
                 switch (state.type) {
-                case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
-                    this.routerDeviceType = [(state.value as DeviceTypeBaseModel).id];
-                    break;
-                case DeviceInstancesRouterStateTypesEnum.NETWORK:
-                    this.routerNetwork = (state.value as NetworksModel).id;
-                    break;
-                case DeviceInstancesRouterStateTypesEnum.LOCATION:
-                    this.routerLocation = (state.value as LocationModel).id;
-                    break;
-                case DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP:
-                    this.routerDeviceIds = state.value as string[];
-                    break;
+                    case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
+                        this.routerDeviceType = [(state.value as DeviceTypeBaseModel).id];
+                        break;
+                    case DeviceInstancesRouterStateTypesEnum.NETWORK:
+                        this.routerNetwork = (state.value as NetworksModel).id;
+                        break;
+                    case DeviceInstancesRouterStateTypesEnum.LOCATION:
+                        this.routerLocation = (state.value as LocationModel).id;
+                        break;
+                    case DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP:
+                        this.routerDeviceIds = state.value as string[];
+                        break;
                 }
             }
         }
@@ -344,9 +344,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
                     if (ok) {
-                        this.snackBar.open('Devices deleted successfully.', undefined, {duration: 2000});
+                        this.snackBar.open('Devices deleted successfully.', undefined, { duration: 2000 });
                     } else {
-                        this.snackBar.open('Error while deleting devices!', 'close', {panelClass: 'snack-bar-error'});
+                        this.snackBar.open('Error while deleting devices!', 'close', { panelClass: 'snack-bar-error' });
                     }
                     this.reload();
                 });
@@ -359,13 +359,21 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     formatBytes(bytes: number, decimals = 2) {
         if (!+bytes) return '0 Bytes'
-    
+
         const k = 1024
         const dm = decimals < 0 ? 0 : decimals
         const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
-    
+
         const i = Math.floor(Math.log(bytes) / Math.log(k))
-    
+
         return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+    }
+
+    getUsageTooltip(d: DeviceInstancesModel): string {
+        const usage = this.getUsage(d);
+        if (d === undefined) { 
+            return ""; 
+        }
+        return this.formatBytes(usage?.bytesPerDay || 0) + '/day, ' + this.formatBytes((usage?.bytesPerDay || 0) * 30) + '/month'
     }
 }
