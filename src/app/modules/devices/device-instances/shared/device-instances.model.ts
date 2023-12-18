@@ -18,7 +18,6 @@ import { DeviceTypePermSearchModel, PermissionsModel } from '../../../metadata/d
 import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
 import { ImportTypeModel } from '../../../imports/import-types/shared/import-types.model';
-import { DeviceInstancesRouterStateTabEnum } from '../device-instances.component';
 
 export interface Attribute {
     key: string;
@@ -101,4 +100,12 @@ export interface FilterSelection {
     deviceTypes?: string[];
     location?: string;
     network?: string;
+}
+
+// eslint-disable-next-line no-shadow
+export enum DeviceInstancesRouterStateTabEnum {
+    ALL,
+    ONLINE,
+    OFFLINE,
+    UNKNOWN,
 }

@@ -9,8 +9,7 @@ import { LocationModel } from '../../../locations/shared/locations.model';
 import { LocationsService } from '../../../locations/shared/locations.service';
 import { NetworksModel } from '../../../networks/shared/networks.model';
 import { NetworksService } from '../../../networks/shared/networks.service';
-import { DeviceInstancesRouterStateTabEnum } from '../../device-instances.component';
-import { DeviceConnectionState, FilterSelection } from '../../shared/device-instances.model';
+import { DeviceConnectionState, DeviceInstancesRouterStateTabEnum, FilterSelection } from '../../shared/device-instances.model';
 import { DeviceInstancesService } from '../../shared/device-instances.service';
 
 @Component({

@@ -25,22 +25,21 @@ import {
     DeviceInstancesModel,
     DeviceInstancesPermSearchModel,
     DeviceInstancesPermSearchTotalModel,
+    DeviceInstancesRouterStateTabEnum,
     DeviceInstancesTotalModel,
     DeviceSelectablesFullModel,
     DeviceSelectablesModel,
-    FilterSelection,
 } from './device-instances.model';
 import {forkJoin, Observable, of} from 'rxjs';
 import {DeviceInstancesHistoryModel, DeviceInstancesHistoryModelWithId} from './device-instances-history.model';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {UtilService} from '../../../../core/services/util.service';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { DeviceTypePermSearchModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type-perm-search.model';
 import { PermissionQueryRequest, Selection } from 'src/app/core/model/permissions/permissions';
 import { LocationsService } from '../../locations/shared/locations.service';
 import { NetworksService } from '../../networks/shared/networks.service';
-import { DeviceInstancesRouterStateTabEnum } from '../device-instances.component';
 
 @Injectable({
     providedIn: 'root',

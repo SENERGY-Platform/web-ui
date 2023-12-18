@@ -17,21 +17,19 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 
 import {DeviceInstancesService} from './shared/device-instances.service';
-import {DeviceConnectionState, DeviceInstancesModel, DeviceInstancesTotalModel, FilterSelection, SelectedTag} from './shared/device-instances.model';
+import {DeviceInstancesModel, DeviceInstancesRouterStateTabEnum, DeviceInstancesTotalModel, FilterSelection, SelectedTag} from './shared/device-instances.model';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {Navigation, Router} from '@angular/router';
 import {NetworksModel} from '../networks/shared/networks.model';
-import {DeviceTypeBaseModel, DeviceTypeModel} from '../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeBaseModel} from '../../metadata/device-types-overview/shared/device-type.model';
 import {LocationModel} from '../locations/shared/locations.model';
 import {MatTableDataSource} from '@angular/material/table';
 import {DeviceInstancesDialogService} from './shared/device-instances-dialog.service';
 import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesUpdateModel} from './shared/device-instances-update.model';
-import {LocationsService} from '../locations/shared/locations.service';
-import {NetworksService} from '../networks/shared/networks.service';
-import {MatSort, Sort, SortDirection} from '@angular/material/sort';
+import {Sort, SortDirection} from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { forkJoin, Observable, map, Subscription, of } from 'rxjs';
@@ -52,14 +50,6 @@ export enum DeviceInstancesRouterStateTypesEnum {
     LOCATION,
     DEVICE_GROUP,
     CONNECTION_STATE
-}
-
-// eslint-disable-next-line no-shadow
-export enum DeviceInstancesRouterStateTabEnum {
-    ALL,
-    ONLINE,
-    OFFLINE,
-    UNKNOWN,
 }
 
 @Component({

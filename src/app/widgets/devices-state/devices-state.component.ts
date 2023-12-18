@@ -21,7 +21,8 @@ import { DevicesStateModel } from './shared/devices-state.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
-import { DeviceInstancesRouterState, DeviceInstancesRouterStateTabEnum, DeviceInstancesRouterStateTypesEnum } from 'src/app/modules/devices/device-instances/device-instances.component';
+import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from 'src/app/modules/devices/device-instances/device-instances.component';
+import { DeviceInstancesRouterStateTabEnum } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 
 @Component({
     selector: 'senergy-devices-state',
