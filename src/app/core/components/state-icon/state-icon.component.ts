@@ -22,5 +22,5 @@ import { Component, Input } from '@angular/core';
     styleUrls: ['./state-icon.component.css'],
 })
 export class StateIconComponent {
-    @Input() state: boolean | null | undefined = false;
+    @Input() state: boolean | null | undefined | string = false;
 }

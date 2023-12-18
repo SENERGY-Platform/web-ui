@@ -38,3 +38,11 @@ a {
     text-decoration: none;
     color: #4484ce;
 }
+
+.inactive {
+    background-color: rgb(237, 237, 237);
+}
+
+.inactive:hover {
+    background-color: rgb(213, 211, 211)!important;
+}

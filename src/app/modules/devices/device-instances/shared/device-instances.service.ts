@@ -337,12 +337,22 @@ export class DeviceInstancesService {
                     });
 
                     devices.forEach(device => {
-                       var deviceWithDeviceType: DeviceInstancesModel = {
+                        var active = true 
+                        if(device.attributes) {
+                            device.attributes.forEach(attribute => {
+                               if(attribute.key == "inactive" && attribute.value == "true") {
+                                   active = false
+                               }  
+                            });
+                        } 
+
+                        var deviceWithDeviceType: DeviceInstancesModel = {
                            ...device,
                            'device_type': deviceTypeIdToType[device.device_type_id],
-                           'log_state': device.annotations ? device.annotations.connected : undefined
-                       } 
-                       devicesWithDeviceType.push(deviceWithDeviceType)
+                           'log_state': device.annotations ? device.annotations.connected : undefined,
+                           'active': active
+                        } 
+                        devicesWithDeviceType.push(deviceWithDeviceType)
                     });
                     
                     return devicesWithDeviceType 

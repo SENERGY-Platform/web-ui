@@ -90,6 +90,7 @@ export class DataTableEditDialogComponent implements OnInit {
         'emoji_objects',
         'check_circle_outline',
         'highlight_off',
+        'heat'
     ];
     groupTypes = [
         'mean',

@@ -52,6 +52,7 @@ export interface DeviceInstancesPermSearchTotalModel {
 export interface DeviceInstancesModel extends DeviceInstancesIntermediateModel {
     device_type: DeviceTypePermSearchModel;
     log_state: boolean;
+    active: boolean;
 }
 
 export interface DeviceInstancesTotalModel {
