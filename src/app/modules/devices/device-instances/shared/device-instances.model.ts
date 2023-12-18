@@ -18,6 +18,7 @@ import { DeviceTypePermSearchModel, PermissionsModel } from '../../../metadata/d
 import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
 import { ImportTypeModel } from '../../../imports/import-types/shared/import-types.model';
+import { DeviceInstancesRouterStateTabEnum } from '../device-instances.component';
 
 export interface Attribute {
     key: string;
@@ -85,7 +86,7 @@ export interface DeviceSelectablesFullModel {
 }
 
 export interface DeviceConnectionState {
-    value: boolean;
+    value: DeviceInstancesRouterStateTabEnum;
     name: string;
 }
 
@@ -96,8 +97,8 @@ export interface SelectedTag {
 }
 
 export interface FilterSelection {
-    connectionState: boolean | undefined;
-    deviceTypes: string[] | undefined;
-    location: string | undefined;
-    network: string | undefined;
+    connectionState?: DeviceInstancesRouterStateTabEnum;
+    deviceTypes?: string[];
+    location?: string;
+    network?: string;
 }

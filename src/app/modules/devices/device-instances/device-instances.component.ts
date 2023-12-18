@@ -39,9 +39,9 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 import { DeviceInstancesFilterDialogComponent } from './dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
+
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
-    tab: DeviceInstancesRouterStateTabEnum | undefined | null;
     value: any;
 }
 
@@ -50,7 +50,8 @@ export enum DeviceInstancesRouterStateTypesEnum {
     NETWORK,
     DEVICE_TYPE,
     LOCATION,
-    DEVICE_GROUP
+    DEVICE_GROUP,
+    CONNECTION_STATE
 }
 
 // eslint-disable-next-line no-shadow
@@ -102,7 +103,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     routerDeviceType: string[] | undefined = undefined;
     routerLocation: string | undefined = undefined;
     routerDeviceIds: string[] | undefined = undefined;
-    routerConnectionState: boolean | undefined = undefined;
+    routerConnectionState: DeviceInstancesRouterStateTabEnum | undefined = undefined;
 
     private searchSub: Subscription = new Subscription();
     sortBy: string = "display_name"
@@ -304,6 +305,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     case DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP:
                         this.routerDeviceIds = state.value as string[];
                         break;
+                    case DeviceInstancesRouterStateTypesEnum.CONNECTION_STATE:
+                        this.routerConnectionState = state.value  
                 }
             }
         }

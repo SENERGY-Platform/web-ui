@@ -9,6 +9,7 @@ import { LocationModel } from '../../../locations/shared/locations.model';
 import { LocationsService } from '../../../locations/shared/locations.service';
 import { NetworksModel } from '../../../networks/shared/networks.model';
 import { NetworksService } from '../../../networks/shared/networks.service';
+import { DeviceInstancesRouterStateTabEnum } from '../../device-instances.component';
 import { DeviceConnectionState, FilterSelection } from '../../shared/device-instances.model';
 import { DeviceInstancesService } from '../../shared/device-instances.service';
 
@@ -22,13 +23,17 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
   locationOptions: LocationModel[] = [];
   networkOptions: NetworksModel[] = [];
   deviceTypeOptions: DeviceTypeBaseModel[] = [];
-  connectionOptions: DeviceConnectionState[] = [{"name": "connected", "value": true}, {"name": "unconnected", "value": false}]
+  connectionOptions: DeviceConnectionState[] = [
+    {"name": "connected", "value": DeviceInstancesRouterStateTabEnum.ONLINE}, 
+    {"name": "unconnected", "value": DeviceInstancesRouterStateTabEnum.OFFLINE},
+    {"name": "unknown", "value": DeviceInstancesRouterStateTabEnum.UNKNOWN}
+  ]
 
   form = new FormGroup({
     location: new FormControl<string|undefined>(undefined),
     network: new FormControl<string|undefined>(undefined),
     deviceTypes: new FormControl<string[]>([]),
-    connectionState: new FormControl<boolean|undefined>(undefined),
+    connectionState: new FormControl<DeviceInstancesRouterStateTabEnum|undefined>(DeviceInstancesRouterStateTabEnum.ALL),
   });
 
   savedFilterSelection!: FilterSelection | undefined
@@ -107,7 +112,7 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
   }
 
   resetConnectionFilter() {
-    this.form.controls.connectionState.patchValue(undefined)
+    this.form.controls.connectionState.patchValue(DeviceInstancesRouterStateTabEnum.ALL)
   }
 
   resetLocationFilter() {

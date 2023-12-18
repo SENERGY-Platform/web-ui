@@ -40,6 +40,7 @@ import { DeviceTypePermSearchModel } from 'src/app/modules/metadata/device-types
 import { PermissionQueryRequest, Selection } from 'src/app/core/model/permissions/permissions';
 import { LocationsService } from '../../locations/shared/locations.service';
 import { NetworksService } from '../../networks/shared/networks.service';
+import { DeviceInstancesRouterStateTabEnum } from '../device-instances.component';
 
 @Injectable({
     providedIn: 'root',
@@ -186,7 +187,7 @@ export class DeviceInstancesService {
         sortDesc: boolean = false,
         searchText?: string,
         deviceTypeIds?: string[], 
-        connectionState?: boolean, 
+        connectionState?: DeviceInstancesRouterStateTabEnum, 
         deviceIds?: string[],
     ): Observable<DeviceInstancesTotalModel> {
         var queryRequest: PermissionQueryRequest = {
@@ -199,23 +200,42 @@ export class DeviceInstancesService {
                 sort_by: sortBy,
             }
         }
-        var optionalFilters: Selection[] = [] 
 
-        if(searchText != null) {
+        var optionalFilters: Selection[] = [] 
+        var optionalNotFilter: Selection = {"not": {}}
+
+        if(searchText != null && searchText != "") {
             if(queryRequest.find) {
                 queryRequest.find.search = searchText
             }
         }
 
         if(connectionState != null) {
-            optionalFilters.push(
-                {
-                    condition: {
-                        feature: 'annotations.connected', operation: '==', value: connectionState
+            if(connectionState == DeviceInstancesRouterStateTabEnum.ONLINE) {
+                optionalFilters.push(
+                    {
+                        condition: {
+                            feature: 'annotations.connected', operation: '==', value: true
+                        }
                     }
+                )
+            } else if(connectionState == DeviceInstancesRouterStateTabEnum.OFFLINE) {
+                optionalFilters.push(
+                    {
+                        condition: {
+                            feature: 'annotations.connected', operation: '==', value: false
+                        }
+                    }
+                )
+            } else if(connectionState == DeviceInstancesRouterStateTabEnum.UNKNOWN) {
+                // filter for unknown connection state
+                optionalNotFilter.not!.condition = {
+                    feature: 'annotations.connected', operation: "any_value_in_feature", value: [true, false]
                 }
-            )
-        }
+                optionalFilters.push(optionalNotFilter)
+            }
+
+        } 
 
         if(deviceTypeIds != null && deviceTypeIds.length > 0) {
             optionalFilters.push(
@@ -240,6 +260,7 @@ export class DeviceInstancesService {
         if(optionalFilters.length > 0 && queryRequest.find) {
             queryRequest.find.filter = {"and": optionalFilters}
         }
+      
         return this.queryPermissionSearch(queryRequest).pipe(
                 map((resp) => <DeviceInstancesPermSearchTotalModel>resp || []),
                 concatMap(result => {
@@ -265,7 +286,7 @@ export class DeviceInstancesService {
         locationId?: string,
         hubId?: string,
         deviceTypeIds?: string[], 
-        connectionState?: boolean,
+        connectionState?: DeviceInstancesRouterStateTabEnum,
     ): Observable<DeviceInstancesTotalModel> {
         if(hubId != null || locationId != null) {
             return this.getDeviceIds(hubId, locationId).pipe(
@@ -296,7 +317,7 @@ export class DeviceInstancesService {
         locationId?: string,
         hubId?: string,
         deviceTypeIds?: string[], 
-        connectionState?: boolean,
+        connectionState?: DeviceInstancesRouterStateTabEnum,
     ): Observable<DeviceInstancesTotalModel>  {
         return this.loadDeviceInstances(limit, offset, sortBy, sortDesc, searchText, locationId, hubId, deviceTypeIds, connectionState)
     }
@@ -310,7 +331,7 @@ export class DeviceInstancesService {
         locationId?: string,
         hubId?: string,
         deviceTypeIds?: string[], 
-        connectionState?: boolean,
+        connectionState?: DeviceInstancesRouterStateTabEnum,
     ): Observable<DeviceInstancesModel[]> {
         return this.loadDeviceInstances(limit, offset, sortBy, sortDesc, searchText, locationId, hubId, deviceTypeIds, connectionState).pipe(
             map((result) => result.result)
