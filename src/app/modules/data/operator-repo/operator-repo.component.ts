@@ -141,6 +141,8 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
             .subscribe((resp: { operators: OperatorModel[]; totalCount: number }) => {
                 if (resp.operators.length > 0) {
                     this.operators = resp.operators;
+                    console.log(this.userId)
+                    console.log(resp.operators)
                     this.operators.forEach((operator) => (operator.editable = operator.userId === this.userId));
                     this.operatorsDataSource.data = this.operators;
 

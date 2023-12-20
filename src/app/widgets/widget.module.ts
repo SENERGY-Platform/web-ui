@@ -99,6 +99,8 @@ import { AcControlComponent } from './ac-control/ac-control.component';
 import {AcControlEditDialogComponent} from './ac-control/dialog/ac-control-edit-dialog.component';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import { ValueComponent } from './single-value/value/value.component';
+import { AnomalyComponent } from './anomaly/anomaly.component';
+import { EditComponent } from './anomaly/dialog/edit/edit.component';
 
 registerLocaleData(localeDe, 'de');
 
@@ -190,6 +192,8 @@ registerLocaleData(localeDe, 'de');
         AcControlComponent,
         AcControlEditDialogComponent,
         ValueComponent,
+        AnomalyComponent,
+        EditComponent
     ],
     exports: [
         SwitchComponent,

@@ -77,6 +77,7 @@ export class DashboardNewWidgetDialogComponent {
         // {value: DashboardTypesEnum.DeviceStatus, viewValue: 'Device Status', disabled: false, tooltip: ''},
         { value: DashboardTypesEnum.DataTable, viewValue: 'Data Table', disabled: false, tooltip: '' },
         { value: DashboardTypesEnum.AcControl, viewValue: 'Air Condition Control', disabled: false, tooltip: '', requirementsService: undefined },
+        { value: DashboardTypesEnum.AnomalyDetection, viewValue: 'Anomaly Detection', disabled: false, tooltip: '' },
     ];
     switchCategories: SwitchCategories[] = [
         {

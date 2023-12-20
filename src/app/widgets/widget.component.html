@@ -87,6 +87,10 @@
   <div *ngSwitchCase="'ac_control'" fxFill>
     <senergy-ac-control [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-ac-control>
   </div>
+  <div *ngSwitchCase="'anomaly_detection'" fxFill>
+    <senergy-anomaly-detection [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-anomaly-detection>
+  </div>
+  
   <div *ngSwitchDefault>
     <div>default</div>
   </div>
