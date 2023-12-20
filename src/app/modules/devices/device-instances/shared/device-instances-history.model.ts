@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import { Attribute } from "./device-instances.model";
+
+
 export interface DeviceInstancesHistoryModel {
     creator: string;
     date: number;
@@ -22,6 +25,7 @@ export interface DeviceInstancesHistoryModel {
     log_state: string;
     log_history: { values: LogHistoryValues[] | null };
     log_edge: (string | boolean)[] | null;
+    attributes?: Attribute[];
 }
 
 interface LogHistoryValues {
