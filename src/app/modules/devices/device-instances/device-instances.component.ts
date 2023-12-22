@@ -101,6 +101,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     userHasUpdateAuthorization: boolean = false
     userHasDeleteAuthorization: boolean = false
+    userHasReadDeviceUsageAuthorization: boolean = false 
 
     ngOnInit(): void {
         this.initSearch(); // does automatically load data on first page load
@@ -116,7 +117,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     checkAuthorization() {
-        if (this.exportDataService.userHasUsageAuthroization()) {
+        this.userHasReadDeviceUsageAuthorization = this.exportDataService.userHasUsageAuthroization()
+        if (this.userHasReadDeviceUsageAuthorization) {
             this.displayedColumns.splice(4, 0, 'usage')
         }
 
@@ -216,7 +218,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                         return deviceInstancesWithTotal
                     }),
                     map(deviceInstancesWithTotal => {
-                        this.exportDataService.getTimescaleDeviceUsage(deviceInstancesWithTotal.result.map(di => di.id)).subscribe(r => this.usage.push(...r))
+                        if(this.userHasReadDeviceUsageAuthorization) {
+                            this.exportDataService.getTimescaleDeviceUsage(deviceInstancesWithTotal.result.map(di => di.id)).subscribe(r => this.usage.push(...r))
+                        }
                     })
                 );
         }
