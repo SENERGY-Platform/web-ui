@@ -23,7 +23,7 @@
                 <mat-list-item *ngFor="let device of devices; let i = index">
                     <div matListItemIcon><mat-icon [ngClass]="device.color">{{device.icon}}</mat-icon></div>
                     <div matListItemTitle [matTooltip]="device.name">{{i + 1 + '. ' + device.name}}</div>
-                    <div matListItemLine>{{device.timeDisconnectedInMin}} min / {{device.failureRate}} time(s)</div>
+                    <div matListItemLine>{{humanizeDuration(device.timeDisconnectedInMin)}} / {{device.failureRate}} time(s)</div>
                 </mat-list-item>
             </mat-list>
         </div>

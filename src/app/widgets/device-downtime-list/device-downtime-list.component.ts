@@ -20,6 +20,7 @@ import { DeviceDowntimeListService } from './shared/device-downtime-list.service
 import { DeviceDowntimeListModel } from './shared/device-downtime-list.model';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import moment from 'moment';
 
 @Component({
     selector: 'senergy-device-downtime-list',
@@ -68,5 +69,10 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
                 }, () => {}, () => this.ready = true);
             }
         });
+    }
+
+    humanizeDuration(durationInMin: any) {
+        console.log(durationInMin)
+        return moment.duration(durationInMin, 'minutes').humanize()
     }
 }
