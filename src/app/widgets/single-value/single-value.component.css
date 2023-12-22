@@ -39,6 +39,23 @@
     white-space: nowrap;
 }
 
+#date-container {
+    text-align: center;
+    font-weight: 500;
+}
+
+.day-old {
+    color: #00733f
+}
+
+.week-old {
+    color: #d36e00
+}
+
+.old {
+    color: #ad0000
+}
+
 .content-box > div > senergy-single-value-value {
     width: 25vw;
     min-height: 200px;

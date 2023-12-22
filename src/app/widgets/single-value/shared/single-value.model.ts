@@ -30,4 +30,5 @@ export interface SingleValuePropertiesModel {
     sourceType?: string;
     device?: DeviceInstancesModel;
     service?: DeviceTypeServiceModel;
+    showTimestamp?: boolean;
 }

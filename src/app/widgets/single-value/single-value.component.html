@@ -35,6 +35,7 @@
 
         <div class="content-box" *ngIf="configured && ready && !zoom">
             <senergy-single-value-value [sv]="sv" [widget]="widget"></senergy-single-value-value>
+            <div *ngIf="showTimestamp" id="date-container" [class]="timestampAgeClass">{{this.sv.date | date:"short" }}</div>
         </div>
 
         <div *ngIf="zoom && svListIndex > 0" class="content-box arrow-left">

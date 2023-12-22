@@ -84,6 +84,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         sourceType: '',
         device: {},
         service: {},
+        showTimestamp: '',
     });
 
     userHasUpdateNameAuthorization: boolean = false 
@@ -159,6 +160,7 @@ export class SingleValueEditDialogComponent implements OnInit {
                 measurement: this.widget.properties.measurement,
                 device: this.widget.properties.device,
                 service: this.widget.properties.service,
+                showTimestamp: this.widget.properties.showTimestamp
             });
             this.form.get('group')?.patchValue({
                 time: widget.properties.group?.time,
@@ -218,7 +220,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.widget.properties.device = this.form.get('device')?.value as DeviceInstancesModel || undefined;
         this.widget.properties.service = this.form.get('service')?.value as DeviceTypeServiceModel || undefined;
         this.widget.properties.sourceType = this.form.get('sourceType')?.value || undefined;
-
+        this.widget.properties.showTimestamp = this.form.get('showTimestamp')?.value || undefined;
 
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
     }

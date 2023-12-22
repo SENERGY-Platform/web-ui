@@ -62,6 +62,9 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     ready = false;
     refreshing = false;
     configured = false;
+    showTimestamp: boolean = false;
+    timestamp?: string
+    timestampAgeClass: string = "old"
     error = false;
     destroy = new Subscription();
     marginLeft = '0';
@@ -101,6 +104,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         this.scheduleRefresh();
         this.registerIcons();
         this.setConfigured();
+        this.loadTimestamp();
         this.dateControl.valueChanges.pipe(debounceTime(1000)).subscribe((localDateString) => {
             if (localDateString === null) {
                 return;
@@ -188,6 +192,20 @@ export class SingleValueComponent implements OnInit, OnDestroy {
 
     private setConfigured() {
         this.configured = this.widget.properties.measurement !== undefined;
+    }
+
+    private loadTimestamp() {
+        this.showTimestamp = this.widget.properties.showTimestamp !== undefined
+        var date = this.sv.date
+        var today = new Date()
+        if(date.getFullYear() == today.getFullYear() && date.getMonth() == today.getMonth() && date.getDate() == today.getDate()) {
+            this.timestampAgeClass = "day-old"
+        }
+
+        today.setDate(today.getDate() - 7)
+        if(date > today) {
+            this.timestampAgeClass = "week-old"
+        } 
     }
 
     right() {
