@@ -196,7 +196,6 @@ export class SingleValueComponent implements OnInit, OnDestroy {
             })
         ).subscribe({
             next: (_) => {
-                console.log(this.sv)
                 this.ready = true;
                 this.refreshing = false;
                 this.error = false;
