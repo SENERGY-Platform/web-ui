@@ -44,15 +44,19 @@
     font-weight: 500;
 }
 
-.day-old {
+.no-age {
+    color: grey;
+}
+
+.age-okay {
     color: #00733f
 }
 
-.week-old {
+.age-warning {
     color: #d36e00
 }
 
-.old {
+.age-problem {
     color: #ad0000
 }
 

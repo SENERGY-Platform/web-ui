@@ -15,7 +15,7 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {FormBuilder, UntypedFormBuilder} from '@angular/forms';
+import {FormBuilder, FormControl, UntypedFormBuilder} from '@angular/forms';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
@@ -84,7 +84,14 @@ export class SingleValueEditDialogComponent implements OnInit {
         sourceType: '',
         device: {},
         service: {},
-        showTimestamp: '',
+        timestampConfig: this.fb.group({
+            showTimestamp: new FormControl<boolean>(false),
+            highlightTimestamp: new FormControl<boolean>(false),
+            warningTimeLevel: new FormControl<string>("d"),
+            warningAge: new FormControl<Number>(1),
+            problemTimeLevel: new FormControl<string>("w"),
+            problemAge: new FormControl<Number>(7),
+        })
     });
 
     userHasUpdateNameAuthorization: boolean = false 
@@ -160,8 +167,19 @@ export class SingleValueEditDialogComponent implements OnInit {
                 measurement: this.widget.properties.measurement,
                 device: this.widget.properties.device,
                 service: this.widget.properties.service,
-                showTimestamp: this.widget.properties.showTimestamp
             });
+
+            if(this.widget.properties.timestampConfig !== undefined) {
+                this.form.get('timestampConfig')?.patchValue({
+                    showTimestamp: this.widget.properties.timestampConfig.showTimestamp,
+                    highlightTimestamp: this.widget.properties.timestampConfig.highlightTimestamp,
+                    warningTimeLevel: this.widget.properties.timestampConfig.warningTimeLevel,
+                    warningAge: this.widget.properties.timestampConfig.warningAge,
+                    problemTimeLevel: this.widget.properties.timestampConfig.problemTimeLevel,
+                    problemAge: this.widget.properties.timestampConfig.problemAge,
+                })    
+            }
+   
             this.form.get('group')?.patchValue({
                 time: widget.properties.group?.time,
                 type: widget.properties.group?.type,
@@ -220,7 +238,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.widget.properties.device = this.form.get('device')?.value as DeviceInstancesModel || undefined;
         this.widget.properties.service = this.form.get('service')?.value as DeviceTypeServiceModel || undefined;
         this.widget.properties.sourceType = this.form.get('sourceType')?.value || undefined;
-        this.widget.properties.showTimestamp = this.form.get('showTimestamp')?.value || undefined;
+        this.widget.properties.timestampConfig = this.form.get('timestampConfig')?.value || undefined;
 
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
     }

@@ -21,11 +21,57 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {SingleValueService} from './shared/single-value.service';
 import {SingleValueModel} from './shared/single-value.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription, map} from 'rxjs';
 import {MatIconRegistry} from '@angular/material/icon';
 import {FormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import {animate, state, style, transition, trigger,} from '@angular/animations';
+
+var DateDiff = {
+    inSeconds: function(d1: Date, d2: Date) {
+        var t2 = d2.getTime();
+        var t1 = d1.getTime();
+ 
+        return Math.floor((t2-t1)/(1000));
+    },
+
+    inMinutes: function(d1: Date, d2: Date) {
+        var t2 = d2.getTime();
+        var t1 = d1.getTime();
+ 
+        return Math.floor((t2-t1)/(60*1000));
+    },
+
+    inHours: function(d1: Date, d2: Date) {
+        var t2 = d2.getTime();
+        var t1 = d1.getTime();
+ 
+        return Math.floor((t2-t1)/(60*60*1000));
+    },
+
+    inDays: function(d1: Date, d2: Date) {
+        var t2 = d2.getTime();
+        var t1 = d1.getTime();
+ 
+        return Math.floor((t2-t1)/(24*3600*1000));
+    },
+ 
+    inWeeks: function(d1: Date, d2: Date) {
+        var t2 = d2.getTime();
+        var t1 = d1.getTime();
+ 
+        return Math.floor((t2-t1)/(7*24*3600*1000));
+    },
+ 
+    inMonths: function(d1: Date, d2: Date) {
+        var d1Y = d1.getFullYear();
+        var d2Y = d2.getFullYear();
+        var d1M = d1.getMonth();
+        var d2M = d2.getMonth();
+ 
+        return (d2M+12*d2Y)-(d1M+12*d1Y);
+    },
+}
 
 @Component({
     selector: 'senergy-single-value',
@@ -58,13 +104,13 @@ import {animate, state, style, transition, trigger,} from '@angular/animations';
 })
 export class SingleValueComponent implements OnInit, OnDestroy {
     svList: SingleValueModel[] = [];
-    sv: SingleValueModel = {} as SingleValueModel;
+    sv?: SingleValueModel;
     ready = false;
     refreshing = false;
     configured = false;
     showTimestamp: boolean = false;
     timestamp?: string
-    timestampAgeClass: string = "old"
+    timestampAgeClass: string = ""
     error = false;
     destroy = new Subscription();
     marginLeft = '0';
@@ -104,12 +150,11 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         this.scheduleRefresh();
         this.registerIcons();
         this.setConfigured();
-        this.loadTimestamp();
         this.dateControl.valueChanges.pipe(debounceTime(1000)).subscribe((localDateString) => {
             if (localDateString === null) {
                 return;
             }
-            this.refresh(localDateString);
+            this.refreshView();
         });
     }
 
@@ -136,20 +181,42 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         this.setConfigured();
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.refresh();
+                this.refreshView();
             }
         });
     }
 
-    private refresh(localDateString?: string) {
+    private refreshView() {
         this.refreshing = true;
-        this.sv = {} as SingleValueModel;
-        this.svList = [];
+
+        this.loadSingleValue().pipe(
+            map((_) => {
+                this.showTimestamp = this.widget.properties.timestampConfig?.showTimestamp !== undefined
+                this.setTimestampColor();
+            })
+        ).subscribe({
+            next: (_) => {
+                console.log(this.sv)
+                this.ready = true;
+                this.refreshing = false;
+                this.error = false;
+            },
+            error: (_) => {
+                this.ready = true;
+                this.refreshing = false;
+                this.error = true;
+            }
+        })
+
+    }
+
+    private loadSingleValue(localDateString?: string): Observable<SingleValueModel[]> {
         if (this.zoom && localDateString === undefined) {
             localDateString = new Date().toISOString();
         }
-        this.singleValueService.getValues(this.widget, localDateString === undefined ? undefined : new Date(localDateString)).subscribe(
-            (sv: SingleValueModel[]) => {
+        localDateString = new Date().toISOString()
+        return this.singleValueService.getValues(this.widget, localDateString === undefined ? undefined : new Date(localDateString)).pipe(
+            map((sv: SingleValueModel[]) => {
                 if (sv.length === 1) {
                     this.sv = sv[0];
                 } else {
@@ -178,34 +245,77 @@ export class SingleValueComponent implements OnInit, OnDestroy {
                         }
                     }
                 }
-                this.ready = true;
-                this.refreshing = false;
-                this.error = false;
-            },
-            () => {
-                this.ready = true;
-                this.refreshing = false;
-                this.error = true;
-            },
+                return sv
+            })
         );
     }
 
     private setConfigured() {
         this.configured = this.widget.properties.measurement !== undefined;
     }
+    
 
-    private loadTimestamp() {
-        this.showTimestamp = this.widget.properties.showTimestamp !== undefined
-        var date = this.sv.date
-        var today = new Date()
-        if(date.getFullYear() == today.getFullYear() && date.getMonth() == today.getMonth() && date.getDate() == today.getDate()) {
-            this.timestampAgeClass = "day-old"
+    private setTimestampColor() {  
+        if(!this.widget.properties.timestampConfig?.highlightTimestamp) {
+            this.timestampAgeClass = "no-age"
+            return
         }
 
-        today.setDate(today.getDate() - 7)
-        if(date > today) {
-            this.timestampAgeClass = "week-old"
+        var date: Date
+        if(this.sv !== undefined) {
+            date = this.sv.date
+        } else {
+            date = this.svList[this.svListIndex].date
+        }
+        this.timestampAgeClass = "age-okay"
+
+        var timeSinceLastValue: number
+        switch(this.widget.properties.timestampConfig?.warningTimeLevel) {
+            case("s"):
+                timeSinceLastValue = DateDiff.inSeconds(date, new Date())
+                break
+            case("min"):
+                timeSinceLastValue = DateDiff.inMinutes(date, new Date())
+                break
+            case("h"):
+                timeSinceLastValue = DateDiff.inHours(date, new Date())
+                break
+            case("d"):
+                timeSinceLastValue = DateDiff.inDays(date, new Date())
+                break
+            case("m"):
+                timeSinceLastValue = DateDiff.inMonths(date, new Date())
+                break
+            default:
+                return
+        }
+        if(timeSinceLastValue >= this.widget.properties.timestampConfig?.warningAge) {
+            this.timestampAgeClass = "age-warning"
         } 
+
+        switch(this.widget.properties.timestampConfig?.problemTimeLevel) {
+            case("s"):
+                timeSinceLastValue = DateDiff.inSeconds(date, new Date())
+                break
+            case("min"):
+                timeSinceLastValue = DateDiff.inMinutes(date, new Date())
+                break
+            case("h"):
+                timeSinceLastValue = DateDiff.inHours(date, new Date())
+                break
+            case("d"):
+                timeSinceLastValue = DateDiff.inDays(date, new Date())
+                break
+            case("m"):
+                timeSinceLastValue = DateDiff.inMonths(date, new Date())
+                break
+            default:
+                return
+        }
+
+        if(timeSinceLastValue >= this.widget.properties.timestampConfig?.problemAge) {
+            this.timestampAgeClass = "age-problem"
+        }
     }
 
     right() {

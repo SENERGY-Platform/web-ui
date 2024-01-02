@@ -34,17 +34,17 @@
                     <td>
                         <mat-form-field color="accent">
                             <mat-label>Choose Device</mat-label>
-                            <senergy-select-search [options]="devices" formControlName="device" useOptionViewProperty="display_name"
-                                [compareWith]="compareIds">
+                            <senergy-select-search [options]="devices" formControlName="device"
+                                useOptionViewProperty="display_name" [compareWith]="compareIds">
                             </senergy-select-search>
                         </mat-form-field>
-            
+
                     </td>
                     <td>
                         <mat-form-field color="accent">
                             <mat-label>Choose Service</mat-label>
-                            <senergy-select-search [options]="services" formControlName="service" useOptionViewProperty="name"
-                                [compareWith]="compareIds">
+                            <senergy-select-search [options]="services" formControlName="service"
+                                useOptionViewProperty="name" [compareWith]="compareIds">
                             </senergy-select-search>
                         </mat-form-field>
                     </td>
@@ -53,11 +53,11 @@
                     <td>
                         <mat-form-field color="accent">
                             <mat-label>Choose Export</mat-label>
-                            <senergy-select-search [options]="exports" formControlName="measurement" useOptionViewProperty="name"
-                                [compareWith]="compareIds">
+                            <senergy-select-search [options]="exports" formControlName="measurement"
+                                useOptionViewProperty="name" [compareWith]="compareIds">
                             </senergy-select-search>
                         </mat-form-field>
-            
+
                     </td>
                 </tr>
                 <tr>
@@ -133,11 +133,61 @@
                         </mat-form-field>
                     </td>
                 </tr>
-                <tr>
+
+                <tr formGroupName="timestampConfig">
                     <td>
-                        <mat-checkbox formControlName="showTimestamp">Show Timestamp?</mat-checkbox>
+                        <mat-checkbox formControlName="showTimestamp">Show timestamp</mat-checkbox>
                     </td>
                 </tr>
+                <tr formGroupName="timestampConfig"
+                    *ngIf="form.get('timestampConfig')?.get('showTimestamp')?.value == true">
+                    <td>
+                        <mat-checkbox formControlName="highlightTimestamp">Highlight timestamp by age</mat-checkbox>
+                    </td>
+                </tr>
+                <tr formGroupName="timestampConfig"
+                    *ngIf="form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true">
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Maximum age for warning</mat-label>
+                            <input type="number" matInput formControlName="warningAge">
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label></mat-label>
+                            <mat-select formControlName="warningTimeLevel">
+                                <mat-option value="s">Seconds</mat-option>
+                                <mat-option value="min">Minutes</mat-option>
+                                <mat-option value="h">Hours</mat-option>
+                                <mat-option value="d">Days</mat-option>
+                                <mat-option value="m">Months</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </td>
+                </tr>
+                <tr formGroupName="timestampConfig"
+                    *ngIf="form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true">
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Maximum age for problem</mat-label>
+                            <input type="number" matInput formControlName="problemAge">
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label></mat-label>
+                            <mat-select formControlName="problemTimeLevel">
+                                <mat-option value="s">Seconds</mat-option>
+                                <mat-option value="min">Minutes</mat-option>
+                                <mat-option value="h">Hours</mat-option>
+                                <mat-option value="d">Days</mat-option>
+                                <mat-option value="m">Months</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </td>
+                </tr>
+
             </table>
         </span>
     </div>

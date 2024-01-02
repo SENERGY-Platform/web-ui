@@ -23,6 +23,15 @@ export interface SingleValueModel {
     date: Date;
 }
 
+interface TimestampConfig {
+    showTimestamp?: boolean;
+    highlightTimestamp?: boolean;
+    warningAge: number;
+    problemAge: number;
+    warningTimeLevel: string;
+    problemTimeLevel: string;
+}
+
 export interface SingleValuePropertiesModel {
     type?: string;
     format?: string;
@@ -30,5 +39,5 @@ export interface SingleValuePropertiesModel {
     sourceType?: string;
     device?: DeviceInstancesModel;
     service?: DeviceTypeServiceModel;
-    showTimestamp?: boolean;
+    timestampConfig?: TimestampConfig;
 }

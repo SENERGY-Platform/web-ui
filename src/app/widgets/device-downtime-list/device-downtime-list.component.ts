@@ -72,7 +72,6 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     }
 
     humanizeDuration(durationInMin: any) {
-        console.log(durationInMin)
         return moment.duration(durationInMin, 'minutes').humanize()
     }
 }
