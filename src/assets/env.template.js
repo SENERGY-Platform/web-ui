@@ -24,3 +24,4 @@ window["env"]["configUrl"] = "${CONFIG_URL}";
 window["env"]["theme"] = "${THEME}";
 window["env"]["title"] = "${TITLE}";
 window["env"]["commit"] = "${COMMIT}";
+window["env"]["version"] = "${VERSION}";

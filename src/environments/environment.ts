@@ -30,6 +30,7 @@ export const environment = {
     theme: env.theme || 'senergy',
     title: env.title || 'SENERGY',
     commit: env.commit || '',
+    version: env.version || '',
     /** URLs **/
     processIoUrl: '',
     smartServiceRepoUrl: '',

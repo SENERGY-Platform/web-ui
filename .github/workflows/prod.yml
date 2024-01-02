@@ -43,6 +43,7 @@ jobs:
           platforms: linux/amd64
           build-args: |
             COMMIT=${{ github.sha }}
+            VERSION=${{ github.ref_name }}
           push: true
           tags: |
             smartenergyplatform/web-ui:prod

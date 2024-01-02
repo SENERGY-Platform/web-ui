@@ -9,11 +9,13 @@ import { environment } from 'src/environments/environment';
 })
 export class InfoDialogComponent {
   commit: string = ""
-  
+  version: string = ""
+
   constructor(
     private dialogRef: MatDialogRef<InfoDialogComponent>,
   ) {
     this.commit = environment.commit
+    this.version = environment.version
   }
 
   close(): void {

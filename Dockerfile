@@ -18,6 +18,8 @@ RUN node --max_old_space_size=8192 $(npm bin)/ng build --configuration productio
 FROM nginx
 ARG COMMIT="no commit provided"
 ENV COMMIT=${COMMIT}
+ARG VERSION="no version provided"
+ENV VERSION=${VERSION}
 RUN apt-get update && apt-get install -y curl
 ADD build-env.sh /
 COPY --from=builder /tmp/workspace/dist/senergy-web-ui/ /usr/share/nginx/html/
