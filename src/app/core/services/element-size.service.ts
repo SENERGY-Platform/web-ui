@@ -26,6 +26,7 @@ export class ElementSizeService {
     getHeightAndWidthByElementId(
         elementId: string,
         heightPercentageAdjustment?: number,
+        widthPercentageAdjustment?: number
     ): { height: number; width: number; heightPercentage: string; widthPercentage: string } {
         let height = 0;
         let width = 0;
@@ -38,7 +39,7 @@ export class ElementSizeService {
             height = element.offsetHeight - 1;
             width = element.offsetWidth - 1;
             heightPercentage = this.calcHeightPercentage(height, heightPercentageAdjustment || 0);
-            widthPercentage = this.calcWidthPercentage(width);
+            widthPercentage = this.calcWidthPercentage(width, widthPercentageAdjustment || 0);
         }
 
         return {height, width, heightPercentage, widthPercentage};
@@ -54,7 +55,7 @@ export class ElementSizeService {
         return percentage - heightPercentageAdjustment + '%';
     }
 
-    private calcWidthPercentage(width: number): string {
+    private calcWidthPercentage(width: number, widthPercentageAdjustment: number): string {
         let percentage = 0;
 
         if (width < 800) {
@@ -66,6 +67,6 @@ export class ElementSizeService {
                 percentage = 85;
             }
         }
-        return percentage + '%';
+        return percentage - widthPercentageAdjustment + '%';
     }
 }

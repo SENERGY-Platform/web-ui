@@ -118,47 +118,17 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         }
     }
 
-    private calculateWidthOfLeftChartArea(): number {
-        // The width of the left area of the chart must increase when the number of digits on the y axis increase
-        var maxValue = this.chartExportData.dataTable[1][1]
-        var numberOfDigits = (''+maxValue).split(".")[0].length
-        
-        if(this.chartExportData.options?.vAxes?.[0]?.title == null) {
-            // No Y Axis
-            if(numberOfDigits == 1) {
-                return 0
-            } else if(numberOfDigits <= 4) {
-                return 10
-            } else {
-                return 15
-            }
-        } else {
-            if(numberOfDigits == 1) {
-                return 15
-            } else if(numberOfDigits <= 4) {
-                return 20
-            } else {
-                return 25
-            }
-        }
-    }
     
     private resizeChart() {
-        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5);
-        var leftAreaWidth = this.calculateWidthOfLeftChartArea() / 100 * element.width
+        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
 
         if (this.chartExportData.options !== undefined) {
             this.chartExportData.options.height = element.height;
             this.chartExportData.options.width = element.width;
             if (this.chartExportData.options.chartArea) {
                 this.chartExportData.options.chartArea.height = element.heightPercentage;
-                this.chartExportData.options.chartArea.width = (element.width - leftAreaWidth);
+                this.chartExportData.options.chartArea.width = element.widthPercentage; 
             }
-
-            if(leftAreaWidth != 0) {
-                this.chartExportData.options.chartArea!.left = leftAreaWidth
-            }
-            //console.log(this.chartExportData.options.chartArea)
         }
     }
 
