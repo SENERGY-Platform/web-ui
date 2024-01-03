@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import {GoogleChartComponent} from 'ng2-google-charts';
-import {ChartsModel} from '../../shared/charts.model';
-import {ElementSizeService} from '../../../../core/services/element-size.service';
-import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
-import {DeviceTotalDowntimeService} from './shared/device-total-downtime.service';
-import {ChartsService} from '../../shared/charts.service';
+import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import { GoogleChartComponent } from 'ng2-google-charts';
+import { ChartsModel } from '../../shared/charts.model';
+import { ElementSizeService } from '../../../../core/services/element-size.service';
+import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
+import { DeviceTotalDowntimeService } from './shared/device-total-downtime.service';
+import { ChartsService } from '../../shared/charts.service';
 
 @Component({
     selector: 'senergy-device-total-downtime',
@@ -30,14 +30,14 @@ import {ChartsService} from '../../shared/charts.service';
     styleUrls: ['./device-total-downtime.component.css'],
 })
 export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
-    deviceTotalDowntime: ChartsModel|undefined;
+    deviceTotalDowntime: ChartsModel | undefined;
     ready = false;
     refeshing = false;
     destroy = new Subscription();
 
     private resizeTimeout = 0;
 
-    @ViewChild('deviceTotalDowntimeChart', {static: false}) deviceTotalDowntimeChart!: GoogleChartComponent;
+    @ViewChild('deviceTotalDowntimeChart', { static: false }) deviceTotalDowntimeChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -82,7 +82,7 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
                 this.refeshing = true;
                 this.deviceDowntimeGatewayService.getTotalDowntime(this.widget.id).subscribe((processDeploymentsHistory: ChartsModel) => {
                     this.deviceTotalDowntime = processDeploymentsHistory;
-                    setTimeout(() => this.deviceTotalDowntimeChart?.draw(), 0);
+                    setTimeout(() => this.deviceTotalDowntimeChart?.draw(), 500);
                     this.ready = true;
                 }, () => {
                 }, () => {

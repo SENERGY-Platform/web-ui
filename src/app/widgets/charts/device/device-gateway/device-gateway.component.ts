@@ -81,7 +81,7 @@ export class DeviceGatewayComponent implements OnInit, OnDestroy {
                 this.refreshing = true;
                 this.deviceGatewayService.getDevicesPerGateway(this.widget.id).subscribe((processDeploymentsHistory: ChartsModel) => {
                     this.deviceGateway = processDeploymentsHistory;
-                    setTimeout(() => this.deviceGatewayChart?.draw(), 0);
+                    setTimeout(() => this.deviceGatewayChart?.draw(), 500);
                     this.ready = true;
                     this.refreshing = false;
                 });

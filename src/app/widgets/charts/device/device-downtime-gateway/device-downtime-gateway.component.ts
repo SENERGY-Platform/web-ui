@@ -83,7 +83,7 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
                     .getDevicesDowntimePerGateway(this.widget)
                     .subscribe((processDeploymentsHistory: ChartsModel) => {
                         this.deviceDowntimeGateway = processDeploymentsHistory;
-                        setTimeout(() => this.deviceDowntimeGatewayChart?.draw(), 0);
+                        setTimeout(() => this.deviceDowntimeGatewayChart?.draw(), 500);
                         this.ready = true;
                         this.refreshing = false;
                     });
