@@ -16,20 +16,35 @@
 
 <mat-card appearance="outlined" class="switch-container">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <div class="content-box">
-        <senergy-fit-text [txt]="this.widget.properties.rangeSliderValue2 + ' ' + this.widget.properties.selectedUnit"
-                          [maxFontSize]="64">
-        </senergy-fit-text>
-    </div>
-    <div>
-        <mat-slider [(ngModel)]="widget.properties.active" [min]="widget.properties.selectedMinValue || 0"
-                    [max]="widget.properties.selectedMaxValue || 100" step="1" #ngSlider color="accent">
-            <input matSliderThumb
-                   (change)="sliderRange({source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value})"
-                   #ngSliderThumb="matSliderThumb"
-                   (input)="sliderRange2({source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value})"/>
-        </mat-slider>
-        <div fxFlex class="drag-handler"></div>
-    </div>
-    <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+    <mat-card-content class="content-size drag-handler">
+
+        <div *ngIf="widget.properties.selectedMinValue === undefined" fxFill fxLayout="column"
+            fxLayoutAlign="center center">
+            <div>Please configure widget!</div>
+        </div>
+
+        <div class="content-box" *ngIf="this.widget.properties.selectedMinValue !== undefined">
+            <senergy-fit-text
+                [txt]="(this.widget.properties.rangeSliderValue2 || '') + ' ' + (this.widget.properties.selectedUnit || '')"
+                [maxFontSize]="64">
+            </senergy-fit-text>
+        </div>
+
+        <div *ngIf="this.widget.properties.selectedMinValue !== undefined">
+            <mat-slider showTickMarks [min]="widget.properties.selectedMinValue || 0"
+                [max]="widget.properties.selectedMaxValue || 100" step="1" #ngSlider color="accent">
+                <input [ngModel]="this.widget.properties.rangeSliderValue2" matSliderThumb
+                    (change)="sliderRange({source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value})"
+                    #ngSliderThumb="matSliderThumb"
+                    (input)="sliderRange2({source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value})" />
+            </mat-slider>
+            <div fxFlex class="drag-handler"></div>
+        </div>
+
+    </mat-card-content>
+    <senergy-widget-footer [widgetHasUpdateableProperties]="true"
+        [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization"
+        [userHasDeleteAuthorization]="userHasDeleteAuthorization"
+        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
+        [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>

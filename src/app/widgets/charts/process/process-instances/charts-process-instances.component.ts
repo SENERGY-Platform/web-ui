@@ -83,7 +83,7 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
                     .getProcessInstancesStatus(this.widget.id)
                     .subscribe((processInstancesStatus: ChartsModel) => {
                         this.processInstancesStatus = processInstancesStatus;
-                        setTimeout(() => this.processInstancesStatusChart?.draw(), 0);
+                        setTimeout(() => this.processInstancesStatusChart?.draw(), 500);
                         this.ready = true;
                         this.refreshing = false;
                     });

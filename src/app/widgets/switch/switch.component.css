@@ -24,11 +24,18 @@
     box-sizing: border-box;
 }
 
+.mat-mdc-card-content {
+    height: calc(100% - 72px);
+    margin: 0;
+    overflow-y: auto;
+}
+
 img {
     object-fit: cover;
     height: 136px;
     margin-top: 0;
     margin-bottom: 0;
+    width: 100%;
 }
 
 .padding {

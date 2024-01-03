@@ -83,7 +83,7 @@ export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
                     .getProcessDeploymentHistory(this.widget.id)
                     .subscribe((processDeploymentsHistory: ChartsModel) => {
                         this.processDeploymentsHistory = processDeploymentsHistory;
-                        setTimeout(() => this.processDeploymentsHistoryChart?.draw(), 0);
+                        setTimeout(() => this.processDeploymentsHistoryChart?.draw(), 500);
                         this.ready = true;
                         this.refreshing = false;
                     });
