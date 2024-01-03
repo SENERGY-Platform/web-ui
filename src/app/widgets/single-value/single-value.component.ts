@@ -191,7 +191,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
 
         this.loadSingleValue().pipe(
             map((_) => {
-                this.showTimestamp = this.widget.properties.timestampConfig?.showTimestamp !== undefined
+                this.showTimestamp = this.widget.properties.timestampConfig?.showTimestamp == true
                 this.setTimestampColor();
             })
         ).subscribe({

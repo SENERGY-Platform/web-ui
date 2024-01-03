@@ -89,7 +89,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             highlightTimestamp: new FormControl<boolean>(false),
             warningTimeLevel: new FormControl<string>("d"),
             warningAge: new FormControl<Number>(1),
-            problemTimeLevel: new FormControl<string>("w"),
+            problemTimeLevel: new FormControl<string>("d"),
             problemAge: new FormControl<Number>(7),
         })
     });
