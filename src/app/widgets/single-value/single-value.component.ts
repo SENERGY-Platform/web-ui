@@ -213,7 +213,6 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         if (this.zoom && localDateString === undefined) {
             localDateString = new Date().toISOString();
         }
-        localDateString = new Date().toISOString()
         return this.singleValueService.getValues(this.widget, localDateString === undefined ? undefined : new Date(localDateString)).pipe(
             map((sv: SingleValueModel[]) => {
                 if (sv.length === 1) {
