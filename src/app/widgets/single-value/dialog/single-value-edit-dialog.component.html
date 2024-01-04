@@ -27,6 +27,7 @@
             <mat-radio-group formControlName="sourceType">
                 <mat-radio-button value="export">Export</mat-radio-button>
                 <mat-radio-button value="device">Device</mat-radio-button>
+                <mat-radio-button value="deviceGroup">Device Group</mat-radio-button>
             </mat-radio-group>
 
             <table>
@@ -60,6 +61,25 @@
 
                     </td>
                 </tr>
+                <tr *ngIf="form.get('sourceType')?.value === 'deviceGroup'">
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Choose Device Group</mat-label>
+                            <senergy-select-search [options]="deviceGroups" formControlName="deviceGroupId" useOptionViewProperty="name" useOptionValueProperty="id"
+                                [compareWith]="compareIds">
+                            </senergy-select-search>
+                        </mat-form-field>
+            
+                    </td>
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Choose Criteria</mat-label>
+                            <senergy-select-search [options]="getCriteria()" formControlName="deviceGroupCriteria" [getOptionViewValue]="describeCriteria()"
+                                [compareWith]="compareCriteria">
+                            </senergy-select-search>
+                        </mat-form-field>
+                    </td>
+                </tr>
                 <tr>
                     <td *ngIf="form.get('sourceType')?.value === 'export'">
                         <mat-form-field color="accent">
@@ -76,9 +96,21 @@
                         </mat-form-field>
                     </td>
                     <td>
-                        <mat-form-field color="accent">
+                        <mat-form-field color="accent" *ngIf="form.get('sourceType')?.value !== 'deviceGroup'">
                             <mat-label>Unit</mat-label>
                             <input type="text" matInput placeholder="Unit" formControlName="vAxisLabel">
+                        </mat-form-field>
+                        <mat-form-field color="accent" *ngIf="form.get('sourceType')?.value === 'deviceGroup'">
+                            <mat-label>Unit</mat-label>
+                            <senergy-select-search [options]="concept?.characteristics || []" formControlName="vAxisLabel" [getOptionValue]="getDisplay" [getOptionViewValue]="getDisplay">
+                            </senergy-select-search>
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent" *ngIf="form.get('sourceType')?.value === 'deviceGroup'">
+                            <mat-label>Aggregation</mat-label>
+                            <senergy-select-search [options]="aggregations" formControlName="deviceGroupAggregation">
+                            </senergy-select-search>
                         </mat-form-field>
                     </td>
                 </tr>

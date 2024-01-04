@@ -19,7 +19,7 @@ import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angul
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
 import {DomSanitizer} from '@angular/platform-browser';
 import {SingleValueService} from './shared/single-value.service';
-import {SingleValueModel} from './shared/single-value.model';
+import {SingleValueAggregations, SingleValueModel} from './shared/single-value.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Observable, Subscription, map} from 'rxjs';
 import {MatIconRegistry} from '@angular/material/icon';
@@ -340,5 +340,8 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         this.animationState = !this.animationState;
     }
 
+    zoomEnabled() {
+        return this.widget.properties.group?.type === undefined && this.widget.properties.deviceGroupAggregation === SingleValueAggregations.Latest;
+    }
 
 }

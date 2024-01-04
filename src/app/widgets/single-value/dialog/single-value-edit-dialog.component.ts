@@ -14,25 +14,33 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {FormBuilder, FormControl, UntypedFormBuilder} from '@angular/forms';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../modules/exports/shared/export.model';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {ExportService} from '../../../modules/exports/shared/export.service';
-import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject, OnInit } from '@angular/core';
+import { FormControl, UntypedFormBuilder } from '@angular/forms';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { ExportModel, ExportResponseModel, ExportValueModel } from '../../../modules/exports/shared/export.model';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { ExportService } from '../../../modules/exports/shared/export.service';
+import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     DeviceInstancesModel,
     DeviceInstancesPermSearchModel
 } from '../../../modules/devices/device-instances/shared/device-instances.model';
-import {DeviceTypeServiceModel} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
-import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
-import {ChartsExportRequestPayloadGroupModel} from '../../charts/export/shared/charts-export-request-payload.model';
-import { forkJoin, Observable } from 'rxjs';
+import { DeviceTypeCharacteristicsModel, DeviceTypeFunctionModel, DeviceTypeServiceModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
+import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
+import { ChartsExportRequestPayloadGroupModel } from '../../charts/export/shared/charts-export-request-payload.model';
+import { forkJoin, map, mergeMap, Observable } from 'rxjs';
+import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
+import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
+import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
+import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-classes/shared/device-classes-perm-search.model';
+import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
+import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
+import { SingleValueAggregations } from '../shared/single-value.model';
 
 @Component({
     templateUrl: './single-value-edit-dialog.component.html',
@@ -63,10 +71,16 @@ export class SingleValueEditDialogComponent implements OnInit {
         'difference-sum',
         'difference-median',
     ];
+    aggregations = Object.values(SingleValueAggregations);
 
     devices: DeviceInstancesModel[] = [];
+    deviceGroups: DeviceGroupsPermSearchModel[] = [];
     services: DeviceTypeServiceModel[] = [];
     paths: { Name: string }[] = [];
+    aspects: AspectsPermSearchModel[] = [];
+    functions: DeviceTypeFunctionModel[] = [];
+    deviceClasses: DeviceClassesPermSearchModel[] = [];
+    concept?: ConceptsCharacteristicsModel | null;
 
     form = this.fb.group({
         vAxis: {},
@@ -84,6 +98,10 @@ export class SingleValueEditDialogComponent implements OnInit {
         sourceType: '',
         device: {},
         service: {},
+        deviceGroupId: '',
+        deviceGroupCriteria: {},
+        deviceGroupAggregation: 'latest',
+        targetCharacteristic: '',
         timestampConfig: this.fb.group({
             showTimestamp: new FormControl<boolean>(false),
             highlightTimestamp: new FormControl<boolean>(false),
@@ -94,8 +112,8 @@ export class SingleValueEditDialogComponent implements OnInit {
         })
     });
 
-    userHasUpdateNameAuthorization: boolean = false 
-    userHasUpdatePropertiesAuthorization: boolean = false 
+    userHasUpdateNameAuthorization: boolean = false
+    userHasUpdatePropertiesAuthorization: boolean = false
 
     constructor(
         private dialogRef: MatDialogRef<SingleValueEditDialogComponent>,
@@ -105,9 +123,11 @@ export class SingleValueEditDialogComponent implements OnInit {
         private fb: UntypedFormBuilder,
         private deviceTypeService: DeviceTypeService,
         private deviceInstancesService: DeviceInstancesService,
-        @Inject(MAT_DIALOG_DATA) data: { 
-            dashboardId: string; 
-            widgetId: string, 
+        private deviceGroupsService: DeviceGroupsService,
+        private conceptsService: ConceptsService,
+        @Inject(MAT_DIALOG_DATA) data: {
+            dashboardId: string;
+            widgetId: string,
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean
         },
@@ -124,7 +144,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         });
         this.form.get('type')?.valueChanges.subscribe(v => {
             if (v === 'String') {
-                this.form.patchValue({format: ''});
+                this.form.patchValue({ format: '' });
                 this.form.get('format')?.disable();
             } else {
                 this.form.get('format')?.enable();
@@ -147,7 +167,23 @@ export class SingleValueEditDialogComponent implements OnInit {
             if (service === undefined || service == null) {
                 return;
             }
-            this.paths = this.deviceTypeService.getValuePaths(service.outputs[0].content_variable).map(x => ({Name: x}));
+            this.paths = this.deviceTypeService.getValuePaths(service.outputs[0].content_variable).map(x => ({ Name: x }));
+        });
+        this.form.get('deviceGroupCriteria')?.valueChanges.subscribe(criteria => {
+            const update = function (that: SingleValueEditDialogComponent) {
+                if (that.functions.length === 0) { //delay until functions populated
+                    setTimeout(() => update(that), 100);
+                    return;
+                }
+                const conceptId = that.functions.find(f => f.id === criteria.function_id)?.concept_id;
+                if (conceptId !== undefined) {
+                    that.conceptsService.getConceptWithCharacteristics(conceptId).subscribe(c => that.concept = c);
+                }
+            }
+            update(this);
+        });
+        this.form.get('vAxisLabel')?.valueChanges.subscribe(unit => {
+            this.form.patchValue({targetCharacteristic: this.concept?.characteristics.find(c => this.getDisplay(c) === unit)?.id});
         });
         this.getWidgetData();
     }
@@ -167,9 +203,13 @@ export class SingleValueEditDialogComponent implements OnInit {
                 measurement: this.widget.properties.measurement,
                 device: this.widget.properties.device,
                 service: this.widget.properties.service,
+                deviceGroupId: this.widget.properties.deviceGroupId,
+                deviceGroupCriteria: this.widget.properties.deviceGroupCriteria,
+                deviceGroupAggregation: this.widget.properties.deviceGroupAggregation,
+                targetCharacteristic: this.widget.properties.targetCharacteristic,
             });
 
-            if(this.widget.properties.timestampConfig !== undefined) {
+            if (this.widget.properties.timestampConfig !== undefined) {
                 this.form.get('timestampConfig')?.patchValue({
                     showTimestamp: this.widget.properties.timestampConfig.showTimestamp,
                     highlightTimestamp: this.widget.properties.timestampConfig.highlightTimestamp,
@@ -177,9 +217,9 @@ export class SingleValueEditDialogComponent implements OnInit {
                     warningAge: this.widget.properties.timestampConfig.warningAge,
                     problemTimeLevel: this.widget.properties.timestampConfig.problemTimeLevel,
                     problemAge: this.widget.properties.timestampConfig.problemAge,
-                })    
+                })
             }
-   
+
             this.form.get('group')?.patchValue({
                 time: widget.properties.group?.time,
                 type: widget.properties.group?.type,
@@ -187,6 +227,7 @@ export class SingleValueEditDialogComponent implements OnInit {
 
             this.initDeployments();
             this.initDevices();
+            this.initDeviceGroups();
         });
     }
 
@@ -209,6 +250,35 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     initDevices() {
         this.deviceInstancesService.getDeviceInstances(10000, 0).subscribe(devices => this.devices = devices);
+    }
+
+    initDeviceGroups() {
+        this.deviceGroupsService.getDeviceGroups('', 10000, 0, "name", "asc").pipe(mergeMap(deviceGroups => {
+            this.deviceGroups = deviceGroups;
+            const ascpectIds: Map<string, null> = new Map();
+            const functionIds: Map<string, null> = new Map();
+            const deviceClassids: Map<string, null> = new Map();
+            this.deviceGroups.forEach(dg => {
+                const criteria: DeviceGroupCriteriaModel[] = [];
+                dg.criteria.forEach(c => {
+                    ascpectIds.set(c.aspect_id, null);
+                    functionIds.set(c.function_id, null);
+                    deviceClassids.set(c.device_class_id, null);
+                    if (criteria.findIndex(c2 => c.aspect_id === c2.aspect_id && c.function_id === c2.function_id && c.device_class_id === c2.device_class_id) === -1) {
+                        // filters interaction, irrelevant for widget
+                        c.interaction = "";
+                        criteria.push(c);
+                    }
+                });
+                dg.criteria = criteria;
+            });
+            const obs: Observable<any>[] = [];
+            obs.push(this.deviceGroupsService.getAspectListByIds(Array.from(ascpectIds.keys())).pipe(map(aspects => this.aspects = aspects)));
+            obs.push(this.deviceGroupsService.getFunctionListByIds(Array.from(functionIds.keys())).pipe(map(functions => this.functions = functions)));
+            obs.push(this.deviceGroupsService.getDeviceClassListByIds(Array.from(deviceClassids.keys())).pipe(map(deviceClasses => this.deviceClasses = deviceClasses)));
+            return forkJoin(obs);
+        })).subscribe();
+
     }
 
     close(): void {
@@ -238,6 +308,10 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.widget.properties.device = this.form.get('device')?.value as DeviceInstancesModel || undefined;
         this.widget.properties.service = this.form.get('service')?.value as DeviceTypeServiceModel || undefined;
         this.widget.properties.sourceType = this.form.get('sourceType')?.value || undefined;
+        this.widget.properties.deviceGroupId = this.form.get('deviceGroupId')?.value || undefined;
+        this.widget.properties.deviceGroupCriteria = this.form.get('deviceGroupCriteria')?.value || undefined;
+        this.widget.properties.targetCharacteristic = this.form.get('targetCharacteristic')?.value || undefined;
+        this.widget.properties.deviceGroupAggregation = this.form.get('deviceGroupAggregation')?.value || undefined;
         this.widget.properties.timestampConfig = this.form.get('timestampConfig')?.value || undefined;
 
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
@@ -245,19 +319,19 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     save(): void {
         var obs = []
-        if(this.userHasUpdateNameAuthorization) {
+        if (this.userHasUpdateNameAuthorization) {
             obs.push(this.updateName())
         }
-        if(this.userHasUpdatePropertiesAuthorization) {
+        if (this.userHasUpdatePropertiesAuthorization) {
             obs.push(this.updateProperties())
         }
-        
+
         forkJoin(obs).subscribe(responses => {
-           var errorOccured = responses.find((response) => response.message != "OK")
-           if(!errorOccured) {
-               this.dialogRef.close(this.widget);
-           } 
-       })
+            var errorOccured = responses.find((response) => response.message != "OK")
+            if (!errorOccured) {
+                this.dialogRef.close(this.widget);
+            }
+        })
     }
 
     displayFn(input?: ChartsExportMeasurementModel): string {
@@ -287,5 +361,26 @@ export class SingleValueEditDialogComponent implements OnInit {
             return a === b;
         }
         return a.Name === b.Name;
+    }
+
+    compareCriteria(a: any, b: any) {
+        if (a === null || b === null || a === undefined || b === undefined) {
+            return a === b;
+        }
+        return a.interaction === b.interaction && a.function_id === b.function_id && a.aspect_id === b.aspect_id && a.device_class_id === b.device_class_id;
+
+    }
+
+    getCriteria(): DeviceGroupCriteriaModel[] {
+        const id = this.form.get('deviceGroupId')?.value;
+        return this.deviceGroups.find(dg => dg.id === id)?.criteria || [];
+    }
+
+    describeCriteria(): (criteria: DeviceGroupCriteriaModel) => string {
+        return criteria => (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + " " + (criteria.device_class_id !== "" ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || "" : "") + " " + (criteria.aspect_id !== "" ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || "" : ""); // TODO
+    }
+
+    getDisplay(c: DeviceTypeCharacteristicsModel): string {
+        return c.display_unit || c.name;
     }
 }

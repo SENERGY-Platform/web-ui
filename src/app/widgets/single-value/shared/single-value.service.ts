@@ -19,11 +19,12 @@ import {
 } from '@angular/core';
 import {
     Observable,
-    of ,
+    of,
     map,
     throwError
 } from 'rxjs';
 import {
+    SingleValueAggregations,
     SingleValueModel
 } from './single-value.model';
 import {
@@ -50,7 +51,8 @@ import {
 } from '../../shared/export-data.service';
 import {
     QueriesRequestElementInfluxModel,
-    QueriesRequestElementTimescaleModel
+    QueriesRequestElementTimescaleModel,
+    QueriesRequestV2ElementTimescaleModel
 } from '../../shared/export-data.model';
 import {
     environment
@@ -65,7 +67,7 @@ export class SingleValueService {
         private dashboardService: DashboardService,
         private errorHandlerService: ErrorHandlerService,
         private exportDataService: ExportDataService,
-    ) {}
+    ) { }
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
@@ -85,27 +87,19 @@ export class SingleValueService {
         });
     }
 
-    getValues(widget: WidgetModel, date ? : Date): Observable < SingleValueModel[] > {
-        /*console.log(widget)
-        console.log(date)
-        var c = new Date()
-        c.setHours(8)
-        return of([{
-            "value": 10,
-            "type": "Number",
-            "date": c
-        }])*/
-        
+    getValues(widget: WidgetModel, date?: Date): Observable<SingleValueModel[]> {
         const m = widget.properties.measurement;
         const name = widget.properties.vAxis ? widget.properties.vAxis.Name : '';
         if (m) {
-            const requestPayload: QueriesRequestElementInfluxModel[] | QueriesRequestElementTimescaleModel[] = [{
+            const requestPayload: QueriesRequestElementInfluxModel[] | QueriesRequestV2ElementTimescaleModel[] = [{
                 columns: [{
-                    name,
+                    name: name.length > 0 ? name : undefined,
                     math: widget.properties.math !== '' ? widget.properties.math : undefined,
-                }, ],
+                    criteria: widget.properties.deviceGroupCriteria,
+                    targetCharacteristicId: widget.properties.targetCharacteristic,
+                },],
             }];
-            if (date !== undefined) { // TODO
+            if (date !== undefined) {
                 requestPayload[0].time = {
                     start: new Date(0).toISOString(),
                     end: date.toISOString(),
@@ -117,10 +111,11 @@ export class SingleValueService {
                 widget.properties.group.type !== undefined &&
                 widget.properties.group.type !== ''
             ) {
-                if (date !== undefined) { // TODO
+                if (date === undefined) {
                     requestPayload[0].time = {
                         last: widget.properties.group.time
                     };
+                    requestPayload[0].limit = 1;
                 }
                 requestPayload[0].columns[0].groupType = widget.properties.group.type;
                 requestPayload[0].groupTime = widget.properties.group.time;
@@ -136,6 +131,7 @@ export class SingleValueService {
                 requestPayload[0].time.start = new Date(0).toISOString();
                 requestPayload[0].time.end = date.toISOString();
                 requestPayload[0].limit = 10;
+                requestPayload[0].orderDirection = 'desc';
 
                 requestPayload.push(JSON.parse(JSON.stringify(requestPayload[0])));
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -146,7 +142,7 @@ export class SingleValueService {
             };
 
 
-            let o: Observable < any[][] > | undefined;
+            let o: Observable<any[][]> | undefined;
             if (widget.properties.sourceType === 'export' || widget.properties.sourceType === undefined) { // undefined for legacy widgets
                 (requestPayload[0] as QueriesRequestElementInfluxModel).measurement = m.id;
                 (requestPayload[0] as QueriesRequestElementTimescaleModel).exportId = m.id;
@@ -164,11 +160,16 @@ export class SingleValueService {
                         return throwError(() => 'cant load data of this export: not internal')
                 }
             }
-            if (widget.properties.sourceType === 'device') {
-                (requestPayload[0] as QueriesRequestElementTimescaleModel).deviceId = widget.properties.device?.id;
-                (requestPayload[0] as QueriesRequestElementTimescaleModel).serviceId = widget.properties.service?.id;
+            if (widget.properties.sourceType === 'device' || widget.properties.sourceType === 'deviceGroup') {
+                (requestPayload[0] as QueriesRequestV2ElementTimescaleModel).deviceId = widget.properties.device?.id; // TODO use deviceGroupId
+                (requestPayload[0] as QueriesRequestV2ElementTimescaleModel).serviceId = widget.properties.service?.id;
+                (requestPayload[0] as QueriesRequestV2ElementTimescaleModel).deviceGroupId = widget.properties.deviceGroupId; // TODO use deviceGroupId
                 queryMultiple();
-                o = this.exportDataService.queryTimescale(requestPayload);
+                o = this.exportDataService.queryTimescaleV2(requestPayload).pipe(map(o => {
+                    const data: any[][][] = [];
+                    o.forEach(o => o.data.forEach(o => data.push(o)));
+                    return data;
+                }));
             }
 
             if (o == undefined) {
@@ -176,7 +177,7 @@ export class SingleValueService {
             }
             return o.pipe(
                 map((pairList: any) => {
-                    const res: SingleValueModel[] = [];
+                    let res: SingleValueModel[] = [];
                     for (const pairs of pairList) {
                         for (const pair of pairs) {
                             let value: any = '';
@@ -197,6 +198,36 @@ export class SingleValueService {
                         }
                     }
                     res.sort((a, b) => a.date.valueOf() - b.date.valueOf());
+                    switch (widget.properties.deviceGroupAggregation) {
+                        case SingleValueAggregations.Sum:
+                            if (requestPayload[0].limit === 1) {
+                                let sum = 0;
+                                res.forEach(r => sum += r.value as number);
+                                res = [{
+                                    value: sum,
+                                    type: res[res.length - 1].type,
+                                    date: res[res.length - 1].date
+                                }];
+                            } else {
+                                const res2: SingleValueModel[] = [];
+                                res.forEach(r => {
+                                    const elem = res2.find(r2 => r2.date.valueOf() === r.date.valueOf());
+                                    if (elem === undefined) {
+                                        res2.push(JSON.parse(JSON.stringify(r)));
+                                    } else {
+                                        const v = (elem.value as number) + (r.value as number);
+                                        elem.value = v;
+                                    }
+                                })
+                                res = res2;
+                            }
+                            break;
+                        case SingleValueAggregations.Latest:
+                        default:
+                            if (requestPayload[0].limit === 1) {
+                                res = [res[res.length - 1]];
+                            }
+                    }
                     return res
                 })
             )

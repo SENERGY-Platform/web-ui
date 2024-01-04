@@ -22,6 +22,7 @@ import {
     LastValuesRequestElementTimescaleModel,
     QueriesRequestElementInfluxModel,
     QueriesRequestElementTimescaleModel,
+    QueriesRequestV2ElementTimescaleModel,
     TimeValuePairModel
 } from './export-data.model';
 import {HttpClient} from '@angular/common/http';
@@ -52,8 +53,12 @@ export class ExportDataService {
         return this.http.post<any[][][]>(environment.influxAPIURL + '/v2/queries?format=per_query', query);
     }
 
-    queryTimescale(query: QueriesRequestElementTimescaleModel[]): Observable<any[][][]> {
+    queryTimescale(query: QueriesRequestElementTimescaleModel[]): Observable<any[][][]> { // TODO implement v2
         return this.http.post<any[][][]>(environment.timescaleAPIURL + '/queries?format=per_query', query);
+    }
+
+    queryTimescaleV2(query: QueriesRequestV2ElementTimescaleModel[]): Observable<{requestIndex: number; data: any[][][]}[]> { // TODO implement v2
+        return this.http.post<{requestIndex: number; data: any[][][]}[]>(environment.timescaleAPIURL + '/queries/v2', query);
     }
 
     queryAsTableInflux(

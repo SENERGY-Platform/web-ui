@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import {DeviceInstancesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
 import {DeviceTypeServiceModel} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 
@@ -39,5 +40,14 @@ export interface SingleValuePropertiesModel {
     sourceType?: string;
     device?: DeviceInstancesModel;
     service?: DeviceTypeServiceModel;
+    deviceGroupId?: string;
+    deviceGroupCriteria?: DeviceGroupCriteriaModel;
+    targetCharacteristic?: string;
+    deviceGroupAggregation?: SingleValueAggregations;
     timestampConfig?: TimestampConfig;
+}
+
+export enum SingleValueAggregations {
+    Latest = 'latest',
+    Sum = 'sum',
 }

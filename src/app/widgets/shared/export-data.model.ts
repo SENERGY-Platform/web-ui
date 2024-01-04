@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { DeviceGroupCriteriaModel } from "src/app/modules/devices/device-groups/shared/device-groups.model";
+
 export interface TimeValuePairModel {
     time: string | null;
     value: string | number | boolean | null;
@@ -43,6 +45,10 @@ export interface QueriesRequestElementTimescaleModel extends QueriesRequestEleme
     serviceId?: string;
 }
 
+export interface QueriesRequestV2ElementTimescaleModel extends QueriesRequestElementTimescaleModel{
+    deviceGroupId?: string;
+}
+
 export interface QueriesRequestElementBaseModel {
     columns: QueriesRequestColumnModel[];
     filters?: QueriesRequestFilterModel[];
@@ -56,7 +62,9 @@ export interface QueriesRequestElementBaseModel {
 export interface QueriesRequestColumnModel {
     groupType?: string;
     math?: string;
-    name: string;
+    name?: string;
+    criteria?: DeviceGroupCriteriaModel;
+    targetCharacteristicId?: string;
 }
 
 export interface QueriesRequestFilterModel {
