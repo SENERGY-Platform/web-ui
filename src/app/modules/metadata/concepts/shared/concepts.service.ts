@@ -35,17 +35,17 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class ConceptsService {
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
-        private http: HttpClient, 
+        private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        var permSearchURL = environment.permissionSearchUrl + '/v3/resources/concepts'
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(permSearchURL)
+        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/concepts';
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(permSearchURL);
     }
-    
+
     tryConverterExtension(extensionTryRequest: ConverterExtensionTryRequest): Observable<ConverterExtensionTryResult | null> {
         return this.http
             .post<ConverterExtensionTryResult>(environment.marshallerUrl + '/converter/extension-call', extensionTryRequest)
@@ -135,33 +135,33 @@ export class ConceptsService {
 
     getTotalCountOfConcepts(searchText: string): Observable<any> {
         const options = searchText ?
-        { params: new HttpParams().set('search', searchText) } : {};
+            { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/concepts', options)
-        .pipe(
-            catchError(
-                this.errorHandlerService.handleError(
-                    ConceptsService.name,
-                    'getTotalCountOfConcepts',
+            .get(environment.permissionSearchUrl + '/v3/total/concepts', options)
+            .pipe(
+                catchError(
+                    this.errorHandlerService.handleError(
+                        ConceptsService.name,
+                        'getTotalCountOfConcepts',
+                    ),
                 ),
-            ),
-        );
+            );
     }
 
-    userHasDeleteAuthorization():boolean {
-        return this.authorizations["DELETE"]      
+    userHasDeleteAuthorization(): boolean {
+        return this.authorizations['DELETE'];
     }
 
-    userHasUpdateAuthorization():boolean {
-        return this.authorizations["PUT"]     
+    userHasUpdateAuthorization(): boolean {
+        return this.authorizations['PUT'];
     }
 
-    userHasCreateAuthorization():boolean {
-        return this.authorizations["POST"]   
+    userHasCreateAuthorization(): boolean {
+        return this.authorizations['POST'];
     }
 
-    userHasReadAuthorization():boolean {
-        return this.authorizations["GET"]     
+    userHasReadAuthorization(): boolean {
+        return this.authorizations['GET'];
     }
 }

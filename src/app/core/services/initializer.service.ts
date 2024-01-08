@@ -19,7 +19,7 @@ import { environment } from '../../../environments/environment';
 import {AuthorizationService} from './authorization.service';
 
 function showErrorBox() {
-    document?.getElementById("error")?.classList.add("show")
+    document?.getElementById('error')?.classList.add('show');
 }
 
 export function initializerService(authorizationService: AuthorizationService, ladonService: LadonService): () => Promise<any> {
@@ -39,23 +39,21 @@ export function initializerService(authorizationService: AuthorizationService, l
                 bearerPrefix: 'Bearer',
                 shouldAddToken: request => !request.url.startsWith(environment.keycloakUrl + '/auth/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token')
             })
-            .then(() => {
-                return loadEnv(authorizationService, environment.configUrl)
-                            .then(() => {
-                                if (!environment.production) {
-                                    return loadEnv(authorizationService, '/assets/env.json').then(_ => ladonService.checkAllServiceEndpointAuthorizations(environment.ladonUrl));
-                                } else {
-                                    return ladonService.checkAllServiceEndpointAuthorizations(environment.ladonUrl);
-                                }
-                            })
-                            .catch(err => {
-                                console.log(err)
-                                showErrorBox()
-                            })
+            .then(() => loadEnv(authorizationService, environment.configUrl)
+                .then(() => {
+                    if (!environment.production) {
+                        return loadEnv(authorizationService, '/assets/env.json').then(_ => ladonService.checkAllServiceEndpointAuthorizations(environment.ladonUrl));
+                    } else {
+                        return ladonService.checkAllServiceEndpointAuthorizations(environment.ladonUrl);
+                    }
                 })
+                .catch(err => {
+                    console.log(err);
+                    showErrorBox();
+                }))
             .catch(err => {
-                console.log(err)
-                showErrorBox()
+                console.log(err);
+                showErrorBox();
             });
 }
 

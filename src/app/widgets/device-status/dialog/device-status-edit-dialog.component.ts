@@ -84,8 +84,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         convertRules: this.fb.array([]),
     });
 
-    userHasUpdateNameAuthorization: boolean = false
-    userHasUpdatePropertiesAuthorization: boolean = false
+    userHasUpdateNameAuthorization = false;
+    userHasUpdatePropertiesAuthorization = false;
 
     constructor(
         private dialogRef: MatDialogRef<DeviceStatusEditDialogComponent>,
@@ -97,17 +97,17 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         private deviceStatusService: DeviceStatusService,
         private processSchedulerService: ProcessSchedulerService,
         private deviceInstanceService: DeviceInstancesService,
-        @Inject(MAT_DIALOG_DATA) data: { 
-            dashboardId: string; 
-            widgetId: string; 
+        @Inject(MAT_DIALOG_DATA) data: {
+            dashboardId: string;
+            widgetId: string;
             userHasUpdateNameAuthorization: boolean;
-            userHasUpdatePropertiesAuthorization: boolean
+            userHasUpdatePropertiesAuthorization: boolean;
         },
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
-        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization
+        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
     }
 
     ngOnInit() {
@@ -417,33 +417,33 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        var newName = this.widgetName;
-        return this.dashboardService.updateWidgetName(this.dashboardId, this.widgetId, newName)
+        const newName = this.widgetName;
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widgetId, newName);
     }
-    
+
     updateProperties(): Observable<DashboardResponseMessageModel> {
         this.widgetNew.properties = {};
         this.widgetNew.properties.refreshTime = (this.formGroup.get('refreshTime') as FormControl).value;
         this.widgetNew.properties.elements = this.elements;
         this.widgetNew.properties.convertRules = this.convertRulesControl.value;
-        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widgetId, [], this.widgetNew.properties)
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widgetId, [], this.widgetNew.properties);
     }
-    
+
     saveWidget(): void {
-        var obs = []
+        const obs = [];
         if(this.userHasUpdateNameAuthorization) {
-            obs.push(this.updateName())
+            obs.push(this.updateName());
         }
         if(this.userHasUpdatePropertiesAuthorization) {
-            obs.push(this.updateProperties())
+            obs.push(this.updateProperties());
         }
 
         forkJoin(obs).subscribe(responses => {
-            var errorOccured = responses.find((response) => response.message != "OK")
+            const errorOccured = responses.find((response) => response.message != 'OK');
             if(!errorOccured) {
                 this.dialogRef.close(this.widgetNew);
             }
-        })
+        });
     }
 
     private cleanExportModel(exportModel: ExportModel, exportValue: ExportValueCharacteristicModel) {

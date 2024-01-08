@@ -181,12 +181,12 @@ export class ChartsExportService {
             let mapper: number[] = [];
             res.forEach(r => {
                 switch (r.source) {
-                    case 'influx':
-                        mapper = influxResultMapper;
-                        break;
-                    case 'timescale':
-                        mapper = timescaleResultMapper;
-                        break;
+                case 'influx':
+                    mapper = influxResultMapper;
+                    break;
+                case 'timescale':
+                    mapper = timescaleResultMapper;
+                    break;
                 }
                 r.res.forEach((series, index) => {
                     series?.forEach(row => {
@@ -233,14 +233,14 @@ export class ChartsExportService {
 
     private setData(series: any[][], properties: WidgetPropertiesModels): {
         table: ChartDataTableModel;
-        colors?: string[]
+        colors?: string[];
     } {
         const vAxes = properties.vAxes || [];
         const indices: {
             index: number;
             conversions: { from: any; to: any }[];
             conversionDefault?: number;
-            type: string
+            type: string;
         }[] = [];
         const header: string[] = ['time'];
         if (vAxes) {
@@ -258,33 +258,33 @@ export class ChartsExportService {
         }
         const dataTable = new ChartDataTableModel([header]);
 
-        var series2: any = []
+        let series2: any = [];
         if (series[0].length > 2 && properties.chartType === 'ColumnChart') {
             /* Grouped Column -> all values for on x tick value need to be in one list
             series = [
                 ["2023-07-18T00:00:00Z", 2.7930317029043543, 5, 3]
             ]
             */
-            var tmp: any = {}
+            const tmp: any = {};
             series.forEach((item: any[]) => {
-                var date: string = item[0]
+                const date: string = item[0];
                 item.slice(1).forEach((element, index) => {
                     if (!!element) {
                         if (!tmp[date]) {
-                            tmp[date] = []
+                            tmp[date] = [];
                         }
-                        tmp[date][index] = element
+                        tmp[date][index] = element;
                     }
                 });
-            })
+            });
 
 
             for (const [date, list] of Object.entries(tmp)) {
-                series2.push([date].concat(<any[]>list))
+                series2.push([date].concat(list as any[]));
             }
 
         } else {
-            series2 = series
+            series2 = series;
         }
 
         series2.forEach((item: (string | number | boolean)[]) => {
@@ -441,7 +441,7 @@ export class ChartsExportService {
 
     private transformTableForTimeline(dat: any[][], vAxes: ChartsExportVAxesModel[], breakInterval: number = -1, breakValue: number = 0, breakUnit: string = ''): {
         table: any[][];
-        colors: string[]
+        colors: string[];
     } {
         const allSlices: any[][] = [];
         const offset = 60 * 1000 * (new Date(0).getTimezoneOffset());

@@ -42,11 +42,11 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     selection = new SelectionModel<PipelineModel>(true, []);
     totalCount = 200;
     searchSub: Subscription = new Subscription();
-    sortBy: string = "createdat"
-    sortDirection: SortDirection = "desc"
+    sortBy = 'createdat';
+    sortDirection: SortDirection = 'desc';
 
-    userHasDeleteAuthorization: boolean = false
-    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization = false;
+    userHasUpdateAuthorization = false;
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
@@ -60,37 +60,37 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     ) {}
 
     ngOnInit() {
-        this.userHasDeleteAuthorization = this.flowEngineService.userHasDeleteAuthorization()
+        this.userHasDeleteAuthorization = this.flowEngineService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete')
+            this.displayedColumns.push('delete');
         }
 
-        this.userHasUpdateAuthorization = this.flowEngineService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.flowEngineService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit')
+            this.displayedColumns.push('edit');
         }
-    
+
         this.initSearch();
     }
 
     initSearch() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            var order = this.sortBy + ':' + this.sortDirection
+            const order = this.sortBy + ':' + this.sortDirection;
             this.pipelineRegistryService.getPipelines(order).subscribe((resp: PipelineModel[]) => {
-                if(searchText != ""){
-                    resp = resp.filter(pipeline => (pipeline.name.search(searchText) != -1))
+                if(searchText != ''){
+                    resp = resp.filter(pipeline => (pipeline.name.search(searchText) != -1));
                 }
                 this.dataSource.data = resp;
                 this.totalCount = resp.length;
 
 
                 this.ready = true;
-            })
-        })
+            });
+        });
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active 
+        this.sortBy = $event.active;
         this.sortDirection = $event.direction;
         this.reload();
     }
@@ -104,7 +104,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
 
     loadPipelines() {
         this.ready = false;
-        var order = this.sortBy + ':' + this.sortDirection
+        const order = this.sortBy + ':' + this.sortDirection;
         this.pipelineRegistryService.getPipelines(order).subscribe((resp: PipelineModel[]) => {
             this.dataSource.data = resp;
             this.totalCount = resp.length;
@@ -128,18 +128,18 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
                     if (deletePipeline) {
                         return this.flowEngineService.deletePipeline(pipe.id);
                     }
-                    return of()
+                    return of();
                 })
             ).subscribe({
                 next: (_) => {
-                    this.reload()
+                    this.reload();
                     this.snackBar.open('Pipeline deleted', undefined, {
                         duration: 2000,
                     });
                 },
                 error: (err) => {
                     this.snackBar.open('Error while deleting pipeline!: ' + err, 'close', {panelClass: 'snack-bar-error'});
-                    this.reload()
+                    this.reload();
                 }
             });
     }
@@ -168,30 +168,30 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
 
     deleteMultipleItems() {
         const deletionJobs: Observable<any>[] = [];
-        var text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' pipelines' : ' pipeline')
+        const text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' pipelines' : ' pipeline');
 
         this.dialogsService
-        .openDeleteDialog(text)
-        .afterClosed()
-        .subscribe((deletePipelines: boolean) => {
-            if (deletePipelines) {
-                this.ready = false;
-                this.selection.selected.forEach((pipeline: PipelineModel) => {
-                    deletionJobs.push(this.flowEngineService.deletePipeline(pipeline.id))
-                });
-            }
-
-            forkJoin(deletionJobs).subscribe(
-            {
-                next: (_) => {
-                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
-                    this.reload()
-                },
-                error: (err) => {
-                    this.snackBar.open('Error while deleting ' + text + '!: ' + err, 'close', {panelClass: 'snack-bar-error'});
-                    this.reload()
+            .openDeleteDialog(text)
+            .afterClosed()
+            .subscribe((deletePipelines: boolean) => {
+                if (deletePipelines) {
+                    this.ready = false;
+                    this.selection.selected.forEach((pipeline: PipelineModel) => {
+                        deletionJobs.push(this.flowEngineService.deletePipeline(pipeline.id));
+                    });
                 }
-            })
-        });
+
+                forkJoin(deletionJobs).subscribe(
+                    {
+                        next: (_) => {
+                            this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
+                            this.reload();
+                        },
+                        error: (err) => {
+                            this.snackBar.open('Error while deleting ' + text + '!: ' + err, 'close', {panelClass: 'snack-bar-error'});
+                            this.reload();
+                        }
+                    });
+            });
     }
 }

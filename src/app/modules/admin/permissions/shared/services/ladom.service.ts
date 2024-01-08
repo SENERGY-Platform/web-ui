@@ -29,7 +29,7 @@ import { HttpClient } from '@angular/common/http';
 export class LadonService {
 
     public baseUrl: string = environment.ladonUrl;
-    private authorizationsPerURL: Record<string, PermissionTestResponse> = {}
+    private authorizationsPerURL: Record<string, PermissionTestResponse> = {};
 
     constructor(
         private http: HttpClient
@@ -85,27 +85,27 @@ export class LadonService {
     }
 
     public getUserAuthorizationsForURI(targetURI: string): PermissionTestResponse {
-        return this.authorizationsPerURL[targetURI]
+        return this.authorizationsPerURL[targetURI];
     }
 
     public checkAllServiceEndpointAuthorizations(ladonUrl: string): Promise<boolean> {
-        this.baseUrl = ladonUrl
+        this.baseUrl = ladonUrl;
 
-        var requests: AuthorizationRequest[] = []
-        var methods: AllowedMethods[] = ["GET", "DELETE", "POST", "PUT", "PATCH"]
-        
-        var ServiceEndpoints = [
+        const requests: AuthorizationRequest[] = [];
+        const methods: AllowedMethods[] = ['GET', 'DELETE', 'POST', 'PUT', 'PATCH'];
+
+        const ServiceEndpoints = [
             environment.flowRepoUrl,
             environment.flowEngineUrl,
             environment.flowParserUrl,
-        
+
             environment.permissionSearchUrl,
             environment.permissionSearchUrl + '/v3/resources/characteristics',
             environment.permissionSearchUrl + '/v3/resources/device-classes',
             environment.permissionSearchUrl + '/v3/resources/functions',
             environment.permissionSearchUrl + '/v3/resources/concepts',
             environment.permissionSearchUrl + '/v3/resources/device-types',
-        
+
             environment.apiAggregatorUrl,
             environment.deviceRepoUrl,
             environment.iotRepoUrl,
@@ -124,13 +124,13 @@ export class LadonService {
             environment.swaggerUrl,
             environment.importDeployUrl,
             environment.importRepoUrl,
-        
+
             environment.deviceRepoUrl,
             environment.deviceRepoUrl + '/aspects',
-        
+
             environment.deviceManagerUrl,
             environment.deviceManagerUrl + '/device-types',
-        
+
             environment.processIoUrl,
             environment.dashboardServiceUrl + '/dashboards',
             environment.dashboardServiceUrl + '/widgets',
@@ -143,39 +143,39 @@ export class LadonService {
             environment.costApiUrl + '/estimation/flow',
             environment.billingApiUrl + '/billing-components',
             environment.timescaleAPIURL + '/usage'
-        ]
-        
-        ServiceEndpoints.forEach(endpointURL => {
-                var endpoint = new URL(endpointURL).pathname
+        ];
 
-                methods.forEach(method => {
-                    requests.push({'endpoint': endpoint, 'method': method})
-                });
-        })
+        ServiceEndpoints.forEach(endpointURL => {
+            const endpoint = new URL(endpointURL).pathname;
+
+            methods.forEach(method => {
+                requests.push({endpoint, method});
+            });
+        });
 
         return new Promise((resolve, _) => {
             this.userIsAuthorized(requests).subscribe(authResponse => {
-                  var allRules: Record<string, PermissionTestResponse> = {}
-                  ServiceEndpoints.forEach((endpointURL, endpointIndex) => {
-                      allRules[endpointURL] = {
-                          "GET": true,
-                          "POST": false,
-                          "DELETE": false,
-                          "PUT": false,
-                          "PATCH": false,
-                          "HEAD": true,
-                      }
-              
-                      methods.forEach(function(method, methodIndex) {
-                          var indexOfEndpointMethodRule = endpointIndex * 5 + methodIndex
-                          allRules[endpointURL][method] = authResponse.allowed[indexOfEndpointMethodRule]
-                      });
-                  })
-              
-                  this.authorizationsPerURL = allRules
-                  resolve(true)
-                })
-        }) 
+                const allRules: Record<string, PermissionTestResponse> = {};
+                ServiceEndpoints.forEach((endpointURL, endpointIndex) => {
+                    allRules[endpointURL] = {
+                        GET: true,
+                        POST: false,
+                        DELETE: false,
+                        PUT: false,
+                        PATCH: false,
+                        HEAD: true,
+                    };
+
+                    methods.forEach(function(method, methodIndex) {
+                        const indexOfEndpointMethodRule = endpointIndex * 5 + methodIndex;
+                        allRules[endpointURL][method] = authResponse.allowed[indexOfEndpointMethodRule];
+                    });
+                });
+
+                this.authorizationsPerURL = allRules;
+                resolve(true);
+            });
+        });
     }
-    
+
 }

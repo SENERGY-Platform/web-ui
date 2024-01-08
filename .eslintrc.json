@@ -71,7 +71,8 @@
         "prefer-arrow/prefer-arrow-functions": "off",
         "max-len": "off",
         "@typescript-eslint/no-unused-expressions": "off",
-        "@typescript-eslint/prefer-for-of": "off"
+        "@typescript-eslint/prefer-for-of": "off",
+        "jsdoc/newline-after-description": "off"
       }
     },
     {

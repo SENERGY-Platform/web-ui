@@ -54,9 +54,9 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
     selectedItems: ProcessModel[] = [];
     rowHeight = 282;
 
-    userHasDeleteAuthorization: boolean = false
-    userHasUpdateAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false
+    userHasDeleteAuthorization = false;
+    userHasUpdateAuthorization = false;
+    userHasCreateAuthorization = false;
 
     private limitInit = 54;
     private limit = this.limitInit;
@@ -83,9 +83,9 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
     }
 
     ngOnInit() {
-        this.userHasDeleteAuthorization = this.designsService.userHasDeleteAuthorization()
-        this.userHasUpdateAuthorization = this.designsService.userHasUpdateAuthorization()
-        this.userHasCreateAuthorization = this.designsService.userHasCreateAuthorization()
+        this.userHasDeleteAuthorization = this.designsService.userHasDeleteAuthorization();
+        this.userHasUpdateAuthorization = this.designsService.userHasUpdateAuthorization();
+        this.userHasCreateAuthorization = this.designsService.userHasCreateAuthorization();
 
         this.initGridCols();
     }

@@ -72,7 +72,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     ) {
         this.getRouterParams();
     }
-    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'info', 'share']
+    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'info', 'share'];
     pageSize = 20;
     dataSource = new MatTableDataSource<DeviceInstancesModel>();
     selection = new SelectionModel<DeviceInstancesModel>(true, []);
@@ -96,16 +96,16 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     routerConnectionState: DeviceInstancesRouterStateTabEnum | undefined = undefined;
 
     private searchSub: Subscription = new Subscription();
-    sortBy: string = "display_name"
-    sortDirection: SortDirection = "asc"
+    sortBy = 'display_name';
+    sortDirection: SortDirection = 'asc';
 
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
-    userHasReadDeviceUsageAuthorization: boolean = false 
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
+    userHasReadDeviceUsageAuthorization = false;
 
     ngOnInit(): void {
         this.initSearch(); // does automatically load data on first page load
-        this.checkAuthorization()
+        this.checkAuthorization();
     }
 
     ngAfterViewInit(): void {
@@ -117,27 +117,27 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     checkAuthorization() {
-        this.userHasReadDeviceUsageAuthorization = this.exportDataService.userHasUsageAuthroization()
+        this.userHasReadDeviceUsageAuthorization = this.exportDataService.userHasUsageAuthroization();
         if (this.userHasReadDeviceUsageAuthorization) {
-            this.displayedColumns.splice(4, 0, 'usage')
+            this.displayedColumns.splice(4, 0, 'usage');
         }
 
-        this.userHasUpdateAuthorization = this.deviceInstancesService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.deviceInstancesService.userHasUpdateAuthorization();
         if (this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
 
-        this.userHasDeleteAuthorization = this.deviceInstancesService.userHasDeleteAuthorization()
+        this.userHasDeleteAuthorization = this.deviceInstancesService.userHasDeleteAuthorization();
         if (this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
 
         if (this.deviceTypesService.userHasReadAuthorization()) {
-            this.displayedColumns.splice(4, 0, 'device_type')
+            this.displayedColumns.splice(4, 0, 'device_type');
         }
 
         if (this.deviceInstancesService.userHasCreateAuthorization()) {
-            this.displayedColumns.push("duplicate")
+            this.displayedColumns.push('duplicate');
         }
     }
 
@@ -149,10 +149,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active
+        this.sortBy = $event.active;
 
         if (this.sortBy == 'log_state') {
-            this.sortBy = "annotations.connected"
+            this.sortBy = 'annotations.connected';
         }
         this.sortDirection = $event.direction;
         this.reload();
@@ -164,21 +164,21 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             return this.deviceInstancesService.getDeviceInstancesByIds(this.routerDeviceIds, this.pageSize, this.offset).pipe(
                 map(result => {
                     this.setDevicesAndTotal(result);
-                    return result.result
+                    return result.result;
                 })
-            )
+            );
         }
-        return of([])
+        return of([]);
 
     }
 
     openFilterDialog() {
-        var filterSelection: FilterSelection = {
+        const filterSelection: FilterSelection = {
             connectionState: this.routerConnectionState,
             network: this.routerNetwork,
             deviceTypes: this.routerDeviceType,
             location: this.routerLocation
-        }
+        };
 
         const editDialogRef = this.dialog.open(DeviceInstancesFilterDialogComponent, {
             data: filterSelection
@@ -186,26 +186,26 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         editDialogRef.afterClosed().subscribe({
             next: (filterSelection: FilterSelection) => {
                 if (filterSelection != null) {
-                    this.routerConnectionState = filterSelection.connectionState
-                    this.routerDeviceType = filterSelection.deviceTypes
-                    this.routerNetwork = filterSelection.network
-                    this.routerLocation = filterSelection.location
+                    this.routerConnectionState = filterSelection.connectionState;
+                    this.routerDeviceType = filterSelection.deviceTypes;
+                    this.routerNetwork = filterSelection.network;
+                    this.routerLocation = filterSelection.location;
                 }
-                this.reload()
+                this.reload();
             }
-        })
+        });
     }
 
     private load(): Observable<any> {
         if (this.routerDeviceIds !== undefined) {
-            return this.loadDevicesByIds()
+            return this.loadDevicesByIds();
         } else {
             return this.deviceInstancesService
                 .getDeviceInstancesWithTotal(
                     this.pageSize,
                     this.offset,
                     this.sortBy,
-                    this.sortDirection == "desc",
+                    this.sortDirection == 'desc',
                     this.searchText,
                     this.routerLocation,
                     this.routerNetwork,
@@ -215,11 +215,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                 .pipe(
                     map((deviceInstancesWithTotal: DeviceInstancesTotalModel) => {
                         this.setDevicesAndTotal(deviceInstancesWithTotal);
-                        return deviceInstancesWithTotal
+                        return deviceInstancesWithTotal;
                     }),
                     map(deviceInstancesWithTotal => {
                         if(this.userHasReadDeviceUsageAuthorization) {
-                            this.exportDataService.getTimescaleDeviceUsage(deviceInstancesWithTotal.result.map(di => di.id)).subscribe(r => this.usage.push(...r))
+                            this.exportDataService.getTimescaleDeviceUsage(deviceInstancesWithTotal.result.map(di => di.id)).subscribe(r => this.usage.push(...r));
                         }
                     })
                 );
@@ -227,8 +227,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     private setDevicesAndTotal(result: DeviceInstancesTotalModel) {
-        this.dataSource.data = result.result
-        this.totalCount = result.total
+        this.dataSource.data = result.result;
+        this.totalCount = result.total;
     }
 
     reload() {
@@ -241,9 +241,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         forkJoin(this.load()).subscribe({
             next: (_) => this.ready = true,
             error: (err) => {
-                console.log(err)
+                console.log(err);
             }
-        })
+        });
     }
 
     showInfoOfDevice(device: DeviceInstancesModel): void {
@@ -287,20 +287,20 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             if (navigation.extras.state !== undefined) {
                 const state = navigation.extras.state as DeviceInstancesRouterState;
                 switch (state.type) {
-                    case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
-                        this.routerDeviceType = [(state.value as DeviceTypeBaseModel).id];
-                        break;
-                    case DeviceInstancesRouterStateTypesEnum.NETWORK:
-                        this.routerNetwork = (state.value as NetworksModel).id;
-                        break;
-                    case DeviceInstancesRouterStateTypesEnum.LOCATION:
-                        this.routerLocation = (state.value as LocationModel).id;
-                        break;
-                    case DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP:
-                        this.routerDeviceIds = state.value as string[];
-                        break;
-                    case DeviceInstancesRouterStateTypesEnum.CONNECTION_STATE:
-                        this.routerConnectionState = state.value  
+                case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
+                    this.routerDeviceType = [(state.value as DeviceTypeBaseModel).id];
+                    break;
+                case DeviceInstancesRouterStateTypesEnum.NETWORK:
+                    this.routerNetwork = (state.value as NetworksModel).id;
+                    break;
+                case DeviceInstancesRouterStateTypesEnum.LOCATION:
+                    this.routerLocation = (state.value as LocationModel).id;
+                    break;
+                case DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP:
+                    this.routerDeviceIds = state.value as string[];
+                    break;
+                case DeviceInstancesRouterStateTypesEnum.CONNECTION_STATE:
+                    this.routerConnectionState = state.value;
                 }
             }
         }
@@ -355,22 +355,24 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     formatBytes(bytes: number, decimals = 2) {
-        if (!+bytes) return '0 Bytes'
+        if (!+bytes) {
+            return '0 Bytes';
+        }
 
-        const k = 1024
-        const dm = decimals < 0 ? 0 : decimals
-        const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
 
-        const i = Math.floor(Math.log(bytes) / Math.log(k))
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
     }
 
     getUsageTooltip(d: DeviceInstancesModel): string {
         const usage = this.getUsage(d);
-        if (d === undefined) { 
-            return ""; 
+        if (d === undefined) {
+            return '';
         }
-        return this.formatBytes(usage?.bytesPerDay || 0) + '/day, ' + this.formatBytes((usage?.bytesPerDay || 0) * 30) + '/month'
+        return this.formatBytes(usage?.bytesPerDay || 0) + '/day, ' + this.formatBytes((usage?.bytesPerDay || 0) * 30) + '/month';
     }
 }

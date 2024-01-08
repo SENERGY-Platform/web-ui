@@ -41,7 +41,7 @@ export class NotificationService implements OnDestroy {
 
     private webSocketSubject: WebSocketSubject<any> | undefined;
     private notifications: NotificationModel[] = [];
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
         private errorHandlerService: ErrorHandlerService,
@@ -51,7 +51,7 @@ export class NotificationService implements OnDestroy {
         private ladonService: LadonService
     ) {
         this.initWs();
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.notificationsUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.notificationsUrl);
     }
 
     ngOnDestroy() {
@@ -179,6 +179,6 @@ export class NotificationService implements OnDestroy {
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]      
+        return this.authorizations['GET'];
     }
 }

@@ -35,8 +35,8 @@ import { BudgetComponent } from './budget/budget.component';
 import { BudgetCreateEditComponent } from './budget/budget-create-edit/budget-create-edit.component';
 import {
     TimescaleRulesCreateEditTemplateComponent
-} from "./timescale-rules/timescale-rules-create-edit-template/timescale-rules-create-edit-template.component";
-import {MatExpansionModule} from "@angular/material/expansion";
+} from './timescale-rules/timescale-rules-create-edit-template/timescale-rules-create-edit-template.component';
+import {MatExpansionModule} from '@angular/material/expansion';
 
 const listRules: Route[] = [
     {

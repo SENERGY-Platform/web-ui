@@ -32,14 +32,14 @@ export class SwaggerService {
     private invalidAfter: Date = new Date();
 
     public baseUrl: string = environment.swaggerUrl;
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
-        private http: HttpClient, 
+        private http: HttpClient,
         private ladonService: LadonService
     ) {
         // Load in constructor to only load permissions once and not for each request as services are singletons in root
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.swaggerUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.swaggerUrl);
     }
 
     public getSwagger(): Observable<SwaggerModel[]> {
@@ -89,6 +89,6 @@ export class SwaggerService {
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]   
+        return this.authorizations['GET'];
     }
 }

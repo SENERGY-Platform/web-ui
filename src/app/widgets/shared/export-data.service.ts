@@ -34,10 +34,10 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class ExportDataService {
-    usageAuthorizations: PermissionTestResponse
-   
+    usageAuthorizations: PermissionTestResponse;
+
     constructor(private http: HttpClient,  private ladonService: LadonService) {
-        this.usageAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.timescaleAPIURL + '/usage')
+        this.usageAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.timescaleAPIURL + '/usage');
 
     }
 
@@ -132,7 +132,7 @@ export class ExportDataService {
     }
 
     userHasUsageAuthroization(): boolean {
-        return this.usageAuthorizations["POST"]      
+        return this.usageAuthorizations['POST'];
     }
 
     getTimescaleDeviceUsage(deviceIds: string[]): Observable<{
@@ -147,8 +147,8 @@ export class ExportDataService {
             bytes: number;
             bytesPerDay: number;
         }[]>(environment.timescaleAPIURL + '/usage/devices', deviceIds).pipe(map(res => {
-            res.forEach(r => r.updateAt = new Date(r.updateAt))
+            res.forEach(r => r.updateAt = new Date(r.updateAt));
             return res;
-        }))
+        }));
     }
 }

@@ -44,18 +44,18 @@ describe('FlowRepoComponent', () => {
     const costServiceSpy: Spy<CostService> = createSpyFromClass(CostService);
     costServiceSpy.userMayGetFlowCostEstimations.and.returnValue(false);
 
-    var testFlow: FlowModel = {
+    const testFlow: FlowModel = {
         _id: 'string',
-        name: "string",
-        description: "string",
-        model: {'cells': []},
-        image: "string",
-        share: {"list": true,"read": true, "write": true},
-        userId: "string",
+        name: 'string',
+        description: 'string',
+        model: {cells: []},
+        image: 'string',
+        share: {list: true,read: true, write: true},
+        userId: 'string',
         dateCreated: 1,
         dateUpdated: 1
-    }
-    flowRepoServiceSpy.getFlows.and.returnValue(of({'flows': [testFlow]}))
+    };
+    flowRepoServiceSpy.getFlows.and.returnValue(of({flows: [testFlow]}));
 
     flowEngineServiceSpy.userHasCreateAuthorization.and.returnValue(true);
     flowEngineServiceSpy.userHasDeleteAuthorization.and.returnValue(true);
@@ -67,7 +67,7 @@ describe('FlowRepoComponent', () => {
                 imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule],
                 declarations: [FlowRepoComponent],
                 providers: [
-                    { provide: AuthorizationService, useClass: AuthorizationServiceMock }, 
+                    { provide: AuthorizationService, useClass: AuthorizationServiceMock },
                     { provide: FlowRepoService, useValue: flowRepoServiceSpy },
                     { provide: FlowEngineService, useValue: flowEngineServiceSpy },
                     { provide: CostService, useValue: costServiceSpy },
@@ -91,17 +91,17 @@ describe('FlowRepoComponent', () => {
         fixture = TestBed.createComponent(FlowRepoComponent);
         flowRepoServiceSpy.userHasDeleteAuthorization.and.returnValue(false);
         component = fixture.componentInstance;
-        component.getFlows(true)
+        component.getFlows(true);
         fixture.detectChanges();
         expect(fixture.debugElement.query(By.css('.delete-button'))).toBeNull();
-    })
+    });
 
     it('should show delete button when authorized', () => {
         fixture = TestBed.createComponent(FlowRepoComponent);
         flowRepoServiceSpy.userHasDeleteAuthorization.and.returnValue(true);
         component = fixture.componentInstance;
-        component.getFlows(true)
+        component.getFlows(true);
         fixture.detectChanges();
         expect(fixture.debugElement.query(By.css('.delete-button'))).toBeTruthy();
-    })
+    });
 });

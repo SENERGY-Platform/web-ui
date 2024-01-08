@@ -37,13 +37,13 @@ export class ImportTypesService {
     STRUCTURE = 'https://schema.org/StructuredValue';
     LIST = 'https://schema.org/ItemList';
     types: Map<string, string> = new Map();
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
-        private http: HttpClient, 
+        private http: HttpClient,
         private ladonService: LadonService
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.importRepoUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.importRepoUrl);
     }
 
     listImportTypes(
@@ -151,26 +151,26 @@ export class ImportTypesService {
     }
 
     userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]     
+        return this.authorizations['DELETE'];
     }
 
     userHasUpdateAuthorization(): boolean {
-        return this.authorizations["PUT"]      
+        return this.authorizations['PUT'];
     }
 
     userHasCreateAuthorization(): boolean {
-        return this.authorizations["POST"]   
+        return this.authorizations['POST'];
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]   
-    } 
+        return this.authorizations['GET'];
+    }
 
     getTotalCountOfTypes(searchText: string): Observable<any> {
         const options = searchText ?
-        { params: new HttpParams().set('search', searchText) } : {};
+            { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/import-types', options)
+            .get(environment.permissionSearchUrl + '/v3/total/import-types', options);
     }
 }

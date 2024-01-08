@@ -47,18 +47,18 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
     ready = false;
     offset = 0;
     totalCount = 0;
-    userHasCreateAuthorization: boolean = false
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization = false;
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<ProcessIoVariable>(true, []);
 
     dataSource = new MatTableDataSource<ProcessIoVariable>();
     displayedColumns: string[] = ['select', 'unix_timestamp_in_s', 'key', 'process_instance_id', 'process_definition_id', 'value'];
-    sortBy: string = "unix_timestamp_in_s"
-    sortDirection: SortDirection = "desc"
-    
+    sortBy = 'unix_timestamp_in_s';
+    sortDirection: SortDirection = 'desc';
+
     private searchSub: Subscription = new Subscription();
 
     constructor(
@@ -69,16 +69,16 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
         private searchbarService: SearchbarService,
         public utilsService: UtilService
     ) {
-        this.userHasCreateAuthorization = this.processIoService.userHasCreateAuthorization()
-        
-        this.userHasUpdateAuthorization = this.processIoService.userHasUpdateAuthorization()
+        this.userHasCreateAuthorization = this.processIoService.userHasCreateAuthorization();
+
+        this.userHasUpdateAuthorization = this.processIoService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
 
-        this.userHasDeleteAuthorization = this.processIoService.userHasDeleteAuthorization()
+        this.userHasDeleteAuthorization = this.processIoService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
 
         this.updateTotal();
@@ -94,14 +94,14 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.loadVariables();
         });
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active 
+        this.sortBy = $event.active;
         this.sortDirection = $event.direction;
         this.reload();
     }
@@ -134,7 +134,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
 
     loadVariables(){
         this.ready = false;
-        var sort = this.sortBy + '.' + this.sortDirection 
+        const sort = this.sortBy + '.' + this.sortDirection;
         this.processIoService.listVariables(this.pageSize, this.offset, sort, this.keyRegex).subscribe(value => {
             if(value){
                 this.dataSource.data = value || [];
@@ -248,29 +248,29 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
 
     deleteMultipleItems(): void {
         const deletionJobs: Observable<any>[] = [];
-        var text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' processes' : ' process')
+        const text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' processes' : ' process');
 
         this.dialogsService
-        .openDeleteDialog(text)
-        .afterClosed()
-        .subscribe((deletePipelines: boolean) => {
-            if (deletePipelines) {
-                this.ready = false;
-                this.selection.selected.forEach((variable: ProcessIoVariable) => {
-                    deletionJobs.push(this.processIoService.remove(variable.key))    
-                });
-            }
-            
-            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                if (ok) {
-                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});            
-                } else {
-                    this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+            .openDeleteDialog(text)
+            .afterClosed()
+            .subscribe((deletePipelines: boolean) => {
+                if (deletePipelines) {
+                    this.ready = false;
+                    this.selection.selected.forEach((variable: ProcessIoVariable) => {
+                        deletionJobs.push(this.processIoService.remove(variable.key));
+                    });
                 }
-                this.reload()
-            })
-        });
+
+                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                    }
+                    this.reload();
+                });
+            });
     }
 
 

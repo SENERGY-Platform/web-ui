@@ -42,23 +42,23 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./device-classes.component.css'],
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name']
+    displayedColumns = ['select', 'name'];
     pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<DeviceClassesPermSearchModel>();
     selection = new SelectionModel<DeviceClassesPermSearchModel>(true, []);
-    totalCount = 200
+    totalCount = 200;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     userIsAdmin = false;
-    searchText: string = ""
+    searchText = '';
     offset = 0;
     private searchSub: Subscription = new Subscription();
-    sortBy: string = "name"
-    sortDirection: SortDirection = "asc"
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false 
-    
+    sortBy = 'name';
+    sortDirection: SortDirection = 'asc';
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
+    userHasCreateAuthorization = false;
+
     constructor(
         private dialog: MatDialog,
         private responsiveService: ResponsiveService,
@@ -79,17 +79,17 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     getTotalCounts() {
         return this.deviceClassesService.getTotalCountOfDevicesClasses(this.searchText).pipe(
             map((totalCount: number) => {
-                this.totalCount = totalCount
-                return totalCount
+                this.totalCount = totalCount;
+                return totalCount;
             })
-        )
+        );
     }
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getDeviceClasses().subscribe()
+            this.getDeviceClasses().subscribe();
         });
     }
 
@@ -98,17 +98,17 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.userHasUpdateAuthorization = this.deviceClassesService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.deviceClassesService.userHasUpdateAuthorization();
         if( this.userHasUpdateAuthorization) {
-             this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
-        
-        this.userHasDeleteAuthorization = this.deviceClassesService.userHasDeleteAuthorization()
+
+        this.userHasDeleteAuthorization = this.deviceClassesService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
-    
-        this.userHasCreateAuthorization = this.deviceClassesService.userHasDeleteAuthorization()
+
+        this.userHasCreateAuthorization = this.deviceClassesService.userHasDeleteAuthorization();
     }
 
     private initSearch() {
@@ -151,7 +151,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
                         } else {
                             this.snackBar.open('Error while deleting the device class!', 'close', { panelClass: 'snack-bar-error' });
                         }
-                        this.reload()
+                        this.reload();
                     });
                 }
             });
@@ -185,9 +185,9 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
             .pipe(
                 map((deviceClasses: DeviceClassesPermSearchModel[]) => {
                     this.dataSource = new MatTableDataSource(deviceClasses);
-                    return deviceClasses
+                    return deviceClasses;
                 })
-            )
+            );
     }
 
     reload() {
@@ -195,12 +195,14 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         this.pageSize = 20;
         this.ready = false;
         this.selectionClear();
-        
-        forkJoin([this.getDeviceClasses(), this.getTotalCounts()]).subscribe(_ => {this.ready = true;})       
+
+        forkJoin([this.getDeviceClasses(), this.getTotalCounts()]).subscribe(_ => {
+            this.ready = true;
+        });
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active 
+        this.sortBy = $event.active;
         this.sortDirection = $event.direction;
         this.reload();
     }
@@ -211,7 +213,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         } else {
             this.snackBar.open('Device class ' + text + 'ed successfully.', undefined, { duration: 2000 });
         }
-        this.reload()
+        this.reload();
     }
 
     isAllSelected() {
@@ -242,19 +244,19 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
                 if (deleteDeviceClass) {
                     this.ready = false;
                     this.selection.selected.forEach((deviceClass: DeviceClassesPermSearchModel) => {
-                        deletionJobs.push(this.deviceClassesService.deleteDeviceClasses(deviceClass.id))
-                    })
+                        deletionJobs.push(this.deviceClassesService.deleteDeviceClasses(deviceClass.id));
+                    });
                 }
-                
+
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
                     if (ok) {
-                        this.snackBar.open('Device classes deleted successfully.', undefined, {duration: 2000});            
+                        this.snackBar.open('Device classes deleted successfully.', undefined, {duration: 2000});
                     } else {
                         this.snackBar.open('Error while deleting device classes!', 'close', {panelClass: 'snack-bar-error'});
                     }
-                    this.reload()
-                })
+                    this.reload();
+                });
             });
     }
 }

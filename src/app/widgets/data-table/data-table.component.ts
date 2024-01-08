@@ -90,30 +90,30 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         switch (this.widget.properties.dataTable?.order) {
-            case DataTableOrderEnum.AlphabeticallyAsc:
-                this.matSortActive = 'name';
-                this.matSortDirection = 'asc';
-                break;
-            case DataTableOrderEnum.AlphabeticallyDesc:
-                this.matSortActive = 'name';
-                this.matSortDirection = 'desc';
-                break;
-            case DataTableOrderEnum.ValueAsc:
-                this.matSortActive = 'value';
-                this.matSortDirection = 'asc';
-                break;
-            case DataTableOrderEnum.ValueDesc:
-                this.matSortActive = 'value';
-                this.matSortDirection = 'desc';
-                break;
-            case DataTableOrderEnum.TimeDesc:
-                this.matSortActive = 'time';
-                this.matSortDirection = 'desc';
-                break;
-            case DataTableOrderEnum.TimeAsc:
-                this.matSortActive = 'time';
-                this.matSortDirection = 'asc';
-                break;
+        case DataTableOrderEnum.AlphabeticallyAsc:
+            this.matSortActive = 'name';
+            this.matSortDirection = 'asc';
+            break;
+        case DataTableOrderEnum.AlphabeticallyDesc:
+            this.matSortActive = 'name';
+            this.matSortDirection = 'desc';
+            break;
+        case DataTableOrderEnum.ValueAsc:
+            this.matSortActive = 'value';
+            this.matSortDirection = 'asc';
+            break;
+        case DataTableOrderEnum.ValueDesc:
+            this.matSortActive = 'value';
+            this.matSortDirection = 'desc';
+            break;
+        case DataTableOrderEnum.TimeDesc:
+            this.matSortActive = 'time';
+            this.matSortDirection = 'desc';
+            break;
+        case DataTableOrderEnum.TimeAsc:
+            this.matSortActive = 'time';
+            this.matSortDirection = 'asc';
+            break;
         }
         this.update();
         this.checkConfigured();
@@ -142,27 +142,27 @@ export class DataTableComponent implements OnInit, OnDestroy {
             return;
         }
         switch (event.active) {
-            case 'value':
-                if (event.direction === 'asc') {
-                    this.widget.properties.dataTable.order = DataTableOrderEnum.ValueAsc;
-                } else {
-                    this.widget.properties.dataTable.order = DataTableOrderEnum.ValueDesc;
-                }
-                break;
-            case 'name':
-                if (event.direction === 'asc') {
-                    this.widget.properties.dataTable.order = DataTableOrderEnum.AlphabeticallyAsc;
-                } else {
-                    this.widget.properties.dataTable.order = DataTableOrderEnum.AlphabeticallyDesc;
-                }
-                break;
-            case 'time':
-                if (event.direction === 'asc') {
-                    this.widget.properties.dataTable.order = DataTableOrderEnum.TimeAsc;
-                } else {
-                    this.widget.properties.dataTable.order = DataTableOrderEnum.TimeDesc;
-                }
-                break;
+        case 'value':
+            if (event.direction === 'asc') {
+                this.widget.properties.dataTable.order = DataTableOrderEnum.ValueAsc;
+            } else {
+                this.widget.properties.dataTable.order = DataTableOrderEnum.ValueDesc;
+            }
+            break;
+        case 'name':
+            if (event.direction === 'asc') {
+                this.widget.properties.dataTable.order = DataTableOrderEnum.AlphabeticallyAsc;
+            } else {
+                this.widget.properties.dataTable.order = DataTableOrderEnum.AlphabeticallyDesc;
+            }
+            break;
+        case 'time':
+            if (event.direction === 'asc') {
+                this.widget.properties.dataTable.order = DataTableOrderEnum.TimeAsc;
+            } else {
+                this.widget.properties.dataTable.order = DataTableOrderEnum.TimeDesc;
+            }
+            break;
         }
         this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties).subscribe();
         this.orderItems();
@@ -265,7 +265,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                         res.push([]);
                                     }
                                     values.forEach((_, elementIndex) => {
-                                        let dataRows = values[elementIndex].data;
+                                        const dataRows = values[elementIndex].data;
                                         if (dataRows === null) {
                                             res[values[elementIndex].requestIndex].push({ time: '', value: null });
                                         } else {
@@ -281,7 +281,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                             r.slice(1).forEach(s => {
                                                 const v = (r[0].value as number) + (s.value as number);
                                                 r[0].value = v;
-                                            })
+                                            });
                                         }
 
                                         res2.push(...(r.slice(0, this.widget.properties.dataTable?.valuesPerElement || 1)));
@@ -298,11 +298,11 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                 resultIndex = Math.floor(resultIndex / (this.widget.properties.dataTable?.valuesPerElement || 1));
                                 let elementIndex = -1;
                                 switch (result.source) {
-                                    case 'influx':
-                                        elementIndex = influxResultMapper[resultIndex];
-                                        break;
-                                    case 'timescale':
-                                        elementIndex = timescaleResultMapper[resultIndex];
+                                case 'influx':
+                                    elementIndex = influxResultMapper[resultIndex];
+                                    break;
+                                case 'timescale':
+                                    elementIndex = timescaleResultMapper[resultIndex];
                                 }
                                 let v = pair.value;
                                 if (v === true || v === false) {
@@ -361,27 +361,27 @@ export class DataTableComponent implements OnInit, OnDestroy {
         if (this.widget.properties.dataTable?.order !== DataTableOrderEnum.Default) {
             this.items.sort((a, b) => {
                 switch (this.widget.properties.dataTable?.order) {
-                    case DataTableOrderEnum.AlphabeticallyAsc:
-                        return a.name.charCodeAt(0) - b.name.charCodeAt(0);
-                    case DataTableOrderEnum.AlphabeticallyDesc:
-                        return b.name.charCodeAt(0) - a.name.charCodeAt(0);
-                    case DataTableOrderEnum.ValueAsc:
-                        if (typeof a.value === 'string' || typeof b.value === 'string') {
-                            return ('' + a.value).localeCompare('' + b.value);
-                        }
-                        return DataTableComponent.parseNumber(a, true) - DataTableComponent.parseNumber(b, true);
-                    case DataTableOrderEnum.ValueDesc:
-                        if (typeof a.value === 'string' || typeof b.value === 'string') {
-                            return ('' + b.value).localeCompare('' + a.value);
-                        }
-                        return DataTableComponent.parseNumber(b, false) - DataTableComponent.parseNumber(a, false);
-                    case DataTableOrderEnum.TimeDesc:
-                        return new Date(b.time || '').valueOf() - new Date(a.time || '').valueOf();
-                    case DataTableOrderEnum.TimeAsc:
-                        return new Date(a.time || '').valueOf() - new Date(b.time || '').valueOf();
-                    default:
-                        console.error('DataTableComponent:orderItems: unknown order type');
-                        return 0;
+                case DataTableOrderEnum.AlphabeticallyAsc:
+                    return a.name.charCodeAt(0) - b.name.charCodeAt(0);
+                case DataTableOrderEnum.AlphabeticallyDesc:
+                    return b.name.charCodeAt(0) - a.name.charCodeAt(0);
+                case DataTableOrderEnum.ValueAsc:
+                    if (typeof a.value === 'string' || typeof b.value === 'string') {
+                        return ('' + a.value).localeCompare('' + b.value);
+                    }
+                    return DataTableComponent.parseNumber(a, true) - DataTableComponent.parseNumber(b, true);
+                case DataTableOrderEnum.ValueDesc:
+                    if (typeof a.value === 'string' || typeof b.value === 'string') {
+                        return ('' + b.value).localeCompare('' + a.value);
+                    }
+                    return DataTableComponent.parseNumber(b, false) - DataTableComponent.parseNumber(a, false);
+                case DataTableOrderEnum.TimeDesc:
+                    return new Date(b.time || '').valueOf() - new Date(a.time || '').valueOf();
+                case DataTableOrderEnum.TimeAsc:
+                    return new Date(a.time || '').valueOf() - new Date(b.time || '').valueOf();
+                default:
+                    console.error('DataTableComponent:orderItems: unknown order type');
+                    return 0;
                 }
             });
         }
@@ -395,28 +395,28 @@ export class DataTableComponent implements OnInit, OnDestroy {
         if (convertRules) {
             for (let i = 0; i < convertRules.length; i++) {
                 switch (type) {
-                    case ExportValueTypes.STRING: {
-                        if (status === convertRules[i].status) {
+                case ExportValueTypes.STRING: {
+                    if (status === convertRules[i].status) {
+                        return { icon: convertRules[i].icon, color: convertRules[i].color };
+                    }
+                    break;
+                }
+                case ExportValueTypes.BOOLEAN: {
+                    try {
+                        if (status === JSON.parse(convertRules[i].status)) {
                             return { icon: convertRules[i].icon, color: convertRules[i].color };
                         }
-                        break;
+                    } catch (_) {
+                    } // happens when rule is not parsable, no problem
+                    break;
+                }
+                case ExportValueTypes.FLOAT:
+                case ExportValueTypes.INTEGER: {
+                    if (status === parseInt(convertRules[i].status, 10)) {
+                        return { icon: convertRules[i].icon, color: convertRules[i].color };
                     }
-                    case ExportValueTypes.BOOLEAN: {
-                        try {
-                            if (status === JSON.parse(convertRules[i].status)) {
-                                return { icon: convertRules[i].icon, color: convertRules[i].color };
-                            }
-                        } catch (_) {
-                        } // happens when rule is not parsable, no problem
-                        break;
-                    }
-                    case ExportValueTypes.FLOAT:
-                    case ExportValueTypes.INTEGER: {
-                        if (status === parseInt(convertRules[i].status, 10)) {
-                            return { icon: convertRules[i].icon, color: convertRules[i].color };
-                        }
-                        break;
-                    }
+                    break;
+                }
                 }
             }
         }

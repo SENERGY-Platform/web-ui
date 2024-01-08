@@ -42,12 +42,12 @@ describe('DeviceInstancesComponent', () => {
     deviceInstanceServiceSpy.userHasReadAuthorization.and.returnValue(true);
     deviceInstanceServiceSpy.userHasCreateAuthorization.and.returnValue(true);
     deviceInstanceServiceSpy.getTotalCountOfDevices.and.returnValue(of(10));
-    deviceInstanceServiceSpy.listUsedDeviceTypeIds.and.returnValue(of())
-    const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass(DeviceTypeService)
-    deviceTypeServiceSpy.userHasPermSearchAuthorization.and.returnValue(true)
+    deviceInstanceServiceSpy.listUsedDeviceTypeIds.and.returnValue(of());
+    const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass(DeviceTypeService);
+    deviceTypeServiceSpy.userHasPermSearchAuthorization.and.returnValue(true);
 
     const exportDataServiceSpy: Spy<ExportDataService> = createSpyFromClass(ExportDataService);
-    exportDataServiceSpy.userHasUsageAuthroization.and.returnValue(false)
+    exportDataServiceSpy.userHasUsageAuthroization.and.returnValue(false);
 
     beforeEach(
         waitForAsync(() => {

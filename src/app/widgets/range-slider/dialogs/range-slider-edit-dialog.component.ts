@@ -56,19 +56,19 @@ export class RangeSliderEditDialogComponent implements OnInit {
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
 
-    userHasUpdateNameAuthorization: boolean = false
-    userHasUpdatePropertiesAuthorization: boolean = false 
+    userHasUpdateNameAuthorization = false;
+    userHasUpdatePropertiesAuthorization = false;
 
     constructor(
         private dialogRef: MatDialogRef<RangeSliderEditDialogComponent>,
         private dashboardService: DashboardService,
         private deploymentsService: DeploymentsService,
         private formBuilder: UntypedFormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: { 
-            dashboardId: string; 
-            widgetId: string, 
+        @Inject(MAT_DIALOG_DATA) data: {
+            dashboardId: string;
+            widgetId: string;
             userHasUpdateNameAuthorization: boolean;
-            userHasUpdatePropertiesAuthorization: boolean 
+            userHasUpdatePropertiesAuthorization: boolean;
         },
     ) {
         this.dashboardId = data.dashboardId;
@@ -113,7 +113,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.widget.name)
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.widget.name);
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
@@ -123,25 +123,25 @@ export class RangeSliderEditDialogComponent implements OnInit {
         this.widget.properties.selectedMaxValue = this.formGroup.get('maxValue')?.value;
         this.widget.properties.selectedUnit = this.formGroup.get('unit')?.value;
         this.widget.properties.selectedParameterModel = this.parametersMap.get(this.formGroup.get('parameter')?.value);
-       
-        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
     }
 
     save(): void {
-        var obs = []
+        const obs = [];
         if(this.userHasUpdateNameAuthorization) {
-            obs.push(this.updateName())
+            obs.push(this.updateName());
         }
         if(this.userHasUpdatePropertiesAuthorization) {
-            obs.push(this.updateProperties())
-        }        
-        
+            obs.push(this.updateProperties());
+        }
+
         forkJoin(obs).subscribe(responses => {
-            var errorOccured = responses.find((response) => response.message != "OK")
+            const errorOccured = responses.find((response) => response.message != 'OK');
             if(!errorOccured) {
                 this.dialogRef.close(this.widget);
             }
-        })
+        });
     }
 
     initDeployments() {

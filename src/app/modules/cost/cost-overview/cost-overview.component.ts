@@ -25,66 +25,66 @@ import { MatDatepicker } from '@angular/material/datepicker';
 import { BillingInformationModel } from '../shared/billing.model';
 
 @Component({
-  selector: 'senergy-cost-overview',
-  templateUrl: './cost-overview.component.html',
-  styleUrls: ['./cost-overview.component.css']
+    selector: 'senergy-cost-overview',
+    templateUrl: './cost-overview.component.html',
+    styleUrls: ['./cost-overview.component.css']
 })
 export class CostOverviewComponent implements OnInit {
-  dataReady = false;
-  tree: Map<string, CostModel> | undefined;
-  dates: Date[] = [];
-  options: BillingInformationModel[] = [];
-  date = new FormControl(new Date());
-  now = new Date();
-  selectedBill = new FormControl();
+    dataReady = false;
+    tree: Map<string, CostModel> | undefined;
+    dates: Date[] = [];
+    options: BillingInformationModel[] = [];
+    date = new FormControl(new Date());
+    now = new Date();
+    selectedBill = new FormControl();
 
-  constructor(private costService: CostService, private billingService: BillingService) {
+    constructor(private costService: CostService, private billingService: BillingService) {
 
-  }
-  ngOnInit(): void {
-    const obs: Observable<any>[] = [];
-    obs.push(
-      this.costService.getTree().pipe(map((res: Map<string, CostModel>) => {
-        this.tree = res;
-      })));
-
-    if (this.billingService.userHasReadAuthorization()) {
-      obs.push(
-        this.billingService.getAvailable().pipe(map((res) => {
-          this.dates = res;
-        })));
     }
+    ngOnInit(): void {
+        const obs: Observable<any>[] = [];
+        obs.push(
+            this.costService.getTree().pipe(map((res: Map<string, CostModel>) => {
+                this.tree = res;
+            })));
 
-    forkJoin(obs).subscribe(_ => this.dataReady = true);
-    this.selectedBill.valueChanges.subscribe(tree => this.tree = tree);
-  }
-
-  originalOrder = (_: KeyValue<string, any>, __: KeyValue<string, any>): number => 0;
-
-  sum(m: CostEntryModel): number {
-    return m.cpu + m.ram + m.storage;
-  }
-
-  setMonthAndYear($event: Date, datepicker: MatDatepicker<any>) {
-    datepicker.close();
-    const now = new Date();
-    if (now.getFullYear() === $event.getFullYear() && now.getMonth() === $event.getMonth()) {
-      this.costService.getTree().subscribe((res: Map<string, CostModel>) => {
-        this.date.setValue(now);
-        this.options = [];
-        this.tree = res;
-      });
-    } else {
-      this.billingService.getForMonth($event.getFullYear(), $event.getMonth() + 1).subscribe((res => {
-        this.date.setValue($event);
-        this.options = res;
-        if (this.options.length === 0) {
-          this.tree = undefined;
-        } else {
-          this.selectedBill.setValue(this.options[this.options.length - 1].tree);
+        if (this.billingService.userHasReadAuthorization()) {
+            obs.push(
+                this.billingService.getAvailable().pipe(map((res) => {
+                    this.dates = res;
+                })));
         }
-      }));
+
+        forkJoin(obs).subscribe(_ => this.dataReady = true);
+        this.selectedBill.valueChanges.subscribe(tree => this.tree = tree);
     }
-  }
+
+    originalOrder = (_: KeyValue<string, any>, __: KeyValue<string, any>): number => 0;
+
+    sum(m: CostEntryModel): number {
+        return m.cpu + m.ram + m.storage;
+    }
+
+    setMonthAndYear($event: Date, datepicker: MatDatepicker<any>) {
+        datepicker.close();
+        const now = new Date();
+        if (now.getFullYear() === $event.getFullYear() && now.getMonth() === $event.getMonth()) {
+            this.costService.getTree().subscribe((res: Map<string, CostModel>) => {
+                this.date.setValue(now);
+                this.options = [];
+                this.tree = res;
+            });
+        } else {
+            this.billingService.getForMonth($event.getFullYear(), $event.getMonth() + 1).subscribe((res => {
+                this.date.setValue($event);
+                this.options = res;
+                if (this.options.length === 0) {
+                    this.tree = undefined;
+                } else {
+                    this.selectedBill.setValue(this.options[this.options.length - 1].tree);
+                }
+            }));
+        }
+    }
 
 }

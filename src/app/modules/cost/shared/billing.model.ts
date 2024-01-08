@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { CostModel } from "./cost.model";
+import { CostModel } from './cost.model';
 
 export interface BillingInformationModel {
-	from: Date,
-	to: Date,
-	created_at: Date,
-	tree: Map<string, CostModel>
+	from: Date;
+	to: Date;
+	created_at: Date;
+	tree: Map<string, CostModel>;
 }

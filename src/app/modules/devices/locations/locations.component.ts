@@ -38,7 +38,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./locations.component.css'],
 })
 export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
-    displayedColumns = ['select', 'name', 'show']
+    displayedColumns = ['select', 'name', 'show'];
     pageSize = 20;
     ready = false;
     instances = [];
@@ -48,12 +48,12 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     selection = new SelectionModel<LocationModel>(true, []);
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     private searchSub: Subscription = new Subscription();
-    searchText: string = ""
-    sortBy: string = "name"
-    sortDirection: SortDirection = "asc"    
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false
+    searchText = '';
+    sortBy = 'name';
+    sortDirection: SortDirection = 'asc';
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
+    userHasCreateAuthorization = false;
 
     constructor(
         private locationsService: LocationsService,
@@ -65,7 +65,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     ngOnInit() {
         this.initSearch();
-        this.checkAuthorization()
+        this.checkAuthorization();
     }
 
     ngOnDestroy() {
@@ -75,33 +75,33 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     getTotalCounts(): Observable<number> {
         return this.locationsService.getTotalCountOfLocations(this.searchText).pipe(
             map((totalCount: number) => this.totalCount = totalCount)
-        )
+        );
     }
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getLocations().subscribe()
+            this.getLocations().subscribe();
         });
     }
 
     checkAuthorization() {
-        this.userHasCreateAuthorization = this.locationsService.userHasCreateAuthorization()
+        this.userHasCreateAuthorization = this.locationsService.userHasCreateAuthorization();
 
-        this.userHasUpdateAuthorization = this.locationsService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.locationsService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
-    
-        this.userHasDeleteAuthorization = this.locationsService.userHasDeleteAuthorization()
+
+        this.userHasDeleteAuthorization = this.locationsService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active 
+        this.sortBy = $event.active;
         this.sortDirection = $event.direction;
         this.reload();
     }
@@ -156,9 +156,9 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
             .pipe(
                 map((locations: LocationModel[]) => {
                     this.dataSource.data = locations;
-                    return locations
+                    return locations;
                 })
-            )
+            );
     }
 
     private reloadLocations() {
@@ -171,11 +171,11 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.offset = 0;
         this.pageSize = 20;
         this.ready = false;
-        this.selectionClear()
+        this.selectionClear();
 
         forkJoin([this.getLocations(), this.getTotalCounts()]).subscribe(_ => {
             this.ready = true;
-        })
+        });
     }
 
     isAllSelected() {
@@ -200,25 +200,25 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         const deletionJobs: Observable<any>[] = [];
 
         this.dialogsService
-        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' locations' : ' location'))
-        .afterClosed()
-        .subscribe((deleteConcepts: boolean) => {
-            if (deleteConcepts) {
-                this.ready = false;
-                this.selection.selected.forEach((location: LocationModel) => {
-                    deletionJobs.push(this.locationsService.deleteLocation(location.id));
-                });
-            }
-            
-            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                if (ok) {
-                    this.snackBar.open('Locations deleted successfully.', undefined, {duration: 2000});            
-                } else {
-                    this.snackBar.open('Error while deleting locations!', 'close', {panelClass: 'snack-bar-error'});
+            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' locations' : ' location'))
+            .afterClosed()
+            .subscribe((deleteConcepts: boolean) => {
+                if (deleteConcepts) {
+                    this.ready = false;
+                    this.selection.selected.forEach((location: LocationModel) => {
+                        deletionJobs.push(this.locationsService.deleteLocation(location.id));
+                    });
                 }
-                this.reload()
-            })
-        });
+
+                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open('Locations deleted successfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while deleting locations!', 'close', {panelClass: 'snack-bar-error'});
+                    }
+                    this.reload();
+                });
+            });
     }
 }

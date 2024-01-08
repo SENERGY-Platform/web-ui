@@ -16,10 +16,10 @@
 
 
 import {Component, Inject} from '@angular/core';
-import {BudgetModel} from "../shared/budget.model";
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {BudgetService} from "../shared/budget.service";
+import {BudgetModel} from '../shared/budget.model';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {BudgetService} from '../shared/budget.service';
 
 @Component({
     selector: 'senergy-budget-create-edit',

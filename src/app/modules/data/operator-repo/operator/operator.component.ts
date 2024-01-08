@@ -72,7 +72,7 @@ export class OperatorComponent implements OnInit {
     }
 
     deleteInput(input: IOModel) {
-        console.log(input)
+        console.log(input);
         if (this.operator.inputs !== undefined) {
             const index = this.operator.inputs.indexOf(input);
             if (index > -1) {

@@ -13,32 +13,32 @@ import { DeviceConnectionState, DeviceInstancesRouterStateTabEnum, FilterSelecti
 import { DeviceInstancesService } from '../../shared/device-instances.service';
 
 @Component({
-  selector: 'app-device-instances-filter-dialog',
-  templateUrl: './device-instances-filter-dialog.component.html',
-  styleUrls: ['./device-instances-filter-dialog.component.css']
+    selector: 'app-device-instances-filter-dialog',
+    templateUrl: './device-instances-filter-dialog.component.html',
+    styleUrls: ['./device-instances-filter-dialog.component.css']
 })
 export class DeviceInstancesFilterDialogComponent implements OnInit {
-  sortDirection: SortDirection = "asc"  
-  locationOptions: LocationModel[] = [];
-  networkOptions: NetworksModel[] = [];
-  deviceTypeOptions: DeviceTypeBaseModel[] = [];
-  connectionOptions: DeviceConnectionState[] = [
-    {"name": "connected", "value": DeviceInstancesRouterStateTabEnum.ONLINE}, 
-    {"name": "unconnected", "value": DeviceInstancesRouterStateTabEnum.OFFLINE},
-    {"name": "unknown", "value": DeviceInstancesRouterStateTabEnum.UNKNOWN}
-  ]
+    sortDirection: SortDirection = 'asc';
+    locationOptions: LocationModel[] = [];
+    networkOptions: NetworksModel[] = [];
+    deviceTypeOptions: DeviceTypeBaseModel[] = [];
+    connectionOptions: DeviceConnectionState[] = [
+        {name: 'connected', value: DeviceInstancesRouterStateTabEnum.ONLINE},
+        {name: 'unconnected', value: DeviceInstancesRouterStateTabEnum.OFFLINE},
+        {name: 'unknown', value: DeviceInstancesRouterStateTabEnum.UNKNOWN}
+    ];
 
-  form = new FormGroup({
-    location: new FormControl<string|undefined>(undefined),
-    network: new FormControl<string|undefined>(undefined),
-    deviceTypes: new FormControl<string[]>([]),
-    connectionState: new FormControl<DeviceInstancesRouterStateTabEnum|undefined>(DeviceInstancesRouterStateTabEnum.ALL),
-  });
+    form = new FormGroup({
+        location: new FormControl<string|undefined>(undefined),
+        network: new FormControl<string|undefined>(undefined),
+        deviceTypes: new FormControl<string[]>([]),
+        connectionState: new FormControl<DeviceInstancesRouterStateTabEnum|undefined>(DeviceInstancesRouterStateTabEnum.ALL),
+    });
 
-  savedFilterSelection!: FilterSelection | undefined
-  ready: boolean = false 
+    savedFilterSelection!: FilterSelection | undefined;
+    ready = false;
 
-  constructor(
+    constructor(
     private dialogRef: MatDialogRef<DeviceInstancesFilterDialogComponent>,
     @Inject(MAT_DIALOG_DATA) data: FilterSelection | undefined,
     private locationsService: LocationsService,
@@ -47,90 +47,88 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
     private deviceInstancesService: DeviceInstancesService,
     private fb: UntypedFormBuilder,
     ) {
-      this.savedFilterSelection = data
-  }
-
-  ngOnInit(): void {
-    var optionLoadObs: Observable<any>[] = []
-
-    optionLoadObs.push(
-      this.locationsService.listLocations(100, 0, "name", this.sortDirection).pipe(map((value) => {
-        this.locationOptions = value;
-      }))
-    )
-
-    optionLoadObs.push(
-    this.networksService.listNetworks(100, 0, "name", this.sortDirection).pipe(map((value) => {
-        this.networkOptions = value;
-    }))
-    )
-
-    optionLoadObs.push(
-    this.deviceInstancesService.listUsedDeviceTypeIds().pipe(
-      concatMap((deviceTypeIds) => {
-        return this.deviceTypesService.getDeviceTypeListByIds(deviceTypeIds)
-      }),
-      map((deviceTypes) => {
-        this.deviceTypeOptions = deviceTypes
-      })
-      )
-    )
-
-    forkJoin(optionLoadObs).subscribe({
-      next: (_) => {
-        this.preselectFormValues()
-        this.ready = true
-      },
-      error: (err) => {
-        console.log(err)
-        this.ready = true
-      }
-    })
-  }
-
-  preselectFormValues() {
-    if(!this.savedFilterSelection) {
-      return 
+        this.savedFilterSelection = data;
     }
 
-    if(this.savedFilterSelection.connectionState != null) {
-      this.form.controls.connectionState.patchValue(this.savedFilterSelection.connectionState)
+    ngOnInit(): void {
+        const optionLoadObs: Observable<any>[] = [];
+
+        optionLoadObs.push(
+            this.locationsService.listLocations(100, 0, 'name', this.sortDirection).pipe(map((value) => {
+                this.locationOptions = value;
+            }))
+        );
+
+        optionLoadObs.push(
+            this.networksService.listNetworks(100, 0, 'name', this.sortDirection).pipe(map((value) => {
+                this.networkOptions = value;
+            }))
+        );
+
+        optionLoadObs.push(
+            this.deviceInstancesService.listUsedDeviceTypeIds().pipe(
+                concatMap((deviceTypeIds) => this.deviceTypesService.getDeviceTypeListByIds(deviceTypeIds)),
+                map((deviceTypes) => {
+                    this.deviceTypeOptions = deviceTypes;
+                })
+            )
+        );
+
+        forkJoin(optionLoadObs).subscribe({
+            next: (_) => {
+                this.preselectFormValues();
+                this.ready = true;
+            },
+            error: (err) => {
+                console.log(err);
+                this.ready = true;
+            }
+        });
     }
 
-    if(this.savedFilterSelection.deviceTypes != null) {
-      this.form.controls.deviceTypes.patchValue(this.savedFilterSelection.deviceTypes)
+    preselectFormValues() {
+        if(!this.savedFilterSelection) {
+            return;
+        }
+
+        if(this.savedFilterSelection.connectionState != null) {
+            this.form.controls.connectionState.patchValue(this.savedFilterSelection.connectionState);
+        }
+
+        if(this.savedFilterSelection.deviceTypes != null) {
+            this.form.controls.deviceTypes.patchValue(this.savedFilterSelection.deviceTypes);
+        }
+
+        if(this.savedFilterSelection.location != null) {
+            this.form.controls.location.patchValue(this.savedFilterSelection.location);
+        }
+
+        if(this.savedFilterSelection.network != null) {
+            this.form.controls.network.patchValue(this.savedFilterSelection.network);
+        }
     }
 
-    if(this.savedFilterSelection.location != null) {
-      this.form.controls.location.patchValue(this.savedFilterSelection.location)
+    resetConnectionFilter() {
+        this.form.controls.connectionState.patchValue(DeviceInstancesRouterStateTabEnum.ALL);
     }
 
-    if(this.savedFilterSelection.network != null) {
-      this.form.controls.network.patchValue(this.savedFilterSelection.network)
+    resetLocationFilter() {
+        this.form.controls.location.patchValue(undefined);
     }
-  }
 
-  resetConnectionFilter() {
-    this.form.controls.connectionState.patchValue(DeviceInstancesRouterStateTabEnum.ALL)
-  }
+    resetNetworkFilter() {
+        this.form.controls.network.patchValue(undefined);
+    }
 
-  resetLocationFilter() {
-    this.form.controls.location.patchValue(undefined)
-  }
+    resetDeviceTypeFilter() {
+        this.form.controls.deviceTypes.patchValue([]);
+    }
 
-  resetNetworkFilter() {
-    this.form.controls.network.patchValue(undefined)
-  }
+    close(): void {
+        this.dialogRef.close();
+    }
 
-  resetDeviceTypeFilter() {
-    this.form.controls.deviceTypes.patchValue([])
-  }
-
-  close(): void {
-    this.dialogRef.close();
-  }
-
-  filter() {
-    this.dialogRef.close(this.form.value)
-  }
+    filter() {
+        this.dialogRef.close(this.form.value);
+    }
 }

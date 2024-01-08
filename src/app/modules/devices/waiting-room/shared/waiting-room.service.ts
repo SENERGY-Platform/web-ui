@@ -45,7 +45,7 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class WaitingRoomService {
-    authorizations:PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
         private http: HttpClient,
@@ -53,7 +53,7 @@ export class WaitingRoomService {
         private authorizationService: AuthorizationService,
         private ladonService: LadonService
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.waitingRoomUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.waitingRoomUrl);
     }
 
     updateDevice(device: WaitingDeviceModel): Observable<WaitingDeviceModel | null> {
@@ -246,6 +246,6 @@ export class WaitingRoomService {
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]   
+        return this.authorizations['GET'];
     }
 }

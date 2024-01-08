@@ -33,7 +33,7 @@ import {DataTableService} from '../../widgets/data-table/shared/data-table.servi
 import {AirQualityService} from '../../widgets/air-quality/shared/air-quality.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatTabGroup} from '@angular/material/tabs';
-import {ChartsService} from "../../widgets/charts/shared/charts.service";
+import {ChartsService} from '../../widgets/charts/shared/charts.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 
 const grids = new Map([
@@ -66,14 +66,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     @ViewChild(MatTabGroup, { static: false }) matTabGroup!: MatTabGroup;
 
     // Authorization
-    userHasUpdateDashboardAuthorization: boolean = false
-    userHasDeleteDashboardAuthorization: boolean = false
-    userHasCreateDashboardAuthorization: boolean = false
-    userHasUpdateWidgetPropertiesAuthorization: boolean = false
-    userHasDeleteWidgetAuthorization: boolean = false
-    userHasCreateWidgetAuthorization: boolean = false
-    userHasMoveWidgetAuthorization: boolean = false
-    userHasUpdateWidgetNameAuthorization: boolean = false 
+    userHasUpdateDashboardAuthorization = false;
+    userHasDeleteDashboardAuthorization = false;
+    userHasCreateDashboardAuthorization = false;
+    userHasUpdateWidgetPropertiesAuthorization = false;
+    userHasDeleteWidgetAuthorization = false;
+    userHasCreateWidgetAuthorization = false;
+    userHasMoveWidgetAuthorization = false;
+    userHasUpdateWidgetNameAuthorization = false;
 
     constructor(
         private responsiveService: ResponsiveService,
@@ -103,16 +103,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.userHasUpdateDashboardAuthorization = this.dashboardService.userHasUpdateDashboardAuthorization()
-        this.userHasDeleteDashboardAuthorization = this.dashboardService.userHasDeleteDashboardAuthorization()
-        this.userHasCreateDashboardAuthorization = this.dashboardService.userHasCreateDashboardAuthorization()
+        this.userHasUpdateDashboardAuthorization = this.dashboardService.userHasUpdateDashboardAuthorization();
+        this.userHasDeleteDashboardAuthorization = this.dashboardService.userHasDeleteDashboardAuthorization();
+        this.userHasCreateDashboardAuthorization = this.dashboardService.userHasCreateDashboardAuthorization();
 
-        this.userHasUpdateWidgetPropertiesAuthorization = this.dashboardService.userHasUpdateWidgetPropertiesAuthorization()
-        this.userHasUpdateWidgetNameAuthorization = this.dashboardService.userHasUpdateWidgetNameAuthorization()
+        this.userHasUpdateWidgetPropertiesAuthorization = this.dashboardService.userHasUpdateWidgetPropertiesAuthorization();
+        this.userHasUpdateWidgetNameAuthorization = this.dashboardService.userHasUpdateWidgetNameAuthorization();
 
-        this.userHasDeleteWidgetAuthorization = this.dashboardService.userHasDeleteWidgetAuthorization()
-        this.userHasCreateWidgetAuthorization = this.dashboardService.userHasCreateWidgetAuthorization()
-        this.userHasMoveWidgetAuthorization = this.dashboardService.userHasMoveWidgetAuthorization()
+        this.userHasDeleteWidgetAuthorization = this.dashboardService.userHasDeleteWidgetAuthorization();
+        this.userHasCreateWidgetAuthorization = this.dashboardService.userHasCreateWidgetAuthorization();
+        this.userHasMoveWidgetAuthorization = this.dashboardService.userHasMoveWidgetAuthorization();
     }
 
     initAllWidgets() {
@@ -210,7 +210,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     let swapIndex1 = 0;
                     let swapIndex2 = 0;
 
-                    var widgetPositionUpdates: WidgetUpdatePosition[] = []
+                    const widgetPositionUpdates: WidgetUpdatePosition[] = [];
 
                     this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
                         if (reorder === false) {
@@ -224,9 +224,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
                                     swapIndex2 = index;
 
                                     widgetPositionUpdates.push({
-                                        "id": widget.id,
-                                        "index": gridIndex
-                                    })
+                                        id: widget.id,
+                                        index: gridIndex
+                                    });
                                 }
                             }
                         }
@@ -236,12 +236,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     if (reorder) {
                         this.reorderWidgets();
                     } else {
-                        var dashboard = this.dashboards[this.activeTabIndex]
+                        const dashboard = this.dashboards[this.activeTabIndex];
 
                         const swap = dashboard.widgets[swapIndex1];
                         dashboard.widgets[swapIndex1] = dashboard.widgets[swapIndex2];
                         dashboard.widgets[swapIndex2] = swap;
-                        
+
                         this.dashboardService.updateWidgetPosition(dashboard.id, widgetPositionUpdates).pipe(
                             catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' }))
                         ).subscribe();

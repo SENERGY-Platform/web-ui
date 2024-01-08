@@ -40,9 +40,9 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
 @Injectable({
     providedIn: 'root',
 })
-export class DeviceTypeService { 
+export class DeviceTypeService {
     constructor(
-        private http: HttpClient, 
+        private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {}
@@ -287,43 +287,43 @@ export class DeviceTypeService {
 
     getTotalCountOfDevicesTypes(searchText: string): Observable<any> {
         const options = searchText ?
-        { params: new HttpParams().set('search', searchText) } : {};
+            { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/device-types', options)
-        .pipe(
-            catchError(
-                this.errorHandlerService.handleError(
-                    DeviceTypeService.name,
-                    'getTotalCountOfDevicesTypes',
+            .get(environment.permissionSearchUrl + '/v3/total/device-types', options)
+            .pipe(
+                catchError(
+                    this.errorHandlerService.handleError(
+                        DeviceTypeService.name,
+                        'getTotalCountOfDevicesTypes',
+                    ),
                 ),
-            ),
-        );
+            );
     }
 
-    userHasDeleteAuthorization():boolean {
-        return this.userHasDeviceManagerAuthorization("DELETE")      
+    userHasDeleteAuthorization(): boolean {
+        return this.userHasDeviceManagerAuthorization('DELETE');
     }
 
-    userHasUpdateAuthorization():boolean {
-        return this.userHasDeviceManagerAuthorization("PUT")      
+    userHasUpdateAuthorization(): boolean {
+        return this.userHasDeviceManagerAuthorization('PUT');
     }
 
     userHasCreateAuthorization(): boolean {
-        return this.userHasDeviceManagerAuthorization("POST")   
+        return this.userHasDeviceManagerAuthorization('POST');
     }
 
     userHasReadAuthorization(): boolean {
-        return this.userHasPermSearchAuthorization("GET")  
+        return this.userHasPermSearchAuthorization('GET');
     }
 
     userHasPermSearchAuthorization(method: AllowedMethods): boolean {
-        var permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-types'
-        return this.ladonService.getUserAuthorizationsForURI(permSearchURL)[method]
+        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-types';
+        return this.ladonService.getUserAuthorizationsForURI(permSearchURL)[method];
     }
 
     userHasDeviceManagerAuthorization(method: AllowedMethods): boolean {
-        var deviceManagerUrl = environment.deviceManagerUrl + '/device-types'
-        return this.ladonService.getUserAuthorizationsForURI(deviceManagerUrl)[method] 
+        const deviceManagerUrl = environment.deviceManagerUrl + '/device-types';
+        return this.ladonService.getUserAuthorizationsForURI(deviceManagerUrl)[method];
     }
 }

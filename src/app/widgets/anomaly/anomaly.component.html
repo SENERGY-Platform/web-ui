@@ -23,13 +23,13 @@
       <div>Please configure widget!</div>
     </div>
     <div *ngIf="ready && widget.properties.measurement !== undefined" fxLayoutAlign="center center" class="outer-container">
-      <div *ngIf="anomaly.type == 'time'" class="anomaly-container">
+      <div *ngIf="anomaly.type === 'time'" class="anomaly-container">
         <div>
           <mat-icon>schedule</mat-icon>
         </div>
         <div>
-          <h2 *ngIf="anomaly.subType == 'high'">Time between inputs was too long!</h2>
-          <h2 *ngIf="anomaly.subType == 'low'">Time between inputs was too short!</h2>
+          <h2 *ngIf="anomaly.subType === 'high'">Time between inputs was too long!</h2>
+          <h2 *ngIf="anomaly.subType === 'low'">Time between inputs was too short!</h2>
         </div>
         <div>
           <p>{{anomaly.value | number:'1.2-3'}} {{anomaly.unit}}</p>
@@ -37,7 +37,7 @@
 
       </div>
 
-      <div *ngIf="anomaly.type == 'schema'" class="anomaly-container">
+      <div *ngIf="anomaly.type === 'schema'" class="anomaly-container">
         <div>
           <mat-icon>schema</mat-icon>
         </div>
@@ -49,20 +49,20 @@
         </div>
       </div>
 
-      <div *ngIf="anomaly.type == 'extreme_value'" class="anomaly-container">
+      <div *ngIf="anomaly.type === 'extreme_value'" class="anomaly-container">
         <div>
           <mat-icon>error</mat-icon>
         </div>
         <div>
-          <h2 *ngIf="anomaly.subType == 'high'">Input is too high!</h2>
-          <h2 *ngIf="anomaly.subType == 'low'">Input is too low!</h2>
+          <h2 *ngIf="anomaly.subType === 'high'">Input is too high!</h2>
+          <h2 *ngIf="anomaly.subType === 'low'">Input is too low!</h2>
         </div>
         <div>
           <p>{{anomaly.value}}</p>
         </div>
       </div>
 
-      <div *ngIf="anomaly.type == 'curve_anomaly'" class="anomaly-container">
+      <div *ngIf="anomaly.type === 'curve_anomaly'" class="anomaly-container">
         <div>
           <mat-icon>error</mat-icon>
         </div>

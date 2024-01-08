@@ -28,14 +28,14 @@ import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/pe
     providedIn: 'root',
 })
 export class FlowEngineService {
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
-        private http: HttpClient, 
+        private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.flowEngineUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.flowEngineUrl);
     }
 
     startPipeline(data: PipelineRequestModel): Observable<unknown> {
@@ -58,14 +58,14 @@ export class FlowEngineService {
     }
 
     userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]      
+        return this.authorizations['DELETE'];
     }
 
     userHasUpdateAuthorization(): boolean {
-        return this.authorizations["POST"]     
+        return this.authorizations['POST'];
     }
 
     userHasCreateAuthorization(): boolean {
-        return this.authorizations["PUT"]  
+        return this.authorizations['PUT'];
     }
 }

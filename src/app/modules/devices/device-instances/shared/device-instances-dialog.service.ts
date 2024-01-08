@@ -35,8 +35,8 @@ import {DeviceInstancesSelectDialogComponent} from '../dialogs/device-instances-
 import {forkJoin, mergeMap, Observable} from 'rxjs';
 import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../../../widgets/shared/export-data.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
-import {environment} from "../../../../../environments/environment";
-import {catchError, map} from "rxjs/operators";
+import {environment} from '../../../../../environments/environment';
+import {catchError, map} from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root',

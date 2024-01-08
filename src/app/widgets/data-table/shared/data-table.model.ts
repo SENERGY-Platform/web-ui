@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { DeviceGroupCriteriaModel } from "src/app/modules/devices/device-groups/shared/device-groups.model";
-import { SingleValueAggregations } from "../../single-value/shared/single-value.model";
+import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
 
 export interface DataTableWidgetPropertiesModel {
     dataTable?: DataTablePropertiesModel;
@@ -75,7 +75,7 @@ export interface DataTableElementModel {
             deviceGroupCriteria?: DeviceGroupCriteriaModel;
             targetCharacteristic?: string;
             deviceGroupAggregation?: SingleValueAggregations;
-        }
+        };
     };
 }
 

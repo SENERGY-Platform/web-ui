@@ -37,7 +37,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./characteristics.component.css'],
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name', 'info']
+    displayedColumns = ['select', 'name', 'info'];
     pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<CharacteristicsPermSearchModel>();
@@ -48,12 +48,12 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     routerConcept: ConceptsPermSearchModel | null = null;
     selectedTag = '';
     private searchSub: Subscription = new Subscription();
-    searchText: string = ""
-    sortBy: string = "name"
-    sortDirection: SortDirection = "asc"
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false
+    searchText = '';
+    sortBy = 'name';
+    sortDirection: SortDirection = 'asc';
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
+    userHasCreateAuthorization = false;
 
     constructor(
         private dialog: MatDialog,
@@ -68,16 +68,16 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
-        this.checkAuthorization()
+        this.checkAuthorization();
     }
 
     getTotalCounts(): Observable<number> {
         return this.characteristicsService.getTotalCountOfCharacteristics(this.searchText).pipe(
             map((totalCount: number) => {
-                this.totalCount = totalCount
-                return totalCount
+                this.totalCount = totalCount;
+                return totalCount;
             })
-        )
+        );
     }
 
     ngOnDestroy() {
@@ -85,31 +85,31 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active 
+        this.sortBy = $event.active;
         this.sortDirection = $event.direction;
         this.reload();
     }
 
 
     checkAuthorization() {
-        this.userHasUpdateAuthorization = this.characteristicsService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.characteristicsService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
-    
-        this.userHasDeleteAuthorization = this.characteristicsService.userHasDeleteAuthorization()
+
+        this.userHasDeleteAuthorization = this.characteristicsService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
-    
-        this.userHasCreateAuthorization = this.characteristicsService.userHasCreateAuthorization()
+
+        this.userHasCreateAuthorization = this.characteristicsService.userHasCreateAuthorization();
     }
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getCharacteristics().subscribe()
+            this.getCharacteristics().subscribe();
         });
     }
 
@@ -133,7 +133,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                     } else {
                         this.snackBar.open('Characteristic created successfully.', undefined, {duration: 2000});
                     }
-                    this.reload()
+                    this.reload();
                 });
             }
         });
@@ -160,7 +160,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                             } else {
                                 this.snackBar.open('Error while deleting the characteristic!', 'close', {panelClass: 'snack-bar-error'});
                             }
-                            this.reload()
+                            this.reload();
                         });
                 }
             });
@@ -234,9 +234,9 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             .pipe(
                 map((characteristics: CharacteristicsPermSearchModel[]) => {
                     this.setCharacteristics(characteristics);
-                    return characteristics
+                    return characteristics;
                 })
-            )
+            );
     }
 
     private setCharacteristics(characteristics: CharacteristicsPermSearchModel[]) {
@@ -258,10 +258,10 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.pageSize = 20;
         this.selectionClear();
-        
+
         forkJoin([this.getCharacteristics(), this.getTotalCounts()]).subscribe(_ => {
             this.ready = true;
-        })
+        });
     }
 
     isAllSelected() {
@@ -286,26 +286,26 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         const deletionJobs: Observable<any>[] = [];
 
         this.dialogsService
-        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' characteristics' : ' characteristic'))
-        .afterClosed()
-        .subscribe((deleteConcepts: boolean) => {
-            if (deleteConcepts) {
-                this.ready = false;
-                this.selection.selected.forEach((characteristic: CharacteristicsPermSearchModel) => {
-                    var job = this.characteristicsService.deleteCharacteristic(characteristic.id)
-                    deletionJobs.push(job)
-                });
-            }
-            
-            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                if (ok) {
-                    this.snackBar.open('Characteristics deleted successfully.', undefined, {duration: 2000});            
-                } else {
-                    this.snackBar.open('Error while deleting characteristics!', 'close', {panelClass: 'snack-bar-error'});
+            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' characteristics' : ' characteristic'))
+            .afterClosed()
+            .subscribe((deleteConcepts: boolean) => {
+                if (deleteConcepts) {
+                    this.ready = false;
+                    this.selection.selected.forEach((characteristic: CharacteristicsPermSearchModel) => {
+                        const job = this.characteristicsService.deleteCharacteristic(characteristic.id);
+                        deletionJobs.push(job);
+                    });
                 }
-                this.reload()
-            })
-        });
+
+                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open('Characteristics deleted successfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while deleting characteristics!', 'close', {panelClass: 'snack-bar-error'});
+                    }
+                    this.reload();
+                });
+            });
     }
 }

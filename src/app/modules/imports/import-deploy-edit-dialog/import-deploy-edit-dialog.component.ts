@@ -22,7 +22,7 @@ import { ImportTypeConfigModel, ImportTypeModel } from '../import-types/shared/i
 import {FormArray, FormBuilder, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { typeValueValidator } from '../validators/type-value-validator';
-import {HttpErrorResponse} from "@angular/common/http";
+import {HttpErrorResponse} from '@angular/common/http';
 
 @Component({
     selector: 'senergy-import-deploy-dialog',

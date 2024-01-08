@@ -37,10 +37,10 @@ import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/pe
     providedIn: 'root',
 })
 export class DeploymentsService {
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.processServiceUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.processServiceUrl);
     }
 
     getStartParameter(modelId: string): Observable<ProcessStartParameter[]> {
@@ -247,10 +247,10 @@ export class DeploymentsService {
     }
 
     userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]     
+        return this.authorizations['DELETE'];
     }
-    
+
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]   
+        return this.authorizations['GET'];
     }
 }

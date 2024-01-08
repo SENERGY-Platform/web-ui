@@ -362,21 +362,21 @@ export class DiagramEditorComponent implements AfterViewInit {
     }
 
     calculateNodePosition() {
-        var box = (<any>document.getElementsByClassName('joint-layers')[0]).getBBox()
-        var x = box.x + box.width + 100;
-        var y = 200
-        
-        return [x,y]
+        const box = (document.getElementsByClassName('joint-layers')[0] as any).getBBox();
+        const x = box.x + box.width + 100;
+        const y = 200;
+
+        return [x,y];
     }
 
     calculateNodeSize(inPorts: any[], outPorts: any[]) {
-        var outCircleradius = 20
-        var heightBasedOnOut = outCircleradius * outPorts.length + 30
-        var heightBasedOnIn = outCircleradius * inPorts.length + 30
-        var height = heightBasedOnIn > heightBasedOnOut ? heightBasedOnIn : heightBasedOnOut
-        height = height > 100 ? height : 100
-        var size = {'height': height, "width": 150}
-        return size
+        const outCircleradius = 20;
+        const heightBasedOnOut = outCircleradius * outPorts.length + 30;
+        const heightBasedOnIn = outCircleradius * inPorts.length + 30;
+        let height = heightBasedOnIn > heightBasedOnOut ? heightBasedOnIn : heightBasedOnOut;
+        height = height > 100 ? height : 100;
+        const size = {height, width: 150};
+        return size;
     }
 
     public newNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
@@ -398,8 +398,8 @@ export class DiagramEditorComponent implements AfterViewInit {
             }
         }
 
-        var size = this.calculateNodeSize(inPorts, outPorts)
-        
+        const size = this.calculateNodeSize(inPorts, outPorts);
+
         const node = new this.NodeElement({
             type: 'senergy.NodeElement',
             inPorts,
@@ -410,8 +410,8 @@ export class DiagramEditorComponent implements AfterViewInit {
             config,
             operatorId,
         });
-        var position = this.calculateNodePosition()
-        node.position(position[0], position[1])
+        const position = this.calculateNodePosition();
+        node.position(position[0], position[1]);
         node.attr({
             label: {
                 visibility: 'visible',

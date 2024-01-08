@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DeviceGroupCriteriaModel } from "src/app/modules/devices/device-groups/shared/device-groups.model";
+import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 
 export interface TimeValuePairModel {
     time: string | null;

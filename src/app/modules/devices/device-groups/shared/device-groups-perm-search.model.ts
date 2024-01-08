@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DeviceGroupCriteriaModel } from "./device-groups.model";
+import { DeviceGroupCriteriaModel } from './device-groups.model';
 
 export interface DeviceGroupsPermSearchModel {
     creator: string;

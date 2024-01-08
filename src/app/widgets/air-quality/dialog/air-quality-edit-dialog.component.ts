@@ -65,11 +65,11 @@ export class AirQualityEditDialogComponent implements OnInit {
         private importTypesService: ImportTypesService,
         private deviceInstancesService: DeviceInstancesService,
         private deviceTypeService: DeviceTypeService,
-        @Inject(MAT_DIALOG_DATA) data: { 
-            dashboardId: string; 
-            widgetId: string; 
+        @Inject(MAT_DIALOG_DATA) data: {
+            dashboardId: string;
+            widgetId: string;
             userHasUpdateNameAuthorization: boolean;
-            userHasUpdatePropertiesAuthorization: boolean
+            userHasUpdatePropertiesAuthorization: boolean;
         },
     ) {
         this.dashboardId = data.dashboardId;
@@ -80,8 +80,8 @@ export class AirQualityEditDialogComponent implements OnInit {
         this.pollenLevel = dwdPollenService.getNameValuePairs();
     }
 
-    userHasUpdateNameAuthorization: boolean = false
-    userHasUpdatePropertiesAuthorization: boolean = false
+    userHasUpdateNameAuthorization = false;
+    userHasUpdatePropertiesAuthorization = false;
     exports: ExportModel[] = [];
     dashboardId: string;
     widgetId: string;
@@ -471,9 +471,9 @@ export class AirQualityEditDialogComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.name)
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.name);
     }
-    
+
     updateProperties(): Observable<DashboardResponseMessageModel> {
         const observables: Observable<any>[] = [];
         observables.push(this.prepareDWDSave());
@@ -486,27 +486,27 @@ export class AirQualityEditDialogComponent implements OnInit {
                 this.widget.properties.location = this.location;
                 this.widget.properties.formatted_address = this.formatted_address;
                 this.widget.properties.pollen = this.pollen;
-                return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+                return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
             })
         );
     }
-    
+
     save(): void {
         this.ready = false;
-        var obs = []
+        const obs = [];
         if(this.userHasUpdateNameAuthorization) {
-            obs.push(this.updateName())
+            obs.push(this.updateName());
         }
 
         if(this.userHasUpdatePropertiesAuthorization) {
-            obs.push(this.updateProperties())
+            obs.push(this.updateProperties());
         }
         forkJoin(obs).subscribe(responses => {
-            var errorOccured = responses.find((response) => response.message != "OK")
+            const errorOccured = responses.find((response) => response.message != 'OK');
             if(!errorOccured) {
                 this.dialogRef.close(this.widget);
             }
-        })
+        });
     }
 
     displayFn(input?: ChartsExportMeasurementModel): string | undefined {

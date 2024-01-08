@@ -258,7 +258,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 is_void: [{disabled: true, value: this.contentVariable.is_void}],
                 omit_empty: [!!this.contentVariable.omit_empty],
             });
-            this.firstFormGroup.get("omit_empty")?.disable(); //[{disabled: true, value: !!this.contentVariable.omit_empty}], doesn't work
+            this.firstFormGroup.get('omit_empty')?.disable(); //[{disabled: true, value: !!this.contentVariable.omit_empty}], doesn't work
         } else {
             this.firstFormGroup = this._formBuilder.group(
                 {

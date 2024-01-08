@@ -156,7 +156,7 @@ export class NewExportComponent implements OnInit {
         forkJoin(array).subscribe((response) => {
             this.devices = response[0] as DeviceInstancesModel[];
             this.pipelines = response[1] as PipelineModel[];
-            console.log(this.pipelines)
+            console.log(this.pipelines);
             this.imports = response[2] as ImportInstancesModel[];
             this.exportDatabases = response[3] as ExportDatabaseModel[];
             this.exportForm.patchValue({exportDatabaseId: environment.exportDatabaseIdInternalTimescaleDb});
@@ -749,7 +749,7 @@ export class NewExportComponent implements OnInit {
     }
 
     selectOperator($event: MouseEvent) {
-        for (const operatorNode of ($event.target as any)?.nearestViewportElement?.getElementsByClassName("joint-cells-layer")[0].childNodes || []) {
+        for (const operatorNode of ($event.target as any)?.nearestViewportElement?.getElementsByClassName('joint-cells-layer')[0].childNodes || []) {
             if (
                 operatorNode.attributes['data-type'] !== undefined &&
                 operatorNode.attributes['data-type'].value === 'senergy.NodeElement'

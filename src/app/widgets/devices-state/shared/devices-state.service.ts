@@ -57,15 +57,15 @@ export class DevicesStateService {
         return this.deviceInstancesService.getDeviceHistory1h().pipe(
             map(devices => devices || []),
             map(devices => devices.filter((device) => {
-                var active = true
+                let active = true;
                 if(device.attributes) {
                     device.attributes.forEach(attribute => {
-                        if(attribute.key == "inactive" && attribute.value == "true") {
-                            active = false
-                        }  
-                     });
+                        if(attribute.key == 'inactive' && attribute.value == 'true') {
+                            active = false;
+                        }
+                    });
                 }
-                return active
+                return active;
             })),
             map((devices: DeviceInstancesHistoryModel[]) => this.sumDevicesStatus(devices))
         );

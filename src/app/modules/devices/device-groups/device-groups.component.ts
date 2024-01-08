@@ -36,7 +36,7 @@ import { DeviceGroupModel } from './shared/device-groups.model';
     styleUrls: ['./device-groups.component.css'],
 })
 export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
-    displayedColumns = ['select', 'name', 'show']
+    displayedColumns = ['select', 'name', 'show'];
     pageSize = 20;
     selection = new SelectionModel<DeviceGroupsPermSearchModel>(true, []);
     totalCount = 200;
@@ -45,17 +45,17 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
     offset = 0;
-    searchText: string = ""
-    sortBy: string = "name"
-    sortDirection: SortDirection = "asc"   
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false
+    searchText = '';
+    sortBy = 'name';
+    sortDirection: SortDirection = 'asc';
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
+    userHasCreateAuthorization = false;
 
     private searchSub: Subscription = new Subscription();
 
     hideGenerated = true;
-    allDataLoaded: boolean = false
+    allDataLoaded = false;
 
     constructor(
         private deviceGroupsService: DeviceGroupsService,
@@ -67,38 +67,38 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     ngOnInit() {
         this.initSearch();
-        this.checkAuthorization()
+        this.checkAuthorization();
     }
 
     getTotalCount(): Observable<number> {
         return this.deviceGroupsService.getTotalCountOfDeviceGroups(this.searchText).pipe(
             map(totalCount => this.totalCount = totalCount)
-        )
+        );
     }
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getDeviceGroups().subscribe()
+            this.getDeviceGroups().subscribe();
         });
     }
 
     checkAuthorization() {
-        this.userHasCreateAuthorization = this.deviceGroupsService.userHasCreateAuthorization()
-        this.userHasUpdateAuthorization = this.deviceGroupsService.userHasUpdateAuthorization()
+        this.userHasCreateAuthorization = this.deviceGroupsService.userHasCreateAuthorization();
+        this.userHasUpdateAuthorization = this.deviceGroupsService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
 
-        this.userHasDeleteAuthorization = this.deviceGroupsService.userHasDeleteAuthorization()
+        this.userHasDeleteAuthorization = this.deviceGroupsService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active 
+        this.sortBy = $event.active;
         this.sortDirection = $event.direction;
         this.reload();
     }
@@ -110,7 +110,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     private initSearch() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.reload()
+            this.reload();
         });
     }
 
@@ -144,7 +144,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
                         } else {
                             this.snackBar.open('Error while deleting the device-group!', 'close', { panelClass: 'snack-bar-error' });
                         }
-                        this.reload()
+                        this.reload();
                     });
                 }
             });
@@ -175,10 +175,10 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         return query.pipe(
             map((deviceGroups: DeviceGroupsPermSearchModel[]) => {
                 this.dataSource.data = deviceGroups;
-                return deviceGroups
-                }
+                return deviceGroups;
+            }
             )
-        )
+        );
     }
 
     public reload() {
@@ -187,51 +187,51 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.ready = false;
         this.selectionClear();
 
-        var jobs = [this.getDeviceGroups(), this.getTotalCount()]
+        const jobs = [this.getDeviceGroups(), this.getTotalCount()];
         forkJoin(jobs).subscribe(_ => {
             this.ready = true;
-        })
+        });
     }
 
     deleteMultipleItems() {
         const deletionJobs: Observable<any>[] = [];
 
         this.dialogsService
-        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' device groups' : ' device group'))
-        .afterClosed()
-        .subscribe((deleteConcepts: boolean) => {
-            if (deleteConcepts) {
-                this.ready = false;
-                this.selection.selected.forEach((deviceGroup: DeviceGroupsPermSearchModel) => {
-                    deletionJobs.push(this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id));
-                });
-            }
-        
-            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                if (ok) {
-                    this.snackBar.open('Device group deleted successfully.', undefined, {duration: 2000});            
-                } else {
-                    this.snackBar.open('Error while deleting the device group!', 'close', {panelClass: 'snack-bar-error'});
+            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' device groups' : ' device group'))
+            .afterClosed()
+            .subscribe((deleteConcepts: boolean) => {
+                if (deleteConcepts) {
+                    this.ready = false;
+                    this.selection.selected.forEach((deviceGroup: DeviceGroupsPermSearchModel) => {
+                        deletionJobs.push(this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id));
+                    });
                 }
-                this.reload()
-            })
-        });
+
+                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open('Device group deleted successfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while deleting the device group!', 'close', {panelClass: 'snack-bar-error'});
+                    }
+                    this.reload();
+                });
+            });
     }
 
     showDevices(group: DeviceGroupsPermSearchModel) {
         this.deviceGroupsService.getDeviceGroup(group.id).subscribe((deviceGroup: DeviceGroupModel | null) => {
             if(!deviceGroup?.device_ids || deviceGroup.device_ids.length == 0) {
                 this.snackBar.open('Device group has no devices', 'close', {panelClass: 'snack-bar-error'});
-                return
+                return;
             }
 
             this.router.navigate(['devices/deviceinstances'], {
-                state: { 
-                    type: DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP, 
-                    value: deviceGroup?.device_ids 
+                state: {
+                    type: DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP,
+                    value: deviceGroup?.device_ids
                 } as DeviceInstancesRouterState,
             });
-        })
+        });
     }
 }

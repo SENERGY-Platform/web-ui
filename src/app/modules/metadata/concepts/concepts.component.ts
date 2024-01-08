@@ -37,7 +37,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./concepts.component.css'],
 })
 export class ConceptsComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name', 'info', 'characteristic']
+    displayedColumns = ['select', 'name', 'info', 'characteristic'];
     pageSize = 20;
     concepts: ConceptsPermSearchModel[] = [];
     ready = false;
@@ -47,12 +47,12 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     private searchSub: Subscription = new Subscription();
-    searchText: string = ""
-    sortBy: string = "name"
-    sortDirection: SortDirection = "asc"
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false 
+    searchText = '';
+    sortBy = 'name';
+    sortDirection: SortDirection = 'asc';
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
+    userHasCreateAuthorization = false;
 
     constructor(
         private dialog: MatDialog,
@@ -65,7 +65,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
-        this.checkAuthorization()
+        this.checkAuthorization();
     }
 
     ngOnDestroy() {
@@ -75,30 +75,30 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     getTotalCounts() {
         return this.conceptsService.getTotalCountOfConcepts(this.searchText).pipe(
             map((totalCount: number) => {
-                this.totalCount = totalCount
-                return totalCount
+                this.totalCount = totalCount;
+                return totalCount;
             })
-        )
+        );
     }
 
     checkAuthorization() {
-        this.userHasUpdateAuthorization = this.conceptsService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.conceptsService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
-    
-        this.userHasDeleteAuthorization = this.conceptsService.userHasDeleteAuthorization()
+
+        this.userHasDeleteAuthorization = this.conceptsService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
-        this.userHasCreateAuthorization = this.conceptsService.userHasDeleteAuthorization()
+        this.userHasCreateAuthorization = this.conceptsService.userHasDeleteAuthorization();
     }
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getConcepts().subscribe()
+            this.getConcepts().subscribe();
         });
     }
 
@@ -187,7 +187,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
                         } else {
                             this.snackBar.open('Error while deleting the concept!', 'close', { panelClass: 'snack-bar-error' });
                         }
-                        this.reload()
+                        this.reload();
                     });
                 }
             });
@@ -203,9 +203,9 @@ export class ConceptsComponent implements OnInit, OnDestroy {
             .pipe(
                 map((concepts: ConceptsPermSearchModel[]) => {
                     this.dataSource.data = concepts;
-                    return concepts
+                    return concepts;
                 })
-            )
+            );
     }
 
     reload() {
@@ -216,11 +216,11 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
         forkJoin([this.getConcepts(), this.getTotalCounts()]).subscribe(_ => {
             this.ready = true;
-        })
+        });
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active 
+        this.sortBy = $event.active;
         this.sortDirection = $event.direction;
         this.reload();
     }
@@ -247,25 +247,25 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         const deletionJobs: Observable<any>[] = [];
 
         this.dialogsService
-        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' concepts' : ' concept'))
-        .afterClosed()
-        .subscribe((deleteConcepts: boolean) => {
-            if (deleteConcepts) {
-                this.ready = false;
-                this.selection.selected.forEach((concept: ConceptsPermSearchModel) => {
-                    deletionJobs.push(this.conceptsService.deleteConcept(concept.id))    
-                });
-            }
-            
-            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                if (ok) {
-                    this.snackBar.open('Concepts deleted successfully.', undefined, {duration: 2000});            
-                } else {
-                    this.snackBar.open('Error while deleting concepts!', 'close', {panelClass: 'snack-bar-error'});
+            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' concepts' : ' concept'))
+            .afterClosed()
+            .subscribe((deleteConcepts: boolean) => {
+                if (deleteConcepts) {
+                    this.ready = false;
+                    this.selection.selected.forEach((concept: ConceptsPermSearchModel) => {
+                        deletionJobs.push(this.conceptsService.deleteConcept(concept.id));
+                    });
                 }
-                this.reload()
-            })
-        });
+
+                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open('Concepts deleted successfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while deleting concepts!', 'close', {panelClass: 'snack-bar-error'});
+                    }
+                    this.reload();
+                });
+            });
     }
 }

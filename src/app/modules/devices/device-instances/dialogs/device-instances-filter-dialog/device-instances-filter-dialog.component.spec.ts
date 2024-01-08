@@ -9,35 +9,35 @@ import { DeviceInstancesService } from '../../shared/device-instances.service';
 import { DeviceInstancesFilterDialogComponent } from './device-instances-filter-dialog.component';
 
 describe('DeviceInstancesFilterDialogComponent', () => {
-  let component: DeviceInstancesFilterDialogComponent;
-  let fixture: ComponentFixture<DeviceInstancesFilterDialogComponent>;
-  const deviceInstanceServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass(DeviceInstancesService);
-  deviceInstanceServiceSpy.listUsedDeviceTypeIds.and.returnValue(of(["id"]))
-  const matDialogRefSpy: Spy<MatDialogRef<DeviceInstancesFilterDialogComponent>> =
+    let component: DeviceInstancesFilterDialogComponent;
+    let fixture: ComponentFixture<DeviceInstancesFilterDialogComponent>;
+    const deviceInstanceServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass(DeviceInstancesService);
+    deviceInstanceServiceSpy.listUsedDeviceTypeIds.and.returnValue(of(['id']));
+    const matDialogRefSpy: Spy<MatDialogRef<DeviceInstancesFilterDialogComponent>> =
   createSpyFromClass<MatDialogRef<DeviceInstancesFilterDialogComponent>>(MatDialogRef);
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [ DeviceInstancesFilterDialogComponent ],
-      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule],
-      providers: [
-        { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
-        { provide: MatDialogRef, useValue: matDialogRefSpy },
-        {
-          provide: MAT_DIALOG_DATA,
-          useValue: {
-          },
-      },
-      ]
-    })
-    .compileComponents();
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            declarations: [ DeviceInstancesFilterDialogComponent ],
+            imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule],
+            providers: [
+                { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
+                { provide: MatDialogRef, useValue: matDialogRefSpy },
+                {
+                    provide: MAT_DIALOG_DATA,
+                    useValue: {
+                    },
+                },
+            ]
+        })
+            .compileComponents();
 
-    fixture = TestBed.createComponent(DeviceInstancesFilterDialogComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+        fixture = TestBed.createComponent(DeviceInstancesFilterDialogComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });

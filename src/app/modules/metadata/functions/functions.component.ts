@@ -38,7 +38,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./functions.component.css'],
 })
 export class FunctionsComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name', 'info']
+    displayedColumns = ['select', 'name', 'info'];
     pageSize = 20;
     dataSource = new MatTableDataSource<FunctionsPermSearchModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -48,12 +48,12 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     ready = false;
     userIsAdmin = false;
     private searchSub: Subscription = new Subscription();
-    searchText: string = ""
-    sortBy: string = "name"
-    sortDirection: SortDirection = "asc"
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false
+    searchText = '';
+    sortBy = 'name';
+    sortDirection: SortDirection = 'asc';
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
+    userHasCreateAuthorization = false;
 
     constructor(
         private dialog: MatDialog,
@@ -73,17 +73,17 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     getTotalCounts() {
         return this.functionsService.getTotalCountOfFunctions(this.searchText).pipe(
             map((totalCount: number) => {
-                this.totalCount = totalCount
-                return totalCount
+                this.totalCount = totalCount;
+                return totalCount;
             })
-        )
+        );
     }
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=> {
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getFunctions().subscribe()
+            this.getFunctions().subscribe();
         });
     }
 
@@ -92,15 +92,15 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.userHasUpdateAuthorization = this.functionsService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.functionsService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
-        this.userHasDeleteAuthorization = this.functionsService.userHasDeleteAuthorization()
+        this.userHasDeleteAuthorization = this.functionsService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
-        this.userHasCreateAuthorization = this.functionsService.userHasCreateAuthorization()
+        this.userHasCreateAuthorization = this.functionsService.userHasCreateAuthorization();
     }
 
     private initSearch() {
@@ -184,24 +184,26 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
     private getFunctions(): Observable<FunctionsPermSearchModel[]> {
         return this.functionsService
-                .getFunctions(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
-                .pipe(
-                    map((functions: FunctionsPermSearchModel[]) => {
-                        this.dataSource = new MatTableDataSource(functions);
-                        return functions
-                    })
-                )
+            .getFunctions(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
+            .pipe(
+                map((functions: FunctionsPermSearchModel[]) => {
+                    this.dataSource = new MatTableDataSource(functions);
+                    return functions;
+                })
+            );
     }
 
     reload() {
         this.ready = false;
         this.offset = 0;
         this.selectionClear();
-        forkJoin([this.getFunctions(), this.getTotalCounts()]).subscribe(_ => {this.ready = true;})
+        forkJoin([this.getFunctions(), this.getTotalCounts()]).subscribe(_ => {
+            this.ready = true;
+        });
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active 
+        this.sortBy = $event.active;
         this.sortDirection = $event.direction;
         this.reload();
     }
@@ -244,19 +246,19 @@ export class FunctionsComponent implements OnInit, OnDestroy {
                 if (deleteExports) {
                     this.ready = false;
                     this.selection.selected.forEach((func: FunctionsPermSearchModel) => {
-                        deletionJobs.push(this.functionsService.deleteFunction(func.id))
+                        deletionJobs.push(this.functionsService.deleteFunction(func.id));
                     });
                 }
-                
+
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
                     if (ok) {
-                        this.snackBar.open('Characteristics deleted successfully.', undefined, {duration: 2000});            
+                        this.snackBar.open('Characteristics deleted successfully.', undefined, {duration: 2000});
                     } else {
                         this.snackBar.open('Error while deleting characteristics!', 'close', {panelClass: 'snack-bar-error'});
                     }
-                    this.reload()
-                })
-            });  
+                    this.reload();
+                });
+            });
     }
 }

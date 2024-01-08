@@ -43,19 +43,19 @@ import {AuthorizationService} from '../../../core/services/authorization.service
     styleUrls: ['./networks.component.css'],
 })
 export class NetworksComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'connection', 'name', 'number_devices', 'show', 'clear']
+    displayedColumns = ['select', 'connection', 'name', 'number_devices', 'show', 'clear'];
     pageSize = 20;
     dataSource = new MatTableDataSource<NetworksModel>();
-    sortBy: string = "name"
-    sortDirection: SortDirection = "asc"    
+    sortBy = 'name';
+    sortDirection: SortDirection = 'asc';
     selection = new SelectionModel<NetworksModel>(true, []);
     searchText = '';
     totalCount = 200;
     offset = 0;
     ready = false;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
 
     private searchSub: Subscription = new Subscription();
 
@@ -83,22 +83,22 @@ export class NetworksComponent implements OnInit, OnDestroy {
     getTotalCount(): Observable<number> {
         return this.networksService.getTotalCountOfNetworks(this.searchText).pipe(
             map((totalCount: number) => this.totalCount = totalCount)
-        )
+        );
     }
 
     checkAuthorization() {
-        this.userHasUpdateAuthorization = this.networksService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.networksService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
-        
-        this.userHasDeleteAuthorization = this.networksService.userHasDeleteAuthorization()
+
+        this.userHasDeleteAuthorization = this.networksService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
-        
+
         if (this.authService.userIsAdmin()) {
-            this.displayedColumns.push('share')
+            this.displayedColumns.push('share');
         }
     }
 
@@ -110,13 +110,13 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active 
+        this.sortBy = $event.active;
 
-        // TODO Ingo suche connection 
-        if (this.sortBy == "connection") {
-            this.sortBy = "annotations.connected"
-        } else if (this.sortBy == "number_devices") {
-            this.sortBy = "device_local_ids"
+        // TODO Ingo suche connection
+        if (this.sortBy == 'connection') {
+            this.sortBy = 'annotations.connected';
+        } else if (this.sortBy == 'number_devices') {
+            this.sortBy = 'device_local_ids';
         }
         this.sortDirection = $event.direction;
         this.reload();
@@ -124,14 +124,14 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getNetworks().subscribe({
                 next: (_) => {
-                    this.ready = true
+                    this.ready = true;
                 },
                 error: (_) => {
-                    this.ready = true
+                    this.ready = true;
                 }
             });
         });
@@ -152,7 +152,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     delete(network: NetworksModel) {
-        this.deviceInstancesService.getDeviceInstances(9999, 0, this.sortBy, this.sortDirection == "desc", undefined, undefined, network.id).subscribe((devices) => {
+        this.deviceInstancesService.getDeviceInstances(9999, 0, this.sortBy, this.sortDirection == 'desc', undefined, undefined, network.id).subscribe((devices) => {
             this.dialog
                 .open(NetworksDeleteDialogComponent, { data: { networkId: network.id, devices }, minWidth: '300px' })
                 .afterClosed()
@@ -161,10 +161,10 @@ export class NetworksComponent implements OnInit, OnDestroy {
                         setTimeout(() => {
                             this.getNetworks().subscribe({
                                 next: (_) => {
-                                    this.ready = true
+                                    this.ready = true;
                                 },
                                 error: (_) => {
-                                    this.ready = true
+                                    this.ready = true;
                                 }
                             });
                         }, 1000);
@@ -179,9 +179,9 @@ export class NetworksComponent implements OnInit, OnDestroy {
             .pipe(
                 map((networks: NetworksModel[]) => {
                     this.dataSource.data = networks;
-                    return networks
+                    return networks;
                 })
-            )
+            );
     }
 
     reload() {
@@ -189,13 +189,13 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.pageSize = 20;
         this.ready = false;
         this.selectionClear();
-        
+
         forkJoin([this.getNetworks(), this.getTotalCount()]).subscribe({
             next: (_) => {
-                this.ready = true
+                this.ready = true;
             },
             error: (_) => {
-                this.ready = true
+                this.ready = true;
             }
         });
     }
@@ -228,7 +228,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
                     let allDeviceIds: string[] = [];
 
                     this.selection.selected.forEach((network: NetworksModel) => {
-                        this.deviceInstancesService.getDeviceInstances(9999, 0, this.sortBy, this.sortDirection == "desc", undefined, undefined, network.id).subscribe((devices) => {
+                        this.deviceInstancesService.getDeviceInstances(9999, 0, this.sortBy, this.sortDirection == 'desc', undefined, undefined, network.id).subscribe((devices) => {
                             const deviceIds = devices.map((p) => p.id);
                             allDeviceIds = allDeviceIds.concat(deviceIds);
 

@@ -29,15 +29,15 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class CharacteristicsService {
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
-        private http: HttpClient, 
+        private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        var characteristicPermSearchURL = environment.permissionSearchUrl + '/v3/resources/characteristics'
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(characteristicPermSearchURL)
+        const characteristicPermSearchURL = environment.permissionSearchUrl + '/v3/resources/characteristics';
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(characteristicPermSearchURL);
     }
 
     createCharacteristic(
@@ -112,33 +112,33 @@ export class CharacteristicsService {
 
     getTotalCountOfCharacteristics(searchText: string): Observable<any> {
         const options = searchText ?
-        { params: new HttpParams().set('search', searchText) } : {};
+            { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/characteristics', options)
-        .pipe(
-            catchError(
-                this.errorHandlerService.handleError(
-                    CharacteristicsService.name,
-                    'getTotalCountOfCharacteristics',
+            .get(environment.permissionSearchUrl + '/v3/total/characteristics', options)
+            .pipe(
+                catchError(
+                    this.errorHandlerService.handleError(
+                        CharacteristicsService.name,
+                        'getTotalCountOfCharacteristics',
+                    ),
                 ),
-            ),
-        );
+            );
     }
 
     userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]      
+        return this.authorizations['DELETE'];
     }
 
     userHasUpdateAuthorization(): boolean {
-        return this.authorizations["PUT"]     
+        return this.authorizations['PUT'];
     }
 
     userHasCreateAuthorization(): boolean {
-        return this.authorizations["POST"]   
+        return this.authorizations['POST'];
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]     
+        return this.authorizations['GET'];
     }
 }

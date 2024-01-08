@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
-import {environment} from "src/environments/environment";
+import {environment} from 'src/environments/environment';
 import { Observable, catchError, map } from 'rxjs';
 import { BillingInformationModel } from './billing.model';
 
@@ -28,26 +28,26 @@ import { BillingInformationModel } from './billing.model';
     providedIn: 'root',
 })
 export class BillingService {
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.billingApiUrl + '/billing-components')
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.billingApiUrl + '/billing-components');
     }
 
     userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]      
+        return this.authorizations['DELETE'];
     }
 
     userHasUpdateAuthorization(): boolean {
-        return this.authorizations["POST"]    
+        return this.authorizations['POST'];
     }
 
     userHasCreateAuthorization(): boolean {
-        return this.authorizations["POST"]   
+        return this.authorizations['POST'];
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]  
+        return this.authorizations['GET'];
     }
 
     getAvailable(): Observable<Date[]> {
@@ -55,7 +55,7 @@ export class BillingService {
             catchError(
                 this.errorHandlerService.handleError(BillingService.name, 'getAvailable: Error', []),
             ),
-            map((resp) => resp.map(x => new Date(x))),            
+            map((resp) => resp.map(x => new Date(x))),
         );
     }
 

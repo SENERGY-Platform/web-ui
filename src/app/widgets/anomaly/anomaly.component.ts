@@ -6,15 +6,15 @@ import { AnomalyResultModel } from './shared/anomaly.model';
 import { AnomalyService } from './shared/anomaly.service';
 
 @Component({
-  selector: 'senergy-anomaly-detection',
-  templateUrl: './anomaly.component.html',
-  styleUrls: ['./anomaly.component.css']
+    selector: 'senergy-anomaly-detection',
+    templateUrl: './anomaly.component.html',
+    styleUrls: ['./anomaly.component.css']
 })
 export class AnomalyComponent implements OnInit {
-  ready: boolean = false
-  refreshing: boolean = false;
-  destroy = new Subscription();
-  anomaly: AnomalyResultModel = {} as AnomalyResultModel;
+    ready = false;
+    refreshing = false;
+    destroy = new Subscription();
+    anomaly: AnomalyResultModel = {} as AnomalyResultModel;
 
   @Input() dashboardId = '';
   @Input() widget: WidgetModel = {} as WidgetModel;
@@ -29,40 +29,40 @@ export class AnomalyComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-      this.update()
+      this.update();
   }
 
   private update() {
-    this.destroy = this.dashboardService.initWidgetObservable.pipe(
-      concatMap((event: string) => {
-        if (event === 'reloadAll' || event === this.widget.id) {
-            this.refreshing = true;
-            return this.loadAnomaly()
-        }
-        return of()
-      })).subscribe({
-        next: (_) => {
-          this.ready = true
-          this.refreshing = false
-        },
-        error: (_) => {
-          this.ready = true
-          this.refreshing = false
-        }
-      })
+      this.destroy = this.dashboardService.initWidgetObservable.pipe(
+          concatMap((event: string) => {
+              if (event === 'reloadAll' || event === this.widget.id) {
+                  this.refreshing = true;
+                  return this.loadAnomaly();
+              }
+              return of();
+          })).subscribe({
+          next: (_) => {
+              this.ready = true;
+              this.refreshing = false;
+          },
+          error: (_) => {
+              this.ready = true;
+              this.refreshing = false;
+          }
+      });
   }
 
   edit() {
-    this.anomalyService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization)
+      this.anomalyService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
   }
 
   loadAnomaly(): Observable<any> {
-   return this.anomalyService.getAnomaly(this.widget).pipe(
-     map((anomaly) => {
-       if(anomaly != null) {
-        this.anomaly = anomaly
-       }
-     })
-   )
+      return this.anomalyService.getAnomaly(this.widget).pipe(
+          map((anomaly) => {
+              if(anomaly != null) {
+                  this.anomaly = anomaly;
+              }
+          })
+      );
   }
 }

@@ -105,15 +105,15 @@ export class SingleValueEditDialogComponent implements OnInit {
         timestampConfig: this.fb.group({
             showTimestamp: new FormControl<boolean>(false),
             highlightTimestamp: new FormControl<boolean>(false),
-            warningTimeLevel: new FormControl<string>("d"),
+            warningTimeLevel: new FormControl<string>('d'),
             warningAge: new FormControl<Number>(1),
-            problemTimeLevel: new FormControl<string>("d"),
+            problemTimeLevel: new FormControl<string>('d'),
             problemAge: new FormControl<Number>(7),
         })
     });
 
-    userHasUpdateNameAuthorization: boolean = false
-    userHasUpdatePropertiesAuthorization: boolean = false
+    userHasUpdateNameAuthorization = false;
+    userHasUpdatePropertiesAuthorization = false;
 
     constructor(
         private dialogRef: MatDialogRef<SingleValueEditDialogComponent>,
@@ -127,9 +127,9 @@ export class SingleValueEditDialogComponent implements OnInit {
         private conceptsService: ConceptsService,
         @Inject(MAT_DIALOG_DATA) data: {
             dashboardId: string;
-            widgetId: string,
+            widgetId: string;
             userHasUpdateNameAuthorization: boolean;
-            userHasUpdatePropertiesAuthorization: boolean
+            userHasUpdatePropertiesAuthorization: boolean;
         },
     ) {
         this.dashboardId = data.dashboardId;
@@ -170,7 +170,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             this.paths = this.deviceTypeService.getValuePaths(service.outputs[0].content_variable).map(x => ({ Name: x }));
         });
         this.form.get('deviceGroupCriteria')?.valueChanges.subscribe(criteria => {
-            const update = function (that: SingleValueEditDialogComponent) {
+            const update = function(that: SingleValueEditDialogComponent) {
                 if (that.functions.length === 0) { //delay until functions populated
                     setTimeout(() => update(that), 100);
                     return;
@@ -179,7 +179,7 @@ export class SingleValueEditDialogComponent implements OnInit {
                 if (conceptId !== undefined) {
                     that.conceptsService.getConceptWithCharacteristics(conceptId).subscribe(c => that.concept = c);
                 }
-            }
+            };
             update(this);
         });
         this.form.get('vAxisLabel')?.valueChanges.subscribe(unit => {
@@ -217,7 +217,7 @@ export class SingleValueEditDialogComponent implements OnInit {
                     warningAge: this.widget.properties.timestampConfig.warningAge,
                     problemTimeLevel: this.widget.properties.timestampConfig.problemTimeLevel,
                     problemAge: this.widget.properties.timestampConfig.problemAge,
-                })
+                });
             }
 
             this.form.get('group')?.patchValue({
@@ -253,7 +253,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     initDeviceGroups() {
-        this.deviceGroupsService.getDeviceGroups('', 10000, 0, "name", "asc").pipe(mergeMap(deviceGroups => {
+        this.deviceGroupsService.getDeviceGroups('', 10000, 0, 'name', 'asc').pipe(mergeMap(deviceGroups => {
             this.deviceGroups = deviceGroups;
             const ascpectIds: Map<string, null> = new Map();
             const functionIds: Map<string, null> = new Map();
@@ -266,7 +266,7 @@ export class SingleValueEditDialogComponent implements OnInit {
                     deviceClassids.set(c.device_class_id, null);
                     if (criteria.findIndex(c2 => c.aspect_id === c2.aspect_id && c.function_id === c2.function_id && c.device_class_id === c2.device_class_id) === -1) {
                         // filters interaction, irrelevant for widget
-                        c.interaction = "";
+                        c.interaction = '';
                         criteria.push(c);
                     }
                 });
@@ -286,8 +286,8 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        var newName = this.form.get('name')?.value || '';
-        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName)
+        const newName = this.form.get('name')?.value || '';
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName);
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
@@ -314,24 +314,24 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.widget.properties.deviceGroupAggregation = this.form.get('deviceGroupAggregation')?.value || undefined;
         this.widget.properties.timestampConfig = this.form.get('timestampConfig')?.value || undefined;
 
-        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
     }
 
     save(): void {
-        var obs = []
+        const obs = [];
         if (this.userHasUpdateNameAuthorization) {
-            obs.push(this.updateName())
+            obs.push(this.updateName());
         }
         if (this.userHasUpdatePropertiesAuthorization) {
-            obs.push(this.updateProperties())
+            obs.push(this.updateProperties());
         }
 
         forkJoin(obs).subscribe(responses => {
-            var errorOccured = responses.find((response) => response.message != "OK")
+            const errorOccured = responses.find((response) => response.message != 'OK');
             if (!errorOccured) {
                 this.dialogRef.close(this.widget);
             }
-        })
+        });
     }
 
     displayFn(input?: ChartsExportMeasurementModel): string {
@@ -377,7 +377,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     describeCriteria(): (criteria: DeviceGroupCriteriaModel) => string {
-        return criteria => (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + " " + (criteria.device_class_id !== "" ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || "" : "") + " " + (criteria.aspect_id !== "" ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || "" : "");
+        return criteria => (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
     }
 
     getDisplay(c: DeviceTypeCharacteristicsModel): string {

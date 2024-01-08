@@ -32,7 +32,7 @@ export class AppComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.storeSubject()
+        this.storeSubject();
         this.themingService.applyTheme();
     }
 

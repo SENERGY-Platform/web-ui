@@ -35,8 +35,8 @@ export class ToolbarComponent implements OnInit {
     header = '';
     notifications: NotificationModel[] = [];
     unreadCounter = 0;
-    userHasSettingsUpdateAuthorization: boolean = false
-    userHasNotificationsReadAuthorization: boolean = false
+    userHasSettingsUpdateAuthorization = false;
+    userHasNotificationsReadAuthorization = false;
 
     constructor(
         private sidenavService: SidenavService,
@@ -57,13 +57,13 @@ export class ToolbarComponent implements OnInit {
             this.notifications = n;
             this.notifications.forEach((no) => (!no.isRead ? this.unreadCounter++ : null));
         });
-        this.checkAuthorization()
+        this.checkAuthorization();
     }
 
     checkAuthorization() {
-        this.userHasSettingsUpdateAuthorization = this.settingsDialogService.userHasUpdateAuthorization()
+        this.userHasSettingsUpdateAuthorization = this.settingsDialogService.userHasUpdateAuthorization();
 
-        this.userHasNotificationsReadAuthorization = this.notificationService.userHasReadAuthorization()
+        this.userHasNotificationsReadAuthorization = this.notificationService.userHasReadAuthorization();
     }
 
     toggle(sidenavOpen: boolean): void {

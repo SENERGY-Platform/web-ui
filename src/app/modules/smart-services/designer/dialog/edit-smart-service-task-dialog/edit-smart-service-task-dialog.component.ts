@@ -294,8 +294,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     private setAceJsCompleter(session: any, pos: any, callback: any){
-        let that = this;
-        completer.getCompletions(null, session, pos, null, function (_: any, completers: { caption: string, value: string, meta: string }[]) {
+        const that = this;
+        completer.getCompletions(null, session, pos, null, function(_: any, completers: { caption: string; value: string; meta: string }[]) {
             if (!completers) {
                 completers = [];
             }
@@ -303,29 +303,29 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             completers.push({
                 caption: 'filter criteria struct',
                 value: 'var criteria = '+JSON.stringify({
-                    aspect_id: "",
-                    device_class_id: "",
-                    function_id: "",
-                    interaction: ""
+                    aspect_id: '',
+                    device_class_id: '',
+                    function_id: '',
+                    interaction: ''
                 } as Criteria)+'/*remove unused fields*/',
                 meta: 'static'
-            })
+            });
 
             that.functions.forEach(value => {
                 completers.push({
                     caption: 'function: '+value.name,
                     value: `"${value.id}"/*${value.name}*/`,
                     meta: 'static'
-                })
-            })
+                });
+            });
 
             that.deviceClasses.forEach(value => {
                 completers.push({
                     caption: 'device-class: '+value.name,
                     value: `"${value.id}"/*${value.name}*/`,
                     meta: 'static'
-                })
-            })
+                });
+            });
 
             that.nestedAspects.forEach((list, _) => {
                 list.forEach(value => {
@@ -333,18 +333,18 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                         caption: 'aspect: '+value.name,
                         value: `"${value.id}"/*${value.name}*/`,
                         meta: 'static'
-                    })
-                })
-            })
+                    });
+                });
+            });
 
-            let interactions: String[] = ["event", "request", "event+request"];
+            const interactions: String[] = ['event', 'request', 'event+request'];
             interactions.forEach(value => {
                 completers.push({
                     caption: 'interaction: '+value,
                     value: `"${value}"`,
                     meta: 'static'
-                })
-            })
+                });
+            });
 
 
             callback(null, completers);

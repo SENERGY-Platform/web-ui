@@ -27,7 +27,7 @@ import {forkJoin, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {
     TimescaleRulesCreateEditTemplateComponent
-} from "./timescale-rules-create-edit-template/timescale-rules-create-edit-template.component";
+} from './timescale-rules-create-edit-template/timescale-rules-create-edit-template.component';
 
 @Component({
     selector: 'senergy-timescale-rules',

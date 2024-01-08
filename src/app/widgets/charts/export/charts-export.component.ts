@@ -56,7 +56,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     onResize() {
         if (this.resizeTimeout === 0) {
             this.resizeTimeout = window.setTimeout(() => {
-                this.resizeChart()
+                this.resizeChart();
                 if (this.chartExportData.dataTable[0].length > 0) {
                     this.chartExport.draw();
                 }
@@ -69,9 +69,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     // This is needed so the element is not undefined when called later to draw
     private chartExport!: GoogleChartComponent;
     @ViewChild('chartExport', {static: false}) set content(content: GoogleChartComponent) {
-       if(content) { // initially setter gets called with undefined
-           this.chartExport = content;
-       }
+        if(content) { // initially setter gets called with undefined
+            this.chartExport = content;
+        }
     }
 
     constructor(
@@ -118,7 +118,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         }
     }
 
-    
+
     private resizeChart() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
 
@@ -127,7 +127,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             this.chartExportData.options.width = element.width;
             if (this.chartExportData.options.chartArea) {
                 this.chartExportData.options.chartArea.height = element.heightPercentage;
-                this.chartExportData.options.chartArea.width = element.widthPercentage; 
+                this.chartExportData.options.chartArea.width = element.widthPercentage;
             }
         }
     }
@@ -171,8 +171,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                     }
                     this.ready = true;
                     this.refreshing = false;
-                    this.resizeChart()
-                    this.chartExport?.draw()
+                    this.resizeChart();
+                    this.chartExport?.draw();
                 }
                 this.size = (this.chartExportData?.dataTable?.length || 0) * ((this.chartExportData?.dataTable?.[0]?.length || 0) - 1);
                 if (this.size > this.sizeLimit) {

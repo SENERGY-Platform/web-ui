@@ -32,22 +32,22 @@ import { MatSelectModule } from '@angular/material/select';
 
 
 @NgModule({
-  declarations: [
-    CostOverviewComponent,
-    CostElementComponent
-  ],
-  imports: [
-    CommonModule,
-    RouterModule.forChild([ { path: 'costs/overview', pathMatch: 'full', component: CostOverviewComponent, data: { header: 'Cost Overview' } }]),
-    MatExpansionModule,
-    CoreModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatFormFieldModule,
-    MatDatepickerModule,
-    ReactiveFormsModule,
-    MatInputModule,
-    MatSelectModule,
-  ]
+    declarations: [
+        CostOverviewComponent,
+        CostElementComponent
+    ],
+    imports: [
+        CommonModule,
+        RouterModule.forChild([ { path: 'costs/overview', pathMatch: 'full', component: CostOverviewComponent, data: { header: 'Cost Overview' } }]),
+        MatExpansionModule,
+        CoreModule,
+        MatIconModule,
+        MatTooltipModule,
+        MatFormFieldModule,
+        MatDatepickerModule,
+        ReactiveFormsModule,
+        MatInputModule,
+        MatSelectModule,
+    ]
 })
 export class CostModule { }

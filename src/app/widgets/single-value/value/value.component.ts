@@ -28,7 +28,7 @@ export class ValueComponent {
     @Input() widget: WidgetModel | undefined;
     @Input() sv: SingleValueModel | undefined;
 
-  maxFontSize() {
-    return this.widget?.properties?.threshold ? this.widget.properties.threshold : 128;
-  }
+    maxFontSize() {
+        return this.widget?.properties?.threshold ? this.widget.properties.threshold : 128;
+    }
 }

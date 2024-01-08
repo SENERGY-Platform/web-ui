@@ -14,12 +14,12 @@ interface QueryListCommons {
     rights?: string;
     sort_by?: string;
     sort_desc?: boolean;
-    add_id_modifier?: UrlValues
+    add_id_modifier?: UrlValues;
 }
 
 interface Condition {
     feature: string;
-    operation: "==" | "!=" | "any_value_in_feature"
+    operation: '==' | '!=' | 'any_value_in_feature';
     value: any;
     ref?: string;
 }

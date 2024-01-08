@@ -116,7 +116,7 @@ export class ChartsProcessInstancesService {
             width: element.width,
             pieSliceText: 'none',
             legend: {
-                'position': 'labeled',
+                position: 'labeled',
             }
         });
     }

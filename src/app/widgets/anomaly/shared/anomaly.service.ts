@@ -77,46 +77,46 @@ export class AnomalyService {
             requestPayload.push({
                 exportId: m.id,
                 measurement: m.id,
-                columnName: "value",
+                columnName: 'value',
             });
             requestPayload.push({
                 exportId: m.id,
                 measurement: m.id,
-                columnName: "type",
+                columnName: 'type',
             });
             requestPayload.push({
                 exportId: m.id,
                 measurement: m.id,
-                columnName: "sub_type",
+                columnName: 'sub_type',
             });
             requestPayload.push({
                 exportId: m.id,
                 measurement: m.id,
-                columnName: "unit",
+                columnName: 'unit',
             });
             requestPayload.push({
                 exportId: m.id,
                 measurement: m.id,
-                columnName: "time"
+                columnName: 'time'
             });
 
             let o: Observable < TimeValuePairModel[] > | undefined;
             switch (m.exportDatabaseId) {
-                case environment.exportDatabaseIdInternalTimescaleDb:
-                    o = this.exportDataService.getLastValuesTimescale(requestPayload);
-                    break;
-                case undefined:
-                case environment.exportDatabaseIdInternalInfluxDb:
-                    o = this.exportDataService.getLastValuesInflux(requestPayload as LastValuesRequestElementInfluxModel[]);
-                    break;
-                default:
-                    console.error('cant load data of this export: not internal');
-                    return of();
+            case environment.exportDatabaseIdInternalTimescaleDb:
+                o = this.exportDataService.getLastValuesTimescale(requestPayload);
+                break;
+            case undefined:
+            case environment.exportDatabaseIdInternalInfluxDb:
+                o = this.exportDataService.getLastValuesInflux(requestPayload as LastValuesRequestElementInfluxModel[]);
+                break;
+            default:
+                console.error('cant load data of this export: not internal');
+                return of();
             }
             return o.pipe(
                 map((pairs) => {
                     if (pairs.length !== 5) {
-                        return null
+                        return null;
                     }
                     const model: AnomalyResultModel = {
                         value: pairs[0].value as string,
@@ -125,10 +125,10 @@ export class AnomalyService {
                         unit: pairs[3].value as string,
                         timestamp: pairs[4].value as string,
                     };
-                    return model
+                    return model;
                 })
-            )
+            );
         }
-        return of()
+        return of();
     }
 }

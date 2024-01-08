@@ -27,51 +27,51 @@ import {FormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import {animate, state, style, transition, trigger,} from '@angular/animations';
 
-var DateDiff = {
-    inSeconds: function(d1: Date, d2: Date) {
-        var t2 = d2.getTime();
-        var t1 = d1.getTime();
- 
+const DateDiff = {
+    inSeconds(d1: Date, d2: Date) {
+        const t2 = d2.getTime();
+        const t1 = d1.getTime();
+
         return Math.floor((t2-t1)/(1000));
     },
 
-    inMinutes: function(d1: Date, d2: Date) {
-        var t2 = d2.getTime();
-        var t1 = d1.getTime();
- 
+    inMinutes(d1: Date, d2: Date) {
+        const t2 = d2.getTime();
+        const t1 = d1.getTime();
+
         return Math.floor((t2-t1)/(60*1000));
     },
 
-    inHours: function(d1: Date, d2: Date) {
-        var t2 = d2.getTime();
-        var t1 = d1.getTime();
- 
+    inHours(d1: Date, d2: Date) {
+        const t2 = d2.getTime();
+        const t1 = d1.getTime();
+
         return Math.floor((t2-t1)/(60*60*1000));
     },
 
-    inDays: function(d1: Date, d2: Date) {
-        var t2 = d2.getTime();
-        var t1 = d1.getTime();
- 
+    inDays(d1: Date, d2: Date) {
+        const t2 = d2.getTime();
+        const t1 = d1.getTime();
+
         return Math.floor((t2-t1)/(24*3600*1000));
     },
- 
-    inWeeks: function(d1: Date, d2: Date) {
-        var t2 = d2.getTime();
-        var t1 = d1.getTime();
- 
+
+    inWeeks(d1: Date, d2: Date) {
+        const t2 = d2.getTime();
+        const t1 = d1.getTime();
+
         return Math.floor((t2-t1)/(7*24*3600*1000));
     },
- 
-    inMonths: function(d1: Date, d2: Date) {
-        var d1Y = d1.getFullYear();
-        var d2Y = d2.getFullYear();
-        var d1M = d1.getMonth();
-        var d2M = d2.getMonth();
- 
+
+    inMonths(d1: Date, d2: Date) {
+        const d1Y = d1.getFullYear();
+        const d2Y = d2.getFullYear();
+        const d1M = d1.getMonth();
+        const d2M = d2.getMonth();
+
         return (d2M+12*d2Y)-(d1M+12*d1Y);
     },
-}
+};
 
 @Component({
     selector: 'senergy-single-value',
@@ -108,9 +108,9 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     ready = false;
     refreshing = false;
     configured = false;
-    showTimestamp: boolean = false;
-    timestamp?: string
-    timestampAgeClass: string = ""
+    showTimestamp = false;
+    timestamp?: string;
+    timestampAgeClass = '';
     error = false;
     destroy = new Subscription();
     marginLeft = '0';
@@ -191,7 +191,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
 
         this.loadSingleValue().pipe(
             map((_) => {
-                this.showTimestamp = this.widget.properties.timestampConfig?.showTimestamp == true
+                this.showTimestamp = this.widget.properties.timestampConfig?.showTimestamp == true;
                 this.setTimestampColor();
             })
         ).subscribe({
@@ -205,7 +205,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
                 this.refreshing = false;
                 this.error = true;
             }
-        })
+        });
 
     }
 
@@ -243,7 +243,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
                         }
                     }
                 }
-                return sv
+                return sv;
             })
         );
     }
@@ -251,68 +251,68 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     private setConfigured() {
         this.configured = this.widget.properties.measurement !== undefined;
     }
-    
 
-    private setTimestampColor() {  
+
+    private setTimestampColor() {
         if(!this.widget.properties.timestampConfig?.highlightTimestamp) {
-            this.timestampAgeClass = "no-age"
-            return
+            this.timestampAgeClass = 'no-age';
+            return;
         }
 
-        var date: Date
+        let date: Date;
         if(this.sv !== undefined) {
-            date = this.sv.date
+            date = this.sv.date;
         } else {
-            date = this.svList[this.svListIndex].date
+            date = this.svList[this.svListIndex].date;
         }
-        this.timestampAgeClass = "age-okay"
+        this.timestampAgeClass = 'age-okay';
 
-        var timeSinceLastValue: number
+        let timeSinceLastValue: number;
         switch(this.widget.properties.timestampConfig?.warningTimeLevel) {
-            case("s"):
-                timeSinceLastValue = DateDiff.inSeconds(date, new Date())
-                break
-            case("min"):
-                timeSinceLastValue = DateDiff.inMinutes(date, new Date())
-                break
-            case("h"):
-                timeSinceLastValue = DateDiff.inHours(date, new Date())
-                break
-            case("d"):
-                timeSinceLastValue = DateDiff.inDays(date, new Date())
-                break
-            case("m"):
-                timeSinceLastValue = DateDiff.inMonths(date, new Date())
-                break
-            default:
-                return
+        case('s'):
+            timeSinceLastValue = DateDiff.inSeconds(date, new Date());
+            break;
+        case('min'):
+            timeSinceLastValue = DateDiff.inMinutes(date, new Date());
+            break;
+        case('h'):
+            timeSinceLastValue = DateDiff.inHours(date, new Date());
+            break;
+        case('d'):
+            timeSinceLastValue = DateDiff.inDays(date, new Date());
+            break;
+        case('m'):
+            timeSinceLastValue = DateDiff.inMonths(date, new Date());
+            break;
+        default:
+            return;
         }
         if(timeSinceLastValue >= this.widget.properties.timestampConfig?.warningAge) {
-            this.timestampAgeClass = "age-warning"
-        } 
+            this.timestampAgeClass = 'age-warning';
+        }
 
         switch(this.widget.properties.timestampConfig?.problemTimeLevel) {
-            case("s"):
-                timeSinceLastValue = DateDiff.inSeconds(date, new Date())
-                break
-            case("min"):
-                timeSinceLastValue = DateDiff.inMinutes(date, new Date())
-                break
-            case("h"):
-                timeSinceLastValue = DateDiff.inHours(date, new Date())
-                break
-            case("d"):
-                timeSinceLastValue = DateDiff.inDays(date, new Date())
-                break
-            case("m"):
-                timeSinceLastValue = DateDiff.inMonths(date, new Date())
-                break
-            default:
-                return
+        case('s'):
+            timeSinceLastValue = DateDiff.inSeconds(date, new Date());
+            break;
+        case('min'):
+            timeSinceLastValue = DateDiff.inMinutes(date, new Date());
+            break;
+        case('h'):
+            timeSinceLastValue = DateDiff.inHours(date, new Date());
+            break;
+        case('d'):
+            timeSinceLastValue = DateDiff.inDays(date, new Date());
+            break;
+        case('m'):
+            timeSinceLastValue = DateDiff.inMonths(date, new Date());
+            break;
+        default:
+            return;
         }
 
         if(timeSinceLastValue >= this.widget.properties.timestampConfig?.problemAge) {
-            this.timestampAgeClass = "age-problem"
+            this.timestampAgeClass = 'age-problem';
         }
     }
 

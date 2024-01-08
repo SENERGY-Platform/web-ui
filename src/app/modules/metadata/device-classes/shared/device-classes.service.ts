@@ -29,16 +29,16 @@ import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/pe
     providedIn: 'root',
 })
 export class DeviceClassesService {
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
-        private http: HttpClient, 
+        private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        var permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-classes'
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(permSearchURL)
-    
+        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-classes';
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(permSearchURL);
+
     }
 
     getDeviceClasses(
@@ -87,34 +87,34 @@ export class DeviceClassesService {
 
     getTotalCountOfDevicesClasses(searchText: string): Observable<any> {
         const options = searchText ?
-        { params: new HttpParams().set('search', searchText) } : {};
+            { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/device-classes', options)
-        .pipe(
-            catchError(
-                this.errorHandlerService.handleError(
-                    DeviceClassesService.name,
-                    'getTotalCountOfDevicesClasses',
+            .get(environment.permissionSearchUrl + '/v3/total/device-classes', options)
+            .pipe(
+                catchError(
+                    this.errorHandlerService.handleError(
+                        DeviceClassesService.name,
+                        'getTotalCountOfDevicesClasses',
+                    ),
                 ),
-            ),
-        );
-    }
-    
-    userHasDeleteAuthorization():boolean {
-        return this.authorizations["DELETE"]      
+            );
     }
 
-    userHasUpdateAuthorization():boolean {
-        return this.authorizations["PUT"]   
+    userHasDeleteAuthorization(): boolean {
+        return this.authorizations['DELETE'];
     }
 
-    userHasCreateAuthorization():boolean {
-        return this.authorizations["POST"]   
+    userHasUpdateAuthorization(): boolean {
+        return this.authorizations['PUT'];
     }
 
-    userHasReadAuthorization():boolean {
-        return this.authorizations["GET"]  
+    userHasCreateAuthorization(): boolean {
+        return this.authorizations['POST'];
+    }
+
+    userHasReadAuthorization(): boolean {
+        return this.authorizations['GET'];
     }
 
 }

@@ -11,16 +11,16 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 
 
 @NgModule({
-  declarations: [
-    InfoDialogComponent
-  ],
-  imports: [
-    CommonModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    FlexLayoutModule
-  ]
+    declarations: [
+        InfoDialogComponent
+    ],
+    imports: [
+        CommonModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        FlexLayoutModule
+    ]
 })
 export class InfoModule { }

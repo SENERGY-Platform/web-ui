@@ -3,22 +3,22 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-info',
-  templateUrl: './info.component.html',
-  styleUrls: ['./info.component.css']
+    selector: 'app-info',
+    templateUrl: './info.component.html',
+    styleUrls: ['./info.component.css']
 })
 export class InfoDialogComponent {
-  commit: string = ""
-  version: string = ""
+    commit = '';
+    version = '';
 
-  constructor(
+    constructor(
     private dialogRef: MatDialogRef<InfoDialogComponent>,
-  ) {
-    this.commit = environment.commit
-    this.version = environment.version
-  }
+    ) {
+        this.commit = environment.commit;
+        this.version = environment.version;
+    }
 
-  close(): void {
-    this.dialogRef.close();
-  }
+    close(): void {
+        this.dialogRef.close();
+    }
 }

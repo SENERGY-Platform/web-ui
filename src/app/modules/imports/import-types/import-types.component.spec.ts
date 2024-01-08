@@ -61,11 +61,11 @@ describe('ImportTypesComponent', () => {
     importTypesServiceSpy.listImportTypes.and.returnValue(of([permSearchModelExample] as ImportTypePermissionSearchModel[]));
 
     importTypesServiceSpy.deleteImportInstance.and.returnValue(of());
-    importTypesServiceSpy.userHasUpdateAuthorization.and.returnValue(of(true))
-    importTypesServiceSpy.userHasDeleteAuthorization.and.returnValue(of(true))
-    importTypesServiceSpy.userHasCreateAuthorization.and.returnValue(of(true))
-    importTypesServiceSpy.getTotalCountOfTypes.and.returnValue(of(0))
-    
+    importTypesServiceSpy.userHasUpdateAuthorization.and.returnValue(of(true));
+    importTypesServiceSpy.userHasDeleteAuthorization.and.returnValue(of(true));
+    importTypesServiceSpy.userHasCreateAuthorization.and.returnValue(of(true));
+    importTypesServiceSpy.getTotalCountOfTypes.and.returnValue(of(0));
+
     const deleteDialogServiceSpy: Spy<DialogsService> = createSpyFromClass(DialogsService);
     deleteDialogServiceSpy.openDeleteDialog.and.returnValue({afterClosed: () => of(true)});
 
@@ -128,7 +128,7 @@ describe('ImportTypesComponent', () => {
     });
 
     it('should create and load data', () => {
-        searchbarSpy.currentSearchText.nextWith("search")
+        searchbarSpy.currentSearchText.nextWith('search');
         expect(component).toBeTruthy();
         expect(importTypesServiceSpy.listImportTypes).toHaveBeenCalled();
     });
@@ -142,7 +142,7 @@ describe('ImportTypesComponent', () => {
     it('should search', () =>  {
         importTypesServiceSpy.listImportTypes.calls.reset();
         component.ngOnInit();
-        searchbarSpy.currentSearchText.nextWith("search")
+        searchbarSpy.currentSearchText.nextWith('search');
         expect(importTypesServiceSpy.listImportTypes.calls.mostRecent().args[0]).toEqual('search');
     });
 

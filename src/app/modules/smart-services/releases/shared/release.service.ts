@@ -28,10 +28,10 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class SmartServiceReleasesService {
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.smartServiceRepoUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.smartServiceRepoUrl);
     }
 
     getExtendedReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean): Observable<SmartServiceExtendedReleaseModel[]> {
@@ -94,6 +94,6 @@ export class SmartServiceReleasesService {
     }
 
     userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]      
+        return this.authorizations['DELETE'];
     }
 }

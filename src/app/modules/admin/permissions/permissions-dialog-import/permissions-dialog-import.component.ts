@@ -21,8 +21,8 @@ import {FormControl, UntypedFormControl, Validators} from '@angular/forms';
 import {MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {PermissionImportModel} from './permissions-dialog-import.model';
-import {MatPaginator} from "@angular/material/paginator";
-import {Subscription} from "rxjs";
+import {MatPaginator} from '@angular/material/paginator';
+import {Subscription} from 'rxjs';
 import { PermissionModel } from '../shared/permission.model';
 
 @Component({

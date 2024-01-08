@@ -57,7 +57,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     sortAttributes = [new SortModel('Date', 'deploymentTime', 'desc'), new SortModel('Name', 'name', 'asc')];
     ready = false;
 
-    userHasDeleteAuthorization: boolean = false
+    userHasDeleteAuthorization = false;
 
     private searchText = '';
     private limitInit = 54;
@@ -112,7 +112,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     ngOnInit() {
-        this.userHasDeleteAuthorization = this.platformDeploymentsService.userHasDeleteAuthorization()
+        this.userHasDeleteAuthorization = this.platformDeploymentsService.userHasDeleteAuthorization();
 
         this.hubsService.listSyncNetworks().subscribe((result) => {
             this.hubList = result;

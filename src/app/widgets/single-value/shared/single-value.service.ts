@@ -123,7 +123,7 @@ export class SingleValueService {
                 requestPayload[0].limit = 1;
             }
 
-            const queryMultiple = function () {
+            const queryMultiple = function() {
                 if (date === undefined || requestPayload[0].time === undefined) {
                     return;
                 }
@@ -147,17 +147,17 @@ export class SingleValueService {
                 (requestPayload[0] as QueriesRequestElementInfluxModel).measurement = m.id;
                 (requestPayload[0] as QueriesRequestElementTimescaleModel).exportId = m.id;
                 switch (m.exportDatabaseId) {
-                    case environment.exportDatabaseIdInternalTimescaleDb:
-                        queryMultiple();
-                        o = this.exportDataService.queryTimescale(requestPayload);
-                        break;
-                    case undefined:
-                    case environment.influxAPIURL:
-                        queryMultiple();
-                        o = this.exportDataService.queryInflux(requestPayload as QueriesRequestElementInfluxModel[]);
-                        break;
-                    default:
-                        return throwError(() => 'cant load data of this export: not internal')
+                case environment.exportDatabaseIdInternalTimescaleDb:
+                    queryMultiple();
+                    o = this.exportDataService.queryTimescale(requestPayload);
+                    break;
+                case undefined:
+                case environment.influxAPIURL:
+                    queryMultiple();
+                    o = this.exportDataService.queryInflux(requestPayload as QueriesRequestElementInfluxModel[]);
+                    break;
+                default:
+                    return throwError(() => 'cant load data of this export: not internal');
                 }
             }
             if (widget.properties.sourceType === 'device' || widget.properties.sourceType === 'deviceGroup') {
@@ -173,7 +173,7 @@ export class SingleValueService {
             }
 
             if (o == undefined) {
-                return throwError(() => 'cant load data of this export: not internal')
+                return throwError(() => 'cant load data of this export: not internal');
             }
             return o.pipe(
                 map((pairList: any) => {
@@ -199,40 +199,40 @@ export class SingleValueService {
                     }
                     res.sort((a, b) => a.date.valueOf() - b.date.valueOf());
                     switch (widget.properties.deviceGroupAggregation) {
-                        case SingleValueAggregations.Sum:
-                            if (requestPayload[0].limit === 1) {
-                                let sum = 0;
-                                res.forEach(r => sum += r.value as number);
-                                res = [{
-                                    value: sum,
-                                    type: res[res.length - 1].type,
-                                    date: res[res.length - 1].date
-                                }];
-                            } else {
-                                const res2: SingleValueModel[] = [];
-                                res.forEach(r => {
-                                    const elem = res2.find(r2 => r2.date.valueOf() === r.date.valueOf());
-                                    if (elem === undefined) {
-                                        res2.push(JSON.parse(JSON.stringify(r)));
-                                    } else {
-                                        const v = (elem.value as number) + (r.value as number);
-                                        elem.value = v;
-                                    }
-                                })
-                                res = res2;
-                            }
-                            break;
-                        case SingleValueAggregations.Latest:
-                        default:
-                            if (requestPayload[0].limit === 1) {
-                                res = [res[res.length - 1]];
-                            }
+                    case SingleValueAggregations.Sum:
+                        if (requestPayload[0].limit === 1) {
+                            let sum = 0;
+                            res.forEach(r => sum += r.value as number);
+                            res = [{
+                                value: sum,
+                                type: res[res.length - 1].type,
+                                date: res[res.length - 1].date
+                            }];
+                        } else {
+                            const res2: SingleValueModel[] = [];
+                            res.forEach(r => {
+                                const elem = res2.find(r2 => r2.date.valueOf() === r.date.valueOf());
+                                if (elem === undefined) {
+                                    res2.push(JSON.parse(JSON.stringify(r)));
+                                } else {
+                                    const v = (elem.value as number) + (r.value as number);
+                                    elem.value = v;
+                                }
+                            });
+                            res = res2;
+                        }
+                        break;
+                    case SingleValueAggregations.Latest:
+                    default:
+                        if (requestPayload[0].limit === 1) {
+                            res = [res[res.length - 1]];
+                        }
                     }
-                    return res
+                    return res;
                 })
-            )
+            );
         }
 
-        return of([])
+        return of([]);
     }
 }

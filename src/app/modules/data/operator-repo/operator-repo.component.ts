@@ -49,9 +49,9 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     userId: string | Error = '';
     shareUser = '';
 
-    userHasDeleteAuthorization: boolean = false
-    userHasUpdateAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false
+    userHasDeleteAuthorization = false;
+    userHasUpdateAuthorization = false;
+    userHasCreateAuthorization = false;
 
     private searchText = '';
     private searchSub: Subscription = new Subscription();
@@ -67,20 +67,20 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.userHasCreateAuthorization = this.operatorRepoService.userHasCreateAuthorization()
+        this.userHasCreateAuthorization = this.operatorRepoService.userHasCreateAuthorization();
 
         this.userId = this.auth.getUserId();
         this.initSearchAndGetOperators();
 
-        this.userHasDeleteAuthorization = this.operatorRepoService.userHasDeleteAuthorization()
+        this.userHasDeleteAuthorization = this.operatorRepoService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete')
+            this.displayedColumns.push('delete');
         }
-    
 
-        this.userHasUpdateAuthorization = this.operatorRepoService.userHasUpdateAuthorization()        
+
+        this.userHasUpdateAuthorization = this.operatorRepoService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit')
+            this.displayedColumns.push('edit');
         }
     }
 
@@ -141,8 +141,8 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
             .subscribe((resp: { operators: OperatorModel[]; totalCount: number }) => {
                 if (resp.operators.length > 0) {
                     this.operators = resp.operators;
-                    console.log(this.userId)
-                    console.log(resp.operators)
+                    console.log(this.userId);
+                    console.log(resp.operators);
                     this.operators.forEach((operator) => (operator.editable = operator.userId === this.userId));
                     this.operatorsDataSource.data = this.operators;
 

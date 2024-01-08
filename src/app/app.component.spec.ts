@@ -23,7 +23,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MockKeycloakService } from './core/services/keycloak.mock';
 import { AuthorizationServiceMock } from './core/services/authorization.service.mock';
-import {AuthorizationService} from "./core/services/authorization.service";
+import {AuthorizationService} from './core/services/authorization.service';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { SettingsDialogService } from './modules/settings/shared/settings-dialog.service';
 import { NotificationService } from './core/components/toolbar/notification/shared/notification.service';
@@ -34,24 +34,24 @@ describe('AppComponent', () => {
     let fixture: ComponentFixture<AppComponent>;
     const ladonServiceSpy: Spy<LadonService> = createSpyFromClass(LadonService);
     ladonServiceSpy.getUserAuthorizationsForURI.and.returnValue({
-        "GET": true,
-        "POST": false,
-        "DELETE": false,
-        "PUT": false,
-        "PATCH": false,
-        "HEAD": true,
-    })
+        GET: true,
+        POST: false,
+        DELETE: false,
+        PUT: false,
+        PATCH: false,
+        HEAD: true,
+    });
 
     const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService, {
         observablePropsToSpyOn: ['notificationEmitter']
-    })
+    });
 
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule],
             declarations: [AppComponent],
             providers: [
-                { provide: KeycloakService, useClass: MockKeycloakService }, 
+                { provide: KeycloakService, useClass: MockKeycloakService },
                 { provide: AuthorizationService, useClass: AuthorizationServiceMock },
                 { provide: LadonService, useValue: ladonServiceSpy},
                 { provide: NotificationService, useValue: notificationServiceSpy}

@@ -85,8 +85,8 @@ export class ChartsExportEditDialogComponent implements OnInit {
     ready = false;
     exportDeviceList: Map<string, ChartsExportMeasurementModel[] | DeviceInstancesModel[]> = new Map();
     emptyMap = new Map();
-    userHasUpdateNameAuthorization: boolean = false
-    userHasUpdatePropertiesAuthorization: boolean = false 
+    userHasUpdateNameAuthorization = false;
+    userHasUpdatePropertiesAuthorization = false;
 
     constructor(
         private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
@@ -98,11 +98,11 @@ export class ChartsExportEditDialogComponent implements OnInit {
         private deviceTypeService: DeviceTypeService,
         private _formBuilder: UntypedFormBuilder,
         private cd: ChangeDetectorRef,
-        @Inject(MAT_DIALOG_DATA) data: { 
-            dashboardId: string; 
-            widgetId: string; 
+        @Inject(MAT_DIALOG_DATA) data: {
+            dashboardId: string;
+            widgetId: string;
             userHasUpdateNameAuthorization: boolean;
-            userHasUpdatePropertiesAuthorization: boolean 
+            userHasUpdatePropertiesAuthorization: boolean;
         },
     ) {
         this.dashboardId = data.dashboardId;
@@ -282,32 +282,32 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        var newName = (this.formGroupController.get('name') as FormControl).value;
-        return this.dashboardService.updateWidgetName(this.dashboardId, this.widgetId, newName)
+        const newName = (this.formGroupController.get('name') as FormControl).value;
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widgetId, newName);
     }
-    
+
     updateProperties(): Observable<DashboardResponseMessageModel> {
         this.formGroupController.patchValue({properties: {vAxes: this.dataSource.data}});
-        var newProperties = (this.formGroupController.get('properties') as FormControl).value;
-        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widgetId, [], newProperties)
+        const newProperties = (this.formGroupController.get('properties') as FormControl).value;
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widgetId, [], newProperties);
     }
-    
+
     save(): void {
-        var obs = []
+        const obs = [];
         if(this.userHasUpdateNameAuthorization) {
-            obs.push(this.updateName())
+            obs.push(this.updateName());
         }
 
         if(this.userHasUpdatePropertiesAuthorization) {
-            obs.push(this.updateProperties())
-        }  
-        
+            obs.push(this.updateProperties());
+        }
+
         forkJoin(obs).subscribe(responses => {
-            var errorOccured = responses.find((response) => response.message != "OK")
+            const errorOccured = responses.find((response) => response.message != 'OK');
             if(!errorOccured) {
                 this.dialogRef.close(this.formGroupController.value);
             }
-        })
+        });
     }
 
     selectionChange(selectedExports: (ChartsExportMeasurementModel | DeviceInstancesModel)[]) {

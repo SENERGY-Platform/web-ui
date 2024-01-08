@@ -46,15 +46,15 @@ export class ExportService {
     typeBoolean = 'https://schema.org/Boolean';
     typeStructure = 'https://schema.org/StructuredValue';
     typeList = 'https://schema.org/ItemList';
-    authorizations: PermissionTestResponse  
-    
+    authorizations: PermissionTestResponse;
+
     constructor(
-        private http: HttpClient, 
-        private errorHandlerService: ErrorHandlerService, 
+        private http: HttpClient,
+        private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService,
         private deviceService: DeviceInstancesService
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.exportService)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.exportService);
     }
 
     getExports(
@@ -271,18 +271,18 @@ export class ExportService {
     }
 
     userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]      
+        return this.authorizations['DELETE'];
     }
 
     userHasUpdateAuthorization(): boolean {
-        return this.authorizations["PUT"]     
+        return this.authorizations['PUT'];
     }
 
     userHasCreateAuthorization(): boolean {
-        return this.authorizations["POST"]   
+        return this.authorizations['POST'];
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]  
+        return this.authorizations['GET'];
     }
 }

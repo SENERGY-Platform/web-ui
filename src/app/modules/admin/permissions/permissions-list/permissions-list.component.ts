@@ -84,10 +84,10 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
     private subscriptions: Subscription[] = [];
     total = 0;
-    selectedUser: string = ""
-    selectedRole: string = ""
-    selectedClientID: string = ""
-    selectedEndpoint: string = ""
+    selectedUser = '';
+    selectedRole = '';
+    selectedClientID = '';
+    selectedEndpoint = '';
 
     constructor(private authService: AuthorizationService,
                 private ladonService: LadonService,
@@ -334,21 +334,21 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
                         (this.selectedClientID && policy.subject != this.selectedClientID)
                     )
                 ) {
-                    filtered.push(policy)
+                    filtered.push(policy);
                 }
             } catch (e) {
-                    // Probably invalid regex, ignore in prod mode
-                    if (isDevMode()) {
-                        console.error('Error filtering policies',
-                            'This is most likely due to an invalid regex and you can ignore this error', e);
-                    }
+                // Probably invalid regex, ignore in prod mode
+                if (isDevMode()) {
+                    console.error('Error filtering policies',
+                        'This is most likely due to an invalid regex and you can ignore this error', e);
+                }
             }
-            
 
-            
+
+
         });
-        
-        this.sortData(this.sort, filtered)
+
+        this.sortData(this.sort, filtered);
     }
 
     public clearSearch() {

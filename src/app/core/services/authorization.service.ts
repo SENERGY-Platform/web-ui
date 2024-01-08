@@ -127,7 +127,7 @@ export class AuthorizationService implements HttpInterceptor {
     }
 
     getUserRoles(): string[] {
-        return this.keycloakService.getUserRoles(true)
+        return this.keycloakService.getUserRoles(true);
     }
 
     loadAllUsers() {

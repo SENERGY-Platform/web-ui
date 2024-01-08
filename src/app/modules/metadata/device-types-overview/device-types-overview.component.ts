@@ -37,25 +37,25 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./device-types-overview.component.css'],
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name', 'info', 'copy', 'new', 'show']
+    displayedColumns = ['select', 'name', 'info', 'copy', 'new', 'show'];
     pageSize = 20;
     deviceTypes: DeviceTypePermSearchModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     dataSource = new MatTableDataSource<DeviceTypePermSearchModel>();
     selection = new SelectionModel<DeviceTypePermSearchModel>(true, []);
-    totalCount = 200
+    totalCount = 200;
     offset = 0;
     searchControl = new UntypedFormControl('');
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
     private searchSub: Subscription = new Subscription();
-    searchText: string = ""
-    sortBy: string = "name"
-    sortDirection: SortDirection = "asc"
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false 
-    
+    searchText = '';
+    sortBy = 'name';
+    sortDirection: SortDirection = 'asc';
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
+    userHasCreateAuthorization = false;
+
     constructor(
         private searchbarService: SearchbarService,
         private deviceTypeService: DeviceTypeService,
@@ -68,45 +68,45 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.initSearch();
         this.loadDeviceClasses();
-        this.checkAuthorization()
+        this.checkAuthorization();
     }
 
     getTotalCounts() {
         return this.deviceTypeService.getTotalCountOfDevicesTypes(this.searchText).pipe(
             map((totalCount: number) => {
-                this.totalCount = totalCount
-                return totalCount
+                this.totalCount = totalCount;
+                return totalCount;
             })
-        )
+        );
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
-    
+
     matSortChange($event: Sort) {
-        this.sortBy = $event.active 
+        this.sortBy = $event.active;
         this.sortDirection = $event.direction;
         this.reload();
     }
 
     checkAuthorization() {
-        this.userHasUpdateAuthorization = this.deviceTypeService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.deviceTypeService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
-        this.userHasDeleteAuthorization = this.deviceTypeService.userHasDeleteAuthorization()
+        this.userHasDeleteAuthorization = this.deviceTypeService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
-        this.userHasCreateAuthorization = this.deviceTypeService.userHasCreateAuthorization()
+        this.userHasCreateAuthorization = this.deviceTypeService.userHasCreateAuthorization();
     }
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getDeviceTypes().subscribe()
+            this.getDeviceTypes().subscribe();
         });
     }
 
@@ -188,9 +188,9 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
             .pipe(
                 map((deviceTypes: DeviceTypePermSearchModel[]) => {
                     this.dataSource.data = deviceTypes;
-                    return deviceTypes
+                    return deviceTypes;
                 })
-            )
+            );
     }
 
 
@@ -198,8 +198,10 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.ready = false;
         this.selectionClear();
-        
-        forkJoin([this.getDeviceTypes(), this.getTotalCounts()]).subscribe(_ => {this.ready = true;})
+
+        forkJoin([this.getDeviceTypes(), this.getTotalCounts()]).subscribe(_ => {
+            this.ready = true;
+        });
     }
 
     private loadDeviceClasses(): void {
@@ -210,29 +212,29 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
 
     public deleteMultipleItems(): void {
         const deletionJobs: Observable<any>[] = [];
-        var text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' device types' : ' device type')
+        const text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' device types' : ' device type');
 
         this.dialogsService
-        .openDeleteDialog(text)
-        .afterClosed()
-        .subscribe((deletePipelines: boolean) => {
-            if (deletePipelines) {
-                this.ready = false;
-                this.selection.selected.forEach((deviceType: DeviceTypePermSearchModel) => {
-                    deletionJobs.push(this.deviceTypeService.deleteDeviceType(deviceType.id))    
-                });
-            }
-            
-            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                if (ok) {
-                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});            
-                } else {
-                    this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+            .openDeleteDialog(text)
+            .afterClosed()
+            .subscribe((deletePipelines: boolean) => {
+                if (deletePipelines) {
+                    this.ready = false;
+                    this.selection.selected.forEach((deviceType: DeviceTypePermSearchModel) => {
+                        deletionJobs.push(this.deviceTypeService.deleteDeviceType(deviceType.id));
+                    });
                 }
-                this.reload()
-            })
-        });
+
+                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                    }
+                    this.reload();
+                });
+            });
     }
 
     isAllSelected() {

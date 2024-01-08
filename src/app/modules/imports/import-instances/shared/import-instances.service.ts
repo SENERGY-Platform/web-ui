@@ -26,13 +26,13 @@ import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared
     providedIn: 'root',
 })
 export class ImportInstancesService {
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
-        private http: HttpClient, 
+        private http: HttpClient,
         private ladonService: LadonService
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.importDeployUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.importDeployUrl);
     }
 
     listImportInstances(
@@ -74,29 +74,29 @@ export class ImportInstancesService {
     }
 
     userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]      
+        return this.authorizations['DELETE'];
     }
 
     userHasUpdateAuthorization(): boolean {
-        return this.authorizations["PUT"]      
+        return this.authorizations['PUT'];
     }
 
     userHasCreateAuthorization(): boolean {
-        return this.authorizations["POST"]   
+        return this.authorizations['POST'];
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]   
+        return this.authorizations['GET'];
     }
 
     getTotalCountOfInstances(searchText: string, excludeGenerated: boolean): Observable<any> {
-        const options = {"params": {}}
-        var params = new HttpParams().set('exclude_generated', excludeGenerated)
+        const options = {params: {}};
+        let params = new HttpParams().set('exclude_generated', excludeGenerated);
         if(searchText) {
-            params = params.set('search', searchText)
+            params = params.set('search', searchText);
         }
-        options["params"] = params
+        options['params'] = params;
         return this.http
-        .get(environment.importDeployUrl + '/total/instances', options)
+            .get(environment.importDeployUrl + '/total/instances', options);
     }
 }

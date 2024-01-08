@@ -69,15 +69,15 @@ export function permissionToPermissionApi(model: PermissionModel): PermissionApi
 }
 
 export interface PermissionTestResponse {
-    GET: boolean; 
-    POST: boolean; 
-    PUT: boolean; 
-    PATCH: boolean; 
-    DELETE: boolean; 
+    GET: boolean;
+    POST: boolean;
+    PUT: boolean;
+    PATCH: boolean;
+    DELETE: boolean;
     HEAD: boolean;
 }
 
-export type AllowedMethods = "GET" | "DELETE" | "POST" | "PATCH" | "PUT" | "HEAD"
+export type AllowedMethods = 'GET' | 'DELETE' | 'POST' | 'PATCH' | 'PUT' | 'HEAD';
 
 export interface AuthorizationRequest {
     method: string;

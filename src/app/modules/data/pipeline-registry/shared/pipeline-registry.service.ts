@@ -28,12 +28,12 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class PipelineRegistryService {
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.pipelineRegistryUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.pipelineRegistryUrl);
     }
-    
+
     getPipelines(order: string = 'id:asc'): Observable<PipelineModel[]> {
         return this.http.get<PipelineModel[]>(environment.pipelineRegistryUrl + '/pipeline?order=' + order).pipe(
             map((resp) => resp || []),
@@ -90,6 +90,6 @@ export class PipelineRegistryService {
         }
     }
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]   
+        return this.authorizations['GET'];
     }
 }

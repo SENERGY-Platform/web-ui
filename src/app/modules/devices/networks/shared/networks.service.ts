@@ -33,16 +33,16 @@ import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/pe
     providedIn: 'root',
 })
 export class NetworksService {
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
-        private http: HttpClient, 
+        private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService,
         private dialog: MatDialog,
         public snackBar: MatSnackBar,
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl);
     }
 
     getNetworksWithLogState(
@@ -74,7 +74,7 @@ export class NetworksService {
     getNetwork(id: string): Observable<NetworksPermModel> {
         return this.http.get<NetworksPermModel[]>(environment.permissionSearchUrl + '/v3/resources/hubs?ids=' + id).pipe(
             map(networks => networks[0])
-        )
+        );
     }
 
     searchNetworks(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksModel[]> {
@@ -190,33 +190,33 @@ export class NetworksService {
 
     getTotalCountOfNetworks(searchText: string): Observable<any> {
         const options = searchText ?
-        { params: new HttpParams().set('search', searchText) } : {};
+            { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/hubs', options)
-        .pipe(
-            catchError(
-                this.errorHandlerService.handleError(
-                    NetworksService.name,
-                    'getTotalCountOfNetworks',
+            .get(environment.permissionSearchUrl + '/v3/total/hubs', options)
+            .pipe(
+                catchError(
+                    this.errorHandlerService.handleError(
+                        NetworksService.name,
+                        'getTotalCountOfNetworks',
+                    ),
                 ),
-            ),
-        );
+            );
     }
 
     userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]      
+        return this.authorizations['DELETE'];
     }
 
     userHasUpdateAuthorization(): boolean {
-        return this.authorizations["PUT"]      
+        return this.authorizations['PUT'];
     }
 
     userHasCreateAuthorization(): boolean {
-        return this.authorizations["POST"]   
+        return this.authorizations['POST'];
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]      
+        return this.authorizations['GET'];
     }
 }

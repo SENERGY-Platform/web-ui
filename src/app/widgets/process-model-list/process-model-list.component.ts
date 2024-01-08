@@ -43,14 +43,14 @@ export class ProcessModelListComponent implements OnInit, OnDestroy {
     userHasProcessRepoUpdateAuthorization = false;
 
     constructor(
-        private processModelListService: ProcessModelListService, 
+        private processModelListService: ProcessModelListService,
         private dashboardService: DashboardService,
         private processRepoService: ProcessRepoService
     ) {}
 
     ngOnInit() {
         this.getProcesses();
-        this.userHasProcessRepoUpdateAuthorization = this.processRepoService.userHasUpdateAuthorization()
+        this.userHasProcessRepoUpdateAuthorization = this.processRepoService.userHasUpdateAuthorization();
     }
 
     ngOnDestroy() {

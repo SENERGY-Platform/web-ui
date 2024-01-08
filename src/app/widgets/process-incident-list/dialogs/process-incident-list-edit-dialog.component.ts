@@ -30,18 +30,18 @@ export class ProcessIncidentListEditDialogComponent implements OnInit {
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
-    userHasUpdateNameAuthorization: boolean = false;
-    userHasUpdatePropertiesAuthorization: boolean = false
+    userHasUpdateNameAuthorization = false;
+    userHasUpdatePropertiesAuthorization = false;
 
     constructor(
         private dialogRef: MatDialogRef<ProcessIncidentListEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
-        @Inject(MAT_DIALOG_DATA) data: { 
-            dashboardId: string; 
-            widgetId: string, 
+        @Inject(MAT_DIALOG_DATA) data: {
+            dashboardId: string;
+            widgetId: string;
             userHasUpdateNameAuthorization: boolean;
-            userHasUpdatePropertiesAuthorization: boolean
+            userHasUpdatePropertiesAuthorization: boolean;
         },
     ) {
         this.dashboardId = data.dashboardId;
@@ -65,26 +65,26 @@ export class ProcessIncidentListEditDialogComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.widget.name)
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.widget.name);
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
-        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
     }
 
     save(): void {
-        var obs = []
+        const obs = [];
         if(this.userHasUpdateNameAuthorization) {
-            obs.push(this.updateName())
+            obs.push(this.updateName());
         }
         if(this.userHasUpdatePropertiesAuthorization) {
-            obs.push(this.updateProperties())
-        }        
+            obs.push(this.updateProperties());
+        }
         forkJoin(obs).subscribe(responses => {
-            var errorOccured = responses.find((response) => response.message != "OK")
+            const errorOccured = responses.find((response) => response.message != 'OK');
             if(!errorOccured) {
                 this.dialogRef.close(this.widget);
             }
-        })
+        });
     }
 }

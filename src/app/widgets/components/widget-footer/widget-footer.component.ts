@@ -47,10 +47,10 @@ export class WidgetFooterComponent implements OnInit {
     @Output() customEvent = new EventEmitter<{index: number; icon: string}>();
 
     constructor(
-        private widgetHeaderService: WidgetFooterService, 
+        private widgetHeaderService: WidgetFooterService,
         private dashboardService: DashboardService,
     ) {
-        
+
     }
 
     ngOnInit() {}

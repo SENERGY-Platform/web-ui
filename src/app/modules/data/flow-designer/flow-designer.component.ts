@@ -141,11 +141,11 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     createSVGFromModel(svg: SVGElement): string {
         let source = '';
         const serializer = new XMLSerializer();
-        
+
         // Get minimal coordinates to include everything + some space at the sides
-        var box = (<any>document.getElementsByClassName('joint-layers')[0]).getBBox()
-        var viewbox = [box.x -10, box.y, box.width + 20, box.height]
-        
+        const box = (document.getElementsByClassName('joint-layers')[0] as any).getBBox();
+        const viewbox = [box.x -10, box.y, box.width + 20, box.height];
+
         const tags = ['text', 'g', 'circle', 'rect', 'tspan', 'path'];
         const classes = [
             'link-tools',
@@ -186,8 +186,8 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
             );
         }
 
-        source = source.replace("joint-element", "")
-        source = source.replace(/class="joint-layers" transform=".*?"/, "class=\"joint-layers\"")
+        source = source.replace('joint-element', '');
+        source = source.replace(/class="joint-layers" transform=".*?"/, 'class="joint-layers"');
 
         source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
         return source;

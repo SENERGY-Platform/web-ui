@@ -35,5 +35,5 @@ export enum DashboardTypesEnum {
     DeviceStatus = 'device_status',
     DataTable = 'data_table',
     AcControl = 'ac_control',
-    AnomalyDetection = "anomaly_detection"
+    AnomalyDetection = 'anomaly_detection'
 }

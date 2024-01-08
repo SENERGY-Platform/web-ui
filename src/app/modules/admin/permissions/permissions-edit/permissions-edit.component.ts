@@ -95,7 +95,7 @@ export class PermissionsEditComponent implements OnInit {
         if (this.isEditMode) {
             this.checkactiveActions();
             this.endpointControl.patchValue(this.permission.resource);
-        }       
+        }
 
         this.initAutoComplete();
     }
@@ -105,13 +105,13 @@ export class PermissionsEditComponent implements OnInit {
             this.kongService.loadUris().subscribe(uris => {
                 this.uris = uris as string[];
 
-                 // autocomplete filter
+                // autocomplete filter
                 this.filteredOptions = this.endpointControl.valueChanges
                     .pipe(
                         startWith(''),
                         map((value) => this._filter(value)),
                     );
-                });
+            });
         } catch (e) {
             console.error('Could not load Uris from kong: ' + e);
         }

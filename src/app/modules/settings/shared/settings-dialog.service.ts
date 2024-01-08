@@ -29,7 +29,7 @@ import {environment} from '../../../../environments/environment';
     providedIn: 'root',
 })
 export class SettingsDialogService {
-    authorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
         private http: HttpClient,
@@ -38,7 +38,7 @@ export class SettingsDialogService {
         public snackBar: MatSnackBar,
         private ladonService: LadonService
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.usersServiceUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.usersServiceUrl);
     }
 
     openSettingsDialog() {
@@ -54,6 +54,6 @@ export class SettingsDialogService {
     }
 
     userHasUpdateAuthorization(): boolean {
-        return this.authorizations["PUT"]   
+        return this.authorizations['PUT'];
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Attribute } from "./device-instances.model";
+import { Attribute } from './device-instances.model';
 
 
 export interface DeviceInstancesHistoryModel {

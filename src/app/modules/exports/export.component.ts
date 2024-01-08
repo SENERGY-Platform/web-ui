@@ -51,9 +51,9 @@ export class ExportComponent implements OnInit, OnDestroy {
         'info'
     ];
     totalCount = 0;
-    userHasCreateAuthorization: boolean = false
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization = false;
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
 
     exports: ExportModel[] = [] as ExportModel[];
     exportsDataSource = new MatTableDataSource<ExportModel>();
@@ -109,7 +109,7 @@ export class ExportComponent implements OnInit, OnDestroy {
 
             this.initSearchAndGetExports();
 
-            this.checkAuthorization()
+            this.checkAuthorization();
         });
     }
 
@@ -119,18 +119,18 @@ export class ExportComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.userHasCreateAuthorization = this.exportService.userHasCreateAuthorization()
+        this.userHasCreateAuthorization = this.exportService.userHasCreateAuthorization();
 
-        this.userHasUpdateAuthorization = this.exportService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.exportService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
 
-        this.userHasDeleteAuthorization = this.exportService.userHasDeleteAuthorization()
+        this.userHasDeleteAuthorization = this.exportService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
-    
+
     }
 
     deleteExport(exp: ExportModel) {

@@ -89,14 +89,14 @@ export class UtilService {
 
 
     dateIsToday(dateTime: string | number): Boolean {
-        var today = new Date()
-        today.setHours(0,0,0,0)
+        const today = new Date();
+        today.setHours(0,0,0,0);
 
-        var date = new Date(dateTime)
+        let date = new Date(dateTime);
         if(typeof(dateTime) == 'number') {
-            date = new Date(dateTime)
-        } 
-        date.setHours(0,0,0,0)
-        return date.getTime() === today.getTime()
+            date = new Date(dateTime);
+        }
+        date.setHours(0,0,0,0);
+        return date.getTime() === today.getTime();
     }
 }

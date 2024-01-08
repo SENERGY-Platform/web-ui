@@ -64,7 +64,7 @@ export class PermissionsDialogService {
                 });
             });
 
-            const users = permissionsIn.filter((x) => x.isRole !== true)
+            const users = permissionsIn.filter((x) => x.isRole !== true);
 
             if (users.length === 0) {
                 this.openPermDialog(name, permissionsIn, kind, id, key);

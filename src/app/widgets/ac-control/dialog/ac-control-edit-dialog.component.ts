@@ -52,8 +52,8 @@ export class AcControlEditDialogComponent implements OnInit {
         environment.getBatteryLevelFunctionId,
     ];
     selectables: DeviceSelectablesFullModel[] = [];
-    userHasUpdateNameAuthorization: boolean = false
-    userHasUpdatePropertiesAuthorization: boolean = false
+    userHasUpdateNameAuthorization = false;
+    userHasUpdatePropertiesAuthorization = false;
 
     constructor(private dialogRef: MatDialogRef<AcControlEditDialogComponent>,
                 private dashboardService: DashboardService,
@@ -61,8 +61,8 @@ export class AcControlEditDialogComponent implements OnInit {
                 private deviceInstancesService: DeviceInstancesService,
                 private deviceGroupsService: DeviceGroupsService,
                 private fb: UntypedFormBuilder,
-                @Inject(MAT_DIALOG_DATA) data: { 
-                    widget: WidgetModel; 
+                @Inject(MAT_DIALOG_DATA) data: {
+                    widget: WidgetModel;
                     dashboardId: string;
                     userHasUpdateNameAuthorization: boolean;
                     userHasUpdatePropertiesAuthorization: boolean;
@@ -106,8 +106,8 @@ export class AcControlEditDialogComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        var newName = this.form.get('name')?.value;
-        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName)
+        const newName = this.form.get('name')?.value;
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName);
     }
 
     updateACProperties(): Observable<DashboardResponseMessageModel> {
@@ -230,31 +230,29 @@ export class AcControlEditDialogComponent implements OnInit {
                     const m = mappings.get(environment.getBatteryLevelFunctionId)?.[0];
                     this.widget.properties.acControl.getBatteryLevel = this.getElement(m, environment.getBatteryLevelFunctionId);
                 }
-            }), concatMap(_ => {
-                return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
-            }))
-        } 
+            }), concatMap(_ => this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)));
+        }
 
-        return of({"message": ""})
+        return of({message: ''});
     }
 
     save(): void {
         this.ready = false;
-        var obs = []
+        const obs = [];
         if(this.userHasUpdatePropertiesAuthorization) {
-            obs.push(this.updateACProperties())
+            obs.push(this.updateACProperties());
         }
         if(this.userHasUpdateNameAuthorization) {
-            obs.push(this.updateName())
+            obs.push(this.updateName());
         }
         forkJoin(obs).subscribe(results => {
-            const errorOccured = results.find((response) => response.message != "OK")
+            const errorOccured = results.find((response) => response.message != 'OK');
             if(errorOccured) {
-                this.ready = true
+                this.ready = true;
             } else {
                 this.dialogRef.close(this.widget);
             }
-        })
+        });
     }
 
     private traverseDataStructure(serviceId: string, field: DeviceTypeContentVariableModel | undefined, functionIds: string[], results: Map<string, { serviceId: string; aspectId: string }[]>) {

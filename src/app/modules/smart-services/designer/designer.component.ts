@@ -207,9 +207,9 @@ export class SmartServiceDesignerComponent implements OnInit {
                     if(this.id === '') {
                         this.router.navigate(['/smart-services/designer/'+design.id]);
                     }
-                })
+                });
             }
-        })
+        });
     }
 
     save(): void {
@@ -220,10 +220,10 @@ export class SmartServiceDesignerComponent implements OnInit {
                     this.router.navigate(['/smart-services/designer/'+design.id]);
                 }
             }
-        })
+        });
     }
 
-    saveThen(then: ((design: SmartServiceDesignModel | null)=>void)): void {
+    saveThen(then: ((design: SmartServiceDesignModel | null) => void)): void {
         this.saveXML((errXML, processXML) => {
             if (errXML) {
                 this.snackBar.open('Error XML! ' + errXML, 'close', { panelClass: 'snack-bar-error' });
@@ -248,7 +248,7 @@ export class SmartServiceDesignerComponent implements OnInit {
         });
     }
 
-    releaseDesign(design: SmartServiceDesignModel, then: ()=>void): void {
+    releaseDesign(design: SmartServiceDesignModel, then: () => void): void {
         this.dialogService.openInputDialog('Release Name and Description', {name: design.name, description: design.description}, ['name'])
             .afterClosed()
             .subscribe((result: {name: string; description: string}) => {

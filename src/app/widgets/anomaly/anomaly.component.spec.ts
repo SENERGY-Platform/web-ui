@@ -6,26 +6,26 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { AnomalyComponent } from './anomaly.component';
 
 describe('AnomalyComponent', () => {
-  let component: AnomalyComponent;
-  let fixture: ComponentFixture<AnomalyComponent>;
+    let component: AnomalyComponent;
+    let fixture: ComponentFixture<AnomalyComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [ AnomalyComponent ],
-      imports: [
-        MatDialogModule,
-        HttpClientTestingModule,
-        MatSnackBarModule
-      ]
-    })
-    .compileComponents();
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            declarations: [ AnomalyComponent ],
+            imports: [
+                MatDialogModule,
+                HttpClientTestingModule,
+                MatSnackBarModule
+            ]
+        })
+            .compileComponents();
 
-    fixture = TestBed.createComponent(AnomalyComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+        fixture = TestBed.createComponent(AnomalyComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });

@@ -61,11 +61,11 @@ export class SidenavService implements OnDestroy {
     private isToggled = false;
     private section = '';
     private waitingRoomEventCloser?: () => void;
-    private sections: SidenavSectionModel[] = []
-    private sectionsSubject: Subject<SidenavSectionModel[]> = new Subject()
+    private sections: SidenavSectionModel[] = [];
+    private sectionsSubject: Subject<SidenavSectionModel[]> = new Subject();
 
     constructor(
-        private waitingRoomService: WaitingRoomService, 
+        private waitingRoomService: WaitingRoomService,
         private authService: AuthorizationService,
         private swaggerService: SwaggerService,
         private flowRepoService: FlowRepoService,
@@ -111,201 +111,201 @@ export class SidenavService implements OnDestroy {
     }
 
     checkAuthorizationForSections(checks: any): SidenavPageModel[] {
-        var sectionsWithAuthorization: SidenavPageModel[] = []
+        const sectionsWithAuthorization: SidenavPageModel[] = [];
 
         checks.forEach((check: any) => {
-            var checkFunction = check[0]
-            var section = check[1]
-            var thisArg = check[2]
+            const checkFunction = check[0];
+            const section = check[1];
+            const thisArg = check[2];
 
             if(checkFunction.call(thisArg)) {
-                sectionsWithAuthorization.push(section)
+                sectionsWithAuthorization.push(section);
             }
         });
 
-        return sectionsWithAuthorization
+        return sectionsWithAuthorization;
     }
 
     setupAnalyticsSection(): SidenavSectionModel {
-        var sections = this.checkAuthorizationForSections([
+        const sections = this.checkAuthorizationForSections([
             [this.operatorRepoService.userHasReadAuthorization, new SidenavPageModel('Operators', 'link', 'code', '/data/operator-repo'), this.operatorRepoService],
             [this.flowRepoService.userHasCreateAuthorization, new SidenavPageModel('Designer', 'link', 'create', '/data/designer'), this.flowRepoService],
             [this.flowRepoService.userHasReadAuthorization, new SidenavPageModel('Flows', 'link', 'insights', '/data/flow-repo'), this.flowRepoService],
             [this.pipelineService.userHasReadAuthorization, new SidenavPageModel('Pipelines', 'link', 'analytics', '/data/pipelines'), this.pipelineService]
-        ])
-        var analyticsSection = new SidenavSectionModel('Analytics', 'toggle', 'bar_chart', '/data', sections)
-        return analyticsSection     
+        ]);
+        const analyticsSection = new SidenavSectionModel('Analytics', 'toggle', 'bar_chart', '/data', sections);
+        return analyticsSection;
     }
 
     setupDevSection(): SidenavSectionModel {
-        var sections: SidenavPageModel[] = []
+        const sections: SidenavPageModel[] = [];
         if(this.swaggerService.userHasReadAuthorization()) {
-            sections.push(new SidenavPageModel('API', 'link', 'api', '/dev/api'))
+            sections.push(new SidenavPageModel('API', 'link', 'api', '/dev/api'));
         }
 
-        var devSection = new SidenavSectionModel('Developer', 'toggle', 'engineering', '/dev', sections)
-        return devSection
+        const devSection = new SidenavSectionModel('Developer', 'toggle', 'engineering', '/dev', sections);
+        return devSection;
     }
 
     setupAdminSection(): SidenavSectionModel {
-        var sections: SidenavPageModel[] = []
+        let sections: SidenavPageModel[] = [];
         if(this.authService.userIsAdmin()) {
             sections = [
                 new SidenavPageModel('Authorization', 'link', 'security', '/admin/authorization'),
                 new SidenavPageModel('Timescale Rules', 'link', 'rule', '/admin/timescale-rules'),
                 new SidenavPageModel('Budgets', 'link', 'savings', '/admin/budgets'),
-            ]
-        } 
+            ];
+        }
 
-        var adminSection = new SidenavSectionModel('Admin', 'toggle', 'admin_panel_settings', '/admin', sections)
-        return adminSection
+        const adminSection = new SidenavSectionModel('Admin', 'toggle', 'admin_panel_settings', '/admin', sections);
+        return adminSection;
     }
 
     setupProcessSection(): SidenavSectionModel {
-        var checks: any = [
+        const checks: any = [
             [this.processRepoService.userHasCreateAuthorization, new SidenavPageModel('Designer', 'link', 'create', '/processes/designer'), this.processRepoService],
             [this.processRepoService.userHasReadAuthorization, new SidenavPageModel('Repository', 'link', 'storage', '/processes/repository'), this.processRepoService],
             [this.processDeploymentService.userHasReadAuthorization, new SidenavPageModel('Deployments', 'link', 'publish', '/processes/deployments'), this.processDeploymentService],
             [this.processMonitorService.userHasReadAuthorization, new SidenavPageModel('Monitor', 'link', 'search', '/processes/monitor'), this.processMonitorService]
-        ]
+        ];
 
         if(environment.processIoUrl) {
-            checks.push([this.processIOService.userHasReadAuthorization, new SidenavPageModel('IO', 'link', 'table_chart', '/processes/io'), this.processIOService])
+            checks.push([this.processIOService.userHasReadAuthorization, new SidenavPageModel('IO', 'link', 'table_chart', '/processes/io'), this.processIOService]);
         }
 
-        var sections = this.checkAuthorizationForSections(checks)
-        var processSection = new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', sections)
-        return processSection
+        const sections = this.checkAuthorizationForSections(checks);
+        const processSection = new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', sections);
+        return processSection;
     }
 
     setupSmartServiceSection(): SidenavSectionModel {
-        var sections = this.checkAuthorizationForSections([
+        const sections = this.checkAuthorizationForSections([
             [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Designs', 'link', 'create', '/smart-services/designs'), this.smartServiceDesignService],
             [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Releases', 'link', 'storage', '/smart-services/releases'), this.smartServiceDesignService]
-        ])
+        ]);
 
-        var smartServiceSection = new SidenavSectionModel('Smart Services', 'toggle', 'design_services', '/smart-services', sections)
-        return smartServiceSection
+        const smartServiceSection = new SidenavSectionModel('Smart Services', 'toggle', 'design_services', '/smart-services', sections);
+        return smartServiceSection;
     }
-    
+
     setupExportSection(): SidenavSectionModel {
-        var sections = this.checkAuthorizationForSections([
+        const sections = this.checkAuthorizationForSections([
             [this.exportService.userHasReadAuthorization, new SidenavPageModel('Database', 'link', 'table_chart', '/exports/db'), this.exportService],
             [this.exportBrokerService.userHasReadAuthorization, new SidenavPageModel('Broker', 'link', 'call_split', '/exports/broker'), this.exportBrokerService]
-        ])
-        var exportSection = new SidenavSectionModel('Exports', 'toggle', 'west', '/exports', sections)
-        return exportSection
+        ]);
+        const exportSection = new SidenavSectionModel('Exports', 'toggle', 'west', '/exports', sections);
+        return exportSection;
     }
 
     setupImportSection(): SidenavSectionModel {
-        var sections = this.checkAuthorizationForSections([
+        const sections = this.checkAuthorizationForSections([
             [this.importTypeService.userHasReadAuthorization, new SidenavPageModel('Types', 'link', 'api', '/imports/types/list'), this.importTypeService],
             [this.importInstanceSercice.userHasReadAuthorization, new SidenavPageModel('Instances', 'link', 'double_arrow', '/imports/instances'), this.importInstanceSercice]
-        ])
-        var importSection = new SidenavSectionModel('Imports', 'toggle', 'east', '/imports', sections)
-        return importSection
+        ]);
+        const importSection = new SidenavSectionModel('Imports', 'toggle', 'east', '/imports', sections);
+        return importSection;
     }
 
-    
+
     setupWaitingRoom(): SidenavPageModel {
         const waitingRoom = new SidenavPageModel('Waiting Room', 'link', 'chair', '/devices/waiting-room', '');
 
         const refreshWaitingRoom = () => {
-                        this.waitingRoomService.searchDevices('', 1, 0, 'name', 'asc', false).subscribe((value) => {
-                            if (value && value.total > 0) {
-                                waitingRoom.badge = String(value.total);
-                            }
-                            if (value && value.total === 0) {
-                                waitingRoom.badge = '';
-                            }
-                        });
+            this.waitingRoomService.searchDevices('', 1, 0, 'name', 'asc', false).subscribe((value) => {
+                if (value && value.total > 0) {
+                    waitingRoom.badge = String(value.total);
+                }
+                if (value && value.total === 0) {
+                    waitingRoom.badge = '';
+                }
+            });
         };
-            
-        this.waitingRoomService
-                        .events(
-                            (closer) => {
-                                this.waitingRoomEventCloser = closer;
-                            },
-                            () => {
-                                refreshWaitingRoom();
-                            },
-                        )
-                        .pipe(debounceTime(1000))
-                        .subscribe((msg) => {
-                            if (msg.type === WaitingRoomEventTypeAuthOk || this.waitingRoomService.eventIsUpdate(msg)) {
-                                refreshWaitingRoom();
-                            }
-                        });
 
-        return waitingRoom
+        this.waitingRoomService
+            .events(
+                (closer) => {
+                    this.waitingRoomEventCloser = closer;
+                },
+                () => {
+                    refreshWaitingRoom();
+                },
+            )
+            .pipe(debounceTime(1000))
+            .subscribe((msg) => {
+                if (msg.type === WaitingRoomEventTypeAuthOk || this.waitingRoomService.eventIsUpdate(msg)) {
+                    refreshWaitingRoom();
+                }
+            });
+
+        return waitingRoom;
     }
 
     setupDeviceManagementSection(): SidenavSectionModel {
-        var sections = this.checkAuthorizationForSections([
+        const sections = this.checkAuthorizationForSections([
             [this.networkService.userHasReadAuthorization, new SidenavPageModel('Networks', 'link', 'device_hub', '/devices/networks'), this.networkService],
             [this.deviceInstanceService.userHasReadAuthorization, new SidenavPageModel('Devices', 'link', 'sensors', '/devices/deviceinstances'), this.deviceInstanceService],
             [this.deviceGroupService.userHasReadAuthorization, new SidenavPageModel('Groups', 'link', 'group_work', '/devices/devicegroups'), this.deviceGroupService],
             [this.locationService.userHasReadAuthorization, new SidenavPageModel('Locations', 'link', 'place', '/devices/locations'), this.locationService]
-        ])
+        ]);
 
         if(this.waitingRoomService.userHasReadAuthorization()) {
-            sections.push(this.setupWaitingRoom())
+            sections.push(this.setupWaitingRoom());
         }
-        var deviceSection = new SidenavSectionModel('Device Management', 'toggle', 'devices', '/devices', sections)
-        return deviceSection
+        const deviceSection = new SidenavSectionModel('Device Management', 'toggle', 'devices', '/devices', sections);
+        return deviceSection;
     }
-    
+
     setupMetadataSection(): SidenavSectionModel {
-        var sections = this.checkAuthorizationForSections([
+        const sections = this.checkAuthorizationForSections([
             [this.deviceClassService.userHasReadAuthorization, new SidenavPageModel('Device Classes', 'link', 'devices_other', '/metadata/deviceclasses'), this.deviceClassService],
             [this.functionService.userHasReadAuthorization, new SidenavPageModel('Functions', 'link', 'functions', '/metadata/functions'), this.functionService],
             [this.aspectsService.userHasReadAuthorization, new SidenavPageModel('Aspects', 'link', 'wallpaper', '/metadata/aspects'), this.aspectsService],
             [this.conceptsService.userHasReadAuthorization, new SidenavPageModel('Concepts', 'link', 'category', '/metadata/concepts'), this.conceptsService],
             [this.characteristicsService.userHasReadAuthorization, new SidenavPageModel('Characteristics', 'link', 'scatter_plot', '/metadata/characteristics'), this.characteristicsService],
             [this.deviceTypeService.userHasReadAuthorization, new SidenavPageModel('Device Types', 'link', 'important_devices', '/metadata/devicetypesoverview'), this.deviceTypeService]
-        ])
-    
-        var metadataSection = new SidenavSectionModel('Metadata', 'toggle', 'web_asset', '/metadata', sections)
-        return metadataSection  
+        ]);
+
+        const metadataSection = new SidenavSectionModel('Metadata', 'toggle', 'web_asset', '/metadata', sections);
+        return metadataSection;
     }
 
     setupCostSection(): SidenavSectionModel {
-        var sections = this.checkAuthorizationForSections([
+        const sections = this.checkAuthorizationForSections([
             [this.costService.userHasReadAuthorization, new SidenavPageModel('Overview', 'link', 'list', '/costs/overview'), this.costService],
-        ])
-    
-        var costSection = new SidenavSectionModel('Cost', 'toggle', 'savings', '/costs', sections)
-        return costSection  
+        ]);
+
+        const costSection = new SidenavSectionModel('Cost', 'toggle', 'savings', '/costs', sections);
+        return costSection;
     }
 
 
     loadSections(): SidenavSectionModel[] {
-            var sections: SidenavSectionModel[] = [
-                this.setupAnalyticsSection(),
-                this.setupDevSection(),
-                this.setupAdminSection(),
-                this.setupProcessSection(),
-                this.setupExportSection(),
-                this.setupImportSection(),
-                this.setupDeviceManagementSection(),
-                this.setupMetadataSection(),
-                this.setupSmartServiceSection(),
-                this.setupCostSection(),
-            ];
+        let sections: SidenavSectionModel[] = [
+            this.setupAnalyticsSection(),
+            this.setupDevSection(),
+            this.setupAdminSection(),
+            this.setupProcessSection(),
+            this.setupExportSection(),
+            this.setupImportSection(),
+            this.setupDeviceManagementSection(),
+            this.setupMetadataSection(),
+            this.setupSmartServiceSection(),
+            this.setupCostSection(),
+        ];
 
-            if(this.dashboardService.userHasReadDashboardAuthorization()) {
-                sections.push(new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', []))
-            }
-            
-            // Just keep Main sections that have at least one subsection
-            sections = sections.filter(section => section.pages.length > 0 || section.name == "Dashboard")
+        if(this.dashboardService.userHasReadDashboardAuthorization()) {
+            sections.push(new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', []));
+        }
 
-            var sortedSectionTitles = ["Dashboard", "Smart Services", "Processes", "Exports", "Analytics", "Device Management", "Imports", "Cost", "Metadata", "Admin", "Developer"]
-            sections.sort(function(section1, section2) {
-                return sortedSectionTitles.indexOf(section1.name) - sortedSectionTitles.indexOf(section2.name)
-            })
+        // Just keep Main sections that have at least one subsection
+        sections = sections.filter(section => section.pages.length > 0 || section.name == 'Dashboard');
 
-            this.sections = sections
-            return sections
+        const sortedSectionTitles = ['Dashboard', 'Smart Services', 'Processes', 'Exports', 'Analytics', 'Device Management', 'Imports', 'Cost', 'Metadata', 'Admin', 'Developer'];
+        sections.sort(function(section1, section2) {
+            return sortedSectionTitles.indexOf(section1.name) - sortedSectionTitles.indexOf(section2.name);
+        });
+
+        this.sections = sections;
+        return sections;
     }
 }

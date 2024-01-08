@@ -37,7 +37,7 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./import-instances.component.css'],
 })
 export class ImportInstancesComponent implements OnInit {
-    displayedColumns = ['select', 'name', 'image', 'created_at', 'updated_at', 'export']
+    displayedColumns = ['select', 'name', 'image', 'created_at', 'updated_at', 'export'];
     dataSource = new MatTableDataSource<ImportInstancesModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
@@ -51,18 +51,18 @@ export class ImportInstancesComponent implements OnInit {
         public utilsService: UtilService
     ) {}
 
-    searchText: string = ""
+    searchText = '';
     pageSize = 20;
     totalCount = 200;
     selection = new SelectionModel<ImportInstancesModel>(true, []);
-    searchSub: Subscription = new Subscription()
+    searchSub: Subscription = new Subscription();
     dataReady = false;
     sort = 'updated_at.desc';
     offset = 0;
     excludeGenerated = localStorage.getItem('import.instances.excludeGenerated') === 'true';
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
+    userHasCreateAuthorization = false;
 
     ngOnInit(): void {
         this.initSearch();
@@ -72,10 +72,10 @@ export class ImportInstancesComponent implements OnInit {
     getTotalNumberOfTypes(): Observable<number> {
         return this.importInstancesService.getTotalCountOfInstances(this.searchText, this.excludeGenerated).pipe(
             map((totalCount: number) => {
-                this.totalCount = totalCount
-                return totalCount
+                this.totalCount = totalCount;
+                return totalCount;
             })
-        )
+        );
     }
 
     private initSearch() {
@@ -83,29 +83,29 @@ export class ImportInstancesComponent implements OnInit {
             this.searchText = searchText;
             this.reload();
         });
-        this.checkAuthorization()
+        this.checkAuthorization();
     }
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load().subscribe();
         });
     }
 
     checkAuthorization() {
-        this.userHasUpdateAuthorization = this.importInstancesService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.importInstancesService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
+            this.displayedColumns.push('edit');
         }
-        
-        this.userHasDeleteAuthorization = this.importInstancesService.userHasDeleteAuthorization()
+
+        this.userHasDeleteAuthorization = this.importInstancesService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('delete');
         }
-        
-        this.userHasCreateAuthorization = this.importInstancesService.userHasCreateAuthorization()
+
+        this.userHasCreateAuthorization = this.importInstancesService.userHasCreateAuthorization();
     }
 
     edit(m: ImportInstancesModel) {
@@ -156,10 +156,10 @@ export class ImportInstancesComponent implements OnInit {
             .listImportInstances(this.searchText, this.pageSize, this.offset, this.sort, this.excludeGenerated)
             .pipe(
                 map((inst: ImportInstancesModel[]) => {
-                this.dataSource.data = inst;
-                return inst
+                    this.dataSource.data = inst;
+                    return inst;
                 })
-            )
+            );
     }
 
     reload() {
@@ -167,8 +167,10 @@ export class ImportInstancesComponent implements OnInit {
         this.pageSize = 20;
         this.selectionClear();
         this.dataReady = false;
-        
-        forkJoin([this.load(), this.getTotalNumberOfTypes()]).subscribe(_ => {this.dataReady = true})
+
+        forkJoin([this.load(), this.getTotalNumberOfTypes()]).subscribe(_ => {
+            this.dataReady = true;
+        });
     }
 
 
@@ -214,28 +216,28 @@ export class ImportInstancesComponent implements OnInit {
 
     deleteMultipleItems() {
         const deletionJobs: Observable<any>[] = [];
-        var text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' import instances' : ' import instance')
+        const text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' import instances' : ' import instance');
 
         this.deleteDialog
-        .openDeleteDialog(text)
-        .afterClosed()
-        .subscribe((deletePipelines: boolean) => {
-            if (deletePipelines) {
-                this.dataReady = false;
-                this.selection.selected.forEach((importInstance: ImportInstancesModel) => {
-                    deletionJobs.push(this.importInstancesService.deleteImportInstance(importInstance.id))
-                });
-            }
-
-            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                if (ok) {
-                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
-                } else {
-                    this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+            .openDeleteDialog(text)
+            .afterClosed()
+            .subscribe((deletePipelines: boolean) => {
+                if (deletePipelines) {
+                    this.dataReady = false;
+                    this.selection.selected.forEach((importInstance: ImportInstancesModel) => {
+                        deletionJobs.push(this.importInstancesService.deleteImportInstance(importInstance.id));
+                    });
                 }
-                this.reload()
-            })
-        });
+
+                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                    }
+                    this.reload();
+                });
+            });
     }
 }

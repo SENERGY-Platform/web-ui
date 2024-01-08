@@ -33,13 +33,13 @@ export class EventListEditDialogComponent implements OnInit {
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
-    userHasUpdateNameAuthorization: boolean = false
+    userHasUpdateNameAuthorization = false;
 
     constructor(
         private dialogRef: MatDialogRef<EventListEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string, userHasUpdateNameAuthorization: boolean},
+        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string; userHasUpdateNameAuthorization: boolean},
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;

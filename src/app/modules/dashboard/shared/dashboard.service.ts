@@ -46,11 +46,11 @@ export class DashboardService {
     dashboardWidgetObservable = this.widgetSubject.asObservable();
     initWidgetObservable = this.animationDoneSubject.asObservable();
 
-    dashboardAuthorizations: PermissionTestResponse
-    widgetAuthorizations: PermissionTestResponse
-    widgetNameAuthorizations: PermissionTestResponse
-    widgetPositionAuthorizations: PermissionTestResponse
-    widgetPropertiesAuthorizations: PermissionTestResponse
+    dashboardAuthorizations: PermissionTestResponse;
+    widgetAuthorizations: PermissionTestResponse;
+    widgetNameAuthorizations: PermissionTestResponse;
+    widgetPositionAuthorizations: PermissionTestResponse;
+    widgetPropertiesAuthorizations: PermissionTestResponse;
 
     constructor(
         private dialog: MatDialog,
@@ -59,11 +59,11 @@ export class DashboardService {
         private dialogsService: DialogsService,
         private ladonService: LadonService
     ) {
-        this.dashboardAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/dashboards')
-        this.widgetAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets')
-        this.widgetNameAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets/name')
-        this.widgetPositionAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets/position')
-        this.widgetPropertiesAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets/properties')
+        this.dashboardAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/dashboards');
+        this.widgetAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets');
+        this.widgetNameAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets/name');
+        this.widgetPositionAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets/position');
+        this.widgetPropertiesAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets/properties');
     }
 
 
@@ -114,10 +114,10 @@ export class DashboardService {
     }
 
     updateWidgetProperty(dashboardId: string, widgetId: string, pathToProperty: string[], newValue: any): Observable<DashboardResponseMessageModel> {
-        var url = environment.dashboardServiceUrl + '/widgets/properties' 
+        let url = environment.dashboardServiceUrl + '/widgets/properties';
         if(pathToProperty.length > 0) {
-            var pathToPropertyString = pathToProperty.join(".")
-            url += pathToPropertyString
+            const pathToPropertyString = pathToProperty.join('.');
+            url += pathToPropertyString;
         }
         return this.http
             .patch<DashboardResponseMessageModel>(url + '/' + dashboardId  + '/' + widgetId, newValue)
@@ -219,38 +219,38 @@ export class DashboardService {
     }
 
     userHasDeleteDashboardAuthorization(): boolean {
-        return this.dashboardAuthorizations["DELETE"]      
+        return this.dashboardAuthorizations['DELETE'];
     }
 
     userHasUpdateDashboardAuthorization(): boolean {
-        return this.dashboardAuthorizations["PUT"]      
+        return this.dashboardAuthorizations['PUT'];
     }
 
     userHasCreateDashboardAuthorization(): boolean {
-        return this.dashboardAuthorizations["POST"]   
+        return this.dashboardAuthorizations['POST'];
     }
 
     userHasReadDashboardAuthorization(): boolean {
-        return this.dashboardAuthorizations["GET"]   
+        return this.dashboardAuthorizations['GET'];
     }
 
     userHasDeleteWidgetAuthorization(): boolean {
-        return this.widgetAuthorizations["DELETE"]      
+        return this.widgetAuthorizations['DELETE'];
     }
 
     userHasUpdateWidgetPropertiesAuthorization(): boolean {
-        return this.widgetPropertiesAuthorizations["PATCH"]      
+        return this.widgetPropertiesAuthorizations['PATCH'];
     }
 
     userHasCreateWidgetAuthorization(): boolean {
-        return this.widgetAuthorizations["POST"]   
+        return this.widgetAuthorizations['POST'];
     }
 
     userHasMoveWidgetAuthorization(): boolean {
-        return this.widgetAuthorizations["PATCH"]
+        return this.widgetAuthorizations['PATCH'];
     }
 
     userHasUpdateWidgetNameAuthorization(): boolean {
-        return this.widgetNameAuthorizations["PATCH"]
+        return this.widgetNameAuthorizations['PATCH'];
     }
 }

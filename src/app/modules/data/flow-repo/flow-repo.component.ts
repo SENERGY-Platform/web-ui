@@ -48,9 +48,9 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
     ready = false;
     gridCols = 0;
     sortAttributes = [new SortModel('Name', 'name', 'asc')];
-    userHasDeleteAuthorization: boolean = false
-    userHasUpdateAuthorization: boolean = false
-    userHasPipelineCreateAuthorization: boolean = false 
+    userHasDeleteAuthorization = false;
+    userHasUpdateAuthorization = false;
+    userHasPipelineCreateAuthorization = false;
 
     private searchText = '';
     private limitInit = 54;
@@ -80,9 +80,9 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         this.initGridCols();
         this.initSearchAndGetFlows();
         this.userId = this.authService.getUserId();
-        this.userHasDeleteAuthorization = this.flowRepoService.userHasDeleteAuthorization()
-        this.userHasUpdateAuthorization = this.flowRepoService.userHasUpdateAuthorization()
-        this.userHasPipelineCreateAuthorization = this.flowEngineService.userHasCreateAuthorization()
+        this.userHasDeleteAuthorization = this.flowRepoService.userHasDeleteAuthorization();
+        this.userHasUpdateAuthorization = this.flowRepoService.userHasUpdateAuthorization();
+        this.userHasPipelineCreateAuthorization = this.flowEngineService.userHasCreateAuthorization();
     }
 
     ngOnDestroy() {
@@ -148,13 +148,13 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
                     this.flows.push(flow);
                 });
                 if (this.costService.userMayGetFlowCostEstimations()) {
-                this.costService.getFlowCostEstimations(this.flows.map(f => f._id || '')).subscribe(estimations => {
-                    this.flowEstimations.push(...estimations);
+                    this.costService.getFlowCostEstimations(this.flows.map(f => f._id || '')).subscribe(estimations => {
+                        this.flowEstimations.push(...estimations);
+                        this.ready = true;
+                    });
+                } else {
                     this.ready = true;
-                })
-            } else {
-                this.ready = true;
-            }
+                }
             });
     }
 

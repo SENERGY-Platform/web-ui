@@ -29,14 +29,14 @@ import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/pe
     providedIn: 'root',
 })
 export class LocationsService {
-    authorizations:PermissionTestResponse
+    authorizations: PermissionTestResponse;
 
     constructor(
-        private http: HttpClient, 
+        private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl)
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl);
     }
 
     searchLocations(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<LocationModel[]> {
@@ -102,33 +102,33 @@ export class LocationsService {
 
     getTotalCountOfLocations(searchText: string): Observable<any> {
         const options = searchText ?
-        { params: new HttpParams().set('search', searchText) } : {};
+            { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-        .get(environment.permissionSearchUrl + '/v3/total/locations', options)
-        .pipe(
-            catchError(
-                this.errorHandlerService.handleError(
-                    LocationsService.name,
-                    'getTotalCountOfLocations',
+            .get(environment.permissionSearchUrl + '/v3/total/locations', options)
+            .pipe(
+                catchError(
+                    this.errorHandlerService.handleError(
+                        LocationsService.name,
+                        'getTotalCountOfLocations',
+                    ),
                 ),
-            ),
-        );
+            );
     }
 
     userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]      
+        return this.authorizations['DELETE'];
     }
 
     userHasUpdateAuthorization(): boolean {
-        return this.authorizations["PUT"]      
+        return this.authorizations['PUT'];
     }
 
     userHasCreateAuthorization(): boolean {
-        return this.authorizations["POST"]   
+        return this.authorizations['POST'];
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]     
+        return this.authorizations['GET'];
     }
 }

@@ -47,8 +47,8 @@ export class MultiValueEditDialogComponent implements OnInit {
         measurements: this.fb.array([]),
     });
 
-    userHasUpdateNameAuthorization: boolean = false
-    userHasUpdatePropertiesAuthorization: boolean = false 
+    userHasUpdateNameAuthorization = false;
+    userHasUpdatePropertiesAuthorization = false;
 
     constructor(
         private dialogRef: MatDialogRef<MultiValueEditDialogComponent>,
@@ -56,17 +56,17 @@ export class MultiValueEditDialogComponent implements OnInit {
         private dashboardService: DashboardService,
         private exportService: ExportService,
         private fb: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: { 
-            dashboardId: string; 
-            widgetId: string, 
+        @Inject(MAT_DIALOG_DATA) data: {
+            dashboardId: string;
+            widgetId: string;
             userHasUpdateNameAuthorization: boolean;
-            userHasUpdatePropertiesAuthorization: boolean 
+            userHasUpdatePropertiesAuthorization: boolean;
         },
     ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
-        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization
+        this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
     }
 
     ngOnInit() {
@@ -267,8 +267,8 @@ export class MultiValueEditDialogComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        var newName = (this.formGroup.get('name') as FormControl).value;
-        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName)
+        const newName = (this.formGroup.get('name') as FormControl).value;
+        return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName);
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
@@ -292,24 +292,24 @@ export class MultiValueEditDialogComponent implements OnInit {
         this.widget.properties.multivaluemeasurements = measurements;
         this.widget.properties.order = (this.formGroup.get('order') as FormControl).value;
         this.widget.properties.valueAlias = (this.formGroup.get('valueAlias') as FormControl).value;
-        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+        return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
     }
 
     save(): void {
-        var obs = []
+        const obs = [];
         if(this.userHasUpdateNameAuthorization) {
-            obs.push(this.updateName())
+            obs.push(this.updateName());
         }
         if(this.userHasUpdatePropertiesAuthorization) {
-            obs.push(this.updateProperties())
-        }        
-        
+            obs.push(this.updateProperties());
+        }
+
         forkJoin(obs).subscribe(responses => {
-            var errorOccured = responses.find((response) => response.message != "OK")
+            const errorOccured = responses.find((response) => response.message != 'OK');
             if(!errorOccured) {
                 this.dialogRef.close(this.widget);
             }
-        })
+        });
     }
 
     addNewMeasurement() {

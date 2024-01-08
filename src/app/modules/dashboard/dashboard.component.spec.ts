@@ -48,9 +48,9 @@ describe('DashboardComponent', () => {
     const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService, {
         observablePropsToSpyOn: ['dashboardObservable', 'dashboardWidgetObservable']
     });
-    dashboardServiceSpy.userHasCreateDashboardAuthorization.and.returnValue(of(true))
-    dashboardServiceSpy.userHasUpdateDashboardAuthorization.and.returnValue(of(true))
-    dashboardServiceSpy.userHasDeleteDashboardAuthorization.and.returnValue(of(true))
+    dashboardServiceSpy.userHasCreateDashboardAuthorization.and.returnValue(of(true));
+    dashboardServiceSpy.userHasUpdateDashboardAuthorization.and.returnValue(of(true));
+    dashboardServiceSpy.userHasDeleteDashboardAuthorization.and.returnValue(of(true));
     const deviceStatusServiceSpy: Spy<DeviceStatusService> = createSpyFromClass<DeviceStatusService>(DeviceStatusService);
 
     beforeEach(

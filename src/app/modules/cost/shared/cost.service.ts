@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
-import {environment} from "src/environments/environment";
+import {environment} from 'src/environments/environment';
 import { Observable, catchError, map } from 'rxjs';
 import { CostEstimationModel, CostModel } from './cost.model';
 
@@ -28,28 +28,28 @@ import { CostEstimationModel, CostModel } from './cost.model';
     providedIn: 'root',
 })
 export class CostService {
-    authorizations: PermissionTestResponse
-    estimationFlowAuthorizations: PermissionTestResponse
+    authorizations: PermissionTestResponse;
+    estimationFlowAuthorizations: PermissionTestResponse;
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.costApiUrl)
-        this.estimationFlowAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.costApiUrl + '/estimation/flow')
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.costApiUrl);
+        this.estimationFlowAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.costApiUrl + '/estimation/flow');
     }
 
     userHasDeleteAuthorization(): boolean {
-        return this.authorizations["DELETE"]      
+        return this.authorizations['DELETE'];
     }
 
     userHasUpdateAuthorization(): boolean {
-        return this.authorizations["POST"]    
+        return this.authorizations['POST'];
     }
 
     userHasCreateAuthorization(): boolean {
-        return this.authorizations["POST"]   
+        return this.authorizations['POST'];
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations["GET"]  
+        return this.authorizations['GET'];
     }
 
     getTree(): Observable<Map<string, CostModel>> {
@@ -57,13 +57,13 @@ export class CostService {
             catchError(
                 this.errorHandlerService.handleError(CostService.name, 'getTree: Error', new Map()),
             ),
-            map((resp) => resp || new Map()),            
+            map((resp) => resp || new Map()),
         );
     }
 
 
     userMayGetFlowCostEstimations(): boolean {
-        return this.estimationFlowAuthorizations["POST"];
+        return this.estimationFlowAuthorizations['POST'];
     }
     getFlowCostEstimations(flowIds: string[]): Observable<CostEstimationModel[]> {
         return this.http.post<CostEstimationModel[]>(environment.costApiUrl+'/estimation/flow', flowIds).pipe(

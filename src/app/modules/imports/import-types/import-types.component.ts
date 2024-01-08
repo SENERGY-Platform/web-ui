@@ -36,20 +36,20 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./import-types.component.css'],
 })
 export class ImportTypesComponent implements OnInit {
-    displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share']
+    displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share'];
     pageSize = 20;
     dataSource = new MatTableDataSource<ImportTypePermissionSearchModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<ImportTypePermissionSearchModel>(true, []);
     dataReady = false;
     sort = 'name.asc';
-    searchText: string = ""
-    searchSub: Subscription = new Subscription()
+    searchText = '';
+    searchSub: Subscription = new Subscription();
     totalCount = 200;
     offset = 0;
-    userHasUpdateAuthorization: boolean = false
-    userHasDeleteAuthorization: boolean = false
-    userHasCreateAuthorization: boolean = false
+    userHasUpdateAuthorization = false;
+    userHasDeleteAuthorization = false;
+    userHasCreateAuthorization = false;
 
     constructor(
         private importTypesService: ImportTypesService,
@@ -69,29 +69,29 @@ export class ImportTypesComponent implements OnInit {
     getTotalNumberOfTypes(): Observable<number> {
         return this.importTypesService.getTotalCountOfTypes(this.searchText).pipe(
             map((totalCount: number) => this.totalCount = totalCount)
-        )
+        );
     }
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load().subscribe();
         });
     }
 
     checkAuthorization() {
-        this.userHasUpdateAuthorization = this.importTypesService.userHasUpdateAuthorization()
+        this.userHasUpdateAuthorization = this.importTypesService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit")
-        }
-    
-        this.userHasDeleteAuthorization = this.importTypesService.userHasDeleteAuthorization()
-        if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push("delete")
+            this.displayedColumns.push('edit');
         }
 
-        this.userHasCreateAuthorization = this.importTypesService.userHasCreateAuthorization()
+        this.userHasDeleteAuthorization = this.importTypesService.userHasDeleteAuthorization();
+        if(this.userHasDeleteAuthorization) {
+            this.displayedColumns.push('delete');
+        }
+
+        this.userHasCreateAuthorization = this.importTypesService.userHasCreateAuthorization();
     }
 
     private initSearch() {
@@ -162,10 +162,10 @@ export class ImportTypesComponent implements OnInit {
         this.dataReady = false;
         return this.importTypesService.listImportTypes(this.searchText, this.pageSize, this.offset, this.sort).pipe(
             map(types => {
-                this.dataSource.data = types
-                return types
+                this.dataSource.data = types;
+                return types;
             })
-        )
+        );
     }
 
     reload() {
@@ -173,10 +173,10 @@ export class ImportTypesComponent implements OnInit {
         this.pageSize = 20;
         this.dataReady = false;
         this.selectionClear();
-        
+
         forkJoin([this.load(), this.getTotalNumberOfTypes()]).subscribe(_ => {
             this.dataReady = true;
-        })
+        });
     }
 
     add() {
@@ -203,28 +203,28 @@ export class ImportTypesComponent implements OnInit {
 
     deleteMultipleItems() {
         const deletionJobs: Observable<any>[] = [];
-        var text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' import types' : ' import type')
+        const text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' import types' : ' import type');
 
         this.deleteDialog
-        .openDeleteDialog(text)
-        .afterClosed()
-        .subscribe((deletePipelines: boolean) => {
-            if (deletePipelines) {
-                this.dataReady = false;
-                this.selection.selected.forEach((importType: ImportTypePermissionSearchModel) => {
-                    deletionJobs.push(this.importTypesService.deleteImportInstance(importType.id))    
-                });
-            }
-            
-            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                if (ok) {
-                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});            
-                } else {
-                    this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+            .openDeleteDialog(text)
+            .afterClosed()
+            .subscribe((deletePipelines: boolean) => {
+                if (deletePipelines) {
+                    this.dataReady = false;
+                    this.selection.selected.forEach((importType: ImportTypePermissionSearchModel) => {
+                        deletionJobs.push(this.importTypesService.deleteImportInstance(importType.id));
+                    });
                 }
-                this.reload()
-            })
-        });
+
+                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                    }
+                    this.reload();
+                });
+            });
     }
 }

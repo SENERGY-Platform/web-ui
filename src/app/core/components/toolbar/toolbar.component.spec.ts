@@ -39,9 +39,9 @@ describe('ToolbarComponent', () => {
     const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService, {
         observablePropsToSpyOn: ['notificationEmitter']
     });
-    notificationServiceSpy.userHasReadAuthorization.and.returnValue(of(true))
-    const settingsDialogServiceSpy: Spy<SettingsDialogService> = createSpyFromClass(SettingsDialogService)
-    settingsDialogServiceSpy.userHasUpdateAuthorization.and.returnValue(of(true))
+    notificationServiceSpy.userHasReadAuthorization.and.returnValue(of(true));
+    const settingsDialogServiceSpy: Spy<SettingsDialogService> = createSpyFromClass(SettingsDialogService);
+    settingsDialogServiceSpy.userHasUpdateAuthorization.and.returnValue(of(true));
 
     beforeEach(() => {
         TestBed.configureTestingModule({

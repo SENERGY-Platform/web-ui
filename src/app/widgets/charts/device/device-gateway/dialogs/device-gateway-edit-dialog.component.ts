@@ -33,7 +33,7 @@ export class DeviceGatewayEditDialogComponent implements OnInit {
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
-    userHasUpdateNameAuthorization: boolean = false 
+    userHasUpdateNameAuthorization = false;
 
     constructor(
         private dialogRef: MatDialogRef<DeviceGatewayEditDialogComponent>,

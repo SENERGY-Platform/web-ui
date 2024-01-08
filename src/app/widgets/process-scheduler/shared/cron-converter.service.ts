@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import {toString} from 'cronstrue'
+import {toString} from 'cronstrue';
 
 @Injectable({
     providedIn: 'root',

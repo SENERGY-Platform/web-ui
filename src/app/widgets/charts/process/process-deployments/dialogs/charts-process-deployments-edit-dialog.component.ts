@@ -33,18 +33,18 @@ export class ChartsProcessDeploymentsEditDialogComponent implements OnInit {
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
-    userHasUpdateNameAuthorization: boolean = false 
-    userHasUpdatePropertiesAuthorization: boolean = false 
+    userHasUpdateNameAuthorization = false;
+    userHasUpdatePropertiesAuthorization = false;
 
     constructor(
         private dialogRef: MatDialogRef<ChartsProcessDeploymentsEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
-        @Inject(MAT_DIALOG_DATA) data: { 
-            dashboardId: string; 
-            widgetId: string; 
+        @Inject(MAT_DIALOG_DATA) data: {
+            dashboardId: string;
+            widgetId: string;
             userHasUpdateNameAuthorization: boolean;
-            userHasUpdatePropertiesAuthorization: boolean 
+            userHasUpdatePropertiesAuthorization: boolean;
         },
     ) {
         this.dashboardId = data.dashboardId;
@@ -69,9 +69,9 @@ export class ChartsProcessDeploymentsEditDialogComponent implements OnInit {
 
     save(): void {
         if(!this.userHasUpdateNameAuthorization) {
-            return 
+            return;
         }
-        
+
         this.dashboardService.updateWidgetName(this.dashboardId, this.widgetId, this.widget.name).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widget);
