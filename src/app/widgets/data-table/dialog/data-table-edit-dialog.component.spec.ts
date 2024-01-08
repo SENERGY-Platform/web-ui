@@ -47,6 +47,9 @@ import { WidgetModule } from '../../widget.module';
 import { DataTableElementTypesEnum, DataTableOrderEnum, ExportValueTypes } from '../shared/data-table.model';
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 import uuid = util.uuid;
+import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
+import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
+import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
 
 describe('DataTableEditDialogComponent', () => {
     let component: DataTableEditDialogComponent;
@@ -58,6 +61,8 @@ describe('DataTableEditDialogComponent', () => {
     let dashboardServiceSpy: Spy<DashboardService>;
     let dataTableHelperServiceSpy: Spy<DataTableHelperService>;
     let processSchedulerServiceSpy: Spy<ProcessSchedulerService>;
+    let deviceGroupServiceSpy: Spy<DeviceGroupsService>;
+    let conceptsServiceSpy: Spy<ConceptsService>;
 
     const serviceMock = {
         id: 'service_1',
@@ -88,6 +93,8 @@ describe('DataTableEditDialogComponent', () => {
             dashboardServiceSpy = createSpyFromClass<DashboardService>(DashboardService);
             dataTableHelperServiceSpy = createSpyFromClass<DataTableHelperService>(DataTableHelperService);
             processSchedulerServiceSpy = createSpyFromClass<ProcessSchedulerService>(ProcessSchedulerService);
+            deviceGroupServiceSpy = createSpyFromClass<DeviceGroupsService>(DeviceGroupsService);
+            conceptsServiceSpy = createSpyFromClass<ConceptsService>(ConceptsService);
 
             exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export_id_123' } as ExportModel));
             const exampleExport: ExportModel = {
@@ -121,7 +128,7 @@ describe('DataTableEditDialogComponent', () => {
             dashboardServiceSpy.getWidget.and.returnValue(of({ name: 'test', properties: {} } as WidgetModel));
             dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'OK' }));
             dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'OK' }));
-            
+
             dataTableHelperServiceSpy.initialize.and.returnValue(of(null));
             dataTableHelperServiceSpy.preloadExports.and.returnValue(of([]));
             dataTableHelperServiceSpy.getExportsForDeviceAndValue.and.returnValue([]);
@@ -188,7 +195,10 @@ describe('DataTableEditDialogComponent', () => {
             deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deploymentId' }));
             processSchedulerServiceSpy.createSchedule.and.returnValue(of({ id: 'scheduleId' }));
             exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'exportId' }));
-
+            deviceGroupServiceSpy.getDeviceGroups.and.returnValue(of([]));
+            deviceGroupServiceSpy.getAspectListByIds.and.returnValue(of([]));
+            deviceGroupServiceSpy.getFunctionListByIds.and.returnValue(of([]));
+            deviceGroupServiceSpy.getDeviceClassListByIds.and.returnValue(of([]));
             TestBed.configureTestingModule({
                 imports: [
                     CoreModule,
@@ -210,12 +220,15 @@ describe('DataTableEditDialogComponent', () => {
                     { provide: MatDialogRef, useValue: matDialogRefSpy },
                     { provide: DataTableHelperService, useValue: dataTableHelperServiceSpy },
                     { provide: ProcessSchedulerService, useValue: processSchedulerServiceSpy },
-                    { provide: MAT_DIALOG_DATA, useValue: { 
-                        widgetId: 'widgetId-1', 
-                        dashboardId: 'dashboardId-1',
-                        userHasUpdateNameAuthorization: true,
-                        userHasUpdatePropertiesAuthorization: true
-                        } 
+                    { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
+                    { provide: ConceptsService, useValue: conceptsServiceSpy },
+                    {
+                        provide: MAT_DIALOG_DATA, useValue: {
+                            widgetId: 'widgetId-1',
+                            dashboardId: 'dashboardId-1',
+                            userHasUpdateNameAuthorization: true,
+                            userHasUpdatePropertiesAuthorization: true
+                        }
                     },
                 ],
             }).compileComponents();
@@ -331,50 +344,56 @@ describe('DataTableEditDialogComponent', () => {
                 [],
                 {
                     dataTable: {
-                            name: 'test',
-                            order: DataTableOrderEnum.TimeAsc,
-                            valueAlias: 'alias',
-                            refreshTime: 10,
-                            valuesPerElement: 1,
-                            elements: [
-                                {
-                                    id: 'known-test-id',
-                                    name: 'name',
-                                    valueType: 'string',
-                                    exportId: null,
-                                    exportValuePath: 'struct.Time',
-                                    exportValueName: 'Time',
-                                    exportCreatedByWidget: null,
-                                    exportTagSelection: null,
-                                    exportDbId: undefined,
-                                    groupType: null,
-                                    groupTime: null,
-                                    unit: null,
-                                    elementDetails: {
-                                        elementType: 0,
-                                        device: {
-                                            aspectId: 'aspectId',
-                                            functionId: 'functionId',
-                                            deviceId: 'deviceId',
-                                            serviceId: 'service_1',
-                                            deploymentId: 'deploymentId',
-                                            requestDevice: true,
-                                            scheduleId: 'scheduleId',
-                                        },
-                                        pipeline: {
-                                            pipelineId: null,
-                                            operatorId: null,
-                                        },
-                                        import: {
-                                            typeId: null,
-                                            instanceId: null,
-                                        },
+                        name: 'test',
+                        order: DataTableOrderEnum.TimeAsc,
+                        valueAlias: 'alias',
+                        refreshTime: 10,
+                        valuesPerElement: 1,
+                        elements: [
+                            {
+                                id: 'known-test-id',
+                                name: 'name',
+                                valueType: 'string',
+                                exportId: null,
+                                exportValuePath: 'struct.Time',
+                                exportValueName: 'Time',
+                                exportCreatedByWidget: null,
+                                exportTagSelection: null,
+                                exportDbId: undefined,
+                                groupType: null,
+                                groupTime: null,
+                                unit: null,
+                                elementDetails: {
+                                    elementType: 0,
+                                    device: {
+                                        aspectId: 'aspectId',
+                                        functionId: 'functionId',
+                                        deviceId: 'deviceId',
+                                        serviceId: 'service_1',
+                                        deploymentId: 'deploymentId',
+                                        requestDevice: true,
+                                        scheduleId: 'scheduleId',
+                                    },
+                                    pipeline: {
+                                        pipelineId: null,
+                                        operatorId: null,
+                                    },
+                                    import: {
+                                        typeId: null,
+                                        instanceId: null,
+                                    },
+                                    deviceGroup: {
+                                        deviceGroupId: null,
+                                        deviceGroupCriteria: null,
+                                        targetCharacteristic: null,
+                                        deviceGroupAggregation: SingleValueAggregations.Latest,
                                     },
                                 },
-                            ],
-                            convertRules: [],
-                        }
+                            },
+                        ],
+                        convertRules: [],
                     }
+                }
             ]);
         }),
     );
@@ -456,7 +475,7 @@ describe('DataTableEditDialogComponent', () => {
 
     it(
         'should copy, move and delete elements',
-        waitForAsync(() => {
+        () => {
             const fixture = TestBed.createComponent(DataTableEditDialogComponent);
             component = fixture.componentInstance;
             fixture.detectChanges();
@@ -471,25 +490,25 @@ describe('DataTableEditDialogComponent', () => {
             expect(id0 !== id1).toBeTrue();
             expect(id1 !== id2).toBeTrue();
             expect(component.step).toBe(2);
-            const elementOld = component.getElement(0)?.value;
-            const elementNew = component.getElement(1)?.value;
+            const elementOld = component.getElement(0)?.getRawValue();
+            const elementNew = component.getElement(1)?.getRawValue();
             elementOld.id = '';
             elementNew.id = '';
-            delete elementOld.elementDetails.pipeline; // does not get copied, since device selected
-            delete elementOld.elementDetails.import; // does not get copied, since device selected
-            delete elementOld.exportId; // does not get copied, since device selected
-            elementNew.exportDbId = null; // is undefined, also fine
-            expect(elementOld).toEqual(elementNew);
+            if (elementNew.exportDbId === undefined) {
+                elementNew.exportDbId = null; // is undefined, also fine
+            }
+
+            expect(elementNew).toEqual(elementOld);
 
             component.moveUp(0);
             expect(component.getElement(1)?.get('id')?.value).toBe(id0);
             expect(component.getElement(0)?.get('id')?.value).toBe(id1);
-        }),
+        }
     );
 
     it(
         'should fill pipeline data and create export',
-        waitForAsync(() => {
+        () => {
             const fixture = TestBed.createComponent(DataTableEditDialogComponent);
             component = fixture.componentInstance;
             fixture.detectChanges();
@@ -529,6 +548,5 @@ describe('DataTableEditDialogComponent', () => {
                     ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
                 },
             ]);
-        }),
-    );
+        });
 });

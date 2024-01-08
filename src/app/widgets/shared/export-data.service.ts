@@ -53,11 +53,11 @@ export class ExportDataService {
         return this.http.post<any[][][]>(environment.influxAPIURL + '/v2/queries?format=per_query', query);
     }
 
-    queryTimescale(query: QueriesRequestElementTimescaleModel[]): Observable<any[][][]> { // TODO implement v2
+    queryTimescale(query: QueriesRequestElementTimescaleModel[]): Observable<any[][][]> {
         return this.http.post<any[][][]>(environment.timescaleAPIURL + '/queries?format=per_query', query);
     }
 
-    queryTimescaleV2(query: QueriesRequestV2ElementTimescaleModel[]): Observable<{requestIndex: number; data: any[][][]}[]> { // TODO implement v2
+    queryTimescaleV2(query: QueriesRequestV2ElementTimescaleModel[]): Observable<{requestIndex: number; data: any[][][]}[]> {
         return this.http.post<{requestIndex: number; data: any[][][]}[]>(environment.timescaleAPIURL + '/queries/v2', query);
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AbstractControl, FormControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { DataTableElementTypesEnum } from '../shared/data-table.model';
 
 export function boundaryValidator(): ValidatorFn {
@@ -150,6 +150,14 @@ export function elementDetailsValidator(): ValidatorFn {
                 ['import', 'typeId'],
                 ['import', 'instanceId'],
             ]);
+            case DataTableElementTypesEnum.DEVICE_GROUP:
+                
+                return getAndCheckValues(control, [
+                    ['deviceGroup', 'deviceGroupId'],
+                    ['deviceGroup','targetCharacteristic'],
+                    ['deviceGroup','deviceGroupCriteria'],
+                    ['deviceGroup', 'deviceGroupAggregation'],
+                ]);
         default:
             control.setErrors({ 'unknown elementType': elementType.value });
             return { 'unknown elementType': elementType.value };

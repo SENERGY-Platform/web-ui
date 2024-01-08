@@ -161,9 +161,9 @@ export class SingleValueService {
                 }
             }
             if (widget.properties.sourceType === 'device' || widget.properties.sourceType === 'deviceGroup') {
-                (requestPayload[0] as QueriesRequestV2ElementTimescaleModel).deviceId = widget.properties.device?.id; // TODO use deviceGroupId
+                (requestPayload[0] as QueriesRequestV2ElementTimescaleModel).deviceId = widget.properties.device?.id;
                 (requestPayload[0] as QueriesRequestV2ElementTimescaleModel).serviceId = widget.properties.service?.id;
-                (requestPayload[0] as QueriesRequestV2ElementTimescaleModel).deviceGroupId = widget.properties.deviceGroupId; // TODO use deviceGroupId
+                (requestPayload[0] as QueriesRequestV2ElementTimescaleModel).deviceGroupId = widget.properties.deviceGroupId;
                 queryMultiple();
                 o = this.exportDataService.queryTimescaleV2(requestPayload).pipe(map(o => {
                     const data: any[][][] = [];

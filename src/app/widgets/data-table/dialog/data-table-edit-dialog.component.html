@@ -59,304 +59,345 @@
                     <mat-form-field color="accent">
                         <mat-label>Values per Element</mat-label>
                         <input type="number" matInput placeholder="Values per Element"
-                               formControlName="valuesPerElement">
+                            formControlName="valuesPerElement">
                     </mat-form-field>
                 </td>
             </tr>
         </table>
 
         <span *ngIf="userHasUpdatePropertiesAuthorization">
-        <table formArrayName="convertRules">
-            <tr [formGroupName]="convertRuleIndex"
-                *ngFor="let convertRule of convertRulesControl.controls; let convertRuleIndex = index">
-                <td>
-                    <mat-form-field color="accent">
-                        <mat-label>Status</mat-label>
-                        <input class="convert-input" type="text" matInput placeholder="Status" formControlName="status">
-                    </mat-form-field>
-                </td>
-                <td>
-                    <mat-form-field color="accent">
-                        <mat-select formControlName="icon"
+            <table formArrayName="convertRules">
+                <tr [formGroupName]="convertRuleIndex"
+                    *ngFor="let convertRule of convertRulesControl.controls; let convertRuleIndex = index">
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Status</mat-label>
+                            <input class="convert-input" type="text" matInput placeholder="Status" formControlName="status">
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-select formControlName="icon"
                                     placeholder="Choose Icon" class="convert-input">
-                            <mat-select-trigger>
-                                <mat-icon
+                                <mat-select-trigger>
+                                    <mat-icon
                                         [ngStyle]="{'color': getColor(convertRuleIndex)}">{{getIcon(convertRuleIndex)}}</mat-icon>
-                            </mat-select-trigger>
-                            <mat-option>-- None --</mat-option>
-                            <mat-option *ngFor="let icon of icons" [value]="icon">
-                                <mat-icon>{{icon}}</mat-icon>
-                                {{icon}}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                </td>
-                <td>
-                    <mat-form-field color="accent">
-                        <mat-label>Color</mat-label>
-                        <input class="convert-input" type="text" matInput placeholder="Color" formControlName="color">
-                    </mat-form-field>
-                </td>
-                <td>
-                    <button mat-icon-button style="float: right"
+                                </mat-select-trigger>
+                                <mat-option>-- None --</mat-option>
+                                <mat-option *ngFor="let icon of icons" [value]="icon">
+                                    <mat-icon>{{icon}}</mat-icon>
+                                    {{icon}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent">
+                            <mat-label>Color</mat-label>
+                            <input class="convert-input" type="text" matInput placeholder="Color" formControlName="color">
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <button mat-icon-button style="float: right"
                             (click)="deleteConvertRule(convertRuleIndex)">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="4">
-                    <button style="float: right" mat-icon-button (click)="addConvertRule()"
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <button style="float: right" mat-icon-button (click)="addConvertRule()"
                             matTooltip="Add icon conversion rule">
-                        <mat-icon>add</mat-icon>
-                    </button>
-                </td>
-            </tr>
-        </table>
+                            <mat-icon>add</mat-icon>
+                        </button>
+                    </td>
+                </tr>
+            </table>
 
 
-        <mat-accordion>
-            <mat-expansion-panel *ngFor="let tab of getElements().controls; let index = index"
-                                 [expanded]="step === index">
-                <mat-expansion-panel-header class="right-aligned-header">
-                    <mat-panel-title>
-                        <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.get('name')?.value}} </span>
-                    </mat-panel-title>
-                    <mat-panel-description>
-                        <span [ngClass]="{'color-warn': tab.invalid}"> {{index}} </span>
-                    </mat-panel-description>
-                </mat-expansion-panel-header>
-                <ng-template matExpansionPanelContent>
-                    <table [formGroup]="getElement(index)">
-                        <tr>
-                            <td colspan="1">
-                                <mat-form-field color="accent">
-                                    <mat-label>Alias</mat-label>
-                                    <input type="text" matInput placeholder="Alias" required
+            <mat-accordion>
+                <mat-expansion-panel *ngFor="let tab of getElements().controls; let index = index"
+                    [expanded]="step === index">
+                    <mat-expansion-panel-header class="right-aligned-header">
+                        <mat-panel-title>
+                            <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.get('name')?.value}} </span>
+                        </mat-panel-title>
+                        <mat-panel-description>
+                            <span [ngClass]="{'color-warn': tab.invalid}"> {{index}} </span>
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <ng-template matExpansionPanelContent>
+                        <table [formGroup]="getElement(index)">
+                            <tr>
+                                <td colspan="1">
+                                    <mat-form-field color="accent">
+                                        <mat-label>Alias</mat-label>
+                                        <input type="text" matInput placeholder="Alias" required
                                            formControlName="name">
-                                </mat-form-field>
-                            </td>
-                            <td colspan="2" formGroupName="elementDetails">
-                                <mat-radio-group formControlName="elementType" fxLayout="row">
-                                    <mat-radio-button [value]="elementTypes.DEVICE" fxFlex>Device</mat-radio-button>
-                                    <mat-radio-button [value]="elementTypes.PIPELINE" fxFlex>Pipeline</mat-radio-button>
-                                    <mat-radio-button [value]="elementTypes.IMPORT" fxFlex>Import</mat-radio-button>
-                                </mat-radio-group>
-                            </td>
-                        </tr>
+                                    </mat-form-field>
+                                </td>
+                                <td colspan="2" formGroupName="elementDetails">
+                                    <mat-radio-group formControlName="elementType" fxLayout="row">
+                                        <mat-radio-button [value]="elementTypes.DEVICE" fxFlex>Device</mat-radio-button>
+                                        <mat-radio-button [value]="elementTypes.PIPELINE"
+                                            fxFlex>Pipeline</mat-radio-button>
+                                        <mat-radio-button [value]="elementTypes.IMPORT" fxFlex>Import</mat-radio-button>
+                                        <mat-radio-button [value]="elementTypes.DEVICE_GROUP" fxFlex>Device
+                                            Group</mat-radio-button>
+                                    </mat-radio-group>
+                                </td>
+                            </tr>
 
-                        <tr formGroupName="elementDetails" *ngIf="isDevice(tab)">
-                            <td formGroupName="device">
-                                <mat-form-field color="accent">
-                                    <senergy-select-search formControlName="aspectId" [required]="true"
-                                                           placeholder="Choose Aspect"
-                                                           [options]="dataTableHelperService.getAspectsWithMeasuringFunction()"
-                                                           useOptionViewProperty="name"
+                            <tr formGroupName="elementDetails" *ngIf="isDevice(tab)">
+                                <td formGroupName="device">
+                                    <mat-form-field color="accent">
+                                        <senergy-select-search formControlName="aspectId" [required]="true"
+                                            placeholder="Choose Aspect"
+                                            [options]="dataTableHelperService.getAspectsWithMeasuringFunction()"
+                                            useOptionViewProperty="name"
                                                            useOptionValueProperty="id">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                            <td formGroupName="device">
-                                <mat-form-field color="accent">
-                                    <senergy-select-search formControlName="functionId" [required]="true"
-                                                           placeholder="Choose Function" [compareWith]="compareStrings"
-                                                           [options]="getFunctions(tab)" useOptionValueProperty="id"
-                                                           useOptionViewProperty="name">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                            <td formGroupName="device">
-                                <mat-form-field color="accent">
-                                    <senergy-select-search [compareWith]="compareStrings"
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                                <td formGroupName="device">
+                                    <mat-form-field color="accent">
+                                        <senergy-select-search formControlName="functionId" [required]="true"
+                                            placeholder="Choose Function" [compareWith]="compareStrings"
+                                            [options]="getFunctions(tab)" useOptionValueProperty="id"
+                                            useOptionViewProperty="name">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                                <td formGroupName="device">
+                                    <mat-form-field color="accent">
+                                        <senergy-select-search [compareWith]="compareStrings"
                                                            formControlName="deviceId" placeholder="Choose Device"
                                                            [required]="true" [options]="getSelectables(tab)"
                                                            useOptionViewProperty="device.display_name"
-                                                           useOptionValueProperty="device.id">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                        <tr *ngIf="isDevice(tab)">
-                            <td formGroupName="elementDetails">
-                                <mat-form-field color="accent" formGroupName="device">
-                                    <senergy-select-search formControlName="serviceId" [required]="true"
-                                                           placeholder="Choose Service" [compareWith]="compareStrings"
-                                                           [options]="getServices(tab)" useOptionValueProperty="id"
-                                                           useOptionViewProperty="name">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <mat-form-field color="accent">
-                                    <senergy-select-search formControlName="exportValuePath" [required]="true"
-                                                           placeholder="Choose Value" [compareWith]="compareStrings"
-                                                           [options]="getServiceValues(tab)"
+                                            useOptionValueProperty="device.id">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr *ngIf="isDevice(tab)">
+                                <td formGroupName="elementDetails">
+                                    <mat-form-field color="accent" formGroupName="device">
+                                        <senergy-select-search formControlName="serviceId" [required]="true"
+                                            placeholder="Choose Service" [compareWith]="compareStrings"
+                                            [options]="getServices(tab)" useOptionValueProperty="id"
+                                            useOptionViewProperty="name">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-form-field color="accent">
+                                        <senergy-select-search formControlName="exportValuePath" [required]="true"
+                                            placeholder="Choose Value" [compareWith]="compareStrings"
+                                            [options]="getServiceValues(tab)"
                                                            useOptionViewProperty="Name"
-                                                           useOptionValueProperty="Path">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                        <tr *ngIf="isPipeline(tab)">
-                            <td formGroupName="elementDetails">
-                                <mat-form-field color="accent" formGroupName="pipeline">
-                                    <senergy-select-search formControlName="pipelineId" [required]="true"
-                                                           placeholder="Choose Pipeline" [compareWith]="compareStrings"
-                                                           [options]="dataTableHelperService.getPipelines()"
-                                                           useOptionValueProperty="id" useOptionViewProperty="name">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                            <td formGroupName="elementDetails">
-                                <mat-form-field color="accent" formGroupName="pipeline">
-                                    <senergy-select-search formControlName="operatorId" [required]="true"
-                                                           placeholder="Choose Operator" [compareWith]="compareStrings"
-                                                           [options]="getOperators(tab)" useOptionValueProperty="id"
-                                                           [getOptionViewValue]="getOperatorViewValue">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <mat-form-field color="accent">
-                                    <senergy-select-search formControlName="exportValuePath" [required]="true"
-                                                           placeholder="Choose Value" [compareWith]="compareStrings"
-                                                           [options]="getOperatorValues(tab)"
+                                            useOptionValueProperty="Path">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr *ngIf="isPipeline(tab)">
+                                <td formGroupName="elementDetails">
+                                    <mat-form-field color="accent" formGroupName="pipeline">
+                                        <senergy-select-search formControlName="pipelineId" [required]="true"
+                                            placeholder="Choose Pipeline" [compareWith]="compareStrings"
+                                            [options]="dataTableHelperService.getPipelines()"
+                                            useOptionValueProperty="id" useOptionViewProperty="name">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                                <td formGroupName="elementDetails">
+                                    <mat-form-field color="accent" formGroupName="pipeline">
+                                        <senergy-select-search formControlName="operatorId" [required]="true"
+                                            placeholder="Choose Operator" [compareWith]="compareStrings"
+                                            [options]="getOperators(tab)" useOptionValueProperty="id"
+                                            [getOptionViewValue]="getOperatorViewValue">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-form-field color="accent">
+                                        <senergy-select-search formControlName="exportValuePath" [required]="true"
+                                            placeholder="Choose Value" [compareWith]="compareStrings"
+                                            [options]="getOperatorValues(tab)"
                                                            useOptionValueProperty="Path"
-                                                           useOptionViewProperty="Name">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                        <tr *ngIf="isImport(tab)">
-                            <td formGroupName="elementDetails">
-                                <mat-form-field color="accent" formGroupName="import">
-                                    <senergy-select-search formControlName="typeId" [required]="true"
-                                                           placeholder="Choose Type"
-                                                           [options]="dataTableHelperService.getImportTypes()"
-                                                           useOptionValueProperty="id" useOptionViewProperty="name">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                            <td formGroupName="elementDetails">
-                                <mat-form-field color="accent" formGroupName="import">
-                                    <senergy-select-search formControlName="instanceId" [required]="true"
-                                                           placeholder="Choose Instance"
-                                                           [options]="dataTableHelperService.getImportInstancesOfType(tab.get('elementDetails.import.typeId')?.value)"
-                                                           useOptionValueProperty="id"
+                                            useOptionViewProperty="Name">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr *ngIf="isImport(tab)">
+                                <td formGroupName="elementDetails">
+                                    <mat-form-field color="accent" formGroupName="import">
+                                        <senergy-select-search formControlName="typeId" [required]="true"
+                                            placeholder="Choose Type"
+                                            [options]="dataTableHelperService.getImportTypes()"
+                                            useOptionValueProperty="id" useOptionViewProperty="name">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                                <td formGroupName="elementDetails">
+                                    <mat-form-field color="accent" formGroupName="import">
+                                        <senergy-select-search formControlName="instanceId" [required]="true"
+                                            placeholder="Choose Instance"
+                                            [options]="dataTableHelperService.getImportInstancesOfType(tab.get('elementDetails.import.typeId')?.value)"
+                                            useOptionValueProperty="id"
                                                            useOptionViewProperty="name">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <mat-form-field color="accent">
-                                    <senergy-select-search formControlName="exportValuePath" [required]="true"
-                                                           placeholder="Choose Value"
-                                                           [options]="dataTableHelperService.getImportTypeValues(tab.get('elementDetails.import.typeId')?.value)"
-                                                           useOptionValueProperty="Path"
-                                                           useOptionViewProperty="Name">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td *ngIf="!isDevice(tab)">
-                                <mat-form-field color="accent">
-                                    <senergy-select-search formControlName="exportId" [required]="true"
-                                                           placeholder="Choose Export" [options]="getExports(tab)"
-                                                           useOptionViewProperty="Name" useOptionValueProperty="ID">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-form-field color="accent">
+                                        <senergy-select-search formControlName="exportValuePath" [required]="true"
+                                            placeholder="Choose Value"
+                                            [options]="dataTableHelperService.getImportTypeValues(tab.get('elementDetails.import.typeId')?.value)"
+                                            useOptionValueProperty="Path" useOptionViewProperty="Name">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr *ngIf="isDeviceGroup(tab)" formGroupName="elementDetails">
+                                <td formGroupName="deviceGroup">
+                                    <mat-form-field color="accent">
+                                        <mat-label>Choose Device Group</mat-label>
+                                        <senergy-select-search [options]="deviceGroups" formControlName="deviceGroupId"
+                                            useOptionViewProperty="name" useOptionValueProperty="id">
+                                        </senergy-select-search>
+                                    </mat-form-field>
 
-                            <td *ngIf="!isDevice(tab) && tab.get('exportId')?.value !== undefined && getTags(tab).size > 0">
-                                <mat-form-field color="accent">
-                                    <senergy-select-search placeholder="Choose Tags" [multiple]="true"
-                                                           [options]="getTags(tab)"
+                                </td>
+                                <td formGroupName="deviceGroup">
+                                    <mat-form-field color="accent">
+                                        <mat-label>Choose Criteria</mat-label>
+                                        <senergy-select-search [options]="getCriteria(tab)"
+                                            formControlName="deviceGroupCriteria"
+                                            [getOptionViewValue]="describeCriteria()" [compareWith]="compareCriteria">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr *ngIf="isDeviceGroup(tab)">
+                                <td>
+                                    <mat-form-field color="accent">
+                                        <mat-label>Unit</mat-label>
+                                        <senergy-select-search [options]="getConcept(tab)?.characteristics || []"
+                                            formControlName="unit" [getOptionValue]="getDisplayUnit"
+                                            [getOptionViewValue]="getDisplayUnit">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                                <td formGroupName="elementDetails">
+                                    <mat-form-field color="accent" formGroupName="deviceGroup">
+                                        <mat-label>Aggregation</mat-label>
+                                        <senergy-select-search [options]="aggregations"
+                                            formControlName="deviceGroupAggregation">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td *ngIf="!isDevice(tab) && !isDeviceGroup(tab)">
+                                    <mat-form-field color="accent">
+                                        <senergy-select-search formControlName="exportId" [required]="true"
+                                            placeholder="Choose Export" [options]="getExports(tab)"
+                                            useOptionViewProperty="Name" useOptionValueProperty="ID">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+
+                                <td *ngIf="!isDevice(tab) && tab.get('exportId')?.value !== undefined && getTags(tab).size > 0">
+                                    <mat-form-field color="accent">
+                                        <senergy-select-search placeholder="Choose Tags" [multiple]="true"
+                                            [options]="getTags(tab)"
                                                            formControlName="exportTagSelection"
-                                                           [getOptionDisabled]="getTagOptionDisabledFunction(tab)"
-                                                           [getOptionValue]="getTagValue"
+                                            [getOptionDisabled]="getTagOptionDisabledFunction(tab)"
+                                            [getOptionValue]="getTagValue"
                                                            useOptionViewProperty="value">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
 
-                            <td>
-                                <mat-form-field color="accent">
-                                    <mat-label>Unit</mat-label>
-                                    <input type="text" matInput placeholder="Unit" formControlName="unit">
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <mat-form-field color="accent" hintLabel="For use in Angular pipes">
-                                    <mat-label>Format</mat-label>
-                                    <input type="text" matInput placeholder="Format" formControlName="format">
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <mat-form-field color="accent">
-                                    <senergy-select-search placeholder="Group Type" [options]="groupTypes"
-                                                           [noneView]="'none'" formControlName="groupType">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <mat-form-field color="accent">
-                                    <mat-label>Group time</mat-label>
-                                    <input type="text" matInput formControlName="groupTime">
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                        <tr formGroupName="warning" matTooltip="{{getBoundaryWarningTooltip(tab)}}">
-                            <td>
-                                <mat-slide-toggle formControlName="enabled">Enable warnings</mat-slide-toggle>
-                            </td>
-                            <td>
-                                <mat-form-field color="accent">
-                                    <mat-label>Lower boundary</mat-label>
-                                    <input matInput type="number" formControlName="lowerBoundary">
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <mat-form-field color="accent">
-                                    <mat-label>Upper boundary</mat-label>
-                                    <input matInput type="number" formControlName="upperBoundary">
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                    </table>
-                    <div>
-                    <span matTooltip="Move this measurement up or down">
-                    <button mat-icon-button
-                            [disabled]="this.getElements().controls.length === 1 || index === 0"
-                            (click)="moveUp(index)">
-                        <mat-icon>arrow_upward</mat-icon>
-                    </button>
-                    <button mat-icon-button
-                            [disabled]="this.getElements().controls.length === 1 || index === this.getElements().controls.length - 1"
-                            (click)="moveDown(index)">
-                        <mat-icon>arrow_downward</mat-icon>
-                    </button>
-                    </span>
-                        <span style="float: right">
-                        <button mat-icon-button
+                                <td *ngIf="!isDeviceGroup(tab)">
+                                    <mat-form-field color="accent">
+                                        <mat-label>Unit</mat-label>
+                                        <input type="text" matInput placeholder="Unit" formControlName="unit">
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <mat-form-field color="accent" hintLabel="For use in Angular pipes">
+                                        <mat-label>Format</mat-label>
+                                        <input type="text" matInput placeholder="Format" formControlName="format">
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-form-field color="accent">
+                                        <senergy-select-search placeholder="Group Type" [options]="groupTypes"
+                                            [noneView]="'none'" formControlName="groupType">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-form-field color="accent">
+                                        <mat-label>Group time</mat-label>
+                                        <input type="text" matInput formControlName="groupTime">
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr formGroupName="warning" matTooltip="{{getBoundaryWarningTooltip(tab)}}">
+                                <td>
+                                    <mat-slide-toggle formControlName="enabled">Enable warnings</mat-slide-toggle>
+                                </td>
+                                <td>
+                                    <mat-form-field color="accent">
+                                        <mat-label>Lower boundary</mat-label>
+                                        <input matInput type="number" formControlName="lowerBoundary">
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-form-field color="accent">
+                                        <mat-label>Upper boundary</mat-label>
+                                        <input matInput type="number" formControlName="upperBoundary">
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                        </table>
+                        <div>
+                            <span matTooltip="Move this measurement up or down">
+                                <button mat-icon-button
+                                    [disabled]="this.getElements().controls.length === 1 || index === 0"
+                                    (click)="moveUp(index)">
+                                    <mat-icon>arrow_upward</mat-icon>
+                                </button>
+                                <button mat-icon-button
+                                    [disabled]="this.getElements().controls.length === 1 || index === this.getElements().controls.length - 1"
+                                    (click)="moveDown(index)">
+                                    <mat-icon>arrow_downward</mat-icon>
+                                </button>
+                            </span>
+                            <span style="float: right">
+                                <button mat-icon-button
                                 (click)="copyTab(index)">
-                            <mat-icon>content_copy</mat-icon>
-                        </button>
-                        <button mat-icon-button
+                                    <mat-icon>content_copy</mat-icon>
+                                </button>
+                                <button mat-icon-button
                                 [disabled]="this.getElements().controls.length === 1"
-                                (click)="removeTab(index)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                        </span>
-                    </div>
-                </ng-template>
-            </mat-expansion-panel>
-        </mat-accordion>
-        <button (click)="addNewMeasurement()" mat-icon-button matTooltip="Add element">
-            <mat-icon>add</mat-icon>
-        </button>
+                                    (click)="removeTab(index)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </span>
+                        </div>
+                    </ng-template>
+                </mat-expansion-panel>
+            </mat-accordion>
+            <button (click)="addNewMeasurement()" mat-icon-button matTooltip="Add element">
+                <mat-icon>add</mat-icon>
+            </button>
         </span>
     </form>
 </mat-dialog-content>

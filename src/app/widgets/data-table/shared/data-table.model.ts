@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import { DeviceGroupCriteriaModel } from "src/app/modules/devices/device-groups/shared/device-groups.model";
+import { SingleValueAggregations } from "../../single-value/shared/single-value.model";
+
 export interface DataTableWidgetPropertiesModel {
     dataTable?: DataTablePropertiesModel;
 }
@@ -67,6 +70,12 @@ export interface DataTableElementModel {
             typeId: string;
             instanceId: string;
         };
+        deviceGroup?: {
+            deviceGroupId?: string;
+            deviceGroupCriteria?: DeviceGroupCriteriaModel;
+            targetCharacteristic?: string;
+            deviceGroupAggregation?: SingleValueAggregations;
+        }
     };
 }
 
@@ -75,6 +84,7 @@ export enum DataTableElementTypesEnum {
     DEVICE,
     PIPELINE,
     IMPORT,
+    DEVICE_GROUP,
 }
 
 export interface DataTableElementWarningModel {

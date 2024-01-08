@@ -73,7 +73,7 @@ export class DataTableHelperService {
         private importTypesService: ImportTypesService,
     ) {}
 
-    private static translateValueType(schemaOrgType: string): string {
+    static translateValueType(schemaOrgType: string): string {
         switch (schemaOrgType) {
         case 'https://schema.org/Text':
             return ExportValueTypes.STRING;
