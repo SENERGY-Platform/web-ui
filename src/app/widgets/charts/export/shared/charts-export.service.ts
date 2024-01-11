@@ -338,11 +338,6 @@ export class ChartsExportService {
                         tableRow.push(null); // insert leading null column values
                     }
                     tableRow.push(row[1]); // actual data
-                    /*
-                    while (tableRow.length < columns) {  // insert trailing null column values
-                        tableRow.push(null);
-                    }
-                    */
                     table.push(tableRow);
                     columnHasData[offset + seriesIndex] = true;
                 });
@@ -372,15 +367,16 @@ export class ChartsExportService {
             type: string;
         }[] = [];
         const header: string[] = ['time'];
+        let colors = this.getColorArray(vAxes);
         if (vAxes) {
+            const colors2: string[] = [];
             vAxes.forEach((vAxis: ChartsExportVAxesModel, index) => {
                 let offset2 = 0;
                 for (let i = 0; i < index; i++) {
                     offset2 += repeats[i];
                 }
                 for (let i = 0; i < repeats[index]; i++) {
-                    // if (table.findIndex((a) => a[offset2 + i + 1] !== null) !== -1) {
-                    if (columnHasData[offset2 + i + 1]) { // TODO check
+                    if (columnHasData[offset2 + i + 1]) {
                         indices.push({
                             index: offset2 + i + 1,
                             conversions: vAxis.conversions || [],
@@ -388,9 +384,11 @@ export class ChartsExportService {
                             type: vAxis.valueType,
                         });
                         header.push(vAxis.valueAlias || vAxis.valueName);
+                        colors2.push(colors[offset2]);
                     }
                 }
             });
+            colors = colors2;
         }
         const dataTable = new ChartDataTableModel([header]);
 
@@ -487,7 +485,7 @@ export class ChartsExportService {
             dataTable.data = res.table;
             return { table: dataTable, colors: res.colors };
         }
-        return { table: dataTable };
+        return {table: dataTable, colors};
     }
 
     private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[], hAxisFormat?: string): ChartsModel {
@@ -567,9 +565,9 @@ export class ChartsExportService {
         return chartModel;
     }
 
-    private getColorArray(vAxes: ChartsExportVAxesModel[]): string[] {
+    private getColorArray(vAxes?: ChartsExportVAxesModel[]): string[] {
         const array: string[] = [];
-        vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
+        vAxes?.forEach((vAxis: ChartsExportVAxesModel) => {
             array.push(vAxis.color ? vAxis.color : customColor);
         });
         return array;

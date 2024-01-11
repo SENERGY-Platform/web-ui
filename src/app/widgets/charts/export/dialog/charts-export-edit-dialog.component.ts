@@ -693,9 +693,9 @@ export class ChartsExportEditDialogComponent implements OnInit {
             'difference-median',
 
         ];
-        const influxExp = (this.exports.value as (ChartsExportMeasurementModel | DeviceInstancesModel)[])
+        const influxExp = (this.exports.value as (ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel)[])
             ?.find(exp => (exp as DeviceInstancesModel).device_type === undefined &&
-                ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb));
+                (((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined && (exp as DeviceGroupsPermSearchModel).criteria === undefined) || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb));
         if (influxExp === undefined) {
             res.push('time-weighted-mean-linear', 'time-weighted-mean-locf');
         }
