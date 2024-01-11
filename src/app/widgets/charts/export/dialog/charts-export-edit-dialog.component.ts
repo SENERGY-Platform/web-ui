@@ -16,7 +16,6 @@
 
 import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
 import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {DashboardResponseMessageModel} from '../../../../modules/dashboard/shared/dashboard-response-message.model';
 import {
@@ -29,18 +28,24 @@ import {
 } from '@angular/forms';
 import {ExportService} from '../../../../modules/exports/shared/export.service';
 import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../../modules/exports/shared/export.model';
-import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
+import {ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
 import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
 import {MatTableDataSource} from '@angular/material/table';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {forkJoin, Observable, of} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {map, mergeMap} from 'rxjs/operators';
 import {DeviceInstancesModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
 import {DeviceInstancesService} from '../../../../modules/devices/device-instances/shared/device-instances.service';
 import {DeviceTypeService} from '../../../../modules/metadata/device-types-overview/shared/device-type.service';
-import {DeviceTypeModel} from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
-import {ExportDataService} from '../../../shared/export-data.service';
+import {DeviceTypeFunctionModel, DeviceTypeModel} from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
 import {environment} from '../../../../../environments/environment';
+import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
+import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
+import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-classes/shared/device-classes-perm-search.model';
+import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
+import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
+import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
@@ -53,6 +58,8 @@ export class ChartsExportEditDialogComponent implements OnInit {
     typeBoolean = 'https://schema.org/Boolean';
     typeStructure = 'https://schema.org/StructuredValue';
     typeList = 'https://schema.org/ItemList';
+
+    chartsExportDeviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy;
 
     formGroupController = new UntypedFormGroup({});
     exportList: ChartsExportMeasurementModel[] = [];
@@ -76,6 +83,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         'filterType',
         'filterValue',
         'tags',
+        'deviceGroupMergingStrategy',
         'displayOnSecondVAxis',
         'duplicate-delete',
     ];
@@ -83,21 +91,27 @@ export class ChartsExportEditDialogComponent implements OnInit {
     vAxesOptions: Map<string, ChartsExportVAxesModel[]> = new Map();
     exportTags: Map<string, Map<string, { value: string; parent: string }[]>> = new Map();
     ready = false;
-    exportDeviceList: Map<string, ChartsExportMeasurementModel[] | DeviceInstancesModel[]> = new Map();
+    exportDeviceList: Map<string, ChartsExportMeasurementModel[] | DeviceInstancesModel[] | DeviceGroupsPermSearchModel[]> = new Map();
     emptyMap = new Map();
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
 
+    deviceGroups: DeviceGroupsPermSearchModel[] = [];
+    aspects: AspectsPermSearchModel[] = [];
+    functions: DeviceTypeFunctionModel[] = [];
+    deviceClasses: DeviceClassesPermSearchModel[] = [];
+    concepts: Map<string, ConceptsCharacteristicsModel | null> = new Map();
+
     constructor(
         private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
-        private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
         private exportService: ExportService,
-        private exportDataService: ExportDataService,
         private deviceInstancesService: DeviceInstancesService,
         private deviceTypeService: DeviceTypeService,
         private _formBuilder: UntypedFormBuilder,
         private cd: ChangeDetectorRef,
+        private deviceGroupsService: DeviceGroupsService,
+        private conceptsService: ConceptsService,
         @Inject(MAT_DIALOG_DATA) data: {
             dashboardId: string;
             widgetId: string;
@@ -266,6 +280,32 @@ export class ChartsExportEditDialogComponent implements OnInit {
                     this.exportDeviceList.set('Devices', this.deviceList);
                     this.cd.detectChanges();
                 })));
+        obs.push(this.deviceGroupsService.getDeviceGroups('', 10000, 0, 'name', 'asc').pipe(mergeMap(deviceGroups => {
+            this.deviceGroups = deviceGroups;
+            const ascpectIds: Map<string, null> = new Map();
+            const functionIds: Map<string, null> = new Map();
+            const deviceClassids: Map<string, null> = new Map();
+            this.deviceGroups.forEach(dg => {
+                const criteria: DeviceGroupCriteriaModel[] = [];
+                dg.criteria.forEach(c => {
+                    ascpectIds.set(c.aspect_id, null);
+                    functionIds.set(c.function_id, null);
+                    deviceClassids.set(c.device_class_id, null);
+                    if (criteria.findIndex(c2 => c.aspect_id === c2.aspect_id && c.function_id === c2.function_id && c.device_class_id === c2.device_class_id) === -1) {
+                        // filters interaction, irrelevant for widget
+                        c.interaction = '';
+                        criteria.push(c);
+                    }
+                });
+                dg.criteria = criteria;
+            });
+            this.exportDeviceList.set('Device Groups', this.deviceGroups);
+            const innerObs: Observable<any>[] = [];
+            innerObs.push(this.deviceGroupsService.getAspectListByIds(Array.from(ascpectIds.keys())).pipe(map(aspects => this.aspects = aspects)));
+            innerObs.push(this.deviceGroupsService.getFunctionListByIds(Array.from(functionIds.keys())).pipe(map(functions => this.functions = functions)));
+            innerObs.push(this.deviceGroupsService.getDeviceClassListByIds(Array.from(deviceClassids.keys())).pipe(map(deviceClasses => this.deviceClasses = deviceClasses)));
+            return forkJoin(innerObs);
+        })));
         return forkJoin(obs);
     }
 
@@ -314,7 +354,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         const newData: Map<string, ChartsExportVAxesModel[]> = new Map();
         const newSelection: ChartsExportVAxesModel[] = [];
         const observables: Observable<any>[] = [];
-        (selectedExports || []).forEach((selectedElement: ChartsExportMeasurementModel | DeviceInstancesModel) => {
+        (selectedExports || []).forEach((selectedElement: ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel) => {
             if (!newData.has(selectedElement.name)) {
                 newData.set(selectedElement.name, []);
             }
@@ -358,6 +398,56 @@ export class ChartsExportEditDialogComponent implements OnInit {
                                 item.valueType === newVAxis.valueType,
                         );
                     newSelection.push(...duplicates);
+                });
+            } else if ((selectedElement as DeviceGroupsPermSearchModel)?.criteria !== undefined) { // is device group
+                const deviceGroup = (selectedElement as DeviceGroupsPermSearchModel);
+                deviceGroup.criteria.forEach(criteria => {
+                    const f = this.functions.find(func => func.id === criteria.function_id);
+                    if (f === undefined) {
+                        return;
+                    }
+                    const conceptSubs: Observable<ConceptsCharacteristicsModel|null|undefined> = this.concepts.get(f.concept_id) !== undefined ? of(this.concepts.get(f.concept_id)) :
+                        this.conceptsService.getConceptWithCharacteristics(f.concept_id).pipe(map(c => {
+                            if (c!==null) {
+                                this.concepts.set(c?.id, c);
+                            }
+                            return c;
+                        }));
+                    observables.push(
+                        conceptSubs.pipe(map(concept => {
+                            if (concept === undefined || concept === null) {
+                                return;
+                            }
+                            const newVAxis: ChartsExportVAxesModel = {
+                                exportName: selectedElement.name,
+                                valueName: this.describeCriteria()(criteria),
+                                criteria,
+                                deviceGroupId: deviceGroup.id,
+                                valueType: this.translateTypeDeviceToExport(concept.characteristics.find(char => char.id === concept.base_characteristic_id)?.type || ''),
+                                color: '',
+                                math: '',
+                                displayOnSecondVAxis: false,
+                                tagSelection: [],
+                            };
+                            const index = this.formGroupController
+                                .get('properties.vAxes')
+                                ?.value.findIndex(
+                                    (item: ChartsExportVAxesModel) => item.deviceGroupId === newVAxis.deviceGroupId && JSON.stringify(item.criteria) === JSON.stringify(newVAxis.criteria));
+                            if (index === -1) {
+                                newData.get(selectedElement.name)?.push(newVAxis);
+                            } else {
+                                newSelection.push(this.formGroupController.get('properties.vAxes')?.value[index]);
+                                newData.get(selectedElement.name)?.push(this.formGroupController.get('properties.vAxes')?.value[index]);
+                            }
+                            // Add duplicates of this device group value
+                            const duplicates = this.formGroupController
+                                .get('properties.vAxes')
+                                ?.value.filter(
+                                    (item: ChartsExportVAxesModel) =>
+                                        item.isDuplicate && item.deviceGroupId === newVAxis.deviceGroupId && JSON.stringify(item.criteria) === JSON.stringify(newVAxis.criteria)
+                                );
+                            newSelection.push(...duplicates);
+                        })));
                 });
             } else {
                 selectedElement = selectedElement as DeviceInstancesModel;
@@ -610,5 +700,9 @@ export class ChartsExportEditDialogComponent implements OnInit {
             res.push('time-weighted-mean-linear', 'time-weighted-mean-locf');
         }
         return res;
+    }
+
+    describeCriteria(): (criteria: DeviceGroupCriteriaModel) => string {
+        return criteria => (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
     }
 }

@@ -17,6 +17,7 @@
 import { ExportValueModel } from '../../../../modules/exports/shared/export.model';
 import { ChartsExportRequestPayloadGroupModel, ChartsExportRequestPayloadTimeModel } from './charts-export-request-payload.model';
 import {DeviceInstancesModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
+import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 
 export interface ChartsExportPropertiesModel {
     chartType?: string;
@@ -46,6 +47,13 @@ export interface ChartsExportMeasurementModel {
     exportDatabaseId?: string;
 }
 
+// eslint-disable-next-line no-shadow
+export enum ChartsExportDeviceGroupMergingStrategy {
+    Separate,
+    Sum,
+    Merge,
+}
+
 export interface ChartsExportVAxesModel {
     instanceId?: string;
     deviceId?: string;
@@ -64,4 +72,7 @@ export interface ChartsExportVAxesModel {
     displayOnSecondVAxis?: boolean;
     conversions?: { from: any; to: any; color?: string }[];
     conversionDefault?: number;
+    criteria?: DeviceGroupCriteriaModel;
+    deviceGroupId?: string;
+    deviceGroupMergingStrategy?: ChartsExportDeviceGroupMergingStrategy;
 }
