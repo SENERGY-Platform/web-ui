@@ -20,6 +20,10 @@
     align-items: center;
 }
 
+.text-container {
+    text-align: center;
+}
+
 mat-icon {
     font-size: 40px;
 }

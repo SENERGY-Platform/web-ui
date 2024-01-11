@@ -31,8 +31,9 @@
           <h2 *ngIf="anomaly.subType === 'high'">Time between inputs was too long!</h2>
           <h2 *ngIf="anomaly.subType === 'low'">Time between inputs was too short!</h2>
         </div>
-        <div>
-          <p>{{anomaly.value | number:'1.2-3'}} {{anomaly.unit}}</p>
+        <div class="text-container">
+          <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
+          <p>Waiting time: {{anomaly.value | number:'1.2-3'}} {{anomaly.unit}}</p>
         </div>
 
       </div>
@@ -44,8 +45,9 @@
         <div>
           <h2>Input data did not follow the schema!</h2>
         </div>
-        <div>
-          <p>{{anomaly.value}}</p>
+        <div class="text-container">
+          <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
+          <p>Value: {{anomaly.value}}</p>
         </div>
       </div>
 
@@ -57,8 +59,9 @@
           <h2 *ngIf="anomaly.subType === 'high'">Input is too high!</h2>
           <h2 *ngIf="anomaly.subType === 'low'">Input is too low!</h2>
         </div>
-        <div>
-          <p>{{anomaly.value}}</p>
+        <div class="text-container">
+          <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
+          <p>Value: {{anomaly.value}}</p>
         </div>
       </div>
 
@@ -69,8 +72,9 @@
         <div>
           <h2>Value is anomalous!</h2>
         </div>
-        <div>
-          <p>{{anomaly.value}}</p>
+        <div class="text-container">
+          <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
+          <p>Value: {{anomaly.value}}</p>
         </div>
       </div>
     </div>
