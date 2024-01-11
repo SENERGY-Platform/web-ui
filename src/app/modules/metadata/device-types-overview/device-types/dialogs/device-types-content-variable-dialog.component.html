@@ -34,7 +34,7 @@
 
         <mat-form-field class="full-width" color="accent">
             <senergy-select-search [options]="aspectOptions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
-                                   placeholder="Aspect" formControlName="aspect_id"></senergy-select-search>
+                                   placeholder="Aspect" formControlName="aspect_id" [getOptionDisabled]="aspectDisabled"></senergy-select-search>
         </mat-form-field>
 
         <mat-form-field class="full-width" color="accent">

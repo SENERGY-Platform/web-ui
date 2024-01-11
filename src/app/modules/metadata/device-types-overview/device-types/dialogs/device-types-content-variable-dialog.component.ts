@@ -329,6 +329,10 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         this.nonPrimitiveTypes.push({type: 'https://schema.org/ItemList', typeShort: 'List'});
     }
 
+    aspectDisabled(aspect: DeviceTypeAspectModel): boolean {
+        return !!aspect.sub_aspects
+    }
+
     private getAllAspectsOnTree(a: DeviceTypeAspectModel): DeviceTypeAspectModel[] {
         const res: DeviceTypeAspectModel[] = [];
         res.push(a);
