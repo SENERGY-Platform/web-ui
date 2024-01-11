@@ -330,13 +330,25 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     }
 
     aspectDisabled(aspect: DeviceTypeAspectModel): boolean {
-        return !!aspect.sub_aspects
+        return !(aspect.sub_aspects === null || aspect.sub_aspects === undefined || aspect.sub_aspects.length == 0)
     }
 
-    private getAllAspectsOnTree(a: DeviceTypeAspectModel): DeviceTypeAspectModel[] {
+    copyAspect(aspect: DeviceTypeAspectModel): DeviceTypeAspectModel {
+        let result: DeviceTypeAspectModel = {
+            id: aspect.id,
+            name: aspect.name,
+            sub_aspects: [],
+        }
+        aspect.sub_aspects?.forEach((a:DeviceTypeAspectModel) => result.sub_aspects?.push(this.copyAspect(a)))
+        return result
+    }
+
+    private getAllAspectsOnTree(a: DeviceTypeAspectModel, prefix: string=""): DeviceTypeAspectModel[] {
         const res: DeviceTypeAspectModel[] = [];
-        res.push(a);
-        a.sub_aspects?.forEach(sub => res.push(...this.getAllAspectsOnTree(sub)));
+        let element = this.copyAspect(a)
+        element.name = prefix+element.name;
+        res.push(element);
+        element.sub_aspects?.forEach(sub => res.push(...this.getAllAspectsOnTree(sub, element.name+".")));
         return res;
     }
 
