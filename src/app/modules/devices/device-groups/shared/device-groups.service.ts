@@ -97,8 +97,9 @@ export class DeviceGroupsService {
         );
     }
 
-    getDeviceGroup(id: string): Observable<DeviceGroupModel | null> {
-        return this.http.get<DeviceGroupModel>(environment.deviceManagerUrl + '/device-groups/' + encodeURIComponent(id)).pipe(
+    getDeviceGroup(id: string, filterGenericDuplicateCriteria = false): Observable<DeviceGroupModel | null> {
+        return this.http.get<DeviceGroupModel>(environment.deviceRepoUrl + '/device-groups/' + id + '?filter_generic_duplicate_criteria=' + filterGenericDuplicateCriteria
+        ).pipe(
             map((resp) => {
                 if (resp && !resp.device_ids) {
                     resp.device_ids = [];
