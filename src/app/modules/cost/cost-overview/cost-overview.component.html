@@ -20,6 +20,13 @@
   <div *ngIf="dataReady">
     <div class="right color-accent">
 
+      <mat-form-field *ngIf="isAdmin" color="accent" appearance="outline">
+        <mat-label>User</mat-label>
+        <senergy-select-search placeholder="Pipeline" [options]="users" [formControl]="selectedUser"
+          useOptionValueProperty="id" useOptionViewProperty="username">
+        </senergy-select-search>
+      </mat-form-field>
+      <div class="spacer-w20" *ngIf="isAdmin"></div>
       <mat-form-field color="accent" appearance="outline" *ngIf="options.length > 0">
         <mat-label>Bill Creation Date</mat-label>
         <mat-select [formControl]="selectedBill">
@@ -46,7 +53,7 @@
     </div>
 
     <mat-accordion multi *ngIf="tree !== undefined">
-      <senergy-cost-element *ngFor="let cat of tree | keyvalue: originalOrder" [name]="cat.key" [element]="cat.value" />
+      <senergy-cost-element *ngFor="let cat of tree | keyvalue: originalOrder" [name]="cat.key" [userid]="getUserid()" [element]="cat.value"/>
     </mat-accordion>
   </div>
 </div>

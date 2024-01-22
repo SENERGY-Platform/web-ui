@@ -34,8 +34,12 @@ export class PipelineRegistryService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.pipelineRegistryUrl);
     }
 
-    getPipelines(order: string = 'id:asc'): Observable<PipelineModel[]> {
-        return this.http.get<PipelineModel[]>(environment.pipelineRegistryUrl + '/pipeline?order=' + order).pipe(
+    getPipelines(order: string = 'id:asc', userId: string | undefined = undefined): Observable<PipelineModel[]> {
+        let url = environment.pipelineRegistryUrl + '/pipeline?order=' + order;
+        if (userId !== undefined) {
+            url += '&for_user=' + userId;
+        }
+        return this.http.get<PipelineModel[]>(url).pipe(
             map((resp) => resp || []),
             map((resp) => {
                 resp.forEach((pipe) => this.fixMaps(pipe));

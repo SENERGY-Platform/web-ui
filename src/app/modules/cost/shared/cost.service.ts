@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
-import {environment} from 'src/environments/environment';
+import { environment } from 'src/environments/environment';
 import { Observable, catchError, map } from 'rxjs';
 import { CostEstimationModel, CostModel } from './cost.model';
 
@@ -52,8 +52,12 @@ export class CostService {
         return this.authorizations['GET'];
     }
 
-    getTree(): Observable<Map<string, CostModel>> {
-        return this.http.get<Map<string, CostModel>>(environment.costApiUrl+'/tree').pipe(
+    getTree(userId: string | undefined = undefined): Observable<Map<string, CostModel>> {
+        let url = environment.costApiUrl + '/tree';
+        if (userId !== undefined) {
+            url += '?for_user=' + userId;
+        }
+        return this.http.get<Map<string, CostModel>>(url).pipe(
             catchError(
                 this.errorHandlerService.handleError(CostService.name, 'getTree: Error', new Map()),
             ),
@@ -66,7 +70,7 @@ export class CostService {
         return this.estimationFlowAuthorizations['POST'];
     }
     getFlowCostEstimations(flowIds: string[]): Observable<CostEstimationModel[]> {
-        return this.http.post<CostEstimationModel[]>(environment.costApiUrl+'/estimation/flow', flowIds).pipe(
+        return this.http.post<CostEstimationModel[]>(environment.costApiUrl + '/estimation/flow', flowIds).pipe(
             catchError(
                 this.errorHandlerService.handleError(CostService.name, 'getFlowCostEstimations: Error', []),
             )

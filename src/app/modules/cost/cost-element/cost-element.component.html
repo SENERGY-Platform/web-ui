@@ -52,7 +52,7 @@
 
         <mat-accordion multi *ngIf="ready">
             <senergy-cost-element *ngFor="let child of element.children  | keyvalue: expensiveFirst"
-                [name]="child.key" [element]="child.value"></senergy-cost-element>
+                [name]="child.key" [userid]="userid" [element]="child.value"></senergy-cost-element>
         </mat-accordion>
     </ng-template>
 </mat-expansion-panel>

@@ -18,11 +18,12 @@ import { Component, OnInit } from '@angular/core';
 import { CostService } from '../shared/cost.service';
 import { CostEntryModel, CostModel } from '../shared/cost.model';
 import { KeyValue } from '@angular/common';
-import { Observable, forkJoin, map } from 'rxjs';
+import { Observable, forkJoin, map, mergeMap } from 'rxjs';
 import { BillingService } from '../shared/billing.service';
 import { FormControl } from '@angular/forms';
 import { MatDatepicker } from '@angular/material/datepicker';
 import { BillingInformationModel } from '../shared/billing.model';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
 
 @Component({
     selector: 'senergy-cost-overview',
@@ -37,26 +38,54 @@ export class CostOverviewComponent implements OnInit {
     date = new FormControl(new Date());
     now = new Date();
     selectedBill = new FormControl();
+    isAdmin = false;
+    users: any[] = [];
+    selectedUser = new FormControl();
 
-    constructor(private costService: CostService, private billingService: BillingService) {
-
+    constructor(private costService: CostService, private billingService: BillingService, private authorizationService: AuthorizationService) {
+        this.isAdmin = this.authorizationService.userIsAdmin();
+        if (this.isAdmin) {
+            this.selectedUser.setValue(this.authorizationService.getUserId());
+        }
     }
     ngOnInit(): void {
         const obs: Observable<any>[] = [];
+        this.selectedBill.valueChanges.subscribe(tree => this.tree = tree);
+        if (this.isAdmin) {
+            this.selectedUser.valueChanges.pipe(mergeMap(userid => {
+                this.dataReady = false;
+                return this.loadForUser(userid);
+            })).subscribe(() => this.dataReady = true);
+            obs.push(this.authorizationService.loadAllUsers().pipe(map((users: any | { error: string }) => {
+                if (users != null) {
+                    this.users = users;
+                } else {
+                    console.error('Could not load users from Keycloak. Reason was : ', users.error);
+                }
+            })));
+        }
+        obs.push(this.loadForUser());
+        forkJoin(obs).subscribe(_ => this.dataReady = true);
+    }
+
+    loadForUser(userId: string | undefined = undefined): Observable<any> {
+        if (userId === this.authorizationService.getUserId()) {
+            userId = undefined;
+        }
+
+        const obs: Observable<any>[] = [];
         obs.push(
-            this.costService.getTree().pipe(map((res: Map<string, CostModel>) => {
+            this.costService.getTree(userId).pipe(map((res: Map<string, CostModel>) => {
                 this.tree = res;
             })));
 
         if (this.billingService.userHasReadAuthorization()) {
             obs.push(
-                this.billingService.getAvailable().pipe(map((res) => {
+                this.billingService.getAvailable(userId).pipe(map((res) => {
                     this.dates = res;
                 })));
         }
-
-        forkJoin(obs).subscribe(_ => this.dataReady = true);
-        this.selectedBill.valueChanges.subscribe(tree => this.tree = tree);
+        return forkJoin(obs);
     }
 
     originalOrder = (_: KeyValue<string, any>, __: KeyValue<string, any>): number => 0;
@@ -66,16 +95,20 @@ export class CostOverviewComponent implements OnInit {
     }
 
     setMonthAndYear($event: Date, datepicker: MatDatepicker<any>) {
+        let userid = this.selectedUser.value;
+        if (userid === this.authorizationService.getUserId()) {
+            userid = undefined;
+        }
         datepicker.close();
         const now = new Date();
         if (now.getFullYear() === $event.getFullYear() && now.getMonth() === $event.getMonth()) {
-            this.costService.getTree().subscribe((res: Map<string, CostModel>) => {
+            this.costService.getTree(userid).subscribe((res: Map<string, CostModel>) => {
                 this.date.setValue(now);
                 this.options = [];
                 this.tree = res;
             });
         } else {
-            this.billingService.getForMonth($event.getFullYear(), $event.getMonth() + 1).subscribe((res => {
+            this.billingService.getForMonth($event.getFullYear(), $event.getMonth() + 1, userid).subscribe((res => {
                 this.date.setValue($event);
                 this.options = res;
                 if (this.options.length === 0) {
@@ -85,6 +118,14 @@ export class CostOverviewComponent implements OnInit {
                 }
             }));
         }
+    }
+
+    getUserid(): string|undefined {
+        const userid = this.selectedUser.value;
+        if (userid === this.authorizationService.getUserId()) {
+            return undefined;
+        }
+        return userid;
     }
 
 }

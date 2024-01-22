@@ -41,20 +41,23 @@ export class OperatorRepoService {
         offset: number,
         feature: string,
         order: string,
+        userId: string | undefined = undefined,
     ): Observable<{ operators: OperatorModel[]; totalCount: number }> {
+        let url = environment.operatorRepoUrl +
+            '/operator?limit=' +
+            limit +
+            '&offset=' +
+            offset +
+            '&sort=' +
+            feature +
+            ':' +
+            order +
+            (search ? '&search=' + search : '');
+        if (userId !== undefined) {
+            url += '&for_user=' + userId;
+        }
         return this.http
-            .get<{ operators: OperatorModel[]; totalCount: number }>(
-                environment.operatorRepoUrl +
-                    '/operator?limit=' +
-                    limit +
-                    '&offset=' +
-                    offset +
-                    '&sort=' +
-                    feature +
-                    ':' +
-                    order +
-                    (search ? '&search=' + search : ''),
-            )
+            .get<{ operators: OperatorModel[]; totalCount: number }>(url)
             .pipe(
                 map((resp) => resp || []),
                 catchError(

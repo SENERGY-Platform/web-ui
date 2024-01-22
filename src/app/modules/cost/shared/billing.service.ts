@@ -50,8 +50,12 @@ export class BillingService {
         return this.authorizations['GET'];
     }
 
-    getAvailable(): Observable<Date[]> {
-        return this.http.get<string[]>(environment.billingApiUrl+'/billing-components').pipe(
+    getAvailable(userId: string | undefined = undefined): Observable<Date[]> {
+        let url = environment.billingApiUrl+'/billing-components';
+        if (userId !== undefined) {
+            url += '?for_user=' + userId;
+        }
+        return this.http.get<string[]>(url).pipe(
             catchError(
                 this.errorHandlerService.handleError(BillingService.name, 'getAvailable: Error', []),
             ),
@@ -59,8 +63,12 @@ export class BillingService {
         );
     }
 
-    getForMonth(year: number, month: number): Observable<BillingInformationModel[]> {
-        return this.http.get<BillingInformationModel[]>(environment.billingApiUrl+'/billing-components/'+year+'/'+month).pipe(
+    getForMonth(year: number, month: number, userId: string | undefined = undefined): Observable<BillingInformationModel[]> {
+        let url = environment.billingApiUrl+'/billing-components/'+year+'/'+month;
+        if (userId !== undefined) {
+            url += '?for_user=' + userId;
+        }
+        return this.http.get<BillingInformationModel[]>(url).pipe(
             catchError(
                 this.errorHandlerService.handleError(BillingService.name, 'getForMonth: Error', []),
             ),
