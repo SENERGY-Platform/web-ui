@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { CostEstimationModel } from "src/app/modules/cost/shared/cost.model";
+
 export interface ImportTypeModel {
     id: string;
     name: string;
@@ -60,4 +62,8 @@ export interface ImportTypePermissionSearchModel {
         x: boolean;
     };
     shared: boolean;
+}
+
+export interface ImportTypePermissionSearchModelWithCosts extends ImportTypePermissionSearchModel {
+    cost?:  CostEstimationModel;
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ImportTypePermissionSearchModel} from './shared/import-types.model';
+import {ImportTypePermissionSearchModel, ImportTypePermissionSearchModelWithCosts} from './shared/import-types.model';
 import {ImportTypesService} from './shared/import-types.service';
 import {Sort} from '@angular/material/sort';
 import {Router} from '@angular/router';
@@ -24,11 +24,12 @@ import {ImportDeployEditDialogComponent} from '../import-deploy-edit-dialog/impo
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import { forkJoin, Observable, map, Subscription } from 'rxjs';
+import { forkJoin, Observable, map, Subscription, of, mergeMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
+import { CostService } from '../../cost/shared/cost.service';
 
 @Component({
     selector: 'senergy-import-types',
@@ -38,7 +39,7 @@ import { MatPaginator } from '@angular/material/paginator';
 export class ImportTypesComponent implements OnInit {
     displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share'];
     pageSize = 20;
-    dataSource = new MatTableDataSource<ImportTypePermissionSearchModel>();
+    dataSource = new MatTableDataSource<ImportTypePermissionSearchModelWithCosts>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<ImportTypePermissionSearchModel>(true, []);
     dataReady = false;
@@ -59,6 +60,7 @@ export class ImportTypesComponent implements OnInit {
         private snackBar: MatSnackBar,
         private deleteDialog: DialogsService,
         private searchbarService: SearchbarService,
+        private costService: CostService,
     ) {}
 
     ngOnInit(): void {
@@ -92,6 +94,10 @@ export class ImportTypesComponent implements OnInit {
         }
 
         this.userHasCreateAuthorization = this.importTypesService.userHasCreateAuthorization();
+
+        if (this.costService.userMayGetImportCostEstimations()) {
+            this.displayedColumns.splice(4, 0, 'cost');
+        }
     }
 
     private initSearch() {
@@ -158,12 +164,21 @@ export class ImportTypesComponent implements OnInit {
         this.reload();
     }
 
-    load(): Observable<ImportTypePermissionSearchModel[]> {
+    load(): Observable<ImportTypePermissionSearchModelWithCosts[]> {
         this.dataReady = false;
         return this.importTypesService.listImportTypes(this.searchText, this.pageSize, this.offset, this.sort).pipe(
-            map(types => {
-                this.dataSource.data = types;
-                return types;
+            mergeMap((types: ImportTypePermissionSearchModelWithCosts[]) => {
+                if (this.costService.userMayGetImportCostEstimations()) {
+                    return this.costService.getImportCostEstimations(types.map(t => t.id)).pipe(map(costs => {
+                        costs.forEach((cost, i) => {
+                            types[i].cost = cost;
+                        });
+                        this.dataSource.data = types;
+                        return types;
+                    }));
+                } else {
+                    return of(types);
+                }
             })
         );
     }

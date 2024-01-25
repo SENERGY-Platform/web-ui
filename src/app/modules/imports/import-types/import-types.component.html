@@ -52,6 +52,18 @@
                         {{m.image}}
                     </td>
                 </ng-container>
+                <ng-container matColumnDef="cost">
+                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Cost</th>
+                    <td mat-cell *matCellDef="let m">
+                        <div *ngIf=" m.cost.max > 0" matTooltipClass="multiline-tooltip" matTooltip="Median: {{m.cost.median | currency:'EUR'}}; Mean: {{m.cost.mean | currency:'EUR'}}">
+                            {{m.cost.min | currency:'EUR'}} - {{m.cost.max |
+                            currency:'EUR'}}
+                        </div>
+                        <div *ngIf=" m.cost.max === 0">
+                            Unknown cost
+                        </div>
+                    </td>
+                </ng-container>
                 <ng-container matColumnDef="details">
                     <th mat-header-cell *matHeaderCellDef class="button-column">Details</th>
                     <td mat-cell *matCellDef="let m">

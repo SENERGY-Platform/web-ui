@@ -42,6 +42,7 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { CostService } from '../../cost/shared/cost.service';
 
 describe('ImportTypesComponent', () => {
     let component: ImportTypesComponent;
@@ -81,6 +82,9 @@ describe('ImportTypesComponent', () => {
         observablePropsToSpyOn: ['currentSearchText']
     });
 
+    const costServiceSpy: Spy<CostService> = createSpyFromClass(CostService);
+    costServiceSpy.userMayGetImportCostEstimations.and.returnValue(false);
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             declarations: [ImportTypesComponent],
@@ -116,7 +120,8 @@ describe('ImportTypesComponent', () => {
                 {provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy},
                 {provide: SearchbarService, useValue: searchbarSpy},
                 {provide: Router, useValue: routerSpy},
-                {provide: MatDialog, useValue: dialogSpy}
+                {provide: MatDialog, useValue: dialogSpy},
+                {provide: CostService, useValue: costServiceSpy}
             ],
         }).compileComponents();
     });

@@ -141,6 +141,7 @@ export class LadonService {
             environment.waitingRoomUrl,
             environment.costApiUrl,
             environment.costApiUrl + '/estimation/flow',
+            environment.costApiUrl + '/estimation/import',
             environment.billingApiUrl + '/billing-components',
             environment.timescaleAPIURL + '/usage'
         ];
