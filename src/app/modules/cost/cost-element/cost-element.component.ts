@@ -22,6 +22,7 @@ import { OperatorRepoService } from '../../data/operator-repo/shared/operator-re
 import { Observable, forkJoin } from 'rxjs';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
 import { OperatorModel } from '../../data/operator-repo/shared/operator.model';
+import { ImportInstancesService } from '../../imports/import-instances/shared/import-instances.service';
 
 @Component({
     selector: 'senergy-cost-element',
@@ -32,7 +33,7 @@ export class CostElementComponent {
     private _element: CostModel = {} as CostModel;
     ready = false;
 
-    constructor(private pipelineService: PipelineRegistryService, private operatorService: OperatorRepoService) { }
+    constructor(private pipelineService: PipelineRegistryService, private operatorService: OperatorRepoService, private importInstancesServcies: ImportInstancesService) { }
 
     @Input() userid: string|undefined;
 
@@ -45,29 +46,41 @@ export class CostElementComponent {
         this._element = dis;
         if (this._element.children !== undefined && this._element.children !== null) {
             const keys = Object.keys(this._element.children);
-            if (keys.length > 0 && keys[0].startsWith('deployment:pipeline')) {
+            if (keys.length > 0) {
                 const obj = this.element.children as any;
                 const obs: Observable<any>[] = [];
                 obs.push(this.pipelineService.getPipelines('id:asc', this.userid));
                 obs.push(this.operatorService.getOperators('', 9999, 0, 'name', 'asc', this.userid));
+                obs.push(this.importInstancesServcies.listImportInstances('', 9999, 0, 'name.asc', false, this.userid));
                 forkJoin(obs).subscribe(obsres => {
                     const pipelines: PipelineModel[] = obsres[0];
                     const operators: OperatorModel[] = obsres[1].operators;
+                    const imports: PipelineModel[] = obsres[2];
                     keys.forEach((name) => {
-                        const pipeline = pipelines.find(p => name.startsWith('deployment:pipeline-' + p.id));
-                        if (pipeline !== undefined) {
-                            obj[name].displayName = pipeline.name;
-                        } else {
-                            obj[name].displayName = name.replace('deployment:pipeline-', 'Pipeline ') + ' (deleted)';
-                        }
-                        const subkeys = Object.keys(obj[name].children);
-                        subkeys.forEach(containername => {
-                            const operator = operators.find(o => containername.startsWith(o._id || 'undefined'));
-                            if (operator !== undefined) {
-                                obj[name].children[containername].displayName = operator.name;
+                        if (name.startsWith('deployment:pipeline-')) {
+                            const pipeline = pipelines.find(p => name.startsWith('deployment:pipeline-' + p.id));
+                            if (pipeline !== undefined) {
+                                obj[name].displayName = pipeline.name;
+                            } else {
+                                obj[name].displayName = name.replace('deployment:pipeline-', 'Pipeline ') + ' (deleted)';
                             }
-                        });
-
+                            const subkeys = Object.keys(obj[name].children);
+                            subkeys.forEach(containername => {
+                                const operator = operators.find(o => containername.startsWith(o._id || 'undefined'));
+                                if (operator !== undefined) {
+                                    obj[name].children[containername].displayName = operator.name;
+                                }
+                            });
+                        } else if (name.startsWith('deployment:import-') || name.startsWith('import-') ) {
+                            const id =  name.replace('deployment:', '').replace('import-', '');
+                            const ip = imports.find(p => id === p.id.replace('urn:infai:ses:import:', ''));
+                            if (ip !== undefined) {
+                                obj[name].displayName = ip.name;
+                            } else {
+                                obj[name].displayName = 'Import ' + id + ' (deleted)';
+                            }
+                            obj[name].children = []; // don't display containers
+                        }
                     });
                     this.element.children = obj;
                     this.ready = true;

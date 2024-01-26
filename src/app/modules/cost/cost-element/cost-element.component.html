@@ -28,7 +28,7 @@
         </mat-panel-description>
     </mat-expansion-panel-header>
 
-    <ng-template matExpansionPanelContent>
+    
         <table>
             <tr>
                 <td>This month:</td>
@@ -54,5 +54,4 @@
             <senergy-cost-element *ngFor="let child of element.children  | keyvalue: expensiveFirst"
                 [name]="child.key" [userid]="userid" [element]="child.value"></senergy-cost-element>
         </mat-accordion>
-    </ng-template>
 </mat-expansion-panel>
