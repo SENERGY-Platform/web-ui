@@ -40,8 +40,10 @@ export interface WidgetModel {
 }
 
 export interface WidgetUpdatePosition {
-    index: number;
+    index?: number;
     id: string;
+    dashboardOrigin: string;
+    dashboardDestination: string;
 }
 
 export interface WidgetPropertiesModels

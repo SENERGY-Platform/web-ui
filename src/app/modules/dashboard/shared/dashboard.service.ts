@@ -130,9 +130,9 @@ export class DashboardService {
             .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetName', { message: 'error update' })));
     }
 
-    updateWidgetPosition(dashboardId: string, widgetPositions: WidgetUpdatePosition[]): Observable<DashboardResponseMessageModel> {
+    updateWidgetPosition(widgetPositions: WidgetUpdatePosition[]): Observable<DashboardResponseMessageModel> {
         return this.http
-            .patch<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/positions/' + dashboardId, widgetPositions)
+            .patch<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/positions', widgetPositions)
             .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' })));
     }
 

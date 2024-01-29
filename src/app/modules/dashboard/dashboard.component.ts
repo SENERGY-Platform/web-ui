@@ -222,10 +222,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
                                 if (gridIndex !== index) {
                                     swapIndex1 = gridIndex;
                                     swapIndex2 = index;
+                                    const dashboard = this.dashboards[this.activeTabIndex];
 
                                     widgetPositionUpdates.push({
                                         id: widget.id,
-                                        index: gridIndex
+                                        index: gridIndex,
+                                        dashboardDestination: dashboard.id,
+                                        dashboardOrigin: dashboard.id
                                     });
                                 }
                             }
@@ -242,7 +245,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         dashboard.widgets[swapIndex1] = dashboard.widgets[swapIndex2];
                         dashboard.widgets[swapIndex2] = swap;
 
-                        this.dashboardService.updateWidgetPosition(dashboard.id, widgetPositionUpdates).pipe(
+                        this.dashboardService.updateWidgetPosition(widgetPositionUpdates).pipe(
                             catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' }))
                         ).subscribe();
                     }
@@ -505,10 +508,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.dashboards[toIndex].widgets = [];
         }
         this.dashboards[toIndex].widgets.push(widgets[0]);
-        const obs: Observable<any>[] = [];
-        obs.push(this.dashboardService.updateDashboard(this.dashboards[this.activeTabIndex]));
-        obs.push(this.dashboardService.updateDashboard(this.dashboards[toIndex]));
-        return forkJoin(obs);
+        const widgetPositionUpdates: WidgetUpdatePosition[] = [{
+            id,
+            dashboardDestination: this.dashboards[toIndex].id,
+            dashboardOrigin: this.dashboards[this.activeTabIndex].id
+        }];
+        return this.dashboardService.updateWidgetPosition(widgetPositionUpdates).pipe(
+            catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' }))
+        );
     }
 
     private moveWidgetToDashboardIfNeeded(item: GridsterItem, $event: MouseEvent): boolean {
