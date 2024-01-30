@@ -1,0 +1,57 @@
+<mat-dialog-content>
+    <table mat-table [dataSource]="dataSource">
+        <ng-container matColumnDef="from">
+            <th mat-header-cell *matHeaderCellDef>From</th>
+            <td mat-cell *matCellDef="let rule">
+                {{rule.from}}
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="to">
+            <th mat-header-cell *matHeaderCellDef>To</th>
+            <td mat-cell *matCellDef="let rule">
+                {{rule.to}}
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="color">
+            <th mat-header-cell *matHeaderCellDef>Color</th>
+            <td mat-cell *matCellDef="let rule">
+                {{rule.color}}
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="alias">
+            <th mat-header-cell *matHeaderCellDef>Alias</th>
+            <td mat-cell *matCellDef="let rule">
+                {{rule.alias}}
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="delete">
+            <th mat-header-cell *matHeaderCellDef>Delete</th>
+            <td mat-cell *matCellDef="let rule; let i = index;">
+                <button mat-icon-button (click)="delete(i)" disableRipple>
+                    <mat-icon color="warn">delete</mat-icon>
+                </button>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true">
+        </tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <button mat-fab class="fab" (click)="add()">
+        <mat-icon>add</mat-icon>
+    </button>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="accent" (click)="cancel()">
+        Cancel
+    </button>
+    <button mat-raised-button color="accent" (click)="saveRules()">
+        Save
+    </button>
+</mat-dialog-actions>

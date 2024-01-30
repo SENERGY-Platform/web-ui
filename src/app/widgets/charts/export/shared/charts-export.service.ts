@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { forkJoin, Observable, of } from 'rxjs';
+import { forkJoin, Observable, of, throwError, concatMap } from 'rxjs';
 import { ChartsModel } from '../../shared/charts.model';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
@@ -44,6 +44,7 @@ import {
 } from '../../../shared/export-data.model';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
+import { data } from 'jquery';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -288,6 +289,145 @@ export class ChartsExportService {
             const error: ErrorModel = { error: err.message };
             return of(error);
         }));
+    }
+
+    getTimelineChartData(widget: WidgetModel, from?: string, to?: string, groupInterval?: string, lastOverride?: string) {
+        return this.getData(widget.properties, from, to, groupInterval, lastOverride).pipe(
+            concatMap((resp: any) => {
+                if (resp === null) {
+                    // no data
+                    return of({"data": [], "colors": []});
+                } else if (this.errorHandlerService.checkIfErrorExists(resp)) {
+                    return throwError(() => new Error(resp.error));
+                } else {
+                    const vAxes = widget?.properties?.vAxes || [];
+                    const chartData = this.setupTimelineChart(vAxes);
+                    resp.forEach((dataForOneEntity: any, i: any) => {
+                        this.processDataForOneEntity(dataForOneEntity, chartData, vAxes[i]);
+                    });
+                    const convertedCartData = this.convertTimelineChartData(chartData);
+                    return of({
+                        "data": convertedCartData,
+                        "colors": this.setupTimelineColors(convertedCartData, vAxes)
+                    });
+                }
+            })
+        );
+    }
+
+    setupTimelineColors(chartData: any, vAxes: ChartsExportVAxesModel[]) {
+        const colors: string[] = [];
+        chartData.forEach((serie: any) => {
+            let aliasFound = false;
+            vAxes.forEach((vAxis: any) => {
+                vAxis.conversions.forEach((conversion: any) => {
+                    if(aliasFound) {
+                        return;
+                    }
+                    if(conversion.alias === serie.name || conversion.alias === serie.to) {
+                        colors.push(conversion.color);
+                        aliasFound = true;
+                    }
+                });
+                if(aliasFound) {
+                    return;
+                }
+            });
+        });
+        return colors;
+    }
+
+    convertTimelineChartData(chartData: any) {
+        const convertedChartData = [];
+        for(const [key, value] of Object.entries(chartData)) {
+            convertedChartData.push({
+                "name": key,
+                "data": (<any>value)["data"]
+            });
+        }
+        return convertedChartData;
+    }
+
+    setupTimelineChart(vAxes: ChartsExportVAxesModel[]) {
+        const chartData: any = {};
+        vAxes.forEach(vAxis => {
+            (vAxis?.conversions || []).forEach(conversion => {
+                chartData[conversion.alias || conversion.to] = {
+                    "data": []
+                };
+            });
+        });
+        return chartData;
+    }
+
+    mergeTimelineData(data: any) {
+        const mergedData: any = [];
+        data = data[0];
+        let endRow: any = data[0];
+
+        data.forEach((row: any, i: any) => {
+            let changeDetected = false;
+            let nextRow;
+            if(i === data.length-1) {
+                changeDetected = true;
+            } else {
+                nextRow = data[i+1];
+                changeDetected = row[1] !== nextRow[1];
+            }
+            if(changeDetected) {
+                mergedData.push(endRow);
+                mergedData.push(row);
+                endRow = nextRow;
+            }
+        });
+        return mergedData;
+    }
+
+    getAliasOfMatchingRule(vAxis: ChartsExportVAxesModel, firstValue: any, lastValue: any) {
+        let alias;
+        (vAxis?.conversions || []).forEach(conversion => {
+            //console.log(conversion.to + "-" + lastValue + "-" + conversion.from + "-" + firstValue)
+            // convert everything to string, as there are problems with booleans in the conversion that are sometimes strings or bool
+            if(String(conversion.to) === String(lastValue) && String(conversion.from) === String(firstValue)) {
+                alias = conversion.alias || String(conversion.to);
+                return;
+            }
+        });
+        return alias;
+    }
+
+    processDataForOneEntity(data: any, chartData: any, vAxis: ChartsExportVAxesModel) {
+        const mergedData = this.mergeTimelineData(data);
+        mergedData.forEach((row: any, i: any) => {
+            if(i === mergedData.length-1) {
+                return;
+            }
+            const nextRow = mergedData[i+1];
+            const firstValue = nextRow[1];
+            const lastValue = row[1];
+            const ruleAlias = this.getAliasOfMatchingRule(vAxis, firstValue, lastValue);
+
+            if(ruleAlias != null) {
+                const startDate = new Date(nextRow[0]);
+                let endDate;
+                if(i === 0) {
+                    endDate = new Date(row[0]);
+                } else {
+                    // here I use the previous row to get the start date, this assumes that the operator output is valid until the next input
+                    // If the border shall be more exact (ending with the last timestamp with that value, use row[0])
+                    const prevRow = mergedData[i-1];
+                    endDate = new Date(prevRow[0]);
+                }
+
+                chartData[ruleAlias]["data"].push({
+                    "x": vAxis.valueAlias || vAxis.exportName,
+                    "y": [
+                        startDate.getTime(),
+                        endDate.getTime()
+                    ]
+                })
+            }
+        });
     }
 
     getChartData(widget: WidgetModel, from?: string, to?: string, groupInterval?: string, hAxisFormat?: string, lastOverride?: string): Observable<ChartsModel | ErrorModel> {
@@ -538,6 +678,7 @@ export class ChartsExportService {
                 legend: widget.properties.chartType !== 'PieChart' ? 'none' : {
                     position: 'labeled',
                 },
+                timeline: { groupByRowLabel: false},
                 pieSliceText: widget.properties.chartType !== 'PieChart' ? undefined : 'none',
                 sliceVisibilityThreshold: widget.properties.chartType !== 'PieChart' || dataTable.data.length > 5 ? undefined : 0,
             },

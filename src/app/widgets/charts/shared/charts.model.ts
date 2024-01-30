@@ -77,6 +77,7 @@ export class ChartsModel {
             displayLegendValues?: boolean;
             zoomStartTime?: Date;
             zoomEndTime?: Date;
+            timeline?: any;
         },
     ) {
     }

@@ -40,6 +40,8 @@ th, td {
 
 mat-form-field {
     width: 100%;
+    min-width: 150px;
+    margin-right: 20px;
 }
 
 .mat-column-duplicate-delete {
@@ -53,5 +55,7 @@ mat-form-field {
 
 .from-to-color {
     display: inline-block;
-    width: 23%;
+    width:  100px;
 }
+
+

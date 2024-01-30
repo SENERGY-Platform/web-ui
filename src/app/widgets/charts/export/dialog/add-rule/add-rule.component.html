@@ -1,0 +1,29 @@
+<mat-dialog-content>
+    <div [formGroup]="form" fxLayout="column" >
+        <mat-form-field color="accent">
+            <mat-label>From</mat-label>
+            <input matInput placeholder="From" type="text" formControlName="from">
+        </mat-form-field>
+        
+        <mat-form-field color="accent">
+            <mat-label>To</mat-label>
+            <input matInput placeholder="To" type="text" formControlName="to">
+        </mat-form-field>
+
+        <mat-form-field class="from-to-color" color="accent">
+            <mat-label>Color</mat-label>
+            <input matInput placeholder="Color" type="text" formControlName="color">
+        </mat-form-field>
+
+        <mat-form-field class="from-to-color" color="accent">
+            <mat-label>Alias</mat-label>
+            <input matInput placeholder="Alias" type="text" formControlName="alias">
+        </mat-form-field>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="accent" type="submit" (click)="cancel()">Cancel</button>
+    <button mat-raised-button color="accent" type="submit" [disabled]="!form.valid" (click)="add()" >Add</button>
+
+</mat-dialog-actions>

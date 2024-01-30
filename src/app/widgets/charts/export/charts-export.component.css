@@ -33,3 +33,7 @@
 :host ::ng-deep .google-visualization-atl .legend-dot {
     height: 12px;
 }
+
+#timeline-container {
+    width: 100vh;
+}

@@ -101,6 +101,9 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import { ValueComponent } from './single-value/value/value.component';
 import { AnomalyComponent } from './anomaly/anomaly.component';
 import { EditComponent } from './anomaly/dialog/edit/edit.component';
+import { NgApexchartsModule } from 'ng-apexcharts';
+import { AddRuleComponent } from './charts/export/dialog/add-rule/add-rule.component';
+import { ListRulesComponent } from './charts/export/dialog/list-rules/list-rules.component';
 
 registerLocaleData(localeDe, 'de');
 
@@ -138,6 +141,7 @@ registerLocaleData(localeDe, 'de');
         MatSortModule,
         MatSliderModule,
         MatDatepickerModule,
+        NgApexchartsModule
     ],
     declarations: [
         RangeSliderComponent,
@@ -193,7 +197,9 @@ registerLocaleData(localeDe, 'de');
         AcControlEditDialogComponent,
         ValueComponent,
         AnomalyComponent,
-        EditComponent
+        EditComponent,
+        AddRuleComponent,
+        ListRulesComponent
     ],
     exports: [
         SwitchComponent,

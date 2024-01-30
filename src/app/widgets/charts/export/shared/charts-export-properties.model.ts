@@ -54,6 +54,13 @@ export enum ChartsExportDeviceGroupMergingStrategy {
     Merge,
 }
 
+export interface ChartsExportConversion {
+    from: any;
+    to: any;
+    color?: string;
+    alias?: string;
+}
+
 export interface ChartsExportVAxesModel {
     instanceId?: string;
     deviceId?: string;
@@ -70,7 +77,7 @@ export interface ChartsExportVAxesModel {
     tagSelection?: string[];
     isDuplicate?: boolean;
     displayOnSecondVAxis?: boolean;
-    conversions?: { from: any; to: any; color?: string }[];
+    conversions?: ChartsExportConversion[];
     conversionDefault?: number;
     criteria?: DeviceGroupCriteriaModel;
     deviceGroupId?: string;

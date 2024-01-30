@@ -28,10 +28,10 @@ import {
 } from '@angular/forms';
 import {ExportService} from '../../../../modules/exports/shared/export.service';
 import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../../modules/exports/shared/export.model';
-import {ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
+import {ChartsExportConversion, ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
 import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
 import {MatTableDataSource} from '@angular/material/table';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogRef, MatDialog} from '@angular/material/dialog';
 import {forkJoin, Observable, of} from 'rxjs';
 import {map, mergeMap} from 'rxjs/operators';
 import {DeviceInstancesModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
@@ -46,6 +46,7 @@ import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-cl
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
+import { ListRulesComponent } from './list-rules/list-rules.component';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
@@ -87,6 +88,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         'displayOnSecondVAxis',
         'duplicate-delete',
     ];
+
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
     vAxesOptions: Map<string, ChartsExportVAxesModel[]> = new Map();
     exportTags: Map<string, Map<string, { value: string; parent: string }[]>> = new Map();
@@ -104,6 +106,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     constructor(
         private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
+        private dialog: MatDialog,
         private dashboardService: DashboardService,
         private exportService: ExportService,
         private deviceInstancesService: DeviceInstancesService,
@@ -582,10 +585,24 @@ export class ChartsExportEditDialogComponent implements OnInit {
         return this.formGroupController.get(['properties', 'timeRangeType']) as FormControl;
     }
 
-    deleteConversion(element: ChartsExportVAxesModel, index: number, $event: MouseEvent) {
-        element.conversions?.splice(index, 1);
-        $event.stopPropagation();
+    listRules(element: ChartsExportVAxesModel) {
+        const dialog = this.dialog.open(ListRulesComponent, {
+            data: element.conversions || []
+        });
+
+        dialog.afterClosed().subscribe({
+            next: (rules: ChartsExportConversion[]) => {
+                if(rules != null) {
+                    element.conversions = rules;
+                }
+            },
+            error: (_) => {
+
+            }
+        });
     }
+
+
 
     addConversion(element: any) {
         if (element.conversions === undefined) {
@@ -599,10 +616,11 @@ export class ChartsExportEditDialogComponent implements OnInit {
         if (this.chartType.value !== 'Timeline' && this.chartType.value !== 'PieChart') {
             to = JSON.parse(to);
         }
-        element.conversions.push({from, to, color: element.__color});
+        element.conversions.push({from, to, color: element.__color, alias: element.__alias});
         element.__from = undefined;
         element.__to = undefined;
         element.__color = undefined;
+        element.__alias = undefined;
     }
 
     getTags(element: ChartsExportVAxesModel): Map<string, { value: string; parent: string }[]> {

@@ -14,6 +14,8 @@
   ~ limitations under the License.
   -->
 
+
+
 <mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"
                            [optionCustomIcon]="getCustomIcons(true).icons" [optionCustomTooltip]="getCustomIcons(true).tooltips"
@@ -23,6 +25,12 @@
                             'This widgets displays many data points and impacts performance. Try reducing the displayed' +
                              ' interval or use an aggregation function!' : ''"></senergy-widget-header>
     <mat-card-content>
+        
+        <div *ngIf="widget.properties.chartType === 'Timeline' && ready" id="timeline-container">
+            <apx-chart *ngIf="apexChartOptions.series.length !== 0" [legend]="apexChartOptions.legend" [colors]="apexChartOptions.colors" [dataLabels]="apexChartOptions.dataLabels" [series]="apexChartOptions.series" [chart]="apexChartOptions.chart" [plotOptions]="apexChartOptions.plotOptions" [xaxis]="apexChartOptions.xaxis"></apx-chart>
+            <senergy-no-data
+            [showIf]="configureWidget === false && apexChartOptions.series.length === 0"></senergy-no-data>
+        </div>
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
             <div *ngIf="ready">
@@ -31,11 +39,14 @@
                 </div>
                 <div *ngIf="!errorHasOccured">
                     <div *ngIf="configureWidget === true">Please configure widget!</div>
-                    <google-chart *ngIf="configureWidget === false && chartExportData.dataTable[0].length !== 0"
-                                  #chartExport [data]="chartExportData"
-                                  (chartSelect)="onChartSelect($event)"></google-chart>
-                    <senergy-no-data
-                            [showIf]="configureWidget === false && chartExportData.dataTable[0].length === 0"></senergy-no-data>
+                    <div *ngIf="widget.properties.chartType !== 'Timeline'">
+                        <google-chart *ngIf="configureWidget === false && chartExportData.dataTable[0].length !== 0"
+                        #chartExport [data]="chartExportData"
+                        (chartSelect)="onChartSelect($event)"></google-chart>
+                        <senergy-no-data
+                        [showIf]="configureWidget === false && chartExportData.dataTable[0].length === 0"></senergy-no-data>
+                    </div>
+                    
                 </div>
             </div>
         </div>

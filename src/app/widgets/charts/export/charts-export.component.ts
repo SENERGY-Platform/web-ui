@@ -21,7 +21,7 @@ import {ElementSizeService} from '../../../core/services/element-size.service';
 import {ChartsModel} from '../shared/charts.model';
 import {ChartsExportService} from './shared/charts-export.service';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
+import {noop, Subscription} from 'rxjs';
 import {ErrorModel} from '../../../core/model/error.model';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {ChartsService} from '../shared/charts.service';
@@ -45,6 +45,45 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     private resizeTimeout = 0;
     private timeRgx = /(\d+)(ms|s|months|m|h|d|w|y)/;
 
+    apexChartOptions: any = {
+        series: [],
+        chart: {
+            width: "100%",
+            height: "100%",
+            type: 'rangeBar',
+            toolbar: {
+                "show": false
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: true,
+                rangeBarGroupRows: true
+            }
+        },
+        xaxis: {
+            type: 'datetime'
+        },
+        colors: [],
+        legend: {
+            show: true
+        }
+    };
+    /*
+    options: any = {
+        series: [44, 55, 13, 43, 22],
+        chart: {
+            width: "100%",
+            height: "auto",
+            type: 'pie',
+        },
+        legend: {
+            floating: true,
+        },
+        labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
+
+    };*/
+
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -57,7 +96,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         if (this.resizeTimeout === 0) {
             this.resizeTimeout = window.setTimeout(() => {
                 this.resizeChart();
-                if (this.chartExportData.dataTable[0].length > 0) {
+                if (this.chartExportData.dataTable != null && this.chartExportData.dataTable.length > 0 && this.chartExportData.dataTable[0].length > 0) {
                     this.chartExport.draw();
                 }
                 this.resizeTimeout = 0;
@@ -141,6 +180,31 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             if (this.zoom && this.widget.properties.chartType === 'LineChart' && this.from === null && this.to === null && rgxRes?.length === 3) {
                 lastOverride = Number(rgxRes[1]) * (this.widget.properties.zoomTimeFactor || 2) + rgxRes[2];
             }
+
+            if(this.widget.properties.chartType === 'Timeline') {
+                this.chartsExportService.getTimelineChartData(this.widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, lastOverride).subscribe({
+                    next: (resp) => {
+                        this.apexChartOptions.series = resp?.data;
+                        this.apexChartOptions.colors = resp?.colors;
+                    },
+                    error: (err) => {
+                        this.errorHasOccured = true;
+                        this.errorMessage = 'No data';
+                        this.errorHandlerService.logError('Chart Export', 'getChartData', err);
+                    },
+                    complete: () => {
+                        this.ready = true;
+                        this.refreshing = false;
+                        if(this.zoom) {
+                            this.apexChartOptions.chart.toolbar.show = true;
+                        }
+                        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
+                        this.apexChartOptions.chart.width = element.width;
+                        this.apexChartOptions.chart.height = element.height;
+                    }
+                });
+                return;
+            };
 
             this.chartsExportService.getChartData(this.widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride).subscribe((resp: ChartsModel | ErrorModel) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
