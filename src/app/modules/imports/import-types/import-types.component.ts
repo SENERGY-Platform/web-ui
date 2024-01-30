@@ -177,6 +177,7 @@ export class ImportTypesComponent implements OnInit {
                         return types;
                     }));
                 } else {
+                    this.dataSource.data = types;
                     return of(types);
                 }
             })
