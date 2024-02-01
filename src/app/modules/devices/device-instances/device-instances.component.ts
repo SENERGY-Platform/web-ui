@@ -238,10 +238,12 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.selectionClear();
         this.usage = [];
 
-        forkJoin(this.load()).subscribe({
-            next: (_) => this.ready = true,
+        this.load().subscribe({
             error: (err) => {
                 console.log(err);
+            },
+            complete: () => {
+                this.ready = true;
             }
         });
     }
@@ -264,14 +266,16 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             .afterClosed()
             .subscribe((deviceDelete: boolean) => {
                 if (deviceDelete) {
-                    this.ready = false;
                     this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstancesUpdateModel | null) => {
                         if (resp !== null) {
                             this.snackBar.open('Device deleted successfully.', '', { duration: 2000 });
                         } else {
                             this.snackBar.open('Error while deleting device!', 'close', { panelClass: 'snack-bar-error' });
                         }
-                        this.reload();
+                        // do deletion on the client instead of reloading, because of caching/slow deletion
+                        const index = this.dataSource.data.findIndex(element => element.id === device.id);
+                        this.dataSource.data.splice(index, 1);
+                        this.dataSource.data = this.dataSource.data;
                     });
                 }
             });
