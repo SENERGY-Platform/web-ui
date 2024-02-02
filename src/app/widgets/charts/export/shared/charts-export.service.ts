@@ -384,7 +384,7 @@ export class ChartsExportService {
                             type: vAxis.valueType,
                         });
                         header.push(vAxis.valueAlias || vAxis.valueName);
-                        colors2.push(colors[offset2]);
+                        colors2.push(colors[index]);
                     }
                 }
             });
@@ -493,7 +493,7 @@ export class ChartsExportService {
 
         // Remove all elements from color array that are missing in the dataTable
         const colors = colorOverride || this.getColorArray(widget.properties.vAxes || []);
-        if (widget.properties.vAxes && dataTable.data.length > 0 && widget.properties.chartType !== 'PieChart') {
+        if (widget.properties.vAxes && dataTable.data.length > 0 && widget.properties.chartType !== 'PieChart' && dataTable.data[0].length !== colors.length + 1) {
             const deleteColorIndices: number[] = [];
             widget.properties.vAxes.forEach((vAxes, index) => {
                 if (dataTable.data[0].indexOf(vAxes.valueAlias || vAxes.valueName) === -1) {
