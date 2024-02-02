@@ -45,6 +45,7 @@ import {AuthorizationService} from './core/services/authorization.service';
 import {KeycloakConfidentialService} from './core/services/keycloak-confidential.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 import { CostModule } from './modules/cost/cost.module';
+import {ReportsModule} from './modules/reports/reports.module';
 
 registerLocaleData(localeDe);
 
@@ -77,6 +78,7 @@ registerLocaleData(localeDe);
             // or after 30 seconds (whichever comes first).
             registrationStrategy: 'registerWhenStable:30000'
         }),
+        ReportsModule
     ],
     providers: [
         {
