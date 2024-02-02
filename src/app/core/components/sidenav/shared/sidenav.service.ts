@@ -22,34 +22,34 @@ import {WaitingRoomService} from '../../../../modules/devices/waiting-room/share
 import {debounceTime} from 'rxjs/operators';
 import {WaitingRoomEventTypeAuthOk} from '../../../../modules/devices/waiting-room/shared/waiting-room.model';
 import {environment} from '../../../../../environments/environment';
-import { AuthorizationService } from 'src/app/core/services/authorization.service';
-import { SwaggerService } from 'src/app/modules/api-doc/shared/swagger/swagger.service';
-import { BehaviorSubject, forkJoin, Observable, Subject, Subscriber } from 'rxjs';
-import { FlowRepoService } from 'src/app/modules/data/flow-repo/shared/flow-repo.service';
-import { OperatorRepoService } from 'src/app/modules/data/operator-repo/shared/operator-repo.service';
-import { PipelineRegistryService } from 'src/app/modules/data/pipeline-registry/shared/pipeline-registry.service';
-import { DesignerHelperService } from 'src/app/modules/processes/designer/shared/designer-helper.service';
-import { ProcessRepoService } from 'src/app/modules/processes/process-repo/shared/process-repo.service';
-import { DeploymentsService } from 'src/app/modules/processes/deployments/shared/deployments.service';
-import { MonitorService } from 'src/app/modules/processes/monitor/shared/monitor.service';
-import { SmartServiceDesignsService } from 'src/app/modules/smart-services/designs/shared/designs.service';
-import { ExportService } from 'src/app/modules/exports/shared/export.service';
-import { BrokerExportService } from 'src/app/modules/exports/shared/broker-export.service';
-import { ImportTypesService } from 'src/app/modules/imports/import-types/shared/import-types.service';
-import { ImportInstancesService } from 'src/app/modules/imports/import-instances/shared/import-instances.service';
-import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
-import { AspectsService } from 'src/app/modules/metadata/aspects/shared/aspects.service';
-import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
-import { CharacteristicsService } from 'src/app/modules/metadata/characteristics/shared/characteristics.service';
-import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
-import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
-import { LocationsService } from 'src/app/modules/devices/locations/shared/locations.service';
-import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
-import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
-import { NetworksService } from 'src/app/modules/devices/networks/shared/networks.service';
-import { ProcessIoService } from 'src/app/modules/processes/process-io/shared/process-io.service';
-import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
-import { CostService } from 'src/app/modules/cost/shared/cost.service';
+import {AuthorizationService} from 'src/app/core/services/authorization.service';
+import {SwaggerService} from 'src/app/modules/api-doc/shared/swagger/swagger.service';
+import {Subject} from 'rxjs';
+import {FlowRepoService} from 'src/app/modules/data/flow-repo/shared/flow-repo.service';
+import {OperatorRepoService} from 'src/app/modules/data/operator-repo/shared/operator-repo.service';
+import {PipelineRegistryService} from 'src/app/modules/data/pipeline-registry/shared/pipeline-registry.service';
+import {DesignerHelperService} from 'src/app/modules/processes/designer/shared/designer-helper.service';
+import {ProcessRepoService} from 'src/app/modules/processes/process-repo/shared/process-repo.service';
+import {DeploymentsService} from 'src/app/modules/processes/deployments/shared/deployments.service';
+import {MonitorService} from 'src/app/modules/processes/monitor/shared/monitor.service';
+import {SmartServiceDesignsService} from 'src/app/modules/smart-services/designs/shared/designs.service';
+import {ExportService} from 'src/app/modules/exports/shared/export.service';
+import {BrokerExportService} from 'src/app/modules/exports/shared/broker-export.service';
+import {ImportTypesService} from 'src/app/modules/imports/import-types/shared/import-types.service';
+import {ImportInstancesService} from 'src/app/modules/imports/import-instances/shared/import-instances.service';
+import {FunctionsService} from 'src/app/modules/metadata/functions/shared/functions.service';
+import {AspectsService} from 'src/app/modules/metadata/aspects/shared/aspects.service';
+import {ConceptsService} from 'src/app/modules/metadata/concepts/shared/concepts.service';
+import {CharacteristicsService} from 'src/app/modules/metadata/characteristics/shared/characteristics.service';
+import {DeviceTypeService} from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
+import {DeviceClassesService} from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
+import {LocationsService} from 'src/app/modules/devices/locations/shared/locations.service';
+import {DeviceGroupsService} from 'src/app/modules/devices/device-groups/shared/device-groups.service';
+import {DeviceInstancesService} from 'src/app/modules/devices/device-instances/shared/device-instances.service';
+import {NetworksService} from 'src/app/modules/devices/networks/shared/networks.service';
+import {ProcessIoService} from 'src/app/modules/processes/process-io/shared/process-io.service';
+import {DashboardService} from 'src/app/modules/dashboard/shared/dashboard.service';
+import {CostService} from 'src/app/modules/cost/shared/cost.service';
 
 @Injectable({
     providedIn: 'root',
@@ -133,8 +133,7 @@ export class SidenavService implements OnDestroy {
             [this.flowRepoService.userHasReadAuthorization, new SidenavPageModel('Flows', 'link', 'insights', '/data/flow-repo'), this.flowRepoService],
             [this.pipelineService.userHasReadAuthorization, new SidenavPageModel('Pipelines', 'link', 'analytics', '/data/pipelines'), this.pipelineService]
         ]);
-        const analyticsSection = new SidenavSectionModel('Analytics', 'toggle', 'bar_chart', '/data', sections);
-        return analyticsSection;
+        return new SidenavSectionModel('Analytics', 'toggle', 'bar_chart', '/data', sections);
     }
 
     setupDevSection(): SidenavSectionModel {
@@ -143,8 +142,7 @@ export class SidenavService implements OnDestroy {
             sections.push(new SidenavPageModel('API', 'link', 'api', '/dev/api'));
         }
 
-        const devSection = new SidenavSectionModel('Developer', 'toggle', 'engineering', '/dev', sections);
-        return devSection;
+        return new SidenavSectionModel('Developer', 'toggle', 'engineering', '/dev', sections);
     }
 
     setupAdminSection(): SidenavSectionModel {
@@ -157,8 +155,7 @@ export class SidenavService implements OnDestroy {
             ];
         }
 
-        const adminSection = new SidenavSectionModel('Admin', 'toggle', 'admin_panel_settings', '/admin', sections);
-        return adminSection;
+        return new SidenavSectionModel('Admin', 'toggle', 'admin_panel_settings', '/admin', sections);
     }
 
     setupProcessSection(): SidenavSectionModel {
@@ -174,8 +171,7 @@ export class SidenavService implements OnDestroy {
         }
 
         const sections = this.checkAuthorizationForSections(checks);
-        const processSection = new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', sections);
-        return processSection;
+        return new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', sections);
     }
 
     setupSmartServiceSection(): SidenavSectionModel {
@@ -184,8 +180,7 @@ export class SidenavService implements OnDestroy {
             [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Releases', 'link', 'storage', '/smart-services/releases'), this.smartServiceDesignService]
         ]);
 
-        const smartServiceSection = new SidenavSectionModel('Smart Services', 'toggle', 'design_services', '/smart-services', sections);
-        return smartServiceSection;
+        return new SidenavSectionModel('Smart Services', 'toggle', 'design_services', '/smart-services', sections);
     }
 
     setupExportSection(): SidenavSectionModel {
@@ -193,8 +188,7 @@ export class SidenavService implements OnDestroy {
             [this.exportService.userHasReadAuthorization, new SidenavPageModel('Database', 'link', 'table_chart', '/exports/db'), this.exportService],
             [this.exportBrokerService.userHasReadAuthorization, new SidenavPageModel('Broker', 'link', 'call_split', '/exports/broker'), this.exportBrokerService]
         ]);
-        const exportSection = new SidenavSectionModel('Exports', 'toggle', 'west', '/exports', sections);
-        return exportSection;
+        return new SidenavSectionModel('Exports', 'toggle', 'west', '/exports', sections);
     }
 
     setupImportSection(): SidenavSectionModel {
@@ -202,8 +196,7 @@ export class SidenavService implements OnDestroy {
             [this.importTypeService.userHasReadAuthorization, new SidenavPageModel('Types', 'link', 'api', '/imports/types/list'), this.importTypeService],
             [this.importInstanceSercice.userHasReadAuthorization, new SidenavPageModel('Instances', 'link', 'double_arrow', '/imports/instances'), this.importInstanceSercice]
         ]);
-        const importSection = new SidenavSectionModel('Imports', 'toggle', 'east', '/imports', sections);
-        return importSection;
+        return new SidenavSectionModel('Imports', 'toggle', 'east', '/imports', sections);
     }
 
 
@@ -251,8 +244,7 @@ export class SidenavService implements OnDestroy {
         if(this.waitingRoomService.userHasReadAuthorization()) {
             sections.push(this.setupWaitingRoom());
         }
-        const deviceSection = new SidenavSectionModel('Device Management', 'toggle', 'devices', '/devices', sections);
-        return deviceSection;
+        return new SidenavSectionModel('Device Management', 'toggle', 'devices', '/devices', sections);
     }
 
     setupMetadataSection(): SidenavSectionModel {
@@ -265,8 +257,7 @@ export class SidenavService implements OnDestroy {
             [this.deviceTypeService.userHasReadAuthorization, new SidenavPageModel('Device Types', 'link', 'important_devices', '/metadata/devicetypesoverview'), this.deviceTypeService]
         ]);
 
-        const metadataSection = new SidenavSectionModel('Metadata', 'toggle', 'web_asset', '/metadata', sections);
-        return metadataSection;
+        return new SidenavSectionModel('Metadata', 'toggle', 'web_asset', '/metadata', sections);
     }
 
     setupCostSection(): SidenavSectionModel {
@@ -274,8 +265,7 @@ export class SidenavService implements OnDestroy {
             [this.costService.userHasReadAuthorization, new SidenavPageModel('Overview', 'link', 'list', '/costs/overview'), this.costService],
         ]);
 
-        const costSection = new SidenavSectionModel('Cost', 'toggle', 'savings', '/costs', sections);
-        return costSection;
+        return new SidenavSectionModel('Cost', 'toggle', 'savings', '/costs', sections);
     }
 
     setupReportsSection(): SidenavSectionModel {
