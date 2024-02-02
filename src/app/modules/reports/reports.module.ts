@@ -18,6 +18,14 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {Route, RouterModule} from '@angular/router';
 import {TemplatesComponent} from './templates/templates.component';
+import {FlexModule} from '@angular/flex-layout';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatIconModule} from '@angular/material/icon';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatSortModule} from '@angular/material/sort';
+import {MatTableModule} from '@angular/material/table';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 const templateList: Route = { path: 'reports/templates', pathMatch: 'full', component: TemplatesComponent, data: { header: 'Templates' } };
 
@@ -25,7 +33,15 @@ const templateList: Route = { path: 'reports/templates', pathMatch: 'full', comp
   declarations: [TemplatesComponent],
   imports: [
     RouterModule.forChild([templateList]),
-    CommonModule
+    CommonModule,
+    FlexModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatIconModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatTableModule,
+    MatTooltipModule
   ]
 })
 export class ReportsModule { }

@@ -16,5 +16,33 @@
 
 
 <div class="layout-margin">
+    <div class="mat-elevation-z1" [hidden]="!ready || (templates.length === 0 && ready)">
+        <div class="table-container">
+            <table #sort="matSort" mat-table [dataSource]="templatesDataSource" matSort
+                   matSortActive="name"
+                   matSortDirection="asc" matSortDisableClear>
 
+                <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef>Id</th>
+                    <td mat-cell *matCellDef="let element">
+                        <div>
+                            {{element.id}}
+                        </div>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let element">
+                        <div>
+                            {{element.name}}
+                        </div>
+                    </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        </div>
+    </div>
+    <div *ngIf="templates.length === 0 && ready">No templates found.</div>
 </div>

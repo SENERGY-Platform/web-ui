@@ -120,6 +120,7 @@ export const environment = {
     budgetApiUrl: 'http://localhost',
     costApiUrl: 'http://localhost',
     billingApiUrl: 'http://localhost',
+    reportEngineUrl: 'http://localhost'
 };
 
 /*
