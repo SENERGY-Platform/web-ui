@@ -62,7 +62,15 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             }
         },
         xaxis: {
-            type: 'datetime'
+            type: 'datetime',
+            title: {
+                text: null
+            }
+        },
+        yaxis: {
+            title: {
+                text: null
+            }
         },
         colors: [],
         legend: {
@@ -171,6 +179,34 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         }
     }
 
+    private renderTimelineChart(lastOverride?: string) {
+        this.chartsExportService.getTimelineChartData(this.widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, lastOverride).subscribe({
+            next: (resp) => {
+                this.apexChartOptions.series = resp?.data;
+                this.apexChartOptions.colors = resp?.colors;
+            },
+            error: (err) => {
+                this.errorHasOccured = true;
+                this.errorMessage = 'No data';
+                this.errorHandlerService.logError('Chart Export', 'getChartData', err);
+            },
+            complete: () => {
+                this.ready = true;
+                this.refreshing = false;
+                if(this.zoom) {
+                    this.apexChartOptions.chart.toolbar.show = true;
+                }
+                const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
+                this.apexChartOptions.chart.width = element.width;
+                this.apexChartOptions.chart.height = element.height;
+                console.log(this.widget.properties)
+                this.apexChartOptions.xaxis.title.text = this.widget.properties.hAxisLabel;
+                this.apexChartOptions.yaxis.title.text = this.widget.properties.vAxisLabel;
+
+            }
+        });
+    }
+
     private refresh() {
         this.refreshing = true;
         this.checkConfiguration();
@@ -182,27 +218,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             }
 
             if(this.widget.properties.chartType === 'Timeline') {
-                this.chartsExportService.getTimelineChartData(this.widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, lastOverride).subscribe({
-                    next: (resp) => {
-                        this.apexChartOptions.series = resp?.data;
-                        this.apexChartOptions.colors = resp?.colors;
-                    },
-                    error: (err) => {
-                        this.errorHasOccured = true;
-                        this.errorMessage = 'No data';
-                        this.errorHandlerService.logError('Chart Export', 'getChartData', err);
-                    },
-                    complete: () => {
-                        this.ready = true;
-                        this.refreshing = false;
-                        if(this.zoom) {
-                            this.apexChartOptions.chart.toolbar.show = true;
-                        }
-                        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
-                        this.apexChartOptions.chart.width = element.width;
-                        this.apexChartOptions.chart.height = element.height;
-                    }
-                });
+                this.renderTimelineChart(lastOverride);
                 return;
             };
 

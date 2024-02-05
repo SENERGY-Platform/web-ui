@@ -52,12 +52,6 @@
                         <mat-slide-toggle formControlName="calculateIntervals"> Calculate Intervals?
                         </mat-slide-toggle>
                     </td>
-                    <td *ngIf="chartType.value === 'Timeline'">
-                        <mat-form-field color="accent" class="full-width">
-                            <mat-label>Break interval</mat-label>
-                            <input type="text" matInput placeholder="e.g. 1m, 1h, 1d" formControlName="breakInterval">
-                        </mat-form-field>
-                    </td>
                 </tr>
             </table>
 
