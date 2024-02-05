@@ -63,6 +63,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         },
         xaxis: {
             type: 'datetime',
+            labels: {
+                datetimeUTC: false,
+            },
             title: {
                 text: null
             }

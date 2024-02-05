@@ -15,6 +15,7 @@ export class ListRulesComponent {
     'to',
     'color',
     'alias',
+    'edit',
     'delete'
   ];
   dataSource = new MatTableDataSource<ChartsExportConversion>();
@@ -26,6 +27,22 @@ export class ListRulesComponent {
   delete(index: number) {
     this.dataSource.data.splice(index, 1);
     this.dataSource.data = this.dataSource.data;
+  }
+
+  edit(index: number) {
+    const oldRule: ChartsExportConversion = this.dataSource.data[index];
+    this.dialog.open(AddRuleComponent, {data: oldRule}).afterClosed().subscribe({
+      next: (rule: ChartsExportConversion) => {
+        if(rule != null) {
+          this.dataSource.data.splice(index, 1);
+          this.dataSource.data.push(rule);
+          this.dataSource.data = this.dataSource.data;
+        }
+      },
+      error: (_) => {
+
+      }
+    });
   }
 
   add() {
