@@ -27,7 +27,7 @@
     <mat-card-content>
         
         <div *ngIf="widget.properties.chartType === 'Timeline' && ready" id="timeline-container">
-            <apx-chart *ngIf="apexChartOptions.series.length !== 0" [legend]="apexChartOptions.legend" [colors]="apexChartOptions.colors" [dataLabels]="apexChartOptions.dataLabels" [series]="apexChartOptions.series" [chart]="apexChartOptions.chart" [plotOptions]="apexChartOptions.plotOptions" [xaxis]="apexChartOptions.xaxis" [yaxis]="apexChartOptions.yaxis"></apx-chart>
+            <apx-chart *ngIf="apexChartOptions.series.length !== 0" [tooltip]="apexChartOptions.tooltip" [legend]="apexChartOptions.legend" [colors]="apexChartOptions.colors" [dataLabels]="apexChartOptions.dataLabels" [series]="apexChartOptions.series" [chart]="apexChartOptions.chart" [plotOptions]="apexChartOptions.plotOptions" [xaxis]="apexChartOptions.xaxis" [yaxis]="apexChartOptions.yaxis"></apx-chart>
             <senergy-no-data
             [showIf]="configureWidget === false && apexChartOptions.series.length === 0"></senergy-no-data>
         </div>

@@ -78,6 +78,11 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         colors: [],
         legend: {
             show: true
+        },
+        tooltip: {
+            x: {
+                format: 'dd.MM HH:mm:ss',
+            }
         }
     };
     /*
