@@ -36,6 +36,12 @@ import { flatMap } from 'rxjs/operators';
 import {flatten} from 'lodash';
 import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import {UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement} from "./used-in-device-type.model";
+import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
+import {
+    DeviceTypesContentVariableDialogComponent
+} from "../device-types/dialogs/device-types-content-variable-dialog.component";
+import {UsedInDeviceTypesDialogComponent} from "../dialogs/used-in-device-types-dialog.component";
 
 @Injectable({
     providedIn: 'root',
@@ -44,8 +50,31 @@ export class DeviceTypeService {
     constructor(
         private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
-        private ladonService: LadonService
+        private ladonService: LadonService,
+        private dialog: MatDialog,
     ) {}
+
+    openUsedInDeviceTypeDialog(element: UsedInDeviceTypeResponseElement) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.closeOnNavigation = true;
+        dialogConfig.data = {
+            element: element,
+        };
+        this.dialog.open(UsedInDeviceTypesDialogComponent, dialogConfig);
+    }
+
+    getUsedInDeviceType(query: UsedInDeviceTypeQuery): Observable<Map<string, UsedInDeviceTypeResponseElement> | null> {
+        return this.http.post<any>(environment.deviceRepoUrl + '/query/used-in-device-type', query).pipe(
+            map((res) => {
+                const m = new Map<string, UsedInDeviceTypeResponseElement>();
+                for (const key of Object.keys(res)) {
+                    m.set(key, res[key]);
+                }
+                return m;
+            }),
+        );
+    }
 
     getDeviceType(id: string): Observable<DeviceTypeModel | null> {
         return this.http

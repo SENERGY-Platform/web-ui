@@ -31,6 +31,11 @@ import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import {DeviceTypeService} from "../device-types-overview/shared/device-type.service";
+import {
+    UsedInDeviceTypeQuery,
+    UsedInDeviceTypeResponseElement
+} from "../device-types-overview/shared/used-in-device-type.model";
 
 @Component({
     selector: 'senergy-functions',
@@ -38,7 +43,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./functions.component.css'],
 })
 export class FunctionsComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name', 'info'];
+    displayedColumns = ['select', 'name', "useCount", 'info'];
     pageSize = 20;
     dataSource = new MatTableDataSource<FunctionsPermSearchModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -54,6 +59,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
+    usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>()
 
     constructor(
         private dialog: MatDialog,
@@ -62,6 +68,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
         private authService: AuthorizationService,
+        private deviceTypeService: DeviceTypeService
     ) {}
 
     ngOnInit() {
@@ -188,6 +195,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             .pipe(
                 map((functions: FunctionsPermSearchModel[]) => {
                     this.dataSource = new MatTableDataSource(functions);
+                    this.updateFunctionUsedInDeviceTypes(functions);
                     return functions;
                 })
             );
@@ -260,5 +268,23 @@ export class FunctionsComponent implements OnInit, OnDestroy {
                     this.reload();
                 });
             });
+    }
+
+    private updateFunctionUsedInDeviceTypes(functions: FunctionsPermSearchModel[]) {
+        let query: UsedInDeviceTypeQuery = {
+            resource: "functions",
+            ids: functions.map(f => f.id)
+        }
+        this.deviceTypeService.getUsedInDeviceType(query).subscribe(result => {
+            result?.forEach((value, key) => {
+                this.usedIn.set(key, value);
+            })
+        })
+    }
+
+    public showUsedInDialog(usedIn: UsedInDeviceTypeResponseElement | undefined) {
+        if (usedIn) {
+            this.deviceTypeService.openUsedInDeviceTypeDialog(usedIn);
+        }
     }
 }
