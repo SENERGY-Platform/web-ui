@@ -99,6 +99,11 @@ export class AnomalyService {
                 measurement: m.id,
                 columnName: 'time'
             });
+            requestPayload.push({
+                exportId: m.id,
+                measurement: m.id,
+                columnName: 'initial_phase'
+            });
 
             let o: Observable < TimeValuePairModel[] > | undefined;
             switch (m.exportDatabaseId) {
@@ -115,7 +120,11 @@ export class AnomalyService {
             }
             return o.pipe(
                 map((pairs) => {
-                    if (pairs.length !== 5) {
+                    if (pairs.length !== 6) {
+                        return null;
+                    }
+
+                    if(pairs[0].value == null) {
                         return null;
                     }
                     const model: AnomalyResultModel = {
@@ -124,6 +133,7 @@ export class AnomalyService {
                         subType: pairs[2].value as string,
                         unit: pairs[3].value as string,
                         timestamp: pairs[4].value as string,
+                        initial_phase: pairs[5].value as string,
                     };
                     return model;
                 })

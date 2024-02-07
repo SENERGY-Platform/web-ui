@@ -14,7 +14,8 @@ export class AnomalyComponent implements OnInit {
     ready = false;
     refreshing = false;
     destroy = new Subscription();
-    anomaly: AnomalyResultModel = {} as AnomalyResultModel;
+    anomaly?: AnomalyResultModel;
+    error?: string;
 
   @Input() dashboardId = '';
   @Input() widget: WidgetModel = {} as WidgetModel;
@@ -37,15 +38,23 @@ export class AnomalyComponent implements OnInit {
           concatMap((event: string) => {
               if (event === 'reloadAll' || event === this.widget.id) {
                   this.refreshing = true;
-                  return this.loadAnomaly();
+                  return this.anomalyService.getAnomaly(this.widget);
               }
               return of();
           })).subscribe({
-          next: (_) => {
+          next: (anomaly) => {
+              if(anomaly != null) {
+                  this.anomaly = anomaly;
+              }
               this.ready = true;
               this.refreshing = false;
           },
-          error: (_) => {
+          error: (err) => {
+              if(err.error) {
+                  this.error = err.error;
+              } else {
+                  this.error = JSON.stringify(err);
+              }
               this.ready = true;
               this.refreshing = false;
           }
@@ -54,15 +63,5 @@ export class AnomalyComponent implements OnInit {
 
   edit() {
       this.anomalyService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
-  }
-
-  loadAnomaly(): Observable<any> {
-      return this.anomalyService.getAnomaly(this.widget).pipe(
-          map((anomaly) => {
-              if(anomaly != null) {
-                  this.anomaly = anomaly;
-              }
-          })
-      );
   }
 }

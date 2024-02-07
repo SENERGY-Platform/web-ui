@@ -18,65 +18,97 @@
   <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
   <mat-card-content>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+
     <div *ngIf="ready && widget.properties.measurement === undefined" fxFill fxLayout="column"
       fxLayoutAlign="center center">
       <div>Please configure widget!</div>
     </div>
-    <div *ngIf="ready && widget.properties.measurement !== undefined" fxLayoutAlign="center center" class="outer-container">
-      <div *ngIf="anomaly.type === 'time'" class="anomaly-container">
-        <div>
-          <mat-icon>schedule</mat-icon>
-        </div>
-        <div>
-          <h2 *ngIf="anomaly.subType === 'high'">Time between inputs was too long!</h2>
-          <h2 *ngIf="anomaly.subType === 'low'">Time between inputs was too short!</h2>
-        </div>
-        <div class="text-container">
-          <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
-          <p>Waiting time: {{anomaly.value | number:'1.2-3'}} {{anomaly.unit}}</p>
-        </div>
 
+    <div *ngIf="ready && widget.properties.measurement !== undefined" fxLayoutAlign="center center"
+      class="outer-container">
+
+      <!-- e.g. network problem or 500 from timescale -->
+      <div *ngIf="error != null" class="text-container">
+        <h2>There was a problem loading the detection!</h2>
+        <h3>{{error}}</h3>
       </div>
 
-      <div *ngIf="anomaly.type === 'schema'" class="anomaly-container">
-        <div>
-          <mat-icon>schema</mat-icon>
+      <div *ngIf="error == null">
+        <div *ngIf="anomaly != null">
+          <div *ngIf="anomaly.initial_phase === ''">
+            <div *ngIf="anomaly.type === 'time'" class="anomaly-container">
+              <div>
+                <mat-icon>schedule</mat-icon>
+              </div>
+              <div>
+                <h2 *ngIf="anomaly.subType === 'high'">Time between inputs was too long!</h2>
+                <h2 *ngIf="anomaly.subType === 'low'">Time between inputs was too short!</h2>
+              </div>
+              <div class="text-container">
+                <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
+                <p>Waiting time: {{anomaly.value | number:'1.2-3'}} {{anomaly.unit}}</p>
+              </div>
+  
+            </div>
+  
+            <div *ngIf="anomaly.type === 'schema'" class="anomaly-container">
+              <div>
+                <mat-icon>schema</mat-icon>
+              </div>
+              <div>
+                <h2>Input data did not follow the schema!</h2>
+              </div>
+              <div class="text-container">
+                <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
+                <p>Value: {{anomaly.value}}</p>
+              </div>
+            </div>
+  
+            <div *ngIf="anomaly.type === 'extreme_value'" class="anomaly-container">
+              <div>
+                <mat-icon>error</mat-icon>
+              </div>
+              <div>
+                <h2 *ngIf="anomaly.subType === 'high'">Input is too high!</h2>
+                <h2 *ngIf="anomaly.subType === 'low'">Input is too low!</h2>
+              </div>
+              <div class="text-container">
+                <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
+                <p>Value: {{anomaly.value}}</p>
+              </div>
+            </div>
+  
+            <div *ngIf="anomaly.type === 'curve_anomaly'" class="anomaly-container">
+              <div>
+                <mat-icon>error</mat-icon>
+              </div>
+              <div>
+                <h2>Value is anomalous!</h2>
+              </div>
+              <div class="text-container">
+                <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
+                <p>Value: {{anomaly.value}}</p>
+              </div>
+            </div>
+  
+            <!-- sometimes there are null rows in the timescale response -->
+            <div *ngIf="anomaly.value == null" class="text-container">
+              <h2>No anomaly detected!</h2>
+            </div>
+          </div>
+
+          <div *ngIf="anomaly.initial_phase !== ''" class="text-container">
+            <h2>Operator is not ready</h2>
+            <p>{{anomaly.initial_phase}}</p>
+          </div>
         </div>
-        <div>
-          <h2>Input data did not follow the schema!</h2>
-        </div>
-        <div class="text-container">
-          <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
-          <p>Value: {{anomaly.value}}</p>
+
+        <!-- Fallback when variable is not set to anything -> timescale returned nothing -> operator has not send his init message yet -->
+        <div *ngIf="anomaly == null" class="text-container">
+          <h2>Operator is not ready</h2>
         </div>
       </div>
 
-      <div *ngIf="anomaly.type === 'extreme_value'" class="anomaly-container">
-        <div>
-          <mat-icon>error</mat-icon>
-        </div>
-        <div>
-          <h2 *ngIf="anomaly.subType === 'high'">Input is too high!</h2>
-          <h2 *ngIf="anomaly.subType === 'low'">Input is too low!</h2>
-        </div>
-        <div class="text-container">
-          <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
-          <p>Value: {{anomaly.value}}</p>
-        </div>
-      </div>
-
-      <div *ngIf="anomaly.type === 'curve_anomaly'" class="anomaly-container">
-        <div>
-          <mat-icon>error</mat-icon>
-        </div>
-        <div>
-          <h2>Value is anomalous!</h2>
-        </div>
-        <div class="text-container">
-          <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
-          <p>Value: {{anomaly.value}}</p>
-        </div>
-      </div>
     </div>
   </mat-card-content>
   <div>

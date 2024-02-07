@@ -241,8 +241,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.load().subscribe({
             error: (err) => {
                 console.log(err);
+                this.ready = true;
             },
-            complete: () => {
+            next: () => {
                 this.ready = true;
             }
         });
