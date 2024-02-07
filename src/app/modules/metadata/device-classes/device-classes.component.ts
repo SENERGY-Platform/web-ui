@@ -35,6 +35,12 @@ import { MatTableDataSource } from '@angular/material/table';
 import { UntypedFormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
+import {
+    UsedInDeviceTypeQuery,
+    UsedInDeviceTypeResponseElement
+} from "../device-types-overview/shared/used-in-device-type.model";
+import {DeviceTypeService} from "../device-types-overview/shared/device-type.service";
+import {FunctionsPermSearchModel} from "../functions/shared/functions-perm-search.model";
 
 @Component({
     selector: 'senergy-device-classes',
@@ -42,7 +48,7 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./device-classes.component.css'],
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name'];
+    displayedColumns = ['select', 'name', "useCount"];
     pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<DeviceClassesPermSearchModel>();
@@ -58,6 +64,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
+    usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>()
 
     constructor(
         private dialog: MatDialog,
@@ -68,6 +75,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         private router: Router,
         private dialogsService: DialogsService,
         private authService: AuthorizationService,
+        private deviceTypeService: DeviceTypeService
     ) {}
 
     ngOnInit() {
@@ -185,6 +193,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
             .pipe(
                 map((deviceClasses: DeviceClassesPermSearchModel[]) => {
                     this.dataSource = new MatTableDataSource(deviceClasses);
+                    this.updateDeviceClassInDeviceTypes(deviceClasses)
                     return deviceClasses;
                 })
             );
@@ -258,5 +267,23 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
                     this.reload();
                 });
             });
+    }
+
+    private updateDeviceClassInDeviceTypes(list: DeviceClassesPermSearchModel[]) {
+        let query: UsedInDeviceTypeQuery = {
+            resource: "device-classes",
+            ids: list.map(f => f.id)
+        }
+        this.deviceTypeService.getUsedInDeviceType(query).subscribe(result => {
+            result?.forEach((value, key) => {
+                this.usedIn.set(key, value);
+            })
+        })
+    }
+
+    public showUsedInDialog(usedIn: UsedInDeviceTypeResponseElement | undefined) {
+        if (usedIn) {
+            this.deviceTypeService.openUsedInDeviceTypeDialog(usedIn);
+        }
     }
 }

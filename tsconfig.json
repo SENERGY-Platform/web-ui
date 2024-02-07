@@ -9,7 +9,7 @@
     "declaration": false,
     "module": "es2020",
     "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
+    "emitDecoratorMetadata": false,
     "experimentalDecorators": true,
     "noUnusedLocals": false,
     "esModuleInterop": true,

@@ -28,7 +28,7 @@ import {Router} from "@angular/router";
     templateUrl: './used-in-device-types-dialog.component.html',
     styleUrls: ['./used-in-device-types-dialog.component.css'],
 })
-export class UsedInDeviceTypesDialogComponent {
+export class UsedInDeviceTypesDialogComponent implements OnInit {
     dataSource = new MatTableDataSource<UsedInDeviceTypeResponseDeviceTypeRef>();
     displayedColumns = ["name"];
     userHasUpdateAuthorization = false;
@@ -39,13 +39,16 @@ export class UsedInDeviceTypesDialogComponent {
         private router: Router,
         @Inject(MAT_DIALOG_DATA) data: { element: UsedInDeviceTypeResponseElement },
     ) {
-        this.userHasUpdateAuthorization = authService.userIsAdmin()
+        this.dataSource = new MatTableDataSource(data.element.used_in || []);
+    }
+
+    ngOnInit() {
+        this.userHasUpdateAuthorization = this.authService.userIsAdmin()
         if(this.userHasUpdateAuthorization) {
             this.displayedColumns.push("edit");
         } else {
             this.displayedColumns.push("view");
         }
-        this.dataSource = new MatTableDataSource(data.element.used_in || []);
     }
 
     close(): void {
