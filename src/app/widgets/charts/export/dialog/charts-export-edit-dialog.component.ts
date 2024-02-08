@@ -202,41 +202,46 @@ export class ChartsExportEditDialogComponent implements OnInit {
             // Remove no longer existing
             for (let i = this.dataSource.data.length - 1; i >= 0; i--) {
                 const axis = this.dataSource.data[i] as ChartsExportVAxesModel;
-                if (
-                    !vAxes.some(
-                        (item: ChartsExportVAxesModel) =>
-                            item.instanceId === axis.instanceId &&
-                            item.exportName === axis.exportName &&
-                            item.valueName === axis.valueName &&
-                            item.valueType === axis.valueType,
-                    )
-                    && !vAxes.some(
-                        (item: ChartsExportVAxesModel) =>
-                            item.deviceId === axis.deviceId &&
-                            item.serviceId === axis.serviceId &&
-                            item.valueName === axis.valueName
-                    )
-                ) {
+                const sameExportAxisExists = vAxes.some(
+                    (item: ChartsExportVAxesModel) =>
+                        item.instanceId != null &&
+                        item.instanceId === axis.instanceId &&
+                        item.exportName === axis.exportName &&
+                        item.valueName === axis.valueName &&
+                        item.valueType === axis.valueType,
+                );
+                const sameDeviceAxisExsits = vAxes.some(
+                    (item: ChartsExportVAxesModel) =>
+                        item.deviceId != null &&
+                        item.deviceId === axis.deviceId &&
+                        item.serviceId === axis.serviceId &&
+                        item.valueName === axis.valueName
+                );
+
+                if (!sameExportAxisExists && !sameDeviceAxisExsits) {
                     this.dataSource.data.splice(i);
                 }
             }
+
             // Add not yet existing
             vAxes.forEach((axis) => {
-                if (
-                    !this.dataSource.data.some(
-                        (item: ChartsExportVAxesModel) =>
-                            item.instanceId === axis.instanceId &&
-                            item.exportName === axis.exportName &&
-                            item.valueName === axis.valueName &&
-                            item.valueType === axis.valueType,
-                    )
-                    && !this.dataSource.data.some(
-                        (item: ChartsExportVAxesModel) =>
-                            item.deviceId === axis.deviceId &&
-                            item.serviceId === axis.serviceId &&
-                            item.valueName === axis.valueName
-                    )
-                ) {
+                const sameExportValueExists = this.dataSource.data.some(
+                    (item: ChartsExportVAxesModel) =>
+                        item.instanceId != null &&
+                        item.instanceId === axis.instanceId &&
+                        item.exportName === axis.exportName &&
+                        item.valueName === axis.valueName &&
+                        item.valueType === axis.valueType,
+                );
+                const sameDeviceValueExists = this.dataSource.data.some(
+                    (item: ChartsExportVAxesModel) =>
+                        item.deviceId != null &&
+                        item.deviceId === axis.deviceId &&
+                        item.serviceId === axis.serviceId &&
+                        item.valueName === axis.valueName
+                );
+
+                if (!sameExportValueExists && !sameDeviceValueExists) {
                     this.dataSource.data.push(axis);
                 }
             });
