@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {ChartSelectEvent, GoogleChartComponent,} from 'ng2-google-charts';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {ElementSizeService} from '../../../core/services/element-size.service';
 import {ChartsModel} from '../shared/charts.model';
 import {ChartsExportService} from './shared/charts-export.service';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {noop, Subscription} from 'rxjs';
+import {noop, of, Subscription, timeout} from 'rxjs';
 import {ErrorModel} from '../../../core/model/error.model';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {ChartsService} from '../shared/charts.service';
+import {ChartComponent} from 'ng-apexcharts';
+import { ApexChartOptions } from './shared/charts-export-properties.model';
 
 @Component({
     selector: 'senergy-charts-export',
@@ -45,18 +47,19 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     private resizeTimeout = 0;
     private timeRgx = /(\d+)(ms|s|months|m|h|d|w|y)/;
 
-    apexChartOptions: any = {
+    apexChartOptions: Partial<ApexChartOptions> = {
         series: [],
         chart: {
+            width: "auto",
+            height: "auto",
             animations: {
                 enabled: false
             },
-            width: "100%",
-            height: "100%",
             type: 'rangeBar',
             toolbar: {
-                "show": false
-            }
+                show: false
+            },
+            redrawOnWindowResize: true
         },
         plotOptions: {
             bar: {
@@ -70,12 +73,12 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                 datetimeUTC: false,
             },
             title: {
-                text: null
+                text: ''
             }
         },
         yaxis: {
             title: {
-                text: null
+                text: ''
             }
         },
         colors: [],
@@ -188,21 +191,35 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                 this.chartExportData.options.chartArea.width = element.widthPercentage;
             }
         }
+
+        if(this.widget.properties.chartType === "Timeline") {}
     }
+
+    private resizeApex() {
+        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
+        if(this.apexChartOptions.chart?.width) {
+            this.apexChartOptions.chart.width = element.width;
+            this.apexChartOptions.chart.height = element.height;
+        }
+    }
+
 
     private renderTimelineChart(lastOverride?: string) {
         this.chartsExportService.getTimelineChartData(this.widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, lastOverride).subscribe({
             next: (resp) => {
                 this.apexChartOptions.series = resp?.data;
                 this.apexChartOptions.colors = resp?.colors;
-                if(this.zoom) {
+                if(this.zoom && this.apexChartOptions.chart?.toolbar !== undefined) {
                     this.apexChartOptions.chart.toolbar.show = true;
                 }
-                const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
-                this.apexChartOptions.chart.width = element.width;
-                this.apexChartOptions.chart.height = element.height;
-                this.apexChartOptions.xaxis.title.text = this.widget.properties.hAxisLabel;
-                this.apexChartOptions.yaxis.title.text = this.widget.properties.vAxisLabel;
+                if(this.apexChartOptions.xaxis?.title !== undefined) {
+                    this.apexChartOptions.xaxis.title.text = this.widget.properties.hAxisLabel;
+                }
+                if(this.apexChartOptions.yaxis?.title !== undefined) {
+                    this.apexChartOptions.yaxis.title.text = this.widget.properties.vAxisLabel;
+                }
+
+                this.resizeApex();
 
                 this.ready = true;
                 this.refreshing = false;
