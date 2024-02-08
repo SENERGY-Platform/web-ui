@@ -30,6 +30,12 @@ import {MatTableDataSource} from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import {DeviceClassesPermSearchModel} from "../device-classes/shared/device-classes-perm-search.model";
+import {
+    UsedInDeviceTypeQuery,
+    UsedInDeviceTypeResponseElement
+} from "../device-types-overview/shared/used-in-device-type.model";
+import {DeviceTypeService} from "../device-types-overview/shared/device-type.service";
 
 @Component({
     selector: 'senergy-characteristic',
@@ -37,7 +43,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./characteristics.component.css'],
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name', 'info'];
+    displayedColumns = ['select', 'name', "useCount", 'info'];
     pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<CharacteristicsPermSearchModel>();
@@ -54,6 +60,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
+    usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>();
 
     constructor(
         private dialog: MatDialog,
@@ -62,6 +69,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         private snackBar: MatSnackBar,
         private router: Router,
         private dialogsService: DialogsService,
+        private deviceTypeService: DeviceTypeService
     ) {
         this.getRouterParams();
     }
@@ -234,6 +242,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             .pipe(
                 map((characteristics: CharacteristicsPermSearchModel[]) => {
                     this.setCharacteristics(characteristics);
+                    this.updateCharacteristicInDeviceTypes(characteristics);
                     return characteristics;
                 })
             );
@@ -307,5 +316,23 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                     this.reload();
                 });
             });
+    }
+
+    private updateCharacteristicInDeviceTypes(list: CharacteristicsPermSearchModel[]) {
+        let query: UsedInDeviceTypeQuery = {
+            resource: "characteristics",
+            ids: list.map(f => f.id)
+        }
+        this.deviceTypeService.getUsedInDeviceType(query).subscribe(result => {
+            result?.forEach((value, key) => {
+                this.usedIn.set(key, value);
+            })
+        })
+    }
+
+    public showUsedInDialog(usedIn: UsedInDeviceTypeResponseElement | undefined) {
+        if (usedIn) {
+            this.deviceTypeService.openUsedInDeviceTypeDialog(usedIn);
+        }
     }
 }

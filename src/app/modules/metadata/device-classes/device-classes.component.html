@@ -49,7 +49,7 @@
                 <ng-container matColumnDef="useCount">
                     <th mat-header-cell disableClear *matHeaderCellDef class="button-column">Used In</th>
                     <td mat-cell *matCellDef="let deviceClass">
-                        <button (click)="showUsedInDialog(usedIn?.get(deviceClass.id))" class="linkbutton" matTooltip="uses of function in device-types">
+                        <button (click)="showUsedInDialog(usedIn?.get(deviceClass.id))" class="linkbutton" matTooltip="uses of device-class in device-types">
                             {{usedIn?.get(deviceClass.id)?.count || 0}}
                         </button>
                     </td>
