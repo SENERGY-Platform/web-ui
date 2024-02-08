@@ -32,5 +32,14 @@ export interface TemplateDataModel {
     id: string;
     name: string;
     dataJsonString: string;
-    dataStructured: {},
+    dataStructured: Map<string, ReportObjectModel>;
+}
+
+export interface ReportObjectModel {
+     name: string;
+     valueType: string;
+     value: any | undefined;
+     fields: Map<string, ReportObjectModel> | undefined;
+     children: Map<string, ReportObjectModel> | undefined;
+     length: number | undefined;
 }

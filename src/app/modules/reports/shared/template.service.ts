@@ -20,7 +20,7 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
 import { environment } from '../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import {TemplateListResponseModel} from './template.model';
+import {TemplateListResponseModel, TemplateResponseModel} from './template.model';
 
 @Injectable({
     providedIn: 'root',
@@ -37,6 +37,14 @@ export class TemplateService {
             .pipe(
                 map((resp: TemplateListResponseModel) => resp || []),
                 catchError(this.errorHandlerService.handleError(TemplateService.name, 'getTemplates: Error', null)),
+            );
+    }
+
+    getTemplate(id: string): Observable<TemplateResponseModel | null> {
+        return this.http.get<TemplateResponseModel>(environment.reportEngineUrl + '/templates/'+id)
+            .pipe(
+                map((resp: TemplateResponseModel) => resp || []),
+                catchError(this.errorHandlerService.handleError(TemplateService.name, 'getTemplate: Error', null)),
             );
     }
 }

@@ -26,22 +26,32 @@ import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatSortModule} from '@angular/material/sort';
 import {MatTableModule} from '@angular/material/table';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {ReportComponent} from './report/report.component';
+import {MatCardModule} from '@angular/material/card';
+import {ReportObjectComponent} from './report/report-object/report-object.component';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 const templateList: Route = { path: 'reports/templates', pathMatch: 'full', component: TemplatesComponent, data: { header: 'Templates' } };
+const newReport: Route = { path: 'reports/new/:templateId', pathMatch: 'full', component: ReportComponent, data: { header: 'Report' } };
 
 @NgModule({
-  declarations: [TemplatesComponent],
-  imports: [
-    RouterModule.forChild([templateList]),
-    CommonModule,
-    FlexModule,
-    MatButtonModule,
-    MatCheckboxModule,
-    MatIconModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatTableModule,
-    MatTooltipModule
-  ]
+  declarations: [TemplatesComponent, ReportComponent, ReportObjectComponent],
+    imports: [
+        RouterModule.forChild([templateList, newReport]),
+        CommonModule,
+        FlexModule,
+        MatButtonModule,
+        MatCheckboxModule,
+        MatIconModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatTableModule,
+        MatTooltipModule,
+        MatCardModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        FormsModule
+    ]
 })
 export class ReportsModule { }
