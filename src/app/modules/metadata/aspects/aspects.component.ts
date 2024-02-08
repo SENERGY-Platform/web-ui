@@ -28,6 +28,11 @@ import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {DeviceTypeService} from '../device-types-overview/shared/device-type.service';
+import {FunctionsPermSearchModel} from "../functions/shared/functions-perm-search.model";
+import {
+    UsedInDeviceTypeQuery,
+    UsedInDeviceTypeResponseElement
+} from "../device-types-overview/shared/used-in-device-type.model";
 
 @Component({
     selector: 'senergy-aspects',
@@ -45,6 +50,8 @@ export class AspectsComponent implements OnInit {
     userIsAdmin = false;
 
     dragging = false;
+
+    usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>()
 
     constructor(
         private dialog: MatDialog,
@@ -241,6 +248,7 @@ export class AspectsComponent implements OnInit {
             .getAspects()
             .subscribe((aspects: DeviceTypeAspectModel[]) => {
                 this.dataSource.data = aspects;
+                this.updateAspectsUsedInDeviceTypes(aspects);
                 this.redraw();
                 this.ready = true;
             });
@@ -252,5 +260,34 @@ export class AspectsComponent implements OnInit {
         this.dataSource.data = [];
         this.dataSource.data = data;
         data.filter(f => expanded.some(e => e.id === f.id )).forEach(n => this.treeControl.expand(n));
+    }
+
+    private updateAspectsUsedInDeviceTypes(aspects: DeviceTypeAspectModel[]) {
+        let query: UsedInDeviceTypeQuery = {
+            resource: "aspects",
+            ids: this.getAspectIds(aspects)
+        }
+        console.log(query);
+        this.deviceTypesService.getUsedInDeviceType(query).subscribe(result => {
+            console.log(result)
+            result?.forEach((value, key) => {
+                this.usedIn.set(key, value);
+            })
+        })
+    }
+
+    public showUsedInDialog(usedIn: UsedInDeviceTypeResponseElement | undefined) {
+        if (usedIn) {
+            this.deviceTypesService.openUsedInDeviceTypeDialog(usedIn);
+        }
+    }
+
+    private getAspectIds(aspects: DeviceTypeAspectModel[] | null | undefined) {
+        var result: string[] = [];
+        aspects?.forEach(value => {
+            result.push(value.id);
+            result = result.concat(this.getAspectIds(value.sub_aspects));
+        })
+        return result;
     }
 }

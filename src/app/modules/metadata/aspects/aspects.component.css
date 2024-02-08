@@ -61,3 +61,19 @@ ul {
     border-top: dotted;
     text-align: center;
 }
+
+.linkbutton {
+    background: none!important;
+    border: none;
+    padding: 0!important;
+    /*optional*/
+    font-family: arial, sans-serif;
+    /*input has OS specific font-family*/
+    color: #069;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: larger;
+
+    width: 48px;
+    height: 48px;
+}

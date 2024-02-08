@@ -28,6 +28,9 @@
                 <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
                     <input matInput placeholder="Name" [(ngModel)]="node.name" required [disabled]="!userIsAdmin">
                 </mat-form-field>
+                <button (click)="showUsedInDialog(usedIn?.get(node.id))" class="linkbutton tree-inline" matTooltip="uses of aspect in device-types">
+                    {{usedIn?.get(node.id)?.count || 0}}
+                </button>
                 <button mat-icon-button disabled *ngIf="!isRootNode(node)"></button>
                 <button mat-icon-button *ngIf="isRootNode(node)" (click)="save(node)" color="accent" class="tree-inline"
                         [disabled]="!userIsAdmin || !nodeValid(node)">
@@ -61,6 +64,9 @@
                         <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
                             <input matInput placeholder="Name" [(ngModel)]="node.name" [disabled]="!userIsAdmin">
                         </mat-form-field>
+                        <button (click)="showUsedInDialog(usedIn?.get(node.id))" class="linkbutton nested-tree-inline" matTooltip="uses of aspect in device-types">
+                            {{usedIn?.get(node.id)?.count || 0}}
+                        </button>
                         <button mat-icon-button disabled *ngIf="!isRootNode(node)"></button>
                         <button mat-icon-button *ngIf="isRootNode(node)" (click)="save(node)" color="accent"
                                 class="nested-tree-inline"
