@@ -303,7 +303,9 @@ export class ChartsExportService {
                     const vAxes = widget?.properties?.vAxes || [];
                     const chartData = this.setupTimelineChart(vAxes);
                     resp.forEach((dataForOneEntity: any, i: any) => {
-                        this.processDataForOneEntity(dataForOneEntity, chartData, vAxes[i]);
+                        if(dataForOneEntity.length > 0) { // only when requested entitity has any data
+                            this.processDataForOneEntity(dataForOneEntity, chartData, vAxes[i]);
+                        }
                     });
                     const convertedCartData = this.convertTimelineChartData(chartData);
                     return of({
