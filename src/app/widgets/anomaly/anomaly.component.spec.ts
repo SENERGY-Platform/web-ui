@@ -22,6 +22,7 @@ describe('AnomalyComponent', () => {
 
         fixture = TestBed.createComponent(AnomalyComponent);
         component = fixture.componentInstance;
+        component.widget = {properties: {measurement: undefined}, id: '', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1};
         fixture.detectChanges();
     });
 
