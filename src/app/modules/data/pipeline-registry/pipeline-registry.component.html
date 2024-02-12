@@ -91,6 +91,18 @@
                     </td>
                 </ng-container>
 
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell mat-sort-header *matHeaderCellDef class="button-column">Health</th>
+                    <td mat-cell *matCellDef="let pipeline">
+                        <div class="circle grey" *ngIf="pipeline.status == null" matTooltip="Status could not be checked"></div>
+                        <span *ngIf="pipeline.status != null">
+                            <div class="circle red" *ngIf="pipeline.status.error" matTooltip="Pipeline is not running"></div>
+                            <div class="circle yellow" *ngIf="pipeline.status.transitioning" matTooltip="Pipeline is not transitioning"></div>
+                            <div class="circle green" *ngIf="pipeline.status.running" matTooltip="Pipeline is running"></div>
+                        </span>
+                    </td>
+                  </ng-container>
+
                 <span *ngIf="userHasDeleteAuthorization">
                     <ng-container matColumnDef="delete">
                         <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>

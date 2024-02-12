@@ -15,7 +15,7 @@
  */
 
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { PipelineModel } from './shared/pipeline.model';
+import { PipelineModel, PipelineStatus } from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
@@ -38,7 +38,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     offset = 0;
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
     ready = false;
-    displayedColumns: string[] = ['select', 'id', 'name', 'createdat', 'updatedat', 'info'];
+    displayedColumns: string[] = ['select', 'status', 'id', 'name', 'createdat', 'updatedat', 'info'];
     selection = new SelectionModel<PipelineModel>(true, []);
     totalCount = 200;
     searchSub: Subscription = new Subscription();
@@ -105,7 +105,23 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     loadPipelines() {
         this.ready = false;
         const order = this.sortBy + ':' + this.sortDirection;
-        this.pipelineRegistryService.getPipelines(order).subscribe((resp: PipelineModel[]) => {
+        this.pipelineRegistryService.getPipelines(order).pipe(
+            concatMap((pipelines) => {
+                const requests: Observable<PipelineStatus>[] = [];
+                pipelines.forEach(pipeline => {
+                    requests.push(this.flowEngineService.getPipelineStatus(pipeline.id));
+                });
+                return forkJoin(requests).pipe(
+                    map((responses) => {
+                        pipelines.map((pipeline: PipelineModel, i) => {
+                            pipeline.status = responses[i];
+                            return pipeline;
+                        });
+                        return pipelines;
+                    })
+                );
+            })
+        ).subscribe((resp: PipelineModel[]) => {
             this.dataSource.data = resp;
             this.totalCount = resp.length;
             this.ready = true;

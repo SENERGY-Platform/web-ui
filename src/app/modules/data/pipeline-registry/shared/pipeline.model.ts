@@ -17,6 +17,13 @@
 import { SafeHtml } from '@angular/platform-browser';
 import { PipelineInputSelectionModel } from '../../flow-repo/deploy-flow/shared/pipeline-request.model';
 
+export interface PipelineStatus {
+    running: boolean;
+    transitioning: boolean;
+    message: string;
+    error: boolean;
+}
+
 export interface PipelineModel {
     id: string;
     name: string;
@@ -30,6 +37,7 @@ export interface PipelineModel {
     windowTime?: number;
     mergeStrategy?: string;
     metrics?: boolean;
+    status?: PipelineStatus;
 }
 
 export interface PipelineOperatorModel {

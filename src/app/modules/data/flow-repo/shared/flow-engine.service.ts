@@ -19,10 +19,11 @@ import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { PipelineRequestModel } from '../deploy-flow/shared/pipeline-request.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PipelineStatus } from '../../pipeline-registry/shared/pipeline.model';
 
 @Injectable({
     providedIn: 'root',
@@ -42,6 +43,16 @@ export class FlowEngineService {
         return this.http.post<unknown>(environment.flowEngineUrl + '/pipeline', data).pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'startPipeline: Error', [])),
+        );
+    }
+
+    getPipelineStatus(pipelineId: string): Observable<PipelineStatus> {
+        return this.http.get<PipelineStatus>(environment.flowEngineUrl + '/pipeline/' + pipelineId).pipe(
+            map((resp) => resp || []),
+            catchError((err) => {
+                this.errorHandlerService.handleError(FlowEngineService.name, 'getPipelineStatus: Error', undefined)
+                return throwError(() => err);
+            }),
         );
     }
 

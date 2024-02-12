@@ -60,3 +60,24 @@ mat-grid-list {
     padding: 0 8px;
 }
 
+.green {
+    background: #008700;
+}
+
+.red {
+    background: #db0000;
+}
+
+.grey {
+    background: grey;
+}
+
+.yellow {
+    background: yellow;
+}
+
+.circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
