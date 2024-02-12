@@ -46,7 +46,7 @@ export class EditComponent {
     }
 
     close(): void {
-        this.dialogRef.close();
+        this.dialogRef.close(this.widget);
     }
 
     ngOnInit() {
@@ -76,6 +76,7 @@ export class EditComponent {
 
     updateName(): Observable<DashboardResponseMessageModel> {
         const newName =  this.form.get('name')?.value;
+        this.widget.name = newName;
         return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName);
     }
 

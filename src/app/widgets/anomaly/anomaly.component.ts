@@ -23,6 +23,7 @@ export class AnomalyComponent implements OnInit {
   @Input() userHasDeleteAuthorization = false;
   @Input() userHasUpdatePropertiesAuthorization = false;
   @Input() userHasUpdateNameAuthorization = false;
+  configured = false;
 
   constructor(
     private dashboardService: DashboardService,
@@ -31,6 +32,7 @@ export class AnomalyComponent implements OnInit {
 
   ngOnInit(): void {
       this.update();
+      this.configured = this.widget.properties.measurement !== undefined;
   }
 
   private update() {
