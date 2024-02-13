@@ -75,16 +75,13 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
 
     initSearch() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            const order = this.sortBy + ':' + this.sortDirection;
-            this.pipelineRegistryService.getPipelines(order).subscribe((resp: PipelineModel[]) => {
-                if(searchText != ''){
-                    resp = resp.filter(pipeline => (pipeline.name.search(searchText) != -1));
+            this.loadPipelines().subscribe({
+                next: (pipelines) => {
+                    if(searchText != ''){
+                        pipelines = pipelines.filter(pipeline => (pipeline.name.search(searchText) != -1));
+                    }
+                    this.setPipelines(pipelines);
                 }
-                this.dataSource.data = resp;
-                this.totalCount = resp.length;
-
-
-                this.ready = true;
             });
         });
     }
@@ -98,14 +95,18 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     ngAfterViewInit() {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize;
-            this.loadPipelines();
+            this.loadPipelines().subscribe({
+                next: (pipelines) => {
+                    this.setPipelines(pipelines);
+                }
+            });
         });
     }
 
-    loadPipelines() {
+    loadPipelines(): Observable<PipelineModel[]> {
         this.ready = false;
         const order = this.sortBy + ':' + this.sortDirection;
-        this.pipelineRegistryService.getPipelines(order).pipe(
+        return this.pipelineRegistryService.getPipelines(order).pipe(
             concatMap((pipelines) => {
                 const requests: Observable<PipelineStatus>[] = [];
                 pipelines.forEach(pipeline => {
@@ -121,18 +122,24 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
                     })
                 );
             })
-        ).subscribe((resp: PipelineModel[]) => {
-            this.dataSource.data = resp;
-            this.totalCount = resp.length;
-            this.ready = true;
-        });
+        );
+    }
+
+    setPipelines(pipelines: PipelineModel[]) {
+        this.dataSource.data = pipelines;
+        this.totalCount = pipelines.length;
+        this.ready = true;
     }
 
     reload() {
         this.pageSize = 20;
         this.offset = 0;
         this.selectionClear();
-        this.loadPipelines();
+        this.loadPipelines().subscribe({
+            next: (pipelines) => {
+                this.setPipelines(pipelines);
+            }
+        });
     }
 
     deletePipeline(pipe: PipelineModel) {
