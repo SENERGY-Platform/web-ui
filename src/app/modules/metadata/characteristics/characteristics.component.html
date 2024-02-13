@@ -46,7 +46,7 @@
                     </td>
                 </ng-container>
 
-                <ng-container matColumnDef="useCount">
+                <ng-container matColumnDef="useCount" *ngIf="userHasUsedInAuthorization">
                     <th mat-header-cell disableClear *matHeaderCellDef class="button-column">Used In</th>
                     <td mat-cell *matCellDef="let characteristic">
                         <button (click)="showUsedInDialog(usedIn?.get(characteristic.id))" class="linkbutton" matTooltip="uses of characteristic in device-types">

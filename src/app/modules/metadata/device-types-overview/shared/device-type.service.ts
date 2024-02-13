@@ -355,4 +355,9 @@ export class DeviceTypeService {
         const deviceManagerUrl = environment.deviceManagerUrl + '/device-types';
         return this.ladonService.getUserAuthorizationsForURI(deviceManagerUrl)[method];
     }
+
+    userHasUsedInAuthorization(): boolean {
+        const endpoint = environment.deviceRepoUrl;
+        return this.ladonService.getUserAuthorizationsForURI(endpoint)["POST"];
+    }
 }

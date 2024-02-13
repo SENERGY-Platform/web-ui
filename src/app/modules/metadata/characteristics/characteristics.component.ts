@@ -43,7 +43,7 @@ import {DeviceTypeService} from "../device-types-overview/shared/device-type.ser
     styleUrls: ['./characteristics.component.css'],
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name', "useCount", 'info'];
+    displayedColumns = ['select', 'name'];
     pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<CharacteristicsPermSearchModel>();
@@ -60,6 +60,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
+    userHasUsedInAuthorization = false;
     usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>();
 
     constructor(
@@ -100,6 +101,13 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
 
     checkAuthorization() {
+        this.userHasUsedInAuthorization = this.deviceTypeService.userHasUsedInAuthorization()
+        if(this.userHasUsedInAuthorization) {
+            this.displayedColumns.push('useCount');
+        }
+
+        this.displayedColumns.push('info');
+
         this.userHasUpdateAuthorization = this.characteristicsService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
             this.displayedColumns.push('edit');
@@ -319,6 +327,9 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     }
 
     private updateCharacteristicInDeviceTypes(list: CharacteristicsPermSearchModel[]) {
+        if (!this.userHasUsedInAuthorization) {
+            return;
+        }
         let query: UsedInDeviceTypeQuery = {
             resource: "characteristics",
             ids: list.map(f => f.id)

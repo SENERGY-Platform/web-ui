@@ -48,7 +48,7 @@ import {FunctionsPermSearchModel} from "../functions/shared/functions-perm-searc
     styleUrls: ['./device-classes.component.css'],
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name', "useCount"];
+    displayedColumns = ['select', 'name'];
     pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<DeviceClassesPermSearchModel>();
@@ -64,6 +64,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
+    userHasUsedInAuthorization = false;
     usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>()
 
     constructor(
@@ -106,6 +107,11 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
+        this.userHasUsedInAuthorization = this.deviceTypeService.userHasUsedInAuthorization()
+        if(this.userHasUsedInAuthorization) {
+            this.displayedColumns.push('useCount');
+        }
+
         this.userHasUpdateAuthorization = this.deviceClassesService.userHasUpdateAuthorization();
         if( this.userHasUpdateAuthorization) {
             this.displayedColumns.push('edit');
@@ -270,6 +276,9 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     }
 
     private updateDeviceClassInDeviceTypes(list: DeviceClassesPermSearchModel[]) {
+        if (!this.userHasUsedInAuthorization) {
+            return;
+        }
         let query: UsedInDeviceTypeQuery = {
             resource: "device-classes",
             ids: list.map(f => f.id)

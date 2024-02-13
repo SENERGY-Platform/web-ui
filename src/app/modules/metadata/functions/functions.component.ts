@@ -43,7 +43,7 @@ import {
     styleUrls: ['./functions.component.css'],
 })
 export class FunctionsComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name', "useCount", 'info'];
+    displayedColumns = ['select', 'name'];
     pageSize = 20;
     dataSource = new MatTableDataSource<FunctionsPermSearchModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -59,7 +59,8 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
-    usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>()
+    userHasUsedInAuthorization = false;
+    usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>();
 
     constructor(
         private dialog: MatDialog,
@@ -99,6 +100,13 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
+        this.userHasUsedInAuthorization = this.deviceTypeService.userHasUsedInAuthorization()
+        if(this.userHasUsedInAuthorization) {
+            this.displayedColumns.push('useCount');
+        }
+
+        this.displayedColumns.push('info');
+
         this.userHasUpdateAuthorization = this.functionsService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
             this.displayedColumns.push('edit');
@@ -271,6 +279,9 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     }
 
     private updateFunctionUsedInDeviceTypes(functions: FunctionsPermSearchModel[]) {
+        if (!this.userHasUsedInAuthorization) {
+            return;
+        }
         let query: UsedInDeviceTypeQuery = {
             resource: "functions",
             ids: functions.map(f => f.id)

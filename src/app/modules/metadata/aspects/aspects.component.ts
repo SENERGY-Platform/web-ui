@@ -49,6 +49,8 @@ export class AspectsComponent implements OnInit {
     hasChild = (_: number, node: DeviceTypeAspectModel) => !!node.sub_aspects && node.sub_aspects.length > 0;
     userIsAdmin = false;
 
+    userHasUsedInAuthorization = false;
+
     dragging = false;
 
     usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>()
@@ -67,8 +69,13 @@ export class AspectsComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.checkAuthorization();
         this.getAspects();
         this.userIsAdmin = this.authService.userIsAdmin();
+    }
+
+    checkAuthorization() {
+        this.userHasUsedInAuthorization = this.deviceTypesService.userHasUsedInAuthorization()
     }
 
     newAspect(): void {
@@ -263,6 +270,9 @@ export class AspectsComponent implements OnInit {
     }
 
     private updateAspectsUsedInDeviceTypes(aspects: DeviceTypeAspectModel[]) {
+        if (!this.userHasUsedInAuthorization) {
+            return;
+        }
         let query: UsedInDeviceTypeQuery = {
             resource: "aspects",
             ids: this.getAspectIds(aspects)
