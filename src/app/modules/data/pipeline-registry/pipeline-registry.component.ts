@@ -24,7 +24,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { forkJoin, Observable, pipe, Subscription, concatMap, of, map} from 'rxjs';
+import { forkJoin, Observable, pipe, Subscription, concatMap, of, map, catchError} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
 
@@ -108,14 +108,21 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         const order = this.sortBy + ':' + this.sortDirection;
         return this.pipelineRegistryService.getPipelines(order).pipe(
             concatMap((pipelines) => {
-                const requests: Observable<PipelineStatus>[] = [];
+                const requests: Observable<PipelineStatus | null >[] = [];
                 pipelines.forEach(pipeline => {
-                    requests.push(this.flowEngineService.getPipelineStatus(pipeline.id));
+                    const statusRequest = this.flowEngineService.getPipelineStatus(pipeline.id).pipe(
+                        catchError((_) => of(null))
+                    );
+                    requests.push(statusRequest);
                 });
                 return forkJoin(requests).pipe(
                     map((responses) => {
                         pipelines.map((pipeline: PipelineModel, i) => {
-                            pipeline.status = responses[i];
+                            if(responses[i] == null) {
+                                return pipeline;
+                            }
+
+                            pipeline.status = responses[i]!;
                             return pipeline;
                         });
                         return pipelines;
