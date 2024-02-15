@@ -21,6 +21,7 @@ import { DeviceInstancesService } from '../shared/device-instances.service';
 import {AbstractControl, FormControl, ValidationErrors} from '@angular/forms';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {senergyConnectorLocalIdConstraint} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {PermissionsService} from "../../../permissions/shared/permissions.service";
 
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',
@@ -34,10 +35,13 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
 
     protocolConstraints: string[] = [];
 
+    sharedBy: string = "";
+
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesEditDialogComponent>,
         private deviceInstancesService: DeviceInstancesService,
         private deviceTypeService: DeviceTypeService,
+        private permissionsService: PermissionsService,
         @Inject(MAT_DIALOG_DATA) private data: { device: DeviceInstancesModel },
     ) {
         this.device = data.device;
@@ -47,6 +51,19 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
             }
         });
 
+        if(this.device.shared) {
+            (this.device as any).permission_holders?.admin_users.forEach((user: string) => {
+                this.permissionsService.getUserById(user).subscribe(value => {
+                    if(value) {
+                        if(this.sharedBy == ""){
+                            this.sharedBy = this.sharedBy + value.username;
+                        } else {
+                            this.sharedBy = this.sharedBy + "," + value.username;
+                        }
+                    }
+                })
+            })
+        }
 
         const protocolsToConstraints: Map<string, string[]> = new Map<string, string[]>();
         this.deviceTypeService.getProtocols(9999, 0, 'name', 'asc').subscribe(protocols => {
