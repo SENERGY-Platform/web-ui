@@ -17,7 +17,14 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 
 import {DeviceInstancesService} from './shared/device-instances.service';
-import {DeviceInstancesModel, DeviceInstancesRouterStateTabEnum, DeviceInstancesTotalModel, FilterSelection, SelectedTag} from './shared/device-instances.model';
+import {
+    DeviceInstancesBaseModel,
+    DeviceInstancesModel,
+    DeviceInstancesRouterStateTabEnum,
+    DeviceInstancesTotalModel,
+    FilterSelection,
+    SelectedTag
+} from './shared/device-instances.model';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -37,6 +44,8 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 import { DeviceInstancesFilterDialogComponent } from './dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
+import {concatMap} from "rxjs/operators";
+import {PermissionsModel} from "../../metadata/device-types-overview/shared/device-type-perm-search.model";
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -213,6 +222,29 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     this.routerConnectionState
                 )
                 .pipe(
+                    //if no result is found: try to interpret the search as shortDeviceId, convert it to a deviceId and load it
+                    concatMap((deviceInstanceWithTotal: DeviceInstancesTotalModel): Observable<DeviceInstancesTotalModel> => {
+                        if (deviceInstanceWithTotal.result.length > 0) {
+                            return of(deviceInstanceWithTotal);
+                        }
+                        //we may also search for normal ids
+                        if (this.searchText.trim().startsWith("urn:infai:ses:device:")){
+                            return this.deviceInstancesService.getDeviceInstancesByIds([this.searchText.trim()], 1, 0);
+                        }
+                        //short ids are expected to be 22 chars long
+                        if (this.searchText.trim().length != 22) {
+                            return of(deviceInstanceWithTotal);
+                        }
+                        return this.deviceInstancesService.shortIdToUUID(this.searchText).pipe(
+                            concatMap((id: string):Observable<DeviceInstancesTotalModel> => {
+                                if (id == "" || this.searchText == id) {
+                                    return of(deviceInstanceWithTotal);
+                                }
+                                return this.deviceInstancesService.getDeviceInstancesByIds([id], 1, 0);
+                            })
+                        )
+                    }),
+                    //handle results
                     map((deviceInstancesWithTotal: DeviceInstancesTotalModel) => {
                         this.setDevicesAndTotal(deviceInstancesWithTotal);
                         return deviceInstancesWithTotal;
@@ -380,4 +412,5 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         }
         return this.formatBytes(usage?.bytesPerDay || 0) + '/day, ' + this.formatBytes((usage?.bytesPerDay || 0) * 30) + '/month';
     }
+
 }

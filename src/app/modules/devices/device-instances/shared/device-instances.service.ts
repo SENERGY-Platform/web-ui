@@ -559,6 +559,13 @@ export class DeviceInstancesService {
         }
     }
 
+    shortIdToUUID(shortId: string): Observable<string> {
+        return this.http.get<string>(environment.deviceManagerUrl+'/helper/id?short_id='+encodeURIComponent(shortId)+'&prefix='+encodeURIComponent("urn:infai:ses:device:")).pipe(
+            map((resp) => resp || ""),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'shortIdToUUID', "")),
+        );
+    }
+
     getTotalCountOfDevices(searchText: string): Observable<any> {
         const options = searchText ?
             { params: new HttpParams().set('search', searchText) } : {};
