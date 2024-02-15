@@ -321,7 +321,6 @@ export class ChartsExportService {
         const colors: string[] = [];
         chartData.forEach((serie: any) => {
             let aliasFound = false;
-            console.log(vAxes)
             vAxes.forEach((vAxis: any) => {
                 vAxis.conversions.forEach((conversion: any) => {
                     if(aliasFound) {
