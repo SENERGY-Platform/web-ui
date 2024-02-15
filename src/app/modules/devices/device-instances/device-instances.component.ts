@@ -250,7 +250,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                         return deviceInstancesWithTotal;
                     }),
                     map(deviceInstancesWithTotal => {
-                        if(this.userHasReadDeviceUsageAuthorization) {
+                        if(this.userHasReadDeviceUsageAuthorization && deviceInstancesWithTotal.result.length > 0) {
                             this.exportDataService.getTimescaleDeviceUsage(deviceInstancesWithTotal.result.map(di => di.id)).subscribe(r => this.usage.push(...r));
                         }
                     })
