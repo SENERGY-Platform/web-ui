@@ -23,6 +23,8 @@ export interface NetworksModel {
 
 export interface NetworksPermModel extends NetworksModel {
     device_ids: string[];
+    creator: string;
+    shared: boolean;
 }
 
 export interface HubAnnotations {

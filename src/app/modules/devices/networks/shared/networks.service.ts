@@ -77,7 +77,7 @@ export class NetworksService {
         );
     }
 
-    searchNetworks(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksModel[]> {
+    searchNetworks(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksPermModel[]> {
         if (!searchText) {
             return this.listNetworks(limit, offset, sortBy, sortDirection);
         }
@@ -95,13 +95,13 @@ export class NetworksService {
             'search=' + encodeURIComponent(searchText),
         ].join('&');
 
-        return this.http.get<NetworksModel[]>(environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
+        return this.http.get<NetworksPermModel[]>(environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', [])),
         );
     }
 
-    listNetworks(limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksModel[]> {
+    listNetworks(limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksPermModel[]> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
             sortDirection = 'asc';
         }
@@ -110,7 +110,7 @@ export class NetworksService {
         }
         const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection].join('&');
 
-        return this.http.get<NetworksModel[]>(environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
+        return this.http.get<NetworksPermModel[]>(environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', [])),
         );

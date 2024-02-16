@@ -17,7 +17,7 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {NetworksService} from './shared/networks.service';
-import {NetworksModel} from './shared/networks.model';
+import {NetworksModel, NetworksPermModel} from './shared/networks.model';
 import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {Router} from '@angular/router';
 import {
@@ -36,6 +36,7 @@ import {SearchbarService} from 'src/app/core/components/searchbar/shared/searchb
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
+import {PermissionsService} from "../../permissions/shared/permissions.service";
 
 @Component({
     selector: 'senergy-networks',
@@ -43,7 +44,7 @@ import {AuthorizationService} from '../../../core/services/authorization.service
     styleUrls: ['./networks.component.css'],
 })
 export class NetworksComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'connection', 'name', 'number_devices', 'show', 'clear'];
+    displayedColumns = ['select', 'connection', 'shared', 'name', 'number_devices', 'show', 'clear'];
     pageSize = 20;
     dataSource = new MatTableDataSource<NetworksModel>();
     sortBy = 'name';
@@ -57,6 +58,8 @@ export class NetworksComponent implements OnInit, OnDestroy {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
 
+    userIdToName: {[key: string]: string} = {};
+
     private searchSub: Subscription = new Subscription();
 
     constructor(
@@ -69,6 +72,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
         private snackBar: MatSnackBar,
         private permissionsDialogService: PermissionsDialogService,
         private authService: AuthorizationService,
+        private permissionsService: PermissionsService,
     ) {}
 
     ngOnInit() {
@@ -177,7 +181,21 @@ export class NetworksComponent implements OnInit, OnDestroy {
         return this.networksService
             .searchNetworks(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .pipe(
-                map((networks: NetworksModel[]) => {
+                map((networks: NetworksPermModel[]) => {
+                    let missingCreators: string[] = [];
+                    networks?.forEach(network => {
+                        if(network.shared && network.creator && !this.userIdToName[network.creator] && !missingCreators.includes(network.creator)) {
+                            missingCreators.push(network.creator);
+                        }
+                    })
+                    missingCreators.forEach(creator => {
+                        this.permissionsService.getUserById(creator).subscribe(value => {
+                            if(value) {
+                                this.userIdToName[value.id] = value.username;
+                            }
+                        })
+                    })
+
                     this.dataSource.data = networks;
                     return networks;
                 })

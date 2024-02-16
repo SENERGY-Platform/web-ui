@@ -57,6 +57,14 @@
                         <senergy-state-icon [state]="network?.annotations?.connected"></senergy-state-icon>
                     </td>
                 </ng-container>
+                <ng-container matColumnDef="shared">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Shared</th>
+                    <td mat-cell *matCellDef="let network">
+                        <mat-icon matTooltip="Device is shared by {{userIdToName[network.creator]}}" *ngIf="network.shared" class="color-sidenav info-icon">
+                            share
+                        </mat-icon>
+                    </td>
+                </ng-container>
                 <ng-container matColumnDef="show">
                     <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Show</th>
                     <td mat-cell *matCellDef="let network">
