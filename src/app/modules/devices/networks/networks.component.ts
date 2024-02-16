@@ -182,24 +182,27 @@ export class NetworksComponent implements OnInit, OnDestroy {
             .searchNetworks(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .pipe(
                 map((networks: NetworksPermModel[]) => {
-                    let missingCreators: string[] = [];
-                    networks?.forEach(network => {
-                        if(network.shared && network.creator && !this.userIdToName[network.creator] && !missingCreators.includes(network.creator)) {
-                            missingCreators.push(network.creator);
-                        }
-                    })
-                    missingCreators.forEach(creator => {
-                        this.permissionsService.getUserById(creator).subscribe(value => {
-                            if(value) {
-                                this.userIdToName[value.id] = value.username;
-                            }
-                        })
-                    })
-
+                    this.loadUserNames(networks);
                     this.dataSource.data = networks;
                     return networks;
                 })
             );
+    }
+
+    private loadUserNames(elements: {creator: string, shared: boolean}[]) {
+        let missingCreators: string[] = [];
+        elements?.forEach(element => {
+            if(element.shared && element.creator && !this.userIdToName[element.creator] && !missingCreators.includes(element.creator)) {
+                missingCreators.push(element.creator);
+            }
+        })
+        missingCreators.forEach(creator => {
+            this.permissionsService.getUserById(creator).subscribe(value => {
+                if(value) {
+                    this.userIdToName[value.id] = value.username;
+                }
+            })
+        })
     }
 
     reload() {

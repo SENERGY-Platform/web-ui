@@ -250,19 +250,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     }),
                     //handle results
                     map((deviceInstancesWithTotal: DeviceInstancesTotalModel) => {
-                        let missingCreators: string[] = [];
-                        deviceInstancesWithTotal?.result?.forEach(device => {
-                            if(device.shared && device.creator && !this.userIdToName[device.creator] && !missingCreators.includes(device.creator)) {
-                                missingCreators.push(device.creator);
-                            }
-                        })
-                        missingCreators.forEach(creator => {
-                            this.permissionsService.getUserById(creator).subscribe(value => {
-                                if(value) {
-                                    this.userIdToName[value.id] = value.username;
-                                }
-                            })
-                        })
+                        this.loadUserNames(deviceInstancesWithTotal.result);
                         this.setDevicesAndTotal(deviceInstancesWithTotal);
                         return deviceInstancesWithTotal;
                     }),
@@ -273,6 +261,22 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     })
                 );
         }
+    }
+
+    private loadUserNames(elements: {creator: string, shared: boolean}[]) {
+        let missingCreators: string[] = [];
+        elements?.forEach(element => {
+            if(element.shared && element.creator && !this.userIdToName[element.creator] && !missingCreators.includes(element.creator)) {
+                missingCreators.push(element.creator);
+            }
+        })
+        missingCreators.forEach(creator => {
+            this.permissionsService.getUserById(creator).subscribe(value => {
+                if(value) {
+                    this.userIdToName[value.id] = value.username;
+                }
+            })
+        })
     }
 
     private setDevicesAndTotal(result: DeviceInstancesTotalModel) {

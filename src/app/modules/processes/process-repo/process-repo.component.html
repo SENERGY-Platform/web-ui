@@ -52,7 +52,7 @@
                                         <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
                                             <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
                                             </mat-checkbox>
-                                            <mat-icon matTooltip="Process is shared" *ngIf="item.value.shared"
+                                            <mat-icon matTooltip="Process is shared by {{userIdToName[item.value.creator]}}" *ngIf="item.value.shared"
                                                 class="color-sidenav info-icon">share
                                             </mat-icon>
                                             <div fxFlex></div>

@@ -20,7 +20,7 @@ import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { forkJoin, Observable, Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { ResponsiveService } from '../../../core/services/responsive.service';
-import { ProcessModel } from './shared/process.model';
+import {ProcessModel, ProcessPermModel} from './shared/process.model';
 import { ProcessRepoService } from './shared/process-repo.service';
 import { UtilService } from '../../../core/services/util.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -32,6 +32,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProcessRepoConditionModel, ProcessRepoConditionsModel } from './shared/process-repo-conditions.model';
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import {PermissionsService} from "../../permissions/shared/permissions.service";
 
 const grids = new Map([
     ['xs', 1],
@@ -74,6 +75,8 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     private gridColChangeTimeout: number | undefined;
     private knownMainPanelOffsetHeight = 0;
 
+    userIdToName: {[key: string]: string} = {};
+
     @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
 
     constructor(
@@ -89,6 +92,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         private snackBar: MatSnackBar,
         private router: Router,
         private _formBuilder: FormBuilder,
+        private permissionsService: PermissionsService,
     ) {
         const sub = this.authorizationService.getUserId();
         if (typeof sub === 'string') {
@@ -290,7 +294,8 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.sortAttribute.order,
                 this.getConditions(),
             )
-            .subscribe((repoItems: ProcessModel[]) => {
+            .subscribe((repoItems: ProcessPermModel[]) => {
+                this.loadUserNames(repoItems);
                 this.animationDone = true;
                 this.addToFormArray(repoItems);
                 if (repoItems.length !== this.limit) {
@@ -300,8 +305,24 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
             });
     }
 
-    private addToFormArray(repoItems: ProcessModel[]): void {
-        repoItems.forEach((repoItem: ProcessModel) => {
+    private loadUserNames(elements: {creator: string, shared: boolean}[]) {
+        let missingCreators: string[] = [];
+        elements?.forEach(element => {
+            if(element.shared && element.creator && !this.userIdToName[element.creator] && !missingCreators.includes(element.creator)) {
+                missingCreators.push(element.creator);
+            }
+        })
+        missingCreators.forEach(creator => {
+            this.permissionsService.getUserById(creator).subscribe(value => {
+                if(value) {
+                    this.userIdToName[value.id] = value.username;
+                }
+            })
+        })
+    }
+
+    private addToFormArray(repoItems: ProcessPermModel[]): void {
+        repoItems.forEach((repoItem: ProcessPermModel) => {
             this.repoItems.push(
                 this._formBuilder.group({
                     id: repoItem.id,
@@ -311,6 +332,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                     bpmn_xml: repoItem.bpmn_xml,
                     publish: repoItem.publish,
                     shared: repoItem.shared,
+                    creator: repoItem.creator,
                     parent_id: repoItem.parent_id,
                     image: this.provideImg(repoItem.svgXML),
                     permissions: repoItem.permissions,

@@ -20,7 +20,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { environment } from '../../../../../environments/environment';
 import { catchError, map, mergeMap, retryWhen } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
-import { ProcessModel } from './process.model';
+import {ProcessModel, ProcessPermModel} from './process.model';
 import { DesignerProcessModel } from '../../designer/shared/designer.model';
 import { ProcessRepoConditionsModel } from './process-repo-conditions.model';
 import { DeviceTypeBaseModel } from '../../../metadata/device-types-overview/shared/device-type.model';
@@ -56,9 +56,9 @@ export class ProcessRepoService {
         feature: string,
         order: string,
         conditions: ProcessRepoConditionsModel | null,
-    ): Observable<ProcessModel[]> {
+    ): Observable<ProcessPermModel[]> {
         return this.http
-            .post<ProcessModel[]>(environment.permissionSearchUrl + '/v3/query/processmodel', {
+            .post<ProcessPermModel[]>(environment.permissionSearchUrl + '/v3/query/processmodel', {
                 resource: 'processmodel',
                 find: {
                     search: query,

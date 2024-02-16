@@ -34,3 +34,7 @@ export interface ProcessModel {
     };
     selected: boolean;
 }
+
+export interface ProcessPermModel extends ProcessModel {
+    creator: string;
+}
