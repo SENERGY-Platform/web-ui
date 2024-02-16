@@ -46,6 +46,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 import {concatMap} from "rxjs/operators";
 import {PermissionsModel} from "../../metadata/device-types-overview/shared/device-type-perm-search.model";
+import {PermissionsService} from "../../permissions/shared/permissions.service";
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -78,6 +79,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         private searchbarService: SearchbarService,
         private dialog: MatDialog,
         private exportDataService: ExportDataService,
+        private permissionsService: PermissionsService,
     ) {
         this.getRouterParams();
     }
@@ -111,6 +113,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasReadDeviceUsageAuthorization = false;
+
+    userIdToName: {[key: string]: string} = {};
 
     ngOnInit(): void {
         this.initSearch(); // does automatically load data on first page load
@@ -246,6 +250,19 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     }),
                     //handle results
                     map((deviceInstancesWithTotal: DeviceInstancesTotalModel) => {
+                        let missingCreators: string[] = [];
+                        deviceInstancesWithTotal?.result?.forEach(device => {
+                            if(device.shared && device.creator && !this.userIdToName[device.creator] && !missingCreators.includes(device.creator)) {
+                                missingCreators.push(device.creator);
+                            }
+                        })
+                        missingCreators.forEach(creator => {
+                            this.permissionsService.getUserById(creator).subscribe(value => {
+                                if(value) {
+                                    this.userIdToName[value.id] = value.username;
+                                }
+                            })
+                        })
                         this.setDevicesAndTotal(deviceInstancesWithTotal);
                         return deviceInstancesWithTotal;
                     }),

@@ -46,10 +46,6 @@
             <mat-label>Local ID</mat-label>
             <input matInput placeholder="Local ID" [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}" [generic_validator]="isValidLocalIdValidator">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent" *ngIf="device.shared && sharedBy">
-            <mat-label>Shared By</mat-label>
-            <input matInput placeholder="Shared By" disabled value="{{sharedBy}}">
-        </mat-form-field>
 
         <div class="attributes">
             <div class="divider">

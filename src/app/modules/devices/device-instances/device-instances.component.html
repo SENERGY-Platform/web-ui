@@ -76,7 +76,7 @@
                 <ng-container matColumnDef="shared">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Shared</th>
                     <td mat-cell *matCellDef="let device">
-                        <mat-icon matTooltip="Device is shared" *ngIf="device.shared" class="color-sidenav info-icon">
+                        <mat-icon matTooltip="Device is shared by {{userIdToName[device.creator]}}" *ngIf="device.shared" class="color-sidenav info-icon">
                             share
                         </mat-icon>
                     </td>
