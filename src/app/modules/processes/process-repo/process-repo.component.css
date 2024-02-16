@@ -82,3 +82,10 @@ mat-grid-list {
     padding-left: 5px;
     padding-right: 5px;
 }
+
+.shared-icon {
+    padding-left: 5px;
+    padding-right: 5px;
+    position: absolute;
+    margin-top: 5px;
+}
