@@ -109,7 +109,7 @@ export class DeployFlowComponent implements OnInit {
         description: '',
         nodes: this.fb.array([]),
         windowTime: 30,
-        enable_metrics: false,
+        enable_metrics: [{value: true, disabled: true}],
         consume_all_msgs: false,
         mergeStrategy: '',
     });
@@ -166,7 +166,7 @@ export class DeployFlowComponent implements OnInit {
                         name: pipeline.name,
                         description: pipeline.description,
                         windowTime: pipeline.windowTime || 30,
-                        enable_metrics: pipeline.metrics || false,
+                        enable_metrics: pipeline.metrics || true,
                         consume_all_msgs: pipeline.consumeAllMessages || false,
                         mergeStrategy: pipeline.mergeStrategy || 'inner',
                     });
@@ -210,7 +210,7 @@ export class DeployFlowComponent implements OnInit {
             description: '',
             nodes: this.fb.array([]),
             windowTime: 30,
-            enable_metrics: false,
+            enable_metrics: [{value: true, disabled: true}],
             consume_all_msgs: false,
             mergeStrategy: 'inner',
         });

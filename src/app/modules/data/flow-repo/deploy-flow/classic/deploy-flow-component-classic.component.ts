@@ -59,7 +59,7 @@ export class DeployFlowClassicComponent {
 
     allMessages = false;
 
-    metrics = false;
+    metrics = true;
 
     vals = [] as string[];
 
