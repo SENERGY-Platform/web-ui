@@ -45,6 +45,7 @@ export class AnomalyComponent implements OnInit {
               return of();
           })).subscribe({
           next: (anomaly) => {
+              console.log(anomaly)
               if(anomaly != null) {
                   this.anomaly = anomaly;
               }

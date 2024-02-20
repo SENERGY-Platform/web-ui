@@ -33,7 +33,7 @@
 
         <div *ngIf="error == null">
           <div *ngIf="anomaly != null">
-            <div *ngIf="anomaly.initial_phase === ''">
+            <div *ngIf="anomaly.initial_phase === '' || anomaly.initial_phase == null">
               <div *ngIf="anomaly.type === 'time'" class="anomaly-container">
                 <div>
                   <mat-icon>schedule</mat-icon>
@@ -95,7 +95,7 @@
               </div>
             </div>
 
-            <div *ngIf="anomaly.initial_phase !== ''" class="text-container">
+            <div *ngIf="anomaly.initial_phase !== '' && anomaly.initial_phase !== null" class="text-container">
               <h2>Operator is not ready</h2>
               <p>{{anomaly.initial_phase}}</p>
             </div>
