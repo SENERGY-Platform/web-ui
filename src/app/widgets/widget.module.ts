@@ -104,6 +104,10 @@ import { EditComponent } from './anomaly/dialog/edit/edit.component';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { AddRuleComponent } from './charts/export/dialog/add-rule/add-rule.component';
 import { ListRulesComponent } from './charts/export/dialog/list-rules/list-rules.component';
+import { OpenWindowComponent } from './charts/open-window/open-window.component';
+import { TimelineComponent } from './charts/shared/chart-types/timeline/timeline.component';
+import { DataSourceSelectorComponent } from './charts/shared/data-source-selector/data-source-selector.component';
+import { OpenWindowEditComponent } from './charts/open-window/dialog/edit/edit.component';
 
 registerLocaleData(localeDe, 'de');
 
@@ -199,7 +203,11 @@ registerLocaleData(localeDe, 'de');
         AnomalyComponent,
         EditComponent,
         AddRuleComponent,
-        ListRulesComponent
+        ListRulesComponent,
+        OpenWindowComponent,
+        TimelineComponent,
+        DataSourceSelectorComponent,
+        OpenWindowEditComponent
     ],
     exports: [
         SwitchComponent,
@@ -212,7 +220,7 @@ registerLocaleData(localeDe, 'de');
         RankingListComponent,
         WidgetSpinnerComponent,
         WidgetComponent,
-        WidgetFooterComponent,
+        WidgetFooterComponent
     ],
     providers: [
         {provide: LOCALE_ID, useValue: 'de'},

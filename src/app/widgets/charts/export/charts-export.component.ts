@@ -35,6 +35,9 @@ import { ApexChartOptions } from './shared/charts-export-properties.model';
 })
 export class ChartsExportComponent implements OnInit, OnDestroy {
     chartExportData = {} as ChartsModel;
+    timelineChartData: any;
+    timelineWidth = 0;
+    timelineHeight = 0;
     ready = false;
     refreshing = true;
     destroy = new Subscription();
@@ -46,65 +49,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
 
     private resizeTimeout = 0;
     private timeRgx = /(\d+)(ms|s|months|m|h|d|w|y)/;
-
-    apexChartOptions: Partial<ApexChartOptions> = {
-        series: [],
-        chart: {
-            width: "auto",
-            height: "auto",
-            animations: {
-                enabled: false
-            },
-            type: 'rangeBar',
-            toolbar: {
-                show: false
-            },
-            redrawOnWindowResize: true
-        },
-        plotOptions: {
-            bar: {
-                horizontal: true,
-                rangeBarGroupRows: true
-            }
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                datetimeUTC: false,
-            },
-            title: {
-                text: ''
-            }
-        },
-        yaxis: {
-            title: {
-                text: ''
-            }
-        },
-        colors: [],
-        legend: {
-            show: true
-        },
-        tooltip: {
-            x: {
-                format: 'dd.MM HH:mm:ss',
-            }
-        }
-    };
-    /*
-    options: any = {
-        series: [44, 55, 13, 43, 22],
-        chart: {
-            width: "100%",
-            height: "auto",
-            type: 'pie',
-        },
-        legend: {
-            floating: true,
-        },
-        labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
-
-    };*/
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -192,35 +136,23 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             }
         }
 
-        if(this.widget.properties.chartType === "Timeline") {}
+        this.timelineHeight = element.height;
+        this.timelineWidth = element.width;
     }
+
 
     private resizeApex() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
-        if(this.apexChartOptions.chart?.width) {
-            this.apexChartOptions.chart.width = element.width;
-            this.apexChartOptions.chart.height = element.height;
-        }
+        this.timelineWidth = element.width;
+        this.timelineHeight = element.height;
     }
 
+    getTimelineData() {
+        this.resizeApex();
 
-    private renderTimelineChart(lastOverride?: string) {
-        this.chartsExportService.getTimelineChartData(this.widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, lastOverride).subscribe({
-            next: (resp) => {
-                this.apexChartOptions.series = resp?.data;
-                this.apexChartOptions.colors = resp?.colors;
-                if(this.zoom && this.apexChartOptions.chart?.toolbar !== undefined) {
-                    this.apexChartOptions.chart.toolbar.show = true;
-                }
-                if(this.apexChartOptions.xaxis?.title !== undefined) {
-                    this.apexChartOptions.xaxis.title.text = this.widget.properties.hAxisLabel;
-                }
-                if(this.apexChartOptions.yaxis?.title !== undefined) {
-                    this.apexChartOptions.yaxis.title.text = this.widget.properties.vAxisLabel;
-                }
-
-                this.resizeApex();
-
+        this.chartsExportService.getData(this.widget.properties, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined).subscribe({
+            next: (data) => {
+                this.timelineChartData = data;
                 this.ready = true;
                 this.refreshing = false;
             },
@@ -245,9 +177,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             }
 
             if(this.widget.properties.chartType === 'Timeline') {
-                this.renderTimelineChart(lastOverride);
+                this.getTimelineData();
                 return;
-            };
+            }
 
             this.chartsExportService.getChartData(this.widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride).subscribe((resp: ChartsModel | ErrorModel) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
@@ -290,6 +222,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             this.ready = true;
             this.refreshing = false;
         }
+
     }
 
     onChartSelect($event: ChartSelectEvent) {

@@ -1,0 +1,14 @@
+mat-form-field {
+    width: 100%;
+}
+
+.one-line-form-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.one-line-form-container > div {
+    flex: 1;
+    margin-right: 10px
+}

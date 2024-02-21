@@ -28,6 +28,7 @@ import {
     ApexLegend,
     ApexTooltip
 } from 'ng-apexcharts';
+import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
 
 export interface ChartsExportPropertiesModel {
     chartType?: string;
@@ -38,7 +39,7 @@ export interface ChartsExportPropertiesModel {
     vAxes?: ChartsExportVAxesModel[];
     vAxisLabel?: string;
     secondVAxisLabel?: string;
-    exports?: (ChartsExportMeasurementModel | DeviceInstancesModel)[];
+    exports?: (ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel)[];
     measurement?: ChartsExportMeasurementModel; // deprecated
     math?: string;
     curvedFunction?: boolean;

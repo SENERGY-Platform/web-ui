@@ -47,6 +47,7 @@ import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/share
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { ListRulesComponent } from './list-rules/list-rules.component';
+import { DataSourceConfig } from '../../shared/data-source-selector/data-source-selector.component';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
@@ -61,16 +62,12 @@ export class ChartsExportEditDialogComponent implements OnInit {
     typeList = 'https://schema.org/ItemList';
 
     chartsExportDeviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy;
+    dataSourceConfig?: DataSourceConfig;
 
     formGroupController = new UntypedFormGroup({});
-    exportList: ChartsExportMeasurementModel[] = [];
-    deviceList: DeviceInstancesModel[] = [];
-    deviceTypes: Map<string, DeviceTypeModel> = new Map();
     dashboardId: string;
     widgetId: string;
     chartTypes = ['LineChart', 'ColumnChart', 'ScatterChart', 'PieChart', 'Timeline'];
-    timeRangeEnum = ChartsExportRangeTimeTypeEnum;
-    timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.RelativeAhead, this.timeRangeEnum.Absolute];
     groupTypeIsDifference = false;
 
     displayedColumns: string[] = [
@@ -93,7 +90,6 @@ export class ChartsExportEditDialogComponent implements OnInit {
     vAxesOptions: Map<string, ChartsExportVAxesModel[]> = new Map();
     exportTags: Map<string, Map<string, { value: string; parent: string }[]>> = new Map();
     ready = false;
-    exportDeviceList: Map<string, ChartsExportMeasurementModel[] | DeviceInstancesModel[] | DeviceGroupsPermSearchModel[]> = new Map();
     emptyMap = new Map();
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
@@ -109,12 +105,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         private dialog: MatDialog,
         private dashboardService: DashboardService,
         private exportService: ExportService,
-        private deviceInstancesService: DeviceInstancesService,
-        private deviceTypeService: DeviceTypeService,
         private _formBuilder: UntypedFormBuilder,
-        private cd: ChangeDetectorRef,
-        private deviceGroupsService: DeviceGroupsService,
-        private conceptsService: ConceptsService,
         @Inject(MAT_DIALOG_DATA) data: {
             dashboardId: string;
             widgetId: string;
@@ -129,21 +120,64 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.getWidgetData().subscribe(_ => this.ready = true);
+        this.getWidgetData();
     }
 
-    getWidgetData(): Observable<any> {
-        return new Observable<any>(obs => {
-            this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
-                this.setDefaultValues(widget);
-                this.initDeployments(widget).subscribe(_ => {
-                    this.initFormGroup(widget);
-                    this.selectionChange(widget.properties.exports || []);
-                    obs.next(null);
-                    obs.complete();
-                });
-            });
+    getWidgetData() {
+        this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
+            this.setDefaultValues(widget);
+            this.initFormGroup(widget);
+            this.createDataSourceConfig(widget);
+            this.ready = true;
         });
+
+    }
+
+    createDataSourceConfig(widget: WidgetModel) {
+        let timeRangeValue = '';
+        let timeRangeLevel = '';
+        const timeRange = widget.properties.time?.ahead || widget.properties.time?.last;
+        if(timeRange != null) {
+            const timeRangeSplit = timeRange.match(/[a-zA-Z]+|[0-9]+/g);
+            timeRangeValue = timeRangeSplit?.[0] || '';
+            timeRangeLevel = timeRangeSplit?.[1] || '';
+        }
+
+        let groupValue = '';
+        let groupLevel = '';
+        const group = widget.properties.group?.time;
+        if(group != null) {
+            const groupSplit = group.match(/[a-zA-Z]+|[0-9]+/g);
+            groupValue = groupSplit?.[0] || '';
+            groupLevel = groupSplit?.[1] || '';
+        }
+
+        this.dataSourceConfig = {
+            exports: widget.properties.exports,
+            fields: widget.properties.vAxes,
+            timeRange: {
+                type: widget.properties.timeRangeType,
+                start: widget.properties.time?.start,
+                end: widget.properties.time?.end,
+                level: timeRangeLevel,
+                time: parseFloat(timeRangeValue)
+            },
+            group: {
+                type: widget.properties.group?.type,
+                time: parseFloat(groupValue),
+                level: groupLevel
+            }
+        };
+
+    }
+
+    dataSourceUpdated(updatedDataSourceConfig: DataSourceConfig) {
+        this.formGroupController.get('properties.vAxes')?.patchValue(updatedDataSourceConfig.fields);
+        this.formGroupController.get('properties.exports')?.patchValue(updatedDataSourceConfig.exports);
+        this.formGroupController.get('properties.timeRangeType')?.patchValue(updatedDataSourceConfig.timeRange?.type);
+        this.formGroupController.get('properties.ahead')?.patchValue(updatedDataSourceConfig.timeRange?.time);
+        this.formGroupController.get('properties.end')?.patchValue(updatedDataSourceConfig.timeRange?.end);
+        this.formGroupController.get('properties.start')?.patchValue(updatedDataSourceConfig.timeRange?.start);
     }
 
     initFormGroup(widget: WidgetModel): void {
@@ -247,79 +281,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
             });
             this.reloadTable();
         });
-
         this.dataSource.data = widget.properties.vAxes || [];
-    }
-
-    initDeployments(widget: WidgetModel): Observable<any> {
-        const obs: Observable<any>[] = [];
-        obs.push(this.exportService.getExports(true, '', 9999, 0, 'name', 'asc', undefined, undefined).pipe(map((exports: ExportResponseModel | null) => {
-            if (exports !== null) {
-                exports.instances?.forEach((exportModel: ExportModel) => {
-                    if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exportList.push({
-                            id: exportModel.ID,
-                            name: exportModel.Name,
-                            values: exportModel.Values,
-                            exportDatabaseId: exportModel.ExportDatabaseID
-                        });
-                    }
-                    this.exportDeviceList.set('Exports', this.exportList);
-                    this.cd.detectChanges();
-                });
-                if (widget.properties.exports !== undefined) {
-                    // exports values or names might have changed
-                    widget.properties.exports.forEach((selected) => {
-                        const latestExisting = exports.instances?.find((existing) => existing.ID === selected.id);
-                        if (latestExisting !== undefined && latestExisting.Name !== undefined && latestExisting.ID !== undefined) {
-                            (selected as ChartsExportMeasurementModel).values = latestExisting.Values;
-                            selected.name = latestExisting.Name;
-                        }
-                    });
-                }
-            }
-        })));
-        obs.push(this.deviceInstancesService.getDeviceInstances(9999, 0)
-            .pipe(
-                map(devices => this.deviceInstancesService.useDisplayNameAsName(devices)),
-                map(devices => devices as DeviceInstancesModel[]),
-                map(devices => this.deviceList = devices),
-                map(_ => {
-                    this.exportDeviceList.set('Devices', this.deviceList);
-                    this.cd.detectChanges();
-                })));
-        obs.push(this.deviceGroupsService.getDeviceGroups('', 10000, 0, 'name', 'asc').pipe(mergeMap(deviceGroups => {
-            this.deviceGroups = deviceGroups;
-            const ascpectIds: Map<string, null> = new Map();
-            const functionIds: Map<string, null> = new Map();
-            const deviceClassids: Map<string, null> = new Map();
-            const innerObs: Observable<any>[] = [];
-            this.deviceGroups.forEach(dg => {
-                dg.criteria.forEach(c => {
-                    ascpectIds.set(c.aspect_id, null);
-                    functionIds.set(c.function_id, null);
-                    deviceClassids.set(c.device_class_id, null);
-                });
-                innerObs.push(this.deviceGroupsService.getDeviceGroup(dg.id, true).pipe(map(newDg => {
-                    const criteria: DeviceGroupCriteriaModel[] = [];
-                    newDg?.criteria.forEach(c => {
-                        if (criteria.findIndex(c2 => c.aspect_id === c2.aspect_id && c.function_id === c2.function_id && c.device_class_id === c2.device_class_id) === -1) {
-                            // filters interaction, irrelevant for widget
-                            c.interaction = '';
-                            criteria.push(c);
-                        }
-                    });
-                    dg.criteria = criteria;
-                })));
-
-            });
-            this.exportDeviceList.set('Device Groups', this.deviceGroups);
-            innerObs.push(this.deviceGroupsService.getAspectListByIds(Array.from(ascpectIds.keys())).pipe(map(aspects => this.aspects = aspects)));
-            innerObs.push(this.deviceGroupsService.getFunctionListByIds(Array.from(functionIds.keys())).pipe(map(functions => this.functions = functions)));
-            innerObs.push(this.deviceGroupsService.getDeviceClassListByIds(Array.from(deviceClassids.keys())).pipe(map(deviceClasses => this.deviceClasses = deviceClasses)));
-            return forkJoin(innerObs);
-        })));
-        return forkJoin(obs);
     }
 
     compare(a: any, b: any): boolean {
@@ -340,8 +302,10 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
-        this.formGroupController.patchValue({properties: {vAxes: this.dataSource.data}});
+        // bug patchValue leads to dataSource.data being empty ? 
+        // this.formGroupController.patchValue({properties: {vAxes: this.dataSource.data}});
         const newProperties = (this.formGroupController.get('properties') as FormControl).value;
+        newProperties['vAxes'] = this.dataSource.data;
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widgetId, [], newProperties);
     }
 
@@ -360,176 +324,6 @@ export class ChartsExportEditDialogComponent implements OnInit {
             if(!errorOccured) {
                 this.dialogRef.close(this.formGroupController.value);
             }
-        });
-    }
-
-    selectionChange(selectedExports: (ChartsExportMeasurementModel | DeviceInstancesModel)[]) {
-        const newData: Map<string, ChartsExportVAxesModel[]> = new Map();
-        const newSelection: ChartsExportVAxesModel[] = [];
-        const observables: Observable<any>[] = [];
-        (selectedExports || []).forEach((selectedElement: ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel) => {
-            if (!newData.has(selectedElement.name)) {
-                newData.set(selectedElement.name, []);
-            }
-            if ((selectedElement as ChartsExportMeasurementModel).values !== undefined) { // is export
-                selectedElement = selectedElement as ChartsExportMeasurementModel;
-                selectedElement.values?.forEach((value: ExportValueModel) => {
-                    const newVAxis: ChartsExportVAxesModel = {
-                        instanceId: value.InstanceID,
-                        exportName: selectedElement.name,
-                        valueName: value.Name,
-                        valueType: value.Type,
-                        color: '',
-                        math: '',
-                        displayOnSecondVAxis: false,
-                        tagSelection: [],
-                    };
-                    const index = this.formGroupController
-                        .get('properties.vAxes')
-                        ?.value.findIndex(
-                            (item: ChartsExportVAxesModel) =>
-                                item.instanceId === newVAxis.instanceId &&
-                                item.exportName === newVAxis.exportName &&
-                                item.valueName === newVAxis.valueName &&
-                                item.valueType === newVAxis.valueType,
-                        );
-                    if (index === -1) {
-                        newData.get(selectedElement.name)?.push(newVAxis);
-                    } else {
-                        newSelection.push(this.formGroupController.get('properties.vAxes')?.value[index]);
-                        newData.get(selectedElement.name)?.push(this.formGroupController.get('properties.vAxes')?.value[index]);
-                    }
-                    // Add duplicates of this export value
-                    const duplicates = this.formGroupController
-                        .get('properties.vAxes')
-                        ?.value.filter(
-                            (item: ChartsExportVAxesModel) =>
-                                item.isDuplicate &&
-                                item.instanceId === newVAxis.instanceId &&
-                                item.exportName === newVAxis.exportName &&
-                                item.valueName === newVAxis.valueName &&
-                                item.valueType === newVAxis.valueType,
-                        );
-                    newSelection.push(...duplicates);
-                });
-            } else if ((selectedElement as DeviceGroupsPermSearchModel)?.criteria !== undefined) { // is device group
-                const deviceGroup = (selectedElement as DeviceGroupsPermSearchModel);
-                deviceGroup.criteria.forEach(criteria => {
-                    const f = this.functions.find(func => func.id === criteria.function_id);
-                    if (f === undefined) {
-                        return;
-                    }
-                    const conceptSubs: Observable<ConceptsCharacteristicsModel|null|undefined> = this.concepts.get(f.concept_id) !== undefined ? of(this.concepts.get(f.concept_id)) :
-                        this.conceptsService.getConceptWithCharacteristics(f.concept_id).pipe(map(c => {
-                            if (c!==null) {
-                                this.concepts.set(c?.id, c);
-                            }
-                            return c;
-                        }));
-                    observables.push(
-                        conceptSubs.pipe(map(concept => {
-                            if (concept === undefined || concept === null) {
-                                return;
-                            }
-                            const newVAxis: ChartsExportVAxesModel = {
-                                exportName: selectedElement.name,
-                                valueName: this.describeCriteria()(criteria),
-                                criteria,
-                                deviceGroupId: deviceGroup.id,
-                                valueType: this.translateTypeDeviceToExport(concept.characteristics.find(char => char.id === concept.base_characteristic_id)?.type || ''),
-                                color: '',
-                                math: '',
-                                displayOnSecondVAxis: false,
-                                tagSelection: [],
-                            };
-                            const index = this.formGroupController
-                                .get('properties.vAxes')
-                                ?.value.findIndex(
-                                    (item: ChartsExportVAxesModel) => item.deviceGroupId === newVAxis.deviceGroupId && JSON.stringify(item.criteria) === JSON.stringify(newVAxis.criteria));
-                            if (index === -1) {
-                                newData.get(selectedElement.name)?.push(newVAxis);
-                            } else {
-                                newSelection.push(this.formGroupController.get('properties.vAxes')?.value[index]);
-                                newData.get(selectedElement.name)?.push(this.formGroupController.get('properties.vAxes')?.value[index]);
-                            }
-                            // Add duplicates of this device group value
-                            const duplicates = this.formGroupController
-                                .get('properties.vAxes')
-                                ?.value.filter(
-                                    (item: ChartsExportVAxesModel) =>
-                                        item.isDuplicate && item.deviceGroupId === newVAxis.deviceGroupId && JSON.stringify(item.criteria) === JSON.stringify(newVAxis.criteria)
-                                );
-                            newSelection.push(...duplicates);
-                        })));
-                });
-            } else {
-                selectedElement = selectedElement as DeviceInstancesModel;
-                let observableDeviceType: Observable<DeviceTypeModel | undefined>;
-                if (this.deviceTypes.has(selectedElement.device_type.id)) {
-                    observableDeviceType = of(this.deviceTypes.get(selectedElement.device_type.id));
-                } else {
-                    observableDeviceType = this.deviceTypeService.getDeviceType(selectedElement.device_type.id).pipe(map(dt => {
-                        if (dt === null) {
-                            return;
-                        }
-                        this.deviceTypes.set((selectedElement as DeviceInstancesModel).device_type.id, dt);
-                        return dt;
-                    }));
-                }
-                observables.push(observableDeviceType.pipe(map(dt => {
-                    dt?.services.forEach(service => {
-                        service.outputs.forEach(output => {
-                            this.deviceTypeService.getValuePathsAndTypes(output.content_variable).forEach(path => {
-                                const newVAxis = {
-                                    exportName: selectedElement.name,
-                                    valueName: service.name + ': ' + path.path,
-                                    valuePath: path.path,
-                                    serviceId: service.id,
-                                    deviceId: selectedElement.id,
-                                    valueType: this.translateTypeDeviceToExport(path.type),
-                                    color: '',
-                                    math: '',
-                                    displayOnSecondVAxis: false,
-                                    tagSelection: [],
-                                };
-                                const index = this.formGroupController
-                                    .get('properties.vAxes')
-                                    ?.value.findIndex(
-                                        (item: ChartsExportVAxesModel) =>
-                                            item.serviceId === newVAxis.serviceId &&
-                                            item.deviceId === newVAxis.deviceId &&
-                                            item.valueName === newVAxis.valueName
-                                    );
-                                if (index === -1) {
-                                    newData.get(selectedElement.name)?.push(newVAxis);
-                                } else {
-                                    newSelection.push(this.formGroupController.get('properties.vAxes')?.value[index]);
-                                    newData.get(selectedElement.name)?.push(this.formGroupController.get('properties.vAxes')?.value[index]);
-                                }
-                                // Add duplicates of this device value
-                                const duplicates = this.formGroupController
-                                    .get('properties.vAxes')
-                                    ?.value.filter(
-                                        (item: ChartsExportVAxesModel) =>
-                                            item.isDuplicate &&
-                                            item.serviceId === newVAxis.serviceId &&
-                                            item.deviceId === newVAxis.deviceId &&
-                                            item.valueName === newVAxis.valueName
-                                    );
-                                newSelection.push(...duplicates);
-                            });
-                        });
-                    });
-                })));
-            }
-        });
-        if (observables.length === 0) {
-            observables.push(of(null));
-        }
-        forkJoin(observables).subscribe(_ => {
-            this.vAxesOptions = newData;
-            this.dataSource.data = newSelection;
-            this.cd.detectChanges();
         });
     }
 
@@ -667,24 +461,6 @@ export class ChartsExportEditDialogComponent implements OnInit {
         return a.parent + '!' + a.value;
     }
 
-    private translateTypeDeviceToExport(type: string): string {
-        switch (type) {
-        case this.typeString:
-            return 'string';
-        case this.typeFloat:
-            return 'float';
-        case this.typeInteger:
-            return 'int';
-        case this.typeBoolean:
-            return 'bool';
-        case this.typeList:
-        case this.typeStructure:
-            return 'string_json';
-        }
-        console.error('unknown type ' + type);
-        return '';
-    }
-
     validateInterval: ValidatorFn = (control: AbstractControl) => {
         const type = this.formGroupController.get('properties.group.type')?.value;
         if (type === undefined || type === null || type.length === 0) {
@@ -700,35 +476,6 @@ export class ChartsExportEditDialogComponent implements OnInit {
         }
         return null;
     };
-
-    groupTypes(): string[] {
-        const res = [
-            'mean',
-            'sum',
-            'count',
-            'median',
-            'min',
-            'max',
-            'first',
-            'last',
-            'difference-first',
-            'difference-last',
-            'difference-min',
-            'difference-max',
-            'difference-count',
-            'difference-mean',
-            'difference-sum',
-            'difference-median',
-
-        ];
-        const influxExp = (this.exports.value as (ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel)[])
-            ?.find(exp => (exp as DeviceInstancesModel).device_type === undefined &&
-                (((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined && (exp as DeviceGroupsPermSearchModel).criteria === undefined) || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb));
-        if (influxExp === undefined) {
-            res.push('time-weighted-mean-linear', 'time-weighted-mean-locf');
-        }
-        return res;
-    }
 
     describeCriteria(): (criteria: DeviceGroupCriteriaModel) => string {
         return criteria => (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');

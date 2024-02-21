@@ -1,0 +1,49 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<mat-card appearance="outlined">
+    <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"></senergy-widget-header>
+    <mat-card-content>
+        <timeline-chart *ngIf="chartDataReady" [data]="timelineChartData"
+        [hAxisLabel]="widget?.properties?.hAxisLabel || ''" [vAxisLabel]="widget?.properties?.vAxisLabel || ''"
+        [enableToolbar]="false" [vAxes]="widget?.properties?.vAxes || []" [width]="timelineWidth"
+        [height]="timelineHeight">
+    </timeline-chart>
+
+        <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
+            <div *ngIf="notConfigured">Please configure widget!</div>
+
+            <div *ngIf="!notConfigured">
+                <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+                <div *ngIf="ready">
+                    <div *ngIf="chartDataReady">
+                      
+                    </div>
+                    <div *ngIf="!chartDataReady">
+                        {{message}}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </mat-card-content>
+    <senergy-widget-footer [widgetHasUpdateableProperties]="true"
+        [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization"
+        [userHasDeleteAuthorization]="userHasDeleteAuthorization"
+        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
+        [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()" [refreshing]="refreshing">
+    </senergy-widget-footer>
+</mat-card>
