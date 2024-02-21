@@ -41,7 +41,12 @@
   "angularCompilerOptions": {
     "strictTemplates": true,
     "fullTemplateTypeCheck": true,
-    "strictInjectionParameters": true
+    "strictInjectionParameters": true,
+    "extendedDiagnostics": {
+      "checks": {
+        "optionalChainNotNullable": "suppress" //#SNRGY-3099 -> functionality is broken inside html templates (https://github.com/angular/angular/issues/46918)
+      }
+    }
   },
   "exclude": [
     "./node_modules",
