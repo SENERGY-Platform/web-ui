@@ -111,6 +111,7 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
                 origin: this.nicknameAttributeOrigin,
                 value: this.displayname
             } as Attribute);
+            this.device.display_name = this.displayname;
         }
     }
 

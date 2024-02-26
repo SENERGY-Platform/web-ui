@@ -32,11 +32,11 @@ import {DeviceTypePermSearchModel} from '../../../metadata/device-types-overview
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesService} from './device-instances.service';
 import {DeviceInstancesSelectDialogComponent} from '../dialogs/device-instances-select-dialog.component';
-import {forkJoin, mergeMap, Observable} from 'rxjs';
+import {forkJoin, mergeMap, Observable, of} from 'rxjs';
 import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../../../widgets/shared/export-data.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
 import {environment} from '../../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
+import {catchError, map, concatMap} from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root',
@@ -129,7 +129,7 @@ export class DeviceInstancesDialogService {
         });
     }
 
-    openDeviceEditDialog(device: DeviceInstancesModel): void {
+    openDeviceEditDialog(device: DeviceInstancesModel) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
@@ -138,20 +138,27 @@ export class DeviceInstancesDialogService {
 
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((deviceOut: DeviceInstancesModel) => {
-            if (deviceOut !== undefined) {
-                this.deviceInstancesService
-                    .updateDeviceInstance(this.convertDeviceInstance(deviceOut))
-                    .subscribe((deviceResp: DeviceInstancesUpdateModel | null) => {
-                        if (deviceResp === null) {
-                            this.snackBar.open('Error while updating the device instance!', 'close', { panelClass: 'snack-bar-error' });
-                        } else {
-                            Object.assign(device, deviceOut);
-                            this.snackBar.open('Device instance updated successfully.', undefined, {duration: 2000});
-                        }
-                    });
-            }
-        });
+        return editDialogRef.afterClosed().pipe(
+            concatMap((deviceOut: DeviceInstancesModel) => {
+                if (deviceOut !== undefined) {
+                    return this.deviceInstancesService
+                        .updateDeviceInstance(this.convertDeviceInstance(deviceOut))
+                        .pipe(
+                            map((deviceResp: DeviceInstancesUpdateModel | null) => {
+                                if (deviceResp === null) {
+                                    this.snackBar.open('Error while updating the device instance!', 'close', { panelClass: 'snack-bar-error' });
+                                } else {
+                                    Object.assign(device, deviceOut);
+                                    this.snackBar.open('Device instance updated successfully.', undefined, {duration: 2000});
+                                    return deviceOut;
+                                }
+                                return null;
+                            })
+                        );
+                }
+                return of(null);
+            })
+        );
     }
 
     openDeviceCreateDialog(deviceType?: DeviceTypePermSearchModel, device?: DeviceInstancesModel): void {

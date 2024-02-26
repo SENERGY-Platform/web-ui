@@ -307,7 +307,15 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     editDevice(device: DeviceInstancesModel): void {
-        this.deviceInstancesDialogService.openDeviceEditDialog(device);
+        this.deviceInstancesDialogService.openDeviceEditDialog(device).subscribe({
+            next: (newDevice) => {
+                if(newDevice != null) {
+                    const index = this.dataSource.data.findIndex(element => element.id === device.id);
+                    this.dataSource.data[index] = newDevice;
+                    this.dataSource.data = this.dataSource.data;
+                }
+            }
+        });
     }
 
     duplicateDevice(device: DeviceInstancesModel): void {
