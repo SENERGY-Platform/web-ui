@@ -108,6 +108,9 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         const order = this.sortBy + ':' + this.sortDirection;
         return this.pipelineRegistryService.getPipelines(order).pipe(
             concatMap((pipelines) => {
+                if(pipelines.length === 0) {
+                    return of([]);
+                }
                 const requests: Observable<PipelineStatus | null >[] = [];
                 pipelines.forEach(pipeline => {
                     const statusRequest = this.flowEngineService.getPipelineStatus(pipeline.id).pipe(
@@ -145,6 +148,9 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         this.loadPipelines().subscribe({
             next: (pipelines) => {
                 this.setPipelines(pipelines);
+            },
+            error: (_) => {
+                this.ready = true;
             }
         });
     }
