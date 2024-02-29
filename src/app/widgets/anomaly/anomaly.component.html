@@ -90,7 +90,7 @@
               </div>
 
               <!-- sometimes there are null rows in the timescale response -->
-              <div *ngIf="anomaly.value == null" class="text-container">
+              <div *ngIf="anomaly.value == null || anomaly.value === ''" class="text-container">
                 <h2>No anomaly detected!</h2>
               </div>
             </div>
