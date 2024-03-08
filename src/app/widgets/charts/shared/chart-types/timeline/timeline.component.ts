@@ -198,17 +198,15 @@ export class TimelineComponent implements OnInit, OnChanges {
 
     getAliasOfMatchingRule(vAxis: ChartsExportVAxesModel, firstValue: any, lastValue: any) {
         let alias;
-        console.log(vAxis);
 
         (vAxis?.conversions || []).forEach(conversion => {
-            console.log(conversion.to + "-" + lastValue + "-" + conversion.from + "-" + firstValue)
+            //console.log(conversion.to + "-" + lastValue + "-" + conversion.from + "-" + firstValue)
             // convert everything to string, as there are problems with booleans in the conversion that are sometimes strings or bool
             if(String(conversion.to) === String(lastValue) && String(conversion.from) === String(firstValue)) {
                 alias = conversion.alias || String(conversion.to);
                 return;
             }
         });
-        console.log(alias)
         return alias;
     }
 

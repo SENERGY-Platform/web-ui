@@ -171,13 +171,42 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     }
 
-    dataSourceUpdated(updatedDataSourceConfig: DataSourceConfig) {
+    dataSourceConfigChanged(updatedDataSourceConfig: DataSourceConfig) {
+        console.log(updatedDataSourceConfig)
         this.formGroupController.get('properties.vAxes')?.patchValue(updatedDataSourceConfig.fields);
         this.formGroupController.get('properties.exports')?.patchValue(updatedDataSourceConfig.exports);
         this.formGroupController.get('properties.timeRangeType')?.patchValue(updatedDataSourceConfig.timeRange?.type);
-        this.formGroupController.get('properties.ahead')?.patchValue(updatedDataSourceConfig.timeRange?.time);
-        this.formGroupController.get('properties.end')?.patchValue(updatedDataSourceConfig.timeRange?.end);
-        this.formGroupController.get('properties.start')?.patchValue(updatedDataSourceConfig.timeRange?.start);
+        const timeRangeType = updatedDataSourceConfig.timeRange?.type;
+        const timeRangeLevel = updatedDataSourceConfig.timeRange?.level || "";
+
+        if(timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute) {
+            const start = updatedDataSourceConfig.timeRange?.start;
+            if(start != null && start !== '') {
+                this.formGroupController.get('properties.time.start')?.patchValue(start + timeRangeLevel);
+            }
+            const end = updatedDataSourceConfig.timeRange?.end;
+            if(end != null && end !== '') {
+                this.formGroupController.get('properties.time.end')?.patchValue(end + timeRangeLevel);
+            }
+        } else if(timeRangeType === ChartsExportRangeTimeTypeEnum.Relative) {
+            const last = updatedDataSourceConfig.timeRange?.time;
+            if(last != null) {
+                this.formGroupController.get('properties.time.last')?.patchValue(last + timeRangeLevel);
+            }
+        } else if(timeRangeType === ChartsExportRangeTimeTypeEnum.RelativeAhead) {
+            const ahead = updatedDataSourceConfig.timeRange?.time;;
+            if(ahead != null) {
+                this.formGroupController.get('properties.time.ahead')?.patchValue(ahead + timeRangeLevel);
+            }
+        }
+
+        const groupTimeType = updatedDataSourceConfig.group?.type;
+        const groupTimeLevel = updatedDataSourceConfig.group?.level || '';
+        const groupTimeValue = updatedDataSourceConfig.group?.time;
+        this.formGroupController.get('properties.group.time')?.patchValue(groupTimeValue + groupTimeLevel);
+        this.formGroupController.get('properties.group.type')?.patchValue(groupTimeType);
+
+        console.log(this.formGroupController.value)
     }
 
     initFormGroup(widget: WidgetModel): void {
