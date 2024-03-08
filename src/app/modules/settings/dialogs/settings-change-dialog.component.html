@@ -48,7 +48,7 @@
         <mat-form-field class="full-width" color="accent">
             <input matInput placeholder="New password" [type]="hidePasswordNew ? 'password' : 'text'" [formControl]="passwordNew">
             <mat-icon matSuffix (click)="hidePasswordNew = !hidePasswordNew">{{hidePasswordNew ? 'visibility_off' : 'visibility'}}</mat-icon>
-            <mat-error *ngIf="passwordNew.invalid">{{getErrorMessageNew()}}</mat-error>
+            <mat-error *ngIf="passwordNew.dirty && passwordNew.invalid">{{getErrorMessageNew()}}</mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
             <input matInput placeholder="Confirm password" [type]="hidePasswordConfirm ? 'password' : 'text'" [formControl]="passwordConfirm">
