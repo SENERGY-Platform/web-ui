@@ -262,12 +262,13 @@ export class DeviceInstancesService {
 
         return this.queryPermissionSearch(queryRequest).pipe(
             map((resp) => resp as DeviceInstancesPermSearchTotalModel || []),
-            concatMap(result => this.addDeviceType(result.result).pipe(
+            concatMap(result => {
+                return this.addDeviceType(result.result || []).pipe(
                 map((devicesWithType) => ({
                     result: devicesWithType,
                     total: result.total
-                } as DeviceInstancesTotalModel))
-            )),
+                } as DeviceInstancesTotalModel)))
+            }),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances', {result: [], total: 0})),
         );
     }

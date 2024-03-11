@@ -428,6 +428,9 @@ export class DataTableEditDialogComponent implements OnInit {
         });
 
         newGroup.get('elementDetails.deviceGroup.deviceGroupCriteria')?.valueChanges.subscribe(criteria => {
+            if(criteria == null) {
+                return;
+            }
             const update = function(that: DataTableEditDialogComponent) {
                 if (that.functions.length === 0) { //delay until functions populated
                     setTimeout(() => update(that), 100);

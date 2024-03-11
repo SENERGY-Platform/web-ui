@@ -32,7 +32,7 @@ import { DeviceTypeCharacteristicsModel, DeviceTypeFunctionModel, DeviceTypeServ
 import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { ChartsExportRequestPayloadGroupModel } from '../../charts/export/shared/charts-export-request-payload.model';
-import { forkJoin, map, mergeMap, Observable } from 'rxjs';
+import { forkJoin, map, mergeMap, Observable, of } from 'rxjs';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
 import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
@@ -53,6 +53,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     widget: WidgetModel = {} as WidgetModel;
     vAxisValues: ExportValueModel[] = [];
     disableSave = false;
+    waitingForDataSourceChange = true;
     groupTypes = [
         'mean',
         'sum',
@@ -139,6 +140,41 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.getWidgetData().subscribe({
+            next: (_: any) => {
+                this.loadDataSourceOptions(this.widget.properties.sourceType || 'export');
+                this.listenForFormChanges();
+            }
+        });
+    }
+
+    loadDataSourceOptions(sourceType: string) {
+        this.waitingForDataSourceChange = true;
+        let obs: Observable<any> = of();
+        if(sourceType === 'export') {
+            obs = this.initDeployments();
+        } else if(sourceType === 'device') {
+            obs = this.initDevices();
+        } else if(sourceType === 'deviceGroup') {
+            obs = this.initDeviceGroups();
+        }
+
+        obs.subscribe({
+            next: (_) => {
+                this.waitingForDataSourceChange = false;
+            },
+            error: (err) => {
+                this.waitingForDataSourceChange = false;
+                console.log(err);
+            }
+        });
+    }
+
+    listenForFormChanges() {
+        this.form.get('sourceType')?.valueChanges.subscribe(sourceType => {
+            this.loadDataSourceOptions(sourceType);
+        });
+
         this.form.get('measurement')?.valueChanges.subscribe(exp => {
             this.vAxisValues = exp?.values;
         });
@@ -185,75 +221,77 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.form.get('vAxisLabel')?.valueChanges.subscribe(unit => {
             this.form.patchValue({targetCharacteristic: this.concept?.characteristics.find(c => this.getDisplay(c) === unit)?.id});
         });
-        this.getWidgetData();
     }
 
     getWidgetData() {
-        this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
-            this.widget = widget;
-            this.form.patchValue({
-                vAxis: widget.properties.vAxis,
-                vAxisLabel: widget.properties.vAxisLabel,
-                name: widget.name,
-                type: widget.properties.type,
-                format: widget.properties.format,
-                threshold: widget.properties.threshold,
-                math: widget.properties.math,
-                sourceType: this.widget.properties.sourceType || 'export',
-                measurement: this.widget.properties.measurement,
-                device: this.widget.properties.device,
-                service: this.widget.properties.service,
-                deviceGroupId: this.widget.properties.deviceGroupId,
-                deviceGroupCriteria: this.widget.properties.deviceGroupCriteria,
-                deviceGroupAggregation: this.widget.properties.deviceGroupAggregation,
-                targetCharacteristic: this.widget.properties.targetCharacteristic,
-            });
-
-            if (this.widget.properties.timestampConfig !== undefined) {
-                this.form.get('timestampConfig')?.patchValue({
-                    showTimestamp: this.widget.properties.timestampConfig.showTimestamp,
-                    highlightTimestamp: this.widget.properties.timestampConfig.highlightTimestamp,
-                    warningTimeLevel: this.widget.properties.timestampConfig.warningTimeLevel,
-                    warningAge: this.widget.properties.timestampConfig.warningAge,
-                    problemTimeLevel: this.widget.properties.timestampConfig.problemTimeLevel,
-                    problemAge: this.widget.properties.timestampConfig.problemAge,
+        return this.dashboardService.getWidget(this.dashboardId, this.widgetId).pipe(
+            map((widget: WidgetModel) => {
+                this.widget = widget;
+                console.log(widget)
+                this.form.patchValue({
+                    vAxis: widget.properties.vAxis,
+                    vAxisLabel: widget.properties.vAxisLabel,
+                    name: widget.name,
+                    type: widget.properties.type,
+                    format: widget.properties.format,
+                    threshold: widget.properties.threshold,
+                    math: widget.properties.math,
+                    sourceType: this.widget.properties.sourceType || 'export',
+                    measurement: this.widget.properties.measurement,
+                    device: this.widget.properties.device,
+                    service: this.widget.properties.service,
+                    deviceGroupId: this.widget.properties.deviceGroupId,
+                    deviceGroupCriteria: this.widget.properties.deviceGroupCriteria,
+                    deviceGroupAggregation: this.widget.properties.deviceGroupAggregation,
+                    targetCharacteristic: this.widget.properties.targetCharacteristic,
                 });
-            }
 
-            this.form.get('group')?.patchValue({
-                time: widget.properties.group?.time,
-                type: widget.properties.group?.type,
-            });
+                if (this.widget.properties.timestampConfig !== undefined) {
+                    this.form.get('timestampConfig')?.patchValue({
+                        showTimestamp: this.widget.properties.timestampConfig.showTimestamp,
+                        highlightTimestamp: this.widget.properties.timestampConfig.highlightTimestamp,
+                        warningTimeLevel: this.widget.properties.timestampConfig.warningTimeLevel,
+                        warningAge: this.widget.properties.timestampConfig.warningAge,
+                        problemTimeLevel: this.widget.properties.timestampConfig.problemTimeLevel,
+                        problemAge: this.widget.properties.timestampConfig.problemAge,
+                    });
+                }
 
-            this.initDeployments();
-            this.initDevices();
-            this.initDeviceGroups();
-        });
+                this.form.get('group')?.patchValue({
+                    time: widget.properties.group?.time,
+                    type: widget.properties.group?.type,
+                });
+
+                return true;
+            }));
     }
 
     initDeployments() {
-        this.exportService.getExports(true, '', 9999, 0, 'name', 'asc', undefined, undefined).subscribe((exports: ExportResponseModel | null) => {
-            if (exports !== null) {
-                exports.instances?.forEach((exportModel: ExportModel) => {
-                    if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exports.push({
-                            id: exportModel.ID,
-                            name: exportModel.Name,
-                            values: exportModel.Values,
-                            exportDatabaseId: exportModel.ExportDatabaseID
-                        });
-                    }
-                });
-            }
-        });
+        this.exports = [];
+        return this.exportService.getExports(true, '', 9999, 0, 'name', 'asc', undefined, undefined).pipe(
+            map((exports: ExportResponseModel | null) => {
+                if (exports !== null) {
+                    exports.instances?.forEach((exportModel: ExportModel) => {
+                        if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
+                            this.exports.push({
+                                id: exportModel.ID,
+                                name: exportModel.Name,
+                                values: exportModel.Values,
+                                exportDatabaseId: exportModel.ExportDatabaseID
+                            });
+                        }
+                    });
+                }
+            }));
     }
 
     initDevices() {
-        this.deviceInstancesService.getDeviceInstances(10000, 0).subscribe(devices => this.devices = devices);
+        return this.deviceInstancesService.getDeviceInstances(10000, 0).pipe(
+            map((devices => this.devices = devices)));
     }
 
     initDeviceGroups() {
-        this.deviceGroupsService.getDeviceGroups('', 10000, 0, 'name', 'asc').pipe(mergeMap(deviceGroups => {
+        return this.deviceGroupsService.getDeviceGroups('', 10000, 0, 'name', 'asc').pipe(mergeMap(deviceGroups => {
             this.deviceGroups = deviceGroups;
             const ascpectIds: Map<string, null> = new Map();
             const functionIds: Map<string, null> = new Map();
@@ -282,8 +320,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             obs.push(this.deviceGroupsService.getFunctionListByIds(Array.from(functionIds.keys())).pipe(map(functions => this.functions = functions)));
             obs.push(this.deviceGroupsService.getDeviceClassListByIds(Array.from(deviceClassids.keys())).pipe(map(deviceClasses => this.deviceClasses = deviceClasses)));
             return forkJoin(obs);
-        })).subscribe();
-
+        }));
     }
 
     close(): void {
