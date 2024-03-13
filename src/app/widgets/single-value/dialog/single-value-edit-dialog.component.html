@@ -17,7 +17,7 @@
 <h2 mat-dialog-title>Edit Single Value</h2>
 
 <mat-dialog-content>
-    <div fxLayout="column" [formGroup]="form">
+    <div fxLayout="column" [formGroup]="form" *ngIf="formIsReady">
         <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
             <mat-label>Name</mat-label>
             <input type="text" matInput placeholder="Name" formControlName="name">
@@ -29,13 +29,13 @@
                 <mat-radio-button value="device">Device</mat-radio-button>
                 <mat-radio-button value="deviceGroup">Device Group</mat-radio-button>
             </mat-radio-group>
-            <mat-spinner *ngIf="waitingForDataSourceChange" [diameter]="50" [strokeWidth]="5" color="accent">
+            <mat-spinner *ngIf="!dataSourceSelectionReady" [diameter]="50" [strokeWidth]="5" color="accent">
             </mat-spinner>
 
-            <table *ngIf="!waitingForDataSourceChange">
-                <tr *ngIf="form.get('sourceType')?.value === 'device'">
+            <div *ngIf="dataSourceSelectionReady">
+                <div *ngIf="form.get('sourceType')?.value === 'device'">
                     <span *ngIf="devices.length > 0">
-                        <td>
+                        <div>
                             <mat-form-field color="accent">
                                 <mat-label>Choose Device</mat-label>
                                 <senergy-select-search [options]="devices" formControlName="device"
@@ -43,24 +43,25 @@
                                 </senergy-select-search>
                             </mat-form-field>
 
-                        </td>
-                        <td>
+                        </div>
+                        <div *ngIf="dataSourceFieldsReady">
                             <mat-form-field color="accent">
                                 <mat-label>Choose Service</mat-label>
                                 <senergy-select-search [options]="services" formControlName="service"
                                     useOptionViewProperty="name" [compareWith]="compareIds">
                                 </senergy-select-search>
                             </mat-form-field>
-                        </td>
+                        </div>
                     </span>
                     <span *ngIf="devices.length === 0">
                         No devices found.
                     </span>
 
-                </tr>
-                <tr *ngIf="form.get('sourceType')?.value === 'export'">
+                </div>
+
+                <div *ngIf="form.get('sourceType')?.value === 'export'">
                     <span *ngIf="exports.length > 0">
-                        <td>
+                        <div>
                             <mat-form-field color="accent">
                                 <mat-label>Choose Export</mat-label>
                                 <senergy-select-search [options]="exports" formControlName="measurement"
@@ -68,179 +69,197 @@
                                 </senergy-select-search>
                             </mat-form-field>
 
-                        </td>
+                        </div>
                     </span>
                     <span *ngIf="exports.length === 0">
                         No exports found.
                     </span>
-                </tr>
-                <tr *ngIf="form.get('sourceType')?.value === 'deviceGroup'">
+                </div>
+
+                <div *ngIf="form.get('sourceType')?.value === 'deviceGroup'">
                     <span *ngIf="deviceGroups.length > 0">
-                        <td>
+                        <div>
                             <mat-form-field color="accent">
                                 <mat-label>Choose Device Group</mat-label>
                                 <senergy-select-search [options]="deviceGroups" formControlName="deviceGroupId"
                                     useOptionViewProperty="name" useOptionValueProperty="id">
                                 </senergy-select-search>
                             </mat-form-field>
-    
-                        </td>
-                        <td>
+
+                        </div>
+                        <div *ngIf="dataSourceFieldsReady">
                             <mat-form-field color="accent">
                                 <mat-label>Choose Criteria</mat-label>
                                 <senergy-select-search [options]="getCriteria()" formControlName="deviceGroupCriteria"
                                     [getOptionViewValue]="describeCriteria()" [compareWith]="compareCriteria">
                                 </senergy-select-search>
                             </mat-form-field>
-                        </td>
+                        </div>
                     </span>
                     <span *ngIf="deviceGroups.length === 0">
                         No device groups found.
                     </span>
-                </tr>
-                <tr>
-                    <td *ngIf="form.get('sourceType')?.value === 'export' && exports.length > 0">
+                </div>
+
+                <mat-spinner *ngIf="!dataSourceFieldsReady" [diameter]="50" [strokeWidth]="5" color="accent">
+                </mat-spinner>
+
+                <div *ngIf="dataSourceFieldsReady">
+                    <div *ngIf="form.get('sourceType')?.value === 'export' && exports.length > 0">
                         <mat-form-field color="accent">
                             <senergy-select-search placeholder="Value" [options]="vAxisValues"
                                 [compareWith]="compareValues" useOptionViewProperty="Name" formControlName="vAxis">
                             </senergy-select-search>
                         </mat-form-field>
-                    </td>
-                    <td *ngIf="form.get('sourceType')?.value === 'device'  && devices.length > 0">
+                    </div>
+                    <div *ngIf="form.get('sourceType')?.value === 'device'  && devices.length > 0">
                         <mat-form-field color="accent">
                             <senergy-select-search placeholder="Value" useOptionViewProperty="Name" [options]="paths"
                                 formControlName="vAxis" [compareWith]="compareNames">
                             </senergy-select-search>
                         </mat-form-field>
-                    </td>
-                    <td>
-                        <mat-form-field color="accent" *ngIf="form.get('sourceType')?.value !== 'deviceGroup'  && deviceGroups.length > 0">
+                    </div>
+                    <div>
+                        <mat-form-field color="accent"
+                            *ngIf="form.get('sourceType')?.value !== 'deviceGroup'  && deviceGroups.length > 0">
                             <mat-label>Unit</mat-label>
                             <input type="text" matInput placeholder="Unit" formControlName="vAxisLabel">
                         </mat-form-field>
-                        <mat-form-field color="accent" *ngIf="form.get('sourceType')?.value === 'deviceGroup' && deviceGroups.length > 0">
+                        <mat-form-field color="accent"
+                            *ngIf="form.get('sourceType')?.value === 'deviceGroup' && deviceGroups.length > 0">
                             <mat-label>Unit</mat-label>
                             <senergy-select-search [options]="concept?.characteristics || []"
                                 formControlName="vAxisLabel" [getOptionValue]="getDisplay"
                                 [getOptionViewValue]="getDisplay">
                             </senergy-select-search>
                         </mat-form-field>
-                    </td>
-                    <td>
+                    </div>
+                    <div>
                         <mat-form-field color="accent" *ngIf="form.get('sourceType')?.value === 'deviceGroup'">
                             <mat-label>Aggregation</mat-label>
                             <senergy-select-search [options]="aggregations" formControlName="deviceGroupAggregation">
                             </senergy-select-search>
                         </mat-form-field>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <mat-form-field color="accent">
-                            <mat-select formControlName="type" placeholder="Type" [compareWith]="compareStrings">
-                                <mat-option [value]="'String'">String</mat-option>
-                                <mat-option [value]="'Number'">Number</mat-option>
-                                <mat-option [value]="'Date'">Date</mat-option>
-                                <mat-option [value]="'Currency'">Currency</mat-option>
-                                <mat-option [value]="'Percent'">Percent</mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </td>
-                    <td>
-                        <mat-form-field color="accent" hintLabel="For use in Angular pipes">
-                            <mat-label>Format</mat-label>
-                            <input type="text" matInput placeholder="Format" formControlName="format">
-                        </mat-form-field>
-                    </td>
-                </tr>
-                <tr formGroupName="group">
-                    <td>
-                        <mat-form-field color="accent">
-                            <mat-select placeholder="Group Type" formControlName="type">
-                                <mat-option [value]="">none</mat-option>
-                                <mat-option *ngFor="let t of groupTypes" [value]="t">
-                                    {{t}}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </td>
-                    <td>
-                        <mat-form-field color="accent">
-                            <mat-label>Group time</mat-label>
-                            <input type="string" matInput formControlName="time">
-                        </mat-form-field>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
+                    </div>
+                    <div class="one-line-form-container">
+                        <div>
+                            <mat-form-field color="accent">
+                                <mat-select formControlName="type" placeholder="Type" [compareWith]="compareStrings">
+                                    <mat-option [value]="'String'">String</mat-option>
+                                    <mat-option [value]="'Number'">Number</mat-option>
+                                    <mat-option [value]="'Date'">Date</mat-option>
+                                    <mat-option [value]="'Currency'">Currency</mat-option>
+                                    <mat-option [value]="'Percent'">Percent</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div>
+                            <mat-form-field color="accent" hintLabel="For use in Angular pipes">
+                                <mat-label>Format</mat-label>
+                                <input type="text" matInput placeholder="Format" formControlName="format">
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div formGroupName="group" class="one-line-form-container">
+                        <div>
+                            <mat-form-field color="accent">
+                                <mat-select placeholder="Group Type" formControlName="type">
+                                    <mat-option [value]="">none</mat-option>
+                                    <mat-option *ngFor="let t of groupTypes" [value]="t">
+                                        {{t}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div>
+                            <mat-form-field color="accent">
+                                <mat-label>Group time</mat-label>
+                                <input type="string" matInput formControlName="time">
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div>
                         <mat-form-field color="accent">
                             <mat-label>Math</mat-label>
                             <input type="text" matInput formControlName="math">
                         </mat-form-field>
-                    </td>
-                    <td>
+                    </div>
+                    <div>
                         <mat-form-field color="accent">
                             <mat-label>Max. font size (px)</mat-label>
                             <input type="number" matInput formControlName="threshold">
                         </mat-form-field>
-                    </td>
-                </tr>
+                    </div>
 
-                <tr formGroupName="timestampConfig">
-                    <td>
-                        <mat-checkbox formControlName="showTimestamp">Show timestamp</mat-checkbox>
-                    </td>
-                </tr>
-                <tr formGroupName="timestampConfig"
-                    *ngIf="form.get('timestampConfig')?.get('showTimestamp')?.value == true">
-                    <td>
-                        <mat-checkbox formControlName="highlightTimestamp">Highlight timestamp by age</mat-checkbox>
-                    </td>
-                </tr>
-                <tr formGroupName="timestampConfig"
-                    *ngIf="form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true">
-                    <td>
-                        <mat-form-field color="accent">
-                            <mat-label>Maximum age for warning</mat-label>
-                            <input type="number" matInput formControlName="warningAge">
-                        </mat-form-field>
-                    </td>
-                    <td>
-                        <mat-form-field color="accent">
-                            <mat-label></mat-label>
-                            <mat-select formControlName="warningTimeLevel">
-                                <mat-option value="s">Seconds</mat-option>
-                                <mat-option value="min">Minutes</mat-option>
-                                <mat-option value="h">Hours</mat-option>
-                                <mat-option value="d">Days</mat-option>
-                                <mat-option value="m">Months</mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </td>
-                </tr>
-                <tr formGroupName="timestampConfig"
-                    *ngIf="form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true">
-                    <td>
-                        <mat-form-field color="accent">
-                            <mat-label>Maximum age for problem</mat-label>
-                            <input type="number" matInput formControlName="problemAge">
-                        </mat-form-field>
-                    </td>
-                    <td>
-                        <mat-form-field color="accent">
-                            <mat-label></mat-label>
-                            <mat-select formControlName="problemTimeLevel">
-                                <mat-option value="s">Seconds</mat-option>
-                                <mat-option value="min">Minutes</mat-option>
-                                <mat-option value="h">Hours</mat-option>
-                                <mat-option value="d">Days</mat-option>
-                                <mat-option value="m">Months</mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </td>
-                </tr>
+                    <div formGroupName="timestampConfig">
+                        <div>
+                            <mat-checkbox formControlName="showTimestamp">Show timestamp?</mat-checkbox>
+                        </div>
+                    </div>
 
-            </table>
+                    <div formGroupName="timestampConfig"
+                        *ngIf="form.get('timestampConfig')?.get('showTimestamp')?.value == true">
+                        <div>
+                            <mat-checkbox formControlName="highlightTimestamp">Highlight timestamp by age?
+                            </mat-checkbox>
+                        </div>
+                    </div>
+
+                    <div formGroupName="timestampConfig"
+                        *ngIf="form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true">
+                        <div>
+                            <mat-form-field color="accent">
+                                <mat-label>Maximum age for warning</mat-label>
+                                <input type="number" matInput formControlName="warningAge">
+                            </mat-form-field>
+                        </div>
+                        <div>
+                            <mat-form-field color="accent">
+                                <mat-label></mat-label>
+                                <mat-select formControlName="warningTimeLevel">
+                                    <mat-option value="s">Seconds</mat-option>
+                                    <mat-option value="min">Minutes</mat-option>
+                                    <mat-option value="h">Hours</mat-option>
+                                    <mat-option value="d">Days</mat-option>
+                                    <mat-option value="m">Months</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div formGroupName="timestampConfig"
+                        *ngIf="form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true">
+                        <div>
+                            <mat-form-field color="accent">
+                                <mat-label>Maximum age for problem</mat-label>
+                                <input type="number" matInput formControlName="problemAge">
+                            </mat-form-field>
+                        </div>
+                        <div>
+                            <mat-form-field color="accent">
+                                <mat-label></mat-label>
+                                <mat-select formControlName="problemTimeLevel">
+                                    <mat-option value="s">Seconds</mat-option>
+                                    <mat-option value="min">Minutes</mat-option>
+                                    <mat-option value="h">Hours</mat-option>
+                                    <mat-option value="d">Days</mat-option>
+                                    <mat-option value="m">Months</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div formGroupName="valueHighlightConfig">
+                        <div>
+                            <mat-checkbox formControlName="highlight">Highlight value by threshold?</mat-checkbox>
+                        </div>
+                    </div>
+
+                    <single-value-threshold *ngIf="form.get('valueHighlightConfig')?.get('highlight')?.value === true"
+                        [oldConfigs]="widget.properties?.valueHighlightConfig?.thresholds || []"
+                        (threshholdConfigUpdated)="valueHighlightConfigUpdated($event)"></single-value-threshold>
+                </div>
+            </div>
         </span>
     </div>
 </mat-dialog-content>

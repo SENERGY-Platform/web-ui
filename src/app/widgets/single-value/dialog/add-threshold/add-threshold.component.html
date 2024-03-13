@@ -1,0 +1,27 @@
+<mat-dialog-content>
+    <div [formGroup]="form" fxLayout="column" >
+        <mat-form-field color="accent">
+            <mat-label>Threshold</mat-label>
+            <input matInput placeholder="Threshold" type="text" formControlName="threshold">
+        </mat-form-field>
+
+        <mat-form-field color="accent">
+            <mat-label>Direction</mat-label>
+            <mat-select formControlName="direction">
+                <mat-option value="<="><=</mat-option>
+                <mat-option value=">=">>=</mat-option>
+            </mat-select>        
+        </mat-form-field>
+        
+        <mat-form-field color="accent">
+            <mat-label>Color</mat-label>
+            <input matInput placeholder="Color" type="text" formControlName="color">
+        </mat-form-field>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="accent" type="submit" (click)="cancel()">Cancel</button>
+    <button mat-raised-button color="accent" type="submit" [disabled]="!form.valid" (click)="add()">{{submitButtonText}}</button>
+
+</mat-dialog-actions>

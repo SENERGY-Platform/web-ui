@@ -16,21 +16,21 @@
 
 
 <senergy-fit-text *ngIf="sv?.type === 'String'" [txt]="sv?.value + ' ' + widget?.properties?.vAxisLabel"
-                  [maxFontSize]="maxFontSize()">
+                  [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
 </senergy-fit-text>
 <senergy-fit-text *ngIf="sv?.type === 'Number'"
                   [txt]="((sv?.value || 0 | number: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
-                  [maxFontSize]="maxFontSize()">
+                  [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
 </senergy-fit-text>
 <senergy-fit-text *ngIf="sv?.type === 'Date'"
                   [txt]="((sv?.value || '' | date: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
-                  [maxFontSize]="maxFontSize()">
+                  [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
 </senergy-fit-text>
 <senergy-fit-text *ngIf="sv?.type === 'Currency'"
                   [txt]="((sv?.value || 0 | currency: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
-                  [maxFontSize]="maxFontSize()">
+                  [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
 </senergy-fit-text>
 <senergy-fit-text *ngIf="sv?.type === 'Percent'"
                   [txt]="((sv?.value || 0 | percent: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
-                  [maxFontSize]="maxFontSize()">
+                  [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
 </senergy-fit-text>

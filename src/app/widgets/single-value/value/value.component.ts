@@ -27,6 +27,7 @@ import {SingleValueModel} from '../shared/single-value.model';
 export class ValueComponent {
     @Input() widget: WidgetModel | undefined;
     @Input() sv: SingleValueModel | undefined;
+    @Input() color?: string;
 
     maxFontSize() {
         return this.widget?.properties?.threshold ? this.widget.properties.threshold : 128;

@@ -116,6 +116,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     marginLeft = '0';
     private _svListIndex = 0;
     animationState = false;
+    highlightColor = 'black';
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -193,6 +194,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
             map((_) => {
                 this.showTimestamp = this.widget.properties.timestampConfig?.showTimestamp == true;
                 this.setTimestampColor();
+                this.setHighlightColor();
             })
         ).subscribe({
             next: (_) => {
@@ -252,6 +254,20 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         this.configured = this.widget.properties.measurement !== undefined;
     }
 
+    private setHighlightColor() {
+        const config = this.widget.properties.valueHighlightConfig;
+        const currentValue = this.sv?.value;
+        if(config && currentValue && config.highlight) {
+            config.thresholds.forEach(thresholdConfig => {
+                const threshold = thresholdConfig.threshold;
+                const direction = thresholdConfig.direction;
+                const thresholdReached = (direction === '<=' && currentValue <= threshold) || (direction === '>=' && currentValue >= threshold);
+                if(thresholdReached) {
+                    this.highlightColor = thresholdConfig.color;
+                }
+            });
+        }
+    }
 
     private setTimestampColor() {
         if(!this.widget.properties.timestampConfig?.highlightTimestamp) {

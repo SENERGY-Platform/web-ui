@@ -108,6 +108,8 @@ import { OpenWindowComponent } from './charts/open-window/open-window.component'
 import { TimelineComponent } from './charts/shared/chart-types/timeline/timeline.component';
 import { DataSourceSelectorComponent } from './charts/shared/data-source-selector/data-source-selector.component';
 import { OpenWindowEditComponent } from './charts/open-window/dialog/edit/edit.component';
+import { ThresholdComponent } from './single-value/dialog/threshold/threshold.component';
+import { AddThresholdComponent } from './single-value/dialog/add-threshold/add-threshold.component';
 
 registerLocaleData(localeDe, 'de');
 
@@ -207,7 +209,9 @@ registerLocaleData(localeDe, 'de');
         OpenWindowComponent,
         TimelineComponent,
         DataSourceSelectorComponent,
-        OpenWindowEditComponent
+        OpenWindowEditComponent,
+        ThresholdComponent,
+        AddThresholdComponent
     ],
     exports: [
         SwitchComponent,

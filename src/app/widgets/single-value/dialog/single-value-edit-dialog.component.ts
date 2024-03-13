@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormControl, UntypedFormBuilder } from '@angular/forms';
+import { Form, FormControl, FormGroup, UntypedFormBuilder } from '@angular/forms';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -32,7 +32,7 @@ import { DeviceTypeCharacteristicsModel, DeviceTypeFunctionModel, DeviceTypeServ
 import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { ChartsExportRequestPayloadGroupModel } from '../../charts/export/shared/charts-export-request-payload.model';
-import { forkJoin, map, mergeMap, Observable, of } from 'rxjs';
+import { concatMap, forkJoin, map, mergeMap, Observable, of } from 'rxjs';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
 import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
@@ -40,20 +40,22 @@ import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/
 import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-classes/shared/device-classes-perm-search.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
-import { SingleValueAggregations } from '../shared/single-value.model';
+import { SingleValueAggregations, ValueHighlightConfig } from '../shared/single-value.model';
 
 @Component({
     templateUrl: './single-value-edit-dialog.component.html',
     styleUrls: ['./single-value-edit-dialog.component.css'],
 })
 export class SingleValueEditDialogComponent implements OnInit {
+    formIsReady = false;
+    dataSourceFieldsReady = true;
     exports: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
     vAxisValues: ExportValueModel[] = [];
     disableSave = false;
-    waitingForDataSourceChange = true;
+    dataSourceSelectionReady = false;
     groupTypes = [
         'mean',
         'sum',
@@ -83,35 +85,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     deviceClasses: DeviceClassesPermSearchModel[] = [];
     concept?: ConceptsCharacteristicsModel | null;
 
-    form = this.fb.group({
-        vAxis: {},
-        vAxisLabel: '',
-        name: '',
-        type: '',
-        format: '',
-        threshold: 128,
-        math: '',
-        measurement: '',
-        group: this.fb.group({
-            time: '',
-            type: '',
-        }),
-        sourceType: '',
-        device: {},
-        service: {},
-        deviceGroupId: '',
-        deviceGroupCriteria: {},
-        deviceGroupAggregation: 'latest',
-        targetCharacteristic: '',
-        timestampConfig: this.fb.group({
-            showTimestamp: new FormControl<boolean>(false),
-            highlightTimestamp: new FormControl<boolean>(false),
-            warningTimeLevel: new FormControl<string>('d'),
-            warningAge: new FormControl<Number>(1),
-            problemTimeLevel: new FormControl<string>('d'),
-            problemAge: new FormControl<Number>(7),
-        })
-    });
+    form: FormGroup = new FormGroup({});
 
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
@@ -140,16 +114,59 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.getWidgetData().subscribe({
-            next: (_: any) => {
-                this.loadDataSourceOptions(this.widget.properties.sourceType || 'export');
+        this.initForm();
+        this.getWidgetData().pipe(
+            concatMap((_: any) => this.loadDataSourceOptions(this.widget.properties.sourceType || 'export')),
+            concatMap(() => this.setAllOptions()),
+            map(() => {
                 this.listenForFormChanges();
+            })
+        ).subscribe({
+            next: (_) => {},
+            error: (err) => {
+                console.log(err);
             }
         });
     }
 
+    initForm() {
+        this.form = this.fb.group({
+            vAxis: {},
+            vAxisLabel: '',
+            name: '',
+            type: '',
+            format: '',
+            threshold: 128,
+            math: '',
+            measurement: '',
+            group: this.fb.group({
+                time: '',
+                type: '',
+            }),
+            sourceType: '',
+            device: {},
+            service: {},
+            deviceGroupId: '',
+            deviceGroupCriteria: {},
+            deviceGroupAggregation: 'latest',
+            targetCharacteristic: '',
+            timestampConfig: this.fb.group({
+                showTimestamp: new FormControl<boolean>(false),
+                highlightTimestamp: new FormControl<boolean>(false),
+                warningTimeLevel: new FormControl<string>('d'),
+                warningAge: new FormControl<number>(1),
+                problemTimeLevel: new FormControl<string>('d'),
+                problemAge: new FormControl<number>(7),
+            }),
+            valueHighlightConfig: this.fb.group({
+                highlight: new FormControl<boolean>(false),
+                thresholds: new FormControl([])
+            })
+        });
+    }
+
     loadDataSourceOptions(sourceType: string) {
-        this.waitingForDataSourceChange = true;
+        this.dataSourceSelectionReady = false;
         let obs: Observable<any> = of();
         if(sourceType === 'export') {
             obs = this.initDeployments();
@@ -159,25 +176,95 @@ export class SingleValueEditDialogComponent implements OnInit {
             obs = this.initDeviceGroups();
         }
 
-        obs.subscribe({
-            next: (_) => {
-                this.waitingForDataSourceChange = false;
-            },
-            error: (err) => {
-                this.waitingForDataSourceChange = false;
-                console.log(err);
+        return obs.pipe(
+            map(() => this.dataSourceSelectionReady = true)
+        );
+    }
+
+    listenForDeviceSelectionChange() {
+        this.form.get('device')?.valueChanges.pipe(
+            concatMap((device: DeviceInstancesPermSearchModel) => {
+                this.dataSourceFieldsReady = false;
+                this.paths = [];
+                this.services = [];
+                this.form.get('service')?.patchValue('');
+                this.form.get('vAxis')?.patchValue('');
+
+                if (device === undefined || device == null) {
+                    return of(null);
+                }
+                return this.loadDeviceServices(device);
+            }),
+            map((_) => {
+                this.dataSourceFieldsReady = true;
+            })
+        ).subscribe();
+    }
+
+    loadDeviceServices(device: DeviceInstancesPermSearchModel) {
+        return this.deviceTypeService.getDeviceType(device.device_type_id).pipe(
+            map((dt) => {
+                this.services = dt?.services.filter(service => service.outputs.length === 1) || [];
+            })
+        );
+    }
+
+    listenForServiceSelectionChange() {
+        this.form.get('service')?.valueChanges.subscribe((service: DeviceTypeServiceModel) => {
+            this.paths = [];
+            this.form.get('vAxis')?.patchValue('');
+            if (service === undefined || service == null) {
+                return;
+            }
+            this.loadDeviceServiceValues(service);
+        });
+    }
+
+    loadDeviceServiceValues(service: DeviceTypeServiceModel) {
+        this.paths = this.deviceTypeService.getValuePaths(service.outputs[0].content_variable).map(x => ({ Name: x }));
+    }
+
+    listenForDeviceGroupCriteriaSelectionChange() {
+        this.form.get('deviceGroupCriteria')?.valueChanges.subscribe(criteria => {
+            this.dataSourceFieldsReady = false;
+            const conceptId = this.functions.find(f => f.id === criteria.function_id)?.concept_id;
+            if (conceptId !== undefined) {
+                this.loadAndSetConcept(conceptId).subscribe(() => {
+                    this.dataSourceFieldsReady = true;
+                });
             }
         });
     }
 
-    listenForFormChanges() {
-        this.form.get('sourceType')?.valueChanges.subscribe(sourceType => {
-            this.loadDataSourceOptions(sourceType);
-        });
+    loadAndSetConcept(conceptID: string) {
+        return this.conceptsService.getConceptWithCharacteristics(conceptID).pipe(
+            map((c) => {
+                this.concept = c;
+            })
+        );
+    }
 
+    listenForExportSelection() {
         this.form.get('measurement')?.valueChanges.subscribe(exp => {
             this.vAxisValues = exp?.values;
         });
+    }
+
+    listenForDeviceGroupSelectionChange() {
+        this.form.get('deviceGroupId')?.valueChanges.subscribe(_ => {
+            this.form.get('vAxisLabel')?.patchValue('');
+        });
+    }
+
+    listenForDataSourceTypeChange() {
+        this.form.get('sourceType')?.valueChanges.subscribe(sourceType => {
+            this.loadDataSourceOptions(sourceType).subscribe();
+        });
+    }
+
+    listenForFormChanges() {
+        this.listenForDataSourceTypeChange();
+
         this.form.get('type')?.valueChanges.subscribe(v => {
             if (v === 'String') {
                 this.form.patchValue({ format: '' });
@@ -187,37 +274,12 @@ export class SingleValueEditDialogComponent implements OnInit {
             }
         });
 
-        this.form.get('device')?.valueChanges.subscribe((device: DeviceInstancesPermSearchModel) => {
-            this.paths = [];
-            this.services = [];
-            if (device === undefined || device == null) {
-                return;
-            }
-            this.deviceTypeService.getDeviceType(device.device_type_id).subscribe(dt => {
-                this.services = dt?.services.filter(service => service.outputs.length === 1) || [];
-            });
-        });
+        this.listenForExportSelection();
+        this.listenForDeviceSelectionChange();
+        this.listenForServiceSelectionChange();
+        this.listenForDeviceGroupCriteriaSelectionChange();
+        this.listenForDeviceGroupSelectionChange();
 
-        this.form.get('service')?.valueChanges.subscribe((service: DeviceTypeServiceModel) => {
-            this.paths = [];
-            if (service === undefined || service == null) {
-                return;
-            }
-            this.paths = this.deviceTypeService.getValuePaths(service.outputs[0].content_variable).map(x => ({ Name: x }));
-        });
-        this.form.get('deviceGroupCriteria')?.valueChanges.subscribe(criteria => {
-            const update = function(that: SingleValueEditDialogComponent) {
-                if (that.functions.length === 0) { //delay until functions populated
-                    setTimeout(() => update(that), 100);
-                    return;
-                }
-                const conceptId = that.functions.find(f => f.id === criteria.function_id)?.concept_id;
-                if (conceptId !== undefined) {
-                    that.conceptsService.getConceptWithCharacteristics(conceptId).subscribe(c => that.concept = c);
-                }
-            };
-            update(this);
-        });
         this.form.get('vAxisLabel')?.valueChanges.subscribe(unit => {
             this.form.patchValue({targetCharacteristic: this.concept?.characteristics.find(c => this.getDisplay(c) === unit)?.id});
         });
@@ -227,7 +289,6 @@ export class SingleValueEditDialogComponent implements OnInit {
         return this.dashboardService.getWidget(this.dashboardId, this.widgetId).pipe(
             map((widget: WidgetModel) => {
                 this.widget = widget;
-                console.log(widget)
                 this.form.patchValue({
                     vAxis: widget.properties.vAxis,
                     vAxisLabel: widget.properties.vAxisLabel,
@@ -262,8 +323,55 @@ export class SingleValueEditDialogComponent implements OnInit {
                     type: widget.properties.group?.type,
                 });
 
+                this.form.get('valueHighlightConfig')?.patchValue(widget.properties.valueHighlightConfig);
+
                 return true;
+            }),
+            map((_) => {
+                this.formIsReady = true;
             }));
+    }
+
+    setAllOptions() {
+        // when selections were made, the matching options must be loaded so that the select works
+        this.setExportValueOptions(this.widget.properties.measurement);
+
+        const selectedService = this.widget.properties.service;
+        if(selectedService != null) {
+            this.loadDeviceServiceValues(selectedService);
+        }
+
+        const obs: Observable<any>[] = [
+            this.setDeviceServiceOptions(this.widget.properties.device),
+            this.setDeviceGroupUnitOptions(this.widget.properties.deviceGroupCriteria),
+        ];
+        return forkJoin(obs);
+    }
+
+    setExportValueOptions(dataExport?: ChartsExportMeasurementModel) {
+        // set export field options
+        this.vAxisValues = dataExport?.values || [];
+    }
+
+    setDeviceServiceOptions(device?: DeviceInstancesPermSearchModel) {
+        // load and set device service options
+        if(device == null) {
+            return of(null);
+        }
+
+        return this.loadDeviceServices(device);
+    }
+
+    setDeviceGroupUnitOptions(criteria?: DeviceGroupCriteriaModel) {
+        // load and set device group unit options
+        if(criteria == null) {
+            return of(null);
+        }
+        const conceptId = this.functions.find(f => f.id === criteria.function_id)?.concept_id;
+        if(conceptId == null) {
+            return of(null);
+        }
+        return this.loadAndSetConcept(conceptId);
     }
 
     initDeployments() {
@@ -333,7 +441,6 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
-        const measurement = this.form.get('measurement')?.value as ChartsExportMeasurementModel || undefined;
         this.widget.properties.measurement = {
             id: this.form.get('measurement')?.value?.id,
             name: this.form.get('measurement')?.value?.name,
@@ -347,7 +454,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.widget.properties.threshold = this.form.get('threshold')?.value || undefined;
         this.widget.properties.math = this.form.get('math')?.value || undefined;
         this.widget.properties.group = this.form.get('group')?.value as ChartsExportRequestPayloadGroupModel || undefined;
-        this.widget.properties.device = this.form.get('device')?.value as DeviceInstancesModel || undefined;
+        this.widget.properties.device = this.form.get('device')?.value as DeviceInstancesPermSearchModel || undefined;
         this.widget.properties.service = this.form.get('service')?.value as DeviceTypeServiceModel || undefined;
         this.widget.properties.sourceType = this.form.get('sourceType')?.value || undefined;
         this.widget.properties.deviceGroupId = this.form.get('deviceGroupId')?.value || undefined;
@@ -355,7 +462,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.widget.properties.targetCharacteristic = this.form.get('targetCharacteristic')?.value || undefined;
         this.widget.properties.deviceGroupAggregation = this.form.get('deviceGroupAggregation')?.value || undefined;
         this.widget.properties.timestampConfig = this.form.get('timestampConfig')?.value || undefined;
-
+        this.widget.properties.valueHighlightConfig = this.form.get('valueHighlightConfig')?.value || undefined;
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
     }
 
@@ -424,5 +531,12 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     getDisplay(c: DeviceTypeCharacteristicsModel): string {
         return c.display_unit || c.name;
+    }
+
+    valueHighlightConfigUpdated(thresholdConfigs: ValueHighlightConfig[]) {
+        this.form.get('valueHighlightConfig')?.patchValue({
+            highlight: true,
+            thresholds: thresholdConfigs
+        });
     }
 }

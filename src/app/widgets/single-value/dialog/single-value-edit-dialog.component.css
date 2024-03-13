@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-table {
-    width: 100%;
-}
 
 mat-radio-group mat-radio-button:not(:first-child) {
     padding-left: 8px;
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+.one-line-form-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.one-line-form-container > div {
+    flex: 1;
+    margin-right: 10px
 }

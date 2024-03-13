@@ -29,13 +29,13 @@
                  [ngClass]="{'side-value': i !== svListIndex}"
                  [class]="timestampAgeClass"
                  fxLayoutAlign="center center" (wheel)="wheel($event)">
-                <senergy-single-value-value *ngIf="zoom" [sv]="sv" [widget]="widget"></senergy-single-value-value>
+                <senergy-single-value-value [color]="highlightColor" *ngIf="zoom" [sv]="sv" [widget]="widget"></senergy-single-value-value>
                 <span class="center-text">{{sv.date | date:'medium'}}</span>
             </div>
         </div>
 
         <div class="content-box" *ngIf="configured && ready && !zoom">
-            <senergy-single-value-value [sv]="sv" [widget]="widget"></senergy-single-value-value>
+            <senergy-single-value-value [color]="highlightColor" [sv]="sv" [widget]="widget"></senergy-single-value-value>
             <div *ngIf="showTimestamp" id="date-container" [class]="timestampAgeClass">{{this.sv?.date | date:"short" }}</div>
         </div>
 
