@@ -254,14 +254,31 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         this.configured = this.widget.properties.measurement !== undefined;
     }
 
+    private sortHighlightConfigs() {
+        // highlight configs must be sorted 
+
+    }
+
     private setHighlightColor() {
         const config = this.widget.properties.valueHighlightConfig;
         const currentValue = this.sv?.value;
         if(config && currentValue && config.highlight) {
-            config.thresholds.forEach(thresholdConfig => {
+            // thresholds must be sorted so that the biggest/smallest threshold is applied
+            // e.g. <= 10, <= 20, <= 50 -> <= 10 should be applied
+            const smallerThreshold = config.thresholds.filter(threshold => threshold.direction === '<=').sort((a, b) => b.threshold - a.threshold);
+            const biggerThreshold = config.thresholds.filter(threshold => threshold.direction === '>=').sort((a, b) => a.threshold - b.threshold);
+            smallerThreshold.forEach(thresholdConfig => {
                 const threshold = thresholdConfig.threshold;
                 const direction = thresholdConfig.direction;
-                const thresholdReached = (direction === '<=' && currentValue <= threshold) || (direction === '>=' && currentValue >= threshold);
+                const thresholdReached = (direction === '<=' && currentValue <= threshold);
+                if(thresholdReached) {
+                    this.highlightColor = thresholdConfig.color;
+                }
+            });
+            biggerThreshold.forEach(thresholdConfig => {
+                const threshold = thresholdConfig.threshold;
+                const direction = thresholdConfig.direction;
+                const thresholdReached = (direction === '>=' && currentValue >= threshold);
                 if(thresholdReached) {
                     this.highlightColor = thresholdConfig.color;
                 }
