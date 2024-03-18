@@ -17,7 +17,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {DeviceInstancesModel} from './device-instances.model';
+import {Attribute, DeviceInstancesModel} from './device-instances.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
 import {
@@ -36,7 +36,7 @@ import {forkJoin, mergeMap, Observable, of} from 'rxjs';
 import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../../../widgets/shared/export-data.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
 import {environment} from '../../../../../environments/environment';
-import {catchError, map, concatMap} from 'rxjs/operators';
+import {defaultIfEmpty, map, concatMap} from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root',
@@ -129,34 +129,51 @@ export class DeviceInstancesDialogService {
         });
     }
 
-    openDeviceEditDialog(device: DeviceInstancesModel) {
+    openDeviceEditDialog(device: DeviceInstancesModel, userHasUpdateDisplayNameAuthorization: boolean, userHasUpdateAttributesAuthorization: boolean) {
+        interface editDeviceResponse {
+            attributes: Attribute[];
+            display_name: string;
+        }
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             device: JSON.parse(JSON.stringify(device)), // create copy of object
+            userHasUpdateAttributesAuthorization,
+            userHasUpdateDisplayNameAuthorization
         };
 
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
 
         return editDialogRef.afterClosed().pipe(
-            concatMap((deviceOut: DeviceInstancesModel) => {
-                if (deviceOut !== undefined) {
-                    return this.deviceInstancesService
-                        .updateDeviceInstance(this.convertDeviceInstance(deviceOut))
-                        .pipe(
-                            map((deviceResp: DeviceInstancesUpdateModel | null) => {
-                                if (deviceResp === null) {
-                                    this.snackBar.open('Error while updating the device instance!', 'close', { panelClass: 'snack-bar-error' });
-                                } else {
-                                    Object.assign(device, deviceOut);
-                                    this.snackBar.open('Device instance updated successfully.', undefined, {duration: 2000});
-                                    return deviceOut;
-                                }
-                                return null;
-                            })
-                        );
+            concatMap((editResponse: editDeviceResponse) => {
+                const obs: Observable<any>[] = [];
+                if (editResponse.attributes !== undefined && userHasUpdateAttributesAuthorization) {
+                    obs.push(this.deviceInstancesService.updateDeviceInstanceAttributes(device.id, editResponse.attributes));
                 }
-                return of(null);
+
+                if(editResponse.display_name != null && userHasUpdateDisplayNameAuthorization) {
+                    obs.push(this.deviceInstancesService.updateDeviceInstanceDisplayName(device.id, editResponse.display_name));
+                }
+                return forkJoin(obs).pipe(
+                    defaultIfEmpty([]),
+                    map((resp: (DeviceInstancesUpdateModel | null)[]) => {
+                        let errorOccured = false;
+                        resp.forEach(updateResp => {
+                            if(updateResp === null) {
+                                errorOccured = true;
+                            }
+                        });
+                        if(errorOccured) {
+                            this.snackBar.open('Error while updating the device instance!', 'close', { panelClass: 'snack-bar-error' });
+                            return device;
+                        }
+                        this.snackBar.open('Device instance updated successfully.', undefined, {duration: 2000});
+                        device.display_name = editResponse.display_name;
+                        device.attributes = editResponse.attributes;
+                        return device;
+
+                    })
+                );
             })
         );
     }

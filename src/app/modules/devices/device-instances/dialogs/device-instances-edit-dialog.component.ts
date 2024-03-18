@@ -34,14 +34,22 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     nicknameAttributeOrigin = 'shared';
 
     protocolConstraints: string[] = [];
+    userHasUpdateDisplayNameAuthorization = false;
+    userHasUpdateAttributesAuthorization = false;
 
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesEditDialogComponent>,
         private deviceInstancesService: DeviceInstancesService,
         private deviceTypeService: DeviceTypeService,
 
-        @Inject(MAT_DIALOG_DATA) private data: { device: DeviceInstancesModel },
+        @Inject(MAT_DIALOG_DATA) private data: {
+            device: DeviceInstancesModel,
+            userHasUpdateDisplayNameAuthorization: boolean,
+            userHasUpdateAttributesAuthorization: boolean
+        },
     ) {
+        this.userHasUpdateDisplayNameAuthorization = data.userHasUpdateDisplayNameAuthorization;
+        this.userHasUpdateAttributesAuthorization = data.userHasUpdateAttributesAuthorization;
         this.device = data.device;
         this.device.attributes?.forEach(value => {
             if (value.key === this.nicknameAttributeKey) {
@@ -79,7 +87,10 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
 
     save(): void {
         this.setDisplayNameAttribute();
-        this.dialogRef.close(this.device);
+        this.dialogRef.close({
+            attributes: this.device.attributes,
+            display_name: this.displayname,
+        });
     }
 
     removeAttr(i: number) {

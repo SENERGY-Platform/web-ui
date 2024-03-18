@@ -110,9 +110,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     sortBy = 'display_name';
     sortDirection: SortDirection = 'asc';
 
-    userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasReadDeviceUsageAuthorization = false;
+    userHasUpdateDisplayNameAuthorization = false;
+    userHasUpdateAttributesAuthorization = false;
 
     userIdToName: {[key: string]: string} = {};
 
@@ -135,11 +136,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             this.displayedColumns.splice(4, 0, 'usage');
         }
 
-        this.userHasUpdateAuthorization = this.deviceInstancesService.userHasUpdateAuthorization();
-        if (this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
-        }
-
         this.userHasDeleteAuthorization = this.deviceInstancesService.userHasDeleteAuthorization();
         if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
@@ -151,6 +147,13 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
         if (this.deviceInstancesService.userHasCreateAuthorization()) {
             this.displayedColumns.push('duplicate');
+        }
+
+        this.userHasUpdateDisplayNameAuthorization = this.deviceInstancesService.userHasUpdateDisplayNameAuthorization();
+        this.userHasUpdateAttributesAuthorization = this.deviceInstancesService.userHasUpdateAttributesAuthorization();
+
+        if (this.userHasUpdateDisplayNameAuthorization || this.userHasUpdateAttributesAuthorization) {
+            this.displayedColumns.push('edit');
         }
     }
 
@@ -307,7 +310,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     editDevice(device: DeviceInstancesModel): void {
-        this.deviceInstancesDialogService.openDeviceEditDialog(device).subscribe({
+        this.deviceInstancesDialogService.openDeviceEditDialog(device, this.userHasUpdateDisplayNameAuthorization, this.userHasUpdateAttributesAuthorization).subscribe({
             next: (newDevice) => {
                 if(newDevice != null) {
                     const index = this.dataSource.data.findIndex(element => element.id === device.id);

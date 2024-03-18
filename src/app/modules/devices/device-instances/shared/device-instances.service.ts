@@ -20,6 +20,7 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, reduce, share, concatMap} from 'rxjs/operators';
 import {
+    Attribute,
     DeviceFilterCriteriaModel,
     DeviceInstancesBaseModel,
     DeviceInstancesModel,
@@ -49,6 +50,8 @@ export class DeviceInstancesService {
     private getDeviceHistoryObservable1h: Observable<DeviceInstancesHistoryModel[]> | null = null;
     nicknameAttributeKey = 'shared/nickname';
     authorizations: PermissionTestResponse;
+    authorizationsDisplayName: PermissionTestResponse;
+    authorizationsAttributes: PermissionTestResponse;
 
     constructor(
         private http: HttpClient,
@@ -59,6 +62,8 @@ export class DeviceInstancesService {
         private networkService: NetworksService,
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl);
+        this.authorizationsDisplayName = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl + '/devices/id/display_name');
+        this.authorizationsAttributes = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl + '/devices/id/attributes');
     }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
@@ -128,6 +133,18 @@ export class DeviceInstancesService {
         return this.http
             .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(device.id), device)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', null)));
+    }
+
+    updateDeviceInstanceDisplayName(deviceId: string, newDisplayName: string) {
+        return this.http
+            .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/display_name', '"' + newDisplayName + '"')
+            .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
+    }
+
+    updateDeviceInstanceAttributes(deviceId: string, attributes: Attribute[]) {
+        return this.http
+            .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes', attributes)
+            .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
     }
 
     saveDeviceInstance(device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel | null> {
@@ -597,5 +614,13 @@ export class DeviceInstancesService {
 
     userHasReadAuthorization(): boolean {
         return this.authorizations['GET'];
+    }
+
+    userHasUpdateDisplayNameAuthorization() {
+        return this.authorizationsDisplayName['PUT'];
+    }
+
+    userHasUpdateAttributesAuthorization() {
+        return this.authorizationsAttributes['PUT'];
     }
 }
