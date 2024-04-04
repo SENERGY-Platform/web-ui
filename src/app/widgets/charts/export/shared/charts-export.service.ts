@@ -256,7 +256,7 @@ export class ChartsExportService {
                 return { source: 'timescale', res };
             })));
         }
-
+        
         return forkJoin(obs).pipe(map(res => {
             const table: any[][][][] = [];
             for (let i = 0; i < timescaleElements.length + influxElements.length; i++) {

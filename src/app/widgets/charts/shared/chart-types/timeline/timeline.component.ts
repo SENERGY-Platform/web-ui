@@ -122,6 +122,7 @@ export class TimelineComponent implements OnInit, OnChanges {
                 this.processDataForOneEntity(dataForOneEntity, chartData, this.vAxes[i]);
             }
         });
+        console.log(chartData)
         const convertedCartData = this.convertTimelineChartData(chartData);
         return {
             data: convertedCartData,

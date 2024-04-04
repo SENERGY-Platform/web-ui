@@ -20,6 +20,7 @@ import { WidgetModel } from '../shared/dashboard-widget.model';
 import { DashboardTypesEnum } from '../shared/dashboard-types.enum';
 import { Observable } from 'rxjs';
 import { EnergyPredictionRequirementsService } from '../../../widgets/energy-prediction/shared/energy-prediction-requirements.service';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
 
 export interface Types {
     value: string;
@@ -121,8 +122,13 @@ export class DashboardNewWidgetDialogComponent {
     constructor(
         private dialogRef: MatDialogRef<DashboardNewWidgetDialogComponent>,
         private energyPredictionRequirementsService: EnergyPredictionRequirementsService,
+        private userService: AuthorizationService
     ) {
         this.types.forEach((t) => this.checkRequirements(t));
+        const activeUserId = this.userService.getUserId();
+        if(activeUserId === 'aae7e87b-63a2-477f-afb4-caa0db84e3fa') {
+            this.types.push({ value: DashboardTypesEnum.FakeAnomalyDetection, viewValue: 'Fake Anomaly Detection', disabled: false, tooltip: '' });
+        }
     }
 
     activateCategory(): void {

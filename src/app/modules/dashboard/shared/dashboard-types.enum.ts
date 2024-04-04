@@ -36,6 +36,6 @@ export enum DashboardTypesEnum {
     DataTable = 'data_table',
     AcControl = 'ac_control',
     AnomalyDetection = 'anomaly_detection',
-    OpenWindow = 'open_window'
-
+    OpenWindow = 'open_window',
+    FakeAnomalyDetection = 'fake-anomaly'
 }

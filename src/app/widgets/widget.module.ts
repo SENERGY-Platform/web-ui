@@ -110,6 +110,7 @@ import { DataSourceSelectorComponent } from './charts/shared/data-source-selecto
 import { OpenWindowEditComponent } from './charts/open-window/dialog/edit/edit.component';
 import { ThresholdComponent } from './single-value/dialog/threshold/threshold.component';
 import { AddThresholdComponent } from './single-value/dialog/add-threshold/add-threshold.component';
+import { FakeAnomalyComponent } from './anomaly/fake/fake.component';
 
 registerLocaleData(localeDe, 'de');
 
@@ -211,7 +212,8 @@ registerLocaleData(localeDe, 'de');
         DataSourceSelectorComponent,
         OpenWindowEditComponent,
         ThresholdComponent,
-        AddThresholdComponent
+        AddThresholdComponent,
+        FakeAnomalyComponent
     ],
     exports: [
         SwitchComponent,

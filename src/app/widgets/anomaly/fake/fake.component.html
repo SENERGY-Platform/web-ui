@@ -1,0 +1,92 @@
+<!--
+  ~ Copyright 2022 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<mat-card appearance="outlined">
+  <senergy-widget-header [widget]="widget"></senergy-widget-header>
+  <mat-card-content>
+    <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
+      <div *ngIf="style === 'timeline'">
+        <timeline-chart *ngIf="chartDataReady" [data]="timelineChartData" [hAxisLabel]="'Zeit'" [vAxisLabel]="'c163d155'"
+          [enableToolbar]="false" [vAxes]="properties.vAxes" [width]="timelineWidth" [height]="timelineHeight">
+        </timeline-chart>
+      </div>
+      <div *ngIf="style === 'single'">
+        <div *ngIf="type === 'time'" class="anomaly-container">
+          <div>
+            <mat-icon>schedule</mat-icon>
+          </div>
+          <div>
+            <h2>Time between inputs was too long!</h2>
+          </div>
+          <div class="text-container">
+            <p><b>At:</b></p>
+            <p>{{timestamp | date:'medium'}}</p>
+            <p><b>Waiting time:</b></p>
+            <p>10 min.</p>
+          </div>
+
+        </div>
+
+        <div *ngIf="type === 'schema'" class="anomaly-container">
+          <div>
+            <mat-icon>schema</mat-icon>
+          </div>
+          <div>
+            <h2>Input data did not follow the schema!</h2>
+          </div>
+          <div class="text-container">
+            <p>Occured at {{timestamp | date:'medium'}}</p>
+            <p>Value: {{'{"status": "error"}'}}</p>
+          </div>
+        </div>
+
+        <div *ngIf="type === 'extreme_value'" class="anomaly-container">
+          <div>
+            <mat-icon>error</mat-icon>
+          </div>
+          <div>
+            <h2>Input is too high!</h2>
+          </div>
+          <div class="text-container">
+            <p>Occured at {{timestamp | date:'medium'}}</p>
+            <p>Value: {{value | number:'1.0-2'}}</p>
+          </div>
+        </div>
+
+        <div *ngIf="type === 'curve_anomaly'" class="anomaly-container">
+          <div>
+            <mat-icon>error</mat-icon>
+          </div>
+          <div>
+            <h2>An anomaly occured!</h2>
+          </div>
+          <div class="text-container">
+            <p><b>From</b></p>
+            <p>{{fromTimestamp | date:'medium'}}</p>
+            <p><b>To</b></p>
+            <p>{{toTimestamp | date:'medium'}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </mat-card-content>
+  <div>
+    <senergy-widget-footer [userHasDeleteAuthorization]="true" [dashboardId]="dashboardId" [widget]="widget">
+    </senergy-widget-footer>
+  </div>
+</mat-card>
