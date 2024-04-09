@@ -28,6 +28,9 @@ import { DataTableWidgetPropertiesModel } from '../../../widgets/data-table/shar
 import { RangeSliderPropertiesModel } from '../../../widgets/range-slider/shared/range-slider-properties.model';
 import {AcControlPropertiesModel} from '../../../widgets/ac-control/shared/ac-control.model';
 import { OpenWindowPropertiesModel } from 'src/app/widgets/charts/open-window/model/model';
+import { PVLoadRecommendationWidgetPropertiesModel } from 'src/app/widgets/pv-load-recommendation/shared/recommendation.model';
+import { PVPredictionWidgetPropertiesModel } from 'src/app/widgets/pv-prediction/shared/prediction.model';
+import { AnomalyWidgetPropertiesModel } from 'src/app/widgets/anomaly/shared/anomaly.model';
 
 export interface WidgetModel {
     id: string;
@@ -61,4 +64,7 @@ export interface WidgetPropertiesModels
         ProcessIncidentPropertiesModel,
         ProcessSchedulerPropertiesModel,
         DataTableWidgetPropertiesModel,
+        PVLoadRecommendationWidgetPropertiesModel,
+        PVPredictionWidgetPropertiesModel,
+        AnomalyWidgetPropertiesModel,
         DeviceStatusPropertiesModel {}

@@ -37,5 +37,7 @@ export enum DashboardTypesEnum {
     AcControl = 'ac_control',
     AnomalyDetection = 'anomaly_detection',
     OpenWindow = 'open_window',
-    FakeAnomalyDetection = 'fake-anomaly'
+    FakeAnomalyDetection = 'fake-anomaly',
+    PVPrediction = 'pv_prediction',
+    PVLoadRecommendation = 'pv_load_recommendation'
 }

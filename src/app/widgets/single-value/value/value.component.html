@@ -15,7 +15,7 @@
   -->
 
 
-<senergy-fit-text *ngIf="sv?.type === 'String'" [txt]="sv?.value + ' ' + widget?.properties?.vAxisLabel"
+<senergy-fit-text *ngIf="sv?.type === 'String'" [txt]="sv?.value + ' ' + (widget?.properties?.vAxisLabel || '')"
                   [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
 </senergy-fit-text>
 <senergy-fit-text *ngIf="sv?.type === 'Number'"

@@ -5,41 +5,50 @@ import { forkJoin, Observable, map, concatMap } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
-import { DeviceInstancesModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
-import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { ExportModel, ExportResponseModel } from 'src/app/modules/exports/shared/export.model';
 import { ExportService } from 'src/app/modules/exports/shared/export.service';
 import { ChartsExportMeasurementModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
+import { PVPredictionProperties } from '../../shared/prediction.model';
 
 @Component({
     selector: 'app-edit',
     templateUrl: './edit.component.html',
     styleUrls: ['./edit.component.css']
 })
-export class EditComponent implements OnInit {
+export class PVPredictionEditComponent implements OnInit {
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
     form = this.formBuilder.group({
         name: [''],
         export: [''],
-        showForAllDevices: [true],
-        showDebug: [false],
-        onlyDataWindows: [false],
-        filterDevices: ['']
+        displayTimeline: [false],
+        displayNextValue: [false],
+        nextValueConfig: this.formBuilder.group({
+            time: [''],
+            level: ['']
+        })
     });
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
     exports: ChartsExportMeasurementModel[] = [];
     ready = false;
-    devices: DeviceInstancesModel[] = [];
-    errorOccured = false;
+
+    levels = [
+        {
+            name: 'Hours',
+            value: 'h'
+        },
+        {
+            name: 'Days',
+            value: 'd'
+        }
+    ];
 
     constructor(
-    private dialogRef: MatDialogRef<EditComponent>,
+    private dialogRef: MatDialogRef<PVPredictionEditComponent>,
     private exportService: ExportService,
     private dashboardService: DashboardService,
-    private deviceRepoService: DeviceInstancesService,
     private formBuilder: UntypedFormBuilder,
     @Inject(MAT_DIALOG_DATA) data: {
             dashboardId: string;
@@ -58,17 +67,8 @@ export class EditComponent implements OnInit {
         this.dialogRef.close(this.widget);
     }
 
-    loadDevices() {
-        return this.deviceRepoService.loadDeviceInstances(9999, 0, undefined, undefined, undefined, undefined, undefined, undefined, undefined).pipe(
-            map((devices) => {
-                this.devices = devices.result;
-            })
-        );
-    }
-
     ngOnInit() {
-        const obs = [this.getAvailableExports(), this.loadDevices()];
-        forkJoin(obs).pipe(
+        this.getAvailableExports().pipe(
             concatMap((_) => this.getWidgetData())
         ).subscribe({
             next: (_) => {
@@ -78,22 +78,38 @@ export class EditComponent implements OnInit {
                 this.ready = true;
             }
         });
+
+        this.setupToggle();
+    }
+
+    setupToggle() {
+        this.form.controls.displayTimeline.valueChanges.subscribe({
+            next: (value) => {
+                if(value) {
+                    this.form.controls.displayNextValue.patchValue(false);
+                }
+            }
+        });
+        this.form.controls.displayNextValue.valueChanges.subscribe({
+            next: (value) => {
+                if(value) {
+                    this.form.controls.displayTimeline.patchValue(false);
+                }
+            }
+        });
     }
 
     getWidgetData(): Observable<WidgetModel> {
         return this.dashboardService.getWidget(this.dashboardId, this.widgetId).pipe(
             map((widget: WidgetModel) => {
                 this.widget = widget;
-                const filterDevices: DeviceInstancesModel[] = this.devices.filter(device => this.widget.properties.anomalyDetection?.filterDeviceIds.includes(device.id))
-                const exportElement = this.exports.find((availableExport) => availableExport.id === this.widget.properties.anomalyDetection?.export);
-
+                const exportElement = this.exports.find((availableExport) => availableExport.id === this.widget.properties.pvPrediction?.exportID);
                 this.form.patchValue({
                     name: widget.name,
                     export: exportElement,
-                    onlyDataWindows: widget.properties.anomalyDetection?.onlyDataWindows || false,
-                    showDebug: widget.properties.anomalyDetection?.showDebug || false,
-                    showForAllDevices: widget.properties.anomalyDetection?.showForAllDevices || true,
-                    filterDevices: filterDevices || []
+                    displayTimeline: widget.properties.pvPrediction?.displayTimeline,
+                    displayNextValue: widget.properties.pvPrediction?.displayNextValue,
+                    nextValueConfig: widget.properties.pvPrediction?.nextValueConfig
                 });
                 return widget;
             })
@@ -107,18 +123,14 @@ export class EditComponent implements OnInit {
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
-        const deviceIDs: string[] = [];
-        this.form.get('filterDevices')?.value.forEach((device: DeviceInstancesModel) => {
-            deviceIDs.push(device.id);
-        });
-
-        this.widget.properties.anomalyDetection = {
-            export: this.form.get("export")?.value['id'],
-            showForAllDevices: this.form.get("showForAllDevices")?.value,
-            showDebug: this.form.get("showDebug")?.value,
-            onlyDataWindows: this.form.get("onlyDataWindows")?.value,
-            filterDeviceIds: deviceIDs
+        const pvPrediction: PVPredictionProperties = {
+            exportID: this.form.get('export')?.value['id'],
+            displayNextValue: this.form.get('displayNextValue')?.value,
+            displayTimeline: this.form.get('displayTimeline')?.value,
+            nextValueConfig: this.form.get('nextValueConfig')?.value
         };
+        this.widget.properties.pvPrediction = pvPrediction;
+
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
     }
 
@@ -143,8 +155,11 @@ export class EditComponent implements OnInit {
             map((exports: ExportResponseModel | null) => {
                 if (exports !== null) {
                     exports.instances?.forEach((exportModel: ExportModel) => {
-                        //EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
-                        if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
+                        if (
+                            exportModel.ID !== undefined &&
+                  exportModel.Name !== undefined //&&
+                  //EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
+                        ) {
                             this.exports.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID });
                         }
                     });
@@ -156,10 +171,6 @@ export class EditComponent implements OnInit {
 
     displayFn(input?: ChartsExportMeasurementModel): string {
         return input ? input.name : '';
-    }
-
-    compare(a: any, b: any): boolean {
-        return a && b && a.id === b.id;
     }
 
 }

@@ -111,6 +111,10 @@ import { OpenWindowEditComponent } from './charts/open-window/dialog/edit/edit.c
 import { ThresholdComponent } from './single-value/dialog/threshold/threshold.component';
 import { AddThresholdComponent } from './single-value/dialog/add-threshold/add-threshold.component';
 import { FakeAnomalyComponent } from './anomaly/fake/fake.component';
+import { PvPredictionComponent } from './pv-prediction/pv-prediction.component';
+import { PvLoadRecommendationComponent } from './pv-load-recommendation/pv-load-recommendation.component';
+import { PVLoadRecommendationEditComponent } from './pv-load-recommendation/dialog/edit/edit.component';
+import { PVPredictionEditComponent } from './pv-prediction/dialog/edit/edit.component';
 
 registerLocaleData(localeDe, 'de');
 
@@ -213,7 +217,11 @@ registerLocaleData(localeDe, 'de');
         OpenWindowEditComponent,
         ThresholdComponent,
         AddThresholdComponent,
-        FakeAnomalyComponent
+        FakeAnomalyComponent,
+        PvPredictionComponent,
+        PVPredictionEditComponent,
+        PvLoadRecommendationComponent,
+        PVLoadRecommendationEditComponent
     ],
     exports: [
         SwitchComponent,
