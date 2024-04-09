@@ -96,6 +96,12 @@
   <div *ngSwitchCase="'fake-anomaly'" fxFill>
     <fake-senergy-anomaly-detection [dashboardId]="dashboardId" [widget]="widget" fxFill></fake-senergy-anomaly-detection>
   </div>
+  <div *ngSwitchCase="'pv_prediction'" fxFill>
+    <senergy-pv-prediction [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-pv-prediction>
+  </div>
+  <div *ngSwitchCase="'pv_load_recommendation'" fxFill>
+    <senergy-pv-load-recommendation [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-pv-load-recommendation>
+  </div>
   <div *ngSwitchDefault>
     <div>default</div>
   </div>

@@ -431,12 +431,10 @@ export class DataSourceSelectorComponent implements OnInit {
         this.waitingForDataSourceChange = true;
         this.loadFieldOptions(selectedDataSource).pipe(
             map((fieldOptions) => {
-                console.log(fieldOptions)
                 this.fieldOptionsTMP = fieldOptions;
                 this.form.get('fieldOptions').value = fieldOptions;
 
                 const filteredFields = this.filterSelectedFields(selectedDataSource);
-                console.log(filteredFields)
                 this.form.get('fields').setValue(filteredFields);
 
                 return null;

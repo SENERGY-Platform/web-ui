@@ -80,6 +80,8 @@ export class DashboardNewWidgetDialogComponent {
         { value: DashboardTypesEnum.AcControl, viewValue: 'Air Condition Control', disabled: false, tooltip: '', requirementsService: undefined },
         { value: DashboardTypesEnum.AnomalyDetection, viewValue: 'Anomaly Detection', disabled: false, tooltip: '' },
         { value: DashboardTypesEnum.OpenWindow, viewValue: 'Open Window Detection', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.PVLoadRecommendation, viewValue: 'PV Load Recommendation', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.PVPrediction, viewValue: 'PV Energy Prediction', disabled: false, tooltip: '' },
 
     ];
     switchCategories: SwitchCategories[] = [

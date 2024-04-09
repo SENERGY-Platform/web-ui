@@ -1,10 +1,12 @@
 import { AfterViewChecked, AfterViewInit, Component, HostListener, Input, OnInit } from '@angular/core';
+import { concatMap, of, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportVAxesModel } from '../../charts/export/shared/charts-export-properties.model';
 import { ChartsExportService } from '../../charts/export/shared/charts-export.service';
 import { SingleValueService } from '../../single-value/shared/single-value.service';
+import { AnomalyService } from '../shared/anomaly.service';
 
 @Component({
     selector: 'fake-senergy-anomaly-detection',
@@ -101,13 +103,23 @@ export class FakeAnomalyComponent implements AfterViewChecked {
     constructor(
         private chartsExportService: ChartsExportService,
         private errorHandlerService: ErrorHandlerService,
-        private elementSizeService: ElementSizeService,
+        private elementSizeService: ElementSizeService
     ) {}
 
     ngAfterViewChecked(): void {
         if(!this.initialized) {
             //this.lastAnomaly();
-            this.timelineAnomalies();
+            this.loadTimelineData(this.properties).subscribe({
+                next: (chartData) => {
+                    this.timelineChartData = chartData;
+                    this.resize();
+                    this.chartDataReady = true;
+                    this.style = 'timeline';
+                },
+                error: (_) => {
+                    this.errorMessage = 'Error';
+                }
+            });
             this.initialized = true;
         }
 
@@ -191,33 +203,27 @@ export class FakeAnomalyComponent implements AfterViewChecked {
             }
         }
 
-        console.log(chartData)
-
-        this.timelineChartData.push([chartData]);
-
+        return chartData;
     }
 
-    timelineAnomalies() {
-        this.chartsExportService.getData(this.properties).subscribe({
-            next: (resp) => {
-                const threshold = 100;
+    loadTimelineData(properties: any) {
+        const timelineChartData: any = [];
+        return this.chartsExportService.getData(properties).pipe(
+            concatMap((resp) => {
                 if (resp != null && this.errorHandlerService.checkIfErrorExists(resp)) {
-                    this.errorMessage = 'No data';
+                    return throwError(() => new Error('No data'));
                 } else if (resp != null) {
                     const tempData = resp[0][0];
-                    this.parseSingleExportData(tempData, 100);
+                    timelineChartData.push([this.parseSingleExportData(tempData, 100)]);
 
                     const gasData = resp[0][1];
-                    this.parseSingleExportData(gasData, 3);
+                    timelineChartData.push([this.parseSingleExportData(gasData, 3)]);
 
-                    this.resize();
-                    this.chartDataReady = true;
-                    this.style = 'timeline';
+                    return of(timelineChartData);
                 }
-            },
-            error: (_) => {
-                this.errorMessage = 'Error';
-            }
-        });
+                return of();
+            })
+        );
     }
+
 }

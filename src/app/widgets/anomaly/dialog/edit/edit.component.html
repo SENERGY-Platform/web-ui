@@ -25,15 +25,30 @@
                     <input type="text" matInput placeholder="Name" formControlName="name">
                 </mat-form-field>
     
-                <mat-form-field color="accent" fxFlex="47" *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-label>Choose Export</mat-label>
-                    <input type="text" matInput formControlName="export" [matAutocomplete]="auto" required>
-                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                        <mat-option *ngFor="let option of exports" [value]="option">
-                            {{option.name}}
-                        </mat-option>
-                    </mat-autocomplete>
-                </mat-form-field>
+                <div *ngIf="exports.length > 0" fxLayout="column">
+                    <mat-form-field color="accent" fxFlex="47" *ngIf="userHasUpdatePropertiesAuthorization">
+                        <mat-label>Choose Export</mat-label>
+                        <input type="text" matInput formControlName="export" [matAutocomplete]="auto" required>
+                        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                            <mat-option *ngFor="let option of exports" [value]="option">
+                                {{option.name}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+    
+                    <mat-checkbox formControlName="showForAllDevices">Show anomalies for all devices?</mat-checkbox>
+                    <mat-form-field color="accent" fxFlex="47" *ngIf="form.controls.showForAllDevices.value == false">
+                        <mat-label>Choose Devices</mat-label>
+                        <senergy-select-search [required]="true" [multiple]="true" [compareWith]="compare" formControlName="filterDevices"
+                            [options]="devices" useOptionViewProperty="name">
+                    </senergy-select-search>
+                    </mat-form-field>
+                    
+                    <mat-checkbox formControlName="showDebug">Show interpretability data?</mat-checkbox>
+                </div>
+                <div *ngIf="exports.length === 0">
+                    No export available
+                </div>
         </form>
     </div>
 

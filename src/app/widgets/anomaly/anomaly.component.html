@@ -33,6 +33,12 @@
         <div *ngIf="error == null">
           <div *ngIf="anomaly != null">
             <div *ngIf="anomaly.initial_phase === '' || anomaly.initial_phase == null">
+              <div *ngIf="widget.properties.anomalyDetection?.onlyDataWindows === true">
+                <timeline-chart *ngIf="chartDataReady" [data]="timelineChartData" [hAxisLabel]="'Zeit'" [vAxisLabel]="'c163d155'"
+                  [enableToolbar]="false" [vAxes]="properties.vAxes" [width]="timelineWidth" [height]="timelineHeight">
+                </timeline-chart>
+              </div>
+
               <div *ngIf="anomaly.type === 'time'" class="anomaly-container">
                 <div>
                   <mat-icon>schedule</mat-icon>
@@ -42,8 +48,12 @@
                   <h2 *ngIf="anomaly.subType === 'low'">Time between inputs was too short!</h2>
                 </div>
                 <div class="text-container">
-                  <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
-                  <p>Waiting time: {{anomaly.value | number:'1.2-3'}} {{anomaly.unit}}</p>
+                  <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
+                  <p><b>Waiting time: </b>{{anomaly.value | number:'1.2-3'}} min.</p>
+                  <div *ngIf="widget.properties.anomalyDetection?.showDebug === true" class="text-container">
+                    <p><b>Threshold: </b>{{anomaly.threshold}}</p>
+                    <p><b>Current Mean: </b>{{anomaly.mean}}</p>
+                  </div>
                 </div>
 
               </div>
@@ -56,8 +66,8 @@
                   <h2>Input data did not follow the schema!</h2>
                 </div>
                 <div class="text-container">
-                  <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
-                  <p>Value: {{anomaly.value}}</p>
+                  <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
+                  <p><b>Value: </b>{{anomaly.value}}</p>
                 </div>
               </div>
 
@@ -70,8 +80,12 @@
                   <h2 *ngIf="anomaly.subType === 'low'">Input is too low!</h2>
                 </div>
                 <div class="text-container">
-                  <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
-                  <p>Value: {{anomaly.value | number:'1.0-2'}}</p>
+                  <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
+                  <p><b>Value: </b>{{anomaly.value | number:'1.0-2'}}</p>
+                  <div *ngIf="widget.properties.anomalyDetection?.showDebug === true">
+                    <p><b>Threshold: </b>{{anomaly.threshold}}</p>
+                    <p><b>Current Mean: </b>{{anomaly.mean}}</p>
+                  </div>
                 </div>
               </div>
 
@@ -83,8 +97,8 @@
                   <h2>Value is anomalous!</h2>
                 </div>
                 <div class="text-container">
-                  <p>Occured at {{anomaly.timestamp | date:'medium'}}</p>
-                  <p>Value: {{anomaly.value}}</p>
+                  <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
+                  <p><b>Value: </b>{{anomaly.value}}</p>
                 </div>
               </div>
 

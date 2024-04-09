@@ -6,7 +6,7 @@ import {
     MatDialogConfig
 } from '@angular/material/dialog';
 import {
-    Observable, of, map
+    Observable, of, map, throwError, concatMap, EMPTY, catchError
 } from 'rxjs';
 import {
     ErrorHandlerService
@@ -35,6 +35,7 @@ import {
     AnomalyResultModel
 } from './anomaly.model';
 import {environment} from '../../../../environments/environment';
+import { ChartsExportService } from '../../charts/export/shared/charts-export.service';
 
 @Injectable({
     providedIn: 'root'
@@ -46,6 +47,7 @@ export class AnomalyService {
         private dashboardService: DashboardService,
         private errorHandlerService: ErrorHandlerService,
         private exportDataService: ExportDataService,
+        private chartsExportService: ChartsExportService
     ) {
 
     }
@@ -70,57 +72,54 @@ export class AnomalyService {
     }
 
     getAnomaly(widget: WidgetModel): Observable<AnomalyResultModel | null> {
-        const m = widget.properties.measurement;
+        const m = widget.properties.anomalyDetection;
         if (m) {
             const requestPayload: (LastValuesRequestElementInfluxModel | LastValuesRequestElementTimescaleModel)[] = [];
 
             requestPayload.push({
-                exportId: m.id,
-                measurement: m.id,
+                exportId: m.export,
+                measurement: m.export,
                 columnName: 'value',
             });
             requestPayload.push({
-                exportId: m.id,
-                measurement: m.id,
+                exportId: m.export,
+                measurement: m.export,
                 columnName: 'type',
             });
             requestPayload.push({
-                exportId: m.id,
-                measurement: m.id,
+                exportId: m.export,
+                measurement: m.export,
                 columnName: 'sub_type',
             });
             requestPayload.push({
-                exportId: m.id,
-                measurement: m.id,
-                columnName: 'unit',
+                exportId: m.export,
+                measurement: m.export,
+                columnName: 'threshold',
             });
             requestPayload.push({
-                exportId: m.id,
-                measurement: m.id,
+                exportId: m.export,
+                measurement: m.export,
+                columnName: 'mean',
+            });
+            requestPayload.push({
+                exportId: m.export,
+                measurement: m.export,
                 columnName: 'time'
             });
             requestPayload.push({
-                exportId: m.id,
-                measurement: m.id,
+                exportId: m.export,
+                measurement: m.export,
                 columnName: 'initial_phase'
             });
+            requestPayload.push({
+                exportId: m.export,
+                measurement: m.export,
+                columnName: 'device_id'
+            });
 
-            let o: Observable < TimeValuePairModel[] > | undefined;
-            switch (m.exportDatabaseId) {
-            case environment.exportDatabaseIdInternalTimescaleDb:
-                o = this.exportDataService.getLastValuesTimescale(requestPayload);
-                break;
-            case undefined:
-            case environment.exportDatabaseIdInternalInfluxDb:
-                o = this.exportDataService.getLastValuesInflux(requestPayload as LastValuesRequestElementInfluxModel[]);
-                break;
-            default:
-                console.error('cant load data of this export: not internal');
-                return of();
-            }
-            return o.pipe(
+            return this.exportDataService.getLastValuesTimescale(requestPayload).pipe(
                 map((pairs) => {
-                    if (pairs.length !== 6) {
+                    if (pairs.length !== 8) {
                         return null;
                     }
 
@@ -131,14 +130,59 @@ export class AnomalyService {
                         value: pairs[0].value as string,
                         type: pairs[1].value as string,
                         subType: pairs[2].value as string,
-                        unit: pairs[3].value as string,
-                        timestamp: pairs[4].value as string,
-                        initial_phase: pairs[5].value as string,
+                        threshold: pairs[3].value as number,
+                        mean: pairs[4].value as number,
+                        timestamp: pairs[5].value as string,
+                        initial_phase: pairs[6].value as string,
+                        device_id: pairs[7].value as string
                     };
                     return model;
-                })
+                }),
+                catchError((_) => of(null))
             );
         }
-        return of();
+        return of(null);
+    }
+
+    getAnomalyHistory(exportID: string) {
+        const properties = {
+            exports: [{
+                    id: exportID,
+                    name: 'value',
+                    values: [],
+                    exportDatabaseId: 'urn:infai:ses:export-db:ac535dbb-4600-4b84-8660-2f40de034644'
+            }],
+            group: {
+                    time: '5m',
+                    type: 'mean'
+            },
+            time: {
+                    last: '1d',
+                    ahead: undefined,
+                    start: undefined,
+                    end: undefined
+            },
+            timeRangeType: 'relative',
+            vAxes: [{
+                    instanceId: exportID,
+                    exportName: '',
+                    color: '',
+                    math: '',
+                    valueName: 'value',
+                    valueType: '',
+                    conversions: [{
+                        from: '1',
+                        to: '1',
+                        color: '#AA4A44',
+                        alias: 'auffällig'
+                    }, {
+                        from: '0',
+                        to: '0',
+                        color: '#50C878',
+                        alias: 'normal'
+                    }],
+                    valueAlias: 'Temperatur'
+            }]
+        };
     }
 }
