@@ -186,7 +186,6 @@ export class ImportTypesComponent implements OnInit {
 
     reload() {
         this.offset = 0;
-        this.pageSize = 20;
         this.dataReady = false;
         this.selectionClear();
 

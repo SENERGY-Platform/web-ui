@@ -292,7 +292,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     reload() {
         this.offset = 0;
         this.ready = false;
-        this.pageSize = 20;
         this.selectionClear();
         this.usage = [];
 

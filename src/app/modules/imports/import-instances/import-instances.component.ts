@@ -164,7 +164,6 @@ export class ImportInstancesComponent implements OnInit {
 
     reload() {
         this.offset = 0;
-        this.pageSize = 20;
         this.selectionClear();
         this.dataReady = false;
 

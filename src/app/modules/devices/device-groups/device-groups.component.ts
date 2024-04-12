@@ -183,7 +183,6 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public reload() {
         this.offset = 0;
-        this.pageSize = 20;
         this.ready = false;
         this.selectionClear();
 

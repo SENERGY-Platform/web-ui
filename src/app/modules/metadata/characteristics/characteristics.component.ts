@@ -273,7 +273,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     reload() {
         this.ready = false;
         this.offset = 0;
-        this.pageSize = 20;
         this.selectionClear();
 
         forkJoin([this.getCharacteristics(), this.getTotalCounts()]).subscribe(_ => {

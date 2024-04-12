@@ -210,7 +210,6 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     reload() {
         this.ready = false;
-        this.pageSize = 20;
         this.offset = 0;
         this.selectionClear();
 

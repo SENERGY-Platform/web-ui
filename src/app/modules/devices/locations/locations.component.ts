@@ -169,7 +169,6 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     reload() {
         this.offset = 0;
-        this.pageSize = 20;
         this.ready = false;
         this.selectionClear();
 
