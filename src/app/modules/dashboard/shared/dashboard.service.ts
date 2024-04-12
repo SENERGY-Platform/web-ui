@@ -199,15 +199,21 @@ export class DashboardService {
     /** Observable services */
 
     manipulateWidget(manipulation: DashboardManipulationEnum, widgetId: string, widget: WidgetModel | null) {
-        this.widgetSubject.next({ manipulation, widgetId, widget });
+        this.widgetSubject.next({
+            manipulation,
+            widgetId,
+            widget,
+            reloadAfterZoom: true,
+            initialWidgetData: null
+        });
     }
 
     manipulateDashboard(manipulation: DashboardManipulationEnum, dashboardId: string, dashboard: DashboardModel | null) {
         this.dashboardSubject.next({ manipulation, dashboardId, dashboard });
     }
 
-    zoomWidget(manipulation: DashboardManipulationEnum, widgetId: string, widget: WidgetModel | null) {
-        this.widgetSubject.next({ manipulation, widgetId, widget });
+    zoomWidget(manipulation: DashboardManipulationEnum, widgetId: string, widget: WidgetModel | null, reloadAfterZoom: boolean, initialWidgetData: any) {
+        this.widgetSubject.next({ manipulation, widgetId, widget, reloadAfterZoom, initialWidgetData});
     }
 
     reloadAllWidgets() {

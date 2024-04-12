@@ -60,6 +60,7 @@
     <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom"
                            (editEvent)="edit()" [refreshing]="refreshing"
                            [optionCustomIcon]="getCustomIcons(false).icons" [optionCustomTooltip]="getCustomIcons(false).tooltips"
-                           (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(false).disabled"></senergy-widget-footer>
+                           (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(false).disabled"
+                           [reloadAfterZoom]="false" [getInitialWidgetData]="getChartData"></senergy-widget-footer>
 </mat-card>
 

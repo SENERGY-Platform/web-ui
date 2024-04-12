@@ -33,7 +33,7 @@ import { ApexChartOptions } from './shared/charts-export-properties.model';
     templateUrl: './charts-export.component.html',
     styleUrls: ['./charts-export.component.css'],
 })
-export class ChartsExportComponent implements OnInit, OnDestroy {
+export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     chartExportData = {} as ChartsModel;
     timelineChartData: any;
     timelineWidth = 0;
@@ -56,6 +56,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
+    @Input() initialWidgetData: any;
 
     @HostListener('window:resize')
     onResize() {
@@ -97,6 +98,26 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         this.scheduleRefresh();
     }
 
+    ngAfterViewInit(): void {
+        // use this hook, to get the resize sizes from the correct widget
+        this.setupInitialChartData();
+
+    }
+
+    setupInitialChartData() {
+        if(this.initialWidgetData != null) {
+            if(this.widget.properties.chartType === 'Timeline') {
+                this.timelineChartData = this.initialWidgetData;
+                this.resizeApex();
+            } else {
+                this.chartExportData = this.initialWidgetData;
+                this.resizeChart();
+            }
+            this.setupZoomChartSettings();
+            this.ready = true;
+        }
+    }
+
     edit() {
         this.chartsExportService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
@@ -126,7 +147,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
 
     private resizeChart() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
-
         if (this.chartExportData.options !== undefined) {
             this.chartExportData.options.height = element.height;
             this.chartExportData.options.width = element.width;
@@ -193,21 +213,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                     this.chartExportData = resp;
                     this.chartExportData.dataTable.sort((a, b) => (a[0] as Date).valueOf() - (b[0] as Date).valueOf());
 
-                    if (this.zoom && this.chartExportData.chartType === 'LineChart' && this.chartExportData.options !== undefined) {
-                        this.chartExportData.chartType = 'AnnotationChart';
-                        this.chartExportData.options.dateFormat = 'dd.MM.yyyy HH:mm:ss';
-                        this.chartExportData.options.displayExactValues = true;
-                        this.chartExportData.options.thickness = 2;
-                        this.chartExportData.options.displayZoomButtons = false;
-                        this.chartExportData.options.displayAnnotations = false;
-                        this.chartExportData.options.displayLegendValues = true;
-                        if (lastOverride !== undefined && !this.ready) {
-                            const start = (this.chartExportData.dataTable[1][0] as Date).valueOf();
-                            const end = (this.chartExportData.dataTable[this.chartExportData.dataTable.length-1][0] as Date).valueOf();
-                            const range = end - start;
-                            this.chartExportData.options.zoomStartTime = new Date(end - (range / (this.widget.properties.zoomTimeFactor || 2)));
-                        }
-                    }
+                    this.setupZoomChartSettings(lastOverride);
                     this.ready = true;
                     this.refreshing = false;
                     this.resizeChart();
@@ -223,6 +229,24 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             this.refreshing = false;
         }
 
+    }
+
+    setupZoomChartSettings(lastOverride?: string) {
+        if (this.zoom && this.chartExportData.chartType === 'LineChart' && this.chartExportData.options !== undefined) {
+            this.chartExportData.chartType = 'AnnotationChart';
+            this.chartExportData.options.dateFormat = 'dd.MM.yyyy HH:mm:ss';
+            this.chartExportData.options.displayExactValues = true;
+            this.chartExportData.options.thickness = 2;
+            this.chartExportData.options.displayZoomButtons = false;
+            this.chartExportData.options.displayAnnotations = false;
+            this.chartExportData.options.displayLegendValues = true;
+            if (lastOverride !== undefined && !this.ready) {
+                const start = (this.chartExportData.dataTable[1][0] as Date).valueOf();
+                const end = (this.chartExportData.dataTable[this.chartExportData.dataTable.length-1][0] as Date).valueOf();
+                const range = end - start;
+                this.chartExportData.options.zoomStartTime = new Date(end - (range / (this.widget.properties.zoomTimeFactor || 2)));
+            }
+        }
     }
 
     onChartSelect($event: ChartSelectEvent) {
@@ -434,4 +458,12 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             this.refresh();
         }
     }
+
+    getChartData = () => {
+        if(this.timelineChartData != null) {
+            return this.timelineChartData;
+        } else {
+            return this.chartExportData;
+        }
+    };
 }

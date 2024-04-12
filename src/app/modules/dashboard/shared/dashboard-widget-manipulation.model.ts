@@ -21,4 +21,6 @@ export interface DashboardWidgetManipulationModel {
     manipulation: DashboardManipulationEnum;
     widgetId: string;
     widget: WidgetModel | null;
+    initialWidgetData: any;
+    reloadAfterZoom: boolean;
 }

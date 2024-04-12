@@ -75,6 +75,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     userHasMoveWidgetAuthorization = false;
     userHasUpdateWidgetNameAuthorization = false;
 
+    initialWidgetData: any;
+
     constructor(
         private responsiveService: ResponsiveService,
         private dashboardService: DashboardService,
@@ -295,7 +297,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     if (widgetId) {
                         const widgetIndex = this.dashboards[idx].widgets.findIndex(w => w.id === widgetId);
                         if (widgetIndex !== -1 && widgetIndex !== this.zoomedWidgetIndex) {
-                            setTimeout(() => this.zoomWidget({widgetId, widget: this.dashboards[idx].widgets[widgetIndex], manipulation: DashboardManipulationEnum.Zoom}), 0);
+                            setTimeout(() => this.zoomWidget({widgetId, widget: this.dashboards[idx].widgets[widgetIndex], manipulation: DashboardManipulationEnum.Zoom, reloadAfterZoom: true, initialWidgetData: null}), 0);
                         }
                     }
                 }
@@ -477,7 +479,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private zoomWidget(widgetManipulationModel: DashboardWidgetManipulationModel) {
         if (this.zoomedWidgetIndex === null && widgetManipulationModel.widget) {
             this.zoomedWidgetIndex = this.dashboards[this.activeTabIndex].widgets.indexOf(widgetManipulationModel.widget);
-            setTimeout(() => this.dashboardService.initWidget(widgetManipulationModel.widgetId), 0);
+
+            if(widgetManipulationModel.reloadAfterZoom === true) {
+                setTimeout(() => this.dashboardService.initWidget(widgetManipulationModel.widgetId), 0);
+            } else {
+                this.initialWidgetData = widgetManipulationModel.initialWidgetData;
+            }
         } else {
             this.zoomedWidgetIndex = null;
             setTimeout(() => this.dashboardService.reloadAllWidgets(), 0);

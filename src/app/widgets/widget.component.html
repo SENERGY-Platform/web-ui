@@ -34,7 +34,7 @@
     <senergy-ranking-list [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-ranking-list>
   </div>
   <div *ngSwitchCase="'charts_export'" fxFill>
-    <senergy-charts-export [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-charts-export>
+    <senergy-charts-export [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" [initialWidgetData]="initialWidgetData" fxFill></senergy-charts-export>
   </div>
   <div *ngSwitchCase="'charts_process_instances'" fxFill>
     <senergy-charts-process-instances [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-charts-process-instances>

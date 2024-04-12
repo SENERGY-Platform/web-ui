@@ -29,6 +29,7 @@ export class WidgetComponent implements OnInit {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
+    @Input() initialWidgetData: any;
 
     constructor() {}
 

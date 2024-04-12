@@ -43,7 +43,7 @@ export class WidgetHeaderComponent implements OnInit {
     }
 
     zoomWidget() {
-        this.dashboardService.zoomWidget(DashboardManipulationEnum.Zoom, this.widget.id, this.widget);
+        this.dashboardService.zoomWidget(DashboardManipulationEnum.Zoom, this.widget.id, this.widget, false, null);
     }
 
     custom(i: number) {

@@ -41,6 +41,8 @@ export class WidgetFooterComponent implements OnInit {
     @Input() userHasUpdateNameAuthorization = false;
     @Input() widgetHasUpdateableProperties = false;
     @Input() refreshing = false;
+    @Input() reloadAfterZoom = true;
+    @Input() getInitialWidgetData: any = () => {};
 
     @Output() editEvent = new EventEmitter<boolean>();
     @Output() addEvent = new EventEmitter<boolean>();
@@ -76,6 +78,6 @@ export class WidgetFooterComponent implements OnInit {
     }
 
     zoomWidget() {
-        this.dashboardService.zoomWidget(DashboardManipulationEnum.Zoom, this.widget.id, this.widget);
+        this.dashboardService.zoomWidget(DashboardManipulationEnum.Zoom, this.widget.id, this.widget, this.reloadAfterZoom, this.getInitialWidgetData());
     }
 }
