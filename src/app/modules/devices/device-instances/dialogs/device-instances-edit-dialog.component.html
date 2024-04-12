@@ -18,29 +18,6 @@
 
 <mat-dialog-content>
     <form class="form">
-        <div *ngIf="false">
-            <mat-form-field class="full-width" color="accent">
-                <mat-label>ID</mat-label>
-                <input matInput placeholder="ID" disabled value="{{device.id}}">
-            </mat-form-field>
-            <mat-form-field class="full-width" color="accent">
-                <mat-label>Short ID</mat-label>
-                <input matInput placeholder="ShortID" disabled value="{{getShortId(device.id)}}">
-            </mat-form-field>
-            <mat-form-field class="full-width" color="accent">
-                <mat-label>Devicetype ID</mat-label>
-                <input matInput placeholder="Devicetype ID" disabled value="{{device.device_type.id}}">
-            </mat-form-field>
-            <mat-form-field class="full-width" color="accent">
-                <mat-label>Devicetype Name</mat-label>
-                <input matInput placeholder="Devicetype Name" disabled value="{{device.device_type.name}}">
-            </mat-form-field>
-            <mat-form-field class="full-width" color="accent">
-                <mat-label>Origin Name</mat-label>
-                <input matInput placeholder="Origin Name" [(ngModel)]="device.name" disabled [ngModelOptions]="{standalone: true}">
-            </mat-form-field>
-        </div>
-        
         <div *ngIf="userHasUpdateDisplayNameAuthorization">
             <mat-form-field class="full-width" color="accent">
                 <mat-label>Display Name</mat-label>

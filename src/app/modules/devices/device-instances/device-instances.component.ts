@@ -306,7 +306,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     showInfoOfDevice(device: DeviceInstancesModel): void {
-        this.deviceInstancesDialogService.openDeviceServiceDialog(device.device_type.id, device.id);
+        this.deviceInstancesDialogService.openDeviceServiceDialog(device);
     }
 
     editDevice(device: DeviceInstancesModel): void {

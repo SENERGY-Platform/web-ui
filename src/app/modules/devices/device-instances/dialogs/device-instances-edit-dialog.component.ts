@@ -39,7 +39,6 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
 
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesEditDialogComponent>,
-        private deviceInstancesService: DeviceInstancesService,
         private deviceTypeService: DeviceTypeService,
 
         @Inject(MAT_DIALOG_DATA) private data: {
@@ -76,10 +75,6 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     }
 
     ngOnInit() {}
-
-    getShortId(id: string): string {
-        return this.deviceInstancesService.convertToShortId(id);
-    }
 
     close(): void {
         this.dialogRef.close();

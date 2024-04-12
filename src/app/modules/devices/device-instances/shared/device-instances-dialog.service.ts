@@ -60,8 +60,10 @@ export class DeviceInstancesDialogService {
         return editDialogRef.afterClosed();
     }
 
-    openDeviceServiceDialog(deviceTypeId: string, deviceId: string): void {
+    openDeviceServiceDialog(device: DeviceInstancesModel): void {
         const obs: Observable<any>[] = [];
+        const deviceTypeId = device.device_type.id;
+        const deviceId = device.id;
         obs.push(this.deviceTypeService.getMeasuringFunctions());
         obs.push(this.deviceTypeService.getAspectNodesWithMeasuringFunction());
         obs.push(this.deviceTypeService.getLeafCharacteristics());
@@ -117,7 +119,7 @@ export class DeviceInstancesDialogService {
             dialogConfig.minWidth = '650px';
             if (deviceType) {
                 dialogConfig.data = {
-                    deviceId,
+                    device,
                     services: deviceType.services,
                     lastValueElements,
                     deviceType,
@@ -135,6 +137,7 @@ export class DeviceInstancesDialogService {
             display_name: string;
         }
         const dialogConfig = new MatDialogConfig();
+        dialogConfig.width = "50vh";
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             device: JSON.parse(JSON.stringify(device)), // create copy of object

@@ -30,6 +30,8 @@ import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {environment} from '../../../../../environments/environment';
 import {AuthorizationService} from '../../../../core/services/authorization.service';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
+import { DeviceInstancesModel } from '../shared/device-instances.model';
+import { DeviceInstancesService } from '../shared/device-instances.service';
 
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',
@@ -49,7 +51,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         from: [{value: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)), disabled: true}],
         to: [{value: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)), disabled: true}],
     });
-    deviceId = '';
+    device: DeviceInstancesModel;
     descriptions: string[][];
     availability: { serviceId: string; from?: Date; to?: Date; groupType?: string; groupTime?: string }[] = [];
     availabilityControl = new FormControl<{
@@ -60,7 +62,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesServiceDialogComponent>,
         @Inject(MAT_DIALOG_DATA) data: {
-            deviceId: string;
+            device: DeviceInstancesModel;
             services: DeviceTypeServiceModel[];
             lastValueElements: LastValuesRequestElementTimescaleModel[];
             deviceType: DeviceTypeModel;
@@ -71,12 +73,13 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         private fb: FormBuilder,
         private errorHandlerService: ErrorHandlerService,
         private authorizationService: AuthorizationService,
+        private deviceInstancesService: DeviceInstancesService
     ) {
         this.services = data.services;
         this.lastValueElements = data.lastValueElements;
         this.deviceType = data.deviceType;
         this.serviceOutputCounts = data.serviceOutputCounts;
-        this.deviceId = data.deviceId;
+        this.device = data.device;
         this.descriptions = data.descriptions;
     }
 
@@ -105,7 +108,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
                 counter += this.serviceOutputCounts[serviceIndex];
             });
         });
-        this.exportDataService.getTimescaleDataAvailability(this.deviceId).subscribe(availability => {
+        this.exportDataService.getTimescaleDataAvailability(this.device.id).subscribe(availability => {
             this.availability = availability;
         });
     }
@@ -123,7 +126,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         const token = await this.authorizationService.getToken();
         const f = await fetch(environment.timescaleAPIURL + '/prepare-download?query=' + JSON.stringify({
             serviceId: this.services[i].id,
-            deviceId: this.deviceId,
+            deviceId: this.device.id,
             columns,
             time: {
                 start: fromIso,
@@ -203,5 +206,9 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         groupTime?: string;
     }): boolean {
         return a.groupTime === b.groupTime && a.groupType === b.groupType;
+    }
+
+    getShortId(id: string): string {
+        return this.deviceInstancesService.convertToShortId(id);
     }
 }

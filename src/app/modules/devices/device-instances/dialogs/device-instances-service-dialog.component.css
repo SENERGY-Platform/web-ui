@@ -25,3 +25,12 @@
 ::ng-deep .example-custom-date-class {
     background:rgba(0,0,0,.38)!important;
 }
+
+#id-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+#id-container mat-form-field {
+    width: 18%;
+}

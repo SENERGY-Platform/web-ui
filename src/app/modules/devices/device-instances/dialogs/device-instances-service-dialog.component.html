@@ -22,6 +22,29 @@
 </div>
 
 <mat-dialog-content>
+    <div id="id-container">
+        <mat-form-field class="full-width" color="accent">
+            <mat-label>ID</mat-label>
+            <input matInput placeholder="ID" disabled value="{{device.id}}">
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent">
+            <mat-label>Short ID</mat-label>
+            <input matInput placeholder="ShortID" disabled value="{{getShortId(device.id)}}">
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent">
+            <mat-label>Devicetype ID</mat-label>
+            <input matInput placeholder="Devicetype ID" disabled value="{{device.device_type.id}}">
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent">
+            <mat-label>Devicetype Name</mat-label>
+            <input matInput placeholder="Devicetype Name" disabled value="{{device.device_type.name}}">
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent">
+            <mat-label>Origin Name</mat-label>
+            <input matInput placeholder="Origin Name" [(ngModel)]="device.name" disabled [ngModelOptions]="{standalone: true}">
+        </mat-form-field>
+    </div>
+
     <mat-accordion>
         <mat-expansion-panel *ngFor="let service of services; let i = index" [expanded]="services.length === 1">
             <mat-expansion-panel-header>
