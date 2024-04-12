@@ -114,6 +114,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     userHasReadDeviceUsageAuthorization = false;
     userHasUpdateDisplayNameAuthorization = false;
     userHasUpdateAttributesAuthorization = false;
+    userHasCreateAuthoriation = false;
 
     userIdToName: {[key: string]: string} = {};
 
@@ -145,7 +146,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             this.displayedColumns.splice(4, 0, 'device_type');
         }
 
-        if (this.deviceInstancesService.userHasCreateAuthorization()) {
+        this.userHasCreateAuthoriation = this.deviceInstancesService.userHasCreateAuthorization();
+        if (this.userHasCreateAuthoriation) {
             this.displayedColumns.push('duplicate');
         }
 

@@ -132,10 +132,6 @@ export class DeviceInstancesDialogService {
     }
 
     openDeviceEditDialog(device: DeviceInstancesModel, userHasUpdateDisplayNameAuthorization: boolean, userHasUpdateAttributesAuthorization: boolean) {
-        interface editDeviceResponse {
-            attributes: Attribute[];
-            display_name: string;
-        }
         const dialogConfig = new MatDialogConfig();
         dialogConfig.width = "50vh";
         dialogConfig.disableClose = false;
@@ -148,14 +144,14 @@ export class DeviceInstancesDialogService {
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
 
         return editDialogRef.afterClosed().pipe(
-            concatMap((editResponse: editDeviceResponse) => {
+            concatMap((newDevice: DeviceInstancesModel) => {
                 const obs: Observable<any>[] = [];
-                if (editResponse.attributes !== undefined && userHasUpdateAttributesAuthorization) {
-                    obs.push(this.deviceInstancesService.updateDeviceInstanceAttributes(device.id, editResponse.attributes));
+                if (newDevice.attributes !== undefined && userHasUpdateAttributesAuthorization) {
+                    obs.push(this.deviceInstancesService.updateDeviceInstanceAttributes(device.id, newDevice.attributes));
                 }
 
-                if(editResponse.display_name != null && userHasUpdateDisplayNameAuthorization) {
-                    obs.push(this.deviceInstancesService.updateDeviceInstanceDisplayName(device.id, editResponse.display_name));
+                if(newDevice.display_name != null && userHasUpdateDisplayNameAuthorization) {
+                    obs.push(this.deviceInstancesService.updateDeviceInstanceDisplayName(device.id, newDevice.display_name));
                 }
                 return forkJoin(obs).pipe(
                     defaultIfEmpty([]),
@@ -171,9 +167,7 @@ export class DeviceInstancesDialogService {
                             return device;
                         }
                         this.snackBar.open('Device instance updated successfully.', undefined, {duration: 2000});
-                        device.display_name = editResponse.display_name;
-                        device.attributes = editResponse.attributes;
-                        return device;
+                        return newDevice;
 
                     })
                 );
@@ -192,6 +186,10 @@ export class DeviceInstancesDialogService {
         }
         dialogConfig.data = {
             device,
+            userHasUpdateAttributesAuthorization: true,
+            userHasUpdateDisplayNameAuthorization: true,
+            action: 'Create',
+            localIdIsEditable: true
         };
 
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);

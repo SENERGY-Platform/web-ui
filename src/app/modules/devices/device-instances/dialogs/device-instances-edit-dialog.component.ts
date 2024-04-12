@@ -32,6 +32,8 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     displayname = '';
     nicknameAttributeKey = 'shared/nickname';
     nicknameAttributeOrigin = 'shared';
+    action = 'Edit';
+    localIdIsEditable = false;
 
     protocolConstraints: string[] = [];
     userHasUpdateDisplayNameAuthorization = false;
@@ -44,7 +46,9 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) private data: {
             device: DeviceInstancesModel,
             userHasUpdateDisplayNameAuthorization: boolean,
-            userHasUpdateAttributesAuthorization: boolean
+            userHasUpdateAttributesAuthorization: boolean,
+            action?: string
+            localIdIsEditable?: boolean
         },
     ) {
         this.userHasUpdateDisplayNameAuthorization = data.userHasUpdateDisplayNameAuthorization;
@@ -72,6 +76,14 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
             });
         });
 
+        if(data.action != null) {
+            this.action = data.action;
+        }
+
+        if(data.localIdIsEditable != null) {
+            this.localIdIsEditable = data.localIdIsEditable;
+        }
+
     }
 
     ngOnInit() {}
@@ -82,10 +94,7 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
 
     save(): void {
         this.setDisplayNameAttribute();
-        this.dialogRef.close({
-            attributes: this.device.attributes,
-            display_name: this.displayname,
-        });
+        this.dialogRef.close(this.device);
     }
 
     removeAttr(i: number) {
