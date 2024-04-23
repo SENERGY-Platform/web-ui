@@ -384,15 +384,14 @@ export class ChartsExportService {
                             conversionDefault: vAxis.conversionDefault,
                             type: vAxis.valueType,
                         });
-                        header.push(vAxis.valueAlias || vAxis.valueName);
-                        colors2.push(colors[index]);
                     }
                 }
+                header.push(vAxis.valueAlias || vAxis.valueName);
+                colors2.push(colors[index]);
             });
             colors = colors2;
         }
         const dataTable = new ChartDataTableModel([header]);
-
         let series2: any = [];
         if (table.length > 0 && table[0].length > 2 && properties.chartType === 'ColumnChart') {
             /* Grouped Column -> all values for on x tick value need to be in one list
