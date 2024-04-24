@@ -3,15 +3,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
-import { EditComponent } from './edit.component';
+import { PVLoadRecommendationEditComponent } from './edit.component';
 
-describe('EditComponent', () => {
-    let component: EditComponent;
-    let fixture: ComponentFixture<EditComponent>;
+describe('PVLoadRecommendationEditComponent', () => {
+    let component: PVLoadRecommendationEditComponent;
+    let fixture: ComponentFixture<PVLoadRecommendationEditComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [ EditComponent ],
+            declarations: [ PVLoadRecommendationEditComponent ],
             imports: [
                 MatDialogModule,
                 HttpClientTestingModule,
@@ -24,8 +24,9 @@ describe('EditComponent', () => {
         })
             .compileComponents();
 
-        fixture = TestBed.createComponent(EditComponent);
+        fixture = TestBed.createComponent(PVLoadRecommendationEditComponent);
         component = fixture.componentInstance;
+        component.widget = {properties: {measurement: undefined}, id: '', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1};
         fixture.detectChanges();
     });
 
