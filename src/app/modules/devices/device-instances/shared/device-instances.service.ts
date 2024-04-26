@@ -131,37 +131,37 @@ export class DeviceInstancesService {
 
     updateDeviceInstance(device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel | null> {
         return this.http
-            .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(device.id), device)
+            .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(device.id)+"?wait=true", device)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', null)));
     }
 
     updateDeviceInstanceDisplayName(deviceId: string, newDisplayName: string) {
         return this.http
-            .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/display_name', '"' + newDisplayName + '"')
+            .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/display_name?wait=true', '"' + newDisplayName + '"')
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
     }
 
     updateDeviceInstanceAttributes(deviceId: string, attributes: Attribute[]) {
         return this.http
-            .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes', attributes)
+            .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes?wait=true', attributes)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
     }
 
     saveDeviceInstance(device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel | null> {
         return this.http
-            .post<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices', device)
+            .post<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices?wait=true', device)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'saveDeviceInstance', null)));
     }
 
     deleteDeviceInstance(id: string): Observable<DeviceInstancesUpdateModel | null> {
         return this.http
-            .delete<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(id))
+            .delete<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(id)+"?wait=true")
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstance', null)));
     }
 
     deleteDeviceInstances(ids: string[]): Observable<DeviceInstancesUpdateModel | null> {
         return this.http
-            .request<DeviceInstancesUpdateModel>('DELETE', environment.deviceManagerUrl + '/devices', {body: ids})
+            .request<DeviceInstancesUpdateModel>('DELETE', environment.deviceManagerUrl + '/devices?wait=true', {body: ids})
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstances', null)));
     }
 

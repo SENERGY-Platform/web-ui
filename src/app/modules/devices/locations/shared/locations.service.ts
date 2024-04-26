@@ -77,7 +77,7 @@ export class LocationsService {
 
     deleteLocation(id: string) {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(id))
+            .delete<boolean>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(id)+"?wait=true")
             .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'deleteLocation', false)));
     }
 
@@ -90,13 +90,13 @@ export class LocationsService {
 
     createLocation(location: LocationModel): Observable<LocationModel | null> {
         return this.http
-            .post<LocationModel>(environment.deviceManagerUrl + '/locations', location)
+            .post<LocationModel>(environment.deviceManagerUrl + '/locations?wait=true', location)
             .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'createLocation', null)));
     }
 
     updateLocation(location: LocationModel): Observable<LocationModel | null> {
         return this.http
-            .put<LocationModel>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(location.id), location)
+            .put<LocationModel>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(location.id)+"?wait=true", location)
             .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'updateLocation', null)));
     }
 
