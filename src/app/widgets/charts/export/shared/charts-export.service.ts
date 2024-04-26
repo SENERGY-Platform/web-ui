@@ -167,10 +167,21 @@ export class ChartsExportService {
         const obs: Observable<{ source: string; res: any[][][][] }>[] = [];
 
         if (influxElements.length > 0) {
-            obs.push(this.exportDataService.queryInflux(influxElements).pipe(map(res => ({
-                source: 'influx',
-                res: res ? [res] : []
-            }))));
+            obs.push(this.exportDataService.queryInflux(influxElements).pipe(
+                map(res => {
+                    const responseTimescaleFormat: any = [];
+                    if(res != null) {
+                        res.forEach(responsePerRequest => {
+                            responseTimescaleFormat.push([responsePerRequest]);
+                        });
+                    }
+
+                    return {
+                        source: 'influx',
+                        res: responseTimescaleFormat
+                    };
+                })
+            ));
         }
 
         if (timescaleElements.length > 0) {
@@ -312,6 +323,11 @@ export class ChartsExportService {
         table: ChartDataTableModel;
         colors?: string[];
     } {
+        // data[] -> requests/vAxis
+        // data[][] -> number of columns within request
+        // data[][][] -> rows
+        // data[][][][] -> values per column
+
         const repeats: number[] = [];
         const table: any[][] = [];
         let columns = 1; // time column
@@ -384,10 +400,10 @@ export class ChartsExportService {
                             conversionDefault: vAxis.conversionDefault,
                             type: vAxis.valueType,
                         });
+                        header.push(vAxis.valueAlias || vAxis.valueName);
+                        colors2.push(colors[index]);
                     }
                 }
-                header.push(vAxis.valueAlias || vAxis.valueName);
-                colors2.push(colors[index]);
             });
             colors = colors2;
         }
