@@ -41,19 +41,19 @@ export class AspectsService {
 
     updateAspects(aspect: DeviceTypeAspectModel): Observable<DeviceTypeAspectModel | null> {
         return this.http
-            .put<DeviceTypeAspectModel>(environment.deviceManagerUrl + '/aspects/' + aspect.id, aspect)
+            .put<DeviceTypeAspectModel>(environment.deviceManagerUrl + '/aspects/' + aspect.id + "?wait=true", aspect)
             .pipe(catchError(this.errorHandlerService.handleError(AspectsService.name, 'updateAspects', null)));
     }
 
     deleteAspects(aspectId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/aspects/' + aspectId)
+            .delete<boolean>(environment.deviceManagerUrl + '/aspects/' + aspectId + "?wait=true")
             .pipe(catchError(this.errorHandlerService.handleError(AspectsService.name, 'deleteAspects', false)));
     }
 
     createAspect(aspect: DeviceTypeAspectModel): Observable<DeviceTypeAspectModel | null> {
         return this.http
-            .post<DeviceTypeAspectModel>(environment.deviceManagerUrl + '/aspects', aspect)
+            .post<DeviceTypeAspectModel>(environment.deviceManagerUrl + '/aspects?wait=true', aspect)
             .pipe(catchError(this.errorHandlerService.handleError(AspectsService.name, 'createAspect', null)));
     }
 
