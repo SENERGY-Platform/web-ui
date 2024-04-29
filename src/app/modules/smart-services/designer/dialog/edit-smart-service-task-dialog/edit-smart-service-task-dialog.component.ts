@@ -1335,6 +1335,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     deviceRepositoryCreateDeviceGroupFieldKey = 'device_repository.create_device_group';
     deviceRepositoryNameFieldKey = 'device_repository.name';
     deviceRepositoryKeyFieldKey = 'device_repository.key';
+    deviceRepositoryWaitFieldKey = 'device_repository.wait';
 
     private initDeviceRepositoryWorkerInfo(inputs: SmartServiceTaskInputDescription[]) {
         inputs.forEach(input => {
@@ -1360,6 +1361,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         case 'create_device_group': {
             result.push({name: this.deviceRepositoryCreateDeviceGroupFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.create_device_group.ids});
             result.push({name: this.deviceRepositoryNameFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.name});
+            result.push({name: this.deviceRepositoryWaitFieldKey, type: 'text', value: "true"});
             if (this.deviceRepositoryWorkerInfo.key) {
                 result.push({name: this.deviceRepositoryKeyFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.key});
             }

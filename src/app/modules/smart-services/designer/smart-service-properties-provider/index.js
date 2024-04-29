@@ -157,10 +157,17 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, elemen
                 let doneEventName = taskId+"_done_event";
                 let doneEventNameRef = "${"+doneEventName+"}";
                 let doneEvent = findMessageEventElement(element, doneEventNameRef);
+
+                let usesWaitParam = function (prefix) {
+                    return !!taskInfo.inputs.find(value => {
+                        return value.name === prefix+".wait" && value.value === "true"
+                    })
+                }
+                
                 if (taskInfo.topic === "process_deployment" && !doneEvent){
                     createIntermediateCatchMessageEvent(bpmnFactory, elementFactory, autoPlace, replace, element, doneEventNameRef)
                 }
-                if (taskInfo.topic === "device_repository" && !doneEvent){
+                if (taskInfo.topic === "device_repository" && !doneEvent && !usesWaitParam("device_repository")){
                     createIntermediateCatchMessageEvent(bpmnFactory, elementFactory, autoPlace, replace, element, doneEventNameRef)
                 }
 
