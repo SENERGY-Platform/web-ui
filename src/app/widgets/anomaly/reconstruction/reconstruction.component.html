@@ -1,0 +1,14 @@
+<mat-dialog-content fxFill>
+    <div *ngIf="ready">
+        <google-chart #chartExport [data]="chartData" (chartSelect)="onChartSelect($event)"></google-chart>
+    </div>
+    <h3>The expected values can be interpreted as the patterns within the real values that the model recognized based on
+        previous data.
+    </h3>
+    <h3>A large gap between both lines indicates the occurence of an anomaly </h3>
+    
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="primary" (click)="close()">Close</button>
+</mat-dialog-actions>

@@ -25,8 +25,9 @@
                     <input type="text" matInput placeholder="Name" formControlName="name">
                 </mat-form-field>
     
-                <div *ngIf="exports.length > 0" fxLayout="column">
-                    <mat-form-field color="accent" fxFlex="47" *ngIf="userHasUpdatePropertiesAuthorization">
+                <div *ngIf="exports.length > 0 && userHasUpdatePropertiesAuthorization" fxLayout="column">
+                    <h2>Anomaly Export</h2>
+                    <mat-form-field  color="accent" fxFlex="47">
                         <mat-label>Choose Export</mat-label>
                         <input type="text" matInput formControlName="export" [matAutocomplete]="auto" required>
                         <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
@@ -35,16 +36,39 @@
                             </mat-option>
                         </mat-autocomplete>
                     </mat-form-field>
-    
-                    <mat-checkbox formControlName="showForAllDevices">Show anomalies for all devices?</mat-checkbox>
-                    <mat-form-field color="accent" fxFlex="47" *ngIf="form.controls.showForAllDevices.value == false">
-                        <mat-label>Choose Devices</mat-label>
-                        <senergy-select-search [required]="true" [multiple]="true" [compareWith]="compare" formControlName="filterDevices"
-                            [options]="devices" useOptionViewProperty="name">
-                    </senergy-select-search>
+
+                    <data-source-selector [dataSourceConfig]="form.controls.timeRangeConfig.value" [enableAggretationConfig]="false"
+                        (updatedDataSourceConfig)="timeRangeConfigUpdated($event)" [enableFieldSelection]="false"
+                        [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="false" [showSource]="false">
+                    </data-source-selector>
+
+                    <h2>Type of Visualization</h2>
+                    <mat-form-field  color="accent" fxFlex="47">
+                        <mat-label>Choose Visualization</mat-label>
+                        <mat-select formControlName="visualizationType" >
+                            <mat-option *ngFor="let visOption of visualizationTypes" [value]="visOption">
+                                {{visOption.name}}
+                            </mat-option>
+                        </mat-select>
                     </mat-form-field>
-                    
-                    <mat-checkbox formControlName="showDebug">Show interpretability data?</mat-checkbox>
+
+                    <div *ngIf="form.controls.visualizationType.value.id === 'timeline'">
+                            <data-source-selector [dataSourceConfig]="form.controls.deviceValueConfig.value" [enableAggretationConfig]="false"
+                            (updatedDataSourceConfig)="deviceValuesConfigUpdated($event)" [enableFieldSelection]="false"
+                            [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="true" [showExportsAsSource]="false"
+                            [showTimeRange]="false"></data-source-selector>
+                    </div>
+
+                    <div *ngIf="form.controls.visualizationType.value.id === 'device'">
+                        <data-source-selector [dataSourceConfig]="form.controls.deviceValueConfig.value" [enableAggretationConfig]="false"
+                        (updatedDataSourceConfig)="deviceValuesConfigUpdated($event)" [enableFieldSelection]="true"
+                        [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="true" [showExportsAsSource]="false"
+                        [showTimeRange]="false"></data-source-selector>
+                        <div><mat-checkbox formControlName="showFrequencyAnomalies">Show Input Frequency Anomalies?</mat-checkbox></div>
+                </div>
+
+                    <div><mat-checkbox formControlName="showDebug">Show interpretability data?</mat-checkbox></div>
+
                 </div>
                 <div *ngIf="exports.length === 0">
                     No export available

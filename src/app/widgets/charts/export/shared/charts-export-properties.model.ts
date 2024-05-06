@@ -26,7 +26,9 @@ import {
     ApexYAxis,
     ApexPlotOptions,
     ApexLegend,
-    ApexTooltip
+    ApexTooltip,
+    ApexAnnotations,
+    ApexMarkers
 } from 'ng-apexcharts';
 import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
 
@@ -105,4 +107,6 @@ export interface ApexChartOptions {
     plotOptions: ApexPlotOptions;
     legend: ApexLegend;
     tooltip: ApexTooltip;
+    annotations: ApexAnnotations;
+    markers: ApexMarkers;
 }

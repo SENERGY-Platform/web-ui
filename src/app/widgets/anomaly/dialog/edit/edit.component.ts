@@ -9,7 +9,8 @@ import { DeviceInstancesModel } from 'src/app/modules/devices/device-instances/s
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { ExportModel, ExportResponseModel } from 'src/app/modules/exports/shared/export.model';
 import { ExportService } from 'src/app/modules/exports/shared/export.service';
-import { ChartsExportMeasurementModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
+import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
+import { DataSourceConfig } from 'src/app/widgets/charts/shared/data-source-selector/data-source-selector.component';
 
 @Component({
     selector: 'app-edit',
@@ -22,10 +23,22 @@ export class EditComponent implements OnInit {
     form = this.formBuilder.group({
         name: [''],
         export: [''],
-        showForAllDevices: [true],
         showDebug: [false],
-        onlyDataWindows: [false],
-        filterDevices: ['']
+        deviceValueConfig: this.formBuilder.group({
+            exports: [''],
+            fields: ['']
+        }),
+        visualizationType: [''],
+        timeRangeConfig: this.formBuilder.group({
+            timeRange: this.formBuilder.group({
+                type: [''],
+                time: [''],
+                level: [''],
+                start: [''],
+                end: ['']
+            })
+        }),
+        showFrequencyAnomalies: [false]
     });
     dashboardId: string;
     widgetId: string;
@@ -34,6 +47,13 @@ export class EditComponent implements OnInit {
     ready = false;
     devices: DeviceInstancesModel[] = [];
     errorOccured = false;
+    visualizationTypes = [{
+        id: 'timeline',
+        name: 'Timeline'
+    }, {
+        id: 'device',
+        name: 'Line'
+    }];
 
     constructor(
     private dialogRef: MatDialogRef<EditComponent>,
@@ -84,17 +104,30 @@ export class EditComponent implements OnInit {
         return this.dashboardService.getWidget(this.dashboardId, this.widgetId).pipe(
             map((widget: WidgetModel) => {
                 this.widget = widget;
-                const filterDevices: DeviceInstancesModel[] = this.devices.filter(device => this.widget.properties.anomalyDetection?.filterDeviceIds.includes(device.id))
-                const exportElement = this.exports.find((availableExport) => availableExport.id === this.widget.properties.anomalyDetection?.export);
+
+                //const filterDevices: DeviceInstancesModel[] = this.devices.filter(device => this.widget.properties.anomalyDetection?.filterDeviceIds.includes(device.id))
+
+                const exportElement = this.exports.find((availableExport) => this.widget.properties.anomalyDetection?.export === availableExport.id);
+
+                let showDebug = widget.properties.anomalyDetection?.showDebug;
+                if(showDebug == null) {
+                    showDebug = false;
+                }
+
+                const visualizationType = this.visualizationTypes.find((visType => widget.properties.anomalyDetection?.visualizationType === visType.id));
+
+                const showFrequencyAnomalies = widget.properties.anomalyDetection?.showFrequencyAnomalies;
 
                 this.form.patchValue({
                     name: widget.name,
                     export: exportElement,
-                    onlyDataWindows: widget.properties.anomalyDetection?.onlyDataWindows || false,
-                    showDebug: widget.properties.anomalyDetection?.showDebug || false,
-                    showForAllDevices: widget.properties.anomalyDetection?.showForAllDevices || true,
-                    filterDevices: filterDevices || []
+                    showDebug,
+                    deviceValueConfig: widget.properties.anomalyDetection?.deviceValueConfig,
+                    timeRangeConfig: widget.properties.anomalyDetection?.timeRangeConfig,
+                    visualizationType,
+                    showFrequencyAnomalies
                 });
+
                 return widget;
             })
         );
@@ -107,18 +140,19 @@ export class EditComponent implements OnInit {
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
-        const deviceIDs: string[] = [];
-        this.form.get('filterDevices')?.value.forEach((device: DeviceInstancesModel) => {
-            deviceIDs.push(device.id);
-        });
-
         this.widget.properties.anomalyDetection = {
-            export: this.form.get("export")?.value['id'],
-            showForAllDevices: this.form.get("showForAllDevices")?.value,
-            showDebug: this.form.get("showDebug")?.value,
-            onlyDataWindows: this.form.get("onlyDataWindows")?.value,
-            filterDeviceIds: deviceIDs
+            export: this.form.controls.export?.value?.['id'],
+            showDebug: this.form.controls.showDebug?.value,
+            timelineConfig: {
+                vAxisLabel: '',
+                hAxisLabel: '',
+            },
+            timeRangeConfig: this.form.controls.timeRangeConfig?.value,
+            deviceValueConfig: this.form.controls.deviceValueConfig?.value,
+            visualizationType: this.form.controls.visualizationType.value['id'],
+            showFrequencyAnomalies: this.form.controls.showFrequencyAnomalies.value
         };
+
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
     }
 
@@ -162,4 +196,27 @@ export class EditComponent implements OnInit {
         return a && b && a.id === b.id;
     }
 
+    updateFormControl(controlName: string, value: any, formKey: string) {
+        const control = this.form.get(formKey + controlName);
+        if(control != null) {
+            control.patchValue(value);
+        }
+    }
+
+    timeRangeConfigUpdated(updatedDataSourceConfig: DataSourceConfig) {
+        const timelineKey = 'timeRangeConfig.timeRange.';
+        this.updateFormControl('type', updatedDataSourceConfig.timeRange?.type, timelineKey);
+        this.updateFormControl('level', updatedDataSourceConfig.timeRange?.level, timelineKey);
+        this.updateFormControl('time', updatedDataSourceConfig.timeRange?.time, timelineKey);
+        this.updateFormControl('end', updatedDataSourceConfig.timeRange?.end, timelineKey);
+        this.updateFormControl('start', updatedDataSourceConfig.timeRange?.start, timelineKey);
+    }
+
+    deviceValuesConfigUpdated(updatedDataSourceConfig: DataSourceConfig) {
+        const formKey = 'deviceValueConfig.';
+        if(updatedDataSourceConfig.fields !== undefined && updatedDataSourceConfig.fields?.length > 0) {
+            this.updateFormControl('fields', updatedDataSourceConfig.fields, formKey);
+            this.updateFormControl('exports', updatedDataSourceConfig.exports, formKey);
+        }
+    }
 }

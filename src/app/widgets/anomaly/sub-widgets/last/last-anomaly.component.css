@@ -1,0 +1,9 @@
+.anomaly-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.text-container {
+    text-align: center;
+}
