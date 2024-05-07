@@ -172,7 +172,6 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     dataSourceConfigChanged(updatedDataSourceConfig: DataSourceConfig) {
-        console.log(updatedDataSourceConfig)
         this.formGroupController.get('properties.vAxes')?.patchValue(updatedDataSourceConfig.fields);
         this.formGroupController.get('properties.exports')?.patchValue(updatedDataSourceConfig.exports);
         this.formGroupController.get('properties.timeRangeType')?.patchValue(updatedDataSourceConfig.timeRange?.type);
@@ -205,8 +204,6 @@ export class ChartsExportEditDialogComponent implements OnInit {
         const groupTimeValue = updatedDataSourceConfig.group?.time;
         this.formGroupController.get('properties.group.time')?.patchValue(groupTimeValue + groupTimeLevel);
         this.formGroupController.get('properties.group.type')?.patchValue(groupTimeType);
-
-        console.log(this.formGroupController.value)
     }
 
     initFormGroup(widget: WidgetModel): void {

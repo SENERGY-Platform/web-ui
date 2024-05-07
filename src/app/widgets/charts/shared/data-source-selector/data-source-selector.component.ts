@@ -620,7 +620,8 @@ export class DataSourceSelectorComponent implements OnInit {
                                         a.valueName === b.valueName);
         const deviceMatch = (a.deviceId != null && b.deviceId != null &&
                                         a.deviceId === b.deviceId &&
-                                        a.serviceId === b.serviceId);
+                                        a.serviceId === b.serviceId && 
+                                        a.valuePath === b.valuePath);
         const deviceGroupMatch = (a.deviceGroupId != null && b.deviceGroupId != null &&
                                              a.deviceGroupId === b.deviceGroupId &&
                                              a.criteria.function_id === b.criteria.function_id);
