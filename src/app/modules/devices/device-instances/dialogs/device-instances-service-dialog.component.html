@@ -43,6 +43,10 @@
             <mat-label>Origin Name</mat-label>
             <input matInput placeholder="Origin Name" [(ngModel)]="device.name" disabled [ngModelOptions]="{standalone: true}">
         </mat-form-field>
+        <mat-form-field class="full-width" color="accent">
+            <mat-label>Local ID</mat-label>
+            <input matInput placeholder="Local ID" [(ngModel)]="device.local_id" disabled>
+        </mat-form-field>
     </div>
 
     <mat-accordion>
