@@ -122,7 +122,6 @@ export class TimelineComponent implements OnInit, OnChanges {
                 this.processDataForOneEntity(dataForOneEntity, chartData, this.vAxes[i]);
             }
         });
-        console.log(chartData)
         const convertedCartData = this.convertTimelineChartData(chartData);
         return {
             data: convertedCartData,
@@ -155,9 +154,13 @@ export class TimelineComponent implements OnInit, OnChanges {
     convertTimelineChartData(chartData: any) {
         const convertedChartData = [];
         for(const [key, value] of Object.entries(chartData)) {
+            const data = (value as any)['data'];
+            if(data.length === 0){
+                continue;
+            }
             convertedChartData.push({
                 name: key,
-                data:(value as any)['data']
+                data
             });
         }
         return convertedChartData;
@@ -176,12 +179,19 @@ export class TimelineComponent implements OnInit, OnChanges {
     }
 
     mergeTimelineData(data: any) {
+        /* Merge intervals with the same value
+           [3.5 false]
+           [2.5 false]
+           [1.5 false]
+           => [3.5 false], [1.5 false] 
+        */
         const mergedData: any = [];
         data = data[0];
         let endRow: any = data[0];
         data.forEach((row: any, i: any) => {
             let changeDetected = false;
             let nextRow;
+            // last value should be the last value even when no change
             if(i === data.length-1) {
                 changeDetected = true;
             } else {

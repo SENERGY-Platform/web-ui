@@ -1,6 +1,8 @@
 import { Component, HostListener, Input, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { Subscription, map, Observable, catchError, concatMap, of } from 'rxjs';
+import moment from 'moment';
+import { DurationInputArg1, unitOfTime } from 'moment';
+import { Subscription, map, Observable, catchError, concatMap, of, forkJoin, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
@@ -201,27 +203,74 @@ export class OpenWindowComponent implements OnInit {
         });
 
         return this.exportDataService.queryTimescaleV2(timescaleElements).pipe(
-            map((resp: any) => {
+            concatMap((resp: any) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     this.errorHandlerService.logError('OpenWindow', 'getTimelineData', resp);
-                    throw(resp.error);
+                    return throwError(() => resp.error);
                 }
 
                 if(((resp as any).length || 0) === 0) {
                     this.message = 'No data';
-                    return;
+                    return throwError(() => new Error('no data'));
                 }
-                this.timelineChartData = this.convertTimescaleResp(resp);
+                return this.parseToTimelineFormat(resp);
+            }),
+            map(chartData => {
+                this.timelineChartData = chartData;
                 this.chartDataReady = true;
             })
         );
     }
 
-    convertTimescaleResp(response: any) {
-        const chartData: any = [];
-        response.forEach((dataPerExport: any) => {
-            chartData.push(dataPerExport['data']);
+    getLastDetectionValue(exportID: string) {
+        const requestPayloads: any[] = [];
+
+        requestPayloads.push({
+            exportId: exportID,
+            measurement: exportID,
+            columnName: 'window_open'
         });
-        return chartData;
+
+        return this.exportDataService.getLastValuesTimescale(requestPayloads).pipe(
+            map((lastValuePerExport: TimeValuePairModel[]) => {
+                if(lastValuePerExport.length === 0) {
+                    throw(new Error('No last value'));
+                }
+
+                return lastValuePerExport[0].value as boolean;
+            })
+        );
+    }
+
+    parseDeviceDataToTimeline(deviceData: any[][][], exportID: string) {
+        let deviceDataWithoutColumn = deviceData[0];
+        if(deviceDataWithoutColumn.length === 0) {
+            return this.getLastDetectionValue(exportID).pipe(
+                map(lastDetectedValue => {
+                    const timeRange = this.widget.properties.windowTimeRange?.time || 2;
+                    const timeRangeLevel = this.widget.properties.windowTimeRange?.level || 'days';
+                    const startTimestamp = moment().subtract(timeRange as DurationInputArg1, timeRangeLevel as unitOfTime.DurationConstructor).toISOString();
+                    const paddingData = [[startTimestamp, lastDetectedValue], [new Date().toISOString(), lastDetectedValue]];
+                    deviceDataWithoutColumn = paddingData.concat(deviceDataWithoutColumn);
+                    return [deviceDataWithoutColumn];
+                })
+            );
+        }
+
+        // Last value in timeline should always be the current time with the last/newest detected value
+        const lastValue = deviceDataWithoutColumn[0][1];
+        deviceDataWithoutColumn = [[new Date().toISOString(), lastValue]].concat(deviceDataWithoutColumn);
+        return of([deviceDataWithoutColumn]);
+    }
+
+    parseToTimelineFormat(response: any) {
+        const exports = this.widget.properties?.windowExports || [];
+        const obs: Observable<any[][][]>[] = [];
+        response.forEach((dataPerExport: any, index: number) => {
+            const exportID = exports[index].id;
+            obs.push(this.parseDeviceDataToTimeline(dataPerExport['data'], exportID));
+        });
+
+        return forkJoin(obs);
     }
 }
