@@ -332,7 +332,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             .afterClosed()
             .subscribe((deviceDelete: boolean) => {
                 if (deviceDelete) {
+                    this.ready = false;
                     this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstancesUpdateModel | null) => {
+                        this.ready = true;
                         if (resp !== null) {
                             this.snackBar.open('Device deleted successfully.', '', { duration: 2000 });
                         } else {
