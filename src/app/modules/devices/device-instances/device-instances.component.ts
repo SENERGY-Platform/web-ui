@@ -311,7 +311,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     editDevice(device: DeviceInstancesModel): void {
-        this.deviceInstancesDialogService.openDeviceEditDialog(device, this.userHasUpdateDisplayNameAuthorization, this.userHasUpdateAttributesAuthorization).subscribe({
+        this.deviceInstancesDialogService.openDeviceEditDialog(
+            device,
+            this.userHasUpdateDisplayNameAuthorization,
+            this.userHasUpdateAttributesAuthorization,
+            (spinnerState: boolean) => {this.ready = !spinnerState}).subscribe({
             next: (newDevice) => {
                 if(newDevice != null) {
                     const index = this.dataSource.data.findIndex(element => element.id === device.id);

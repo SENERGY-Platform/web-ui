@@ -131,7 +131,7 @@ export class DeviceInstancesDialogService {
         });
     }
 
-    openDeviceEditDialog(device: DeviceInstancesModel, userHasUpdateDisplayNameAuthorization: boolean, userHasUpdateAttributesAuthorization: boolean) {
+    openDeviceEditDialog(device: DeviceInstancesModel, userHasUpdateDisplayNameAuthorization: boolean, userHasUpdateAttributesAuthorization: boolean, setSpinnerState?: (state: boolean)=>void) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.width = "50vh";
         dialogConfig.disableClose = false;
@@ -147,10 +147,16 @@ export class DeviceInstancesDialogService {
             concatMap((newDevice: DeviceInstancesModel) => {
                 const obs: Observable<any>[] = [];
                 if (newDevice.attributes !== undefined && userHasUpdateAttributesAuthorization) {
+                    if(setSpinnerState) {
+                        setSpinnerState(true);
+                    }
                     obs.push(this.deviceInstancesService.updateDeviceInstanceAttributes(device.id, newDevice.attributes));
                 }
 
                 if(newDevice.display_name != null && userHasUpdateDisplayNameAuthorization) {
+                    if(setSpinnerState) {
+                        setSpinnerState(true);
+                    }
                     obs.push(this.deviceInstancesService.updateDeviceInstanceDisplayName(device.id, newDevice.display_name));
                 }
                 return forkJoin(obs).pipe(
@@ -162,13 +168,15 @@ export class DeviceInstancesDialogService {
                                 errorOccured = true;
                             }
                         });
+                        if(setSpinnerState) {
+                            setSpinnerState(false);
+                        }
                         if(errorOccured) {
                             this.snackBar.open('Error while updating the device instance!', 'close', { panelClass: 'snack-bar-error' });
                             return device;
                         }
                         this.snackBar.open('Device instance updated successfully.', undefined, {duration: 2000});
                         return newDevice;
-
                     })
                 );
             })
