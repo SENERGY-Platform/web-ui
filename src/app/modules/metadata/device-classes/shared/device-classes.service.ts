@@ -69,19 +69,19 @@ export class DeviceClassesService {
 
     updateDeviceClasses(deviceClass: DeviceTypeDeviceClassModel): Observable<DeviceTypeDeviceClassModel | null> {
         return this.http
-            .put<DeviceTypeDeviceClassModel>(environment.deviceManagerUrl + '/device-classes/' + deviceClass.id + "?wait=true", deviceClass)
+            .put<DeviceTypeDeviceClassModel>(environment.deviceManagerUrl + '/device-classes/' + deviceClass.id , deviceClass)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'updateDeviceClasses', null)));
     }
 
     deleteDeviceClasses(deviceClassId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/device-classes/' + deviceClassId + "?wait=true")
+            .delete<boolean>(environment.deviceManagerUrl + '/device-classes/' + deviceClassId )
             .pipe(catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'deleteDeviceClasses', false)));
     }
 
     createDeviceClass(deviceClass: DeviceTypeDeviceClassModel): Observable<DeviceTypeDeviceClassModel | null> {
         return this.http
-            .post<DeviceTypeDeviceClassModel>(environment.deviceManagerUrl + '/device-classes?wait=true', deviceClass)
+            .post<DeviceTypeDeviceClassModel>(environment.deviceManagerUrl + '/device-classes', deviceClass)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'createDeviceClass', null)));
     }
 

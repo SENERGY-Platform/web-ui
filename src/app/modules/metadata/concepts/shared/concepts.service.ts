@@ -54,13 +54,13 @@ export class ConceptsService {
 
     createConcept(concept: DeviceTypeConceptModel): Observable<DeviceTypeConceptModel | null> {
         return this.http
-            .post<DeviceTypeConceptModel>(environment.deviceManagerUrl + '/concepts?wait=true', concept)
+            .post<DeviceTypeConceptModel>(environment.deviceManagerUrl + '/concepts', concept)
             .pipe(catchError(this.errorHandlerService.handleError(ConceptsService.name, 'createConcept', null)));
     }
 
     updateConcept(concept: DeviceTypeConceptModel): Observable<DeviceTypeConceptModel | null> {
         return this.http
-            .put<DeviceTypeConceptModel>(environment.deviceManagerUrl + '/concepts/' + concept.id + "?wait=true", concept)
+            .put<DeviceTypeConceptModel>(environment.deviceManagerUrl + '/concepts/' + concept.id , concept)
             .pipe(catchError(this.errorHandlerService.handleError(ConceptsService.name, 'createConcept', null)));
     }
 
@@ -103,7 +103,7 @@ export class ConceptsService {
 
     deleteConcept(conceptId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/concepts/' + conceptId + "?wait=true")
+            .delete<boolean>(environment.deviceManagerUrl + '/concepts/' + conceptId )
             .pipe(catchError(this.errorHandlerService.handleError(ConceptsService.name, 'deleteConcept', false)));
     }
 

@@ -125,13 +125,13 @@ export class NetworksService {
 
     changeName(hubId: string, hubName: string): Observable<HubModel | null> {
         return this.http
-            .put<HubModel>(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hubId) + '/name?wait=true', '"' + hubName + '"')
+            .put<HubModel>(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hubId) + '/name', '"' + hubName + '"')
             .pipe(catchError(this.errorHandlerService.handleError(NetworksService.name, 'changeName', null)));
     }
 
     delete(networkId: string): Observable<{ status: number }> {
         return this.http
-            .delete(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(networkId)+"?wait=true", { responseType: 'text', observe: 'response' })
+            .delete(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(networkId), { responseType: 'text', observe: 'response' })
             .pipe(
                 map((resp) => ({ status: resp.status })),
                 catchError(this.errorHandlerService.handleError(NetworksService.name, 'delete', { status: 500 })),
@@ -140,7 +140,7 @@ export class NetworksService {
 
     update(hub: HubModel): Observable<HubModel | null> {
         return this.http
-            .put<HubModel>(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hub.id)+"?wait=true", hub)
+            .put<HubModel>(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hub.id), hub)
             .pipe(catchError(this.errorHandlerService.handleError(NetworksService.name, 'update', null)));
     }
 

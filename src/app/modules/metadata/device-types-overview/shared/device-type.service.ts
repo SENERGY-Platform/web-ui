@@ -190,19 +190,19 @@ export class DeviceTypeService {
 
     createDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
         return this.http
-            .post<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types?wait=true', deviceType)
+            .post<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types', deviceType)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createDeviceType', null)));
     }
 
     updateDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
         return this.http
-            .put<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types/' + encodeURIComponent(deviceType.id) + "?wait=true", deviceType)
+            .put<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types/' + encodeURIComponent(deviceType.id) , deviceType)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'updateDeviceType', null)));
     }
 
     deleteDeviceType(id: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/device-types/' + id + "?wait=true")
+            .delete<boolean>(environment.deviceManagerUrl + '/device-types/' + id )
             .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'deleteDeviceType', false)));
     }
 

@@ -115,19 +115,19 @@ export class DeviceGroupsService {
 
     createDeviceGroup(deviceGroup: DeviceGroupModel): Observable<DeviceGroupModel | null> {
         return this.http
-            .post<DeviceGroupModel>(environment.deviceManagerUrl + '/device-groups?wait=true', deviceGroup)
+            .post<DeviceGroupModel>(environment.deviceManagerUrl + '/device-groups', deviceGroup)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'createDeviceGroup', null)));
     }
 
     updateDeviceGroup(deviceGroup: DeviceGroupModel): Observable<DeviceGroupModel | null> {
         return this.http
-            .put<DeviceGroupModel>(environment.deviceManagerUrl + '/device-groups/' + encodeURIComponent(deviceGroup.id)+"?wait=true", deviceGroup)
+            .put<DeviceGroupModel>(environment.deviceManagerUrl + '/device-groups/' + encodeURIComponent(deviceGroup.id), deviceGroup)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'updateDeviceGroup', null)));
     }
 
     deleteDeviceGroup(id: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/device-groups/' + encodeURIComponent(id)+"?wait=true")
+            .delete<boolean>(environment.deviceManagerUrl + '/device-groups/' + encodeURIComponent(id))
             .pipe(catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'deleteDeviceGroup', false)));
     }
 
