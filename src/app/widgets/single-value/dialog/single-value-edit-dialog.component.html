@@ -121,7 +121,7 @@
                     </div>
                     <div>
                         <mat-form-field color="accent"
-                            *ngIf="form.get('sourceType')?.value !== 'deviceGroup'  && deviceGroups.length > 0">
+                            *ngIf="form.get('sourceType')?.value !== 'deviceGroup'">
                             <mat-label>Unit</mat-label>
                             <input type="text" matInput placeholder="Unit" formControlName="vAxisLabel">
                         </mat-form-field>
