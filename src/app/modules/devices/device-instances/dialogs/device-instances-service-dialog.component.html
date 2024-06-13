@@ -41,7 +41,8 @@
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
             <mat-label>Origin Name</mat-label>
-            <input matInput placeholder="Origin Name" [(ngModel)]="device.name" disabled [ngModelOptions]="{standalone: true}">
+            <input matInput placeholder="Origin Name" [(ngModel)]="device.name" disabled
+                [ngModelOptions]="{standalone: true}">
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
             <mat-label>Local ID</mat-label>
@@ -55,77 +56,85 @@
                 <mat-panel-title fxFlex>{{service.name}}</mat-panel-title>
                 <mat-panel-description>
                     {{service.description}}
-                    <span *ngIf="lastValueArray[i] !== undefined && lastValueArray[i].length > 0">{{lastValueArray[i][0].response.time |  date:'dd.MM.yyyy - HH:mm:ss'}}</span>
+                    <span
+                        *ngIf="lastValueArray[i] !== undefined && lastValueArray[i].length > 0">{{lastValueArray[i][0].response.time |  date:'dd.MM.yyyy - HH:mm:ss'}}</span>
                 </mat-panel-description>
             </mat-expansion-panel-header>
+
             <ng-template matExpansionPanelContent>
-                <table mat-table *ngIf="lastValueArray[i] !== undefined && lastValueArray[i].length > 0"
-                       [dataSource]="lastValueArray[i]">
-                    <ng-container matColumnDef="field">
-                        <th mat-header-cell *matHeaderCellDef>Field</th>
-                        <td mat-cell *matCellDef="let element"> {{element.request.columnName}} </td>
-                    </ng-container>
+                <div *ngIf="errorOccured === false && lastValueArray[i] !== undefined">
+                    <table mat-table *ngIf="lastValueArray[i].length > 0" [dataSource]="lastValueArray[i]">
+                        <ng-container matColumnDef="field">
+                            <th mat-header-cell *matHeaderCellDef>Field</th>
+                            <td mat-cell *matCellDef="let element"> {{element.request.columnName}} </td>
+                        </ng-container>
 
-                    <ng-container matColumnDef="value">
-                        <th mat-header-cell *matHeaderCellDef>Value</th>
-                        <td mat-cell
-                            *matCellDef="let element"> {{element.response.value !== null ? element.response.value : 'N/A'}} </td>
-                    </ng-container>
+                        <ng-container matColumnDef="value">
+                            <th mat-header-cell *matHeaderCellDef>Value</th>
+                            <td mat-cell *matCellDef="let element">
+                                {{element.response.value !== null ? element.response.value : 'N/A'}} </td>
+                        </ng-container>
 
-                    <ng-container matColumnDef="description">
-                        <th mat-header-cell *matHeaderCellDef>Description</th>
-                        <td mat-cell
-                            *matCellDef="let element"> {{element.description !== undefined ? (element.description) : 'N/A'}} </td>
-                    </ng-container>
+                        <ng-container matColumnDef="description">
+                            <th mat-header-cell *matHeaderCellDef>Description</th>
+                            <td mat-cell *matCellDef="let element">
+                                {{element.description !== undefined ? (element.description) : 'N/A'}} </td>
+                        </ng-container>
 
-                    <tr mat-header-row *matHeaderRowDef="['field', 'value', 'description']"></tr>
-                    <tr mat-row *matRowDef="let row; columns: ['field', 'value', 'description'];"></tr>
-                </table>
-                <span *ngIf="lastValueArray[i].length === 0">Service does not provide data</span>
-                <div *ngIf="lastValueArray[i].length > 0">
-                    <mat-expansion-panel>
-                        <mat-expansion-panel-header>
-                            <mat-panel-title fxFlex>Download Data</mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <ng-template matExpansionPanelContent>
-                            <div fxLayout="column">
-                                <mat-form-field fxFlex color="accent" appearance="fill">
-                                    <mat-label>Data Format</mat-label>
-                                    <senergy-select-search [options]="filterAvailability(i)"
-                                                           [getOptionViewValue]="formatAvailability"
-                                                           [getOptionValue]="valueAvailability"
-                                                           [formControl]="availabilityControl"
-                                                           [compareWith]="compareAvailabilityValue"
-                                                           placeholder="Device">
-                                    </senergy-select-search>
-                                </mat-form-field>
-                                <mat-form-field appearance="fill" fxFlex color="accent" (click)="picker.open()">
-                                    <mat-label>Enter a date range</mat-label>
-                                    <mat-date-range-input [formGroup]="timeControl" [rangePicker]="picker"
-                                                          [min]="getMin(i)" [max]="getMax(i)">
-                                        <input matStartDate formControlName="from" placeholder="Start date">
-                                        <input matEndDate formControlName="to" placeholder="End date">
-                                    </mat-date-range-input>
-                                    <mat-datepicker-toggle matPrefix [for]="picker"
-                                                           disabled="false"></mat-datepicker-toggle>
-                                    <mat-date-range-picker #picker disabled="false"></mat-date-range-picker>
+                        <tr mat-header-row *matHeaderRowDef="['field', 'value', 'description']"></tr>
+                        <tr mat-row *matRowDef="let row; columns: ['field', 'value', 'description'];"></tr>
+                    </table>
+                    <span *ngIf="lastValueArray[i].length === 0">Service does not provide data</span>
+                    <div *ngIf="lastValueArray[i].length > 0">
+                        <mat-expansion-panel>
+                            <mat-expansion-panel-header>
+                                <mat-panel-title fxFlex>Download Data</mat-panel-title>
+                            </mat-expansion-panel-header>
+                            <ng-template matExpansionPanelContent>
+                                <div fxLayout="column">
+                                    <mat-form-field fxFlex color="accent" appearance="fill">
+                                        <mat-label>Data Format</mat-label>
+                                        <senergy-select-search [options]="filterAvailability(i)"
+                                            [getOptionViewValue]="formatAvailability"
+                                            [getOptionValue]="valueAvailability" [formControl]="availabilityControl"
+                                            [compareWith]="compareAvailabilityValue" placeholder="Device">
+                                        </senergy-select-search>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="fill" fxFlex color="accent" (click)="picker.open()">
+                                        <mat-label>Enter a date range</mat-label>
+                                        <mat-date-range-input [formGroup]="timeControl" [rangePicker]="picker"
+                                            [min]="getMin(i)" [max]="getMax(i)">
+                                            <input matStartDate formControlName="from" placeholder="Start date">
+                                            <input matEndDate formControlName="to" placeholder="End date">
+                                        </mat-date-range-input>
+                                        <mat-datepicker-toggle matPrefix [for]="picker" disabled="false">
+                                        </mat-datepicker-toggle>
+                                        <mat-date-range-picker #picker disabled="false"></mat-date-range-picker>
 
-                                    <button matSuffix mat-icon-button (click)="download($event, i)">
-                                        <mat-icon>download</mat-icon>
-                                    </button>
-                                    <mat-error *ngIf="timeControl.controls.from.hasError('matStartDateInvalid')">Invalid
-                                        start
-                                        date
-                                    </mat-error>
-                                    <mat-error *ngIf="timeControl.controls.to.hasError('matEndDateInvalid')">Invalid end
-                                        date
-                                    </mat-error>
-                                </mat-form-field>
-                            </div>
-                        </ng-template>
-                    </mat-expansion-panel>
+                                        <button matSuffix mat-icon-button (click)="download($event, i)">
+                                            <mat-icon>download</mat-icon>
+                                        </button>
+                                        <mat-error *ngIf="timeControl.controls.from.hasError('matStartDateInvalid')">
+                                            Invalid
+                                            start
+                                            date
+                                        </mat-error>
+                                        <mat-error *ngIf="timeControl.controls.to.hasError('matEndDateInvalid')">Invalid
+                                            end
+                                            date
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </ng-template>
+                        </mat-expansion-panel>
+                    </div>
                 </div>
+
             </ng-template>
+
+            <div *ngIf="errorOccured === true">
+                {{errorMessage}}
+            </div>
         </mat-expansion-panel>
     </mat-accordion>
 </mat-dialog-content>
@@ -133,4 +142,3 @@
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="accent" (click)="close()">Close</button>
 </mat-dialog-actions>
-

@@ -59,6 +59,9 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         groupTime?: string;
     }>({});
 
+    errorOccured = false;
+    errorMessage = '';
+
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesServiceDialogComponent>,
         @Inject(MAT_DIALOG_DATA) data: {
@@ -88,25 +91,31 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
     }
 
     refresh() {
-        this.exportDataService.getLastValuesTimescale(this.lastValueElements).subscribe(lastValues => {
-            this.lastValueArray = [];
-            let counter = 0;
-            this.deviceType.services.forEach((_, serviceIndex) => {
-                const subArray: {
-                    request: LastValuesRequestElementTimescaleModel;
-                    response: TimeValuePairModel;
-                    description?: string;
-                }[] = [];
-                lastValues.slice(counter, counter + this.serviceOutputCounts[serviceIndex]).forEach((response, responseIndex) => {
-                    subArray.push({
-                        request: this.lastValueElements[counter + responseIndex],
-                        response,
-                        description: this.descriptions[serviceIndex][responseIndex]
+        this.exportDataService.getLastValuesTimescale(this.lastValueElements).subscribe({
+            next: (lastValues) => {
+                this.lastValueArray = [];
+                let counter = 0;
+                this.deviceType.services.forEach((_, serviceIndex) => {
+                    const subArray: {
+                        request: LastValuesRequestElementTimescaleModel;
+                        response: TimeValuePairModel;
+                        description?: string;
+                    }[] = [];
+                    lastValues.slice(counter, counter + this.serviceOutputCounts[serviceIndex]).forEach((response, responseIndex) => {
+                        subArray.push({
+                            request: this.lastValueElements[counter + responseIndex],
+                            response,
+                            description: this.descriptions[serviceIndex][responseIndex]
+                        });
                     });
+                    this.lastValueArray.push(subArray);
+                    counter += this.serviceOutputCounts[serviceIndex];
                 });
-                this.lastValueArray.push(subArray);
-                counter += this.serviceOutputCounts[serviceIndex];
-            });
+            },
+            error: (_) => {
+                this.errorOccured = true;
+                this.errorMessage = 'Could not retrieve device data';
+            }
         });
         this.exportDataService.getTimescaleDataAvailability(this.device.id).subscribe(availability => {
             this.availability = availability;
