@@ -138,7 +138,8 @@ export class DeviceInstancesDialogService {
         dialogConfig.data = {
             device: JSON.parse(JSON.stringify(device)), // create copy of object
             userHasUpdateAttributesAuthorization,
-            userHasUpdateDisplayNameAuthorization
+            userHasUpdateDisplayNameAuthorization,
+            localIdIsEditable: true
         };
 
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
