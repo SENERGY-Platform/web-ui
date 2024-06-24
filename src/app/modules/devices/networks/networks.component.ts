@@ -243,37 +243,63 @@ export class NetworksComponent implements OnInit, OnDestroy {
             .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' networks' : ' network'))
             .afterClosed()
             .subscribe((deleteNetworks: boolean) => {
-                if (deleteNetworks) {
-                    const deletionJobs: Observable<any>[] = [];
-                    let allDeviceIds: string[] = [];
-
-                    this.selection.selected.forEach((network: NetworksModel) => {
-                        this.deviceInstancesService.getDeviceInstances(9999, 0, this.sortBy, this.sortDirection == 'desc', undefined, undefined, network.id).subscribe((devices) => {
-                            const deviceIds = devices.map((p) => p.id);
-                            allDeviceIds = allDeviceIds.concat(deviceIds);
-
-                            if (deviceIds.length > 0) {
-                                deletionJobs.push(this.deviceInstancesService.deleteDeviceInstances(deviceIds));
-                            }
-                            deletionJobs.push(this.networksService.delete(network.id));
-                        });
-                    });
-
-                    forkJoin(deletionJobs).subscribe((resps) => {
-                        const ok = resps.findIndex((r: any) => r === null || r.status === 500) === -1;
-                        if (ok) {
-                            this.snackBar.open('Hub ' + (allDeviceIds.length > 0 ? 'and devices ' : '') + 'deleted successfully.', undefined, {
-                                duration: 2000,
-                            });
-                        } else {
-                            this.snackBar.open('Error while deleting the hub' + (allDeviceIds.length > 0 ? ' and devices' : '') + '!', 'close', { panelClass: 'snack-bar-error' });
-                            this.ready = true;
-                        }
-
-                        this.reload();
-                    });
+                if (!deleteNetworks) {
+                    return;
                 }
+
+                const deletionJobs: Observable<any>[] = [];
+                const getDevicesJobs: Observable<any>[] = [];
+                let allDeviceIds: string[] = [];
+                const allNetworkIDs =  this.selection.selected.map((network) => network.id);
+
+                allNetworkIDs.forEach((networkID) => {
+                    getDevicesJobs.push(
+                        this.deviceInstancesService.getDeviceInstances(9999, 0, this.sortBy, this.sortDirection == 'desc', undefined, undefined, networkID).pipe(
+                            map((devices) => {
+                                const deviceIds = devices.map((p) => p.id);
+                                allDeviceIds = allDeviceIds.concat(deviceIds);
+
+                                if (deviceIds.length > 0) {
+                                    deletionJobs.push(this.deviceInstancesService.deleteDeviceInstances(deviceIds));
+                                }
+                                deletionJobs.push(this.networksService.delete(networkID));
+                            })
+                        )
+                    );
+                });
+
+                forkJoin(getDevicesJobs).subscribe({
+                    next: (_) => {
+                        forkJoin(deletionJobs).subscribe((resps) => {
+                            const ok = resps.findIndex((r: any) => r === null || r.status === 500) === -1;
+                            if (ok) {
+                                this.snackBar.open('Hub ' + (allDeviceIds.length > 0 ? 'and devices ' : '') + 'deleted successfully.', undefined, {
+                                    duration: 2000,
+                                });
+                            } else {
+                                this.snackBar.open('Error while deleting the hub' + (allDeviceIds.length > 0 ? ' and devices' : '') + '!', 'close', { panelClass: 'snack-bar-error' });
+                                this.ready = true;
+                            }
+
+                            this.removeNetworksClientSide(allNetworkIDs);
+                        });
+                    },
+                    error: (_) => {
+                        this.snackBar.open('Error while deleting the hub' + (allDeviceIds.length > 0 ? ' and devices' : '') + '!', 'close', { panelClass: 'snack-bar-error' });
+                        this.reload();
+                    }
+                });
             });
+    }
+
+    private removeNetworksClientSide(allNetworkIDs: string[]) {
+        for (const networkID of allNetworkIDs) {
+            const foundIndex = this.dataSource.data.findIndex((network) => network.id === networkID);
+            if(foundIndex === -1) {
+                continue;
+            }
+            this.dataSource.data.splice(foundIndex,1);
+        };
     }
 
     shareNetwork(network: NetworksModel): void {
