@@ -47,6 +47,7 @@ import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 import {concatMap} from "rxjs/operators";
 import {PermissionsModel} from "../../metadata/device-types-overview/shared/device-type-perm-search.model";
 import {PermissionsService} from "../../permissions/shared/permissions.service";
+import { isNumber } from 'lodash';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -431,6 +432,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     formatBytes(bytes: number, decimals = 2) {
+        if (bytes === -1) {
+            return '';
+        }
         if (!+bytes) {
             return '0 Bytes';
         }
@@ -446,7 +450,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     getUsageTooltip(d: DeviceInstancesModel): string {
         const usage = this.getUsage(d);
-        if (d === undefined) {
+        if (usage === undefined) {
             return '';
         }
         return this.formatBytes(usage?.bytesPerDay || 0) + '/day, ' + this.formatBytes((usage?.bytesPerDay || 0) * 30) + '/month';

@@ -20,16 +20,18 @@ import { ExportModel, ExportResponseModel } from './shared/export.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { ResponsiveService } from '../../core/services/responsive.service';
-import { merge, Subscription } from 'rxjs';
+import { merge, of, Subscription } from 'rxjs';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
-import { startWith, switchMap } from 'rxjs/operators';
+import { map, mergeMap, startWith, switchMap } from 'rxjs/operators';
 import { BrokerExportService } from './shared/broker-export.service';
 import { ActivatedRoute } from '@angular/router';
 import { UtilService } from 'src/app/core/services/util.service';
+import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
+import {environment} from '../../../environments/environment';
 
 @Component({
     selector: 'senergy-export',
@@ -41,23 +43,23 @@ export class ExportComponent implements OnInit, OnDestroy {
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
     selection = new SelectionModel<ExportModel>(true, []);
-    displayedColumns: string[] = [
-        'select',
-        'filter_type',
-        'name',
-        'description',
-        'created_at',
-        'updated_at',
-        'info'
-    ];
+    displayedColumns: string[] = [];
     totalCount = 0;
     userHasCreateAuthorization = false;
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
+    userHasReadUsageAuthorization = false;
+
 
     exports: ExportModel[] = [] as ExportModel[];
     exportsDataSource = new MatTableDataSource<ExportModel>();
     showGenerated = localStorage.getItem('data.exports.showGenerated') === 'true';
+    usage: {
+        exportId: string;
+        updateAt: Date;
+        bytes: number;
+        bytesPerDay: number;
+    }[] = [];
     ready = false;
 
     public searchText = '';
@@ -83,11 +85,13 @@ export class ExportComponent implements OnInit, OnDestroy {
         private responsiveService: ResponsiveService,
         private brokerExportService: BrokerExportService,
         private route: ActivatedRoute,
-        public utilsService: UtilService
+        public utilsService: UtilService,
+        private exportDataService: ExportDataService,
     ) {}
 
     ngOnInit() {
         this.route.url.subscribe((url) => {
+            this.checkAuthorization();
             if (url[url.length - 1]?.toString() === 'broker') {
                 this.brokerMode = true;
                 this.displayedColumns = [
@@ -99,6 +103,23 @@ export class ExportComponent implements OnInit, OnDestroy {
                     'updated_at',
                     'info',
                 ];
+            } else {
+                this.brokerMode = false;
+                this.displayedColumns = [
+                    'select',
+                    'filter_type',
+                    'name',
+                    'description',
+                ];
+                if (this.userHasReadUsageAuthorization) {
+                    this.displayedColumns.push('usage');
+                }
+                this.displayedColumns.push(...[
+                    'usage',
+                    'created_at',
+                    'updated_at',
+                    'info'
+                ]);
             }
             if (localStorage.getItem('data.exports.search') !== null) {
                 this.initSearchText = localStorage.getItem('data.exports.search') as string;
@@ -109,7 +130,6 @@ export class ExportComponent implements OnInit, OnDestroy {
 
             this.initSearchAndGetExports();
 
-            this.checkAuthorization();
         });
     }
 
@@ -131,6 +151,7 @@ export class ExportComponent implements OnInit, OnDestroy {
             this.displayedColumns.push('delete');
         }
 
+        this.userHasReadUsageAuthorization = this.exportDataService.userHasUsageAuthroization();
     }
 
     deleteExport(exp: ExportModel) {
@@ -184,6 +205,7 @@ export class ExportComponent implements OnInit, OnDestroy {
                 startWith({}),
                 switchMap(() => {
                     this.ready = false;
+                    this.usage = [];
                     return this.brokerMode
                         ? this.brokerExportService.getExports(
                             this.searchText,
@@ -203,7 +225,16 @@ export class ExportComponent implements OnInit, OnDestroy {
                             this.sort.direction,
                             this.showGenerated ? undefined : false,
                             this.searchField,
-                        );
+                        ).pipe(mergeMap(resp => {
+                            if (resp?.instances !== undefined && resp.instances.length > 0) {
+                                const exportIds = resp.instances.filter(e => e.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb && e.ID !== undefined).map(e => e.ID) as string[];
+                                return this.exportDataService.getTimescaleExportUsage(exportIds).pipe(map(usage => {
+                                    this.usage = usage;
+                                    return resp;
+                                }));
+                            }
+                            return of(resp);
+                        }));
                 }),
             )
             .subscribe((resp: ExportResponseModel | null) => {
@@ -277,5 +308,34 @@ export class ExportComponent implements OnInit, OnDestroy {
                     });
                 }
             });
+    }
+
+    getUsage(e: ExportModel) {
+        return this.usage.find(u => u.exportId === e.ID);
+    }
+
+    formatBytes(bytes: number, decimals = 2) {
+        if (bytes === -1) {
+            return '';
+        }
+        if (!+bytes) {
+            return '0 Bytes';
+        }
+
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+    }
+
+    getUsageTooltip(d: ExportModel): string {
+        const usage = this.getUsage(d);
+        if (usage === undefined) {
+            return '';
+        }
+        return this.formatBytes(usage?.bytesPerDay || 0) + '/day, ' + this.formatBytes((usage?.bytesPerDay || 0) * 30) + '/month';
     }
 }

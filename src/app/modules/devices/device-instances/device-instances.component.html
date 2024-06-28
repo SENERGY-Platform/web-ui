@@ -69,7 +69,7 @@
                     <th mat-header-cell *matHeaderCellDef>Storage
                     </th>
                     <td mat-cell *matCellDef="let device" [matTooltip]="getUsageTooltip(device)">
-                        {{formatBytes(getUsage(device)?.bytes || 0)}}
+                        {{formatBytes(getUsage(device)?.bytes || -1)}}
                     </td>
                 </ng-container>
 

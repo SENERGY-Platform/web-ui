@@ -95,6 +95,14 @@
                     <td mat-cell *matCellDef="let element"> {{element.Description}}</td>
                 </ng-container>
 
+                <ng-container matColumnDef="usage">
+                    <th mat-header-cell *matHeaderCellDef>Storage
+                    </th>
+                    <td mat-cell *matCellDef="let element" [matTooltip]="getUsageTooltip(element)">
+                        {{formatBytes(getUsage(element)?.bytes || -1)}}
+                    </td>
+                </ng-container>
+
                 <ng-container matColumnDef="created_at">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
                     <td mat-cell *matCellDef="let element">

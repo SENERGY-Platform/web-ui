@@ -151,4 +151,21 @@ export class ExportDataService {
             return res;
         }));
     }
+
+    getTimescaleExportUsage(exportIds: string[]): Observable<{
+        exportId: string;
+        updateAt: Date;
+        bytes: number;
+        bytesPerDay: number;
+    }[]> {
+        return this.http.post<{
+            exportId: string;
+            updateAt: Date;
+            bytes: number;
+            bytesPerDay: number;
+        }[]>(environment.timescaleAPIURL + '/usage/exports', exportIds).pipe(map(res => {
+            res.forEach(r => r.updateAt = new Date(r.updateAt));
+            return res;
+        }));
+    }
 }
