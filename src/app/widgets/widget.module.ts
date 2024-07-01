@@ -115,6 +115,10 @@ import { PvPredictionComponent } from './pv-prediction/pv-prediction.component';
 import { PvLoadRecommendationComponent } from './pv-load-recommendation/pv-load-recommendation.component';
 import { PVLoadRecommendationEditComponent } from './pv-load-recommendation/dialog/edit/edit.component';
 import { PVPredictionEditComponent } from './pv-prediction/dialog/edit/edit.component';
+import { ConsumptionProfileComponent } from './consumption-profile/consumption-profile.component';
+import { LeakageDetectionComponent } from './leakage-detection/leakage-detection.component';
+import { LeakageDetectionEditComponent } from './leakage-detection/dialog/edit/edit.component';
+import { ConsumptionProfileEditComponent } from './consumption-profile/dialog/edit/edit.component';
 
 registerLocaleData(localeDe, 'de');
 
@@ -221,7 +225,11 @@ registerLocaleData(localeDe, 'de');
         PvPredictionComponent,
         PVPredictionEditComponent,
         PvLoadRecommendationComponent,
-        PVLoadRecommendationEditComponent
+        PVLoadRecommendationEditComponent,
+        ConsumptionProfileComponent,
+        LeakageDetectionComponent,
+        LeakageDetectionEditComponent,
+        ConsumptionProfileEditComponent
     ],
     exports: [
         SwitchComponent,

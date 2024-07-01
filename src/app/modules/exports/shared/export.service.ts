@@ -305,4 +305,25 @@ export class ExportService {
     userHasReadAuthorization(): boolean {
         return this.authorizations['GET'];
     }
+
+
+    getAvailableExports(): Observable<ExportModel[]> {
+        return this.getExports(true, '', 9999, 0, 'name', 'asc', undefined, undefined).pipe(
+            map((exports: ExportResponseModel | null) => {
+                const filteredExports: ExportModel[] = [];
+                if (exports !== null) {
+                    exports.instances?.forEach((exportModel: ExportModel) => {
+                        if (
+                            exportModel.ID !== undefined &&
+                  exportModel.Name !== undefined //&&
+                  //EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
+                        ) {
+                            filteredExports.push(exportModel);
+                        }
+                    });
+                }
+                return filteredExports;
+            })
+        );
+    }
 }

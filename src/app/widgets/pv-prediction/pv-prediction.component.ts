@@ -102,7 +102,6 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
             }
         });
         this.chartExport?.draw();
-
     }
 
     calcNextPVPrediction(data: PVPredictionResult, level: string, time: number) {

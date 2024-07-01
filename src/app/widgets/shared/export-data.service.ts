@@ -29,6 +29,7 @@ import {HttpClient} from '@angular/common/http';
 import {map} from 'rxjs/operators';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { ExportResponseModel } from 'src/app/modules/exports/shared/export.model';
 
 @Injectable({
     providedIn: 'root',

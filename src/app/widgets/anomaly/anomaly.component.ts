@@ -39,8 +39,11 @@ export class AnomalyComponent implements OnInit,OnDestroy {
     ) {}
 
     ngOnInit(): void {
+        this.configured = this.widget.properties.anomalyDetection !== undefined;
+        if(!this.configured) {
+            return;
+        }
         this.update();
-        this.configured = this.widget.properties.measurement !== undefined;
     }
 
     ngOnDestroy(): void {

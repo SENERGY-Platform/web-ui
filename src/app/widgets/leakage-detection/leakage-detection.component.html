@@ -1,0 +1,49 @@
+<!--
+  ~ Copyright 2022 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+  <mat-card appearance="outlined">
+    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
+    <mat-card-content>
+      <div *ngIf="!configured" fxFill fxLayout="column" fxLayoutAlign="center center">
+        <div>Please configure widget!</div>
+      </div>
+  
+      <span *ngIf="configured">
+        <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
+        <div *ngIf="ready" fxLayoutAlign="center center" class="outer-container">
+  
+          <!-- e.g. network problem or 500 from timescale -->
+          <div *ngIf="error != null" class="text-container">
+            <h2>An error occured</h2>
+          </div>
+  
+          <div *ngIf="error == null">
+              <google-chart *ngIf="chartExportData.dataTable[0].length !== 0" #chartExport [data]="chartExportData"></google-chart>
+          </div>
+  
+        </div>
+      </span>
+  
+  
+    </mat-card-content>
+    <div>
+      <senergy-widget-footer [widgetHasUpdateableProperties]="true"
+        [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
+        [userHasDeleteAuthorization]="userHasDeleteAuthorization"
+        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
+        [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+    </div>
+  </mat-card>

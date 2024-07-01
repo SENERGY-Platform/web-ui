@@ -102,6 +102,12 @@
   <div *ngSwitchCase="'pv_load_recommendation'" fxFill>
     <senergy-pv-load-recommendation [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-pv-load-recommendation>
   </div>
+  <div *ngSwitchCase="'leakage_detection'" fxFill>
+    <senergy-leakage-detection-widget [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-leakage-detection-widget>
+  </div>
+  <div *ngSwitchCase="'consumption_profile'" fxFill>
+    <senergy-consumption-profile-widget [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-consumption-profile-widget>
+  </div>
   <div *ngSwitchDefault>
     <div>default</div>
   </div>

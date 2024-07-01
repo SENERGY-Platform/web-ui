@@ -31,6 +31,8 @@ import { OpenWindowPropertiesModel } from 'src/app/widgets/charts/open-window/mo
 import { PVLoadRecommendationWidgetPropertiesModel } from 'src/app/widgets/pv-load-recommendation/shared/recommendation.model';
 import { PVPredictionWidgetPropertiesModel } from 'src/app/widgets/pv-prediction/shared/prediction.model';
 import { AnomalyWidgetPropertiesModel } from 'src/app/widgets/anomaly/shared/anomaly.model';
+import { LeakageDetectionWidgetPropertiesModel } from 'src/app/widgets/leakage-detection/shared/leakage-detction.model';
+import { ConsumptionProfilePropertiesModel } from 'src/app/widgets/consumption-profile/shared/consumption-profile.model';
 
 export interface WidgetModel {
     id: string;
@@ -67,4 +69,6 @@ export interface WidgetPropertiesModels
         PVLoadRecommendationWidgetPropertiesModel,
         PVPredictionWidgetPropertiesModel,
         AnomalyWidgetPropertiesModel,
+        LeakageDetectionWidgetPropertiesModel,
+        ConsumptionProfilePropertiesModel,
         DeviceStatusPropertiesModel {}
