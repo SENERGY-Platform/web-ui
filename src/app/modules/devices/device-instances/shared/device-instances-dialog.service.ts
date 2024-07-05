@@ -32,7 +32,7 @@ import {DeviceTypePermSearchModel} from '../../../metadata/device-types-overview
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesService} from './device-instances.service';
 import {DeviceInstancesSelectDialogComponent} from '../dialogs/device-instances-select-dialog.component';
-import {forkJoin, mergeMap, Observable, of} from 'rxjs';
+import {combineLatest, concat, forkJoin, mergeMap, Observable, of} from 'rxjs';
 import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../../../widgets/shared/export-data.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
 import {environment} from '../../../../../environments/environment';
@@ -146,29 +146,28 @@ export class DeviceInstancesDialogService {
 
         return editDialogRef.afterClosed().pipe(
             concatMap((newDevice: DeviceInstancesModel) => {
-                const obs: Observable<any>[] = [];
+                let obs: Observable<any> = of(null);
+                // Display Name is an attribute, so if someone got attribute authorization, display name is also allowed
                 if (newDevice.attributes !== undefined && userHasUpdateAttributesAuthorization) {
                     if(setSpinnerState) {
                         setSpinnerState(true);
                     }
-                    obs.push(this.deviceInstancesService.updateDeviceInstanceAttributes(device.id, newDevice.attributes));
+                    obs = this.deviceInstancesService.updateDeviceInstanceAttributes(device.id, newDevice.attributes);
                 }
 
-                if(newDevice.display_name != null && userHasUpdateDisplayNameAuthorization) {
+                if(newDevice.display_name != null && userHasUpdateDisplayNameAuthorization && !userHasUpdateAttributesAuthorization) {
                     if(setSpinnerState) {
                         setSpinnerState(true);
                     }
-                    obs.push(this.deviceInstancesService.updateDeviceInstanceDisplayName(device.id, newDevice.display_name));
+                    obs = this.deviceInstancesService.updateDeviceInstanceDisplayName(device.id, newDevice.display_name);
                 }
-                return forkJoin(obs).pipe(
-                    defaultIfEmpty([]),
-                    map((resp: (DeviceInstancesUpdateModel | null)[]) => {
+                return obs.pipe(
+                    map((resp: (DeviceInstancesUpdateModel | null)) => {
                         let errorOccured = false;
-                        resp.forEach(updateResp => {
-                            if(updateResp === null) {
-                                errorOccured = true;
-                            }
-                        });
+                        if(resp === null) {
+                            errorOccured = true;
+                        }
+
                         if(setSpinnerState) {
                             setSpinnerState(false);
                         }
