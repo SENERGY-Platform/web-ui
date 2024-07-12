@@ -32,32 +32,28 @@
     <table>
         <tr>
             <td>This month:</td>
-            <div *ngIf="element.month.requests === 0">
-                <td><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon></td>
-                <td>{{element.month.cpu | currency:'EUR'}}</td>
-                <td><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
-                <td>{{element.month.ram | currency:'EUR'}}</td>
-                <td><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
-                <td>{{element.month.storage | currency:'EUR'}}</td>
-            </div>
-            <div *ngIf="element.month.requests !== 0">
-                <td><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
-                <td>{{element.month.requests}}</td>
-            </div>
+            <div>
+                <td *ngIf="element.month.cpu !== 0"><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon></td>
+                <td *ngIf="element.month.cpu !== 0">{{element.month.cpu | currency:'EUR'}}</td>
+                <td *ngIf="element.month.ram !== 0"><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
+                <td *ngIf="element.month.ram !== 0">{{element.month.ram | currency:'EUR'}}</td>
+                <td *ngIf="element.month.storage !== 0"><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
+                <td *ngIf="element.month.storage !== 0">{{element.month.storage | currency:'EUR'}}</td>
+                <td *ngIf="element.month.requests !== 0"><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
+                <td *ngIf="element.month.requests !== 0">{{element.month.requests | number: '1.0-0'}}</td>
+                </div>
         </tr>
         <tr *ngIf="element.estimation_month !== undefined">
             <td>Estimation (month):</td>
-            <div *ngIf="element.estimation_month.requests === 0">
-                <td><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon> </td>
-                <td>{{element.estimation_month.cpu | currency:'EUR'}}</td>
-                <td><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
-                <td>{{element.estimation_month.ram | currency:'EUR'}}</td>
-                <td><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
-                <td>{{element.estimation_month.storage | currency:'EUR'}}</td>
-            </div>
-            <div *ngIf="element.estimation_month.requests !== 0">
-                <td><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
-                <td>{{element.estimation_month.requests}}</td>
+            <div>
+                <td *ngIf="element.estimation_month.cpu !== 0"><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon> </td>
+                <td *ngIf="element.estimation_month.cpu !== 0">{{element.estimation_month.cpu | currency:'EUR'}}</td>
+                <td *ngIf="element.estimation_month.ram !== 0"><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
+                <td *ngIf="element.estimation_month.ram !== 0">{{element.estimation_month.ram | currency:'EUR'}}</td>
+                <td *ngIf="element.estimation_month.storage !== 0"><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
+                <td *ngIf="element.estimation_month.storage !== 0">{{element.estimation_month.storage | currency:'EUR'}}</td>
+                <td *ngIf="element.estimation_month.requests !== 0"><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
+                <td *ngIf="element.estimation_month.requests !== 0">{{element.estimation_month.requests | number: '1.0-0'}}</td>
             </div>
         </tr>
     </table>
