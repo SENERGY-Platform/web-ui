@@ -127,7 +127,6 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
     ngOnInit() {
         this.initSearchAndGetExports();
-        this.checkAuthorization();
         this.getUserData();
 
         this.route.url.pipe(
@@ -147,6 +146,8 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     'info'
                 ]);
 
+                this.checkAuthorization();
+                this.displayedColumns.push('share');
                 if (localStorage.getItem('data.exports.search') !== null) {
                     this.initSearchText = localStorage.getItem('data.exports.search') as string;
                 }
