@@ -18,6 +18,7 @@ export interface CostEntryModel  {
 	cpu: number;
 	ram: number;
 	storage: number;
+	requests: number;
 }
 
 export interface CostModel  {

@@ -56,7 +56,7 @@ export class CostService {
 
     getTree(userId: string | undefined = undefined): Observable<Map<string, CostModel>> {
         let url = environment.costApiUrl + '/tree';
-        if (userId !== undefined) {
+        if (userId !== undefined && userId !== null) {
             url += '?for_user=' + userId;
         }
         return this.http.get<Map<string, CostModel>>(url).pipe(

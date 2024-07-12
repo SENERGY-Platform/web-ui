@@ -28,30 +28,42 @@
         </mat-panel-description>
     </mat-expansion-panel-header>
 
-    
-        <table>
-            <tr>
-                <td>This month:</td>
+
+    <table>
+        <tr>
+            <td>This month:</td>
+            <div *ngIf="element.month.requests === 0">
                 <td><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon></td>
                 <td>{{element.month.cpu | currency:'EUR'}}</td>
                 <td><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
                 <td>{{element.month.ram | currency:'EUR'}}</td>
                 <td><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
                 <td>{{element.month.storage | currency:'EUR'}}</td>
-            </tr>
-            <tr *ngIf="element.estimation_month !== undefined">
-                <td>Estimation (month):</td>
+            </div>
+            <div *ngIf="element.month.requests !== 0">
+                <td><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
+                <td>{{element.month.requests}}</td>
+            </div>
+        </tr>
+        <tr *ngIf="element.estimation_month !== undefined">
+            <td>Estimation (month):</td>
+            <div *ngIf="element.estimation_month.requests === 0">
                 <td><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon> </td>
                 <td>{{element.estimation_month.cpu | currency:'EUR'}}</td>
                 <td><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
                 <td>{{element.estimation_month.ram | currency:'EUR'}}</td>
                 <td><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
                 <td>{{element.estimation_month.storage | currency:'EUR'}}</td>
-            </tr>
-        </table>
+            </div>
+            <div *ngIf="element.estimation_month.requests !== 0">
+                <td><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
+                <td>{{element.estimation_month.requests}}</td>
+            </div>
+        </tr>
+    </table>
 
-        <mat-accordion multi *ngIf="ready">
-            <senergy-cost-element *ngFor="let child of element.children  | keyvalue: expensiveFirst"
-                [name]="child.key" [userid]="userid" [element]="child.value"></senergy-cost-element>
-        </mat-accordion>
+    <mat-accordion multi *ngIf="ready">
+        <senergy-cost-element *ngFor="let child of element.children  | keyvalue: expensiveFirst" [parentName]="name" [name]="child.key"
+        [pipelines]="pipelines" [imports]="imports" [operators]="operators" [devices]="devices" [exports]="exports" [element]="child.value" ></senergy-cost-element>
+    </mat-accordion>
 </mat-expansion-panel>

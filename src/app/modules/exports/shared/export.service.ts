@@ -31,10 +31,9 @@ import {
 import { DeviceTypeContentVariableModel, DeviceTypeServiceModel } from '../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceInstancesModel } from '../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesUpdateModel } from '../../devices/device-instances/shared/device-instances-update.model';
-import { PathOption } from '../../data/flow-repo/shared/path-options.service';
-import {DeviceInstancesService} from '../../devices/device-instances/shared/device-instances.service';
+import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
-import { AllowedMethods, PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
@@ -73,20 +72,43 @@ export class ExportService {
         return this.http
             .get<ExportResponseModel>(
                 environment.exportService +
-                    '/instance?limit=' +
-                    limit +
-                    '&offset=' +
-                    offset +
-                    '&order=' +
-                    sort +
-                    ':' +
-                    order +
-                    (search ? '&search=' + searchField + ':' + search : '') +
-                    (generated !== undefined ? '&generated=' + generated.valueOf() : '') +
-                    '&internal_only=' + internalOnly,
+                '/instance?internal_only=' + internalOnly +
+                (limit ? '&limit=' + limit : '') +
+                (offset ? '&offset=' + offset : '') +
+                (order ? '&order=' + order : '') +
+                (sort ? '?&ort=' + sort : '') +
+                (search ? '&search=' + searchField + ':' + search : '') +
+                (generated !== undefined ? '&generated=' + generated.valueOf() : '')       
             )
             .pipe(
                 map((resp: ExportResponseModel) => resp || []),
+                catchError(this.errorHandlerService.handleError(ExportService.name, 'getExports: Error', null)),
+            );
+    }
+
+    getExportsAdmin(
+        internalOnly: boolean,
+        search?: string,
+        limit?: number,
+        offset?: number,
+        sort?: string,
+        order?: string,
+        generated?: boolean,
+        searchField?: string,
+    ): Observable<ExportModel[] | null> {
+        return this.http
+            .get<ExportModel[]>(
+                environment.exportService +
+                    '/admin/instance?internal_only=' + internalOnly +
+                    (limit ? '&limit=' + limit : '') +
+                    (offset ? '&offset=' + offset : '') +
+                    (order ? '&order=' + order : '') +
+                    (sort ? '?&ort=' + sort : '') +
+                    (search ? '&search=' + searchField + ':' + search : '') +
+                    (generated !== undefined ? '&generated=' + generated.valueOf() : '')                    
+            )
+            .pipe(
+                map((resp: ExportModel[]) => resp || []),
                 catchError(this.errorHandlerService.handleError(ExportService.name, 'getExports: Error', null)),
             );
     }
@@ -149,21 +171,21 @@ export class ExportService {
                 if (trav.Path !== timePath.path) {
                     let type = '';
                     switch (trav.Type) {
-                    case this.typeString:
-                        type = 'string';
-                        break;
-                    case this.typeFloat:
-                        type = 'float';
-                        break;
-                    case this.typeInteger:
-                        type = 'int';
-                        break;
-                    case this.typeBoolean:
-                        type = 'bool';
-                        break;
-                    case this.typeList:
-                        type = 'string_json';
-                        break;
+                        case this.typeString:
+                            type = 'string';
+                            break;
+                        case this.typeFloat:
+                            type = 'float';
+                            break;
+                        case this.typeInteger:
+                            type = 'int';
+                            break;
+                        case this.typeBoolean:
+                            type = 'bool';
+                            break;
+                        case this.typeList:
+                            type = 'string_json';
+                            break;
                     }
                     exportValues.push({
                         Name: hasAmbiguousNames ? trav.Path : trav.Name,
@@ -229,7 +251,7 @@ export class ExportService {
         return false;
     }
 
-    getTimePath(traverse: ExportValueCharacteristicModel[]): { path: string; precision: string | undefined} {
+    getTimePath(traverse: ExportValueCharacteristicModel[]): { path: string; precision: string | undefined } {
         let path = '';
         let precision: string | undefined;
         traverse.forEach((t: ExportValueCharacteristicModel) => {

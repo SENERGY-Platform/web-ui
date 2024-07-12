@@ -46,6 +46,7 @@ export interface ExportModel {
     ExportDatabaseID?: string;
     ExportDatabase?: ExportDatabaseModel;
     TimestampFormat?: string;
+    UserId?: string;
 }
 
 export interface ExportValueBaseModel {
