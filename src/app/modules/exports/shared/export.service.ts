@@ -75,8 +75,7 @@ export class ExportService {
                 '/instance?internal_only=' + internalOnly +
                 (limit ? '&limit=' + limit : '') +
                 (offset ? '&offset=' + offset : '') +
-                (order ? '&order=' + order : '') +
-                (sort ? '&sort=' + sort : '') +
+                (sort && order ? '&order=' + sort + ":" + order : '') +
                 (search ? '&search=' + searchField + ':' + search : '') +
                 (generated !== undefined ? '&generated=' + generated.valueOf() : '')       
             )
@@ -102,8 +101,7 @@ export class ExportService {
                     '/admin/instance?internal_only=' + internalOnly +
                     (limit ? '&limit=' + limit : '') +
                     (offset ? '&offset=' + offset : '') +
-                    (order ? '&order=' + order : '') +
-                    (sort ? '&sort=' + sort : '') +
+                    (sort && order ? '&order=' + sort + ":" + order : '') +
                     (search ? '&search=' + searchField + ':' + search : '') +
                     (generated !== undefined ? '&generated=' + generated.valueOf() : '')                    
             )
