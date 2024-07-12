@@ -115,7 +115,6 @@ export class ExportComponent implements OnInit, OnDestroy {
                     this.displayedColumns.push('usage');
                 }
                 this.displayedColumns.push(...[
-                    'usage',
                     'created_at',
                     'updated_at',
                     'info'
