@@ -128,6 +128,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     ngOnInit() {
         this.initSearchAndGetExports();
         this.getUserData();
+        this.checkAuthorization();
 
         this.route.url.pipe(
             map((url) => {
@@ -146,7 +147,12 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     'info'
                 ]);
 
-                this.checkAuthorization();
+                if(this.userHasUpdateAuthorization) {
+                    this.displayedColumns.push('edit');
+                }
+                if(this.userHasDeleteAuthorization) {
+                    this.displayedColumns.push('delete');
+                }
                 this.displayedColumns.push('share');
                 if (localStorage.getItem('data.exports.search') !== null) {
                     this.initSearchText = localStorage.getItem('data.exports.search') as string;
@@ -175,17 +181,8 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
     checkAuthorization() {
         this.userHasCreateAuthorization = this.exportService.userHasCreateAuthorization();
-
         this.userHasUpdateAuthorization = this.exportService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
-        }
-
         this.userHasDeleteAuthorization = this.exportService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
-
         this.userHasReadUsageAuthorization = this.exportDataService.userHasUsageAuthroization();
     }
 

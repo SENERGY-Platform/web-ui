@@ -39,7 +39,7 @@ export class ExportDataService {
 
     constructor(private http: HttpClient,  private ladonService: LadonService) {
         this.usageAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.timescaleAPIURL + '/usage');
-
+        console.log(this.usageAuthorizations)
     }
 
     getLastValuesInflux(requestElements: LastValuesRequestElementInfluxModel[]): Observable<TimeValuePairModel[]> {
