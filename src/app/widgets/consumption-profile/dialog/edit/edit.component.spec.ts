@@ -1,18 +1,30 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
-import { EditComponent } from './edit.component';
+import { ConsumptionProfileEditComponent } from './edit.component';
 
-describe('EditComponent', () => {
-  let component: EditComponent;
-  let fixture: ComponentFixture<EditComponent>;
+describe('ConsumptionProfileEditComponent', () => {
+  let component: ConsumptionProfileEditComponent;
+  let fixture: ComponentFixture<ConsumptionProfileEditComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EditComponent ]
+      declarations: [ ConsumptionProfileEditComponent ],
+      imports: [
+        MatDialogModule,
+        HttpClientTestingModule,
+        MatSnackBarModule
+      ],
+      providers: [
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+        { provide: MatDialogRef, useValue: {}},
+    ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(EditComponent);
+    fixture = TestBed.createComponent(ConsumptionProfileEditComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -40,12 +40,12 @@ export class LeakageDetectionComponent implements OnInit {
   }
 
   ngOnInit(): void {
-      if(!this.widget.properties.consumptionProfile) {
+      if(!this.widget.properties.leakageDetection) {
           this.configured = false;
           return;
       } else {
           this.configured = true;
-          this.widgetProperties = this.widget.properties.consumptionProfile || {};
+          this.widgetProperties = this.widget.properties.leakageDetection || {};
       }
 
       this.leakageService.getLatestLeakageDetectionOutput(this.widgetProperties.exportID).pipe(
