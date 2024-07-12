@@ -103,7 +103,7 @@ export class ExportService {
                     (limit ? '&limit=' + limit : '') +
                     (offset ? '&offset=' + offset : '') +
                     (order ? '&order=' + order : '') +
-                    (sort ? '&ssort=' + sort : '') +
+                    (sort ? '&sort=' + sort : '') +
                     (search ? '&search=' + searchField + ':' + search : '') +
                     (generated !== undefined ? '&generated=' + generated.valueOf() : '')                    
             )
