@@ -144,6 +144,17 @@
                     </td>
                 </ng-container>
 
+                <ng-container matColumnDef="share">
+                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button mat-icon-button color="accent" matTooltip="Share" (click)="shareExport(element)"
+                            [disabled]="!userHasExecutePermission(element.ID)">
+                            <mat-icon>share</mat-icon>
+
+                        </button>
+                    </td>
+                </ng-container>
+
                 <span *ngIf="userHasDeleteAuthorization">
                     <ng-container matColumnDef="delete">
                         <th mat-header-cell *matHeaderCellDef>Delete</th>

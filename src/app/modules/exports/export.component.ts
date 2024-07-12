@@ -14,36 +14,46 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ExportService } from './shared/export.service';
 import { ExportModel, ExportResponseModel } from './shared/export.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { ResponsiveService } from '../../core/services/responsive.service';
-import { merge, of, Subscription } from 'rxjs';
+import { merge, Subscription, map } from 'rxjs';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
-import { map, mergeMap, startWith, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { concatMap } from 'rxjs/operators';
 import { BrokerExportService } from './shared/broker-export.service';
 import { ActivatedRoute } from '@angular/router';
 import { UtilService } from 'src/app/core/services/util.service';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 import {environment} from '../../../environments/environment';
+import { PermissionsDialogService } from '../permissions/shared/permissions-dialog.service';
+import { PermissionsService } from '../permissions/shared/permissions.service';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import { PermissionsV2ResourceModel } from '../permissions/shared/permissions-resource.model';
 
 @Component({
     selector: 'senergy-export',
     templateUrl: './export.component.html',
     styleUrls: ['./export.component.css'],
 })
-export class ExportComponent implements OnInit, OnDestroy {
+export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
     selection = new SelectionModel<ExportModel>(true, []);
-    displayedColumns: string[] = [];
+    displayedColumns: string[] = [
+        'select',
+        'filter_type',
+        'name',
+        'description'
+    ];
     totalCount = 0;
     userHasCreateAuthorization = false;
     userHasUpdateAuthorization = false;
@@ -61,6 +71,10 @@ export class ExportComponent implements OnInit, OnDestroy {
         bytesPerDay: number;
     }[] = [];
     ready = false;
+
+    permissionsPerExports: Record<string, PermissionsV2ResourceModel> = {};
+    userID = '';
+    userRoles: string[] = [];
 
     public searchText = '';
     public initSearchText = '';
@@ -87,48 +101,69 @@ export class ExportComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute,
         public utilsService: UtilService,
         private exportDataService: ExportDataService,
+        private permissionsDialogService: PermissionsDialogService,
+        private permissionsService: PermissionsService,
+        private userService: AuthorizationService
     ) {}
 
+    ngAfterViewInit(): void {
+        this.paginator.page.subscribe(() => {
+            this.reload();
+        });
+
+        this.sort.sortChange.subscribe(() => {
+            this.paginator.pageIndex = 0;
+            this.selectionClear();
+            this.reload();
+        });
+    }
+
+    reload() {
+        this.ready = false;
+        this.getExports().subscribe({
+            next: () => this.ready = true
+        });
+    }
+
     ngOnInit() {
-        this.route.url.subscribe((url) => {
-            this.checkAuthorization();
-            if (url[url.length - 1]?.toString() === 'broker') {
-                this.brokerMode = true;
-                this.displayedColumns = [
-                    'select',
-                    'filter_type',
-                    'name',
-                    'description',
-                    'created_at',
-                    'updated_at',
-                    'info',
-                ];
-            } else {
-                this.brokerMode = false;
-                this.displayedColumns = [
-                    'select',
-                    'filter_type',
-                    'name',
-                    'description',
-                ];
-                if (this.userHasReadUsageAuthorization) {
-                    this.displayedColumns.push('usage');
+        this.initSearchAndGetExports();
+        this.checkAuthorization();
+        this.getUserData();
+
+        this.route.url.pipe(
+            map((url) => {
+                if (url[url.length - 1]?.toString() === 'broker') {
+                    this.brokerMode = true;
+                } else {
+                    this.brokerMode = false;
+                    if (this.userHasReadUsageAuthorization) {
+                        this.displayedColumns.push('usage');
+                    }
                 }
+
                 this.displayedColumns.push(...[
                     'created_at',
                     'updated_at',
                     'info'
                 ]);
-            }
-            if (localStorage.getItem('data.exports.search') !== null) {
-                this.initSearchText = localStorage.getItem('data.exports.search') as string;
-            }
-            if (localStorage.getItem('data.exports.searchField') !== null) {
-                this.searchField = localStorage.getItem('data.exports.searchField') as string;
-            }
 
-            this.initSearchAndGetExports();
-
+                if (localStorage.getItem('data.exports.search') !== null) {
+                    this.initSearchText = localStorage.getItem('data.exports.search') as string;
+                }
+                if (localStorage.getItem('data.exports.searchField') !== null) {
+                    this.searchField = localStorage.getItem('data.exports.searchField') as string;
+                }
+                return null;
+            }),
+            concatMap((_) => this.loadExportPermissions()),
+            concatMap((_) => this.getExports())
+        ).subscribe({
+            next: () => {
+                this.ready = true;
+            },
+            error: () => {
+                this.ready = true;
+            }
         });
     }
 
@@ -166,7 +201,7 @@ export class ExportComponent implements OnInit, OnDestroy {
                             this.snackBar.open('Export deleted', undefined, {
                                 duration: 2000,
                             });
-                            this.getExports(true);
+                            this.getExports();
                         } else {
                             this.snackBar.open('Export could not be deleted', 'close', { panelClass: 'snack-bar-error' });
                         }
@@ -176,67 +211,41 @@ export class ExportComponent implements OnInit, OnDestroy {
             });
     }
 
-
-
     searchFieldChanged() {
         localStorage.setItem('data.exports.searchField', String(this.searchField));
-        this.getExports(true);
+        this.getExports();
     }
 
     showGeneratedChanged() {
         this.showGenerated = !this.showGenerated;
         localStorage.setItem('data.exports.showGenerated', String(this.showGenerated));
-        this.getExports(true);
+        this.getExports();
     }
 
-    private getExports(reset: boolean) {
-        if (reset) {
-            this.reset();
-        }
+    private getExports() {
         this.exportsDataSource.sort = this.sort;
-        this.sort.sortChange.subscribe(() => {
-            this.paginator.pageIndex = 0;
-            this.selectionClear();
-        });
+        const obs = this.brokerMode ? this.brokerExportService.getExports(
+            this.searchText,
+            this.paginator.pageSize,
+            this.paginator.pageSize * this.paginator.pageIndex,
+            this.sort.active,
+            this.sort.direction,
+            this.showGenerated ? undefined : false,
+            this.searchField,
+        )
+            : this.exportService.getExports(
+                false,
+                this.searchText,
+                this.paginator.pageSize,
+                this.paginator.pageSize * this.paginator.pageIndex,
+                this.sort.active,
+                this.sort.direction,
+                this.showGenerated ? undefined : false,
+                this.searchField,
+            );
 
-        this.exportSub = merge(this.sort.sortChange, this.paginator.page)
-            .pipe(
-                startWith({}),
-                switchMap(() => {
-                    this.ready = false;
-                    this.usage = [];
-                    return this.brokerMode
-                        ? this.brokerExportService.getExports(
-                            this.searchText,
-                            this.paginator.pageSize,
-                            this.paginator.pageSize * this.paginator.pageIndex,
-                            this.sort.active,
-                            this.sort.direction,
-                            this.showGenerated ? undefined : false,
-                            this.searchField,
-                        )
-                        : this.exportService.getExports(
-                            false,
-                            this.searchText,
-                            this.paginator.pageSize,
-                            this.paginator.pageSize * this.paginator.pageIndex,
-                            this.sort.active,
-                            this.sort.direction,
-                            this.showGenerated ? undefined : false,
-                            this.searchField,
-                        ).pipe(mergeMap(resp => {
-                            if (resp?.instances !== undefined && resp.instances.length > 0) {
-                                const exportIds = resp.instances.filter(e => e.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb && e.ID !== undefined).map(e => e.ID) as string[];
-                                return this.exportDataService.getTimescaleExportUsage(exportIds).pipe(map(usage => {
-                                    this.usage = usage;
-                                    return resp;
-                                }));
-                            }
-                            return of(resp);
-                        }));
-                }),
-            )
-            .subscribe((resp: ExportResponseModel | null) => {
+        return obs.pipe(
+            map((resp: ExportResponseModel | null) => {
                 if (resp !== null) {
                     this.exports = resp.instances || [];
                     if (this.exports === undefined) {
@@ -245,21 +254,26 @@ export class ExportComponent implements OnInit, OnDestroy {
                     this.totalCount = resp.total || 0;
                     this.exportsDataSource.data = this.exports;
                 }
-                this.ready = true;
-            });
+                return resp;
+            }),
+            concatMap((resp: ExportResponseModel | null) => {
+                if (resp?.instances !== undefined && resp.instances.length > 0) {
+                    const exportIds = resp.instances.filter(e => e.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb && e.ID !== undefined).map(e => e.ID) as string[];
+                    return this.exportDataService.getTimescaleExportUsage(exportIds).pipe(map(usage => {
+                        this.usage = usage;
+                    }));
+                }
+                return of(null);
+            }),
+        );
     }
 
     private initSearchAndGetExports() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
             localStorage.setItem('data.exports.search', this.searchText);
-            this.getExports(true);
+            this.reload();
         });
-    }
-
-    private reset() {
-        this.exports = [];
-        this.ready = false;
     }
 
     isAllSelected() {
@@ -300,7 +314,7 @@ export class ExportComponent implements OnInit, OnDestroy {
                         : this.exportService.stopPipelines(exportIDs);
                     obs.subscribe(() => {
                         this.paginator.pageIndex = 0;
-                        this.getExports(true);
+                        this.getExports();
                         this.selectionClear();
 
                         this.ready = true;
@@ -336,5 +350,51 @@ export class ExportComponent implements OnInit, OnDestroy {
             return '';
         }
         return this.formatBytes(usage?.bytesPerDay || 0) + '/day, ' + this.formatBytes((usage?.bytesPerDay || 0) * 30) + '/month';
+    }
+
+    shareExport(exp: ExportModel): void {
+        if(exp.ID == null) {
+            return;
+        }
+        this.permissionsDialogService.openPermissionV2Dialog('export-instances', exp.ID, exp.Name || '');
+    }
+
+    loadExportPermissions() {
+        return this.permissionsService.getAllResourcePermissionsV2('export-instances').pipe(
+            map((permissionsPerExports) => {
+                permissionsPerExports.forEach(permission => {
+                    this.permissionsPerExports[permission.id] = permission;
+                });
+            })
+        );
+    }
+
+    getUserData() {
+        const userIDResp = this.userService.getUserId();
+        if(typeof(userIDResp) == 'string') {
+            this.userID = userIDResp;
+        }
+        this.userRoles = this.userService.getUserRoles();
+    }
+
+    userHasExecutePermission(exportID: string) {
+        const userPermissionsForExport = this.permissionsPerExports[exportID];
+        if(userPermissionsForExport == null) {
+            return false;
+        }
+
+        const permission = userPermissionsForExport.user_permissions[this.userID];
+        if(permission != null && permission.execute) {
+            return true;
+        }
+
+        let oneRoleHasPermission = false;
+        this.userRoles.forEach(role => {
+            const groupPermission = userPermissionsForExport.group_permissions[role];
+            if(groupPermission != null && groupPermission.execute) {
+                oneRoleHasPermission = true;
+            }
+        });
+        return oneRoleHasPermission;
     }
 }

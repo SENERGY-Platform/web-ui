@@ -29,3 +29,17 @@ export interface PermissionsResourceBaseModel {
         [key: string]: PermissionsRightsModel;
     };
 }
+
+export interface PermissionsV2ResourceModel extends PermissionsV2ResourceBaseModel {
+    topic_id: string;
+    id: string;
+}
+
+export interface PermissionsV2ResourceBaseModel {
+    user_permissions: {
+        [key: string]: PermissionsRightsModel;
+    };
+    group_permissions: {
+        [key: string]: PermissionsRightsModel;
+    };
+}

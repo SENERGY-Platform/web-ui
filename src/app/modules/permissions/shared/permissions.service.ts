@@ -20,10 +20,9 @@ import { environment } from '../../../../environments/environment';
 import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import {PermissionsResourceBaseModel, PermissionsResourceModel} from './permissions-resource.model';
+import { PermissionsResourceBaseModel, PermissionsResourceModel, PermissionsV2ResourceBaseModel, PermissionsV2ResourceModel} from './permissions-resource.model';
 import { PermissionsGroupModel, PermissionsUserModel } from './permissions-user.model';
 import { PermissionsRightsModel } from './permissions-rights.model';
-import { PermissionsResponseModel } from './permissions-response.model';
 
 @Injectable({
     providedIn: 'root',
@@ -61,6 +60,32 @@ export class PermissionsService {
             );
     }
 
+    getResourcePermissionsV2(topicID: string, ressourceId: string): Observable<PermissionsV2ResourceModel> {
+        return this.http
+            .get<PermissionsV2ResourceModel>(
+                environment.permissionV2Url + '/manage/' + encodeURIComponent(topicID) + '/' + encodeURIComponent(ressourceId),
+            )
+            .pipe(
+                map((resp) => resp || {} as PermissionsV2ResourceModel),
+                catchError(
+                    this.errorHandlerService.handleError(PermissionsService.name, 'getResourcePermissionsV2', {} as PermissionsV2ResourceModel),
+                ),
+            );
+    }
+
+    getAllResourcePermissionsV2(topicID: string): Observable<PermissionsV2ResourceModel[]> {
+        return this.http
+            .get<PermissionsV2ResourceModel[]>(
+                environment.permissionV2Url + '/manage/' + encodeURIComponent(topicID),
+            )
+            .pipe(
+                map((resp) => resp || {} as PermissionsV2ResourceModel[]),
+                catchError(
+                    this.errorHandlerService.handleError(PermissionsService.name, 'getAllResourcePermissionsV2', []),
+                ),
+            );
+    }
+
     //key is the kafka key this permission command will be published to. is optional
     setResourcePermissions(kind: string, id: string, rights: PermissionsResourceBaseModel, key?: string): Observable<boolean> {
         let query = '';
@@ -76,6 +101,20 @@ export class PermissionsService {
                 map((_) => true),
                 catchError(
                     this.errorHandlerService.handleError(PermissionsService.name, 'getResourcePermissions', false),
+                ),
+            );
+    }
+
+    setResourcePermissionsV2(topicID: string, ressourceID: string, rights: PermissionsV2ResourceBaseModel): Observable<boolean> {
+        return this.http
+            .put<PermissionsResourceBaseModel>(
+                environment.permissionV2Url + '/manage/' + encodeURIComponent(topicID) + '/' + encodeURIComponent(ressourceID),
+                rights
+            )
+            .pipe(
+                map((_) => true),
+                catchError(
+                    this.errorHandlerService.handleError(PermissionsService.name, 'setResourcePermissionsV2', false),
                 ),
             );
     }
