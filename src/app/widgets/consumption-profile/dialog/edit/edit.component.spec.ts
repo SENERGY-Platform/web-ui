@@ -20,7 +20,7 @@ describe('ConsumptionProfileEditComponent', () => {
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: MatDialogRef, useValue: {}},
-    ]
+      ]
     })
     .compileComponents();
 
