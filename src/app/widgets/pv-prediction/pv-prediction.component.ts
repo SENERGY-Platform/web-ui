@@ -7,7 +7,6 @@ import { PvPredictionService } from './shared/pv-load.service';
 import { PVPredictionResult } from './shared/prediction.model';
 import { ChartsModel } from '../charts/shared/charts.model';
 import { SingleValueModel } from '../single-value/shared/single-value.model';
-import { options } from 'yargs';
 
 @Component({
     selector: 'senergy-pv-prediction',

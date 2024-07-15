@@ -101,7 +101,10 @@ export class DataSourceSelectorComponent implements OnInit {
     @Input() showExportsAsSource = true;
     @Input() showDeviceGroupsAsSource = true;
     @Input() showDevicesAsSource = true;
+    @Input() showTimeRange = true;
+    @Input() showSource = true;
     @Output() updatedDataSourceConfig = new EventEmitter<DataSourceConfig>();
+    dataSourcePlaceholder = '';
 
     constructor(
         private deviceTypeService: DeviceTypeService,
@@ -112,6 +115,7 @@ export class DataSourceSelectorComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
+        this.setDataSourcePlaceholder()
         this.setupDataSources().pipe(
             concatMap((_) => this.loadFieldOptions(this.dataSourceConfig?.exports || [])),
             map((fieldOptions) => {
@@ -132,6 +136,27 @@ export class DataSourceSelectorComponent implements OnInit {
                 this.waitingForDataSourceChange = false;
             }
         });
+    }
+
+    setDataSourcePlaceholder() {
+        let seperatorNeeded = false;
+        if(this.showDevicesAsSource) {
+            this.dataSourcePlaceholder += 'Device';
+            seperatorNeeded = true;
+        }
+        if(this.showDeviceGroupsAsSource) {
+            if(seperatorNeeded) {
+                this.dataSourcePlaceholder += '/';
+            }
+            this.dataSourcePlaceholder += 'Device Group';
+        }
+
+        if(this.showExportsAsSource) {
+            if(seperatorNeeded) {
+                this.dataSourcePlaceholder += '/';
+            }
+            this.dataSourcePlaceholder += 'Export';
+        }
     }
 
     initForm() {

@@ -1,5 +1,7 @@
-import { ChangeDetectorRef, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, ComponentFactoryResolver, ComponentRef, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChanges, ViewChild, ViewContainerRef } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
+import { AnomalyReconstructionComponent } from 'src/app/widgets/anomaly/reconstruction/reconstruction.component';
 import { ApexChartOptions, ChartsExportVAxesModel } from '../../../export/shared/charts-export-properties.model';
 
 @Component({
@@ -8,13 +10,21 @@ import { ApexChartOptions, ChartsExportVAxesModel } from '../../../export/shared
   styleUrls: ['./timeline.component.css']
 })
 export class TimelineComponent implements OnInit, OnChanges {
+    /* 
+    Data is expected to be in shape
+    [NUMBER_TIMELINE_ROWS, NUMBER_COLUMNS, NUMBER_TIMESTAMPS, 2]
+    where NUMBER_TIMELINE_ROWS comes mostly from the number of exports, the index has to match with the vAxes list to find the corresponding alias
+    The last dimension is expected to be [timestamp string, value] and has to be sorted descending by timestamp
+    */
     @Input() data = [];
+
     @Input() hAxisLabel = '';
     @Input() vAxisLabel = '';
     @Input() enableToolbar = false;
     @Input() vAxes: ChartsExportVAxesModel[] = [];
     @Input() height = 0;
     @Input() width = 0;
+    @Input() OnClickFnc = (_: any, _2: any, _3: any) => {};
     render = false;
 
     apexChartOptions: Partial<ApexChartOptions> = {
@@ -29,7 +39,8 @@ export class TimelineComponent implements OnInit, OnChanges {
             toolbar: {
                 show: false
             },
-            redrawOnWindowResize: true
+            redrawOnWindowResize: true,
+            events: {}
         },
         plotOptions: {
             bar: {
@@ -64,10 +75,14 @@ export class TimelineComponent implements OnInit, OnChanges {
 
     constructor(
         private errorHandlerService: ErrorHandlerService,
+        private cdr: ChangeDetectorRef
     ) {}
 
     ngOnInit() {
         this.renderTimelineChart();
+        if(this.apexChartOptions.chart != null && this.apexChartOptions.chart.events != null) {
+            this.apexChartOptions.chart.events['dataPointSelection'] = this.OnClickFnc;
+        }
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -76,7 +91,7 @@ export class TimelineComponent implements OnInit, OnChanges {
             this.render = false;
             this.height = changes["height"].currentValue;
             this.width = changes["width"].currentValue;
-
+            this.cdr.detectChanges();
             this.render = true;
         }
     }
@@ -209,7 +224,6 @@ export class TimelineComponent implements OnInit, OnChanges {
 
     getAliasOfMatchingRule(vAxis: ChartsExportVAxesModel, firstValue: any, lastValue: any) {
         let alias;
-
         (vAxis?.conversions || []).forEach(conversion => {
             //console.log(conversion.to + "-" + lastValue + "-" + conversion.from + "-" + firstValue)
             // convert everything to string, as there are problems with booleans in the conversion that are sometimes strings or bool
@@ -222,7 +236,6 @@ export class TimelineComponent implements OnInit, OnChanges {
     }
 
     processDataForOneEntity(data: any, chartData: any, vAxis: ChartsExportVAxesModel) {
-
         const mergedData = this.mergeTimelineData(data);
         mergedData.forEach((row: any, i: any) => {
             if(i === mergedData.length-1) {

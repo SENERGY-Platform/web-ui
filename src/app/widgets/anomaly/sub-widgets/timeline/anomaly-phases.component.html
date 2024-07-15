@@ -1,0 +1,9 @@
+<div *ngIf="anomaliePhases.length === 0"class="text-container">
+    <h2>No anomaly detected!</h2>
+</div>
+
+<div *ngIf="anomaliePhases.length > 0 && chartDataReady === true">
+    <timeline-chart [data]="anomaliePhases" [hAxisLabel]="hAxisLabel" [vAxisLabel]="vAxisLabel"
+    [enableToolbar]="false" [vAxes]="vAxes" [width]="timelineWidth" [height]="timelineHeight" [OnClickFnc]="onClick">
+    </timeline-chart>
+</div>

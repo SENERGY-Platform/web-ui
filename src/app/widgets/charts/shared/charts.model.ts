@@ -78,6 +78,11 @@ export class ChartsModel {
             zoomStartTime?: Date;
             zoomEndTime?: Date;
             timeline?: any;
+            pointSize?: number;
+            lineWidth?: number;
+            theme?: string;
+            intervals?: any;
+            interval?: any;
         },
     ) {
     }

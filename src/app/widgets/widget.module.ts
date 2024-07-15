@@ -119,6 +119,10 @@ import { ConsumptionProfileComponent } from './consumption-profile/consumption-p
 import { LeakageDetectionComponent } from './leakage-detection/leakage-detection.component';
 import { LeakageDetectionEditComponent } from './leakage-detection/dialog/edit/edit.component';
 import { ConsumptionProfileEditComponent } from './consumption-profile/dialog/edit/edit.component';
+import { LastAnomalyComponent } from './anomaly/sub-widgets/last/last-anomaly.component';
+import { AnomalyPhasesComponent } from './anomaly/sub-widgets/timeline/anomaly-phases.component';
+import { AnomalyReconstructionComponent } from './anomaly/reconstruction/reconstruction.component';
+import { LineComponent } from './anomaly/sub-widgets/line/line.component';
 
 registerLocaleData(localeDe, 'de');
 
@@ -229,7 +233,11 @@ registerLocaleData(localeDe, 'de');
         ConsumptionProfileComponent,
         LeakageDetectionComponent,
         LeakageDetectionEditComponent,
-        ConsumptionProfileEditComponent
+        ConsumptionProfileEditComponent,
+        LastAnomalyComponent,
+        AnomalyPhasesComponent,
+        AnomalyReconstructionComponent,
+        LineComponent
     ],
     exports: [
         SwitchComponent,

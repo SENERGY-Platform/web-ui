@@ -1,0 +1,13 @@
+<div *ngIf="chartsReady">
+    <apx-chart *ngIf="render" #apexChart [tooltip]="valueChartData.tooltip!" [legend]="valueChartData.legend!"
+        [colors]="valueChartData.colors!" [series]="valueChartData.series!" [chart]="valueChartData.chart!"
+        [plotOptions]="valueChartData.plotOptions!" [xaxis]="valueChartData.xaxis!" [yaxis]="valueChartData.yaxis!"
+        [annotations]="valueChartData.annotations!">
+    </apx-chart>
+
+    <apx-chart *ngIf="render && showFrequencyAnomalies === true" #apexChart [tooltip]="timeChartData.tooltip!" [legend]="timeChartData.legend!"
+        [colors]="timeChartData.colors!" [series]="timeChartData.series!" [chart]="timeChartData.chart!"
+        [plotOptions]="timeChartData.plotOptions!" [xaxis]="timeChartData.xaxis!" [yaxis]="timeChartData.yaxis!"
+        [annotations]="timeChartData.annotations!" [markers]="timeChartData.markers!">
+    </apx-chart>
+</div>
