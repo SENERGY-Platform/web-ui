@@ -64,7 +64,7 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
 
     private createMockAnomalies(): AnomaliesPerDevice {
         // Mock Anomalies.
-        const extreme1 = moment().subtract(10, 'minutes').toISOString();
+        const extreme1 = moment().subtract(8, 'minutes').toISOString();
         const curve1Start = moment().subtract(30, 'minutes').toISOString();
         const curve1End = moment().subtract(10, 'minutes').toISOString();
         const curve2Start = moment().subtract(20, 'minutes').toISOString();
@@ -75,7 +75,7 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
 
         return {
             'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e6': [{
-                'value': '700',
+                'value': '350',
                 'type': 'curve',
                 'subType': '',
                 'timestamp': '2024-06-27T09:47:14.058Z',
@@ -86,12 +86,12 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
                 'initial_phase': '',
                 'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
                 'original_reconstructed_curves': [
-                    [new Date(curve3Start).getTime(), 200, 300], 
-                    [new Date(curve3End).getTime(), 200, 400], 
+                    [new Date(curve3Start).getTime(), 260, 270], 
+                    [new Date(curve3End).getTime(), 250, 260], 
                 ]
             },
             {
-                'value': '700',
+                'value': '0.7',
                 'type': 'curve',
                 'subType': '',
                 'timestamp': '2024-06-27T09:47:14.058Z',
@@ -102,13 +102,13 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
                 'initial_phase': '',
                 'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
                 'original_reconstructed_curves': [
-                    [new Date(curve1Start).getTime(), 200, 300], 
-                    [new Date(curve1End).getTime(), 200, 400], 
+                    [new Date(curve1Start).getTime(), 260, 270], 
+                    [new Date(curve1End).getTime(), 240, 250], 
                 ],
             },
             ],
             'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5': [{
-                'value': '354',
+                'value': '350',
                 'type': 'extreme_value',
                 'subType': '',
                 'timestamp': extreme1,
@@ -123,7 +123,7 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
                 'lower_bound': 800
             },
             {
-                'value': '700',
+                'value': '0.8',
                 'type': 'curve',
                 'subType': '',
                 'timestamp': '2024-06-27T09:47:14.058Z',
@@ -134,12 +134,12 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
                 'initial_phase': '',
                 'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
                 'original_reconstructed_curves': [
-                    [new Date(curve3Start).getTime(), 200, 300], 
-                    [new Date(curve3End).getTime(), 200, 400], 
+                    [new Date(curve3Start).getTime(), 270, 280], 
+                    [new Date(curve3End).getTime(), 240, 250], 
                 ]
             },
             {
-                'value': '700',
+                'value': '0.9',
                 'type': 'curve',
                 'subType': '',
                 'timestamp': '2024-06-27T09:47:14.058Z',
@@ -150,13 +150,13 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
                 'initial_phase': '',
                 'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
                 'original_reconstructed_curves': [
-                    [new Date(curve1Start).getTime(), 200, 300], 
-                    [new Date(curve1End).getTime(), 200, 400], 
+                    [new Date(curve1Start).getTime(), 240, 250], 
+                    [new Date(curve1End).getTime(), 240, 250], 
                 ],
             
             },
             {
-                'value': '700',
+                'value': '0.8',
                 'type': 'curve',
                 'subType': '',
                 'timestamp': '2024-06-27T09:47:14.058Z',
@@ -167,8 +167,8 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
                 'initial_phase': '',
                 'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
                 'original_reconstructed_curves': [
-                    [new Date(curve2Start).getTime(), 200, 300], 
-                    [new Date(curve2End).getTime(), 200, 400], 
+                    [new Date(curve2Start).getTime(),240, 250], 
+                    [new Date(curve2End).getTime(), 240, 250], 
                 ]
             },
             {

@@ -12,6 +12,13 @@ import { AnomaliesPerDevice, AnomalyResultModel, DeviceValue } from '../../share
 import { AnomalyService } from '../../shared/anomaly.service';
 import {  ChangeDetectorRef } from '@angular/core';
 
+const AnomalyPointSize = 7;
+const AnomalyPointColor = '#FF0000';
+const NormalPointSize = 0;
+const NormalPointColor = '#008FFB';
+const DebugPointSize = 5;
+const NormalWaitingPointSize = 5;
+
 @Component({
     selector: 'anomaly-line',
     templateUrl: './line.component.html',
@@ -35,7 +42,7 @@ export class LineComponent implements OnInit, OnChanges {
 
     valueChartData: any;
     private createApexChartOptions(chartType: ChartType): ApexChartOptions {
-        return {
+        const chartData = {
             series: [],
             chart: {
                 redrawOnParentResize: true,
@@ -54,7 +61,7 @@ export class LineComponent implements OnInit, OnChanges {
             title: {},
             plotOptions: {},
             xaxis: {
-                type: 'datetime',
+                type: 'datetime' as 'datetime' | 'category',
                 labels: {
                     datetimeUTC: false,
                 },
@@ -84,6 +91,8 @@ export class LineComponent implements OnInit, OnChanges {
             },
             markers: {},
         };
+
+        return chartData;
     };
 
     constructor(
@@ -108,14 +117,17 @@ export class LineComponent implements OnInit, OnChanges {
     private setChartSize() {
         this.render = false;
         this.chartHeight = this.widgetHeight;
+        this.chartWidth = this.widgetWidth - 100;
+
         if(this.showFrequencyAnomalies === true) {
             this.chartHeight = this.widgetHeight * 0.45;
+
+            this.timeChartData.chart.width = this.chartWidth;
+            this.timeChartData.chart.height = this.chartHeight;
         }
-        this.chartWidth = this.widgetWidth - 100;
         this.valueChartData.chart.width = this.chartWidth;
         this.valueChartData.chart.height = this.chartHeight;
-        this.timeChartData.chart.width = this.chartWidth;
-        this.timeChartData.chart.height = this.chartHeight;
+   
         this.cdr.detectChanges();
         this.render = true;
     }
@@ -272,13 +284,7 @@ export class LineComponent implements OnInit, OnChanges {
                 this.extremeOutliers.push(anomaly);
                 anomalyPoints.push({
                     x: ts,
-                    y: parseFloat(anomaly.value),
-                    marker: {
-                        size: 6,
-                        fillColor: '#FF4560',
-                        strokeColor: 'red',
-                        radius: 2,
-                    }
+                    y: parseFloat(anomaly.value)
                 });
 
                 extremeBoundIntervals.push({
@@ -302,7 +308,7 @@ export class LineComponent implements OnInit, OnChanges {
         // Anomaly Operator works on 1 minute sampling for curve anomalies
         return this.anomalyService.getDeviceCurve(deviceId, serviceId, pathToColumn, lastTimeRange, '1m').pipe(
             map(data => {
-                const chartData = this.createApexChartOptions('scatter');
+                const chartData = this.createApexChartOptions('line');
                 const points: any[] = [];
                 data.forEach(deviceValue => {
                     points.push({
@@ -311,10 +317,10 @@ export class LineComponent implements OnInit, OnChanges {
                     });
                 });
 
-                const colors = ['#008FFB'];
-                const sizes = [3];
+                const colors = [NormalPointColor];
+                const sizes = [NormalPointSize];
 
-                chartData.series?.push({data: points, name: 'Original', type:'scatter'});
+                chartData.series?.push({data: points, name: 'Original', type:'line'});
                 const anomalies = this.getChartAnomalies(deviceId);
 
                 const outlierPoints = anomalies[0];
@@ -323,20 +329,20 @@ export class LineComponent implements OnInit, OnChanges {
                     // Can be drawn as scatter plot -> but marker size is not configurable when combi chart line+scatter is done
                     //chartData.annotations.points = anomalyPoints;
                     chartData.series?.push({data: outlierPoints, name: 'Outlier', type:'scatter'});
-                    colors.push('#FF0000');
-                    sizes.push(6);
+                    colors.push(AnomalyPointColor);
+                    sizes.push(AnomalyPointSize);
                 }
 
                 if(this.showDebug) {
                     const reconstrucedPoints = anomalies[1];
-                    chartData.series?.push({data: reconstrucedPoints, name: 'Prediction', type:'scatter'});
+                    chartData.series?.push({data: reconstrucedPoints, name: 'Prediction', type:'line'});
                     colors.push('#228B22');
-                    sizes.push(3);
+                    sizes.push(DebugPointSize);
 
                     const reconstructionInputPoints = anomalies[2];
-                    chartData.series?.push({data: reconstructionInputPoints, name: 'Processed', type:'scatter'});
+                    chartData.series?.push({data: reconstructionInputPoints, name: 'Processed', type:'line'});
                     colors.push('#AFE1AF');
-                    sizes.push(3);
+                    sizes.push(DebugPointSize);
                 }
 
                 const anomalyIntervals = anomalies[3];
@@ -344,6 +350,7 @@ export class LineComponent implements OnInit, OnChanges {
                     chartData.annotations.xaxis = anomalyIntervals;
                 }
 
+                chartData.markers.colors = colors;
                 chartData.colors = colors;
                 chartData.markers.size = sizes;
 
@@ -379,6 +386,7 @@ export class LineComponent implements OnInit, OnChanges {
                       '</div>';
                 };
 
+                console.log(chartData)
                 return chartData;
             })
         );
@@ -565,6 +573,20 @@ export class LineComponent implements OnInit, OnChanges {
 
     */
 
+
+    private parseFrequencyAnomalies(deviceId: string) {
+        const frequencyAnomalies: any[] = [];
+        this.anomalies?.[deviceId].forEach(anomaly => {
+            if(anomaly.type === 'freq') {
+                frequencyAnomalies.push({
+                    x: new Date(anomaly.timestamp).getTime(),
+                    y: parseFloat(anomaly.value)
+                });
+            }
+        });
+        return frequencyAnomalies;
+    }
+
     private createTimeChartModel(deviceId: string, serviceId: string, pathToColumn: string, _: string) {
         return this.anomalyService.getDeviceCurve(deviceId, serviceId, pathToColumn, '10m').pipe(
             map(data => {
@@ -584,24 +606,20 @@ export class LineComponent implements OnInit, OnChanges {
                     });
                 });
 
-                chartData.series?.push({data: points});
-                chartData.markers.size = 3;
+                chartData.series?.push({data: points, name: 'Waiting Time'});
+                const colors = [NormalPointColor];
+                const sizes = [NormalWaitingPointSize];
 
-                this.anomalies?.[deviceId].forEach(anomaly => {
-                    if(anomaly.type === "freq") {
-                        console.log(anomaly);
-                        (chartData.annotations?.points || []).push({
-                            x: new Date(anomaly.timestamp).getTime(),
-                            y: parseFloat(anomaly.value),
-                            marker: {
-                                size: 5,
-                                fillColor: '#FF4560',
-                                strokeColor: 'red',
-                                radius: 2,
-                            }
-                        });
-                    }
-                });
+                const outlierPoints = this.parseFrequencyAnomalies(deviceId);
+                chartData.series?.push({data: outlierPoints, name: 'Outlier', type:'scatter'});
+                colors.push(AnomalyPointColor);
+                sizes.push(AnomalyPointSize);
+
+                chartData.markers.colors = colors;
+                chartData.colors = colors;
+                console.log(sizes)
+                chartData.markers.size = sizes;
+                console.log(chartData);
                 return chartData;
             })
         );
