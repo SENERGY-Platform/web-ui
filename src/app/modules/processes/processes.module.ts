@@ -77,6 +77,7 @@ import {ProcessIoVariablesComponent} from './process-io/variables/variables.comp
 import {ShortKeyPipe} from './process-io/shared/short-key.pipe';
 import {ProcessIoVariableEditDialogComponent} from './process-io/dialogs/process-io-variable-edit-dialog.component';
 import {ConditionalEventDialogComponent} from './designer/dialogs/conditional-event-dialog/conditional-event-dialog.component';
+import { IncidentDialogComponent } from './designer/dialogs/incident-dialog/incident-dialog.component';
 
 const processRepo: Route = {
     path: 'processes/repository',
@@ -193,7 +194,8 @@ const processIo: Route = {
         ProcessIoDesignerDialogComponent,
         ProcessIoVariablesComponent,
         ShortKeyPipe,
-        ProcessIoVariableEditDialogComponent
+        ProcessIoVariableEditDialogComponent,
+        IncidentDialogComponent,
     ],
 })
 export class ProcessesModule {}

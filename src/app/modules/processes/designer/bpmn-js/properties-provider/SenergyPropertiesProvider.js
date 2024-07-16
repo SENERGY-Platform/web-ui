@@ -37,6 +37,8 @@ function SenergyPropertiesProvider(eventBus, canvas, bpmnFactory, elementRegistr
         camundaTabs[0].groups.unshift(createHelperGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
         camundaTabs[0].groups.unshift(createInfluxTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
         camundaTabs[0].groups.unshift(createTimeEventHelperGroup(element, bpmnjs, eventBus, modeling));
+        camundaTabs[0].groups.unshift(createIncidentTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
+
         return camundaTabs;
     };
 }
@@ -66,6 +68,17 @@ var isCollaborationOrProcess = function (element) {
     return is(element, "bpmn:Collaboration") || is(element, "bpmn:Process")
     // return element.businessObject && element.businessObject.eventDefinitions && element.businessObject.eventDefinitions[0] && element.businessObject.eventDefinitions[0].$type == "bpmn:TimerEventDefinition"
 };
+
+function createIncidentTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
+    var iotGroup = {
+        id: 'incident',
+        label: 'Incident',
+        entries: [],
+        enabled: isTask
+    };
+    iotProps.processIncident(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    return iotGroup;
+}
 
 function createIotExternalTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
     var iotGroup = {

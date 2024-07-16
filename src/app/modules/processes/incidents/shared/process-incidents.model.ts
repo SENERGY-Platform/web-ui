@@ -25,3 +25,7 @@ export interface ProcessIncidentsModel {
     tenant_id: string;
     deployment_name: string;
 }
+
+export interface ProcessIncidentsConfig {
+    message: string;
+}

@@ -319,6 +319,50 @@ module.exports = {
         }
     },
 
+    processIncident: function (group, element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
+        var refresh = function () {
+            eventBus.fire('elements.changed', {elements: [element]});
+        };
+
+        const callback = bpmnjs.designerCallbacks.processIncident;
+
+        if (callback != null) {
+            group.entries.push({
+                id: "process-incident-helper",
+                html: "<button class='bpmn-iot-button' data-action='saveIncident'>Incident</button>",
+                saveIncident: function (element, node) {
+                    var bo = getBusinessObject(element);
+                    let oldMessage = '';
+                    if (
+                        bo.extensionElements != null
+                        && bo.extensionElements.values != null
+                        && bo.extensionElements.values.length > 0
+                        && bo.extensionElements.values[0] != null
+                        && bo.extensionElements.values[0].inputParameters
+                        && bo.extensionElements.values[0].inputParameters.length > 0
+                    ) {
+                        oldMessage = bo.extensionElements.values[0].inputParameters[0].value
+                    }
+                    var oldConfig = {
+                        message: oldMessage
+                    };
+
+                    callback(oldConfig, function (newConfig) {
+                        console.log(newConfig)
+                        helper.toExternalServiceTask(bpmnFactory, replace, selection, element, function (serviceTask, element) {
+                            serviceTask.topic = 'optimistic';
+                            const inputs = [];
+                            inputs.push(createTextInputParameter(bpmnjs, 'incident', newConfig.message));
+                            var inputOutput = createInputOutput(bpmnjs, inputs, []);
+                            setExtentionsElement(bpmnjs, serviceTask, inputOutput);
+                        });
+                    });
+                    return true;
+                }
+            });
+        }
+    },
+
     notification: function (group, element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
         var refresh = function () {
             eventBus.fire('elements.changed', {elements: [element]});

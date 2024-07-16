@@ -36,6 +36,8 @@ import { FilterCriteriaDialogComponent } from '../dialogs/filter-criteria-dialog
 import {ProcessIoDesignerInfo} from '../../process-io/shared/process-io.model';
 import {ProcessIoDesignerDialogComponent} from '../dialogs/process-io-designer-dialog/process-io-designer-dialog.component';
 import {ConditionalEventDialogComponent} from '../dialogs/conditional-event-dialog/conditional-event-dialog.component';
+import { IncidentDialogComponent } from '../dialogs/incident-dialog/incident-dialog.component';
+import { ProcessIncidentsConfig } from '../../incidents/shared/process-incidents.model';
 
 @Injectable({
     providedIn: 'root',
@@ -149,5 +151,12 @@ export class DesignerDialogService {
         dialogConfig.disableClose = false;
         dialogConfig.data = { info };
         return this.dialog.open(ProcessIoDesignerDialogComponent, dialogConfig).afterClosed();
+    }
+
+    openIncidentConfigDialog(config: ProcessIncidentsConfig) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = { config };
+        return this.dialog.open(IncidentDialogComponent, dialogConfig).afterClosed();
     }
 }

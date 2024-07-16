@@ -42,6 +42,7 @@ import { DesignerSnackBarComponent } from './snack-bar/designer-snack-bar.compon
 import { defaultIfEmpty } from 'rxjs/operators';
 import {ConditionalEventEditModel, FilterCriteriaDialogResultModel} from './shared/designer-dialog.model';
 import {defaultProcessIoDesignerConfig, ProcessIoDesignerConfig, ProcessIoDesignerInfo} from '../process-io/shared/process-io.model';
+import { ProcessIncidentsConfig } from '../incidents/shared/process-incidents.model';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -201,6 +202,13 @@ export class ProcessDesignerComponent implements OnInit {
                 configNotification: (subj: string, content: string, callback: (subj_: string, content_: string) => void) => {
                     that.designerDialogService.openNotificationConfigDialog(subj, content, callback);
                 },
+                processIncident: (config: ProcessIncidentsConfig, callback: (result_: any) => void) => {
+                    that.designerDialogService.openIncidentConfigDialog(config).subscribe((result: DeviceTypeSelectionResultModel) => {
+                        if (result != null) {
+                            callback(result);
+                        }
+                    });
+                }
             };
 
             if (this.id === '') {
