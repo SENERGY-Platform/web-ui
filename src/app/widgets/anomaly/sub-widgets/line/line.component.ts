@@ -14,9 +14,9 @@ import {  ChangeDetectorRef } from '@angular/core';
 
 const AnomalyPointSize = 7;
 const AnomalyPointColor = '#FF0000';
-const NormalPointSize = 0;
+const NormalPointSize = 1;
 const NormalPointColor = '#008FFB';
-const DebugPointSize = 5;
+const DebugPointSize = 0;
 const NormalWaitingPointSize = 5;
 
 @Component({
@@ -89,7 +89,8 @@ export class LineComponent implements OnInit, OnChanges {
                     format: 'dd.MM HH:mm:ss.fff',
                 }
             },
-            markers: {},
+            markers: {
+            },
         };
 
         return chartData;
@@ -107,7 +108,7 @@ export class LineComponent implements OnInit, OnChanges {
                 this.chartsReady = true;
             },
             error: (err: any) => {
-                console.log('Cant load charts: ' + err);
+                console.log(err);
                 this.chartsReady = false;
             }
         });
@@ -175,8 +176,7 @@ export class LineComponent implements OnInit, OnChanges {
                 this.valueChartData = results[0];
                 this.timeChartData = results[1];
                 return null;
-            }),
-            catchError(err => throwError(() => new Error('Cant setup chart data: ' + err)))
+            })
         );
     }
 
@@ -228,7 +228,7 @@ export class LineComponent implements OnInit, OnChanges {
         }
 
         if(!overlapFound) {
-            return anomalyIntervals;
+            return [anomalyIntervals, []];
         } else {
             const result = this.combineCurveAnomalies(anomaliesWithOverlap);
             anomalyIntervals = anomalyIntervals.concat(result[0]);
@@ -272,13 +272,19 @@ export class LineComponent implements OnInit, OnChanges {
         return [reconstrucedPoints, reconstructionInputPoints];
     }
 
+    private getDeviceAnomalies(deviceId: string) {
+        let anomaliesOfDevice: AnomalyResultModel[] = [];
+        if(this.anomalies != null && this.anomalies[deviceId] != null) {
+            anomaliesOfDevice = this.anomalies[deviceId];
+        }
+        return anomaliesOfDevice;
+    }
 
     private getChartAnomalies(deviceId: string) {
         const anomalyPoints: any[] = [];
         const curveAnomalies: any[] = [];
         const extremeBoundIntervals: any[] = [];
-
-        this.anomalies?.[deviceId].forEach(anomaly => {
+        this.getDeviceAnomalies(deviceId).forEach(anomaly => {
             const ts = new Date(anomaly.timestamp).getTime();
             if(anomaly.type === 'extreme_value') {
                 this.extremeOutliers.push(anomaly);
@@ -360,7 +366,7 @@ export class LineComponent implements OnInit, OnChanges {
                 const self = this;
 
                 chartData.tooltip.custom = function({series, seriesIndex, dataPointIndex, w}) {
-                    console.log(series, seriesIndex, w)
+                    console.log(w)
                     const value = series[seriesIndex][dataPointIndex].toFixed(2);
                     let tooltipMsg;
                     switch(seriesIndex) {
@@ -369,7 +375,7 @@ export class LineComponent implements OnInit, OnChanges {
                             break;
                         case 1:
                             const anomaly = self.extremeOutliers[dataPointIndex];
-                            tooltipMsg = "<b>Extreme Outlier:</b> " + anomaly.value + " [" + anomaly.lower_bound + "/" + anomaly.upper_bound + "]";
+                            tooltipMsg = "<b>Extreme Outlier:</b> " + anomaly.value + " [" + anomaly.lower_bound + "-" + anomaly.upper_bound + "]";
                             break;
                         case 2:
                             tooltipMsg = '<b>Predicted Value:</b> ' + value;
@@ -576,7 +582,7 @@ export class LineComponent implements OnInit, OnChanges {
 
     private parseFrequencyAnomalies(deviceId: string) {
         const frequencyAnomalies: any[] = [];
-        this.anomalies?.[deviceId].forEach(anomaly => {
+        this.getDeviceAnomalies(deviceId).forEach(anomaly => {
             if(anomaly.type === 'freq') {
                 frequencyAnomalies.push({
                     x: new Date(anomaly.timestamp).getTime(),
@@ -617,9 +623,7 @@ export class LineComponent implements OnInit, OnChanges {
 
                 chartData.markers.colors = colors;
                 chartData.colors = colors;
-                console.log(sizes)
                 chartData.markers.size = sizes;
-                console.log(chartData);
                 return chartData;
             })
         );

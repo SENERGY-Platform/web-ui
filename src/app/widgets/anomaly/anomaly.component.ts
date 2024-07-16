@@ -196,7 +196,7 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
         return this.anomalyService.getAnomalyHistory(exportID, lastTimeRange).pipe(
             map((anomalies) => {
                 this.anomalies = anomalies;
-                this.anomalies = this.createMockAnomalies();
+                //this.anomalies = this.createMockAnomalies(); Use this to simulate some anomalies in the UI`
                 this.getAllDevices(this.anomalies);
             })
         );
