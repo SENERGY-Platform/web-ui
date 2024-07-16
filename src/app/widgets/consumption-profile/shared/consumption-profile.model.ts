@@ -1,6 +1,6 @@
 export interface ConsumptionProfileResponse {
     message: string;
-    value: number;
+    value: boolean;
     last_consumptions: any[][];
     time_window: any;
     timestamp: Date;

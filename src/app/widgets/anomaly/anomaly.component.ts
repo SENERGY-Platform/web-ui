@@ -46,8 +46,8 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget?.id||"");
         this.widgetWidth = element.width;
         this.widgetHeight = element.height;
-
     }
+    
     ngOnInit(): void {
         this.configured = this.widget.properties.anomalyDetection !== undefined;
         if(!this.configured) {

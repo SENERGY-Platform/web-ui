@@ -1,7 +1,9 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { GoogleChartComponent } from 'ng2-google-charts';
 import { map } from 'rxjs';
+import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
+import { ApexChartOptions } from '../charts/export/shared/charts-export-properties.model';
 import { ChartsModel } from '../charts/shared/charts.model';
 import { LeackageDetectionProperties, LeakageDetectionResponse } from './shared/leakage-detction.model';
 import { LeakageDetectionService } from './shared/leakage-detection.service';
@@ -25,17 +27,67 @@ export class LeakageDetectionComponent implements OnInit {
   chartExportData: any;
   configured = false;
   widgetProperties!: LeackageDetectionProperties;
+  message = '';
+  timeWindow = '';
+  anomalyOccured = 0;
 
-  // Use a setter for the chart which will get called when then ngif from ready evaluates to true
-  // This is needed so the element is not undefined when called later to draw
-  private chartExport!: GoogleChartComponent;
-  @ViewChild('chartExport', {static: false}) set content(content: GoogleChartComponent) {
-      if(content) { // initially setter gets called with undefined
-          this.chartExport = content;
-      }
-  }
+  chartData: ApexChartOptions = {
+    series: [],
+    chart: {
+        redrawOnParentResize: true,
+        redrawOnWindowResize: true,
+        width: '100%',
+        height: 'auto',
+        animations: {
+            enabled: false
+        },
+        type: 'scatter',
+        toolbar: {
+            show: false
+        },
+        events: {}
+    },
+    markers: {
+        size: 3
+    },
+    title: {},
+    plotOptions: {},
+    xaxis: {
+        type: 'datetime' as 'datetime' | 'category',
+        labels: {
+            datetimeUTC: false,
+        },
+        title: {
+            text: ''
+        }
+    },
+    yaxis: {
+        title: {
+            text: ''
+        },
+        decimalsInFloat: 3
+    },
+    colors: [],
+    legend: {
+        show: true
+    },
+    annotations: {
+        points: [],
+        xaxis: []
+    },
+    tooltip:{
+        enabled: true,
+        x: {
+            format: 'dd.MM HH:mm:ss.fff',
+        }
+    },
+  };
+  widgetWidth = 0;
+  widgetHeight = 0;
 
-  constructor(private leakageService: LeakageDetectionService) {
+  constructor(
+      private leakageService: LeakageDetectionService
+  ) {
 
   }
 
@@ -65,19 +117,18 @@ export class LeakageDetectionComponent implements OnInit {
   }
 
   setupChartData(data: LeakageDetectionResponse) {
-      const dataTable: any = [["time", "value"]];
+      this.anomalyOccured = data.value;
+      this.timeWindow = data.time_window;
+      const points: any[] = [];
       data.last_consumptions.forEach(row => {
-          const ts = row[0];
+          const ts = new Date(row[0]).getTime();
           const value = row[1];
-          dataTable.push([ts, value]);
+          points.push({
+              x: ts,
+              y: value
+          });
       });
-      this.chartExportData = new ChartsModel('LineChart', dataTable, {
-          legend: {position: 'none'},
-          vAxis: {
-              title: 'Leakage'
-          }
-      });
-      this.chartExport?.draw();
+      this.chartData?.series.push({data: points, name: 'Foo'});
   }
 
   edit() {

@@ -1,7 +1,9 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { GoogleChartComponent } from 'ng2-google-charts';
 import { map } from 'rxjs';
+import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
+import { ApexChartOptions } from '../charts/export/shared/charts-export-properties.model';
 import { ChartsModel } from '../charts/shared/charts.model';
 import { ConsumptionProfileProperties, ConsumptionProfilePropertiesModel, ConsumptionProfileResponse } from './shared/consumption-profile.model';
 import { ConsumptionProfileService } from './shared/consumption-profile.service';
@@ -19,23 +21,68 @@ export class ConsumptionProfileComponent implements OnInit {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-    chartExportData: any;
     configured = false;
     error = false;
     widgetProperties!: ConsumptionProfileProperties;
     refreshing = false;
     ready = false;
+    renderChart = false;
+    timeWindow = '';
+    anomalyOccured = false;
+    chartData: ApexChartOptions = {
+        series: [],
+        chart: {
+            redrawOnParentResize: true,
+            redrawOnWindowResize: true,
+            width: '100%',
+            animations: {
+                enabled: false
+            },
+            type: 'scatter',
+            toolbar: {
+                show: false
+            },
+            events: {},
+        },
+        title: {},
+        plotOptions: {},
+        xaxis: {
+            type: 'datetime' as 'datetime' | 'category',
+            labels: {
+                datetimeUTC: false,
+            },
+            title: {
+                text: ''
+            }
+        },
+        yaxis: {
+            title: {
+                text: ''
+            },
+            decimalsInFloat: 3
+        },
+        colors: [],
+        legend: {
+            show: true
+        },
+        annotations: {
+            points: [],
+            xaxis: []
+        },
+        tooltip:{
+            enabled: true,
+            x: {
+                format: 'dd.MM HH:mm:ss.fff',
+            }
+        },
+        markers: {
+            size: 3
+        },
+    };
 
-    // Use a setter for the chart which will get called when then ngif from ready evaluates to true
-    // This is needed so the element is not undefined when called later to draw
-    private chartExport!: GoogleChartComponent;
-    @ViewChild('chartExport', {static: false}) set content(content: GoogleChartComponent) {
-        if(content) { // initially setter gets called with undefined
-            this.chartExport = content;
-        }
-    }
-
-    constructor(private consumptionService: ConsumptionProfileService) {
+    constructor(
+        private consumptionService: ConsumptionProfileService,
+    ) {
 
     }
 
@@ -55,6 +102,7 @@ export class ConsumptionProfileComponent implements OnInit {
         ).subscribe({
             next: () => {
                 this.ready = true;
+                this.renderChart = true;
             },
             error: (err) => {
                 console.log(err);
@@ -65,19 +113,18 @@ export class ConsumptionProfileComponent implements OnInit {
     }
 
     setupChartData(data: ConsumptionProfileResponse) {
-        const dataTable: any = [["time", "value"]];
+        this.anomalyOccured = data.value;
+        this.timeWindow = data.time_window;
+        const points: any[] = [];
         data.last_consumptions.forEach(row => {
-            const ts = row[0];
+            const ts = new Date(row[0]).getTime();
             const value = row[1];
-            dataTable.push([ts, value]);
+            points.push({
+                x: ts,
+                y: value
+            });
         });
-        this.chartExportData = new ChartsModel('LineChart', dataTable, {
-            legend: {position: 'none'},
-            vAxis: {
-                title: 'Consumption'
-            }
-        });
-        this.chartExport?.draw();
+        this.chartData?.series.push({data: points, name: 'Foo'});
     }
 
     edit() {
