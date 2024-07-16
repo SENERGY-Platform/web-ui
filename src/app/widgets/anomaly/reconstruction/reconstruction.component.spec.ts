@@ -1,18 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
-import { ReconstructionComponent } from './reconstruction.component';
+import { AnomalyReconstructionComponent } from './reconstruction.component';
 
-describe('ReconstructionComponent', () => {
-  let component: ReconstructionComponent;
-  let fixture: ComponentFixture<ReconstructionComponent>;
+describe('AnomalyReconstructionComponent', () => {
+  let component: AnomalyReconstructionComponent;
+  let fixture: ComponentFixture<AnomalyReconstructionComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ReconstructionComponent ]
+      declarations: [ AnomalyReconstructionComponent ],
+      providers: [
+        { provide: MAT_DIALOG_DATA, useValue: {anomaly: {original_reconstructed_curves: []}}},
+        {provide: MatDialogRef, useValue: {}},
+    ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ReconstructionComponent);
+    fixture = TestBed.createComponent(AnomalyReconstructionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

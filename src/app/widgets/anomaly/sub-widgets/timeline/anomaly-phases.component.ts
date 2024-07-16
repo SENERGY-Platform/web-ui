@@ -63,7 +63,7 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
         this.filterCurveAnomalies();
 
         // data must be sorted by descending time for timeline chart
-        const timeRangeConfig = this.widget?.properties.anomalyDetection?.timeRangeConfig.timeRange;
+        const timeRangeConfig = this.widget?.properties.anomalyDetection?.timeRangeConfig?.timeRange;
         if(timeRangeConfig == null) {
             throw new Error('Time Range not configured');
         }

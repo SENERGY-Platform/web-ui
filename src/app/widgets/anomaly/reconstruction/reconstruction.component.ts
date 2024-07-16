@@ -44,7 +44,6 @@ export class AnomalyReconstructionComponent implements OnInit {
         private dialogRef: MatDialogRef<AnomalyReconstructionComponent>,
         @Inject(MAT_DIALOG_DATA) public data: {anomaly: AnomalyResultModel}
     ) {
-        console.log(data)
         this.values = data.anomaly.original_reconstructed_curves;
     }
 
