@@ -28,6 +28,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../device-instances/device-instances.component';
 import { DeviceGroupModel } from './shared/device-groups.model';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 
 
 @Component({
@@ -62,7 +63,8 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         private snackBar: MatSnackBar,
         private router: Router,
         private dialogsService: DialogsService,
-        private searchbarService: SearchbarService
+        private searchbarService: SearchbarService,
+        private permissionsDialogService: PermissionsDialogService
     ) {}
 
     ngOnInit() {
@@ -95,6 +97,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         if(this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
+        this.displayedColumns.push('share');
     }
 
     matSortChange($event: Sort) {
@@ -232,5 +235,9 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
                 } as DeviceInstancesRouterState,
             });
         });
+    }
+
+    shareDeviceGroup(group: DeviceGroupsPermSearchModel) {
+        this.permissionsDialogService.openPermissionDialog('device-groups', group.id, group.name);
     }
 }

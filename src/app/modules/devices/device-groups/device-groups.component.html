@@ -73,6 +73,17 @@
                     </td>
                 </ng-container>
 
+                <ng-container matColumnDef="share">
+                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
+                    <td mat-cell *matCellDef="let group">
+                        <button mat-icon-button color="accent" matTooltip="Share" (click)="shareDeviceGroup(group)"
+                            [disabled]="!group.permissions.a">
+                            <mat-icon>share</mat-icon>
+
+                        </button>
+                    </td>
+                </ng-container>
+
                 <span *ngIf="userHasDeleteAuthorization">
                     <ng-container matColumnDef="delete">
                         <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
