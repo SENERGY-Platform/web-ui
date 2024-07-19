@@ -29,7 +29,6 @@ export class LeakageDetectionComponent implements OnInit {
   widgetProperties!: LeackageDetectionProperties;
   message = '';
   timeWindow = '';
-  anomalyOccured = 0;
 
   chartData: ApexChartOptions = {
     series: [],
@@ -48,7 +47,7 @@ export class LeakageDetectionComponent implements OnInit {
         events: {}
     },
     markers: {
-        size: 3
+        size: 4
     },
     title: {},
     plotOptions: {},
@@ -82,8 +81,6 @@ export class LeakageDetectionComponent implements OnInit {
         }
     },
   };
-  widgetWidth = 0;
-  widgetHeight = 0;
 
   constructor(
       private leakageService: LeakageDetectionService
@@ -117,18 +114,33 @@ export class LeakageDetectionComponent implements OnInit {
   }
 
   setupChartData(data: LeakageDetectionResponse) {
-      this.anomalyOccured = data.value;
+      this.message = 'Normaler Wasserverbrauch im Zeitfenster:';
+      if(data.value===1) {
+          this.message = 'In den letzten 5 Minuten wurde übermäßig viel Wasser verbraucht:';
+      }
       this.timeWindow = data.time_window;
       const points: any[] = [];
+      const anomalyPoints: any[] = [];
       data.last_consumptions.forEach(row => {
           const ts = new Date(row[0]).getTime();
           const value = row[1];
-          points.push({
-              x: ts,
-              y: value
-          });
+          const pointIsAnomaly = row[2];
+
+          if(pointIsAnomaly === 1) {
+              anomalyPoints.push({
+                  x: ts,
+                  y: value
+              });
+          } else {
+              points.push({
+                  x: ts,
+                  y: value
+              });
+          }
       });
-      this.chartData?.series.push({data: points, name: 'Foo'});
+      this.chartData?.series.push({data: points, name: 'Normal Consumption'});
+      this.chartData?.series.push({data: anomalyPoints, name: 'Anomalous Consumption'});
+      this.chartData.colors = ['#008FFB', '#FF0000'];
   }
 
   edit() {

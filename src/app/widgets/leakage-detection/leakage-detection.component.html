@@ -23,21 +23,23 @@
 
     <span *ngIf="configured">
       <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
-      <div *ngIf="ready" fxLayoutAlign="center center" class="outer-container">
+      <div *ngIf="ready" fxLayoutAlign="center center">
 
         <!-- e.g. network problem or 500 from timescale -->
-        <div *ngIf="error === true" class="text-container">
+        <div *ngIf="error === true">
           <h2>An error occured</h2>
         </div>
 
-        <div *ngIf="error === false">
-          <p *ngIf="anomalyOccured===1">In den letzten 5 Minuten wurde übermäßig viel Wasser verbraucht: {{timeWindow}}</p>
-          <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!"
+        <div *ngIf="error === false"  >
+          <p>{{message}}: <b>{{timeWindow}}</b></p>
+          <div fxLayoutAlign="center center">
+            <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!"
             [colors]="chartData.colors!" [series]="chartData.series!" [chart]="chartData.chart!"
             [plotOptions]="chartData.plotOptions!" [xaxis]="chartData.xaxis!" [yaxis]="chartData.yaxis!"
             [annotations]="chartData.annotations!" [markers]="chartData.markers!">
           </apx-chart>
-          <div>{{message}}</div>
+          </div>
+          
         </div>
 
       </div>

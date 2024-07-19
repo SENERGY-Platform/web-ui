@@ -26,9 +26,8 @@ export class ConsumptionProfileComponent implements OnInit {
     widgetProperties!: ConsumptionProfileProperties;
     refreshing = false;
     ready = false;
-    renderChart = false;
     timeWindow = '';
-    anomalyOccured = false;
+    message = '';
     chartData: ApexChartOptions = {
         series: [],
         chart: {
@@ -72,11 +71,11 @@ export class ConsumptionProfileComponent implements OnInit {
         tooltip:{
             enabled: true,
             x: {
-                format: 'dd.MM HH:mm:ss.fff',
+                format: 'dd.MM',
             }
         },
         markers: {
-            size: 3
+            size: 4
         },
     };
 
@@ -102,7 +101,6 @@ export class ConsumptionProfileComponent implements OnInit {
         ).subscribe({
             next: () => {
                 this.ready = true;
-                this.renderChart = true;
             },
             error: (err) => {
                 console.log(err);
@@ -113,18 +111,36 @@ export class ConsumptionProfileComponent implements OnInit {
     }
 
     setupChartData(data: ConsumptionProfileResponse) {
-        this.anomalyOccured = data.value;
         this.timeWindow = data.time_window;
+
+        this.message = 'Normaler Verbrauch im Zeitfenster:';
+        if(data.value===true) {
+            const anomalyType = data.type === 'low' ? 'niedriger' : 'hoher';
+            this.message = 'Ungewöhnlicher ' + anomalyType + ' Verbrauch im Zeitfenster:';
+        }
+
         const points: any[] = [];
+        const anomalyPoints: any[] = [];
         data.last_consumptions.forEach(row => {
             const ts = new Date(row[0]).getTime();
             const value = row[1];
-            points.push({
-                x: ts,
-                y: value
-            });
+            const pointIsAnomaly = row[2];
+
+            if(pointIsAnomaly === 1) {
+                anomalyPoints.push({
+                    x: ts,
+                    y: value
+                });
+            } else {
+                points.push({
+                    x: ts,
+                    y: value
+                });
+            }
         });
-        this.chartData?.series.push({data: points, name: 'Foo'});
+        this.chartData?.series.push({data: points, name: 'Normal Consumption'});
+        this.chartData?.series.push({data: anomalyPoints, name: 'Anomalous Consumption'});
+        this.chartData.colors = ['#008FFB', '#FF0000'];
     }
 
     edit() {

@@ -31,7 +31,7 @@ export class ConsumptionProfileService {
         requestPayload.push({
             exportId: exportID,
             measurement: exportID,
-            columnName: 'message',
+            columnName: 'type',
         });
         requestPayload.push({
             exportId: exportID,
@@ -61,7 +61,7 @@ export class ConsumptionProfileService {
 
                 const model: ConsumptionProfileResponse = {
                     value: pairs[0].value as boolean,
-                    message: pairs[1].value as string,
+                    type: pairs[1].value as string,
                     last_consumptions: JSON.parse(pairs[2].value as string) as any[][],
                     time_window: pairs[3].value as any,
                     timestamp: new Date(pairs[4].value as string) as Date

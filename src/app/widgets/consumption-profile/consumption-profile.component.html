@@ -29,17 +29,15 @@
       <h2>An error occured</h2>
     </div>
 
-    <div *ngIf="configured  && ready && error === false" id="container" >
-      <p *ngIf="anomalyOccured===true">Ungewöhnlicher Verbrauch im Zeitfenster: <b>{{timeWindow}}</b></p>
+    <div *ngIf="configured  && ready && error === false">
+      <p>{{message}}: <b>{{timeWindow}}</b></p>
 
-      <div id="chart-container" fxLayoutAlign="center center" >
-        <div *ngIf="renderChart===true">
+      <div fxLayoutAlign="center center" >
           <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!" [colors]="chartData.colors!"
             [series]="chartData.series!" [chart]="chartData.chart!" [plotOptions]="chartData.plotOptions!"
             [xaxis]="chartData.xaxis!" [yaxis]="chartData.yaxis!" [annotations]="chartData.annotations!"
             [markers]="chartData.markers!">
           </apx-chart>
-        </div>
       </div>
     </div>
   </mat-card-content>
