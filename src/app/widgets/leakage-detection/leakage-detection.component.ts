@@ -81,6 +81,8 @@ export class LeakageDetectionComponent implements OnInit {
         }
     },
   };
+  operatorIsInitPhase = false;
+  initialPhaseMsg = '';
 
   constructor(
       private leakageService: LeakageDetectionService
@@ -113,7 +115,17 @@ export class LeakageDetectionComponent implements OnInit {
       });
   }
 
+  private checkForInit(data: LeakageDetectionResponse) {
+      if(data.initial_phase !== '' && data.initial_phase !== null) {
+          this.operatorIsInitPhase = true;
+          this.initialPhaseMsg = data.initial_phase;
+          return true;
+      }
+      return false;
+  }
+
   setupChartData(data: LeakageDetectionResponse) {
+      this.checkForInit(data);
       this.message = 'Normaler Wasserverbrauch im Zeitfenster:';
       if(data.value===1) {
           this.message = 'In den letzten 5 Minuten wurde übermäßig viel Wasser verbraucht:';

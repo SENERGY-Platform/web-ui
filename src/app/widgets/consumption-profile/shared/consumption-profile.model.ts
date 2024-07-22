@@ -4,6 +4,7 @@ export interface ConsumptionProfileResponse {
     last_consumptions: any[][];
     time_window: any;
     timestamp: Date;
+    initial_phase: string;
 }
 
 export interface ConsumptionProfileProperties {

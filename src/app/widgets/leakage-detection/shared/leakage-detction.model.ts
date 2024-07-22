@@ -4,6 +4,7 @@ export interface LeakageDetectionResponse {
     last_consumptions: any[][];
     time_window: any;
     timestamp: Date;
+    initial_phase: string;
 }
 
 export interface LeackageDetectionProperties {

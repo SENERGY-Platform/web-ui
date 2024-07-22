@@ -48,10 +48,15 @@ export class ConsumptionProfileService {
             measurement: exportID,
             columnName: 'time',
         });
+        requestPayload.push({
+            exportId: exportID,
+            measurement: exportID,
+            columnName: 'initial_phase',
+        });
 
         return this.exportDataService.getLastValuesTimescale(requestPayload).pipe(
             map((pairs) => {
-                if (pairs.length !== 5) {
+                if (pairs.length !== 6) {
                     throw new Error('not enough data in response')
                 }
 
@@ -59,12 +64,19 @@ export class ConsumptionProfileService {
                     throw new Error('not enough data in response')
                 }
 
+                const lastConsumptionsStr = pairs[2].value as string;
+                let lastConsumptions: any = [];
+                if(lastConsumptions !== '') {
+                    lastConsumptions = JSON.parse(lastConsumptionsStr) as any[][];
+                }
+
                 const model: ConsumptionProfileResponse = {
                     value: pairs[0].value as boolean,
                     type: pairs[1].value as string,
-                    last_consumptions: JSON.parse(pairs[2].value as string) as any[][],
+                    last_consumptions: lastConsumptions,
                     time_window: pairs[3].value as any,
-                    timestamp: new Date(pairs[4].value as string) as Date
+                    timestamp: new Date(pairs[4].value as string) as Date,
+                    initial_phase: pairs[5].value as string
                 };
                 return model;
             })

@@ -78,11 +78,22 @@ export class ConsumptionProfileComponent implements OnInit {
             size: 4
         },
     };
+    operatorIsInitPhase = false;
+    initialPhaseMsg = '';
 
     constructor(
         private consumptionService: ConsumptionProfileService,
     ) {
 
+    }
+
+    private checkForInit(data: ConsumptionProfileResponse) {
+        if(data.initial_phase !== '' && data.initial_phase !== null) {
+            this.operatorIsInitPhase = true;
+            this.initialPhaseMsg = data.initial_phase;
+            return true;
+        }
+        return false;
     }
 
     ngOnInit(): void {
@@ -111,6 +122,7 @@ export class ConsumptionProfileComponent implements OnInit {
     }
 
     setupChartData(data: ConsumptionProfileResponse) {
+        this.checkForInit(data);
         this.timeWindow = data.time_window;
 
         this.message = 'Normaler Verbrauch im Zeitfenster:';

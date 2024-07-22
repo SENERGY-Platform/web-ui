@@ -30,16 +30,22 @@
           <h2>An error occured</h2>
         </div>
 
-        <div *ngIf="error === false"  >
-          <p>{{message}}: <b>{{timeWindow}}</b></p>
-          <div fxLayoutAlign="center center">
-            <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!"
-            [colors]="chartData.colors!" [series]="chartData.series!" [chart]="chartData.chart!"
-            [plotOptions]="chartData.plotOptions!" [xaxis]="chartData.xaxis!" [yaxis]="chartData.yaxis!"
-            [annotations]="chartData.annotations!" [markers]="chartData.markers!">
-          </apx-chart>
+        <div *ngIf="error === false">
+          <div *ngIf="operatorIsInitPhase === true" class="text-container">
+            <h2>Operator is not ready</h2>
+            <p>{{initialPhaseMsg}}</p>
           </div>
-          
+
+          <div *ngIf="operatorIsInitPhase === false">
+            <p>{{message}}: <b>{{timeWindow}}</b></p>
+            <div fxLayoutAlign="center center">
+              <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!"
+                [colors]="chartData.colors!" [series]="chartData.series!" [chart]="chartData.chart!"
+                [plotOptions]="chartData.plotOptions!" [xaxis]="chartData.xaxis!" [yaxis]="chartData.yaxis!"
+                [annotations]="chartData.annotations!" [markers]="chartData.markers!">
+              </apx-chart>
+            </div>
+          </div>
         </div>
 
       </div>
