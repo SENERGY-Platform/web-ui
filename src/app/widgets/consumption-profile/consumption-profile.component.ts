@@ -125,10 +125,10 @@ export class ConsumptionProfileComponent implements OnInit {
         this.checkForInit(data);
         this.timeWindow = data.time_window;
 
-        this.message = 'Normaler Verbrauch im Zeitfenster:';
+        this.message = 'Normaler Verbrauch im Zeitfenster';
         if(data.value===true) {
             const anomalyType = data.type === 'low' ? 'niedriger' : 'hoher';
-            this.message = 'Ungewöhnlicher ' + anomalyType + ' Verbrauch im Zeitfenster:';
+            this.message = 'Ungewöhnlicher ' + anomalyType + ' Verbrauch im Zeitfenster';
         }
 
         const points: any[] = [];
