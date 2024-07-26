@@ -199,7 +199,10 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                             this.snackBar.open('Export deleted', undefined, {
                                 duration: 2000,
                             });
-                            this.getExports();
+                            // do deletion on the client instead of reloading, because of caching/slow deletion
+                            const index = this.exportsDataSource.data.findIndex(element => element.ID === exp.ID);
+                            this.exportsDataSource.data.splice(index, 1);
+                            this.exportsDataSource.data = this.exportsDataSource.data;
                         } else {
                             this.snackBar.open('Export could not be deleted', 'close', { panelClass: 'snack-bar-error' });
                         }
