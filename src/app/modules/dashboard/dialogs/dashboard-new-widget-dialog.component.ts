@@ -84,6 +84,7 @@ export class DashboardNewWidgetDialogComponent {
         { value: DashboardTypesEnum.PVPrediction, viewValue: 'PV Energy Prediction', disabled: false, tooltip: '' },
         { value: DashboardTypesEnum.LeakageDetection, viewValue: 'Leakage Detection', disabled: false, tooltip: '' },
         { value: DashboardTypesEnum.ConsumptionProfile, viewValue: 'Consumption Profile', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.BadVentilation, viewValue: 'Bad Ventilation', disabled: false, tooltip: '' },
 
     ];
     switchCategories: SwitchCategories[] = [

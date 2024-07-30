@@ -41,5 +41,6 @@ export enum DashboardTypesEnum {
     PVPrediction = 'pv_prediction',
     PVLoadRecommendation = 'pv_load_recommendation',
     LeakageDetection = 'leakage_detection',
-    ConsumptionProfile = 'consumption_profile'
+    ConsumptionProfile = 'consumption_profile',
+    BadVentilation = 'bad_ventilation',
 }

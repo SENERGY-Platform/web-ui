@@ -115,7 +115,8 @@ export class DataSourceSelectorComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.setDataSourcePlaceholder()
+        console.log(this.dataSourceConfig)
+        this.setDataSourcePlaceholder();
         this.setupDataSources().pipe(
             concatMap((_) => this.loadFieldOptions(this.dataSourceConfig?.exports || [])),
             map((fieldOptions) => {
@@ -124,6 +125,7 @@ export class DataSourceSelectorComponent implements OnInit {
                 this.form.get('fieldOptions').patchValue(fieldOptions);
                 this.setupOutput();
                 this.setupGroupTypes();
+                console.log(this.form)
             })
         ).subscribe({
             next: (_) => {
@@ -362,7 +364,7 @@ export class DataSourceSelectorComponent implements OnInit {
                         }
                         this.dataSourceOptions.set('Exports', this.exportList);
                     });
-                    if (this.dataSourceConfig?.exports !== undefined) {
+                    if (this.dataSourceConfig?.exports != null) {
                         // exports values or names might have changed
                         this.dataSourceConfig.exports.forEach((selected) => {
                             const latestExisting = exports.instances?.find((existing) => existing.ID === selected.id);
@@ -449,7 +451,10 @@ export class DataSourceSelectorComponent implements OnInit {
         if(this.showDeviceGroupsAsSource) {
             obs.push(this.getDeviceGroups());
         }
-        return forkJoin(obs);
+        if(obs.length === 0) {
+            obs.push(of(true));
+        }
+        return forkJoin(obs).pipe(defaultIfEmpty(true)); // in case no datsa sources are selected
     }
 
     dataSourceChanged(selectedDataSource: (ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel)[]) {

@@ -123,6 +123,8 @@ import { LastAnomalyComponent } from './anomaly/sub-widgets/last/last-anomaly.co
 import { AnomalyPhasesComponent } from './anomaly/sub-widgets/timeline/anomaly-phases.component';
 import { AnomalyReconstructionComponent } from './anomaly/reconstruction/reconstruction.component';
 import { LineComponent } from './anomaly/sub-widgets/line/line.component';
+import { BadVentilationComponent } from './bad-ventilation/bad-ventilation.component';
+import { EditVentilationWidgetComponent } from './bad-ventilation/dialog/edit/edit.component';
 
 registerLocaleData(localeDe, 'de');
 
@@ -237,7 +239,9 @@ registerLocaleData(localeDe, 'de');
         LastAnomalyComponent,
         AnomalyPhasesComponent,
         AnomalyReconstructionComponent,
-        LineComponent
+        LineComponent,
+        BadVentilationComponent,
+        EditVentilationWidgetComponent
     ],
     exports: [
         SwitchComponent,

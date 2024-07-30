@@ -108,6 +108,9 @@
   <div *ngSwitchCase="'consumption_profile'" fxFill>
     <senergy-consumption-profile-widget [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-consumption-profile-widget>
   </div>
+  <div *ngSwitchCase="'bad_ventilation'" fxFill>
+    <senergy-bad-ventilation [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-bad-ventilation>
+  </div>
   <div *ngSwitchDefault>
     <div>default</div>
   </div>

@@ -33,6 +33,7 @@ import { PVPredictionWidgetPropertiesModel } from 'src/app/widgets/pv-prediction
 import { AnomalyWidgetPropertiesModel } from 'src/app/widgets/anomaly/shared/anomaly.model';
 import { LeakageDetectionWidgetPropertiesModel } from 'src/app/widgets/leakage-detection/shared/leakage-detction.model';
 import { ConsumptionProfilePropertiesModel } from 'src/app/widgets/consumption-profile/shared/consumption-profile.model';
+import { VentilationWidgetPropertiesModel } from 'src/app/widgets/bad-ventilation/shared/model';
 
 export interface WidgetModel {
     id: string;
@@ -71,4 +72,5 @@ export interface WidgetPropertiesModels
         AnomalyWidgetPropertiesModel,
         LeakageDetectionWidgetPropertiesModel,
         ConsumptionProfilePropertiesModel,
+        VentilationWidgetPropertiesModel,
         DeviceStatusPropertiesModel {}
