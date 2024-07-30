@@ -1,4 +1,7 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { EditVentilationWidgetComponent } from './edit.component';
 
@@ -8,7 +11,16 @@ describe('EditVentilationWidgetComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EditVentilationWidgetComponent ]
+      declarations: [ EditVentilationWidgetComponent ],
+      imports: [
+        MatDialogModule,
+        HttpClientTestingModule,
+        MatSnackBarModule
+    ],
+    providers: [
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+        {provide: MatDialogRef, useValue: {}},
+    ]
     })
     .compileComponents();
 
