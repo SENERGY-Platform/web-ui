@@ -121,7 +121,7 @@ export const environment = {
     costApiUrl: 'http://localhost',
     billingApiUrl: 'http://localhost',
     reportEngineUrl: 'http://localhost',
-    permissionV2Url: 'https://api.senergy.infai.org/permissions/v2'
+    permissionV2Url: 'http://localhost'
 };
 
 /*
