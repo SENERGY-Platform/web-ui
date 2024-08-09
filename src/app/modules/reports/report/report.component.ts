@@ -29,7 +29,7 @@ import {ActivatedRoute} from '@angular/router';
 export class ReportComponent implements OnInit {
     template: TemplateModel = {} as TemplateModel;
     ready = false;
-    templateId: string | null = "";
+    templateId: string | null = '';
     requestObject: Map<string, any> = new Map<string, any>();
 
     constructor(
