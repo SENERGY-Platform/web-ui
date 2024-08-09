@@ -48,11 +48,12 @@ export class ReportComponent implements OnInit {
                     this.template = resp.data;
                 }
                 this.ready = true;
-            })
+            });
         }
     }
 
     save(){
-        console.log(this.template)
+        console.log(this.template);
+        this.templateService.createReport({id: 'test', data: this.template.data?.dataStructured}).subscribe();
     }
 }

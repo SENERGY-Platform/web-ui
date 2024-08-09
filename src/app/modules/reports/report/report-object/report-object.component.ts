@@ -24,7 +24,7 @@ import {ReportObjectModel} from '../../shared/template.model';
 })
 export class ReportObjectComponent implements OnInit {
 
-    @Input() name: string = "";
+    @Input() name = '';
     @Input() data: ReportObjectModel = {} as ReportObjectModel;
     @Input() requestObject: Map<string, any> = new Map<string, any>();
 

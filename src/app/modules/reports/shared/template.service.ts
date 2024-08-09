@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { environment } from '../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
@@ -45,6 +45,13 @@ export class TemplateService {
             .pipe(
                 map((resp: TemplateResponseModel) => resp || []),
                 catchError(this.errorHandlerService.handleError(TemplateService.name, 'getTemplate: Error', null)),
+            );
+    }
+
+    createReport(data = {}): Observable<HttpResponse<string> | null> {
+        return this.http.post<any>(environment.reportEngineUrl + '/report', data)
+            .pipe(
+                catchError(this.errorHandlerService.handleError(TemplateService.name, 'postReport: Error', null)),
             );
     }
 }
