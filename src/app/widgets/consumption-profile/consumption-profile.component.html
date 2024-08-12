@@ -29,7 +29,7 @@
       <h2>An error occured</h2>
     </div>
 
-    <div *ngIf="configured  && ready && error === false && operatorIsInitPhase === true" class="text-container">
+    <div *ngIf="configured  && ready && error === false && operatorIsInitPhase === true"  fxFill fxLayout="row" fxLayoutAlign="center center">
       <p>{{initialPhaseMsg}}</p>
     </div>
 
