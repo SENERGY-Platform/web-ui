@@ -155,7 +155,18 @@ export class OpenWindowEditComponent implements OnInit {
                 math: '',
                 color: '',
                 valueName: 'window-open',
-                valueType: 'string'
+                valueType: 'string',
+                conversions: [{
+                    from: 'false',
+                    to: 'false',
+                    color: '#097969',
+                    alias: 'zu'
+                }, {
+                    from: 'true',
+                    to: 'true',
+                    color: '#C41E3A',
+                    alias: 'offen'
+                }]
             });
         });
 
@@ -192,6 +203,7 @@ export class OpenWindowEditComponent implements OnInit {
             }
         });
         this.vAxesDataSource.data = this.vAxesDataSource.data;
+        console.log(this.vAxesDataSource)
     }
 
     listRules(element: ChartsExportVAxesModel) {

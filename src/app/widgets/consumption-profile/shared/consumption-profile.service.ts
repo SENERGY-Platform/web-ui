@@ -57,16 +57,16 @@ export class ConsumptionProfileService {
         return this.exportDataService.getLastValuesTimescale(requestPayload).pipe(
             map((pairs) => {
                 if (pairs.length !== 6) {
-                    throw new Error('not enough data in response')
+                    throw new Error('not enough data in response');
                 }
 
                 if(pairs[0].value == null) {
-                    throw new Error('not enough data in response')
+                    throw new Error('not enough data in response');
                 }
 
                 const lastConsumptionsStr = pairs[2].value as string;
                 let lastConsumptions: any = [];
-                if(lastConsumptions !== '') {
+                if(lastConsumptionsStr !== '') {
                     lastConsumptions = JSON.parse(lastConsumptionsStr) as any[][];
                 }
 
