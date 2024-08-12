@@ -31,6 +31,7 @@ import {MatCardModule} from '@angular/material/card';
 import {ReportObjectComponent} from './report/report-object/report-object.component';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatRadioModule} from "@angular/material/radio";
 
 const templateList: Route = { path: 'reports/templates', pathMatch: 'full', component: TemplatesComponent, data: { header: 'Templates' } };
 const newReport: Route = { path: 'reports/new/:templateId', pathMatch: 'full', component: ReportComponent, data: { header: 'Report' } };
@@ -51,7 +52,8 @@ const newReport: Route = { path: 'reports/new/:templateId', pathMatch: 'full', c
         MatCardModule,
         MatInputModule,
         ReactiveFormsModule,
-        FormsModule
+        FormsModule,
+        MatRadioModule
     ]
 })
 export class ReportsModule { }

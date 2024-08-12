@@ -13,37 +13,63 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<mat-card>
+<mat-card style="margin-top: 15px;">
     <mat-card-content>
-        <div *ngIf="data.valueType == 'string'">
-            <mat-form-field>
-                <mat-label>{{name}} string</mat-label>
-                <input matInput [(ngModel)]="data.value">
-            </mat-form-field>
+        <mat-radio-group *ngIf="data.valueType === 'string' || data.valueType === 'float64' || data.valueType === 'array'"
+                         [(ngModel)]="inputType" aria-label="Select an option">
+            <mat-radio-button value="value">Value</mat-radio-button>
+            <mat-radio-button value="query">Query</mat-radio-button>
+        </mat-radio-group>
+        <div *ngIf="inputType === 'query'">
+            <div>
+                <mat-form-field>
+                    <mat-label>DeviceId</mat-label>
+                    <input matInput [(ngModel)]="data.query!.deviceId">
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-form-field>
+                    <mat-label>ServiceId</mat-label>
+                    <input matInput [(ngModel)]="data.query!.serviceId">
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-form-field>
+                    <mat-label>Time</mat-label>
+                    <input matInput [(ngModel)]="data.query!.time!.last">
+                </mat-form-field>
+            </div>
         </div>
-        <div *ngIf="data.valueType == 'float64'">
-            <mat-form-field>
-                <mat-label>{{name}} float64</mat-label>
-                <input matInput  [(ngModel)]="data.value">
-            </mat-form-field>
-        </div>
-        <div *ngIf="data.valueType == 'object' && data.fields != undefined">
-            {{name}}<br>
-            {{data.valueType}}
-            <senergy-reports-object *ngFor="let element of data.fields | keyvalue"
-                                    [requestObject]="requestObject"
-                                    [name]="name+element.key"
-                                    [data]="element.value">
-            </senergy-reports-object>
-        </div>
-        <div *ngIf="data.valueType == 'array' && data.children != undefined">
-            {{name}}<br>
-            {{data.valueType}}
-            <senergy-reports-object *ngFor="let element of data.children | keyvalue"
-                                    [requestObject]="requestObject"
-                                    [name]="name+element.key"
-                                    [data]="element.value">
-            </senergy-reports-object>
+        <div *ngIf="inputType === 'value'">
+            <div *ngIf="data.valueType === 'string'">
+                <mat-form-field>
+                    <mat-label>{{name}} string</mat-label>
+                    <input matInput [(ngModel)]="data.value">
+                </mat-form-field>
+            </div>
+            <div *ngIf="data.valueType === 'float64'">
+                <mat-form-field>
+                    <mat-label>{{name}} float64</mat-label>
+                    <input matInput  [(ngModel)]="data.value">
+                </mat-form-field>
+            </div>
+            <div *ngIf="data.valueType === 'object' && data.fields !== undefined">
+                {{name}}-{{data.valueType}}
+
+                <senergy-reports-object *ngFor="let element of data.fields | keyvalue"
+                                        [requestObject]="requestObject"
+                                        [name]="name+element.key"
+                                        [data]="element.value">
+                </senergy-reports-object>
+            </div>
+            <div *ngIf="data.valueType === 'array' && data.children !== undefined">
+                {{name}}-{{data.valueType}}
+                <senergy-reports-object *ngFor="let element of data.children | keyvalue"
+                                        [requestObject]="requestObject"
+                                        [name]="name+element.key"
+                                        [data]="element.value">
+                </senergy-reports-object>
+            </div>
         </div>
     </mat-card-content>
 </mat-card>

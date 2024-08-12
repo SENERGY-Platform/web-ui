@@ -20,6 +20,9 @@ import { UtilService } from 'src/app/core/services/util.service';
 import {TemplateModel, TemplateResponseModel} from '../shared/template.model';
 import {TemplateService} from '../shared/template.service';
 import {ActivatedRoute} from '@angular/router';
+import {UntypedFormBuilder, Validators} from "@angular/forms";
+import {environment} from "../../../../environments/environment";
+import {ExportValueModel} from "../../exports/shared/export.model";
 
 @Component({
     selector: 'senergy-reports-new',
@@ -31,7 +34,6 @@ export class ReportComponent implements OnInit {
     ready = false;
     templateId: string | null = '';
     requestObject: Map<string, any> = new Map<string, any>();
-
     constructor(
         private route: ActivatedRoute,
         public snackBar: MatSnackBar,

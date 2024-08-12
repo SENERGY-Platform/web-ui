@@ -16,6 +16,8 @@
 
 import {Component, Input, OnInit} from '@angular/core';
 import {ReportObjectModel} from '../../shared/template.model';
+import {QueriesRequestTimeModel} from '../../../../widgets/shared/export-data.model';
+
 
 @Component({
     selector: 'senergy-reports-object',
@@ -27,11 +29,13 @@ export class ReportObjectComponent implements OnInit {
     @Input() name = '';
     @Input() data: ReportObjectModel = {} as ReportObjectModel;
     @Input() requestObject: Map<string, any> = new Map<string, any>();
+    inputType = 'value';
 
     constructor() {
     }
 
     ngOnInit() {
+        this.data.query = {columns: [], time: {last: '1h'} as QueriesRequestTimeModel};
     }
 
     inputChanged(key: string, data: any) {
