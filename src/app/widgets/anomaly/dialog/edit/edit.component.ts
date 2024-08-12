@@ -12,6 +12,16 @@ import { ExportService } from 'src/app/modules/exports/shared/export.service';
 import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
 import { DataSourceConfig } from 'src/app/widgets/charts/shared/data-source-selector/data-source-selector.component';
 
+const visualizationTypeLine =  {
+    id: 'device',
+    name: 'Line'
+};
+
+const visualizationTypeTimeline = {
+    id: 'timeline',
+    name: 'Timeline'
+};
+
 @Component({
     selector: 'app-edit',
     templateUrl: './edit.component.html',
@@ -28,7 +38,7 @@ export class EditComponent implements OnInit {
             exports: [''],
             fields: ['']
         }),
-        visualizationType: [''],
+        visualizationType: [visualizationTypeLine],
         timeRangeConfig: this.formBuilder.group({
             timeRange: this.formBuilder.group({
                 type: [''],
@@ -47,13 +57,7 @@ export class EditComponent implements OnInit {
     ready = false;
     devices: DeviceInstancesModel[] = [];
     errorOccured = false;
-    visualizationTypes = [{
-        id: 'timeline',
-        name: 'Timeline'
-    }, {
-        id: 'device',
-        name: 'Line'
-    }];
+    visualizationTypes = [visualizationTypeTimeline, visualizationTypeLine];
 
     constructor(
     private dialogRef: MatDialogRef<EditComponent>,
@@ -114,7 +118,10 @@ export class EditComponent implements OnInit {
                     showDebug = false;
                 }
 
-                const visualizationType = this.visualizationTypes.find((visType => widget.properties.anomalyDetection?.visualizationType === visType.id));
+                let visualizationType = this.visualizationTypes.find((visType => widget.properties.anomalyDetection?.visualizationType === visType.id));
+                if(visualizationType == null) {
+                    visualizationType = visualizationTypeLine;
+                }
 
                 const showFrequencyAnomalies = widget.properties.anomalyDetection?.showFrequencyAnomalies;
 
