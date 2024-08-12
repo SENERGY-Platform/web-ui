@@ -27,27 +27,12 @@
                     <mat-form-field color="accent">
                         <input matInput placeholder="Add user"
                                [formControl]="formControl">
-                        <mat-error *ngIf="formControl.hasError('invalid') === true">
+                        <mat-error *ngIf="formControl.hasError('invalid')">
                             User unknown!
                         </mat-error>
-                        <mat-error *ngIf="formControl.hasError('userExists') === true">
+                        <mat-error *ngIf="formControl.hasError('userExists')">
                             User already exists!
                         </mat-error>
-                    </mat-form-field>
-                </form>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="role">
-            <th mat-header-cell *matHeaderCellDef> User</th>
-            <td mat-footer-cell *matFooterCellDef>
-                <form class="user-input">
-                    <mat-form-field color="accent">
-                        <senergy-select-search placeholder="Add role"
-                                               [formControl]="groupFormControl"
-                                               [options]="roles"
-                                               useOptionViewProperty="name">
-                        </senergy-select-search>
                     </mat-form-field>
                 </form>
             </td>
@@ -120,20 +105,11 @@
             </td>
         </ng-container>
 
-        <ng-container matColumnDef="roleAction">
-            <th mat-header-cell *matHeaderCellDef> Action</th>
-            <td mat-footer-cell *matFooterCellDef>
-                <button class="margin" mat-icon-button color="accent" (click)="addRole()">
-                    <mat-icon>add</mat-icon>
-                </button>
-            </td>
-        </ng-container>
-
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         <tr mat-footer-row *matFooterRowDef="displayedColumns" class="example-first-footer-row"></tr>
         <tr mat-footer-row
-            *matFooterRowDef="['role', 'isRole', 'read', 'write', 'execute', 'administrate', 'roleAction']"
+            *matFooterRowDef="['isRole', 'read', 'write', 'execute', 'administrate']"
             class="example-first-footer-row"></tr>
     </table>
 
