@@ -14,62 +14,108 @@
   ~ limitations under the License.
   -->
 <mat-card style="margin-top: 15px;">
-    <mat-card-content>
-        <mat-radio-group *ngIf="data.valueType === 'string' || data.valueType === 'float64' || data.valueType === 'array'"
-                         [(ngModel)]="inputType" aria-label="Select an option">
-            <mat-radio-button value="value">Value</mat-radio-button>
-            <mat-radio-button value="query">Query</mat-radio-button>
-        </mat-radio-group>
-        <div *ngIf="inputType === 'query'">
-            <div>
-                <mat-form-field>
+    <div fxLayout="column">
+        <mat-card-content>
+            <mat-radio-group
+                    *ngIf="data.valueType === 'string' || data.valueType === 'float64' || data.valueType === 'array'"
+                    [(ngModel)]="inputType" (ngModelChange)="changeInputType()" aria-label="Select an option">
+                <mat-radio-button value="value">Value</mat-radio-button>
+                <mat-radio-button value="query">Query</mat-radio-button>
+            </mat-radio-group>
+            <div *ngIf="inputType === 'query'" fxLayout="column">
+                <div>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Device</mat-label>
+                        <senergy-select-search [options]="allDevices"
+                                               useOptionViewProperty="name"
+                                               placeholder="Device" ngDefaultControl
+                                               (ngModelChange)="queryDeviceChanged($event)"
+                                               [(ngModel)]="queryDevice"
+                                               [multiple]="false">
+                        </senergy-select-search>
+                    </mat-form-field>
+                </div>
+                <mat-form-field fxFlex appearance="outline">
                     <mat-label>DeviceId</mat-label>
                     <input matInput [(ngModel)]="data.query!.deviceId">
                 </mat-form-field>
-            </div>
-            <div>
-                <mat-form-field>
-                    <mat-label>ServiceId</mat-label>
-                    <input matInput [(ngModel)]="data.query!.serviceId">
+                <mat-form-field fxFlex color="accent" appearance="outline">
+                    <mat-label>Service</mat-label>
+                    <senergy-select-search (ngModelChange)="queryServiceChanged($event)" placeholder="Service"
+                                           [(ngModel)]="queryService"
+                                           [options]="queryDeviceType.services"
+                                           useOptionViewProperty="name">
+                    </senergy-select-search>
                 </mat-form-field>
-            </div>
-            <div>
-                <mat-form-field>
-                    <mat-label>Time</mat-label>
-                    <input matInput [(ngModel)]="data.query!.time!.last">
+                <div>
+                    <mat-form-field fxFlex appearance="outline">
+                        <mat-label>ServiceId</mat-label>
+                        <input matInput [(ngModel)]="data.query!.serviceId">
+                    </mat-form-field>
+                </div>
+                <mat-form-field fxFill color="accent" appearance="outline">
+                    <mat-label>Path</mat-label>
+                    <senergy-select-search [(ngModel)]="data.query!.columns[0].name" placeholder="path"
+                                           [options]="queryServicePaths">
+                    </senergy-select-search>
                 </mat-form-field>
+                <div>
+                    <mat-form-field fxFlex appearance="outline">
+                        <mat-label>Field</mat-label>
+                        <input matInput [(ngModel)]="data.query!.columns[0].name">
+                    </mat-form-field>
+                </div>
+                <div>
+                    <mat-form-field fxFlex appearance="outline">
+                        <mat-label>Field Group Type</mat-label>
+                        <input matInput [(ngModel)]="data.query!.columns[0].groupType">
+                    </mat-form-field>
+                </div>
+                <div>
+                    <mat-form-field fxFlex appearance="outline">
+                        <mat-label>GroupingTime</mat-label>
+                        <input matInput [(ngModel)]="data.query!.groupTime">
+                    </mat-form-field>
+                </div>
+                <div>
+                    <mat-form-field fxFlex appearance="outline">
+                        <mat-label>Timeframe</mat-label>
+                        <input matInput [(ngModel)]="data.query!.time!.last">
+                    </mat-form-field>
+                </div>
             </div>
-        </div>
-        <div *ngIf="inputType === 'value'">
-            <div *ngIf="data.valueType === 'string'">
-                <mat-form-field>
-                    <mat-label>{{name}} string</mat-label>
-                    <input matInput [(ngModel)]="data.value">
-                </mat-form-field>
-            </div>
-            <div *ngIf="data.valueType === 'float64'">
-                <mat-form-field>
-                    <mat-label>{{name}} float64</mat-label>
-                    <input matInput  [(ngModel)]="data.value">
-                </mat-form-field>
-            </div>
-            <div *ngIf="data.valueType === 'object' && data.fields !== undefined">
-                {{name}}-{{data.valueType}}
 
-                <senergy-reports-object *ngFor="let element of data.fields | keyvalue"
-                                        [requestObject]="requestObject"
-                                        [name]="name+element.key"
-                                        [data]="element.value">
-                </senergy-reports-object>
+            <div *ngIf="inputType === 'value'" fxLayout="column">
+                <div *ngIf="data.valueType === 'string'">
+                    <mat-form-field fxFlex appearance="outline">
+                        <mat-label>{{ name }} string</mat-label>
+                        <input matInput [(ngModel)]="data.value">
+                    </mat-form-field>
+                </div>
+                <div *ngIf="data.valueType === 'float64'">
+                    <mat-form-field fxFlex appearance="outline">
+                        <mat-label>{{ name }} float64</mat-label>
+                        <input matInput [(ngModel)]="data.value">
+                    </mat-form-field>
+                </div>
+                <div *ngIf="data.valueType === 'object' && data.fields !== undefined">
+
+                    <senergy-reports-object *ngFor="let element of data.fields | keyvalue"
+                                            [requestObject]="requestObject"
+                                            [name]="name+element.key"
+                                            [data]="element.value"
+                                            [allDevices]="allDevices">
+                    </senergy-reports-object>
+                </div>
+                <div *ngIf="data.valueType === 'array' && data.children !== undefined">
+                    <senergy-reports-object *ngFor="let element of data.children | keyvalue"
+                                            [requestObject]="requestObject"
+                                            [name]="name+element.key"
+                                            [data]="element.value"
+                                            [allDevices]="allDevices">
+                    </senergy-reports-object>
+                </div>
             </div>
-            <div *ngIf="data.valueType === 'array' && data.children !== undefined">
-                {{name}}-{{data.valueType}}
-                <senergy-reports-object *ngFor="let element of data.children | keyvalue"
-                                        [requestObject]="requestObject"
-                                        [name]="name+element.key"
-                                        [data]="element.value">
-                </senergy-reports-object>
-            </div>
-        </div>
-    </mat-card-content>
+        </mat-card-content>
+    </div>
 </mat-card>

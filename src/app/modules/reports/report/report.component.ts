@@ -23,6 +23,8 @@ import {ActivatedRoute} from '@angular/router';
 import {UntypedFormBuilder, Validators} from "@angular/forms";
 import {environment} from "../../../../environments/environment";
 import {ExportValueModel} from "../../exports/shared/export.model";
+import {DeviceInstancesService} from "../../devices/device-instances/shared/device-instances.service";
+import {DeviceInstancesModel} from "../../devices/device-instances/shared/device-instances.model";
 
 @Component({
     selector: 'senergy-reports-new',
@@ -34,13 +36,19 @@ export class ReportComponent implements OnInit {
     ready = false;
     templateId: string | null = '';
     requestObject: Map<string, any> = new Map<string, any>();
+    allDevices: DeviceInstancesModel[] = [];
     constructor(
         private route: ActivatedRoute,
         public snackBar: MatSnackBar,
         public utilsService: UtilService,
         private templateService: TemplateService,
+        private deviceInstanceService: DeviceInstancesService
     ) {
         this.templateId = this.route.snapshot.paramMap.get('templateId');
+        this.deviceInstanceService.getDeviceInstances(9999, 0).subscribe((devices: DeviceInstancesModel[]) => {
+            devices = this.deviceInstanceService.useDisplayNameAsName(devices) as DeviceInstancesModel[];
+            this.allDevices = devices;
+        });
     }
 
     ngOnInit() {

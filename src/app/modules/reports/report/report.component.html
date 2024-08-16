@@ -23,7 +23,8 @@
             <senergy-reports-object *ngFor="let element of template.data.dataStructured | keyvalue"
                                     [requestObject]="requestObject"
                                     [name]="element.key"
-                                    [data]="element.value">
+                                    [data]="element.value"
+                                    [allDevices]="allDevices">
             </senergy-reports-object>
     </div>
     <button mat-fab class="fab" (click)="save()" matTooltip="Create Report">
