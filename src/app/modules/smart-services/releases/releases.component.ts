@@ -246,6 +246,6 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     }
 
     permission(release: SmartServiceReleaseModel): void {
-        this.permissionsDialogService.openPermissionDialog('smart_service_releases', release.id, release.name, release.design_id+'/'+release.id+'_rights');
+        this.permissionsDialogService.openPermissionV2Dialog('smart_service_releases', release.id, release.name);
     }
 }
