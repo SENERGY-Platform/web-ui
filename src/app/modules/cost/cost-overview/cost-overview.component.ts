@@ -147,7 +147,7 @@ export class CostOverviewComponent implements OnInit {
     originalOrder = (_: KeyValue<string, any>, __: KeyValue<string, any>): number => 0;
 
     sum(m: CostEntryModel): number {
-        return m.cpu + m.ram + m.storage;
+        return (m.cpu || 0) + (m.ram || 0) + (m.storage || 0);
     }
 
     setMonthAndYear($event: Date, datepicker: MatDatepicker<any>) {

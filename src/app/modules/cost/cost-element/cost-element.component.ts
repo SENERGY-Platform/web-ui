@@ -61,22 +61,25 @@ export class CostElementComponent {
                 const obj = this.element.children as any;
                 const obs: Observable<any>[] = [];
                 keys.forEach((name) => {
-                    if (name.startsWith('deployment:pipeline-')) {
-                        const pipeline = this.pipelines.find(p => name.startsWith('deployment:pipeline-' + p.id));
+                    if (this.name === "analytics") {
+                        const pipeline = this.pipelines.find(p => name === p.id);
                         if (pipeline !== undefined) {
                             obj[name].displayName = pipeline.name;
                         } else {
-                            obj[name].displayName = name.replace('deployment:pipeline-', 'Pipeline ') + ' (deleted)';
+                            obj[name].displayName = 'Pipeline ' + name + ' (deleted)';
                         }
-                        const subkeys = Object.keys(obj[name].children);
-                        subkeys.forEach(containername => {
-                            const operator = this.operators.find(o => containername.startsWith(o._id || 'undefined'));
-                            if (operator !== undefined) {
-                                obj[name].children[containername].displayName = operator.name;
-                            }
+                        const podkeys = Object.keys(obj[name].children);
+                        podkeys.forEach(podkey => {
+                            const operatorkeys = Object.keys(obj[name].children[podkey].children);
+                            operatorkeys.forEach(operatorKey => {
+                                const operator = this.operators.find(o => operatorKey.startsWith(o._id || 'undefined'));
+                                if (operator !== undefined) {
+                                    obj[name].children[podkey].children[operatorKey].displayName = operator.name;
+                                }
+                            });
                         });
-                    } else if ((name.startsWith('deployment:import-') || name.startsWith('import-')) && name !== "import-deploy" && name !== "import-repo") {
-                        const id = name.replace('deployment:', '').replace('import-', '');
+                    } else if (name.startsWith('import-') && name !== "import-deploy" && name !== "import-repo") {
+                        const id = name.replace('import-', '');
                         const ip = this.imports.find(p => id === p.id.replace('urn:infai:ses:import:', ''));
                         if (ip !== undefined) {
                             obj[name].displayName = ip.name;
@@ -105,7 +108,7 @@ export class CostElementComponent {
 
     @Input() name = '';
     expensiveFirst = (a: KeyValue<string, CostModel>, b: KeyValue<string, CostModel>): number => {
-        if (a.value.month.requests !== 0 && b.value.month.requests !== 0) {
+        if (a.value.month.requests !== undefined && b.value.month.requests !== undefined) {
             return b.value.month.requests - a.value.month.requests
         }
         return this.sum(b.value.month) - this.sum(a.value.month);
@@ -114,6 +117,6 @@ export class CostElementComponent {
         if (m === undefined) {
             return 0;
         }
-        return m.cpu + m.ram + m.storage;
+        return (m.cpu || 0) + (m.ram || 0) + (m.storage || 0);
     }
 }
