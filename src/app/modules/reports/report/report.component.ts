@@ -17,14 +17,11 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
-import {TemplateModel, TemplateResponseModel} from '../shared/template.model';
-import {TemplateService} from '../shared/template.service';
+import {TemplateModel, TemplateResponseModel} from '../shared/reporting.model';
+import {ReportingService} from '../shared/reporting.service';
 import {ActivatedRoute} from '@angular/router';
-import {UntypedFormBuilder, Validators} from "@angular/forms";
-import {environment} from "../../../../environments/environment";
-import {ExportValueModel} from "../../exports/shared/export.model";
-import {DeviceInstancesService} from "../../devices/device-instances/shared/device-instances.service";
-import {DeviceInstancesModel} from "../../devices/device-instances/shared/device-instances.model";
+import {DeviceInstancesService} from '../../devices/device-instances/shared/device-instances.service';
+import {DeviceInstancesModel} from '../../devices/device-instances/shared/device-instances.model';
 
 @Component({
     selector: 'senergy-reports-new',
@@ -41,7 +38,7 @@ export class ReportComponent implements OnInit {
         private route: ActivatedRoute,
         public snackBar: MatSnackBar,
         public utilsService: UtilService,
-        private templateService: TemplateService,
+        private reportingService: ReportingService,
         private deviceInstanceService: DeviceInstancesService
     ) {
         this.templateId = this.route.snapshot.paramMap.get('templateId');
@@ -53,7 +50,7 @@ export class ReportComponent implements OnInit {
 
     ngOnInit() {
         if (this.templateId != null) {
-            this.templateService.getTemplate(this.templateId).subscribe((resp: TemplateResponseModel | null) => {
+            this.reportingService.getTemplate(this.templateId).subscribe((resp: TemplateResponseModel | null) => {
                 if (resp !== null) {
                     this.template = resp.data;
                 }
@@ -64,6 +61,6 @@ export class ReportComponent implements OnInit {
 
     save(){
         console.log(this.template);
-        this.templateService.createReport({id: 'test', data: this.template.data?.dataStructured}).subscribe();
+        this.reportingService.createReport({id: 'test', data: this.template.data?.dataStructured}).subscribe();
     }
 }

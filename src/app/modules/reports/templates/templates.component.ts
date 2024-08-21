@@ -19,8 +19,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { UtilService } from 'src/app/core/services/util.service';
-import {TemplateListResponseModel, TemplateModel} from '../shared/template.model';
-import {TemplateService} from '../shared/template.service';
+import {TemplateListResponseModel, TemplateModel} from '../shared/reporting.model';
+import {ReportingService} from '../shared/reporting.service';
 import {MatTableDataSource} from '@angular/material/table';
 
 @Component({
@@ -40,11 +40,11 @@ export class TemplatesComponent implements OnInit {
     constructor(
         public snackBar: MatSnackBar,
         public utilsService: UtilService,
-        private templateService: TemplateService,
+        private reportingService: ReportingService,
     ) {}
 
     ngOnInit() {
-        this.templateService.getTemplates().subscribe((resp: TemplateListResponseModel | null) => {
+        this.reportingService.getTemplates().subscribe((resp: TemplateListResponseModel | null) => {
             if (resp !== null) {
                 this.templates = resp.data || [];
                 this.templatesDataSource.data = this.templates;

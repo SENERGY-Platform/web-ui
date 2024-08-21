@@ -20,12 +20,12 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
 import { environment } from '../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import {TemplateListResponseModel, TemplateResponseModel} from './template.model';
+import {TemplateListResponseModel, TemplateResponseModel} from './reporting.model';
 
 @Injectable({
     providedIn: 'root',
 })
-export class TemplateService {
+export class ReportingService {
 
     constructor(
         private http: HttpClient,
@@ -36,7 +36,7 @@ export class TemplateService {
         return this.http.get<TemplateListResponseModel>(environment.reportEngineUrl + '/templates')
             .pipe(
                 map((resp: TemplateListResponseModel) => resp || []),
-                catchError(this.errorHandlerService.handleError(TemplateService.name, 'getTemplates: Error', null)),
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'getTemplates: Error', null)),
             );
     }
 
@@ -44,14 +44,14 @@ export class TemplateService {
         return this.http.get<TemplateResponseModel>(environment.reportEngineUrl + '/templates/'+id)
             .pipe(
                 map((resp: TemplateResponseModel) => resp || []),
-                catchError(this.errorHandlerService.handleError(TemplateService.name, 'getTemplate: Error', null)),
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'getTemplate: Error', null)),
             );
     }
 
     createReport(data = {}): Observable<HttpResponse<string> | null> {
-        return this.http.post<any>(environment.reportEngineUrl + '/report', data)
+        return this.http.post<any>(environment.reportEngineUrl + '/report/create', data)
             .pipe(
-                catchError(this.errorHandlerService.handleError(TemplateService.name, 'postReport: Error', null)),
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'postReport: Error', null)),
             );
     }
 }

@@ -15,7 +15,7 @@
  */
 
 import {Component, Input, OnInit} from '@angular/core';
-import {ReportObjectModel} from '../../shared/template.model';
+import {ReportObjectModel} from '../../shared/reporting.model';
 import {QueriesRequestTimeModel} from '../../../../widgets/shared/export-data.model';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
