@@ -54,4 +54,11 @@ export class ReportingService {
                 catchError(this.errorHandlerService.handleError(ReportingService.name, 'postReport: Error', null)),
             );
     }
+
+    saveReport(data = {}): Observable<HttpResponse<string> | null> {
+        return this.http.post<any>(environment.reportEngineUrl + '/report', data)
+            .pipe(
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'postReport: Error', null)),
+            );
+    }
 }

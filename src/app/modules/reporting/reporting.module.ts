@@ -31,16 +31,18 @@ import {MatCardModule} from '@angular/material/card';
 import {ReportObjectComponent} from './report/report-object/report-object.component';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatRadioModule} from "@angular/material/radio";
-import {CoreModule} from "../../core/core.module";
+import {MatRadioModule} from '@angular/material/radio';
+import {CoreModule} from '../../core/core.module';
+import {ReportsComponent} from './reports/reports.component';
 
-const templateList: Route = { path: 'reports/templates', pathMatch: 'full', component: TemplatesComponent, data: { header: 'Templates' } };
-const newReport: Route = { path: 'reports/new/:templateId', pathMatch: 'full', component: ReportComponent, data: { header: 'Report' } };
+const templateList: Route = { path: 'reporting/templates', pathMatch: 'full', component: TemplatesComponent, data: { header: 'Templates' } };
+const reportsList: Route = { path: 'reporting/reports', pathMatch: 'full', component: ReportsComponent, data: { header: 'Reports' } };
+const newReport: Route = { path: 'reporting/new/:templateId', pathMatch: 'full', component: ReportComponent, data: { header: 'Report' } };
 
 @NgModule({
-  declarations: [TemplatesComponent, ReportComponent, ReportObjectComponent],
+    declarations: [TemplatesComponent, ReportComponent, ReportObjectComponent, ReportsComponent],
     imports: [
-        RouterModule.forChild([templateList, newReport]),
+        RouterModule.forChild([templateList,reportsList, newReport]),
         CommonModule,
         FlexModule,
         MatButtonModule,
@@ -58,4 +60,4 @@ const newReport: Route = { path: 'reports/new/:templateId', pathMatch: 'full', c
         CoreModule
     ]
 })
-export class ReportsModule { }
+export class ReportingModule { }

@@ -44,7 +44,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {AuthorizationService} from './core/services/authorization.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 import { CostModule } from './modules/cost/cost.module';
-import {ReportsModule} from './modules/reports/reports.module';
+import {ReportingModule} from './modules/reporting/reporting.module';
 
 registerLocaleData(localeDe);
 
@@ -77,7 +77,7 @@ registerLocaleData(localeDe);
             // or after 30 seconds (whichever comes first).
             registrationStrategy: 'registerWhenStable:30000'
         }),
-        ReportsModule
+        ReportingModule
     ],
     providers: [
         {

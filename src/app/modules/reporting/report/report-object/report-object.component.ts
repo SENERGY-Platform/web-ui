@@ -28,7 +28,7 @@ import {
 
 
 @Component({
-    selector: 'senergy-reports-object',
+    selector: 'senergy-reporting-object',
     templateUrl: './report-object.component.html',
     styleUrls: ['./report-object.component.css'],
 })

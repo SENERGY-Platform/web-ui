@@ -269,7 +269,11 @@ export class SidenavService implements OnDestroy {
     }
 
     setupReportsSection(): SidenavSectionModel {
-        return new SidenavSectionModel('Reports', 'toggle', 'summarize', '/reports', [new SidenavPageModel('Templates', 'link', 'list', '/reports/templates')]);
+        return new SidenavSectionModel('Reporting', 'toggle', 'summarize', '/reporting',
+            [
+                new SidenavPageModel('Templates', 'link', 'list', '/reporting/templates'),
+                new SidenavPageModel('Reports', 'link', 'list', '/reporting/reports')
+            ]);
     }
 
     loadSections(): SidenavSectionModel[] {
@@ -284,7 +288,7 @@ export class SidenavService implements OnDestroy {
             this.setupMetadataSection(),
             this.setupSmartServiceSection(),
             this.setupCostSection(),
-            this.setupReportsSection()
+            //this.setupReportsSection()
         ];
 
         if(this.dashboardService.userHasReadDashboardAuthorization()) {
@@ -292,9 +296,9 @@ export class SidenavService implements OnDestroy {
         }
 
         // Just keep Main sections that have at least one subsection
-        sections = sections.filter(section => section.pages.length > 0 || section.name == 'Dashboard');
+        sections = sections.filter(section => section.pages.length > 0 || section.name === 'Dashboard');
 
-        const sortedSectionTitles = ['Dashboard','Reports', 'Smart Services', 'Processes', 'Exports', 'Analytics', 'Device Management', 'Imports', 'Cost', 'Metadata', 'Admin', 'Developer'];
+        const sortedSectionTitles = ['Dashboard','Reporting', 'Smart Services', 'Processes', 'Exports', 'Analytics', 'Device Management', 'Imports', 'Cost', 'Metadata', 'Admin', 'Developer'];
         sections.sort(function(section1, section2) {
             return sortedSectionTitles.indexOf(section1.name) - sortedSectionTitles.indexOf(section2.name);
         });

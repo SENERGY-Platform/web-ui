@@ -14,20 +14,26 @@
   ~ limitations under the License.
   -->
 
-
-<div class="layout-margin">
-    <mat-card>
-        <mat-card-content>Template Name: {{template.name}}</mat-card-content>
-    </mat-card>
-    <div *ngIf="template.data !== undefined">
-            <senergy-reports-object *ngFor="let element of template.data.dataStructured | keyvalue"
+<div fxLayout="column" fxFill>
+    <div class="button-header background-color-accent">
+        <button mat-icon-button matTooltip="Save" (click)="save()">
+            <mat-icon>save</mat-icon>
+        </button>
+    </div>
+    <div class="layout-margin" >
+        <mat-card>
+            <mat-card-content>Template Name: {{ template.name }}</mat-card-content>
+        </mat-card>
+        <div *ngIf="template.data !== undefined">
+            <senergy-reporting-object *ngFor="let element of template.data.dataStructured | keyvalue"
                                     [requestObject]="requestObject"
                                     [name]="element.key"
                                     [data]="element.value"
                                     [allDevices]="allDevices">
-            </senergy-reports-object>
+            </senergy-reporting-object>
+        </div>
+        <button mat-fab class="fab" (click)="create()" matTooltip="Create Report">
+            <mat-icon>create</mat-icon>
+        </button>
     </div>
-    <button mat-fab class="fab" (click)="save()" matTooltip="Create Report">
-        <mat-icon>save</mat-icon>
-    </button>
 </div>

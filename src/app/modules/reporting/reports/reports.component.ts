@@ -24,11 +24,11 @@ import {ReportingService} from '../shared/reporting.service';
 import {MatTableDataSource} from '@angular/material/table';
 
 @Component({
-    selector: 'senergy-reports-templates',
-    templateUrl: './templates.component.html',
-    styleUrls: ['./templates.component.css'],
+    selector: 'senergy-reporting-reports',
+    templateUrl: './reports.component.html',
+    styleUrls: ['./reports.component.css'],
 })
-export class TemplatesComponent implements OnInit {
+export class ReportsComponent implements OnInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
@@ -50,7 +50,7 @@ export class TemplatesComponent implements OnInit {
                 this.templatesDataSource.data = this.templates;
             }
             this.ready = true;
-        })
+        });
     }
 
 }

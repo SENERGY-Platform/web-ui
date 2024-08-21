@@ -100,20 +100,20 @@
                 </div>
                 <div *ngIf="data.valueType === 'object' && data.fields !== undefined">
 
-                    <senergy-reports-object *ngFor="let element of data.fields | keyvalue"
+                    <senergy-reporting-object *ngFor="let element of data.fields | keyvalue"
                                             [requestObject]="requestObject"
                                             [name]="name+element.key"
                                             [data]="element.value"
                                             [allDevices]="allDevices">
-                    </senergy-reports-object>
+                    </senergy-reporting-object>
                 </div>
                 <div *ngIf="data.valueType === 'array' && data.children !== undefined">
-                    <senergy-reports-object *ngFor="let element of data.children | keyvalue"
+                    <senergy-reporting-object *ngFor="let element of data.children | keyvalue"
                                             [requestObject]="requestObject"
                                             [name]="name+element.key"
                                             [data]="element.value"
                                             [allDevices]="allDevices">
-                    </senergy-reports-object>
+                    </senergy-reporting-object>
                 </div>
             </div>
         </mat-card-content>

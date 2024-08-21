@@ -24,7 +24,7 @@ import {DeviceInstancesService} from '../../devices/device-instances/shared/devi
 import {DeviceInstancesModel} from '../../devices/device-instances/shared/device-instances.model';
 
 @Component({
-    selector: 'senergy-reports-new',
+    selector: 'senergy-reporting-new',
     templateUrl: './report.component.html',
     styleUrls: ['./report.component.css'],
 })
@@ -59,8 +59,13 @@ export class ReportComponent implements OnInit {
         }
     }
 
-    save(){
+    create(){
         console.log(this.template);
         this.reportingService.createReport({id: 'test', data: this.template.data?.dataStructured}).subscribe();
+    }
+
+    save(){
+        console.log(this.template);
+        this.reportingService.saveReport({id: 'test', data: this.template.data?.dataStructured}).subscribe();
     }
 }
