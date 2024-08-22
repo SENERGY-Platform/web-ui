@@ -199,7 +199,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         this.availableProcessIotSelections = this.getAvailableProcessIotSelections();
         this.addPipelineWithOperatorIdOptionsToAvailableVariables();
         this.addImportIotEntityWithPathToAvailableVariables();
-        this.exportRequest = this.parseExport(this.result.inputs.find(value => value.name === 'export.request')?.value || '{}');
+        this.exportRequest = this.parseExport(this.result.inputs.find(value => value.name === 'export.request')?.value || '{"generated": true}');
         this.importRequest = this.parseImport(this.result.inputs.find(value => value.name === 'import.request')?.value || '{}');
         this.importTypeService.listImportTypes('', 9999, 0, 'name.asc').subscribe(value => this.importTypes = value);
         if(this.importRequest.import_type_id) {
