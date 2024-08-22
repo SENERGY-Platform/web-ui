@@ -14,40 +14,7 @@
  * limitations under the License.
  */
 
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.report-component {
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
-
-senergy-searchbar {
-    margin-right: 10px;
-}
-
-.warning-icon {
-    color: orangered;
-}
-/* Note: If you're using an SVG icon, you should make the class target the `<svg>` element */
-.warning-icon svg {
-    fill: orangered;
-}
-
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
-}
-
-table {
-    width: 100%;
-}
-
-.offset {
-    margin-right: 8px;
-}
-
-.hidden {
-    margin-left: 8px;
-}
-

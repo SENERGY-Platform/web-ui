@@ -14,15 +14,18 @@
   ~ limitations under the License.
   -->
 
-<div fxLayout="column" fxFill>
+<div class="main-panel" fxLayout="column">
     <div class="button-header background-color-accent">
-        <button mat-icon-button matTooltip="Save" (click)="save()">
+        <button mat-icon-button matTooltip="Save" (click)="save()" *ngIf="reportId === null">
+            <mat-icon>save</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Update" (click)="update()" *ngIf="reportId !== null">
             <mat-icon>save</mat-icon>
         </button>
     </div>
-    <div class="layout-margin" >
+    <div class="layout-margin" fxLayout="column">
         <mat-card>
-            <mat-card-content>Template Name: {{ template.name }}</mat-card-content>
+            <mat-card-content>Template Name: {{ template.name }} Id: {{templateId}}</mat-card-content>
         </mat-card>
         <div *ngIf="template.data !== undefined">
             <senergy-reporting-object *ngFor="let element of template.data.dataStructured | keyvalue"

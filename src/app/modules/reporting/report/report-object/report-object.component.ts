@@ -32,10 +32,10 @@ import {
     templateUrl: './report-object.component.html',
     styleUrls: ['./report-object.component.css'],
 })
-export class ReportObjectComponent implements OnInit {
+export class ReportObjectComponent implements OnInit{
 
     @Input() name = '';
-    @Input() data: ReportObjectModel = {} as ReportObjectModel;
+    @Input() data: ReportObjectModel | undefined;
     @Input() requestObject: Map<string, any> = new Map<string, any>();
     inputType = 'value';
     origData: ReportObjectModel = {} as ReportObjectModel;
@@ -48,75 +48,78 @@ export class ReportObjectComponent implements OnInit {
 
     constructor(
         private deviceTypeService: DeviceTypeService) {
-
     }
 
     ngOnInit() {
+        if (this.data?.query !== undefined) {
+            this.inputType = 'query';
+        }
     }
 
     changeInputType() {
-        if (this.inputType === 'query') {
-            if (this.data.value !== undefined) {
-                this.origData.value = this.data.value;
+        if (this.data !== undefined) {
+            if (this.inputType === 'query') {
+                if (this.data?.value !== undefined) {
+                    this.origData.value = this.data.value;
+                }
+                if (this.data?.children !== undefined) {
+                    this.origData.children = this.data.children;
+                }
+                if (this.data?.fields !== undefined) {
+                    this.origData.fields = this.data.fields;
+                }
+                if (this.data?.length !== undefined) {
+                    this.origData.length = this.data.length;
+                }
+                delete this.data?.value;
+                delete this.data?.children;
+                delete this.data?.fields;
+                delete this.data?.length;
+                this.data.query = {
+                    columns: [{name: 'energy.value', groupType: 'difference-last'}],
+                    time: {last: '12months'} as QueriesRequestTimeModel,
+                    groupTime: '1months',
+                    deviceId: '',
+                    serviceId: ''
+                };
+            } else {
+                if (this.origData.value !== undefined) {
+                    this.data.value = this.origData.value;
+                }
+                if (this.origData.children !== undefined) {
+                    this.data.children = this.origData.children;
+                }
+                if (this.origData.fields !== undefined) {
+                    this.data.fields = this.origData.fields;
+                }
+                if (this.origData.length !== undefined) {
+                    this.data.length = this.origData.length;
+                }
+                delete this.data.query;
             }
-            if (this.data.children !== undefined) {
-                this.origData.children = this.data.children;
-            }
-            if (this.data.fields !== undefined) {
-                this.origData.fields = this.data.fields;
-            }
-            if (this.data.length !== undefined) {
-                this.origData.length = this.data.length;
-            }
-            delete this.data.value;
-            delete this.data.children;
-            delete this.data.fields;
-            delete this.data.length;
-            this.data.query = {
-                columns: [{name: 'energy.value', groupType: 'difference-last'}],
-                time: {last: '12months'} as QueriesRequestTimeModel,
-                groupTime: '1months',
-                deviceId: '',
-                serviceId: ''
-            };
-        } else {
-            if (this.origData.value !== undefined) {
-                this.data.value = this.origData.value;
-            }
-            if (this.origData.children !== undefined) {
-                this.data.children = this.origData.children;
-            }
-            if (this.origData.fields !== undefined) {
-                this.data.fields = this.origData.fields;
-            }
-            if (this.origData.length !== undefined) {
-                this.data.length = this.origData.length;
-            }
-            delete this.data.query;
         }
     }
 
     queryDeviceChanged(device: DeviceInstancesModel) {
-        this.data.query!.deviceId = device.id;
-        this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((resp: DeviceTypeModel | null) => {
-            if (resp !== null) {
-                this.queryDeviceType = resp;
-            }
-        });
+        if (this.data !== undefined && this.data.query !== undefined) {
+            this.data.query.deviceId = device.id;
+            this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((resp: DeviceTypeModel | null) => {
+                if (resp !== null) {
+                    this.queryDeviceType = resp;
+                }
+            });
+        }
     }
 
     queryServiceChanged(service: DeviceTypeServiceModel) {
-        this.data.query!.serviceId = service.id;
-        const pathString = 'value';
-        this.queryServicePaths = [];
-        service.outputs.forEach((out: DeviceTypeContentModel) => {
-            this.traverseDataStructure(pathString, out.content_variable, false);
-        });
-    }
-
-    inputChanged(key: string, data: any) {
-        this.requestObject.set(key, data);
-        //this.changeInputEvent.emit(this.requestObject);
+        if (this.data !== undefined && this.data.query !== undefined) {
+            this.data.query.serviceId = service.id;
+            const pathString = 'value';
+            this.queryServicePaths = [];
+            service.outputs.forEach((out: DeviceTypeContentModel) => {
+                this.traverseDataStructure(pathString, out.content_variable, false);
+            });
+        }
     }
 
     private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel, isLocal: boolean) {
@@ -141,4 +144,6 @@ export class ReportObjectComponent implements OnInit {
             this.queryServicePaths.push(out);
         }
     }
+
+
 }

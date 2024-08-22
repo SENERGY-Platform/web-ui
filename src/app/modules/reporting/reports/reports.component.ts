@@ -19,7 +19,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { UtilService } from 'src/app/core/services/util.service';
-import {TemplateListResponseModel, TemplateModel} from '../shared/reporting.model';
+import {
+    ReportListResponseModel,
+    ReportModel,
+    TemplateListResponseModel,
+    TemplateModel
+} from '../shared/reporting.model';
 import {ReportingService} from '../shared/reporting.service';
 import {MatTableDataSource} from '@angular/material/table';
 
@@ -32,9 +37,9 @@ export class ReportsComponent implements OnInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
-    templates: TemplateModel[] = [] as TemplateModel[];
-    templatesDataSource = new MatTableDataSource<TemplateModel>();
-    displayedColumns: string[] = ['id', 'name', 'edit'];
+    reports: ReportModel[] = [] as ReportModel[];
+    reportsDataSource = new MatTableDataSource<ReportModel>();
+    displayedColumns: string[] = ['id', 'name', 'edit', 'delete'];
     ready = false;
 
     constructor(
@@ -44,13 +49,17 @@ export class ReportsComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.reportingService.getTemplates().subscribe((resp: TemplateListResponseModel | null) => {
+        this.reportingService.getReports().subscribe((resp: ReportListResponseModel | null) => {
             if (resp !== null) {
-                this.templates = resp.data || [];
-                this.templatesDataSource.data = this.templates;
+                this.reports = resp.data || [];
+                this.reportsDataSource.data = this.reports;
             }
             this.ready = true;
         });
+    }
+
+    deleteReport(id: string){
+        this.reportingService.deleteReport(id).subscribe();
     }
 
 }

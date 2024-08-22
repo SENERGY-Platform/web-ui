@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-senergy-searchbar {
-    margin-right: 10px;
-}
-
-.warning-icon {
-    color: orangered;
-}
-/* Note: If you're using an SVG icon, you should make the class target the `<svg>` element */
-.warning-icon svg {
-    fill: orangered;
-}
-
 .fab {
     position: fixed;
     bottom: 15px;
@@ -39,15 +21,7 @@ senergy-searchbar {
     z-index: 100;
 }
 
-table {
-    width: 100%;
+.main-panel {
+    height: calc(100% - 64px);
+    overflow-y: auto;
 }
-
-.offset {
-    margin-right: 8px;
-}
-
-.hidden {
-    margin-left: 8px;
-}
-

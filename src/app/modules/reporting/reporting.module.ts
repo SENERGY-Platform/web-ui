@@ -37,12 +37,13 @@ import {ReportsComponent} from './reports/reports.component';
 
 const templateList: Route = { path: 'reporting/templates', pathMatch: 'full', component: TemplatesComponent, data: { header: 'Templates' } };
 const reportsList: Route = { path: 'reporting/reports', pathMatch: 'full', component: ReportsComponent, data: { header: 'Reports' } };
-const newReport: Route = { path: 'reporting/new/:templateId', pathMatch: 'full', component: ReportComponent, data: { header: 'Report' } };
+const newReport: Route = { path: 'reporting/new/:templateId', pathMatch: 'full', component: ReportComponent, data: { header: 'New Report' } };
+const editReport: Route = { path: 'reporting/edit/:reportId', pathMatch: 'full', component: ReportComponent, data: { header: 'Edit Report' } };
 
 @NgModule({
     declarations: [TemplatesComponent, ReportComponent, ReportObjectComponent, ReportsComponent],
     imports: [
-        RouterModule.forChild([templateList,reportsList, newReport]),
+        RouterModule.forChild([templateList,reportsList, newReport, editReport]),
         CommonModule,
         FlexModule,
         MatButtonModule,

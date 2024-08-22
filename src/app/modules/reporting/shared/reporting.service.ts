@@ -20,7 +20,12 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
 import { environment } from '../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import {TemplateListResponseModel, TemplateResponseModel} from './reporting.model';
+import {
+    ReportListResponseModel, ReportModel,
+    ReportResponseModel,
+    TemplateListResponseModel,
+    TemplateResponseModel
+} from './reporting.model';
 
 @Injectable({
     providedIn: 'root',
@@ -48,17 +53,47 @@ export class ReportingService {
             );
     }
 
-    createReport(data = {}): Observable<HttpResponse<string> | null> {
+    createReport(data: ReportModel = {} as ReportModel): Observable<HttpResponse<string> | null> {
         return this.http.post<any>(environment.reportEngineUrl + '/report/create', data)
             .pipe(
-                catchError(this.errorHandlerService.handleError(ReportingService.name, 'postReport: Error', null)),
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'createReport: Error', null)),
             );
     }
 
-    saveReport(data = {}): Observable<HttpResponse<string> | null> {
+    saveReport(data: ReportModel = {} as ReportModel): Observable<HttpResponse<string> | null> {
         return this.http.post<any>(environment.reportEngineUrl + '/report', data)
             .pipe(
-                catchError(this.errorHandlerService.handleError(ReportingService.name, 'postReport: Error', null)),
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'saveReport: Error', null)),
+            );
+    }
+
+    updateReport(data: ReportModel = {} as ReportModel): Observable<HttpResponse<string> | null> {
+        return this.http.put<any>(environment.reportEngineUrl + '/report', data)
+            .pipe(
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'updateReport: Error', null)),
+            );
+    }
+
+    deleteReport(id: string): Observable<HttpResponse<string> | null> {
+        return this.http.delete<any>(environment.reportEngineUrl + '/report/'+id)
+            .pipe(
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'deleteReport: Error', null)),
+            );
+    }
+
+    getReports(): Observable<ReportListResponseModel | null> {
+        return this.http.get<ReportListResponseModel>(environment.reportEngineUrl + '/report')
+            .pipe(
+                map((resp: ReportListResponseModel) => resp || []),
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'getReports: Error', null)),
+            );
+    }
+
+    getReport(id: string): Observable<ReportResponseModel | null> {
+        return this.http.get<ReportResponseModel>(environment.reportEngineUrl + '/report/'+id)
+            .pipe(
+                map((resp: ReportResponseModel) => resp || []),
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'getReport: Error', null)),
             );
     }
 }

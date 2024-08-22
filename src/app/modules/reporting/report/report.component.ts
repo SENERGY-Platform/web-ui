@@ -17,7 +17,13 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
-import {TemplateModel, TemplateResponseModel} from '../shared/reporting.model';
+import {
+    ReportModel,
+    ReportObjectModel,
+    ReportResponseModel,
+    TemplateModel,
+    TemplateResponseModel
+} from '../shared/reporting.model';
 import {ReportingService} from '../shared/reporting.service';
 import {ActivatedRoute} from '@angular/router';
 import {DeviceInstancesService} from '../../devices/device-instances/shared/device-instances.service';
@@ -29,7 +35,10 @@ import {DeviceInstancesModel} from '../../devices/device-instances/shared/device
     styleUrls: ['./report.component.css'],
 })
 export class ReportComponent implements OnInit {
-    template: TemplateModel = {} as TemplateModel;
+
+    reportId: string | null = null;
+    template: TemplateModel = {data:{}} as TemplateModel;
+    report: ReportModel = {} as ReportModel;
     ready = false;
     templateId: string | null = '';
     requestObject: Map<string, any> = new Map<string, any>();
@@ -41,6 +50,7 @@ export class ReportComponent implements OnInit {
         private reportingService: ReportingService,
         private deviceInstanceService: DeviceInstancesService
     ) {
+        this.reportId = this.route.snapshot.paramMap.get('reportId');
         this.templateId = this.route.snapshot.paramMap.get('templateId');
         this.deviceInstanceService.getDeviceInstances(9999, 0).subscribe((devices: DeviceInstancesModel[]) => {
             devices = this.deviceInstanceService.useDisplayNameAsName(devices) as DeviceInstancesModel[];
@@ -49,23 +59,45 @@ export class ReportComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (this.reportId != null) {
+            this.reportingService.getReport(this.reportId).subscribe((resp: ReportResponseModel | null) => {
+                if (resp !== null) {
+                    this.report = resp.data;
+                    this.templateId = this.report.templateId;
+                    this.template.data = {dataJsonString: '', dataStructured: {} as Map<string, ReportObjectModel>, id: '', name: ''};
+                    this.template.data.dataStructured = this.report.data;
+                    this.reportingService.getTemplate(this.templateId).subscribe((resp2: TemplateResponseModel | null) => {
+                        if (resp2 !== null) {
+                            this.template.name = resp2.data.name;
+                        }
+                    });
+                }
+            });
+        }
         if (this.templateId != null) {
             this.reportingService.getTemplate(this.templateId).subscribe((resp: TemplateResponseModel | null) => {
                 if (resp !== null) {
                     this.template = resp.data;
                 }
-                this.ready = true;
             });
         }
+        this.ready = true;
     }
 
     create(){
-        console.log(this.template);
-        this.reportingService.createReport({id: 'test', data: this.template.data?.dataStructured}).subscribe();
+        this.reportingService.createReport({templateId: this.templateId,
+            templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe();
     }
 
     save(){
-        console.log(this.template);
-        this.reportingService.saveReport({id: 'test', data: this.template.data?.dataStructured}).subscribe();
+        this.reportingService.saveReport({templateId: this.templateId,
+            templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe();
+    }
+
+    update(){
+        console.log({id: this.reportId, templateId: this.templateId,
+            templateName: this.template.name, data: this.template.data?.dataStructured});
+        this.reportingService.updateReport({id: this.reportId, templateId: this.templateId,
+            templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe();
     }
 }

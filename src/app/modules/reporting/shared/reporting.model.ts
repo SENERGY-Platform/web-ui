@@ -46,3 +46,19 @@ export interface ReportObjectModel {
      length: number | undefined;
      query?:  QueriesRequestV2ElementTimescaleModel | undefined;
 }
+
+export interface ReportListResponseModel {
+    data: ReportModel[];
+}
+
+export interface ReportResponseModel {
+    data: ReportModel;
+}
+
+export interface ReportModel {
+    id: string | undefined;
+    name: string;
+    templateName: string;
+    templateId: string;
+    data: Map<string, ReportObjectModel>;
+}
