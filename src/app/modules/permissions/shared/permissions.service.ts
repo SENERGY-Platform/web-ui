@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { PermissionsResourceBaseModel, PermissionsResourceModel, PermissionsV2ResourceBaseModel, PermissionsV2ResourceModel} from './permissions-resource.model';
-import { PermissionsGroupModel, PermissionsUserModel } from './permissions-user.model';
+import { PermissionsUserModel } from './permissions-user.model';
 import { PermissionsRightsModel } from './permissions-rights.model';
 
 @Injectable({
@@ -125,15 +125,9 @@ export class PermissionsService {
             .pipe(catchError(this.errorHandlerService.handleError(PermissionsService.name, 'getUserById', {} as PermissionsUserModel)));
     }
 
-    getUserByName(userName: string): Observable<PermissionsUserModel | null> {
+    getSharableUsers(): Observable<PermissionsUserModel[] | null> {
         return this.http
-            .get<PermissionsUserModel>(environment.usersServiceUrl + '/user/name/' + userName)
-            .pipe(catchError(this.errorHandlerService.handleError(PermissionsService.name, 'getUserByName', null)));
-    }
-
-    getRoles(): Observable<PermissionsGroupModel[]> {
-        return this.http
-            .get<PermissionsGroupModel[]>(environment.usersServiceUrl + '/roles')
-            .pipe(catchError(this.errorHandlerService.handleError(PermissionsService.name, 'getRoles', [] as PermissionsGroupModel[])));
+        .get<PermissionsUserModel[] | null>(environment.usersServiceUrl + '/user-list?excludeCaller=true')
+        .pipe(catchError(this.errorHandlerService.handleError(PermissionsService.name, 'getSharableUsers', [] as PermissionsUserModel[])));
     }
 }

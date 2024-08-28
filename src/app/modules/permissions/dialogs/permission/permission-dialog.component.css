@@ -27,3 +27,6 @@ table {
     margin-top: 6px;
 }
 
+.selector {
+    width: calc(100% - 64px);
+}

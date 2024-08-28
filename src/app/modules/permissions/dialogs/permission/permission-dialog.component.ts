@@ -14,33 +14,46 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import {
     MAT_DIALOG_DATA,
     MatDialogRef
 } from '@angular/material/dialog';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {PermissionsEditModel} from '../../shared/permissions-edit.model';
-import {UntypedFormControl} from '@angular/forms';
-import {AuthorizationService} from '../../../../core/services/authorization.service';
-import {PermissionsGroupModel, PermissionsUserModel} from '../../shared/permissions-user.model';
-import {HttpClient} from '@angular/common/http';
-import {PermissionsService} from '../../shared/permissions.service';
-import {MatTable} from '@angular/material/table';
+import { UntypedFormControl } from '@angular/forms';
+import { AuthorizationService } from '../../../../core/services/authorization.service';
+import { PermissionsUserModel } from '../../shared/permissions-user.model';
+import { PermissionsService } from '../../shared/permissions.service';
+import { PermissionsV2ResourceBaseModel } from '../../shared/permissions-resource.model';
+import { PermissionTypes, TableComponent } from './table/table.component';
+
+export interface PermissionDialogComponentData {
+    name: string;
+    permissions: PermissionsV2ResourceBaseModel;
+    kind?: string;
+}
+
 
 @Component({
     templateUrl: './permission-dialog.component.html',
     styleUrls: ['./permission-dialog.component.css'],
 })
 export class PermissionDialogComponent implements OnInit {
-    @ViewChild(MatTable, { static: false }) table!: MatTable<PermissionsEditModel>;
-    formControl = new UntypedFormControl('');
+    @ViewChild('userTable', { static: false }) userTable?: TableComponent;
+    @ViewChild('groupTable', { static: false }) groupTable?: TableComponent;
+    @ViewChild('roleTable', { static: false }) roleTable?: TableComponent;
+
+
+    userFormControl = new UntypedFormControl('');
     groupFormControl = new UntypedFormControl('');
-    roles: PermissionsGroupModel[] = [];
+    roleFormControl = new UntypedFormControl('');
     name: string;
     userId: null | string = null;
-    displayedColumns: string[] = ['user', 'isRole', 'read', 'write', 'execute', 'administrate', 'action'];
-    permissions: PermissionsEditModel[] = [];
+    permissions: PermissionsV2ResourceBaseModel;
+    users: PermissionsUserModel[] = [];
+    groups: string[] = [];
+    roles: string[] = [];
+    isAdmin: boolean = false;
+    permissionTypes = PermissionTypes;
 
     descriptions = {
         read: 'read resource information',
@@ -51,44 +64,65 @@ export class PermissionDialogComponent implements OnInit {
 
     constructor(
         private dialogRef: MatDialogRef<PermissionDialogComponent>,
-        private errorHandlerService: ErrorHandlerService,
         private authorizationService: AuthorizationService,
-        private http: HttpClient,
         private permissionsService: PermissionsService,
         @Inject(MAT_DIALOG_DATA)
-        data: {
-            name: string;
-            permissions: PermissionsEditModel[];
-            kind?: string;
-        },
+        data: PermissionDialogComponentData,
     ) {
         this.name = data.name;
         this.permissions = data.permissions;
-        switch (data.kind){
-        case 'devices':
-            this.descriptions = {
-                read: 'read device metadata',
-                write: 'write device metadata',
-                execute: 'use device, read sensor-data',
-                administrate: 'delete device, change permissions'
-            };
-            break;
-        case 'processmodel':
-            break;
-        case 'hubs':
-            break;
-        case 'locations':
-            break;
-        case 'smart_service_releases':
-            break;
+        switch (data.kind) {
+            case 'devices':
+                this.descriptions = {
+                    read: 'read device metadata',
+                    write: 'write device metadata',
+                    execute: 'use device, read sensor-data',
+                    administrate: 'delete device, change permissions'
+                };
+                break;
+            case 'processmodel':
+                break;
+            case 'hubs':
+                break;
+            case 'locations':
+                break;
+            case 'smart_service_releases':
+                break;
         }
     }
 
     ngOnInit() {
         this.getUserId();
-        this.permissionsService.getRoles().subscribe((roles) => {
-            this.roles = roles.filter((r) => this.permissions.findIndex((p) => p.isRole === true && p.userName === r.name) === -1);
-        });
+        this.isAdmin = this.authorizationService.userIsAdmin();
+        if (this.isAdmin) {
+            this.authorizationService.loadAllGroups().subscribe(groups => {
+                this.groups = groups.map((g: { path: any; }) => g.path);
+                setTimeout(() => this.groupTable?.render(), 0);
+            });
+            this.authorizationService.loadAllUsers().subscribe(users => {
+                this.users = users;
+                setTimeout(() => this.userTable?.render(), 0);
+            });
+            this.authorizationService.loadAllRoles().subscribe(roles => {
+                this.roles = roles.map((r: any) => r.name);
+                setTimeout(() => this.roleTable?.render(), 0);
+            });
+        } else {
+            this.groups = this.authorizationService.getUsersGroups();
+            setTimeout(() => this.groupTable?.render(), 0);
+
+            this.permissionsService.getSharableUsers().subscribe(res => {
+                this.users = res || [];
+                this.authorizationService.getUserName().then(username => {
+                    this.users.push({
+                        id: this.userId || '',
+                        username: username,
+
+                    });
+                    setTimeout(() => this.userTable?.render(), 0);
+                })
+            });
+        }
     }
 
     close(): void {
@@ -99,65 +133,94 @@ export class PermissionDialogComponent implements OnInit {
         this.dialogRef.close(this.permissions);
     }
 
-    deleteRow(index: number) {
-        this.permissions.splice(index, 1);
-        this.table.renderRows();
-    }
-
-    addColumn() {
-        let userExists = false;
-        this.permissions.forEach((data: PermissionsEditModel) => {
-            if (data.userName === this.formControl.value) {
-                userExists = true;
-            }
-        });
-
-        if (userExists) {
-            this.formControl.setErrors({ userExists: true });
-        } else {
-            this.permissionsService.getUserByName(this.formControl.value).subscribe((userPermission: PermissionsUserModel | null) => {
-                if (userPermission !== null) {
-                    this.permissions.push({
-                        userId: userPermission.id,
-                        userName: userPermission.username,
-                        userRights: {
-                            administrate: false,
-                            execute: false,
-                            write: false,
-                            read: false,
-                        },
-                    });
-                    this.formControl.setValue('');
-                    this.table.renderRows();
-                    this.formControl.updateValueAndValidity();
-                } else {
-                    this.formControl.setErrors({ invalid: true });
-                }
-            });
-        }
-    }
-
     private getUserId(): void {
         this.userId = this.authorizationService.getUserId() as string;
     }
 
-    addRole() {
+    get adddableUsers(): PermissionsUserModel[] {
+        const keys = Object.keys(this.permissions.user_permissions);
+        const u = this.users.filter(u => keys.findIndex(k => k === u.id) === -1);
+        if (u.length === 0) {
+            this.userFormControl.disable();
+        } else {
+            this.userFormControl.enable();
+        }
+        return u;
+    }
+
+    get adddableGroups(): string[] {
+        const keys = Object.keys(this.permissions.group_permissions);
+        const u = this.groups.filter(u => keys.findIndex(k => k === u) === -1);
+        if (u.length === 0) {
+            this.groupFormControl.disable();
+        } else {
+            this.groupFormControl.enable();
+        }
+        return u;
+    }
+
+    get adddableRoles(): string[] {
+        const keys = Object.keys(this.permissions.role_permissions);
+        const u = this.roles.filter(u => keys.findIndex(k => k === u) === -1);
+        if (u.length === 0) {
+            this.roleFormControl.disable();
+        } else {
+            this.roleFormControl.enable();
+        }
+        return u;
+    }
+
+    addUser() {
+        if (this.userFormControl.value === '') {
+            return;
+        }
+
+        this.permissions.user_permissions[this.userFormControl.value] = {
+            administrate: false,
+            execute: false,
+            write: false,
+            read: false,
+        };
+        this.userFormControl.setValue('');
+        this.userFormControl.updateValueAndValidity();
+        this.userTable?.render();
+    }
+
+    addGroup() {
         if (this.groupFormControl.value === '') {
             return;
         }
-        this.permissions.push({
-            userId: this.groupFormControl.value.id,
-            userName: this.groupFormControl.value.name,
-            userRights: {
-                administrate: false,
-                execute: false,
-                write: false,
-                read: false,
-            },
-            isRole: true,
-        });
-        this.table.renderRows();
+        this.permissions.group_permissions[this.groupFormControl.value] = {
+            administrate: false,
+            execute: false,
+            write: false,
+            read: false,
+        };
+        this.groupFormControl.setValue('');
+        this.groupFormControl.updateValueAndValidity();
+        this.groupTable?.render();
+    }
 
-        this.roles = this.roles.filter((r) => this.permissions.findIndex((p) => p.isRole === true && p.userId === r.id) === -1);
+    addRole() {
+        if (this.roleFormControl.value === '') {
+            return;
+        }
+        this.permissions.role_permissions[this.roleFormControl.value] = {
+            administrate: false,
+            execute: false,
+            write: false,
+            read: false,
+        };
+        this.roleFormControl.setValue('');
+        this.roleFormControl.updateValueAndValidity();
+        this.roleTable?.render();
+    }
+
+    showDividerBeforeGroupTable(): boolean {
+        return Object.keys(this.permissions.user_permissions).length > 0;
+    }
+
+    showDividerBeforeRoleTable(): boolean {
+        return this.isAdmin && Object.keys(this.permissions.group_permissions).length > 0;
     }
 }

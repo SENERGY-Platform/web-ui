@@ -29,6 +29,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { CoreModule } from '../../core/core.module';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TableComponent } from './dialogs/permission/table/table.component';
+import { MatDividerModule } from '@angular/material/divider';
 
 @NgModule({
     imports: [
@@ -45,7 +47,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         FlexLayoutModule,
         CoreModule,
         MatTooltipModule,
+        MatDividerModule,
     ],
-    declarations: [PermissionDialogComponent],
+    declarations: [PermissionDialogComponent, TableComponent],
 })
 export class PermissionsModule {}

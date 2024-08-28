@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 InfAI (CC SES)
+ * Copyright 2024 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,30 @@
  * limitations under the License.
  */
 
-import { PermissionsRightsModel } from './permissions-rights.model';
+.mat-column-name {
+    width: calc(100% - 499px);
+}
 
-export interface PermissionsEditModel {
-    userId: string;
-    userName: string;
-    userRights: PermissionsRightsModel;
-    isRole?: boolean;
+.mat-column-icon {
+    width: 72px;
+}
+
+.mat-column-read {
+    width: 72px;
+}
+
+.mat-column-write {
+    width: 72px;
+}
+
+.mat-column-execute {
+    width: 83px;
+}
+
+.mat-column-administrate {
+    width: 120px;
+}
+
+.mat-column-action {
+    width: 80px;
 }

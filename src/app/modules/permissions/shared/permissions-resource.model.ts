@@ -42,4 +42,7 @@ export interface PermissionsV2ResourceBaseModel {
     group_permissions: {
         [key: string]: PermissionsRightsModel;
     };
+    role_permissions: {
+        [key: string]: PermissionsRightsModel;
+    };
 }

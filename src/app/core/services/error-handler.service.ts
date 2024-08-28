@@ -41,7 +41,7 @@ export class ErrorHandlerService {
     handleErrorWithSnackBar<T>(snackbarMessage: string, service: string, method: string, result?: T) {
         return (error?: HttpErrorResponse): Observable<T> => {
             this.handleError(service, method, result)(error);
-            this.snackBar.open(snackbarMessage, 'close', { panelClass: 'snack-bar-error' });
+            this.showErrorInSnackBar(snackbarMessage);
             return of(result as T);
         };
     }
@@ -51,5 +51,9 @@ export class ErrorHandlerService {
             return true;
         }
         return false;
+    }
+
+    showErrorInSnackBar(snackbarMessage: string) {
+        this.snackBar.open(snackbarMessage, 'close', { panelClass: 'snack-bar-error' });
     }
 }

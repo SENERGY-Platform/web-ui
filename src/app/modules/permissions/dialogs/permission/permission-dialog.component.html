@@ -17,102 +17,50 @@
 <h2 mat-dialog-title>Permissions for {{name}}</h2>
 
 <mat-dialog-content>
-    <table #table mat-table [dataSource]="permissions">
+    <senergy-permission-table #userTable [permissions]="permissions.user_permissions" [type]="permissionTypes.user"
+     [users]="users" [userId]="userId" [isAdmin]="isAdmin" [descriptions]="descriptions" [header]="true" [icon]="'person'"></senergy-permission-table> 
 
-        <ng-container matColumnDef="user">
-            <th mat-header-cell *matHeaderCellDef> User</th>
-            <td mat-cell *matCellDef="let element"> {{element.userName}} </td>
-            <td mat-footer-cell *matFooterCellDef>
-                <form class="user-input">
-                    <mat-form-field color="accent">
-                        <input matInput placeholder="Add user"
-                               [formControl]="formControl">
-                        <mat-error *ngIf="formControl.hasError('invalid')">
-                            User unknown!
-                        </mat-error>
-                        <mat-error *ngIf="formControl.hasError('userExists')">
-                            User already exists!
-                        </mat-error>
-                    </mat-form-field>
-                </form>
-            </td>
-        </ng-container>
+     <mat-divider *ngIf="showDividerBeforeGroupTable()"></mat-divider>
+     <senergy-permission-table #groupTable [permissions]="permissions.group_permissions" [type]="permissionTypes.group"
+     [isAdmin]="isAdmin" [descriptions]="descriptions" [icon]="'group'"></senergy-permission-table> 
 
-        <ng-container matColumnDef="isRole">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let element">
-                <mat-icon *ngIf="element.isRole === true" color="accent" matTooltip="role">group</mat-icon>
-            </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-        </ng-container>
+     <mat-divider *ngIf="showDividerBeforeRoleTable()"></mat-divider>
+     <senergy-permission-table #roleTable [permissions]="permissions.role_permissions" [type]="permissionTypes.role"
+     [isAdmin]="isAdmin" [descriptions]="descriptions" [icon]="'manage_accounts'"></senergy-permission-table> 
 
-        <ng-container matColumnDef="read">
-            <th mat-header-cell *matHeaderCellDef> Read</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.read"
-                              [disabled]="element.userId === userId || (element.isRole === true && element.userName === 'admin')"
-                              [matTooltip]="descriptions.read"></mat-checkbox>
-            </td>
-            <td mat-footer-cell *matFooterCellDef>
-            </td>
-        </ng-container>
+    <form class="user-input">
+        <mat-form-field color="accent" appearance="outline" class="selector">
+            <mat-label>User</mat-label>
+            <senergy-select-search placeholder="User" [options]="adddableUsers" [formControl]="userFormControl"
+              useOptionValueProperty="id" useOptionViewProperty="username">
+            </senergy-select-search> 
+        </mat-form-field>
+        <button [disabled]="adddableUsers.length === 0" class="margin add-button" mat-icon-button color="accent" (click)="addUser()">
+            <mat-icon>add</mat-icon>
+        </button>
+    </form>
 
-        <ng-container matColumnDef="write">
-            <th mat-header-cell *matHeaderCellDef> Write</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.write"
-                              [disabled]="element.isRole === true && element.userName === 'admin'"
-                              [matTooltip]="descriptions.write"></mat-checkbox>
-            </td>
-            <td mat-footer-cell *matFooterCellDef>
-            </td>
-        </ng-container>
+    <form class="user-input">
+        <mat-form-field color="accent" appearance="outline" class="selector">
+            <mat-label>Group</mat-label>
+            <senergy-select-search placeholder="Group" [options]="adddableGroups" [formControl]="groupFormControl">
+            </senergy-select-search> 
+        </mat-form-field>
+        <button [disabled]="adddableGroups.length === 0" class="margin add-button" mat-icon-button color="accent" (click)="addGroup()">
+            <mat-icon>add</mat-icon>
+        </button>
+    </form>
 
-        <ng-container matColumnDef="execute">
-            <th mat-header-cell *matHeaderCellDef> Execute</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.execute"
-                              [disabled]="element.isRole === true && element.userName === 'admin'"
-                              [matTooltip]="descriptions.execute"></mat-checkbox>
-            </td>
-            <td mat-footer-cell *matFooterCellDef>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="administrate">
-            <th mat-header-cell *matHeaderCellDef> Administrate</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.administrate"
-                              [disabled]="element.userId === userId || (element.isRole === true && element.userName === 'admin')"
-                              [matTooltip]="descriptions.administrate"></mat-checkbox>
-            </td>
-            <td mat-footer-cell *matFooterCellDef>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="action">
-            <th mat-header-cell *matHeaderCellDef> Action</th>
-            <td mat-cell *matCellDef="let i = index; let element">
-                <button class="margin" mat-icon-button color="accent" (click)="deleteRow(i)"
-                        [disabled]="element.userId === userId || (element.isRole === true && element.userName === 'admin')">
-                    <mat-icon>delete</mat-icon>
-                </button>
-            </td>
-            <td mat-footer-cell *matFooterCellDef>
-                <button class="margin" mat-icon-button color="accent" (click)="addColumn()">
-                    <mat-icon>add</mat-icon>
-                </button>
-            </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        <tr mat-footer-row *matFooterRowDef="displayedColumns" class="example-first-footer-row"></tr>
-        <tr mat-footer-row
-            *matFooterRowDef="['isRole', 'read', 'write', 'execute', 'administrate']"
-            class="example-first-footer-row"></tr>
-    </table>
-
+    <form *ngIf="isAdmin" class="user-input">
+        <mat-form-field color="accent" appearance="outline" class="selector">
+            <mat-label>Role</mat-label>
+            <senergy-select-search placeholder="Role" [options]="adddableRoles" [formControl]="roleFormControl">
+            </senergy-select-search> 
+        </mat-form-field>
+        <button [disabled]="adddableRoles.length === 0" class="margin add-button" mat-icon-button color="accent" (click)="addRole()">
+            <mat-icon>add</mat-icon>
+        </button>
+    </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

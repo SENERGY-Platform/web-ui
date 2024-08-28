@@ -97,6 +97,10 @@ export class AuthorizationService implements HttpInterceptor {
         });
     }
 
+    getUsersGroups(): string[] {
+        return (this.keycloakService.getKeycloakInstance().tokenParsed || {groups: []})["groups"];
+    }
+
     getToken(): Promise<string> {
         return this.keycloakService.getToken().then((resp) => 'Bearer ' + resp);
     }
@@ -146,6 +150,12 @@ export class AuthorizationService implements HttpInterceptor {
         return this.http
             .get<any | { error: string }>(environment.keycloakUrl + '/auth/admin/realms/master/clients')
             .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllClients', {error: 'error'})));
+    }
+
+    loadAllGroups() {
+        return this.http
+        .get<any | { error: string }>(environment.keycloakUrl + '/auth/admin/realms/master/groups')
+        .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllGroups', {error: 'error'})));
     }
 
     static usingConfidentialClient(): boolean {
