@@ -18,9 +18,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { ApiAggregatorNetworksModel, HubModel, NetworksModel, NetworksPermModel } from './networks.model';
+import {catchError, concatMap, map} from 'rxjs/operators';
+import {Observable, of} from 'rxjs';
+import {
+    ApiAggregatorNetworksModel, ExtendedHubModel,
+    ExtendedHubTotalModel, HubAnnotations,
+    HubModel, LegacyNetworksModel,
+    NetworksModel,
+    NetworksPermModel
+} from './networks.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { NetworksEditDialogComponent } from '../dialogs/networks-edit-dialog.component';
 import { NetworksHistoryModel } from './networks-history.model';
@@ -28,6 +34,12 @@ import { NetworksClearDialogComponent } from '../dialogs/networks-clear-dialog.c
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import {
+    DeviceInstancesPermSearchModel,
+    DeviceInstancesPermSearchTotalModel,
+    DeviceInstancesRouterStateTabEnum, ExtendedDeviceInstanceModel,
+    ExtendedDeviceInstancesTotalModel
+} from "../../device-instances/shared/device-instances.model";
 
 @Injectable({
     providedIn: 'root',
@@ -43,77 +55,6 @@ export class NetworksService {
         public snackBar: MatSnackBar,
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl);
-    }
-
-    getNetworksWithLogState(
-        searchText: string,
-        limit: number,
-        offset: number,
-        value: string,
-        order: string,
-    ): Observable<ApiAggregatorNetworksModel[]> {
-        return this.http
-            .get<ApiAggregatorNetworksModel[]>(
-                environment.apiAggregatorUrl +
-                    '/hubs?limit=' +
-                    limit +
-                    '&offset=' +
-                    offset +
-                    '&sort=' +
-                    value +
-                    '.' +
-                    order +
-                    (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText)),
-            )
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworks', [])),
-            );
-    }
-
-    getNetwork(id: string): Observable<NetworksPermModel> {
-        return this.http.get<NetworksPermModel[]>(environment.permissionSearchUrl + '/v3/resources/hubs?ids=' + id).pipe(
-            map(networks => networks[0])
-        );
-    }
-
-    searchNetworks(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksPermModel[]> {
-        if (!searchText) {
-            return this.listNetworks(limit, offset, sortBy, sortDirection);
-        }
-        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
-            sortDirection = 'asc';
-        }
-        if (sortBy === '' || sortBy === null || sortBy === undefined) {
-            sortBy = 'name';
-        }
-        const params = [
-            'limit=' + limit,
-            'offset=' + offset,
-            'rights=r',
-            'sort=' + sortBy + '.' + sortDirection,
-            'search=' + encodeURIComponent(searchText),
-        ].join('&');
-
-        return this.http.get<NetworksPermModel[]>(environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
-            map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', [])),
-        );
-    }
-
-    listNetworks(limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksPermModel[]> {
-        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
-            sortDirection = 'asc';
-        }
-        if (sortBy === '' || sortBy === null || sortBy === undefined) {
-            sortBy = 'name';
-        }
-        const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection].join('&');
-
-        return this.http.get<NetworksPermModel[]>(environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
-            map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', [])),
-        );
     }
 
     listSyncNetworks(): Observable<NetworksModel[]> {
@@ -188,20 +129,87 @@ export class NetworksService {
         });
     }
 
-    getTotalCountOfNetworks(searchText: string): Observable<any> {
-        const options = searchText ?
-            { params: new HttpParams().set('search', searchText) } : {};
+    extendedHubToLegacyModel(hub: ExtendedHubModel): LegacyNetworksModel {
+        let annotation = {};
+        if(hub.connection_state != "") {
+            annotation = {connected: hub.connection_state=="online"}
+        }
+        return {
+            id: hub.id,
+            name: hub.name,
+            device_local_ids: hub.device_local_ids,
+            annotations: annotation,
+            log_state: hub.connection_state=="online",
+            device_ids: hub.device_ids,
+            creator: hub.owner_id,
+            shared: hub.shared
+        } as LegacyNetworksModel
+    }
 
-        return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/hubs', options)
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(
-                        NetworksService.name,
-                        'getTotalCountOfNetworks',
-                    ),
-                ),
-            );
+    getExtendedHub(id: string): Observable<ExtendedHubModel|null> {
+        return this.http.get<ExtendedHubModel>(environment.deviceRepoUrl + '/extended-hubs/'+encodeURIComponent(id)).pipe(
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'getExtendedHub', null)),
+        );
+    }
+
+    listExtendedHubs(options: {
+        limit: number;
+        offset: number;
+        sortBy?: string;
+        sortDesc?: boolean;
+        searchText?: string;
+        connectionState?: DeviceInstancesRouterStateTabEnum;
+        ids?: string[];
+    }): Observable<ExtendedHubTotalModel> {
+        let params = new HttpParams()
+        if(options.limit > 0) {
+            params = params.set("limit", options.limit.toString());
+        }
+        if(options.offset > 0) {
+            params = params.set("offset", options.offset.toString());
+        }
+        let sort = options.sortBy || "name";
+        if(sort == "annotations.connected") {
+            sort = "connectionstate"
+        }
+        if(options.sortDesc){
+            sort = sort+".desc";
+        }
+        if(sort != "") {
+            params = params.set("sort", sort);
+        }
+        if (options.searchText && options.searchText != "") {
+            params = params.set("search", options.searchText);
+        }
+        if(options.ids!==null && options.ids!==undefined && options.ids.join){
+            params = params.set("ids", options.ids.join(","));
+        }
+        if(options.connectionState!==null && options.connectionState!==undefined) {
+            switch (options.connectionState){
+                case DeviceInstancesRouterStateTabEnum.ONLINE: {
+                    params = params.set("connection-state", "online");
+                    break
+                }
+                case DeviceInstancesRouterStateTabEnum.OFFLINE: {
+                    params = params.set("connection-state", "offline");
+                    break
+                }
+                case DeviceInstancesRouterStateTabEnum.UNKNOWN: {
+                    params = params.set("connection-state", "");
+                    break
+                }
+            }
+        }
+        return this.http.get<ExtendedHubModel[]>(environment.deviceRepoUrl + '/extended-hubs', { observe: 'response', params: params }).pipe(
+            map((resp) => {
+                let totalStr = resp.headers.get("X-Total-Count") || "0";
+                return {
+                    result: resp.body,
+                    total: parseInt(totalStr)
+                } as ExtendedHubTotalModel
+            }),
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'getExtendedHubs', {result: [], total: 0})),
+        );
     }
 
     userHasDeleteAuthorization(): boolean {

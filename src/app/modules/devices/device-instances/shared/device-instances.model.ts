@@ -55,6 +55,30 @@ export interface DeviceInstancesModel extends DeviceInstancesIntermediateModel {
     active: boolean;
 }
 
+export interface ExtendedDeviceInstancesTotalModel {
+    result: ExtendedDeviceInstanceModel[];
+    total: number;
+}
+
+export interface ExtendedDeviceInstanceModel {
+    id: string;
+    local_id: string;
+    name: string;
+    attributes?: Attribute[];
+    connection_state: ""|"online"|"offline";
+    device_type_id: string;
+    owner_id: string;
+    display_name: string;
+    device_type_name: string;
+    shared: boolean;
+    permissions: {
+        read: boolean;
+        write: boolean;
+        execute: boolean;
+        administrate: boolean;
+    }
+}
+
 export interface DeviceInstancesTotalModel {
     result: DeviceInstancesModel[];
     total: number;

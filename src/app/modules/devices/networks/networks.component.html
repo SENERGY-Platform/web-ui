@@ -45,7 +45,7 @@
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="number_devices">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>Number of Devices</th>
+                    <th mat-header-cell *matHeaderCellDef disableClear>Number of Devices</th>
                     <td mat-cell *matCellDef="let network">
                         {{network.device_local_ids?.length || 0}}
                     </td>
@@ -58,7 +58,7 @@
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="shared">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Shared</th>
+                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Shared</th>
                     <td mat-cell *matCellDef="let network">
                         <mat-icon matTooltip="Device is shared by {{userIdToName[network.creator]}}" *ngIf="network.shared" class="color-sidenav info-icon">
                             share

@@ -17,7 +17,7 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {NetworksService} from './shared/networks.service';
-import {NetworksModel, NetworksPermModel} from './shared/networks.model';
+import {ExtendedHubTotalModel, NetworksModel, NetworksPermModel} from './shared/networks.model';
 import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {Router} from '@angular/router';
 import {
@@ -82,12 +82,6 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
-    }
-
-    getTotalCount(): Observable<number> {
-        return this.networksService.getTotalCountOfNetworks(this.searchText).pipe(
-            map((totalCount: number) => this.totalCount = totalCount)
-        );
     }
 
     checkAuthorization() {
@@ -179,12 +173,14 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     private getNetworks(): Observable<NetworksModel[]> {
         return this.networksService
-            .searchNetworks(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
+            .listExtendedHubs({limit: this.pageSize, offset: this.offset, sortBy: this.sortBy, sortDesc: this.sortDirection != 'asc'})
             .pipe(
-                map((networks: NetworksPermModel[]) => {
-                    this.loadUserNames(networks);
-                    this.dataSource.data = networks;
-                    return networks;
+                map((networks: ExtendedHubTotalModel) => {
+                    this.totalCount = networks.total;
+                    let list = networks.result.map(this.networksService.extendedHubToLegacyModel);
+                    this.loadUserNames(list);
+                    this.dataSource.data = list;
+                    return list;
                 })
             );
     }
@@ -210,7 +206,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.selectionClear();
 
-        forkJoin([this.getNetworks(), this.getTotalCount()]).subscribe({
+        this.getNetworks().subscribe({
             next: (_) => {
                 this.ready = true;
             },

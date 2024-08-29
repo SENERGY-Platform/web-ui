@@ -29,7 +29,7 @@ import {
     DeviceInstancesRouterStateTabEnum,
     DeviceInstancesTotalModel,
     DeviceSelectablesFullModel,
-    DeviceSelectablesModel,
+    DeviceSelectablesModel, ExtendedDeviceInstanceModel, ExtendedDeviceInstancesTotalModel,
 } from './device-instances.model';
 import {forkJoin, Observable, of} from 'rxjs';
 import {DeviceInstancesHistoryModel, DeviceInstancesHistoryModelWithId} from './device-instances-history.model';
@@ -37,7 +37,10 @@ import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {UtilService} from '../../../../core/services/util.service';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
-import { DeviceTypePermSearchModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type-perm-search.model';
+import {
+    DeviceTypePermSearchModel,
+    PermissionsModel
+} from 'src/app/modules/metadata/device-types-overview/shared/device-type-perm-search.model';
 import { PermissionQueryRequest, Selection } from 'src/app/core/model/permissions/permissions';
 import { LocationsService } from '../../locations/shared/locations.service';
 import { NetworksService } from '../../networks/shared/networks.service';
@@ -45,6 +48,7 @@ import { NetworksService } from '../../networks/shared/networks.service';
 @Injectable({
     providedIn: 'root',
 })
+
 export class DeviceInstancesService {
     private getDeviceHistoryObservable7d: Observable<DeviceInstancesHistoryModel[]> | null = null;
     private getDeviceHistoryObservable1h: Observable<DeviceInstancesHistoryModel[]> | null = null;
@@ -169,7 +173,7 @@ export class DeviceInstancesService {
         let deviceIDs: string[] = [];
         const obs = [];
         if(hubId != null) {
-            obs.push(this.networkService.getNetwork(hubId));
+            obs.push(this.networkService.getExtendedHub(hubId));
         }
 
         if(locationId != null) {
@@ -184,7 +188,7 @@ export class DeviceInstancesService {
                             if(i == 0) {
                                 deviceIDs = result.device_ids || [];
                             } else {
-                                deviceIDs = deviceIDs.filter((deviceID) => result.device_ids.includes(deviceID));
+                                deviceIDs = deviceIDs.filter((deviceID) => result.device_ids?.includes(deviceID));
                             }
                         }
                     });
@@ -196,100 +200,116 @@ export class DeviceInstancesService {
         return of([]);
     }
 
-    getDeviceInstancesBySearch(
-        limit: number,
-        offset: number,
-        sortBy: string = 'name',
-        sortDesc: boolean = false,
-        searchText?: string,
-        deviceTypeIds?: string[],
-        connectionState?: DeviceInstancesRouterStateTabEnum,
-        deviceIds?: string[],
-    ): Observable<DeviceInstancesTotalModel> {
-        const queryRequest: PermissionQueryRequest = {
-            resource: 'devices',
-            find: {
-                limit,
-                offset,
-                with_total: true,
-                sort_desc: sortDesc,
-                sort_by: sortBy,
-            }
-        };
-
-        const optionalFilters: Selection[] = [];
-        const optionalNotFilter: Selection = {not: {}};
-
-        if(searchText != null && searchText != '') {
-            if(queryRequest.find) {
-                queryRequest.find.search = searchText;
-            }
-        }
-
-        if(connectionState != null) {
-            if(connectionState == DeviceInstancesRouterStateTabEnum.ONLINE) {
-                optionalFilters.push(
-                    {
-                        condition: {
-                            feature: 'annotations.connected', operation: '==', value: true
-                        }
-                    }
-                );
-            } else if(connectionState == DeviceInstancesRouterStateTabEnum.OFFLINE) {
-                optionalFilters.push(
-                    {
-                        condition: {
-                            feature: 'annotations.connected', operation: '==', value: false
-                        }
-                    }
-                );
-            } else if(connectionState == DeviceInstancesRouterStateTabEnum.UNKNOWN) {
-                // filter for unknown connection state
-                optionalNotFilter.not!.condition = {
-                    feature: 'annotations.connected', operation: 'any_value_in_feature', value: [true, false]
-                };
-                optionalFilters.push(optionalNotFilter);
-            }
-
-        }
-
-        if(deviceTypeIds != null && deviceTypeIds.length > 0) {
-            optionalFilters.push(
-                {
-                    condition: {
-                        feature: 'features.device_type_id', operation: 'any_value_in_feature', value: deviceTypeIds
-                    }
+    private extendedDeviceInstancesToLegacyModel(deviceListWrapper: ExtendedDeviceInstancesTotalModel):DeviceInstancesPermSearchTotalModel {
+        let result: DeviceInstancesPermSearchTotalModel = {
+            total: deviceListWrapper.total,
+            result: deviceListWrapper.result.map((value: ExtendedDeviceInstanceModel) => {
+                let annotation = {};
+                if(value.connection_state != "") {
+                    annotation = {connected: value.connection_state=="online"}
                 }
+                return {
+                    id: value.id,
+                    local_id: value.local_id,
+                    name: value.name,
+                    attributes: value.attributes,
+                    display_name: value.display_name,
+                    creator: value.owner_id,
+                    permissions: {
+                        a: value.permissions.administrate,
+                        w: value.permissions.write,
+                        r: value.permissions.read,
+                        x: value.permissions.execute
+                    },
+                    shared: value.shared,
+                    device_type_id: value.device_type_id,
+                    annotations: annotation,
+                } as DeviceInstancesPermSearchModel
+            })
+        }
+        return result
+    }
+
+    getExtendedDeviceInstances(options: {
+        limit: number;
+        offset: number;
+        sortBy?: string;
+        sortDesc?: boolean;
+        searchText?: string;
+        deviceTypeIds?: string[];
+        connectionState?: DeviceInstancesRouterStateTabEnum;
+        deviceIds?:string[];
+        hubId?: string;
+        locationId?: string;
+    }): Observable<ExtendedDeviceInstancesTotalModel> {
+        if(options.hubId || options.locationId) {
+            return this.getDeviceIds(options.hubId, options.locationId).pipe(
+                concatMap((deviceIds) => {
+                    if(deviceIds.length == 0) {
+                        return of({result: [], total: 0});
+                    }
+                    options.hubId = undefined;
+                    options.locationId = undefined;
+                    options.deviceIds = deviceIds;
+                    return this.getExtendedDeviceInstances(options);
+                })
             );
         }
-
-        if(deviceIds != null && deviceIds.length > 0) {
-            optionalFilters.push(
-                {
-                    condition: {
-                        feature: 'id', operation: 'any_value_in_feature', value: deviceIds
-                    }
+        let params = new HttpParams()
+        if(options.limit > 0) {
+            params = params.set("limit", options.limit.toString());
+        }
+        if(options.offset > 0) {
+            params = params.set("offset", options.offset.toString());
+        }
+        let sort = options.sortBy || "name";
+        if(sort == "annotations.connected") {
+            sort = "connection_state"
+        }
+        if(options.sortDesc){
+            sort = sort+".desc";
+        }
+        if(sort != "") {
+            params = params.set("sort", sort);
+        }
+        if (options.searchText && options.searchText != "") {
+            params = params.set("search", options.searchText);
+        }
+        if(options.deviceTypeIds!==null && options.deviceTypeIds!==undefined && options.deviceTypeIds.join){
+            params = params.set("device-type-ids", options.deviceTypeIds.join(","));
+        }
+        if(options.deviceIds!==null && options.deviceIds!==undefined && options.deviceIds.join){
+            params = params.set("ids", options.deviceIds.join(","));
+        }
+        if(options.connectionState!==null && options.connectionState!==undefined) {
+            switch (options.connectionState){
+                case DeviceInstancesRouterStateTabEnum.ONLINE: {
+                    params = params.set("connection-state", "online");
+                    break
                 }
-            );
+                case DeviceInstancesRouterStateTabEnum.OFFLINE: {
+                    params = params.set("connection-state", "offline");
+                    break
+                }
+                case DeviceInstancesRouterStateTabEnum.UNKNOWN: {
+                    params = params.set("connection-state", "");
+                    break
+                }
+            }
         }
-
-        if(optionalFilters.length > 0 && queryRequest.find) {
-            queryRequest.find.filter = {and: optionalFilters};
-        }
-
-        return this.queryPermissionSearch(queryRequest).pipe(
-            map((resp) => resp as DeviceInstancesPermSearchTotalModel || []),
-            concatMap(result => {
-                return this.addDeviceType(result.result || []).pipe(
-                map((devicesWithType) => ({
-                    result: devicesWithType,
-                    total: result.total
-                } as DeviceInstancesTotalModel)))
+        return this.http.get<ExtendedDeviceInstanceModel[]>(environment.deviceRepoUrl + '/extended-devices', { observe: 'response', params: params }).pipe(
+            map((resp) => {
+                let totalStr = resp.headers.get("X-Total-Count") || "0";
+                return {
+                    result: resp.body,
+                    total: parseInt(totalStr)
+                } as ExtendedDeviceInstancesTotalModel
             }),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances', {result: [], total: 0})),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getExtendedDeviceInstances', {result: [], total: 0})),
         );
     }
 
+    //@deprecated use getExtendedDeviceInstances
     loadDeviceInstances(
         limit: number,
         offset: number,
@@ -301,26 +321,30 @@ export class DeviceInstancesService {
         deviceTypeIds?: string[],
         connectionState?: DeviceInstancesRouterStateTabEnum,
     ): Observable<DeviceInstancesTotalModel> {
-        if(hubId != null || locationId != null) {
-            return this.getDeviceIds(hubId, locationId).pipe(
-                concatMap((deviceIds) => {
-                    if(deviceIds.length == 0) {
-                        return of({result: [], total: 0});
-                    }
-
-                    if((searchText == null || searchText == '') && (deviceTypeIds == null || deviceTypeIds.length == 0) && connectionState == null) {
-                        // If only location or network filter are used, then use less expensive non-search method
-                        return this.getDeviceInstancesByIds(deviceIds, limit, offset, sortBy, sortDesc);
-                    }
-
-                    return this.getDeviceInstancesBySearch(limit, offset, sortBy, sortDesc, searchText, deviceTypeIds, connectionState, deviceIds);
-                })
-            );
-        }
-
-        return this.getDeviceInstancesBySearch(limit, offset, sortBy, sortDesc, searchText, deviceTypeIds, connectionState, undefined);
+        return this.getExtendedDeviceInstances({
+            limit: limit,
+            offset:offset,
+            sortBy:sortBy,
+            sortDesc:sortDesc,
+            connectionState:connectionState,
+            deviceTypeIds:deviceTypeIds,
+            searchText:searchText,
+            hubId:hubId,
+            locationId:locationId,
+        }).pipe(
+            map(this.extendedDeviceInstancesToLegacyModel),
+            concatMap(result => {
+                return this.addDeviceType(result.result || []).pipe(
+                    map((devicesWithType) => ({
+                        result: devicesWithType,
+                        total: result.total
+                    } as DeviceInstancesTotalModel)))
+            }),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances', {result: [], total: 0})),
+        );
     }
 
+    //@deprecated use getExtendedDeviceInstances
     getDeviceInstancesWithTotal(
         limit: number,
         offset: number,
@@ -335,6 +359,7 @@ export class DeviceInstancesService {
         return this.loadDeviceInstances(limit, offset, sortBy, sortDesc, searchText, locationId, hubId, deviceTypeIds, connectionState);
     }
 
+    //@deprecated use getExtendedDeviceInstances
     getDeviceInstances(
         limit: number,
         offset: number,
@@ -623,4 +648,5 @@ export class DeviceInstancesService {
     userHasUpdateAttributesAuthorization() {
         return this.authorizationsAttributes['PUT'];
     }
+
 }

@@ -26,7 +26,7 @@ import { V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel } fr
 import { MatDialog } from '@angular/material/dialog';
 import { DeploymentsFogMetadataModel, DeploymentsFogModel } from './deployments-fog.model';
 import { NetworksService } from '../../../devices/networks/shared/networks.service';
-import { NetworksModel } from '../../../devices/networks/shared/networks.model';
+import {ExtendedHubModel, NetworksModel} from '../../../devices/networks/shared/networks.model';
 
 @Injectable({
     providedIn: 'root',
@@ -132,7 +132,9 @@ export class DeploymentsFogService {
             url += '&search=' + encodeURIComponent(query);
         }
 
-        return this.networksService.getNetworksWithLogState('', 1000, 0, 'name', 'asc').pipe(
+        return this.networksService.listExtendedHubs({limit:1000, offset: 0, sortBy: 'name'}).pipe(
+            map((resp) => {return resp ? resp.result : [] as ExtendedHubModel[]}),
+            map((list) => list.map(this.networksService.extendedHubToLegacyModel)),
             mergeMap((networks) => {
                 const networkState = new Map<string, NetworksModel>();
                 networks.forEach((value) => {

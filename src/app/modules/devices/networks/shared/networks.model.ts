@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Attribute} from "../../device-instances/shared/device-instances.model";
+
 export interface NetworksModel {
     id: string;
     name: string;
@@ -35,9 +37,34 @@ export interface ApiAggregatorNetworksModel extends NetworksModel {
     log_state: boolean;
 }
 
+export interface LegacyNetworksModel extends ApiAggregatorNetworksModel, NetworksPermModel {
+}
+
 export interface HubModel {
     id: string;
     name: string;
     hash: string;
     device_local_ids: string[] | null;
+}
+
+export interface ExtendedHubTotalModel {
+    result: ExtendedHubModel[];
+    total: number;
+}
+
+export interface ExtendedHubModel {
+    id: string;
+    name: string;
+    hash: string;
+    device_local_ids: string[] | null;
+    device_ids: string[] | null;
+    owner_id: string;
+    connection_state: "online" | "offline" | "";
+    shared: boolean;
+    permissions: {
+        read: boolean;
+        write: boolean;
+        execute: boolean;
+        administrate: boolean;
+    }
 }
