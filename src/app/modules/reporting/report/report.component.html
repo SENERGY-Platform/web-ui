@@ -25,8 +25,19 @@
     </div>
     <div class="layout-margin" fxLayout="column">
         <mat-card>
-            <mat-card-content>Template Name: {{ template.name }} Id: {{templateId}}</mat-card-content>
+            <mat-card-content>
+                <div fxLayout="column">
+                    <div>
+                        Template Name: {{ template.name }} Id: {{templateId}}
+                    </div>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Reportname</mat-label>
+                        <input matInput [(ngModel)]="reportName">
+                    </mat-form-field>
+                </div>
+            </mat-card-content>
         </mat-card>
+
         <div *ngIf="template.data !== undefined">
             <senergy-reporting-object *ngFor="let element of template.data.dataStructured | keyvalue"
                                     [requestObject]="requestObject"
