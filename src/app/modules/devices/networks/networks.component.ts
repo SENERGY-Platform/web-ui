@@ -173,7 +173,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     private getNetworks(): Observable<NetworksModel[]> {
         return this.networksService
-            .listExtendedHubs({limit: this.pageSize, offset: this.offset, sortBy: this.sortBy, sortDesc: this.sortDirection != 'asc'})
+            .listExtendedHubs({limit: this.pageSize, offset: this.offset, sortBy: this.sortBy, sortDesc: this.sortDirection != 'asc', searchText: this.searchText})
             .pipe(
                 map((networks: ExtendedHubTotalModel) => {
                     this.totalCount = networks.total;
