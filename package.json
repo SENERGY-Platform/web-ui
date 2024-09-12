@@ -40,7 +40,7 @@
     "core-js": "^3.17.3",
     "cronstrue": "^1.96.0",
     "dotenv": "^8.2.0",
-    "file-saver": "^2.0.2",
+    "file-saver": "^2.0.5",
     "jointjs": "^3.4.4",
     "jquery": "^3.5.1",
     "keycloak-angular": "^13.0.0",

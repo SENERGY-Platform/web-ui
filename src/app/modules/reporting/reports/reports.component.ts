@@ -39,7 +39,7 @@ export class ReportsComponent implements OnInit {
 
     reports: ReportModel[] = [] as ReportModel[];
     reportsDataSource = new MatTableDataSource<ReportModel>();
-    displayedColumns: string[] = ['id', 'name', 'edit', 'delete'];
+    displayedColumns: string[] = ['id', 'name', 'files', 'edit', 'delete'];
     ready = false;
 
     constructor(

@@ -26,6 +26,7 @@ import {
     TemplateListResponseModel,
     TemplateResponseModel
 } from './reporting.model';
+import {options} from "yargs";
 
 @Injectable({
     providedIn: 'root',
@@ -94,6 +95,14 @@ export class ReportingService {
             .pipe(
                 map((resp: ReportResponseModel) => resp || []),
                 catchError(this.errorHandlerService.handleError(ReportingService.name, 'getReport: Error', null)),
+            );
+    }
+
+    getReportFile(reportId: string, fileId: string): Observable<Blob | null> {
+        return this.http.get(environment.reportEngineUrl + '/report/file/'+reportId+'/'+fileId, {responseType: 'blob'})
+            .pipe(
+                map((resp: Blob) => resp || null),
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'getReportFile: Error', null)),
             );
     }
 }

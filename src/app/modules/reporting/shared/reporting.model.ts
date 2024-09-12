@@ -61,4 +61,10 @@ export interface ReportModel {
     templateName: string;
     templateId: string;
     data: Map<string, ReportObjectModel>;
+    reportFiles: ReportFileModel[];
+}
+
+export interface ReportFileModel {
+    id: string;
+    type: string;
 }
