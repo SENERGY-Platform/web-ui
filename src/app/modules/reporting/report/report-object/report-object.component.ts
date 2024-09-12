@@ -114,7 +114,7 @@ export class ReportObjectComponent implements OnInit{
     queryServiceChanged(service: DeviceTypeServiceModel) {
         if (this.data !== undefined && this.data.query !== undefined) {
             this.data.query.serviceId = service.id;
-            const pathString = 'value';
+            const pathString = '';
             this.queryServicePaths = [];
             service.outputs.forEach((out: DeviceTypeContentModel) => {
                 this.traverseDataStructure(pathString, out.content_variable, false);
