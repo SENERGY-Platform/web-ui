@@ -105,4 +105,11 @@ export class ReportingService {
                 catchError(this.errorHandlerService.handleError(ReportingService.name, 'getReportFile: Error', null)),
             );
     }
+
+    deleteReportFile(reportId: string, fileId: string): Observable<HttpResponse<string> | null> {
+        return this.http.delete<any>(environment.reportEngineUrl + '/report/file/'+reportId+'/'+fileId)
+            .pipe(
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'deleteReportFile: Error', null)),
+            );
+    }
 }

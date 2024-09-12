@@ -20,6 +20,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { UtilService } from 'src/app/core/services/util.service';
 import {
+    ReportFileModel,
     ReportListResponseModel,
     ReportModel,
     TemplateListResponseModel,
@@ -59,7 +60,12 @@ export class ReportsComponent implements OnInit {
     }
 
     deleteReport(id: string){
-        this.reportingService.deleteReport(id).subscribe();
+        this.reportingService.deleteReport(id).subscribe(() => {
+            this.snackBar.open('Report deleted', 'ReportDelete', {
+                duration: 3000,
+            });
+            this.reportsDataSource.data = this.reportsDataSource.data.filter((report: ReportModel) => report.id !== id);
+        });
     }
 
 }

@@ -87,5 +87,16 @@ export class ReportFilesComponent implements OnInit {
         }
     }
 
-    protected readonly environment = environment;
+    delete($event: Event, fileId: string) {
+        $event.stopPropagation();
+        if (this.reportId != null) {
+            this.reportingService.deleteReportFile(this.reportId, fileId).subscribe(() => {
+                this.snackBar.open('File deleted', 'ReportingFileDelete', {
+                    duration: 3000,
+                });
+                this.reportsDataSource.data = this.reportsDataSource.data.filter((reportFile: ReportFileModel) => reportFile.id !== fileId);
+            });
+        }
+    }
+
 }
