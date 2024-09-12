@@ -26,7 +26,6 @@ import {
     TemplateListResponseModel,
     TemplateResponseModel
 } from './reporting.model';
-import {options} from "yargs";
 
 @Injectable({
     providedIn: 'root',

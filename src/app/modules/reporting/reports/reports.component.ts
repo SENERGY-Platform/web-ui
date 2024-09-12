@@ -20,11 +20,8 @@ import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { UtilService } from 'src/app/core/services/util.service';
 import {
-    ReportFileModel,
     ReportListResponseModel,
     ReportModel,
-    TemplateListResponseModel,
-    TemplateModel
 } from '../shared/reporting.model';
 import {ReportingService} from '../shared/reporting.service';
 import {MatTableDataSource} from '@angular/material/table';

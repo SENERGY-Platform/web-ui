@@ -21,16 +21,12 @@ import { MatPaginator } from '@angular/material/paginator';
 import { UtilService } from 'src/app/core/services/util.service';
 import {
     ReportFileModel,
-    ReportListResponseModel,
-    ReportModel, ReportObjectModel, ReportResponseModel,
-    TemplateListResponseModel,
-    TemplateModel, TemplateResponseModel
+    ReportModel, ReportResponseModel,
 } from '../shared/reporting.model';
 import {ReportingService} from '../shared/reporting.service';
 import {MatTableDataSource} from '@angular/material/table';
 import {ActivatedRoute} from '@angular/router';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {environment} from '../../../../environments/environment';
 import {saveAs} from 'file-saver';
 
 @Component({
