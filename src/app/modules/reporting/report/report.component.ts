@@ -88,7 +88,15 @@ export class ReportComponent implements OnInit {
 
     create(){
         this.reportingService.createReport({id: this.reportId, templateId: this.templateId, name: this.reportName,
-            templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe();
+            templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe(resp => {
+            if (resp !== null)  {
+                if (resp.status === 200) {
+                    this.snackBar.open('Report created', 'ReportCreate', {
+                        duration: 2000
+                    });
+                }
+            }
+        });
     }
 
     save(){

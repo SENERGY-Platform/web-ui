@@ -54,7 +54,7 @@ export class ReportingService {
     }
 
     createReport(data: ReportModel = {} as ReportModel): Observable<HttpResponse<string> | null> {
-        return this.http.post<any>(environment.reportEngineUrl + '/report/create', data)
+        return this.http.post<any>(environment.reportEngineUrl + '/report/create', data,{observe: 'response'})
             .pipe(
                 catchError(this.errorHandlerService.handleError(ReportingService.name, 'createReport: Error', null)),
             );
