@@ -36,7 +36,7 @@ import {CoreModule} from '../../core/core.module';
 import {ReportsComponent} from './reports/reports.component';
 import {ReportFilesComponent} from './reportFiles/reportFiles.component';
 import {QueryPreviewDialogComponent} from './report/report-object/query-preview/query-preview-dialog.component';
-import {MatDialogModule} from "@angular/material/dialog";
+import {MatDialogModule} from '@angular/material/dialog';
 
 const templateList: Route = { path: 'reporting/templates', pathMatch: 'full', component: TemplatesComponent, data: { header: 'Templates' } };
 const reportsList: Route = { path: 'reporting/reports', pathMatch: 'full', component: ReportsComponent, data: { header: 'Reports' } };

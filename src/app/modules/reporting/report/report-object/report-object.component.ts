@@ -26,8 +26,8 @@ import {
     DeviceTypeServiceModel
 } from '../../../metadata/device-types-overview/shared/device-type.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
-import {MatDialog} from "@angular/material/dialog";
-import {QueryPreviewDialogComponent} from "./query-preview/query-preview-dialog.component";
+import {MatDialog} from '@angular/material/dialog';
+import {QueryPreviewDialogComponent} from './query-preview/query-preview-dialog.component';
 
 
 @Component({
@@ -137,7 +137,7 @@ export class ReportObjectComponent implements OnInit{
                         response.push(value[1]);
                     });
                     this.queryPreview = JSON.stringify(response, undefined, 4).replace(/ /g, ' ').replace(/\n/g, '<br/>');
-                    const dialogRef = this.dialog.open(QueryPreviewDialogComponent, {
+                    this.dialog.open(QueryPreviewDialogComponent, {
                         data: {dataString: this.queryPreview, dataCount: response.length},
                     });
                 }

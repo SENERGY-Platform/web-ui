@@ -288,7 +288,7 @@ export class SidenavService implements OnDestroy {
             this.setupMetadataSection(),
             this.setupSmartServiceSection(),
             this.setupCostSection(),
-            this.setupReportsSection()
+            //this.setupReportsSection()
         ];
 
         if(this.dashboardService.userHasReadDashboardAuthorization()) {
