@@ -36,6 +36,7 @@ import {DeviceInstancesModel} from '../../devices/device-instances/shared/device
 })
 export class ReportComponent implements OnInit {
 
+    reportName = '';
     reportId: string | null = null;
     template: TemplateModel = {data:{}} as TemplateModel;
     report: ReportModel = {} as ReportModel;
@@ -64,6 +65,7 @@ export class ReportComponent implements OnInit {
                 if (resp !== null) {
                     this.report = resp.data;
                     this.templateId = this.report.templateId;
+                    this.reportName = this.report.name;
                     this.template.data = {dataJsonString: '', dataStructured: {} as Map<string, ReportObjectModel>, id: '', name: ''};
                     this.template.data.dataStructured = this.report.data;
                     this.reportingService.getTemplate(this.templateId).subscribe((resp2: TemplateResponseModel | null) => {
@@ -85,19 +87,25 @@ export class ReportComponent implements OnInit {
     }
 
     create(){
-        this.reportingService.createReport({templateId: this.templateId,
-            templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe();
+        this.reportingService.createReport({id: this.reportId, templateId: this.templateId, name: this.reportName,
+            templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe(resp => {
+            if (resp !== null)  {
+                if (resp.status === 200) {
+                    this.snackBar.open('Report created', 'ReportCreate', {
+                        duration: 2000
+                    });
+                }
+            }
+        });
     }
 
     save(){
-        this.reportingService.saveReport({templateId: this.templateId,
+        this.reportingService.saveReport({templateId: this.templateId, name: this.reportName,
             templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe();
     }
 
     update(){
-        console.log({id: this.reportId, templateId: this.templateId,
-            templateName: this.template.name, data: this.template.data?.dataStructured});
-        this.reportingService.updateReport({id: this.reportId, templateId: this.templateId,
+        this.reportingService.updateReport({id: this.reportId, templateId: this.templateId, name: this.reportName,
             templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe();
     }
 }

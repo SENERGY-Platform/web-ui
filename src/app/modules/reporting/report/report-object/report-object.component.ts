@@ -25,6 +25,9 @@ import {
     DeviceTypeModel,
     DeviceTypeServiceModel
 } from '../../../metadata/device-types-overview/shared/device-type.model';
+import {ExportDataService} from '../../../../widgets/shared/export-data.service';
+import {MatDialog} from '@angular/material/dialog';
+import {QueryPreviewDialogComponent} from './query-preview/query-preview-dialog.component';
 
 
 @Component({
@@ -45,9 +48,12 @@ export class ReportObjectComponent implements OnInit{
     queryService: DeviceTypeServiceModel = {} as DeviceTypeServiceModel;
     queryServicePaths: string[] = [];
     queryDeviceType: DeviceTypeModel = {} as DeviceTypeModel;
+    queryPreview = '';
 
     constructor(
-        private deviceTypeService: DeviceTypeService) {
+        private deviceTypeService: DeviceTypeService,
+        private exportDataService: ExportDataService,
+        private dialog: MatDialog) {
     }
 
     ngOnInit() {
@@ -114,10 +120,27 @@ export class ReportObjectComponent implements OnInit{
     queryServiceChanged(service: DeviceTypeServiceModel) {
         if (this.data !== undefined && this.data.query !== undefined) {
             this.data.query.serviceId = service.id;
-            const pathString = 'value';
+            const pathString = '';
             this.queryServicePaths = [];
             service.outputs.forEach((out: DeviceTypeContentModel) => {
                 this.traverseDataStructure(pathString, out.content_variable, false);
+            });
+        }
+    }
+
+    previewQuery() {
+        if (this.data !== undefined && this.data.query !== undefined) {
+            this.exportDataService.queryTimescaleV2([this.data.query]).subscribe((resp) => {
+                if (resp !== undefined) {
+                    const response: any = [];
+                    resp[0].data[0].forEach(value => {
+                        response.push(value[1]);
+                    });
+                    this.queryPreview = JSON.stringify(response, undefined, 4).replace(/ /g, ' ').replace(/\n/g, '<br/>');
+                    this.dialog.open(QueryPreviewDialogComponent, {
+                        data: {dataString: this.queryPreview, dataCount: response.length},
+                    });
+                }
             });
         }
     }

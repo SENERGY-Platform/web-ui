@@ -22,8 +22,6 @@ import { UtilService } from 'src/app/core/services/util.service';
 import {
     ReportListResponseModel,
     ReportModel,
-    TemplateListResponseModel,
-    TemplateModel
 } from '../shared/reporting.model';
 import {ReportingService} from '../shared/reporting.service';
 import {MatTableDataSource} from '@angular/material/table';
@@ -39,7 +37,7 @@ export class ReportsComponent implements OnInit {
 
     reports: ReportModel[] = [] as ReportModel[];
     reportsDataSource = new MatTableDataSource<ReportModel>();
-    displayedColumns: string[] = ['id', 'name', 'edit', 'delete'];
+    displayedColumns: string[] = ['id', 'name', 'files', 'edit', 'delete'];
     ready = false;
 
     constructor(
@@ -59,7 +57,12 @@ export class ReportsComponent implements OnInit {
     }
 
     deleteReport(id: string){
-        this.reportingService.deleteReport(id).subscribe();
+        this.reportingService.deleteReport(id).subscribe(() => {
+            this.snackBar.open('Report deleted', 'ReportDelete', {
+                duration: 3000,
+            });
+            this.reportsDataSource.data = this.reportsDataSource.data.filter((report: ReportModel) => report.id !== id);
+        });
     }
 
 }

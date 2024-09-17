@@ -34,16 +34,20 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatRadioModule} from '@angular/material/radio';
 import {CoreModule} from '../../core/core.module';
 import {ReportsComponent} from './reports/reports.component';
+import {ReportFilesComponent} from './reportFiles/reportFiles.component';
+import {QueryPreviewDialogComponent} from './report/report-object/query-preview/query-preview-dialog.component';
+import {MatDialogModule} from '@angular/material/dialog';
 
 const templateList: Route = { path: 'reporting/templates', pathMatch: 'full', component: TemplatesComponent, data: { header: 'Templates' } };
 const reportsList: Route = { path: 'reporting/reports', pathMatch: 'full', component: ReportsComponent, data: { header: 'Reports' } };
 const newReport: Route = { path: 'reporting/new/:templateId', pathMatch: 'full', component: ReportComponent, data: { header: 'New Report' } };
 const editReport: Route = { path: 'reporting/edit/:reportId', pathMatch: 'full', component: ReportComponent, data: { header: 'Edit Report' } };
+const reportFilesList: Route = { path: 'reporting/files/:reportId', pathMatch: 'full', component: ReportFilesComponent, data: { header: 'Report Files' } };
 
 @NgModule({
-    declarations: [TemplatesComponent, ReportComponent, ReportObjectComponent, ReportsComponent],
+    declarations: [TemplatesComponent, ReportComponent, ReportObjectComponent, ReportsComponent, ReportFilesComponent, QueryPreviewDialogComponent],
     imports: [
-        RouterModule.forChild([templateList,reportsList, newReport, editReport]),
+        RouterModule.forChild([templateList, reportsList, newReport, editReport, reportFilesList]),
         CommonModule,
         FlexModule,
         MatButtonModule,
@@ -58,7 +62,8 @@ const editReport: Route = { path: 'reporting/edit/:reportId', pathMatch: 'full',
         ReactiveFormsModule,
         FormsModule,
         MatRadioModule,
-        CoreModule
+        CoreModule,
+        MatDialogModule
     ]
 })
 export class ReportingModule { }
