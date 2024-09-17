@@ -50,6 +50,7 @@ import {NetworksService} from 'src/app/modules/devices/networks/shared/networks.
 import {ProcessIoService} from 'src/app/modules/processes/process-io/shared/process-io.service';
 import {DashboardService} from 'src/app/modules/dashboard/shared/dashboard.service';
 import {CostService} from 'src/app/modules/cost/shared/cost.service';
+import {LadonService} from '../../../../modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
@@ -71,7 +72,6 @@ export class SidenavService implements OnDestroy {
         private flowRepoService: FlowRepoService,
         private operatorRepoService: OperatorRepoService,
         private pipelineService: PipelineRegistryService,
-        private processDesignerService: DesignerHelperService,
         private processRepoService: ProcessRepoService,
         private processDeploymentService: DeploymentsService,
         private processMonitorService: MonitorService,
@@ -93,6 +93,7 @@ export class SidenavService implements OnDestroy {
         private processIOService: ProcessIoService,
         private dashboardService: DashboardService,
         private costService: CostService,
+        private ladonService: LadonService
     ) {}
 
     ngOnDestroy() {
@@ -269,11 +270,14 @@ export class SidenavService implements OnDestroy {
     }
 
     setupReportsSection(): SidenavSectionModel {
-        return new SidenavSectionModel('Reporting', 'toggle', 'summarize', '/reporting',
-            [
+        const authorizations = this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl);
+        if (authorizations.GET) {
+            return new SidenavSectionModel('Reporting', 'toggle', 'summarize', '/reporting', [
                 new SidenavPageModel('Templates', 'link', 'list', '/reporting/templates'),
                 new SidenavPageModel('Reports', 'link', 'list', '/reporting/reports')
             ]);
+        }
+        return new SidenavSectionModel('Reporting', 'toggle', 'summarize', '/reporting', []);
     }
 
     loadSections(): SidenavSectionModel[] {
@@ -288,7 +292,7 @@ export class SidenavService implements OnDestroy {
             this.setupMetadataSection(),
             this.setupSmartServiceSection(),
             this.setupCostSection(),
-            //this.setupReportsSection()
+            this.setupReportsSection()
         ];
 
         if(this.dashboardService.userHasReadDashboardAuthorization()) {
