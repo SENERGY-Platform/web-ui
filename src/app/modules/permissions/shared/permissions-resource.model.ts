@@ -46,3 +46,7 @@ export interface PermissionsV2ResourceBaseModel {
         [key: string]: PermissionsRightsModel;
     };
 }
+
+export interface PermissionsV2RightsAndIdModel extends PermissionsRightsModel {
+    id: string;
+}

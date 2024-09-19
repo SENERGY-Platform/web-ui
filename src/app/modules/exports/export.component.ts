@@ -20,23 +20,24 @@ import { ExportModel, ExportResponseModel } from './shared/export.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { ResponsiveService } from '../../core/services/responsive.service';
-import { merge, Subscription, map } from 'rxjs';
+import { Subscription, map, Observable, forkJoin, merge } from 'rxjs';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { of } from 'rxjs';
-import { concatMap } from 'rxjs/operators';
+import { concatMap, mergeAll } from 'rxjs/operators';
 import { BrokerExportService } from './shared/broker-export.service';
 import { ActivatedRoute } from '@angular/router';
 import { UtilService } from 'src/app/core/services/util.service';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
-import {environment} from '../../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { PermissionsDialogService } from '../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../permissions/shared/permissions.service';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
-import { PermissionsV2ResourceModel } from '../permissions/shared/permissions-resource.model';
+import { PermissionsRightsModel } from '../permissions/shared/permissions-rights.model';
+import { PermissionsV2RightsAndIdModel } from '../permissions/shared/permissions-resource.model';
 
 @Component({
     selector: 'senergy-export',
@@ -72,7 +73,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }[] = [];
     ready = false;
 
-    permissionsPerExports: Record<string, PermissionsV2ResourceModel> = {};
+    permissionsPerExports: PermissionsV2RightsAndIdModel[] = [];
     userID = '';
     userRoles: string[] = [];
 
@@ -96,7 +97,6 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
         public snackBar: MatSnackBar,
         private dialogsService: DialogsService,
         private searchbarService: SearchbarService,
-        private responsiveService: ResponsiveService,
         private brokerExportService: BrokerExportService,
         private route: ActivatedRoute,
         public utilsService: UtilService,
@@ -104,7 +104,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
         private permissionsDialogService: PermissionsDialogService,
         private permissionsService: PermissionsService,
         private userService: AuthorizationService
-    ) {}
+    ) { }
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(() => {
@@ -147,10 +147,10 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     'info'
                 ]);
 
-                if(this.userHasUpdateAuthorization) {
+                if (this.userHasUpdateAuthorization) {
                     this.displayedColumns.push('edit');
                 }
-                if(this.userHasDeleteAuthorization) {
+                if (this.userHasDeleteAuthorization) {
                     this.displayedColumns.push('delete');
                 }
                 this.displayedColumns.push('share');
@@ -162,7 +162,6 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
                 return null;
             }),
-            concatMap((_) => this.loadExportPermissions()),
             concatMap((_) => this.getExports())
         ).subscribe({
             next: () => {
@@ -213,29 +212,23 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     searchFieldChanged() {
+        this.ready = false;
         localStorage.setItem('data.exports.searchField', String(this.searchField));
-        this.getExports();
+        this.getExports().subscribe(_ => this.ready = true);
     }
 
     showGeneratedChanged() {
+        this.ready = false;
         this.showGenerated = !this.showGenerated;
         localStorage.setItem('data.exports.showGenerated', String(this.showGenerated));
-        this.getExports();
+        this.getExports().subscribe(_ => this.ready = true);
     }
 
-    private getExports() {
+    private getExports(): Observable<any> {
         this.exportsDataSource.sort = this.sort;
-        const obs = this.brokerMode ? this.brokerExportService.getExports(
-            this.searchText,
-            this.paginator.pageSize,
-            this.paginator.pageSize * this.paginator.pageIndex,
-            this.sort.active,
-            this.sort.direction,
-            this.showGenerated ? undefined : false,
-            this.searchField,
-        )
-            : this.exportService.getExports(
-                false,
+        let obs: Observable<any>;
+        if (this.brokerMode) {
+            obs = this.brokerExportService.getExports(
                 this.searchText,
                 this.paginator.pageSize,
                 this.paginator.pageSize * this.paginator.pageIndex,
@@ -244,29 +237,40 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.showGenerated ? undefined : false,
                 this.searchField,
             );
-
-        return obs.pipe(
-            map((resp: ExportResponseModel | null) => {
-                if (resp !== null) {
-                    this.exports = resp.instances || [];
-                    if (this.exports === undefined) {
-                        this.exports = [];
+        } else {
+            obs = this.exportService.getExports(
+                false,
+                this.searchText,
+                this.paginator.pageSize,
+                this.paginator.pageSize * this.paginator.pageIndex,
+                this.sort.active,
+                this.sort.direction,
+                this.showGenerated ? undefined : false,
+                this.searchField,
+            ).pipe(
+                map((resp: ExportResponseModel | null) => {
+                    if (resp !== null) {
+                        this.exports = resp.instances || [];
+                        if (this.exports === undefined) {
+                            this.exports = [];
+                        }
+                        this.totalCount = resp.total || 0;
+                        this.exportsDataSource.data = this.exports;
                     }
-                    this.totalCount = resp.total || 0;
-                    this.exportsDataSource.data = this.exports;
-                }
-                return resp;
-            }),
-            concatMap((resp: ExportResponseModel | null) => {
-                if (resp?.instances !== undefined && resp.instances.length > 0) {
-                    const exportIds = resp.instances.filter(e => e.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb && e.ID !== undefined).map(e => e.ID) as string[];
-                    return this.exportDataService.getTimescaleExportUsage(exportIds).pipe(map(usage => {
-                        this.usage = usage;
-                    }));
-                }
-                return of(null);
-            }),
-        );
+                    return resp;
+                }),
+                concatMap((resp: ExportResponseModel | null) => {
+                    if (resp !=null && resp?.instances !== undefined && resp.instances.length > 0) {
+                        const exportIds = resp.instances.filter(e => e.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb && e.ID !== undefined).map(e => e.ID) as string[];
+                        return this.exportDataService.getTimescaleExportUsage(exportIds).pipe(map(usage => {
+                            this.usage = usage;
+                        }));
+                    }
+                    return of(null);
+                })
+            );
+        }
+        return obs.pipe(concatMap(_ => this.loadExportPermissions()));
     }
 
     private initSearchAndGetExports() {
@@ -279,16 +283,25 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
     isAllSelected() {
         const numSelected = this.selection.selected.length;
-        const currentViewed = this.exportsDataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return numSelected === this.getAllDeleteableExports().length;
     }
 
     masterToggle() {
         if (this.isAllSelected()) {
             this.selectionClear();
         } else {
-            this.exportsDataSource.connect().value.forEach((row) => this.selection.select(row));
+            this.selection.select(...this.getAllDeleteableExports());
         }
+    }
+
+    private getAllDeleteableExports(): ExportModel[] {
+        const res: ExportModel[] = [];
+        this.exportsDataSource.connect().value.forEach((row) => {
+            if (this.userHasAdministratePermission(row.ID || '')) {
+                res.push(row);
+            }
+        });
+        return res;
     }
 
     selectionClear(): void {
@@ -315,10 +328,8 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         : this.exportService.stopPipelines(exportIDs);
                     obs.subscribe(() => {
                         this.paginator.pageIndex = 0;
-                        this.getExports();
                         this.selectionClear();
-
-                        this.ready = true;
+                        this.getExports().subscribe(_ => this.ready = true);
                     });
                 }
             });
@@ -354,48 +365,31 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     shareExport(exp: ExportModel): void {
-        if(exp.ID == null) {
+        if (exp.ID == null) {
             return;
         }
         this.permissionsDialogService.openPermissionV2Dialog('export-instances', exp.ID, exp.Name || '');
     }
 
-    loadExportPermissions() {
-        return this.permissionsService.getAllResourcePermissionsV2('export-instances').pipe(
-            map((permissionsPerExports) => {
-                permissionsPerExports.forEach(permission => {
-                    this.permissionsPerExports[permission.id] = permission;
-                });
-            })
+    loadExportPermissions(): Observable<PermissionsRightsModel[]> {
+        return this.permissionsService.getComputedResourcePermissionsV2('export-instances', this.exports.map(e => e.ID || '')).pipe(
+            map(perms => this.permissionsPerExports = perms)
         );
     }
 
     getUserData() {
         const userIDResp = this.userService.getUserId();
-        if(typeof(userIDResp) == 'string') {
+        if (typeof (userIDResp) == 'string') {
             this.userID = userIDResp;
         }
         this.userRoles = this.userService.getUserRoles();
     }
 
-    userHasExecutePermission(exportID: string) {
-        const userPermissionsForExport = this.permissionsPerExports[exportID];
-        if(userPermissionsForExport == null) {
-            return false;
-        }
+    userHasAdministratePermission(id: string): boolean {
+        return this.permissionsPerExports.find(e => e.id === id)?.administrate || false;
+    }
 
-        const permission = userPermissionsForExport.user_permissions[this.userID];
-        if(permission != null && permission.execute) {
-            return true;
-        }
-
-        let oneRoleHasPermission = false;
-        this.userRoles.forEach(role => {
-            const groupPermission = userPermissionsForExport.group_permissions[role];
-            if(groupPermission != null && groupPermission.execute) {
-                oneRoleHasPermission = true;
-            }
-        });
-        return oneRoleHasPermission;
+    userHasWritePermission(id: string): boolean {
+        return this.permissionsPerExports.find(e => e.id === id)?.write || false;
     }
 }

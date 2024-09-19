@@ -20,7 +20,7 @@ import { environment } from '../../../../environments/environment';
 import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import { PermissionsResourceBaseModel, PermissionsResourceModel, PermissionsV2ResourceBaseModel, PermissionsV2ResourceModel} from './permissions-resource.model';
+import { PermissionsResourceBaseModel, PermissionsResourceModel, PermissionsV2ResourceBaseModel, PermissionsV2ResourceModel, PermissionsV2RightsAndIdModel} from './permissions-resource.model';
 import { PermissionsUserModel } from './permissions-user.model';
 import { PermissionsRightsModel } from './permissions-rights.model';
 
@@ -69,6 +69,19 @@ export class PermissionsService {
                 map((resp) => resp || {} as PermissionsV2ResourceModel),
                 catchError(
                     this.errorHandlerService.handleError(PermissionsService.name, 'getResourcePermissionsV2', {} as PermissionsV2ResourceModel),
+                ),
+            );
+    }
+
+    getComputedResourcePermissionsV2(topicID: string, ressourceIds: string[]): Observable<PermissionsV2RightsAndIdModel[]> {
+        return this.http
+            .get<PermissionsV2RightsAndIdModel[]>(
+                environment.permissionV2Url + '/permissions/' + encodeURIComponent(topicID) + '?ids=' + encodeURIComponent(ressourceIds.join(',')),
+            )
+            .pipe(
+                map((resp) => resp || [] as PermissionsV2RightsAndIdModel[]),
+                catchError(
+                    this.errorHandlerService.handleError(PermissionsService.name, 'getComputedResourcePermissionsV2', [] as PermissionsV2RightsAndIdModel[]),
                 ),
             );
     }
