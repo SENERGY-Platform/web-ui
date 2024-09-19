@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ImportInstancesComponent} from './import-instances.component';
 import {CoreModule} from '../../../core/core.module';
 import {Router, RouterModule} from '@angular/router';
 import {ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FlexModule} from '@angular/flex-layout';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -34,15 +34,18 @@ import {MatTreeModule} from '@angular/material/tree';
 import {WidgetModule} from '../../../widgets/widget.module';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {ImportInstancesService} from './shared/import-instances.service';
-import {BehaviorSubject, of} from 'rxjs';
+import {of} from 'rxjs';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {MatTableModule} from '@angular/material/table';
 import {ImportInstancesModel} from './shared/import-instances.model';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
+import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
 
-describe('ImportInstancesComponent', () => {
+describe('ImportInstancesComponent', () => { // TODO
     let component: ImportInstancesComponent;
     let fixture: ComponentFixture<ImportInstancesComponent>;
 
@@ -80,6 +83,16 @@ describe('ImportInstancesComponent', () => {
         observablePropsToSpyOn: ['currentSearchText']
     });
 
+    const permissionsServiceSpy: Spy<PermissionsService> = createSpyFromClass(PermissionsService);
+    permissionsServiceSpy.getComputedResourcePermissionsV2.and.callFake((_, ids: string[]) => {
+        const res: PermissionsV2RightsAndIdModel[] = [];
+        ids.forEach(id => res.push({id, administrate: true, write: true, read: true, execute: true}));
+        return of(res);
+    });
+
+    const authorizationServiceSpy: Spy<AuthorizationService> = createSpyFromClass(AuthorizationService);
+    authorizationServiceSpy.getUserRoles.and.returnValue(['user']);
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             declarations: [ImportInstancesComponent],
@@ -111,7 +124,9 @@ describe('ImportInstancesComponent', () => {
                 {provide: DialogsService, useValue: deleteDialogServiceSpy},
                 {provide: Router, useValue: routerSpy},
                 {provide: SearchbarService, useValue: searchbarSpy},
-                {provide: MatDialog, useValue: dialogSpy}
+                {provide: MatDialog, useValue: dialogSpy},
+                {provide: PermissionsService, useValue: permissionsServiceSpy},
+                {provide: AuthorizationService, useValue: authorizationServiceSpy},
             ],
         }).compileComponents();
     });
