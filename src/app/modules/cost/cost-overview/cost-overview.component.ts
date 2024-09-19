@@ -99,7 +99,7 @@ export class CostOverviewComponent implements OnInit {
         const obs: Observable<any>[] = [];
         obs.push(this.pipelineService.getPipelines('id:asc', userId));
         obs.push(this.operatorService.getOperators('', 9999, 0, 'name', 'asc', userId));
-        obs.push(this.importInstancesServcies.listImportInstances('', 9999, 0, 'name.asc', false, userId));
+        obs.push(this.importInstancesServcies.listImportInstances('', 9999, 0, 'name.asc', false));
 
         if (this.isAdmin && userId !== undefined) {
             obs.push(this.exportService.getExportsAdmin(true).pipe(map(exps => exps?.filter(exp => exp.UserId === userId))));

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, OnInit, ViewChild, } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, } from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
 import { Sort } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
@@ -24,19 +24,23 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
 import { Router } from '@angular/router';
-import { forkJoin, Observable, Subscription, map } from 'rxjs';
+import { forkJoin, Observable, Subscription, map, mergeAll, concatMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UtilService } from 'src/app/core/services/util.service';
 import { MatPaginator } from '@angular/material/paginator';
+import { PermissionsV2ResourceModel, PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
 
 @Component({
     selector: 'senergy-import-instances',
     templateUrl: './import-instances.component.html',
     styleUrls: ['./import-instances.component.css'],
 })
-export class ImportInstancesComponent implements OnInit {
+export class ImportInstancesComponent implements OnInit, AfterViewInit {
     displayedColumns = ['select', 'name', 'image', 'created_at', 'updated_at', 'export'];
     dataSource = new MatTableDataSource<ImportInstancesModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -48,7 +52,10 @@ export class ImportInstancesComponent implements OnInit {
         private deleteDialog: DialogsService,
         private router: Router,
         private searchbarService: SearchbarService,
-        public utilsService: UtilService
+        public utilsService: UtilService,
+        private permissionsDialogService: PermissionsDialogService,
+        private permissionsService: PermissionsService,
+        private userService: AuthorizationService,
     ) {}
 
     searchText = '';
@@ -63,10 +70,18 @@ export class ImportInstancesComponent implements OnInit {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
+    permissionsPerInstance: PermissionsV2RightsAndIdModel[] = [];
+    userID = '';
+    userRoles: string[] = [];
 
     ngOnInit(): void {
         this.initSearch();
         this.getTotalNumberOfTypes();
+        const userIDResp = this.userService.getUserId();
+        if(typeof(userIDResp) == 'string') {
+            this.userID = userIDResp;
+        }
+        this.userRoles = this.userService.getUserRoles();
     }
 
     getTotalNumberOfTypes(): Observable<number> {
@@ -104,7 +119,7 @@ export class ImportInstancesComponent implements OnInit {
         if(this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
-
+        this.displayedColumns.push('share');
         this.userHasCreateAuthorization = this.importInstancesService.userHasCreateAuthorization();
     }
 
@@ -150,7 +165,7 @@ export class ImportInstancesComponent implements OnInit {
         this.reload();
     }
 
-    load(): Observable<ImportInstancesModel[]> {
+    load(): Observable<any> {
         this.dataReady = false;
         return this.importInstancesService
             .listImportInstances(this.searchText, this.pageSize, this.offset, this.sort, this.excludeGenerated)
@@ -158,7 +173,11 @@ export class ImportInstancesComponent implements OnInit {
                 map((inst: ImportInstancesModel[]) => {
                     this.dataSource.data = inst;
                     return inst;
-                })
+                }),
+                concatMap((a) => this.permissionsService.getComputedResourcePermissionsV2('import-instances', this.dataSource.data.map(i => i.id)).pipe(
+                    map(permissions => this.permissionsPerInstance = permissions),
+                    map(_ => a)
+                )),
             );
     }
 
@@ -197,16 +216,25 @@ export class ImportInstancesComponent implements OnInit {
 
     isAllSelected() {
         const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return numSelected === this.getAllDeleteableInstances().length;
     }
 
     masterToggle() {
         if (this.isAllSelected()) {
             this.selectionClear();
         } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+            this.selection.select(...this.getAllDeleteableInstances());
         }
+    }
+
+    private getAllDeleteableInstances(): ImportInstancesModel[] {
+        const res: ImportInstancesModel[] = [];
+        this.dataSource.connect().value.forEach((row) => {
+            if (this.userHasAdministratePermission(row.id || '')) {
+                res.push(row);
+            }
+        });
+        return res;
     }
 
     selectionClear(): void {
@@ -238,5 +266,21 @@ export class ImportInstancesComponent implements OnInit {
                     this.reload();
                 });
             });
+    }
+
+    userHasEditPermission(instanceId: string) {
+        return this.permissionsPerInstance.find(e => e.id === instanceId)?.write || false;
+    }
+
+
+    userHasAdministratePermission(instanceId: string) {
+        return this.permissionsPerInstance.find(e => e.id === instanceId)?.administrate || false;
+    }
+
+    shareInstance(instance: ImportInstancesModel): void {
+        if(instance.id == null) {
+            return;
+        }
+        this.permissionsDialogService.openPermissionV2Dialog('import-instances', instance.id, instance.name || '');
     }
 }
