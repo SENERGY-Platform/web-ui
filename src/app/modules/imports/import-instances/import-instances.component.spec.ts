@@ -45,7 +45,7 @@ import { PermissionsService } from '../../permissions/shared/permissions.service
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 
-describe('ImportInstancesComponent', () => { // TODO
+describe('ImportInstancesComponent', () => {
     let component: ImportInstancesComponent;
     let fixture: ComponentFixture<ImportInstancesComponent>;
 
