@@ -16,7 +16,7 @@
 
 <form class="form">
 
-  <mat-form-field class="form-field" color="accent">
+  <mat-form-field appearance="outline" class="form-field" color="accent">
     <input matInput [formControl]="year" type="number" min="0" step="1">
     <mat-label>Years</mat-label>
     <mat-error *ngIf="year.hasError('max') || year.hasError('min')">
@@ -24,7 +24,7 @@
     </mat-error>
   </mat-form-field>
 
-  <mat-form-field class="form-field" color="accent">
+  <mat-form-field appearance="outline" class="form-field" color="accent">
     <input matInput [formControl]="month" type="number" min="0" step="1">
     <mat-label>Months</mat-label>
     <mat-error *ngIf="month.hasError('max') || month.hasError('min')">
@@ -32,7 +32,7 @@
     </mat-error>
   </mat-form-field>
 
-  <mat-form-field class="form-field" color="accent">
+  <mat-form-field appearance="outline" class="form-field" color="accent">
     <input matInput [formControl]="day" type="number" min="0" step="1">
     <mat-label>Days</mat-label>
     <mat-error *ngIf="day.hasError('max') || day.hasError('min')">
@@ -40,7 +40,7 @@
     </mat-error>
   </mat-form-field>
 
-  <mat-form-field class="form-field" color="accent">
+  <mat-form-field appearance="outline" class="form-field" color="accent">
     <input matInput [formControl]="hour" type="number" min="0" step="1">
     <mat-label>Hours</mat-label>
     <mat-error *ngIf="hour.hasError('max') || hour.hasError('min')">
@@ -48,7 +48,7 @@
     </mat-error>
   </mat-form-field>
 
-  <mat-form-field class="form-field" color="accent">
+  <mat-form-field appearance="outline" class="form-field" color="accent">
     <input matInput [formControl]="minute" type="number" min="0" step="1">
     <mat-label>Minutes</mat-label>
     <mat-error *ngIf="minute.hasError('max') || minute.hasError('min')">
@@ -56,7 +56,7 @@
     </mat-error>
   </mat-form-field>
 
-  <mat-form-field class="form-field" color="accent">
+  <mat-form-field appearance="outline" class="form-field" color="accent">
     <input matInput [formControl]="second" type="number" min="0" step="1">
     <mat-label>Seconds</mat-label>
     <mat-error *ngIf="second.hasError('max') || second.hasError('min')">

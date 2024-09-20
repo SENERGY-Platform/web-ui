@@ -25,13 +25,13 @@
       </mat-expansion-panel-header>
       <div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="name of the new variable" [(ngModel)]="exportInfo.OutputName">
           </mat-form-field>
         </div>
         <div>
           <div>
-            <mat-form-field class="form-field full-width" color="accent">
+            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
               <senergy-select-search placeholder="variable with json string"
                                      [(ngModel)]="exportInfo.JsonSource"
                                      [options]="availableProcessVariables.get('all') || []"
@@ -42,7 +42,7 @@
           </div>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field  appearance="outline" color="accent" class="full-width">
             <input matInput placeholder="path to the value in the source json string" [(ngModel)]="exportInfo.FieldPath">
           </mat-form-field>
         </div>

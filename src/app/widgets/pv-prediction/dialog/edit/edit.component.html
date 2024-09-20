@@ -20,12 +20,12 @@
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <div *ngIf="ready">
         <form fxLayout="column" [formGroup]="form">
-                <mat-form-field color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
+                <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
                     <mat-label>Name</mat-label>
                     <input type="text" matInput placeholder="Name" formControlName="name">
                 </mat-form-field>
     
-                <mat-form-field color="accent" fxFlex="47" *ngIf="userHasUpdatePropertiesAuthorization">
+                <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdatePropertiesAuthorization">
                     <mat-label>Choose Export</mat-label>
                     <input type="text" matInput formControlName="export" [matAutocomplete]="auto" required>
                     <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
@@ -41,11 +41,11 @@
 
                 <div *ngIf="form.controls.displayNextValue.value === true" formGroupName="nextValueConfig">
                     <p>Show prediction of the next ?</p>
-                    <mat-form-field color="accent" class="full-width">
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Time</mat-label>
                         <input type="number" matInput placeholder="e.g. 15, 1" formControlName="time">
                     </mat-form-field>
-                    <mat-form-field color="accent" class="full-width">
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Interval</mat-label>
                         <mat-select formControlName="level" placeholder="">
                             <mat-option [value]="">none</mat-option>

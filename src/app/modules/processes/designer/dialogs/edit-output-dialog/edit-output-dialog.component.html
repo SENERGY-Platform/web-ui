@@ -20,7 +20,7 @@
 <mat-dialog-content>
   <form class="form">
     <div *ngFor="let output of outputs; let i = index;">
-      <mat-form-field color="accent">
+      <mat-form-field appearance="outline" color="accent">
         <input matInput type="text" [(ngModel)]="outputs[i].name" name="outputs_{{i}}_name_input">
         <mat-label>{{output.value | shortOutputVariableName}}</mat-label>
       </mat-form-field>

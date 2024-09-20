@@ -25,21 +25,21 @@
     </mat-radio-group>
 
     <form class="form">
-        <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Controlling'">
+        <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Controlling'">
             <senergy-select-search placeholder="Device class" [compareWith]="compare"
                                    [formControl]="deviceClassFormControl" [required]="true"
                                    [options]="deviceClasses" useOptionViewProperty="name">
             </senergy-select-search>
         </mat-form-field>
 
-        <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Measuring'">
+        <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Measuring'">
             <senergy-select-search placeholder="Aspect" [compareWith]="compare"
                                    [formControl]="aspectFormControl" [required]="true"
                                    [options]="aspects" useOptionViewProperty="name">
             </senergy-select-search>
         </mat-form-field>
 
-        <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value !== ''">
+        <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value !== ''">
             <senergy-select-search placeholder="Function" [compareWith]="compare"
                                    [formControl]="functionFormControl" [required]="true"
                                    [options]="functions" useOptionViewProperty="name">
@@ -53,7 +53,7 @@
     </mat-radio-group>
 
     <form>
-        <mat-form-field class="form-field" color="accent">
+        <mat-form-field appearance="outline" class="form-field" color="accent">
             <input type="number" matInput placeholder="Retries"
                    [formControl]="retriesFormControl">
         </mat-form-field>

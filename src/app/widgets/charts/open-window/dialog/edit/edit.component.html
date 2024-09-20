@@ -20,7 +20,7 @@
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <div *ngIf="ready">
         <form fxLayout="column" [formGroup]="form">
-            <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
+            <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
                 <mat-label>Name</mat-label>
                 <input type="text" matInput placeholder="Name" formControlName="name">
             </mat-form-field>
@@ -33,13 +33,13 @@
                 <h2>Configure Chart</h2>
                 <div class="one-line-form-container">
                     <div>
-                        <mat-form-field color="accent" class="full-width">
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>X-Axis-Label</mat-label>
                             <input type="text" matInput placeholder="X-Axis-Label" formControlName="hAxisLabel">
                         </mat-form-field>
                     </div>
                     <div>
-                        <mat-form-field color="accent" class="full-width">
+                        <mat-form-field appearance="outline" color="accent" class="full-width">
                             <mat-label>Y-Axis-Label</mat-label>
                             <input type="text" matInput placeholder="Y-Axis-Label" formControlName="vAxisLabel">
                         </mat-form-field>
@@ -68,7 +68,7 @@
             <ng-container matColumnDef="valueAlias">
                 <th mat-header-cell *matHeaderCellDef>Alias</th>
                 <td mat-cell *matCellDef="let element">
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <input type="text" matInput [(ngModel)]="element.valueAlias">
                     </mat-form-field>
                 </td>

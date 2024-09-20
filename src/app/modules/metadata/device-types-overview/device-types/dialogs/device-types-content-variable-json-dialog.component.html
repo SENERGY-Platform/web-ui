@@ -18,12 +18,12 @@
 
 <mat-dialog-content class="device-type-content-variable-json-dialog-content">
     <div>
-        <mat-form-field  color="accent" class="full-width" >
+        <mat-form-field appearance="outline"  color="accent" class="full-width" >
             <input matInput placeholder="Field Name" [(ngModel)]="name" type="text" required [isNotProhibitedName]="prohibitedNames">
         </mat-form-field>
     </div>
     <div>
-        <mat-form-field  color="accent" class="full-width">
+        <mat-form-field appearance="outline"  color="accent" class="full-width">
             <textarea rows="20" matInput placeholder="JSON" [(ngModel)]="jsonStr" type="text" isValidJson required></textarea>
         </mat-form-field>
     </div>

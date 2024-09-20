@@ -20,13 +20,13 @@
     <mat-tab label="Process">
       <div class="smart-service-task-tab">
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
           </mat-form-field>
         </div>
         <ng-container *ngFor="let input of result.inputs">
           <div *ngIf="input.name === 'process_deployment.process_model_id'">
-            <mat-form-field  color="accent" class="full-width">
+            <mat-form-field appearance="outline"  color="accent" class="full-width">
               <mat-label>Process-Model</mat-label>
               <senergy-select-search placeholder="Process-Model"
                                      [(ngModel)]="input.value"
@@ -39,7 +39,7 @@
           </div>
         </ng-container>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Deployment-Name" [(ngModel)]="processProcessName" required>
           </mat-form-field>
         </div>
@@ -83,7 +83,7 @@
               </mat-expansion-panel-header>
               <ng-container *ngFor="let input of result.inputs">
                 <div *ngIf="isProcessStartParam(input)">
-                  <mat-form-field class="full-width" color="accent">
+                  <mat-form-field appearance="outline" class="full-width" color="accent">
                     <input type="text"  matInput placeholder="{{getProcessStartParameterName(input)}}" [(ngModel)]="input.value">
                   </mat-form-field>
                 </div>
@@ -103,7 +103,7 @@
               <div>
                 <ng-container *ngFor="let input of result.inputs">
                   <div *ngIf="processTaskMatches(input, taskId, 'selection')">
-                    <mat-form-field  color="accent" class="full-width-minus-button">
+                    <mat-form-field  appearance="outline" color="accent" class="full-width-minus-button">
                       <mat-label>IoT-Selection</mat-label>
                       <senergy-select-search placeholder="IoT-Selection"
                                              [(ngModel)]="input.value"
@@ -115,17 +115,17 @@
                     <button mat-icon-button (click)="generateInputForProcessElement(input, taskId)" matTooltip="generate and use input from task criteria">
                       <mat-icon>playlist_add</mat-icon>
                     </button>
-                    <mat-form-field  color="accent" class="full-width">
+                    <mat-form-field appearance="outline"  color="accent" class="full-width">
                       <input matInput placeholder="IoT-Selection Value" [(ngModel)]="input.value" required>
                     </mat-form-field>
                   </div>
                   <div *ngIf="processTaskMatches(input, taskId, 'time')">
-                    <mat-form-field  color="accent" class="full-width">
+                    <mat-form-field appearance="outline"  color="accent" class="full-width">
                       <input matInput placeholder="Time-Event" [(ngModel)]="input.value" required>
                     </mat-form-field>
                   </div>
                   <div *ngIf="processTaskMatches(input, taskId, 'event.flow_id')">
-                    <mat-form-field  color="accent" class="full-width">
+                    <mat-form-field appearance="outline"  color="accent" class="full-width">
                       <mat-label>Event-Flow</mat-label>
                       <senergy-select-search placeholder="Event-Flow"
                                              [(ngModel)]="input.value"
@@ -136,7 +136,7 @@
                     </mat-form-field>
                   </div>
                   <div *ngIf="processTaskMatches(input, taskId, 'event.value')">
-                    <mat-form-field  color="accent" class="full-width">
+                    <mat-form-field appearance="outline"  color="accent" class="full-width">
                       <input matInput placeholder="Event-Value" [(ngModel)]="input.value">
                     </mat-form-field>
                   </div>
@@ -154,7 +154,7 @@
 
                   <ng-container *ngFor="let parameter of getProcessTaskParameter(taskId)">
                     <div *ngIf="processTaskMatches(input, taskId, 'parameter.'+parameter)">
-                      <mat-form-field  color="accent" class="full-width">
+                      <mat-form-field appearance="outline"  color="accent" class="full-width">
                         <input matInput placeholder="{{parameter}}" [(ngModel)]="input.value">
                       </mat-form-field>
                     </div>
@@ -162,7 +162,7 @@
 
                   <ng-container *ngFor="let variable of getProcessConditionalEventVariables(taskId)">
                     <div *ngIf="processTaskMatches(input, taskId, 'variables.'+variable)">
-                      <mat-form-field  color="accent" class="full-width">
+                      <mat-form-field appearance="outline"  color="accent" class="full-width">
                         <input matInput placeholder="{{variable}}" [(ngModel)]="input.value">
                       </mat-form-field>
                     </div>
@@ -179,12 +179,12 @@
     <mat-tab label="Process-Start">
       <div class="smart-service-task-tab">
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Deployment-ID" [(ngModel)]="processStart.deployment_id">
             <button mat-icon-button matSuffix [matMenuTriggerFor]="menuDeploymentId">
               <mat-icon>data_object</mat-icon>
@@ -198,10 +198,10 @@
         </div>
         <div>
           <div *ngFor="let input of processStart.inputs; let i = index" class="process-start-input">
-            <mat-form-field color="accent" class="process-start-input-field">
+            <mat-form-field appearance="outline" color="accent" class="process-start-input-field">
                 <input matInput placeholder="Input-Name" [(ngModel)]="input.key">
             </mat-form-field>
-            <mat-form-field color="accent" class="process-start-input-field">
+            <mat-form-field appearance="outline" color="accent" class="process-start-input-field">
               <input matInput placeholder="Input-Value" [(ngModel)]="input.value" #processStartInput>
               <button mat-icon-button matSuffix [matMenuTriggerFor]="menuInputValue">
                 <mat-icon>data_object</mat-icon>
@@ -244,17 +244,17 @@
       <div class="smart-service-task-tab">
         <div class="smart-service-task-tab">
           <div>
-            <mat-form-field  color="accent" class="full-width">
+            <mat-form-field appearance="outline"  color="accent" class="full-width">
               <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field  color="accent" class="full-width">
+            <mat-form-field appearance="outline"  color="accent" class="full-width">
               <input matInput placeholder="Key" [(ngModel)]="analyticsKeyId" type="text" matTooltip="optional key used to reference the module for updates">
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field class="form-field full-width" color="accent">
+            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
               <senergy-select-search placeholder="Flow"
                                      [(ngModel)]="analyticsFlowId"
                                      [options]="flows || []"
@@ -264,17 +264,17 @@
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field  color="accent" class="full-width">
+            <mat-form-field appearance="outline"  color="accent" class="full-width">
               <input matInput placeholder="Pipeline-Name" [(ngModel)]="analyticsPipelineName" required>
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field  color="accent" class="full-width">
+            <mat-form-field appearance="outline"  color="accent" class="full-width">
               <input matInput placeholder="Pipeline-Description" [(ngModel)]="analyticsPipelineDesc">
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field  color="accent" class="full-width">
+            <mat-form-field appearance="outline"  color="accent" class="full-width">
               <input matInput placeholder="Pipeline Window-Time" [(ngModel)]="analyticsWindowTime" required>
             </mat-form-field>
           </div>
@@ -289,7 +289,7 @@
             </mat-checkbox>
           </div>
           <div>
-            <mat-form-field class="full-width" color="accent">
+            <mat-form-field appearance="outline" class="full-width" color="accent">
               <mat-label>Pipeline Merge-Strategy</mat-label>
               <mat-select [(ngModel)]="analyticsMergeStrategy">
                 <mat-option value="inner">inner</mat-option>
@@ -322,7 +322,7 @@
                       <h4 class="mat-h4">{{port}}</h4>
                       <ng-container *ngFor="let input of result.inputs">
                         <div *ngIf="analyticsInputMatchesIotSelection(input, flowInput.id, port)">
-                          <mat-form-field  color="accent" class="full-width">
+                          <mat-form-field appearance="outline"  color="accent" class="full-width">
                             <mat-label>IoT-Selection</mat-label>
                             <senergy-select-search placeholder="IoT-Selection"
                                                    [(ngModel)]="input.value"
@@ -331,7 +331,7 @@
                                                    useOptionValueProperty="value">
                             </senergy-select-search>
                           </mat-form-field>
-                          <mat-form-field  color="accent" class="full-width">
+                          <mat-form-field appearance="outline"  color="accent" class="full-width">
                             <input matInput placeholder="IoT-Selection Value" [(ngModel)]="input.value" required>
                           </mat-form-field>
                         </div>
@@ -365,7 +365,7 @@
                     <div *ngFor="let config of flowInput.config">
                       <ng-container *ngFor="let input of result.inputs">
                         <div *ngIf="analyticsInputMatchesIotConfig(input, flowInput.id, config.name)">
-                          <mat-form-field  color="accent" class="full-width">
+                          <mat-form-field appearance="outline"  color="accent" class="full-width">
                             <input matInput placeholder="{{config.name}}" [(ngModel)]="input.value" #configInput>
                             <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
                               <mat-icon>data_object</mat-icon>
@@ -408,22 +408,22 @@
     <mat-tab label="Export">
       <div class="smart-service-task-tab">
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Name" [(ngModel)]="exportRequest.Name" type="text" required>
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Description" [(ngModel)]="exportRequest.Description" type="text">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <mat-label>FilterType</mat-label>
             <mat-select [(ngModel)]="exportRequest.FilterType" required>
               <mat-option value="deviceId">deviceId</mat-option>
@@ -433,7 +433,7 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Filter" [(ngModel)]="exportRequest.Filter" type="text" #filterInput required>
             <button mat-icon-button matSuffix [matMenuTriggerFor]="menuFilter">
               <mat-icon>data_object</mat-icon>
@@ -456,17 +456,17 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="EntityName" [(ngModel)]="exportRequest.EntityName" type="text" required>
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Topic" [(ngModel)]="exportRequest.Topic" type="text" required>
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <mat-label>ExportDatabaseID</mat-label>
             <senergy-select-search placeholder="ExportDatabaseID"
                                    [(ngModel)]="exportRequest.ExportDatabaseID"
@@ -477,27 +477,27 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="TimePath" [(ngModel)]="exportRequest.TimePath" type="text" required>
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="TimestampFormat" [(ngModel)]="exportRequest.TimestampFormat" type="text">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="TimePrecision" [(ngModel)]="exportRequest.TimePrecision" type="text">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="ServiceName" [(ngModel)]="exportRequest.ServiceName" type="text" required>
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <mat-label>Offset</mat-label>
             <mat-select [(ngModel)]="exportRequest.Offset" required>
               <mat-option value="largest">largest</mat-option>
@@ -517,17 +517,17 @@
             </mat-expansion-panel-header>
             <div>
               <div>
-                <mat-form-field  color="accent" class="full-width">
+                <mat-form-field appearance="outline"  color="accent" class="full-width">
                   <input matInput placeholder="Name" [(ngModel)]="value.Name" type="text" required>
                 </mat-form-field>
               </div>
               <div>
-                <mat-form-field  color="accent" class="full-width">
+                <mat-form-field appearance="outline"  color="accent" class="full-width">
                   <input matInput placeholder="Path" [(ngModel)]="value.Path" type="text" required>
                 </mat-form-field>
               </div>
               <div>
-                <mat-form-field  color="accent" class="full-width">
+                <mat-form-field appearance="outline"  color="accent" class="full-width">
                   <mat-label>Type</mat-label>
                   <mat-select [(ngModel)]="value.Type" required>
                     <mat-option value="string">string</mat-option>
@@ -554,17 +554,17 @@
     <mat-tab label="Import">
       <div class="smart-service-task-tab">
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Name" [(ngModel)]="importRequest.name" type="text">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <mat-label>Import-Type</mat-label>
             <mat-select [(ngModel)]="importTypeId">
               <mat-option *ngFor="let importType of importTypes" [value]="importType.id">
@@ -581,18 +581,18 @@
         <mat-checkbox class="checkbox-margin" [(ngModel)]="importRequest.generated">Restart</mat-checkbox>
       </div>
       <div *ngFor="let config of importRequest.configs" class="input-with-overwrite">
-        <mat-form-field  color="accent" class="input-with-overwrite-value" *ngIf="isTextImportConfig(config)">
+        <mat-form-field appearance="outline"  color="accent" class="input-with-overwrite-value" *ngIf="isTextImportConfig(config)">
           <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="text">
         </mat-form-field>
-        <mat-form-field  color="accent" class="input-with-overwrite-value" *ngIf="isNumberImportConfig(config)">
+        <mat-form-field appearance="outline"  color="accent" class="input-with-overwrite-value" *ngIf="isNumberImportConfig(config)">
           <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="number">
         </mat-form-field>
         <mat-checkbox class="checkbox-margin" *ngIf="isBooleanImportConfig(config)" [(ngModel)]="importRequest.restart">{{config.name}}</mat-checkbox>
-        <mat-form-field  color="accent" class="input-with-overwrite-value" *ngIf="isUnknownImportConfig(config)">
+        <mat-form-field  appearance="outline" color="accent" class="input-with-overwrite-value" *ngIf="isUnknownImportConfig(config)">
           <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="text" isValidJson>
         </mat-form-field>
         <ng-container *ngFor="let overwrite of importOverwrites">
-          <mat-form-field *ngIf="overwrite.config_name === config.name" color="accent" class="input-with-overwrite-overwrite">
+          <mat-form-field appearance="outline" *ngIf="overwrite.config_name === config.name" color="accent" class="input-with-overwrite-overwrite">
             <input matInput placeholder="{{config.name}} overwrite with placeholder evaluated as json" [(ngModel)]="overwrite.json_value" type="text" #overwriterJsonInput>
             <button mat-icon-button matSuffix [matMenuTriggerFor]="menuImportOverwrites">
               <mat-icon>data_object</mat-icon>
@@ -627,17 +627,17 @@
     <mat-tab label="Info">
       <div class="smart-service-task-tab">
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Task-Name" [(ngModel)]="result.name" type="text">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Key" [(ngModel)]="infoKey" type="text" matTooltip="optional key used to reference the module for updates">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Module-Type" [(ngModel)]="infoModuleType" type="text">
           </mat-form-field>
         </div>
@@ -650,17 +650,17 @@
     <mat-tab label="Device-Repository">
       <div class="smart-service-task-tab">
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field  appearance="outline" color="accent" class="full-width">
             <input matInput placeholder="Task-Name" [(ngModel)]="result.name" type="text">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Key" [(ngModel)]="deviceRepositoryWorkerInfo.key" type="text" matTooltip="optional key used to reference the module for updates">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field class="full-width" color="accent">
+          <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Operation</mat-label>
             <mat-select [(ngModel)]="deviceRepositoryWorkerInfo.operation">
               <mat-option value="create_device_group">Create Device-Group</mat-option>
@@ -669,12 +669,12 @@
         </div>
         <ng-container *ngIf="deviceRepositoryWorkerInfo.operation === 'create_device_group'">
           <div>
-            <mat-form-field  color="accent" class="full-width">
+            <mat-form-field appearance="outline"  color="accent" class="full-width">
               <input matInput placeholder="Device-Group Name" [(ngModel)]="deviceRepositoryWorkerInfo.name" type="text">
             </mat-form-field>
           </div>
           <div >
-            <mat-form-field  color="accent" class="full-width">
+            <mat-form-field appearance="outline"  color="accent" class="full-width">
               <input matInput placeholder="List of Devices" [(ngModel)]="deviceRepositoryWorkerInfo.create_device_group.ids" #configInput>
               <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
                 <mat-icon>data_object</mat-icon>
@@ -692,17 +692,17 @@
     <mat-tab label="Watcher">
       <div class="smart-service-task-tab">
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Task-Name" [(ngModel)]="result.name" type="text">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Interval" [(ngModel)]="watcherWorkerInfo.interval" type="text">
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field class="full-width" color="accent">
+          <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Hash-Type</mat-label>
             <mat-select [(ngModel)]="watcherWorkerInfo.hash_type">
               <mat-option value="deviceids">deviceids</mat-option>
@@ -711,7 +711,7 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field  color="accent" class="full-width">
+          <mat-form-field appearance="outline"  color="accent" class="full-width">
             <input matInput placeholder="Maintenance-Procedure Event-Msg-Name" [(ngModel)]="watcherWorkerInfo.maintenance_producer" type="text">
           </mat-form-field>
         </div>
@@ -721,11 +721,11 @@
             <mat-divider></mat-divider>
           </div>
           <div *ngFor="let inp of watcherWorkerInfo.maintenance_procedure_inputs; let i = index" class="maintenanceInput">
-            <mat-form-field class="third-width" color="accent" fxFlex>
+            <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
               <input matInput placeholder="Key" [(ngModel)]="inp.key" [ngModelOptions]="{standalone: true}">
             </mat-form-field>
             <span style="width: 2em"></span>
-            <mat-form-field class="third-width" color="accent" fxFlex>
+            <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
               <input matInput placeholder="Value" [(ngModel)]="inp.value" [ngModelOptions]="{standalone: true}" matTooltip="preferred as json value">
             </mat-form-field>
             <button mat-icon-button color="warn" (click)="watcherWorkerInfo.maintenance_procedure_inputs.splice(i, 1)">
@@ -738,7 +738,7 @@
           </div>
         </div>
         <div>
-          <mat-form-field class="full-width" color="accent">
+          <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Watch-Operation</mat-label>
             <mat-select [(ngModel)]="watcherWorkerInfo.operation">
               <mat-option value="devices_by_criteria">Watch Devices by Criteria</mat-option>
@@ -758,7 +758,7 @@
               </mat-expansion-panel-header>
               <div>
                 <div>
-                  <mat-form-field class="full-width">
+                  <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Interaction</mat-label>
                     <mat-select [(ngModel)]="criteria.interaction">
                       <mat-option [value]="undefined">NONE</mat-option>
@@ -770,7 +770,7 @@
                 </div>
                 <div>
                   <div>
-                    <mat-form-field class="form-field full-width" color="accent">
+                    <mat-form-field appearance="outline"  class="form-field full-width" color="accent">
                       <senergy-select-search placeholder="Function"
                                              [(ngModel)]="criteria.function_id"
                                              [options]="functions"
@@ -781,7 +781,7 @@
                     </mat-form-field>
                   </div>
                   <div>
-                    <mat-form-field class="form-field full-width" color="accent">
+                    <mat-form-field appearance="outline"  class="form-field full-width" color="accent">
                       <senergy-select-search placeholder="Aspect"
                                              [(ngModel)]="criteria.aspect_id"
                                              [options]="nestedAspects"
@@ -792,7 +792,7 @@
                     </mat-form-field>
                   </div>
                   <div>
-                    <mat-form-field class="form-field full-width" color="accent">
+                    <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                       <senergy-select-search placeholder="Device-Class"
                                              [(ngModel)]="criteria.device_class_id"
                                              [options]="deviceClasses"
@@ -815,7 +815,7 @@
         </ng-container>
         <ng-container *ngIf="watcherWorkerInfo.operation === 'watch_request'">
           <div>
-            <mat-form-field class="full-width" color="accent">
+            <mat-form-field appearance="outline" class="full-width" color="accent">
               <mat-label>Method</mat-label>
               <mat-select [(ngModel)]="watcherWorkerInfo.request.method">
                 <mat-option value="GET">GET</mat-option>
@@ -828,17 +828,17 @@
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field  color="accent" class="full-width">
+            <mat-form-field appearance="outline"  color="accent" class="full-width">
               <input matInput placeholder="Endpoint" [(ngModel)]="watcherWorkerInfo.request.endpoint" type="text">
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field  color="accent" class="full-width">
+            <mat-form-field appearance="outline"  color="accent" class="full-width">
               <input matInput placeholder="Body" [(ngModel)]="watcherWorkerInfo.request.body" type="text" matTooltip="as base64 encoded byte array">
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field  color="accent" class="full-width">
+            <mat-form-field appearance="outline"  color="accent" class="full-width">
               <input matInput placeholder="Headers" [(ngModel)]="watcherWorkerInfoRequestHeader" type="text" isValidJson>
             </mat-form-field>
           </div>

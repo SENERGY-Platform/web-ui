@@ -20,21 +20,21 @@
 
 <mat-dialog-content>
     <form class="form">
-        <mat-form-field class="form-field" color="accent">
+        <mat-form-field appearance="outline" class="form-field" color="accent">
             <senergy-select-search placeholder="Aspect"
                         [formControl]="aspectFormControl" [required]="true"
                         [options]="this.aspects" useOptionViewProperty="name" useOptionValueProperty="id">
             </senergy-select-search>
         </mat-form-field>
 
-        <mat-form-field class="form-field" color="accent">
+        <mat-form-field appearance="outline" class="form-field" color="accent">
             <senergy-select-search placeholder="Function" [compareWith]="compare"
                         [formControl]="functionFormControl" [required]="true"
                         [options]="functions" useOptionViewProperty="name">
             </senergy-select-search>
         </mat-form-field>
 
-        <mat-form-field class="form-field" color="accent">
+        <mat-form-field appearance="outline" class="form-field" color="accent">
             <mat-label>Qos</mat-label>
             <mat-select [(ngModel)]="result.qos" [ngModelOptions]="{standalone: true}">
                 <mat-option value="0">0</mat-option>
@@ -42,7 +42,7 @@
             </mat-select>
         </mat-form-field>
 
-        <mat-form-field class="form-field" color="accent">
+        <mat-form-field appearance="outline" class="form-field" color="accent">
             <input matInput placeholder="Script" [(ngModel)]="result.script" [ngModelOptions]="{standalone: true}">
         </mat-form-field>
     </form>

@@ -19,7 +19,7 @@
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
 
     <div *ngIf="ready" fxLayout="column" [formGroup]="formGroupController">
-        <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
+        <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
             <mat-label>Name</mat-label>
             <input type="text" matInput placeholder="Name" formControlName="name">
         </mat-form-field>
@@ -28,7 +28,7 @@
             <table class="full-width">
                 <tr>
                     <td>
-                        <mat-form-field color="accent" class="full-width">
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>Chart Type</mat-label>
                             <mat-select formControlName="chartType" placeholder="Chart Type" required>
                                 <mat-option *ngFor="let chartType of chartTypes" [value]="chartType">
@@ -43,7 +43,7 @@
                     <td *ngIf="chartType.value === 'LineChart'">
                         <mat-slide-toggle formControlName="curvedFunction"> Curved?
                         </mat-slide-toggle>
-                        <mat-form-field color="accent" style="width: 140px">
+                        <mat-form-field color="accent" appearance="outline" style="width: 140px">
                             <mat-label>Zoom Time Factor</mat-label>
                             <input type="number" matInput formControlName="zoomTimeFactor">
                         </mat-form-field>
@@ -67,32 +67,32 @@
             <table>
                 <tr>
                     <td>
-                        <mat-form-field color="accent" class="full-width">
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>X-Axis</mat-label>
                             <input type="text" matInput placeholder="X-Axis" value="time" disabled>
                         </mat-form-field>
                     </td>
                     <td>
-                        <mat-form-field color="accent" class="full-width">
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>X-Axis-Label</mat-label>
                             <input type="text" matInput placeholder="X-Axis-Label" formControlName="hAxisLabel">
                         </mat-form-field>
                     </td>
                     <td>
-                        <mat-form-field color="accent" class="full-width">
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>X-Axis-Format</mat-label>
                             <input type="text" matInput placeholder="X-Axis-Format" formControlName="hAxisFormat"
                                 matTooltip="Date format string">
                         </mat-form-field>
                     </td>
                     <td>
-                        <mat-form-field color="accent" class="full-width">
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>Y-Axis-Label</mat-label>
                             <input type="text" matInput placeholder="Y-Axis-Label" formControlName="vAxisLabel">
                         </mat-form-field>
                     </td>
                     <td>
-                        <mat-form-field color="accent" class="full-width">
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>Second Y-Axis-Label</mat-label>
                             <input type="text" matInput placeholder="Second-Y-Axis-Label"
                                 formControlName="secondVAxisLabel">
@@ -128,7 +128,7 @@
         <ng-container matColumnDef="valueAlias">
             <th mat-header-cell *matHeaderCellDef>Alias</th>
             <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent">
+                <mat-form-field color="accent" appearance="outline">
                     <input type="text" matInput [(ngModel)]="element.valueAlias">
                 </mat-form-field>
             </td>
@@ -137,7 +137,7 @@
         <ng-container matColumnDef="color">
             <th mat-header-cell *matHeaderCellDef>Color</th>
             <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent">
+                <mat-form-field color="accent" appearance="outline">
                     <input type="text" matInput placeholder="e.g. red, #004411" [(ngModel)]="element.color">
                 </mat-form-field>
             </td>
@@ -146,7 +146,7 @@
         <ng-container matColumnDef="math">
             <th mat-header-cell *matHeaderCellDef>Math</th>
             <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent">
+                <mat-form-field color="accent" appearance="outline">
                     <input type="text" matInput placeholder="e.g. / 1000" [(ngModel)]="element.math"
                         [disabled]="groupTypeIsDifference">
                 </mat-form-field>
@@ -166,7 +166,7 @@
         <ng-container matColumnDef="filterType">
             <th mat-header-cell *matHeaderCellDef>Filter</th>
             <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent">
+                <mat-form-field color="accent" appearance="outline">
                     <mat-select [compareWith]="compareFilterTypes" [(ngModel)]="element.filterType"
                         (valueChange)="filerTypeSelected(element)">
                         <mat-option [value]="undefined">None</mat-option>
@@ -180,7 +180,7 @@
         <ng-container matColumnDef="filterValue">
             <th mat-header-cell *matHeaderCellDef>Filtervalue</th>
             <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent">
+                <mat-form-field color="accent" appearance="outline">
                     <input [type]="element.valueType === 'string' ? 'text' : 'number'" matInput
                         placeholder="e.g. 1000, filter" [disabled]="element.filterType === undefined"
                         [(ngModel)]="element.filterValue">
@@ -191,7 +191,7 @@
         <ng-container matColumnDef="tags">
             <th mat-header-cell *matHeaderCellDef>Tags</th>
             <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent">
+                <mat-form-field color="accent" appearance="outline">
                     <senergy-select-search placeholder="Choose Tags" [multiple]="true"
                         [disabled]="getTags(element).size === 0" [options]="getTags(element)"
                         [getOptionDisabled]="getTagOptionDisabledFunction(element)" [getOptionValue]="getTagValue"
@@ -204,7 +204,7 @@
         <ng-container matColumnDef="deviceGroupMergingStrategy">
             <th mat-header-cell *matHeaderCellDef>Merging Strategy</th>
             <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent">
+                <mat-form-field color="accent" appearance="outline">
                     <mat-select placeholder="Choose Tags" [disabled]="element.criteria === undefined"
                         [(ngModel)]="element.deviceGroupMergingStrategy">
                         <mat-option [value]="chartsExportDeviceGroupMergingStrategy.Separate">Separate</mat-option>

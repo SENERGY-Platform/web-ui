@@ -17,13 +17,13 @@
     <h2>Location</h2>
 
     <div *ngIf="locationForm" [formGroup]="locationForm">
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <input matInput placeholder="Name" formControlName="name" required>
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <textarea matInput placeholder="Description" formControlName="name" required></textarea>
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <input matInput placeholder="Image" formControlName="image">
         </mat-form-field>
     </div>

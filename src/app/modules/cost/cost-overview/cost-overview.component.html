@@ -36,7 +36,7 @@
         </mat-select>
       </mat-form-field>
       <div class="spacer-w20"></div>
-      <mat-form-field color="accent" (click)="dp.open()" *ngIf="dates.length > 0">
+      <mat-form-field appearance="outline" color="accent" (click)="dp.open()" *ngIf="dates.length > 0">
         <mat-label>Month and Year</mat-label>
         <input matInput [matDatepicker]="dp" [formControl]="date" [min]="dates[0]" [max]="now">
         <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>

@@ -23,28 +23,28 @@
 
 <mat-dialog-content>
     <div id="id-container">
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>ID</mat-label>
             <input matInput placeholder="ID" disabled value="{{device.id}}">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Short ID</mat-label>
             <input matInput placeholder="ShortID" disabled value="{{getShortId(device.id)}}">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Devicetype ID</mat-label>
             <input matInput placeholder="Devicetype ID" disabled value="{{device.device_type.id}}">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Devicetype Name</mat-label>
             <input matInput placeholder="Devicetype Name" disabled value="{{device.device_type.name}}">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Origin Name</mat-label>
             <input matInput placeholder="Origin Name" [(ngModel)]="device.name" disabled
                 [ngModelOptions]="{standalone: true}">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Local ID</mat-label>
             <input matInput placeholder="Local ID" [(ngModel)]="device.local_id" disabled>
         </mat-form-field>
@@ -92,7 +92,7 @@
                             </mat-expansion-panel-header>
                             <ng-template matExpansionPanelContent>
                                 <div fxLayout="column">
-                                    <mat-form-field fxFlex color="accent" appearance="fill">
+                                    <mat-form-field fxFlex color="accent" appearance="outline">
                                         <mat-label>Data Format</mat-label>
                                         <senergy-select-search [options]="filterAvailability(i)"
                                             [getOptionViewValue]="formatAvailability"
@@ -100,7 +100,7 @@
                                             [compareWith]="compareAvailabilityValue" placeholder="Device">
                                         </senergy-select-search>
                                     </mat-form-field>
-                                    <mat-form-field appearance="fill" fxFlex color="accent" (click)="picker.open()">
+                                    <mat-form-field appearance="outline" fxFlex color="accent" (click)="picker.open()">
                                         <mat-label>Enter a date range</mat-label>
                                         <mat-date-range-input [formGroup]="timeControl" [rangePicker]="picker"
                                             [min]="getMin(i)" [max]="getMax(i)">

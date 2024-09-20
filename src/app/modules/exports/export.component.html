@@ -18,7 +18,7 @@
 <div class="layout-margin">
     <div fxLayout="row" class="search-button-container">
         <senergy-searchbar fxFlex [searchTextIn]="initSearchText"></senergy-searchbar>
-        <mat-form-field color="accent" class="user-input" style="padding-left: 8px;">
+        <mat-form-field appearance="outline" color="accent" class="user-input" style="padding-left: 8px;">
             <mat-label>Choose Search Field</mat-label>
             <mat-select [(ngModel)]="searchField" (ngModelChange)="searchFieldChanged()">
                 <mat-option *ngFor="let searchField of searchFields" [value]="searchField[1]">

@@ -7,7 +7,7 @@
         </mat-expansion-panel-header>
         <div>
             <div>
-                <mat-form-field class="full-width">
+                <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Interaction</mat-label>
                     <mat-select [(ngModel)]="criteria.interaction" (selectionChange)="emitUpdate()">
                         <mat-option [value]="undefined">NONE</mat-option>
@@ -19,7 +19,7 @@
             </div>
             <div>
                 <div>
-                    <mat-form-field class="form-field full-width" color="accent">
+                    <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                         <senergy-select-search placeholder="Function"
                                                [(ngModel)]="criteria.function_id"
                                                [options]="functions"
@@ -31,7 +31,7 @@
                     </mat-form-field>
                 </div>
                 <div>
-                    <mat-form-field class="form-field full-width" color="accent">
+                    <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                         <senergy-select-search placeholder="Aspect"
                                                [(ngModel)]="criteria.aspect_id"
                                                [options]="nestedAspects"
@@ -43,7 +43,7 @@
                     </mat-form-field>
                 </div>
                 <div>
-                    <mat-form-field class="form-field full-width" color="accent">
+                    <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                         <senergy-select-search placeholder="Device-Class"
                                                [(ngModel)]="criteria.device_class_id"
                                                [options]="deviceClasses"

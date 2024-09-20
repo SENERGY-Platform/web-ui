@@ -23,26 +23,26 @@
         <mat-radio-button value="void" *ngIf="allowVoid">void</mat-radio-button>
     </mat-radio-group>
     <form [formGroup]="firstFormGroup" class="form">
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <input matInput placeholder="Id" formControlName="id">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent" *ngIf="!isVoidType()">
+        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isVoidType()">
             <input matInput placeholder="Name" formControlName="name" required>
         </mat-form-field>
 
         <mat-checkbox formControlName="omit_empty">Omit Empty</mat-checkbox>
 
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <senergy-select-search [options]="aspectOptions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
                                    placeholder="Aspect" formControlName="aspect_id" [getOptionDisabled]="aspectDisabled"></senergy-select-search>
         </mat-form-field>
 
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <senergy-select-search [options]="functions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
                                    placeholder="Function" formControlName="function_id" useOptionClassProperty="class"></senergy-select-search>
         </mat-form-field>
 
-        <mat-form-field class="full-width" color="accent" *ngIf="!isVoidType()">
+        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isVoidType()">
             <mat-label>Characteristic</mat-label>
             <senergy-select-search formControlName="characteristic_id" noneView="-- None --"
                                    [options]="characteristics" useOptionViewProperty="name" useOptionValueProperty="id"
@@ -50,7 +50,7 @@
             </senergy-select-search>
             <mat-error *ngIf="firstFormGroup.get('characteristic_id')?.invalid">{{getCharacteristicError(firstFormGroup.get('characteristic_id')) || ''}}</mat-error>
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
+        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
             <mat-select placeholder="Type"
                         formControlName="type" required>
                 <mat-option *ngFor="let primitive of primitiveTypes"
@@ -59,7 +59,7 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent" *ngIf="!isPrimitiveType() && !isVoidType()">
+        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isPrimitiveType() && !isVoidType()">
             <mat-select placeholder="Type"
                         formControlName="type" required>
                 <mat-option *ngFor="let nonPrimitive of nonPrimitiveTypes"
@@ -68,13 +68,13 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
+        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
             <input matInput placeholder="Serialization Options" formControlName="serialization_options">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
+        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
             <input matInput placeholder="Unit reference" formControlName="unit_reference">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType() && !isOmitEmpty()">
+        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType() && !isOmitEmpty()">
             <input matInput placeholder="Value" formControlName="value">
         </mat-form-field>
     </form>

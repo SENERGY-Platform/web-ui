@@ -19,14 +19,14 @@
 <mat-dialog-content>
     <form class="form">
         <div *ngIf="userHasUpdateDisplayNameAuthorization">
-            <mat-form-field class="full-width" color="accent">
+            <mat-form-field appearance="outline" class="full-width" color="accent">
                 <mat-label>Display Name</mat-label>
                 <input matInput placeholder="Display Name" [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}">
             </mat-form-field>
         </div>
   
         <div *ngIf="localIdIsEditable">
-            <mat-form-field class="full-width" color="accent">
+            <mat-form-field appearance="outline" class="full-width" color="accent">
                 <mat-label>Local ID</mat-label>
                 <input matInput placeholder="Local ID" [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}" [generic_validator]="isValidLocalIdValidator">
             </mat-form-field>
@@ -39,11 +39,11 @@
             </div>
             <div *ngFor="let attr of device.attributes; let i = index" class="attribute">
                 <ng-container *ngIf="attr.key !== nicknameAttributeKey">
-                    <mat-form-field class="third-width" color="accent">
+                    <mat-form-field appearance="outline" class="third-width" color="accent">
                         <input matInput placeholder="Key" [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
                     </mat-form-field>
                     =
-                    <mat-form-field class="third-width" color="accent">
+                    <mat-form-field appearance="outline" class="third-width" color="accent">
                         <input matInput placeholder="Value" [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
                     </mat-form-field>
                     <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">

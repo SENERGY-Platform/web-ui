@@ -18,11 +18,11 @@
 
 <mat-dialog-content>
     <div fxLayout="column">
-       <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
+       <mat-form-field appearance="outline" color="accent" *ngIf="userHasUpdateNameAuthorization">
             <mat-label>Name</mat-label>
             <input matInput placeholder="Name" [(ngModel)]="widget.name">
         </mat-form-field>
-        <mat-form-field color="accent" *ngIf="userHasUpdatePropertiesAuthorization">
+        <mat-form-field appearance="outline" color="accent" *ngIf="userHasUpdatePropertiesAuthorization">
             <mat-label>Limit</mat-label>
             <input type="number" min="0" matInput placeholder="Limit" [(ngModel)]="widget.properties.limit">
         </mat-form-field>

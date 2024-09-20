@@ -29,21 +29,21 @@
         </mat-radio-button>
     </div>
     <div class="role-user">
-        <mat-form-field *ngIf="permission.mode === 'user'">
+        <mat-form-field appearance="outline" *ngIf="permission.mode === 'user'">
             <mat-select [(ngModel)]="permission.subject" placeholder="User">
                 <mat-option *ngFor="let user of users" [value]="user.username">
                     {{user.username}}
                 </mat-option>
             </mat-select>
         </mat-form-field>
-        <mat-form-field *ngIf="permission.mode === 'role'">
+        <mat-form-field appearance="outline" *ngIf="permission.mode === 'role'">
             <mat-select [(ngModel)]="permission.subject" placeholder="Role">
                 <mat-option *ngFor="let role of roles" [value]="role.name">
                     {{role.name}}
                 </mat-option>
             </mat-select>
         </mat-form-field>
-        <mat-form-field *ngIf="permission.mode === 'client'">
+        <mat-form-field appearance="outline" *ngIf="permission.mode === 'client'">
             <mat-select [(ngModel)]="permission.subject" placeholder="Client">
                 <mat-option *ngFor="let client of clients" [value]="client.clientId">
                     {{client.clientId}}
@@ -62,7 +62,7 @@
         </div>
     </div>
     <div>
-        <mat-form-field class="endpoint">
+        <mat-form-field appearance="outline" class="endpoint">
             <input [formControl]="endpointControl" [matAutocomplete]="auto" aria-label="Number" matInput
                    placeholder="Endpoint"
                    type="text">

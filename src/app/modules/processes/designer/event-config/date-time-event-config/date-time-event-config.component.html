@@ -15,7 +15,7 @@
   -->
 
 <form class="form">
-  <mat-form-field class="form-field" color="accent">
+  <mat-form-field appearance="outline" class="form-field" color="accent">
     <input matInput [formControl]="date" [matDatepicker]="picker" placeholder="Choose a date" readonly>
     <mat-label>Date</mat-label>
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
@@ -25,7 +25,7 @@
     </mat-error>
   </mat-form-field>
 
-  <mat-form-field class="form-field" color="accent">
+  <mat-form-field appearance="outline" class="form-field" color="accent">
     <input matInput [formControl]="hour" type="number" min="0" max="23" step="1">
     <mat-label>Hours</mat-label>
     <mat-error *ngIf="hour.hasError('max') || hour.hasError('min')">
@@ -33,7 +33,7 @@
     </mat-error>
   </mat-form-field>
 
-  <mat-form-field class="form-field" color="accent">
+  <mat-form-field appearance="outline" class="form-field" color="accent">
     <input matInput [formControl]="minute" type="number" min="0" max="59" step="1">
     <mat-label>Minutes</mat-label>
     <mat-error *ngIf="minute.hasError('max') || minute.hasError('min')">

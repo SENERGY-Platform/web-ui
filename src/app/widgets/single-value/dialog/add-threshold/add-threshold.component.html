@@ -1,11 +1,11 @@
 <mat-dialog-content>
     <div [formGroup]="form" fxLayout="column" >
-        <mat-form-field color="accent">
+        <mat-form-field appearance="outline" color="accent">
             <mat-label>Threshold</mat-label>
             <input matInput placeholder="Threshold" type="text" formControlName="threshold">
         </mat-form-field>
 
-        <mat-form-field color="accent">
+        <mat-form-field appearance="outline" color="accent">
             <mat-label>Direction</mat-label>
             <mat-select formControlName="direction">
                 <mat-option value="<="><=</mat-option>
@@ -13,7 +13,7 @@
             </mat-select>        
         </mat-form-field>
         
-        <mat-form-field color="accent">
+        <mat-form-field appearance="outline" color="accent">
             <mat-label>Color</mat-label>
             <input matInput placeholder="Color" type="text" formControlName="color">
         </mat-form-field>

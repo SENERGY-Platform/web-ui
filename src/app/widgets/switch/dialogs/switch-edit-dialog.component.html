@@ -18,11 +18,11 @@
 
 <mat-dialog-content>
     <div fxLayout="column">
-        <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
+        <mat-form-field appearance="outline" color="accent" *ngIf="userHasUpdateNameAuthorization">
             <mat-label>Name</mat-label>
             <input matInput placeholder="Name" [(ngModel)]="widget.name">
         </mat-form-field>
-        <mat-form-field color="accent" *ngIf="userHasUpdatePropertiesAuthorization">
+        <mat-form-field appearance="outline" color="accent" *ngIf="userHasUpdatePropertiesAuthorization">
             <mat-label>Image URL</mat-label>
             <input matInput placeholder="Image URL" [(ngModel)]="widget.properties.imgUrl">
         </mat-form-field>
@@ -34,7 +34,7 @@
                 <th mat-header-cell *matHeaderCellDef>Deployment</th>
                 <td mat-cell *matCellDef="let element"> {{element.name}}</td>
                 <td mat-footer-cell *matFooterCellDef>
-                    <mat-form-field color="accent" class="user-input">
+                    <mat-form-field appearance="outline" color="accent" class="user-input">
                         <mat-label>Choose Deployment</mat-label>
                         <input type="text" matInput [formControl]="formControl" [matAutocomplete]="auto">
                         <mat-error *ngIf="formControl.hasError('valid') === false">

@@ -19,10 +19,10 @@
         <h2>Device-Group</h2>
 
         <div *ngIf="deviceGroupForm" [formGroup]="deviceGroupForm">
-            <mat-form-field class="full-width" color="accent">
+            <mat-form-field appearance="outline" class="full-width" color="accent">
                 <input matInput placeholder="Name" formControlName="name" required>
             </mat-form-field>
-            <mat-form-field class="full-width" color="accent">
+            <mat-form-field appearance="outline" class="full-width" color="accent">
                 <input matInput placeholder="Image" formControlName="image">
             </mat-form-field>
         </div>
@@ -67,12 +67,12 @@
                 <mat-divider></mat-divider>
             </div>
             <div *ngFor="let attr of attributes; let i = index" class="attribute">
-                <mat-form-field class="third-width" color="accent" fxFlex>
+                <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
                     <input matInput placeholder="Key" [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
                            [disabled]="!editableAttribute(attr)">
                 </mat-form-field>
                 <span style="width: 2em"></span>
-                <mat-form-field class="third-width" color="accent" fxFlex>
+                <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
                     <input matInput placeholder="Value" [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
                            [disabled]="!editableAttribute(attr)">
                 </mat-form-field>
@@ -93,7 +93,7 @@
     </div>
     <div fxLayout="column" Class="selectables" [ngClass.gt-xs]="'selectables-large'">
         <h2>Selectable-Devices</h2>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <input matInput placeholder="Search" [formControl]="searchText">
             <mat-icon matPrefix *ngIf="searchText.value === ''">search</mat-icon>
             <mat-icon class="pointer" matPrefix *ngIf="searchText.value !== ''" (click)="resetSearchText()">close

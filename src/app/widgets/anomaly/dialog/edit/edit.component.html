@@ -20,14 +20,14 @@
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <div *ngIf="ready">
         <form fxLayout="column" [formGroup]="form">
-                <mat-form-field color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
+                <mat-form-field color="accent" appearance="outline" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
                     <mat-label>Name</mat-label>
                     <input type="text" matInput placeholder="Name" formControlName="name">
                 </mat-form-field>
     
                 <div *ngIf="exports.length > 0 && userHasUpdatePropertiesAuthorization" fxLayout="column">
                     <h2>Anomaly Export</h2>
-                    <mat-form-field  color="accent" fxFlex="47">
+                    <mat-form-field  color="accent" appearance="outline" fxFlex="47">
                         <mat-label>Choose Export</mat-label>
                         <input type="text" matInput formControlName="export" [matAutocomplete]="auto" required>
                         <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
@@ -43,7 +43,7 @@
                     </data-source-selector>
 
                     <h2>Type of Visualization</h2>
-                    <mat-form-field  color="accent" fxFlex="47">
+                    <mat-form-field  color="accent" appearance="outline" fxFlex="47">
                         <mat-label>Choose Visualization</mat-label>
                         <mat-select formControlName="visualizationType" >
                             <mat-option *ngFor="let visOption of visualizationTypes" [value]="visOption">

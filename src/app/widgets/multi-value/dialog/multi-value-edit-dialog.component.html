@@ -21,13 +21,13 @@
         <table>
             <tr>
                 <td *ngIf="userHasUpdateNameAuthorization">
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Widget Name</mat-label>
                         <input type="text" matInput placeholder="Widget Name" formControlName="name">
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Default Order</mat-label>
                         <mat-select formControlName="order" placeholder="Order by" [compareWith]="compareStrings"
                             required>
@@ -42,7 +42,7 @@
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Value Alias</mat-label>
                         <input type="text" matInput placeholder="Value" formControlName="valueAlias">
                     </mat-form-field>
@@ -65,7 +65,7 @@
                         <table [formGroup]="getMeasurement(index)">
                             <tr>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Alias</mat-label>
                                         <input type="text" matInput placeholder="Alias" required formControlName="name">
                                     </mat-form-field>
@@ -73,7 +73,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-select formControlName="export" required [compareWith]="compareExports"
                                             placeholder="Choose Export">
                                             <mat-option *ngFor="let option of exports" [value]="option">
@@ -83,7 +83,7 @@
                                     </mat-form-field>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-select placeholder="Value" [compareWith]="compare" formControlName="column"
                                             required>
                                             <mat-option *ngFor="let column of (tab.get('export')?.value.values)"
@@ -94,7 +94,7 @@
                                     </mat-form-field>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Unit</mat-label>
                                         <input type="text" matInput placeholder="Unit" formControlName="unit">
                                     </mat-form-field>
@@ -102,7 +102,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-select formControlName="type" placeholder="Type"
                                             [compareWith]="compareStrings" required>
                                             <mat-option [value]="'String'">String</mat-option>
@@ -115,13 +115,13 @@
                                     </mat-form-field>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent" hintLabel="For use in Angular pipes">
+                                    <mat-form-field appearance="outline" color="accent" hintLabel="For use in Angular pipes">
                                         <mat-label>Format</mat-label>
                                         <input type="text" matInput placeholder="Format" formControlName="format">
                                     </mat-form-field>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent" matTooltip="{{getMathWarningTooltip(index)}}">
+                                    <mat-form-field appearance="outline" color="accent" matTooltip="{{getMathWarningTooltip(index)}}">
                                         <mat-label>Math</mat-label>
                                         <input type="text" matInput placeholder="Math" formControlName="math">
                                     </mat-form-field>
@@ -134,13 +134,13 @@
                                     </mat-slide-toggle>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Lower boundary</mat-label>
                                         <input matInput type="number" formControlName="lowerBoundary">
                                     </mat-form-field>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Upper boundary</mat-label>
                                         <input matInput type="number" formControlName="upperBoundary">
                                     </mat-form-field>

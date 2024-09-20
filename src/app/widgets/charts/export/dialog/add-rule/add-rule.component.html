@@ -1,21 +1,21 @@
 <mat-dialog-content>
     <div [formGroup]="form" fxLayout="column" >
-        <mat-form-field color="accent">
+        <mat-form-field color="accent" appearance="outline">
             <mat-label>From</mat-label>
             <input matInput placeholder="From" type="text" formControlName="from">
         </mat-form-field>
         
-        <mat-form-field color="accent">
+        <mat-form-field color="accent" appearance="outline">
             <mat-label>To</mat-label>
             <input matInput placeholder="To" type="text" formControlName="to">
         </mat-form-field>
 
-        <mat-form-field class="from-to-color" color="accent">
+        <mat-form-field class="from-to-color" appearance="outline" color="accent">
             <mat-label>Color</mat-label>
             <input matInput placeholder="Color" type="text" formControlName="color">
         </mat-form-field>
 
-        <mat-form-field class="from-to-color" color="accent">
+        <mat-form-field class="from-to-color" appearance="outline" color="accent">
             <mat-label>Alias</mat-label>
             <input matInput placeholder="Alias" type="text" formControlName="alias">
         </mat-form-field>

@@ -19,12 +19,12 @@
 <mat-dialog-content >
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <form *ngIf="ready" [formGroup]="form" fxLayout="column">
-        <mat-form-field color="accent" *ngIf="userHasUpdateNameAuthorization">
+        <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
             <mat-label>Widget Name</mat-label>
             <input type="text" matInput placeholder="Widget Name" formControlName="name" required>
         </mat-form-field>
         <div *ngIf="userHasUpdatePropertiesAuthorization" fxLayout="column">
-            <mat-form-field color="accent">
+            <mat-form-field color="accent" appearance="outline">
                 <mat-label>Device/Group</mat-label>
                 <senergy-select-search [options]="selectables"
                                        [getOptionViewValue]="getSelectableName"
@@ -33,11 +33,11 @@
                                        [required]="true">
                 </senergy-select-search>
             </mat-form-field>
-            <mat-form-field color="accent">
+            <mat-form-field color="accent" appearance="outline">
                 <mat-label>Min. Temperature</mat-label>
                 <input type="number" matInput placeholder="15" formControlName="minTarget" required>
             </mat-form-field>
-            <mat-form-field color="accent">
+            <mat-form-field color="accent" appearance="outline">
                 <mat-label>Max. Temperature</mat-label>
                 <input type="number" matInput placeholder="30" formControlName="maxTarget" required>
             </mat-form-field>

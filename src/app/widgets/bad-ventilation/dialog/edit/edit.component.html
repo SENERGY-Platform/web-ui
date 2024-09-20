@@ -20,7 +20,7 @@
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <div *ngIf="ready">
         <form fxLayout="column" [formGroup]="form">
-            <mat-form-field color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
+            <mat-form-field color="accent" appearance="outline" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
                 <mat-label>Name</mat-label>
                 <input type="text" matInput placeholder="Name" formControlName="name">
             </mat-form-field>

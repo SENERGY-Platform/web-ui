@@ -53,7 +53,7 @@
             </div>
             <ng-container *ngIf="concept">
                 <div *ngFor="let conversion of concept.conversions; let i = index" class="conversion">
-                    <mat-form-field class="forth-width">
+                    <mat-form-field appearance="outline" class="forth-width">
                         <mat-label>From</mat-label>
                         <mat-select [(ngModel)]="conversion.from" [ngModelOptions]="{standalone: true}" required>
                             <mat-option *ngFor="let characteristic of characteristicsControl.value" [value]="characteristic.id">
@@ -61,7 +61,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field class="forth-width">
+                    <mat-form-field appearance="outline" class="forth-width">
                         <mat-label>To</mat-label>
                         <mat-select [(ngModel)]="conversion.to" [ngModelOptions]="{standalone: true}" required>
                             <mat-option *ngFor="let characteristic of characteristicsControl.value" [value]="characteristic.id">
@@ -69,7 +69,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field class="third-width" color="accent">
+                    <mat-form-field appearance="outline" class="third-width" color="accent">
                         <input matInput placeholder="f({{conversion.placeholder_name}})" [(ngModel)]="conversion.formula" [ngModelOptions]="{standalone: true}" required>
                     </mat-form-field>
                     <button mat-icon-button color="warn" (click)="removeConversion(i)" [disabled]="disabled">
@@ -85,19 +85,19 @@
                     <mat-panel-title>Converter Code Try</mat-panel-title>
                 </mat-expansion-panel-header>
                 <div>
-                    <mat-form-field class="full-width" color="accent">
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
                         <input matInput placeholder="json input" [(ngModel)]="testinput" [ngModelOptions]="{standalone: true}" isValidJson required>
                     </mat-form-field>
-                    <mat-form-field class="full-width" color="accent">
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
                         <input matInput placeholder="f(x)" [(ngModel)]="testformula" [ngModelOptions]="{standalone: true}" required>
                         <button matSuffix mat-icon-button color="accent" (click)="tryFormula()">
                             <mat-icon>play_arrow</mat-icon>
                         </button>
                     </mat-form-field>
-                    <mat-form-field class="full-width" color="warn" *ngIf="testerr">
+                    <mat-form-field appearance="outline" class="full-width" color="warn" *ngIf="testerr">
                         <input matInput placeholder="output error" [(ngModel)]="testerr" [ngModelOptions]="{standalone: true}" disabled>
                     </mat-form-field>
-                    <mat-form-field class="full-width" color="accent" *ngIf="!testerr">
+                    <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!testerr">
                         <input matInput placeholder="output json" [(ngModel)]="testoutput" [ngModelOptions]="{standalone: true}" disabled>
                     </mat-form-field>
                 </div>

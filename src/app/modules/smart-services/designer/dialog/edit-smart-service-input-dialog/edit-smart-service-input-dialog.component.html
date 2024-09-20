@@ -25,24 +25,24 @@
                 </mat-expansion-panel-header>
                 <div>
                     <div>
-                        <mat-form-field class="full-width" color="accent" >
+                        <mat-form-field appearance="outline" class="full-width" color="accent" >
                             <input matInput placeholder="ID" [(ngModel)]="input.id" [generic_validator]="isValidCamundaVariableNameValidator">
                         </mat-form-field>
                     </div>
                     <div>
-                        <mat-form-field class="full-width" color="accent" >
+                        <mat-form-field appearance="outline" class="full-width" color="accent" >
                             <input matInput placeholder="Label" [(ngModel)]="input.label">
                         </mat-form-field>
                     </div>
 
                     <div>
-                        <mat-form-field class="full-width" color="accent" >
+                        <mat-form-field appearance="outline" class="full-width" color="accent" >
                             <input matInput placeholder="Description" [(ngModel)]="input.description">
                         </mat-form-field>
                     </div>
 
                     <div>
-                        <mat-form-field class="full-width" color="accent" >
+                        <mat-form-field appearance="outline" class="full-width" color="accent" >
                             <input matInput placeholder="Order" [(ngModel)]="input.order" type="number">
                         </mat-form-field>
                     </div>
@@ -84,7 +84,7 @@
                             </mat-checkbox>
                         </div>
                         <div>
-                            <mat-form-field class="full-width" color="accent" >
+                            <mat-form-field appearance="outline" class="full-width" color="accent" >
                                 <mat-label>Iot-Selectors</mat-label>
                                 <mat-select [(ngModel)]="input.iot_selectors" multiple>
                                     <mat-option value="device">Device</mat-option>
@@ -105,7 +105,7 @@
                                 </mat-expansion-panel-header>
                                 <div>
                                     <div>
-                                        <mat-form-field class="full-width">
+                                        <mat-form-field appearance="outline" class="full-width">
                                             <mat-label>Interaction</mat-label>
                                             <mat-select [(ngModel)]="criteria.interaction">
                                                 <mat-option [value]="undefined">NONE</mat-option>
@@ -117,7 +117,7 @@
                                     </div>
                                     <div>
                                         <div>
-                                            <mat-form-field class="form-field full-width" color="accent">
+                                            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                                                 <senergy-select-search placeholder="Function"
                                                                        [(ngModel)]="criteria.function_id"
                                                                        [options]="functions"
@@ -128,7 +128,7 @@
                                             </mat-form-field>
                                         </div>
                                         <div>
-                                            <mat-form-field class="form-field full-width" color="accent">
+                                            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                                                 <senergy-select-search placeholder="Aspect"
                                                                        [(ngModel)]="criteria.aspect_id"
                                                                        [options]="nestedAspects"
@@ -139,7 +139,7 @@
                                             </mat-form-field>
                                         </div>
                                         <div>
-                                            <mat-form-field class="form-field full-width" color="accent">
+                                            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                                                 <senergy-select-search placeholder="Device-Class"
                                                                        [(ngModel)]="criteria.device_class_id"
                                                                        [options]="deviceClasses"
@@ -163,7 +163,7 @@
 
                     <ng-container *ngIf="!input.iot_selectors">
                         <div>
-                            <mat-form-field class="full-width">
+                            <mat-form-field appearance="outline" class="full-width">
                                 <mat-label>Type</mat-label>
                                 <mat-select [(ngModel)]="input.type">
                                     <mat-option value="string">string</mat-option>
@@ -174,12 +174,12 @@
                         </div>
 
                         <div *ngIf="input.type === 'string'">
-                            <mat-form-field class="full-width">
+                            <mat-form-field appearance="outline" class="full-width">
                                 <input matInput placeholder="Default Value" [(ngModel)]="input.default_value" type="text">
                             </mat-form-field>
                         </div>
                         <div *ngIf="input.type === 'long'">
-                            <mat-form-field class="full-width">
+                            <mat-form-field appearance="outline" class="full-width">
                                 <input matInput placeholder="Default Value" [(ngModel)]="input.default_value" type="number">
                             </mat-form-field>
                         </div>
@@ -191,7 +191,7 @@
                         </div>
 
                         <div>
-                            <mat-form-field class="form-field full-width" color="accent">
+                            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                                 <senergy-select-search placeholder="Characteristic"
                                                        [(ngModel)]="input.characteristic_id"
                                                        [options]="characteristics"
@@ -206,13 +206,13 @@
                             <mat-divider [inset]="true"></mat-divider>
                             <h4 class="mat-h4">Options</h4>
                             <div *ngFor="let option of input.options" class="full-width">
-                                <mat-form-field>
+                                <mat-form-field appearance="outline">
                                     <input matInput placeholder="Name" [(ngModel)]="option.key">
                                 </mat-form-field>
-                                <mat-form-field  *ngIf="input.type === 'string'">
+                                <mat-form-field appearance="outline" *ngIf="input.type === 'string'">
                                     <input matInput placeholder="Value" [(ngModel)]="option.value" type="text">
                                 </mat-form-field>
-                                <mat-form-field *ngIf="input.type === 'long'">
+                                <mat-form-field appearance="outline" *ngIf="input.type === 'long'">
                                     <input matInput placeholder="Value" [(ngModel)]="option.value" type="number">
                                 </mat-form-field>
                                 <mat-radio-group aria-label="Value" [(ngModel)]="option.value" *ngIf="input.type === 'boolean'">

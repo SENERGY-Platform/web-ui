@@ -23,7 +23,7 @@
     <form class="form">
         <div *ngFor="let device of devices">
             <ng-container *ngFor="let attr of device.attributes">
-                <mat-form-field class="full-width" color="accent"  *ngIf="attr.key === wmbusKeyAttributeKey">
+                <mat-form-field appearance="outline" class="full-width" color="accent"  *ngIf="attr.key === wmbusKeyAttributeKey">
                     <input matInput placeholder="{{device.name}}" [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" required>
                 </mat-form-field>
             </ng-container>

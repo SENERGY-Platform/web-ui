@@ -27,7 +27,7 @@
       </mat-expansion-panel-header>
       <div>
         <div *ngFor="let set of info.set; let i = index" class="variables">
-          <mat-form-field color="accent">
+          <mat-form-field appearance="outline" color="accent">
             <mat-select placeholder="Binding" [(ngModel)]="set.binding" required>
               <mat-option value="global">
                 global
@@ -40,10 +40,10 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field class="third-width" color="accent">
+          <mat-form-field appearance="outline" class="third-width" color="accent">
             <input matInput placeholder="Key" [(ngModel)]="set.key" type="text" required>
           </mat-form-field>
-          <mat-form-field class="third-width" color="accent">
+          <mat-form-field appearance="outline" class="third-width" color="accent">
             <input matInput placeholder="Value" [(ngModel)]="set.value" type="text">
           </mat-form-field>
           <button mat-icon-button (click)="removeSet(i)">
@@ -63,7 +63,7 @@
       </mat-expansion-panel-header>
       <div>
         <div *ngFor="let get of info.get; let i = index" class="variables">
-          <mat-form-field color="accent">
+          <mat-form-field appearance="outline" color="accent">
             <mat-select placeholder="Binding" [(ngModel)]="get.binding" required>
               <mat-option value="global">
                 global
@@ -76,13 +76,13 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field class="fifth-width" color="accent">
+          <mat-form-field appearance="outline" class="fifth-width" color="accent">
             <input matInput placeholder="Key" [(ngModel)]="get.key" type="text" required>
           </mat-form-field>
-          <mat-form-field class="fifth-width" color="accent">
+          <mat-form-field appearance="outline" class="fifth-width" color="accent">
             <input matInput placeholder="Output-Name" [(ngModel)]="get.outputVariableName" type="text" required>
           </mat-form-field>
-          <mat-form-field class="fifth-width" color="accent">
+          <mat-form-field appearance="outline" class="fifth-width" color="accent">
             <input matInput placeholder="Default-Value" [(ngModel)]="get.defaultValue" type="text" required>
           </mat-form-field>
           <button mat-icon-button  (click)="removeGet(i)">

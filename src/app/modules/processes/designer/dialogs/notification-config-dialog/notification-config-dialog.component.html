@@ -20,7 +20,7 @@
 <mat-dialog-content>
   <form class="form">
     <div [formGroup]="subjectFormGroup" class="form-group">
-      <mat-form-field class="form-field" color="accent">
+      <mat-form-field appearance="outline" class="form-field" color="accent">
         <mat-label>Subject</mat-label>
         <input matInput type="text" formControlName="defaultValue" [errorStateMatcher]="parentErrorStateMatcher">
         <mat-error *ngIf="subjectFormGroup.hasError('fixedNull')">
@@ -30,7 +30,7 @@
     </div>
 
     <div [formGroup]="contentFormGroup" class="form-group">
-      <mat-form-field class="form-field-area" color="accent">
+      <mat-form-field appearance="outline" class="form-field-area" color="accent">
         <mat-label>Message</mat-label>
         <textarea matInput type="text" formControlName="defaultValue" [errorStateMatcher]="parentErrorStateMatcher"></textarea>
         <mat-error *ngIf="contentFormGroup.hasError('fixedNull')">

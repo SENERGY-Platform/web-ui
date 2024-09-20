@@ -21,13 +21,13 @@
         <table>
             <tr>
                 <td *ngIf="userHasUpdateNameAuthorization">
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Widget Name</mat-label>
                         <input type="text" matInput placeholder="Widget Name" formControlName="name">
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Refresh time</mat-label>
                         <input type="number" matInput placeholder="Refresh Time" formControlName="refreshTime">
                     </mat-form-field>
@@ -43,13 +43,13 @@
             <tr [formGroupName]="convertRuleIndex"
                 *ngFor="let convertRule of convertRulesControl.controls; let convertRuleIndex = index">
                 <td>
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Status</mat-label>
                         <input class="convert-input" type="text" matInput placeholder="Status" formControlName="status">
                     </mat-form-field>
                 </td>
                 <td>
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-select formControlName="icon"
                                     placeholder="Choose Icon" class="convert-input">
                             <mat-select-trigger>
@@ -64,7 +64,7 @@
                     </mat-form-field>
                 </td>
                 <td>
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Color</mat-label>
                         <input class="convert-input" type="text" matInput placeholder="Icon" formControlName="color">
                     </mat-form-field>
@@ -93,7 +93,7 @@
                     <table>
                         <tr>
                             <td>
-                                <mat-form-field color="accent">
+                                <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Alias</mat-label>
                                     <input type="text" matInput placeholder="Alias" required
                                            formControlName="name">
@@ -102,7 +102,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <mat-form-field color="accent">
+                                <mat-form-field appearance="outline" color="accent">
                                     <mat-select formControlName="aspectId" required
                                                 placeholder="Choose Aspect">
                                         <mat-option *ngFor="let aspect of aspects" [value]="aspect.id">
@@ -112,7 +112,7 @@
                                 </mat-form-field>
                             </td>
                             <td>
-                                <mat-form-field color="accent">
+                                <mat-form-field appearance="outline" color="accent">
                                     <mat-select formControlName="function" required
                                                 placeholder="Choose Function" [compareWith]="compareFunc">
                                         <mat-option *ngFor="let func of funcArray[elementIndex]" [value]="func">
@@ -122,7 +122,7 @@
                                 </mat-form-field>
                             </td>
                             <td>
-                                <mat-form-field color="accent">
+                                <mat-form-field appearance="outline" color="accent">
                                     <mat-select formControlName="selectable" required
                                                 placeholder="Choose Device" [compareWith]="compareSelectables">
                                         <mat-option *ngFor="let selectable of selectablesArray[elementIndex]" [value]="selectable">
@@ -134,7 +134,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <mat-form-field color="accent">
+                                <mat-form-field appearance="outline" color="accent">
                                     <mat-select formControlName="service" required
                                                 placeholder="Choose Service" [compareWith]="compareServices">
                                         <mat-option *ngFor="let item of serviceExportValueArray[elementIndex]" [value]="item.service">
@@ -144,7 +144,7 @@
                                 </mat-form-field>
                             </td>
                             <td>
-                                <mat-form-field color="accent">
+                                <mat-form-field appearance="outline" color="accent">
                                     <mat-select formControlName="exportValues" required
                                                 placeholder="Choose Value" [compareWith]="compareValues">
                                         <mat-option *ngFor="let exportValue of getServiceExportValues(elementIndex)" [value]="exportValue">

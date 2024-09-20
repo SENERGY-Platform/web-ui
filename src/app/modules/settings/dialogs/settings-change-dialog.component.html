@@ -18,39 +18,39 @@
 
 <mat-dialog-content>
     <form class="form" [formGroup]="firstFormGroup">
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Username</mat-label>
             <input type="text" matInput placeholder="Username" [value]="profile.username" disabled>
         </mat-form-field>
         <table class="full-width">
             <tr>
                 <td>
-                    <mat-form-field color="accent" class="full-width">
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>First name</mat-label>
                         <input type="text" matInput placeholder="First name" formControlName="firstName">
                     </mat-form-field>
                 </td>
                 <td>
-                    <mat-form-field color="accent" class="full-width">
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Last name</mat-label>
                         <input type="text" matInput placeholder="Last name" formControlName="lastName">
                     </mat-form-field>
                 </td>
             </tr>
         </table>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Email</mat-label>
             <input type="email" matInput placeholder="Email" formControlName="email">
             <mat-error *ngIf="firstFormGroup.controls['email'].invalid">Not a valid email!</mat-error>
         </mat-form-field>
     </form>
     <form class="form">
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <input matInput placeholder="New password" [type]="hidePasswordNew ? 'password' : 'text'" [formControl]="passwordNew">
             <mat-icon matSuffix (click)="hidePasswordNew = !hidePasswordNew">{{hidePasswordNew ? 'visibility_off' : 'visibility'}}</mat-icon>
             <mat-error *ngIf="passwordNew.dirty && passwordNew.invalid">{{getErrorMessageNew()}}</mat-error>
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <input matInput placeholder="Confirm password" [type]="hidePasswordConfirm ? 'password' : 'text'" [formControl]="passwordConfirm">
             <mat-icon matSuffix (click)="hidePasswordConfirm = !hidePasswordConfirm">{{hidePasswordConfirm ? 'visibility_off' : 'visibility'}}</mat-icon>
             <mat-error *ngIf="passwordConfirm.getError('notEqual')">Passwords don't match!</mat-error>

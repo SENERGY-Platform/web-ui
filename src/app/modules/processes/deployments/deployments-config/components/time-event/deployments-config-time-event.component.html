@@ -14,12 +14,12 @@
   ~ limitations under the License.
   -->
 <div class="deployments-config-time-event-container" [formGroup]="time_event" *ngIf="time_event.value.type === 'timeCycle'">
-    <mat-form-field class="full-width" color="accent">
+    <mat-form-field appearance="outline" class="full-width" color="accent">
         <input matInput placeholder="Cron" formControlName="time">
     </mat-form-field>
 </div>
 <div class="deployments-config-time-event-container" [formGroup]="time_event" *ngIf="time_event.value.type === 'timeDate'">
-    <mat-form-field class="full-width" color="accent">
+    <mat-form-field appearance="outline" class="full-width" color="accent">
         <input matInput placeholder="ISO 8601 Date-Timestamp" formControlName="time">
     </mat-form-field>
 </div>
@@ -30,37 +30,37 @@
     <table class="full-width" formGroupName="durationUnits" (change)="changeDuration()" >
         <tr>
             <td>
-                <mat-form-field class="full-width" color="accent">
+                <mat-form-field appearance="outline" class="full-width" color="accent">
                     <input type="number" matInput placeholder="Years"
                            formControlName="years">
                 </mat-form-field>
             </td>
             <td>
-                <mat-form-field class="full-width" color="accent">
+                <mat-form-field appearance="outline" class="full-width" color="accent">
                     <input type="number" matInput placeholder="Months"
                            formControlName="months">
                 </mat-form-field>
             </td>
             <td>
-                <mat-form-field class="full-width" color="accent">
+                <mat-form-field appearance="outline" class="full-width" color="accent">
                     <input type="number" matInput placeholder="Days"
                            formControlName="days">
                 </mat-form-field>
             </td>
             <td>
-                <mat-form-field class="full-width" color="accent">
+                <mat-form-field appearance="outline" class="full-width" color="accent">
                     <input type="number" matInput placeholder="Hours"
                            formControlName="hours">
                 </mat-form-field>
             </td>
             <td>
-                <mat-form-field class="full-width" color="accent">
+                <mat-form-field appearance="outline" class="full-width" color="accent">
                     <input type="number" matInput placeholder="Minutes"
                            formControlName="minutes">
                 </mat-form-field>
             </td>
             <td>
-                <mat-form-field class="full-width" color="accent">
+                <mat-form-field appearance="outline" class="full-width" color="accent">
                     <input type="number" matInput placeholder="Seconds"
                            formControlName="seconds">
                 </mat-form-field>

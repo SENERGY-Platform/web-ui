@@ -20,7 +20,7 @@
         <mat-card-title>Rule Tester</mat-card-title>
         <mat-card-content>
             <div>
-                <mat-form-field>
+                <mat-form-field appearance="outline">
                     <mat-select (valueChange)="setTestUser($event)" placeholder="User">
                         <mat-option *ngFor="let user of users" [value]="user">
                             {{user.username}}
@@ -28,7 +28,7 @@
                     </mat-select>
                 </mat-form-field>
 
-                <mat-form-field>
+                <mat-form-field appearance="outline">
                     <mat-select (valueChange)="setTestRole($event)" placeholder="Role">
                         <mat-option *ngFor="let role of roles" [value]="role.name">
                             {{role.name}}
@@ -38,7 +38,7 @@
             </div>
 
             <div>
-                <mat-form-field>
+                <mat-form-field appearance="outline">
                     <mat-select (valueChange)="setTestClient($event)" placeholder="Client">
                         <mat-option *ngFor="let client of clients" [value]="client.clientId">
                             {{client.clientId}}
@@ -46,7 +46,7 @@
                     </mat-select>
                 </mat-form-field>
 
-                <mat-form-field class="endpoint">
+                <mat-form-field appearance="outline" class="endpoint">
                     <input [formControl]="endpointControl" [matAutocomplete]="auto" aria-label="Number" matInput
                         placeholder="Endpoint" type="text">
                     <mat-autocomplete #auto="matAutocomplete">
@@ -71,7 +71,7 @@
 
     <mat-card appearance="outlined" *ngIf="ready" class="search-card">
         <mat-card-content class="search">
-            <mat-form-field>
+            <mat-form-field appearance="outline">
                 <mat-icon matPrefix>search</mat-icon>
                 <input (ngModelChange)="filter($event)" [(ngModel)]="query"
                     [placeholder]="'Search (for users, roles, actions or resources)'" matInput type="text">
@@ -81,28 +81,28 @@
             </mat-form-field>
 
             <div id="filter">
-                <mat-form-field>
+                <mat-form-field appearance="outline">
                     <mat-select placeholder="User" [(ngModel)]="selectedUser" (ngModelChange)="filter($event)">
                         <mat-option *ngFor="let user of users" [value]="user.username">
                             {{user.username}}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
-                <mat-form-field>
+                <mat-form-field appearance="outline">
                     <mat-select placeholder="Role" [(ngModel)]="selectedRole" (ngModelChange)="filter($event)">
                         <mat-option *ngFor="let role of roles" [value]="role.name">
                             {{role.name}}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
-                <mat-form-field>
+                <mat-form-field appearance="outline">
                     <mat-select placeholder="Client" [(ngModel)]="selectedClientID" (ngModelChange)="filter($event)">
                         <mat-option *ngFor="let client of clients" [value]="client.clientId">
                             {{client.clientId}}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
-                <mat-form-field class="endpoint">
+                <mat-form-field appearance="outline" class="endpoint">
                     <input [matAutocomplete]="auto" aria-label="Number" matInput
                            placeholder="Endpoint"
                            type="text" [(ngModel)]="selectedEndpoint" (ngModelChange)="filter($event)">
