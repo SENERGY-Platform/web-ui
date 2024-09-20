@@ -18,16 +18,16 @@
 <h2 mat-dialog-title *ngIf="useDialog">Use Device</h2>
 <mat-dialog-content>
     <form class="form">
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <input matInput placeholder="ID" disabled value="{{device.local_id}}">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <input matInput placeholder="Devicetype ID" disabled value="{{device.device_type_id}}">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <input matInput placeholder="Devicetype Name" disabled value="{{deviceType.name}}">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
             <input matInput placeholder="Name" required [(ngModel)]="device.name" [ngModelOptions]="{standalone: true}" #name="ngModel">
         </mat-form-field>
 
@@ -40,11 +40,11 @@
             </div>
             <div formArrayName="attributes">
                 <div [formGroupName]="i" *ngFor="let _ of attributes.controls; let i = index" class="attribute">
-                    <mat-form-field class="third-width" color="accent">
+                    <mat-form-field appearance="outline" class="third-width" color="accent">
                         <input matInput placeholder="Key" formControlName="key">
                     </mat-form-field>
                     =
-                    <mat-form-field class="third-width" color="accent">
+                    <mat-form-field appearance="outline" class="third-width" color="accent">
                         <input matInput placeholder="Value" formControlName="value" >
                     </mat-form-field>
                     <button mat-icon-button color="warn" (click)="removeAttr(i)">

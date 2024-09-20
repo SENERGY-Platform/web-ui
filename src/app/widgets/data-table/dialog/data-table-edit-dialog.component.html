@@ -23,13 +23,13 @@
         <table>
             <tr>
                 <td *ngIf="userHasUpdateNameAuthorization">
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Widget Name</mat-label>
                         <input type="text" matInput placeholder="Widget Name" formControlName="name">
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-form-field color="accent" class="order-select">
+                    <mat-form-field appearance="outline" color="accent" class="order-select">
                         <mat-label>Default Order</mat-label>
                         <mat-select formControlName="order" placeholder="Order by"
                                     [compareWith]="compareStrings" required>
@@ -44,19 +44,19 @@
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Value Alias</mat-label>
                         <input type="text" matInput placeholder="Value" formControlName="valueAlias">
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Refresh time</mat-label>
                         <input type="number" matInput placeholder="Refresh Time" formControlName="refreshTime">
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-form-field color="accent">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Values per Element</mat-label>
                         <input type="number" matInput placeholder="Values per Element"
                             formControlName="valuesPerElement">
@@ -70,13 +70,13 @@
                 <tr [formGroupName]="convertRuleIndex"
                     *ngFor="let convertRule of convertRulesControl.controls; let convertRuleIndex = index">
                     <td>
-                        <mat-form-field color="accent">
+                        <mat-form-field appearance="outline" color="accent">
                             <mat-label>Status</mat-label>
                             <input class="convert-input" type="text" matInput placeholder="Status" formControlName="status">
                         </mat-form-field>
                     </td>
                     <td>
-                        <mat-form-field color="accent">
+                        <mat-form-field appearance="outline" color="accent">
                             <mat-select formControlName="icon"
                                     placeholder="Choose Icon" class="convert-input">
                                 <mat-select-trigger>
@@ -92,7 +92,7 @@
                         </mat-form-field>
                     </td>
                     <td>
-                        <mat-form-field color="accent">
+                        <mat-form-field appearance="outline" color="accent">
                             <mat-label>Color</mat-label>
                             <input class="convert-input" type="text" matInput placeholder="Color" formControlName="color">
                         </mat-form-field>
@@ -130,7 +130,7 @@
                         <table [formGroup]="getElement(index)">
                             <tr>
                                 <td colspan="1">
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Alias</mat-label>
                                         <input type="text" matInput placeholder="Alias" required
                                            formControlName="name">
@@ -150,7 +150,7 @@
 
                             <tr formGroupName="elementDetails" *ngIf="isDevice(tab)">
                                 <td formGroupName="device">
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <senergy-select-search formControlName="aspectId" [required]="true"
                                             placeholder="Choose Aspect"
                                             [options]="dataTableHelperService.getAspectsWithMeasuringFunction()"
@@ -160,7 +160,7 @@
                                     </mat-form-field>
                                 </td>
                                 <td formGroupName="device">
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <senergy-select-search formControlName="functionId" [required]="true"
                                             placeholder="Choose Function" [compareWith]="compareStrings"
                                             [options]="getFunctions(tab)" useOptionValueProperty="id"
@@ -169,7 +169,7 @@
                                     </mat-form-field>
                                 </td>
                                 <td formGroupName="device">
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <senergy-select-search [compareWith]="compareStrings"
                                                            formControlName="deviceId" placeholder="Choose Device"
                                                            [required]="true" [options]="getSelectables(tab)"
@@ -181,7 +181,7 @@
                             </tr>
                             <tr *ngIf="isDevice(tab)">
                                 <td formGroupName="elementDetails">
-                                    <mat-form-field color="accent" formGroupName="device">
+                                    <mat-form-field appearance="outline" color="accent" formGroupName="device">
                                         <senergy-select-search formControlName="serviceId" [required]="true"
                                             placeholder="Choose Service" [compareWith]="compareStrings"
                                             [options]="getServices(tab)" useOptionValueProperty="id"
@@ -190,7 +190,7 @@
                                     </mat-form-field>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <senergy-select-search formControlName="exportValuePath" [required]="true"
                                             placeholder="Choose Value" [compareWith]="compareStrings"
                                             [options]="getServiceValues(tab)"
@@ -202,7 +202,7 @@
                             </tr>
                             <tr *ngIf="isPipeline(tab)">
                                 <td formGroupName="elementDetails">
-                                    <mat-form-field color="accent" formGroupName="pipeline">
+                                    <mat-form-field appearance="outline" color="accent" formGroupName="pipeline">
                                         <senergy-select-search formControlName="pipelineId" [required]="true"
                                             placeholder="Choose Pipeline" [compareWith]="compareStrings"
                                             [options]="dataTableHelperService.getPipelines()"
@@ -211,7 +211,7 @@
                                     </mat-form-field>
                                 </td>
                                 <td formGroupName="elementDetails">
-                                    <mat-form-field color="accent" formGroupName="pipeline">
+                                    <mat-form-field appearance="outline" color="accent" formGroupName="pipeline">
                                         <senergy-select-search formControlName="operatorId" [required]="true"
                                             placeholder="Choose Operator" [compareWith]="compareStrings"
                                             [options]="getOperators(tab)" useOptionValueProperty="id"
@@ -220,7 +220,7 @@
                                     </mat-form-field>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <senergy-select-search formControlName="exportValuePath" [required]="true"
                                             placeholder="Choose Value" [compareWith]="compareStrings"
                                             [options]="getOperatorValues(tab)"
@@ -232,7 +232,7 @@
                             </tr>
                             <tr *ngIf="isImport(tab)">
                                 <td formGroupName="elementDetails">
-                                    <mat-form-field color="accent" formGroupName="import">
+                                    <mat-form-field appearance="outline" color="accent" formGroupName="import">
                                         <senergy-select-search formControlName="typeId" [required]="true"
                                             placeholder="Choose Type"
                                             [options]="dataTableHelperService.getImportTypes()"
@@ -241,7 +241,7 @@
                                     </mat-form-field>
                                 </td>
                                 <td formGroupName="elementDetails">
-                                    <mat-form-field color="accent" formGroupName="import">
+                                    <mat-form-field appearance="outline" color="accent" formGroupName="import">
                                         <senergy-select-search formControlName="instanceId" [required]="true"
                                             placeholder="Choose Instance"
                                             [options]="dataTableHelperService.getImportInstancesOfType(tab.get('elementDetails.import.typeId')?.value)"
@@ -251,7 +251,7 @@
                                     </mat-form-field>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline"  color="accent">
                                         <senergy-select-search formControlName="exportValuePath" [required]="true"
                                             placeholder="Choose Value"
                                             [options]="dataTableHelperService.getImportTypeValues(tab.get('elementDetails.import.typeId')?.value)"
@@ -262,7 +262,7 @@
                             </tr>
                             <tr *ngIf="isDeviceGroup(tab)" formGroupName="elementDetails">
                                 <td formGroupName="deviceGroup">
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Choose Device Group</mat-label>
                                         <senergy-select-search [options]="deviceGroups" formControlName="deviceGroupId"
                                             useOptionViewProperty="name" useOptionValueProperty="id">
@@ -271,7 +271,7 @@
 
                                 </td>
                                 <td formGroupName="deviceGroup">
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Choose Criteria</mat-label>
                                         <senergy-select-search [options]="getCriteria(tab)"
                                             formControlName="deviceGroupCriteria"
@@ -282,7 +282,7 @@
                             </tr>
                             <tr *ngIf="isDeviceGroup(tab)">
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Unit</mat-label>
                                         <senergy-select-search [options]="getConcept(tab)?.characteristics || []"
                                             formControlName="unit" [getOptionValue]="getDisplayUnit"
@@ -291,7 +291,7 @@
                                     </mat-form-field>
                                 </td>
                                 <td formGroupName="elementDetails">
-                                    <mat-form-field color="accent" formGroupName="deviceGroup">
+                                    <mat-form-field appearance="outline" color="accent" formGroupName="deviceGroup">
                                         <mat-label>Aggregation</mat-label>
                                         <senergy-select-search [options]="aggregations"
                                             formControlName="deviceGroupAggregation">
@@ -301,7 +301,7 @@
                             </tr>
                             <tr>
                                 <td *ngIf="!isDevice(tab) && !isDeviceGroup(tab)">
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <senergy-select-search formControlName="exportId" [required]="true"
                                             placeholder="Choose Export" [options]="getExports(tab)"
                                             useOptionViewProperty="Name" useOptionValueProperty="ID">
@@ -310,7 +310,7 @@
                                 </td>
 
                                 <td *ngIf="!isDevice(tab) && tab.get('exportId')?.value !== undefined && getTags(tab).size > 0">
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <senergy-select-search placeholder="Choose Tags" [multiple]="true"
                                             [options]="getTags(tab)"
                                                            formControlName="exportTagSelection"
@@ -322,7 +322,7 @@
                                 </td>
 
                                 <td *ngIf="!isDeviceGroup(tab)">
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Unit</mat-label>
                                         <input type="text" matInput placeholder="Unit" formControlName="unit">
                                     </mat-form-field>
@@ -330,20 +330,20 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <mat-form-field color="accent" hintLabel="For use in Angular pipes">
+                                    <mat-form-field appearance="outline" color="accent" hintLabel="For use in Angular pipes">
                                         <mat-label>Format</mat-label>
                                         <input type="text" matInput placeholder="Format" formControlName="format">
                                     </mat-form-field>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <senergy-select-search placeholder="Group Type" [options]="groupTypes"
                                             [noneView]="'none'" formControlName="groupType">
                                         </senergy-select-search>
                                     </mat-form-field>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Group time</mat-label>
                                         <input type="text" matInput formControlName="groupTime">
                                     </mat-form-field>
@@ -354,13 +354,13 @@
                                     <mat-slide-toggle formControlName="enabled">Enable warnings</mat-slide-toggle>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Lower boundary</mat-label>
                                         <input matInput type="number" formControlName="lowerBoundary">
                                     </mat-form-field>
                                 </td>
                                 <td>
-                                    <mat-form-field color="accent">
+                                    <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Upper boundary</mat-label>
                                         <input matInput type="number" formControlName="upperBoundary">
                                     </mat-form-field>

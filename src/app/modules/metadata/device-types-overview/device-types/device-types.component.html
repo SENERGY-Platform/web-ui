@@ -20,19 +20,19 @@
             <form [formGroup]="firstFormGroup">
                 <ng-template matStepLabel>Information</ng-template>
                 <div class="form">
-                    <mat-form-field class="full-width" color="accent">
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
                         <input matInput placeholder="Id" formControlName="id">
                     </mat-form-field>
-                    <mat-form-field class="full-width" color="accent">
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
                         <input matInput placeholder="Name" formControlName="name" required>
                     </mat-form-field>
-                    <mat-form-field class="full-width" color="accent">
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
                         <input matInput placeholder="Description" formControlName="description">
                     </mat-form-field>
                     <table class="full-width">
                         <tr>
                             <td>
-                                <mat-form-field class="full-width" color="accent">
+                                <mat-form-field appearance="outline" class="full-width" color="accent">
                                     <senergy-select-search placeholder="Device class"
                                                            formControlName="device_class_id" [required]="true"
                                                            [options]="deviceTypeDeviceClasses"
@@ -52,11 +52,11 @@
                 <div formArrayName="attributes">
                     <div [formGroupName]="i" *ngFor="let attr of deviceTypeAttributes.controls; let i = index"
                          class="attribute">
-                        <mat-form-field class="third-width" color="accent">
+                        <mat-form-field appearance="outline" class="third-width" color="accent">
                             <input matInput placeholder="Key" formControlName="key">
                         </mat-form-field>
                         =
-                        <mat-form-field class="third-width" color="accent">
+                        <mat-form-field appearance="outline" class="third-width" color="accent">
                             <input matInput placeholder="Value" formControlName="value">
                         </mat-form-field>
                         <button mat-icon-button color="warn" [disabled]="!editable" (click)="removeDeviceTypeAttr(i)">
@@ -81,10 +81,10 @@
                             </mat-expansion-panel-header>
                             <ng-template matExpansionPanelContent>
                                 <div *ngIf="group.isGroup" [formGroup]="getServiceGroup(group.key)">
-                                    <mat-form-field class="full-width" color="accent">
+                                    <mat-form-field appearance="outline" class="full-width" color="accent">
                                         <input matInput placeholder="Name" formControlName="name">
                                     </mat-form-field>
-                                    <mat-form-field class="full-width" color="accent">
+                                    <mat-form-field appearance="outline" class="full-width" color="accent">
                                         <input matInput placeholder="Description" formControlName="description">
                                     </mat-form-field>
                                 </div>
@@ -101,19 +101,19 @@
                                             <mat-tab-group color="accent" headerPosition="above" dynamicHeight="true">
                                                 <mat-tab label="Information">
                                                     <div class="form">
-                                                        <mat-form-field class="full-width" color="accent">
+                                                        <mat-form-field appearance="outline" class="full-width" color="accent">
                                                             <input matInput placeholder="Id" formControlName="id">
                                                         </mat-form-field>
-                                                        <mat-form-field class="full-width" color="accent">
+                                                        <mat-form-field appearance="outline" class="full-width" color="accent">
                                                             <input matInput placeholder="Name" formControlName="name" required>
                                                         </mat-form-field>
-                                                        <mat-form-field class="full-width" color="accent">
+                                                        <mat-form-field appearance="outline" class="full-width" color="accent">
                                                             <input matInput placeholder="Description" formControlName="description">
                                                         </mat-form-field>
-                                                        <mat-form-field class="full-width" color="accent">
+                                                        <mat-form-field appearance="outline" class="full-width" color="accent">
                                                             <input matInput placeholder="Local Id" formControlName="local_id" required>
                                                         </mat-form-field>
-                                                        <mat-form-field class="full-width" color="accent">
+                                                        <mat-form-field appearance="outline" class="full-width" color="accent">
                                                             <mat-select placeholder="Protocol"
                                                                         formControlName="protocol_id"
                                                                         required>
@@ -124,7 +124,7 @@
                                                                 </mat-option>
                                                             </mat-select>
                                                         </mat-form-field>
-                                                        <mat-form-field class="full-width" color="accent">
+                                                        <mat-form-field appearance="outline" class="full-width" color="accent">
                                                             <mat-select placeholder="Interaction"
                                                                         formControlName="interaction"
                                                                         required>
@@ -141,11 +141,11 @@
                                                     <div [formGroupName]="i"
                                                          *ngFor="let attr of serviceAttributeArray(serviceAndIndex.service).controls; let i = index"
                                                          class="attribute">
-                                                        <mat-form-field class="third-width" color="accent">
+                                                        <mat-form-field appearance="outline" class="third-width" color="accent">
                                                             <input matInput placeholder="Key" formControlName="key">
                                                         </mat-form-field>
                                                         =
-                                                        <mat-form-field class="third-width" color="accent">
+                                                        <mat-form-field appearance="outline" class="third-width" color="accent">
                                                             <input matInput placeholder="Value" formControlName="value" *ngIf="attr.get('key')?.value !== timeAttributeKey">
                                                             <senergy-select-search [options]="getTimePathOptions(serviceAndIndex.index)" *ngIf="attr.get('key')?.value === timeAttributeKey"
                                                                                    placeholder="Path"
@@ -177,7 +177,7 @@
 
                                                         <div fxLayout="row" [fxShow]="inOut.show === true">
                                                             <div fxFlex>
-                                                                <mat-form-field class="full-width" color="accent">
+                                                                <mat-form-field appearance="outline" class="full-width" color="accent">
                                                                     <senergy-select-search
                                                                             [options]="serializations"
                                                                             placeholder="Serialization"

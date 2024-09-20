@@ -16,7 +16,7 @@
 <div class="deployments-config-container">
     <div class="layout-margin" fxLayout="column">
         <div *ngIf="ready">
-            <mat-form-field class="full-width" color="accent" *ngIf="hubList && hubList.length">
+            <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="hubList && hubList.length">
                 <senergy-select-search placeholder="Deployment Destination"
                                        [formControl]="selectedHubForm"
                                        [autoSelectSingleElement]="true"
@@ -28,11 +28,11 @@
             <form [formGroup]="deploymentFormGroup">
                 <mat-card appearance="outlined" class="deployment-description">
                     <mat-card-content>
-                        <mat-form-field class="full-width" color="accent">
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
                             <input type="text" matInput placeholder="Prozessname"
                                    formControlName="name">
                         </mat-form-field>
-                        <mat-form-field class="full-width" color="accent">
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
                     <textarea type="text" matInput placeholder="Process Description"
                               formControlName="description" cdkTextareaAutosize
                               #autosize="cdkTextareaAutosize"></textarea>
@@ -66,7 +66,7 @@
                     </mat-card-header>
                     <mat-card-content>
                         <div [formGroupName]="paramIndex" *ngFor="let param of start_parameter; let paramIndex = index; trackBy:trackByFn">
-                            <mat-form-field class="full-width" color="accent">
+                            <mat-form-field appearance="outline" class="full-width" color="accent">
                                 <input type="text"  matInput placeholder="{{param.label}}" formControlName="default">
                             </mat-form-field>
                         </div>
@@ -79,7 +79,7 @@
                          *ngFor="let element of elements; let elementIndex = index; trackBy:trackByFn">
                         <div formGroupName="conditional_event" *ngIf="element.conditional_event !== null">
                             <div formGroupName="selection">
-                                <mat-form-field class="full-width" color="accent">
+                                <mat-form-field appearance="outline" class="full-width" color="accent">
                                     <senergy-select-search placeholder="{{element.name}}" [required]="true"
                                                            formControlName="selection_options_index"
                                                            [scrollWindowSize]="10000"
@@ -90,7 +90,7 @@
                                     </senergy-select-search>
                                 </mat-form-field>
 
-                                <mat-form-field class="full-width" color="accent" *ngIf="element.conditional_event.selection.show === true">
+                                <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="element.conditional_event.selection.show === true">
                                     <senergy-select-search placeholder="Service" [required]="true"
                                                            formControlName="selected_service_id"
                                                            [options]="element.conditional_event.selection.selection_options[element.conditional_event.selection.selection_options_index || 0].services || []"
@@ -99,7 +99,7 @@
                                     </senergy-select-search>
                                 </mat-form-field>
 
-                                <mat-form-field class="full-width" color="accent"
+                                <mat-form-field appearance="outline" class="full-width" color="accent"
                                                 [fxShow]="getPathOptions(elementIndex, 'conditional_event').length > 1">
                                     <senergy-select-search placeholder="Path" [required]="true"
                                                            (selectionChange)="setSelectedPathOptionByElementIndex('conditional_event', elementIndex, $event.value)"
@@ -111,7 +111,7 @@
                             </div>
                             <div formGroupName="variables">
                                 <td *ngFor="let item of element.conditional_event.variables | keyvalue; trackBy:trackByFn">
-                                    <mat-form-field class="full-width" color="accent">
+                                    <mat-form-field appearance="outline" class="full-width" color="accent">
                                         <input type="text" matInput placeholder="{{item.key}}" [formControlName]="'' + item.key">
                                     </mat-form-field>
                                 </td>
@@ -122,7 +122,7 @@
                                 <tr>
                                     <td formGroupName="selection">
 
-                                        <mat-form-field class="full-width" color="accent">
+                                        <mat-form-field appearance="outline" class="full-width" color="accent">
                                             <senergy-select-search placeholder="{{element.name}}" [required]="true"
                                                                    formControlName="selection_options_index"
                                                                    [scrollWindowSize]="10000"
@@ -133,7 +133,7 @@
                                             </senergy-select-search>
                                         </mat-form-field>
 
-                                        <mat-form-field class="full-width" color="accent" *ngIf="element.task.selection.show === true">
+                                        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="element.task.selection.show === true">
                                             <senergy-select-search placeholder="Service" [required]="true"
                                                                    formControlName="selected_service_id"
                                                                    [options]="element.task.selection.selection_options[element.task.selection.selection_options_index || 0].services || []"
@@ -142,7 +142,7 @@
                                             </senergy-select-search>
                                         </mat-form-field>
 
-                                        <mat-form-field class="full-width" color="accent"
+                                        <mat-form-field appearance="outline" class="full-width" color="accent"
                                                         [fxShow]="getPathOptions(elementIndex, 'task').length > 1">
                                             <senergy-select-search placeholder="Path" [required]="true"
                                                                    (selectionChange)="setSelectedPathOptionByElementIndex('task', elementIndex, $event.value)"
@@ -153,7 +153,7 @@
                                         </mat-form-field>
                                     </td>
                                     <td formGroupName="parameter" *ngFor="let item of element.task.parameter | keyvalue; trackBy:trackByFn">
-                                        <mat-form-field class="full-width" color="accent" *ngIf="displayParameter(item.value)">
+                                        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="displayParameter(item.value)">
                                             <input type="text" matInput placeholder="{{item.key}}" [formControlName]="'' + item.key">
                                         </mat-form-field>
                                     </td>
@@ -161,10 +161,10 @@
                                         <ng-container formGroupName="selected_path">
                                             <ng-container formGroupName="configurables">
                                                 <div [formGroupName]="configurableIndex">
-                                                    <mat-form-field class="full-width" color="accent" *ngIf="configurable.type==='https://schema.org/Text'">
+                                                    <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="configurable.type==='https://schema.org/Text'">
                                                         <input type="text"  matInput placeholder="{{configurable.path}}" formControlName="value">
                                                     </mat-form-field>
-                                                    <mat-form-field class="full-width" color="accent" *ngIf="configurable.type==='https://schema.org/Integer' || configurable.type==='https://schema.org/Float'">
+                                                    <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="configurable.type==='https://schema.org/Integer' || configurable.type==='https://schema.org/Float'">
                                                         <input type="number"  matInput placeholder="{{configurable.path}}" formControlName="value">
                                                     </mat-form-field>
                                                     <mat-checkbox *ngIf="configurable.type==='https://schema.org/Boolean'" formControlName="value">
@@ -181,7 +181,7 @@
                             <table class="full-width">
                                 <tr>
                                     <td formGroupName="selection">
-                                        <mat-form-field class="full-width" color="accent">
+                                        <mat-form-field appearance="outline" class="full-width" color="accent">
                                             <senergy-select-search placeholder="{{element.name}}" [required]="true"
                                                                    [scrollWindowSize]="10000"
                                                                    formControlName="selection_options_index"
@@ -192,7 +192,7 @@
                                             </senergy-select-search>
                                         </mat-form-field>
 
-                                        <mat-form-field class="full-width" color="accent"
+                                        <mat-form-field appearance="outline" class="full-width" color="accent"
                                                         *ngIf="element.message_event.selection.show === true">
                                             <senergy-select-search placeholder="Service" [required]="true"
                                                                    formControlName="selected_service_id"
@@ -203,7 +203,7 @@
                                             </senergy-select-search>
                                         </mat-form-field>
 
-                                        <mat-form-field class="full-width" color="accent"
+                                        <mat-form-field appearance="outline" class="full-width" color="accent"
                                                         [fxShow]="getPathOptions(elementIndex, 'message_event').length > 1">
                                             <senergy-select-search placeholder="Path" [required]="true"
                                                                    (selectionChange)="setSelectedPathOptionByElementIndex('message_event', elementIndex, $event.value)"
@@ -214,7 +214,7 @@
                                         </mat-form-field>
                                     </td>
                                     <td>
-                                        <mat-form-field class="full-width" color="accent">
+                                        <mat-form-field appearance="outline" class="full-width" color="accent">
                                             <senergy-select-search placeholder="Handler" [required]="true"
                                                                    formControlName="flow_id"
                                                                    [options]="handlerList"
@@ -224,7 +224,7 @@
                                         </mat-form-field>
                                     </td>
                                     <td>
-                                        <mat-form-field class="full-width" color="accent">
+                                        <mat-form-field appearance="outline" class="full-width" color="accent">
                                             <input type="text" matInput placeholder="Value {{characteristicNames.get(element.message_event.selection.filter_criteria.characteristic_id || '')}}"
                                                    formControlName="value">
                                         </mat-form-field>
