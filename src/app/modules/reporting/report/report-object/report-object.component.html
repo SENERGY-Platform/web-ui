@@ -13,9 +13,14 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<mat-card class="report-component">
+<mat-expansion-panel *ngIf="data !== undefined" class="reporting-object" >
+    <mat-expansion-panel-header>
+        <mat-panel-title> {{ name }} </mat-panel-title>
+        <mat-panel-description *ngIf="inputType==='value' && data.value !== undefined"> {{data.valueType }} - {{inputType}} - {{data.value}} </mat-panel-description>
+        <mat-panel-description *ngIf="inputType==='value' && data.value === undefined"> {{data.valueType }} - {{inputType}}</mat-panel-description>
+        <mat-panel-description *ngIf="inputType==='query'"> {{data.valueType }} - {{inputType}} - {{data.query?.deviceId}}/{{data.query?.serviceId}}  </mat-panel-description>
+    </mat-expansion-panel-header>
     <div fxLayout="column">
-        <mat-card-content *ngIf="data !== undefined">
             <div fxLayout="row">
             <mat-radio-group
                     *ngIf="data.valueType === 'string' || data.valueType === 'float64' || data.valueType === 'array'"
@@ -110,6 +115,5 @@
                     </senergy-reporting-object>
                 </div>
             </div>
-        </mat-card-content>
     </div>
-</mat-card>
+</mat-expansion-panel>
