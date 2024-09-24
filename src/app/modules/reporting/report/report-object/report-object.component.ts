@@ -30,6 +30,10 @@ import {MatDialog} from '@angular/material/dialog';
 import {QueryPreviewDialogComponent} from './query-preview/query-preview-dialog.component';
 
 
+class TimeFormField {
+    constructor(public timeNumber: string, public timeUnit: string) {}
+}
+
 @Component({
     selector: 'senergy-reporting-object',
     templateUrl: './report-object.component.html',
@@ -49,6 +53,10 @@ export class ReportObjectComponent implements OnInit{
     queryServicePaths: string[] = [];
     queryDeviceType: DeviceTypeModel = {} as DeviceTypeModel;
     queryPreview = '';
+    fieldGroupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median', 'time-weighted-mean-linear', 'time-weighted-mean-locf'];
+    groupingTime = {number: '12', unit: 'months'};
+    timeUnits = ['ms', 's','months','m','h','d','w','y'];
+    timeframe = {number: '1', unit: 'months'};
 
     constructor(
         private deviceTypeService: DeviceTypeService,
@@ -59,6 +67,8 @@ export class ReportObjectComponent implements OnInit{
     ngOnInit() {
         if (this.data?.query !== undefined) {
             this.inputType = 'query';
+            this.getGroupingTime();
+            this.getTimeframe();
         }
     }
 
@@ -88,6 +98,8 @@ export class ReportObjectComponent implements OnInit{
                     deviceId: '',
                     serviceId: ''
                 };
+                this.getGroupingTime();
+                this.getTimeframe();
             } else {
                 if (this.origData.value !== undefined) {
                     this.data.value = this.origData.value;
@@ -168,5 +180,34 @@ export class ReportObjectComponent implements OnInit{
         }
     }
 
+    setGroupingTime() {
+        if (this.data?.query !== undefined) {
+            this.data.query.groupTime = this.groupingTime.number + this.groupingTime.unit;
+        }
+    }
+
+    getGroupingTime() {
+        let splitString;
+        if (this.data?.query?.groupTime !== undefined) {
+            splitString = this.data.query.groupTime.split(/(\d+)/);
+            this.groupingTime.number = splitString[1];
+            this.groupingTime.unit = splitString[2];
+        }
+    }
+
+    setTimeframe() {
+        if (this.data?.query?.time !== undefined) {
+            this.data.query.time.last = this.timeframe.number + this.timeframe.unit;
+        }
+    }
+
+    getTimeframe() {
+        let splitString;
+        if (this.data?.query?.time?.last !== undefined) {
+            splitString = this.data?.query?.time?.last.split(/(\d+)/);
+            this.timeframe.number = splitString[1];
+            this.timeframe.unit = splitString[2];
+        }
+    }
 
 }

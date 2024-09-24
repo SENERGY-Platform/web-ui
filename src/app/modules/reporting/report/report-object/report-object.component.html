@@ -71,17 +71,34 @@
                 </mat-form-field>
                 <mat-form-field fxFlex color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
                     <mat-label>Field Group Type</mat-label>
-                    <input matInput [(ngModel)]="data.query!.columns[0].groupType">
+                    <senergy-select-search [(ngModel)]="data.query!.columns[0].groupType" placeholder="Field Group Type"
+                                           [options]="fieldGroupTypes">
+                    </senergy-select-search>
                 </mat-form-field>
-
-                <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>GroupingTime</mat-label>
-                    <input matInput [(ngModel)]="data.query!.groupTime">
-                </mat-form-field>
-                <mat-form-field fxFlex color="accent" appearance="outline" *ngIf="data.query?.time !== undefined">
-                    <mat-label>Timeframe</mat-label>
-                    <input matInput [(ngModel)]="data.query!.time!.last">
-                </mat-form-field>
+                <div role="group">
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>GroupingTime</mat-label>
+                        <input matInput [(ngModel)]="groupingTime.number" (ngModelChange)="setGroupingTime()">
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>GroupingTimeUnit</mat-label>
+                        <senergy-select-search [(ngModel)]="groupingTime.unit" placeholder="GroupingTimeUnit"
+                                               [options]="timeUnits" (ngModelChange)="setGroupingTime()">
+                        </senergy-select-search>
+                    </mat-form-field>
+                </div>
+                <div role="group">
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Timeframe</mat-label>
+                        <input matInput [(ngModel)]="timeframe.number" (ngModelChange)="setTimeframe()">
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>TimeframeUnit</mat-label>
+                        <senergy-select-search [(ngModel)]="timeframe.unit" placeholder="TimeframeUnit"
+                                               [options]="timeUnits" (ngModelChange)="setTimeframe()">
+                        </senergy-select-search>
+                    </mat-form-field>
+                </div>
             </div>
 
             <div *ngIf="inputType === 'value'" fxLayout="column">
