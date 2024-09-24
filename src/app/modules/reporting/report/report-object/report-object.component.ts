@@ -29,11 +29,6 @@ import {ExportDataService} from '../../../../widgets/shared/export-data.service'
 import {MatDialog} from '@angular/material/dialog';
 import {QueryPreviewDialogComponent} from './query-preview/query-preview-dialog.component';
 
-
-class TimeFormField {
-    constructor(public timeNumber: string, public timeUnit: string) {}
-}
-
 @Component({
     selector: 'senergy-reporting-object',
     templateUrl: './report-object.component.html',
