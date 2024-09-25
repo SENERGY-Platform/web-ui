@@ -40,8 +40,8 @@ import {ImportInstancesService} from '../../imports/import-instances/shared/impo
 import {ImportInstancesModel} from '../../imports/import-instances/shared/import-instances.model';
 import {ImportTypeContentVariableModel, ImportTypeModel} from '../../imports/import-types/shared/import-types.model';
 import {ImportTypesService} from '../../imports/import-types/shared/import-types.service';
-import {map} from 'rxjs/operators';
-import {AbstractControl, FormArray, UntypedFormBuilder, Validators} from '@angular/forms';
+import {map, startWith} from 'rxjs/operators';
+import {AbstractControl, FormArray, FormControl, UntypedFormBuilder, Validators} from '@angular/forms';
 import * as _ from 'lodash';
 import {BrokerExportService} from '../shared/broker-export.service';
 import {PageEvent} from '@angular/material/paginator';
@@ -57,6 +57,10 @@ export class NewExportComponent implements OnInit {
     defaultPageSize = 5;
     offset = 0;
     lastPageEvent: PageEvent | undefined;
+
+    public formatControl = new FormControl('');
+    timestamp_formats: string[] = ['%Y-%m-%dT%H:%M:%S.%fZ']
+    filtered_formats: Observable<string[]> = new Observable();
 
     exportForm = this.fb.group({
         selector: ['', Validators.required],
@@ -278,6 +282,11 @@ export class NewExportComponent implements OnInit {
             }, 0);
             this.ready = true;
         });
+
+        this.filtered_formats = this.formatControl.valueChanges.pipe(
+            startWith(''),
+            map(value => this._filter(value || '')),
+        );
     }
 
     onSubmit() {
@@ -788,5 +797,10 @@ export class NewExportComponent implements OnInit {
 
     isTimescaleSelected() {
         return this.exportDatabases.find((e: ExportDatabaseModel) => e.ID === this.exportForm.getRawValue().exportDatabaseId)?.Type === DatabaseType.timescaledb;
+    }
+
+    private _filter(value: string): string[] {
+        const filterValue = value.toLowerCase()
+        return this.timestamp_formats.filter(format => format.toLowerCase().includes(filterValue));
     }
 }

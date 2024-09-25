@@ -163,7 +163,14 @@
 
                 <mat-form-field fxFill color="accent" appearance="outline" *ngIf="isTimescaleSelected()">
                     <mat-label>Timestamp Format</mat-label>
-                    <input matInput formControlName="timestampFormat" placeholder="Timestamp Format"/>
+                    <input matInput
+                           formControlName="timestampFormat"
+                           placeholder="Choose or write yourself"
+                           [formControl]="formatControl"
+                           [matAutocomplete]="auto"/>
+                    <mat-autocomplete #auto="matAutocomplete">
+                        <mat-option *ngFor='let format of filtered_formats| async' [value]="format">{{format}}</mat-option>
+                    </mat-autocomplete>
                 </mat-form-field>
 
                 <mat-checkbox formControlName="allMessages">Consume all messages</mat-checkbox>
