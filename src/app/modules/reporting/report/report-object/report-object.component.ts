@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnInit, SimpleChanges} from '@angular/core';
-import {ReportObjectModel} from '../../shared/reporting.model';
-import {QueriesRequestTimeModel} from '../../../../widgets/shared/export-data.model';
-import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
-import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
+import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
+import { ReportObjectModel } from '../../shared/reporting.model';
+import { QueriesRequestTimeModel } from '../../../../widgets/shared/export-data.model';
+import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
+import { DeviceInstancesModel } from '../../../devices/device-instances/shared/device-instances.model';
 import {
     DeviceTypeContentModel,
     DeviceTypeContentVariableModel,
     DeviceTypeModel,
     DeviceTypeServiceModel
 } from '../../../metadata/device-types-overview/shared/device-type.model';
-import {ExportDataService} from '../../../../widgets/shared/export-data.service';
-import {MatDialog} from '@angular/material/dialog';
-import {QueryPreviewDialogComponent} from './query-preview/query-preview-dialog.component';
+import { ExportDataService } from '../../../../widgets/shared/export-data.service';
+import { MatDialog } from '@angular/material/dialog';
+import { QueryPreviewDialogComponent } from './query-preview/query-preview-dialog.component';
 import { map, Observable, of } from 'rxjs';
 
 class TimeUnit {
-    constructor(unit:string, desc:string) {
+    constructor(unit: string, desc: string) {
         this.unit = unit;
         this.desc = desc;
     }
@@ -46,7 +46,7 @@ class TimeUnit {
 })
 
 
-export class ReportObjectComponent implements OnInit{
+export class ReportObjectComponent implements OnInit {
 
     @Input() name = '';
     @Input() data: ReportObjectModel | undefined;
@@ -61,20 +61,20 @@ export class ReportObjectComponent implements OnInit{
     queryDeviceType: DeviceTypeModel = {} as DeviceTypeModel;
     queryPreview = '';
     fieldGroupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median', 'time-weighted-mean-linear', 'time-weighted-mean-locf'];
-    groupingTime = {number: '12', unit: 'months'};
+    groupingTime = { number: '12', unit: 'months' };
     timeUnits = [
-        new TimeUnit('ms', 'Milliseconds'), 
-        new TimeUnit('s', 'Seconds'), 
-        new TimeUnit('m', 'Minutes'), 
-        new TimeUnit('h', 'Hours'), 
-        new TimeUnit('d', 'Days'), 
+        new TimeUnit('ms', 'Milliseconds'),
+        new TimeUnit('s', 'Seconds'),
+        new TimeUnit('m', 'Minutes'),
+        new TimeUnit('h', 'Hours'),
+        new TimeUnit('d', 'Days'),
         new TimeUnit('w', 'Weeks'),
         new TimeUnit('months', 'Months'),
         new TimeUnit('y', 'Years'),
     ];
-    timeframe = {number: '1', unit: 'months'};
+    timeframe = { number: '1', unit: 'months' };
 
-    
+
 
     constructor(
         private deviceTypeService: DeviceTypeService,
@@ -87,7 +87,7 @@ export class ReportObjectComponent implements OnInit{
             this.inputType = 'query';
             this.getGroupingTime();
             this.getTimeframe();
-            
+
         }
     }
 
@@ -103,7 +103,7 @@ export class ReportObjectComponent implements OnInit{
                                     this.queryService = service;
                                     this.queryServiceChanged(service);
                                 }
-                            })  
+                            })
                         });
                     }
                 })
@@ -131,8 +131,8 @@ export class ReportObjectComponent implements OnInit{
                 delete this.data?.fields;
                 delete this.data?.length;
                 this.data.query = {
-                    columns: [{name: 'energy.value', groupType: 'difference-last'}],
-                    time: {last: '12months'} as QueriesRequestTimeModel,
+                    columns: [{ name: 'energy.value', groupType: 'difference-last' }],
+                    time: { last: '12months' } as QueriesRequestTimeModel,
                     groupTime: '1months',
                     deviceId: '',
                     serviceId: ''
@@ -157,7 +157,7 @@ export class ReportObjectComponent implements OnInit{
         }
     }
 
-    queryDeviceChanged(device: DeviceInstancesModel): Observable<DeviceTypeModel | null>  {
+    queryDeviceChanged(device: DeviceInstancesModel): Observable<DeviceTypeModel | null> {
         if (this.data !== undefined && this.data.query !== undefined) {
             this.data.query.deviceId = device.id;
             return this.deviceTypeService.getDeviceType(device.device_type.id).pipe(map((resp: DeviceTypeModel | null) => {
@@ -185,13 +185,18 @@ export class ReportObjectComponent implements OnInit{
         if (this.data !== undefined && this.data.query !== undefined) {
             this.exportDataService.queryTimescaleV2([this.data.query]).subscribe((resp) => {
                 if (resp !== undefined) {
-                    const response: any = [];
-                    resp[0].data[0].forEach(value => {
-                        response.push(value[1]);
-                    });
-                    this.queryPreview = JSON.stringify(response, undefined, 4).replace(/ /g, ' ').replace(/\n/g, '<br/>');
+                    let response: any = {};
+                    for (let key in resp[0].data[0]) {
+                        let value = resp[0].data[0][key];
+                        for (let keyInner in value) {
+                            if (key === '0') {
+                                response['Key ' + keyInner] = [];
+                            }
+                            response['Key ' + keyInner].push(value[keyInner]);
+                        }
+                    }
                     this.dialog.open(QueryPreviewDialogComponent, {
-                        data: {dataString: this.queryPreview, dataCount: response.length},
+                        data: { jsonData: response, dataCount: response['Key '+ 0].length },
                     });
                 }
             });

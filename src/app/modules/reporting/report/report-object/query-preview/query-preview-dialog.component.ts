@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     selector: 'senergy-reporting-query-preview-dialog',
     templateUrl: './query-preview-dialog.component.html',
     styleUrls: ['./query-preview-dialog.component.css'],
 })
-export class QueryPreviewDialogComponent  {
+export class QueryPreviewDialogComponent {
 
-    constructor(@Inject(MAT_DIALOG_DATA) public queryPreview: {dataString: string; dataCount: number},
-                private dialogRef: MatDialogRef<QueryPreviewDialogComponent>) {
+    values: string[] = [];
+
+    constructor(@Inject(MAT_DIALOG_DATA) public queryPreview: { jsonData: any; dataCount: number },
+        private dialogRef: MatDialogRef<QueryPreviewDialogComponent>) {
+            Object.entries(queryPreview.jsonData).forEach(([key, value]) => {
+                this.values.push(JSON.stringify({ [key]: value }, undefined, 4).replace(/ /g, ' ').replace(/\n/g, '<br/>'));
+            });
     }
 
     onCloseClick(): void {

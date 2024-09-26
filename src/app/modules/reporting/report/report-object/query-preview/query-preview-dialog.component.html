@@ -16,7 +16,9 @@
 <h2 mat-dialog-title>Query Result</h2>
 <mat-dialog-content>
     <p>Item count: {{queryPreview.dataCount}}</p>
-    <pre [innerHTML]="queryPreview.dataString"></pre>
+    <div fxLayout="row">
+      <pre *ngFor="let value of values" [innerHTML]="value" class="json-container"></pre>
+    </div>
 </mat-dialog-content>
 <mat-dialog-actions>
     <button mat-button mat-raised-button color="accent" (click)="onCloseClick()">Close</button>
