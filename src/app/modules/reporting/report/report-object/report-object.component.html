@@ -16,8 +16,9 @@
 <mat-expansion-panel *ngIf="data !== undefined" class="reporting-object" >
     <mat-expansion-panel-header>
         <mat-panel-title> {{ name }} </mat-panel-title>
-        <mat-panel-description *ngIf="inputType==='value' && data.value !== undefined"> {{data.valueType }} - {{inputType}} - {{data.value}} </mat-panel-description>
-        <mat-panel-description *ngIf="inputType==='value' && data.value === undefined"> {{data.valueType }} - {{inputType}}</mat-panel-description>
+        <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value !== undefined"> {{data.valueType }} - {{inputType}} - {{data.value}} </mat-panel-description>
+        <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value === undefined"> {{data.valueType }} - {{inputType}}</mat-panel-description>
+        <mat-panel-description *ngIf="data.valueType==='object'"> {{data.valueType }}</mat-panel-description>
         <mat-panel-description *ngIf="inputType==='query'"> {{data.valueType }} - {{inputType}} - {{data.query?.deviceId}}/{{data.query?.serviceId}}  </mat-panel-description>
     </mat-expansion-panel-header>
     <div fxLayout="column">
