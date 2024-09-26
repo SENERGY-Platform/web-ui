@@ -24,10 +24,10 @@ import {
     TemplateModel,
     TemplateResponseModel
 } from '../shared/reporting.model';
-import {ReportingService} from '../shared/reporting.service';
-import {ActivatedRoute} from '@angular/router';
-import {DeviceInstancesService} from '../../devices/device-instances/shared/device-instances.service';
-import {DeviceInstancesModel} from '../../devices/device-instances/shared/device-instances.model';
+import { ReportingService } from '../shared/reporting.service';
+import { ActivatedRoute } from '@angular/router';
+import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
+import { DeviceInstancesModel } from '../../devices/device-instances/shared/device-instances.model';
 
 @Component({
     selector: 'senergy-reporting-new',
@@ -38,7 +38,7 @@ export class ReportComponent implements OnInit {
 
     reportName = '';
     reportId: string | null = null;
-    template: TemplateModel = {data:{}} as TemplateModel;
+    template: TemplateModel = { data: {} } as TemplateModel;
     report: ReportModel = {} as ReportModel;
     ready = false;
     templateId: string | null = '';
@@ -66,7 +66,7 @@ export class ReportComponent implements OnInit {
                     this.report = resp.data;
                     this.templateId = this.report.templateId;
                     this.reportName = this.report.name;
-                    this.template.data = {dataJsonString: '', dataStructured: {} as Map<string, ReportObjectModel>, id: '', name: ''};
+                    this.template.data = { dataJsonString: '', dataStructured: {} as Map<string, ReportObjectModel>, id: '', name: '' };
                     this.template.data.dataStructured = this.report.data;
                     this.reportingService.getTemplate(this.templateId).subscribe((resp2: TemplateResponseModel | null) => {
                         if (resp2 !== null) {
@@ -86,10 +86,12 @@ export class ReportComponent implements OnInit {
         this.ready = true;
     }
 
-    create(){
-        this.reportingService.createReport({id: this.reportId, templateId: this.templateId, name: this.reportName,
-            templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe(resp => {
-            if (resp !== null)  {
+    create() {
+        this.reportingService.createReport({
+            id: this.reportId, templateId: this.templateId, name: this.reportName,
+            templateName: this.template.name, data: this.template.data?.dataStructured
+        } as ReportModel).subscribe(resp => {
+            if (resp !== null) {
                 if (resp.status === 200) {
                     this.snackBar.open('Report created', 'ReportCreate', {
                         duration: 2000
@@ -99,13 +101,38 @@ export class ReportComponent implements OnInit {
         });
     }
 
-    save(){
-        this.reportingService.saveReport({templateId: this.templateId, name: this.reportName,
-            templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe();
+    /**
+     * Saves the current report to the reporting service.
+     *
+     * @return {void} No return value, but opens a snackbar with a success message if the report is saved successfully.
+     */
+    save() {
+        this.reportingService.saveReport({
+            templateId: this.templateId, name: this.reportName,
+            templateName: this.template.name, data: this.template.data?.dataStructured
+        } as ReportModel).subscribe(resp => {
+            if (resp !== null) {
+                if (resp.status === 200) {
+                    this.snackBar.open('Report saved', 'ReportSave', {
+                        duration: 2000
+                    });
+                }
+            }
+        });
     }
 
-    update(){
-        this.reportingService.updateReport({id: this.reportId, templateId: this.templateId, name: this.reportName,
-            templateName: this.template.name, data: this.template.data?.dataStructured} as ReportModel).subscribe();
+    update() {
+        this.reportingService.updateReport({
+            id: this.reportId, templateId: this.templateId, name: this.reportName,
+            templateName: this.template.name, data: this.template.data?.dataStructured
+        } as ReportModel).subscribe(resp => {
+            if (resp !== null) {
+                if (resp.status === 200) {
+                    this.snackBar.open('Report updated', 'ReportUpdate', {
+                        duration: 2000
+                    });
+                }
+            }
+        });
     }
 }

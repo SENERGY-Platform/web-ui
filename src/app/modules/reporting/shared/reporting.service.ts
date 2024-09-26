@@ -61,14 +61,14 @@ export class ReportingService {
     }
 
     saveReport(data: ReportModel = {} as ReportModel): Observable<HttpResponse<string> | null> {
-        return this.http.post<any>(environment.reportEngineUrl + '/report', data)
+        return this.http.post<any>(environment.reportEngineUrl + '/report', data, {observe: 'response'})
             .pipe(
                 catchError(this.errorHandlerService.handleError(ReportingService.name, 'saveReport: Error', null)),
             );
     }
 
     updateReport(data: ReportModel = {} as ReportModel): Observable<HttpResponse<string> | null> {
-        return this.http.put<any>(environment.reportEngineUrl + '/report', data)
+        return this.http.put<any>(environment.reportEngineUrl + '/report', data,{observe: 'response'} )
             .pipe(
                 catchError(this.errorHandlerService.handleError(ReportingService.name, 'updateReport: Error', null)),
             );
