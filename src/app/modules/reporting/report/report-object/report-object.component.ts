@@ -30,11 +30,22 @@ import {MatDialog} from '@angular/material/dialog';
 import {QueryPreviewDialogComponent} from './query-preview/query-preview-dialog.component';
 import { map, Observable, of } from 'rxjs';
 
+class TimeUnit {
+    constructor(unit:string, desc:string) {
+        this.unit = unit;
+        this.desc = desc;
+    }
+    unit: string;
+    desc: string;
+}
+
 @Component({
     selector: 'senergy-reporting-object',
     templateUrl: './report-object.component.html',
     styleUrls: ['./report-object.component.css'],
 })
+
+
 export class ReportObjectComponent implements OnInit{
 
     @Input() name = '';
@@ -51,8 +62,19 @@ export class ReportObjectComponent implements OnInit{
     queryPreview = '';
     fieldGroupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median', 'time-weighted-mean-linear', 'time-weighted-mean-locf'];
     groupingTime = {number: '12', unit: 'months'};
-    timeUnits = ['ms', 's','months','m','h','d','w','y'];
+    timeUnits = [
+        new TimeUnit('ms', 'Milliseconds'), 
+        new TimeUnit('s', 'Seconds'), 
+        new TimeUnit('m', 'Minutes'), 
+        new TimeUnit('h', 'Hours'), 
+        new TimeUnit('d', 'Days'), 
+        new TimeUnit('w', 'Weeks'),
+        new TimeUnit('months', 'Months'),
+        new TimeUnit('y', 'Years'),
+    ];
     timeframe = {number: '1', unit: 'months'};
+
+    
 
     constructor(
         private deviceTypeService: DeviceTypeService,

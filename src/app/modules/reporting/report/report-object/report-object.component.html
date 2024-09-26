@@ -13,117 +13,110 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<mat-expansion-panel *ngIf="data !== undefined" class="reporting-object" >
+<mat-expansion-panel *ngIf="data !== undefined" class="reporting-object">
     <mat-expansion-panel-header>
         <mat-panel-title> {{ name }} </mat-panel-title>
-        <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value !== undefined"> {{data.valueType }} - {{inputType}}:{{data.value}} </mat-panel-description>
-        <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value === undefined"> {{data.valueType }} - {{inputType}}</mat-panel-description>
+        <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value !== undefined">
+            {{data.valueType }} - {{inputType}}:{{data.value}} </mat-panel-description>
+        <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value === undefined">
+            {{data.valueType }} - {{inputType}}</mat-panel-description>
         <mat-panel-description *ngIf="data.valueType==='object'"> {{data.valueType }}</mat-panel-description>
-        <mat-panel-description *ngIf="inputType==='query'"> {{data.valueType }} - {{inputType}} - {{data.query?.deviceId}}/{{data.query?.serviceId}}  </mat-panel-description>
+        <mat-panel-description *ngIf="inputType==='query'"> {{data.valueType }} - {{inputType}} -
+            {{data.query?.deviceId}}/{{data.query?.serviceId}} </mat-panel-description>
     </mat-expansion-panel-header>
     <div fxLayout="column">
-            <div fxLayout="row">
+        <div fxLayout="row">
             <mat-radio-group
-                    *ngIf="data.valueType === 'string' || data.valueType === 'float64' || data.valueType === 'array'"
-                    [(ngModel)]="inputType" (ngModelChange)="changeInputType()" aria-label="Select an option">
+                *ngIf="data.valueType === 'string' || data.valueType === 'float64' || data.valueType === 'array'"
+                [(ngModel)]="inputType" (ngModelChange)="changeInputType()" aria-label="Select an option">
                 <mat-radio-button value="value">Value</mat-radio-button>
                 <mat-radio-button value="query">Query</mat-radio-button>
             </mat-radio-group>
-                <button *ngIf="inputType === 'query' && data.query !== undefined" mat-icon-button matTooltip="Preview Query" (click)="previewQuery()">
-                    <mat-icon>preview</mat-icon>
-                </button>
-            </div>
-            <div *ngIf="inputType === 'query' && data.query !== undefined" fxLayout="column">
+            <button *ngIf="inputType === 'query' && data.query !== undefined" mat-icon-button matTooltip="Preview Query"
+                (click)="previewQuery()">
+                <mat-icon>preview</mat-icon>
+            </button>
+        </div>
+        <div *ngIf="inputType === 'query' && data.query !== undefined" fxLayout="column">
+            <mat-form-field fxFlex color="accent" appearance="outline">
+                <mat-label>Device</mat-label>
+                <senergy-select-search [options]="allDevices" useOptionViewProperty="name" placeholder="Device"
+                    ngDefaultControl (ngModelChange)="queryDeviceChanged($event)" [(ngModel)]="queryDevice"
+                    [multiple]="false">
+                </senergy-select-search>
+            </mat-form-field>
+            <mat-form-field fxFlex color="accent" appearance="outline">
+                <mat-label>Service</mat-label>
+                <senergy-select-search (ngModelChange)="queryServiceChanged($event)" placeholder="Service"
+                    [(ngModel)]="queryService" [options]="queryDeviceType.services" useOptionViewProperty="name">
+                </senergy-select-search>
+            </mat-form-field>
+            <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
+                <mat-label>Path</mat-label>
+                <input matInput [(ngModel)]="data.query!.columns[0].name" placeholder="Choose or write yourself"
+                    [matAutocomplete]="auto" />
+                <mat-autocomplete #auto="matAutocomplete">
+                    <mat-option *ngFor="let path of queryServicePaths | keyvalue"
+                        [value]="path.value">{{path.value}}</mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
+                <mat-label>Field Group Type</mat-label>
+                <mat-select [(ngModel)]="data.query!.columns[0].groupType">
+                    <mat-option *ngFor="let type of fieldGroupTypes" [value]="type">{{type}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <div role="group" class="form-grouping">
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>Device</mat-label>
-                    <senergy-select-search [options]="allDevices"
-                                           useOptionViewProperty="name"
-                                           placeholder="Device" ngDefaultControl
-                                           (ngModelChange)="queryDeviceChanged($event)"
-                                           [(ngModel)]="queryDevice"
-                                           [multiple]="false">
-                    </senergy-select-search>
+                    <mat-label>GroupingTime</mat-label>
+                    <input matInput [(ngModel)]="groupingTime.number" (ngModelChange)="setGroupingTime()">
                 </mat-form-field>
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>Service</mat-label>
-                    <senergy-select-search (ngModelChange)="queryServiceChanged($event)" placeholder="Service"
-                                           [(ngModel)]="queryService"
-                                           [options]="queryDeviceType.services"
-                                           useOptionViewProperty="name">
-                    </senergy-select-search>
+                    <mat-label>GroupingTimeUnit</mat-label>
+                    <mat-select [(ngModel)]="groupingTime.unit" (ngModelChange)="setGroupingTime()">
+                        <mat-option *ngFor="let units of timeUnits" [value]="units.unit">{{units.desc}}</mat-option>
+                    </mat-select>
                 </mat-form-field>
-                <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
-                    <mat-label>Path</mat-label>
-                    <input matInput
-                           [(ngModel)]="data.query!.columns[0].name"
-                           placeholder="Choose or write yourself"
-                           [matAutocomplete]="auto"/>
-                    <mat-autocomplete #auto="matAutocomplete">
-                            <mat-option *ngFor="let path of queryServicePaths | keyvalue" [value]="path.value">{{path.value}}</mat-option>
-                    </mat-autocomplete>
-                </mat-form-field>
-                <mat-form-field fxFlex color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
-                    <mat-label>Field Group Type</mat-label>
-                    <senergy-select-search [(ngModel)]="data.query!.columns[0].groupType" placeholder="Field Group Type"
-                                           [options]="fieldGroupTypes">
-                    </senergy-select-search>
-                </mat-form-field>
-                <div role="group" class="form-grouping">
-                    <mat-form-field fxFlex color="accent" appearance="outline">
-                        <mat-label>GroupingTime</mat-label>
-                        <input matInput [(ngModel)]="groupingTime.number" (ngModelChange)="setGroupingTime()">
-                    </mat-form-field>
-                    <mat-form-field fxFlex color="accent" appearance="outline">
-                        <mat-label>GroupingTimeUnit</mat-label>
-                        <senergy-select-search [(ngModel)]="groupingTime.unit" placeholder="GroupingTimeUnit"
-                                               [options]="timeUnits" (ngModelChange)="setGroupingTime()">
-                        </senergy-select-search>
-                    </mat-form-field>
-                </div>
-                <div role="group" class="form-grouping">
-                    <mat-form-field fxFlex color="accent" appearance="outline">
-                        <mat-label>Timeframe</mat-label>
-                        <input matInput [(ngModel)]="timeframe.number" (ngModelChange)="setTimeframe()">
-                    </mat-form-field>
-                    <mat-form-field fxFlex color="accent" appearance="outline">
-                        <mat-label>TimeframeUnit</mat-label>
-                        <senergy-select-search [(ngModel)]="timeframe.unit" placeholder="TimeframeUnit"
-                                               [options]="timeUnits" (ngModelChange)="setTimeframe()">
-                        </senergy-select-search>
-                    </mat-form-field>
-                </div>
             </div>
-
-            <div *ngIf="inputType === 'value'" fxLayout="column">
-                <div *ngIf="data.valueType === 'string'">
-                    <mat-form-field fxFlex color="accent" appearance="outline">
-                        <mat-label>{{ name }} string</mat-label>
-                        <input matInput [(ngModel)]="data.value">
-                    </mat-form-field>
-                </div>
-                <div *ngIf="data.valueType === 'float64'">
-                    <mat-form-field fxFlex color="accent" appearance="outline">
-                        <mat-label>{{ name }} float64</mat-label>
-                        <input matInput [(ngModel)]="data.value">
-                    </mat-form-field>
-                </div>
-                <div *ngIf="data.valueType === 'object' && data.fields !== undefined">
-
-                    <senergy-reporting-object *ngFor="let element of data.fields | keyvalue"
-                                              [requestObject]="requestObject"
-                                              [name]="name+element.key"
-                                              [data]="element.value"
-                                              [allDevices]="allDevices">
-                    </senergy-reporting-object>
-                </div>
-                <div *ngIf="data.valueType === 'array' && data.children !== undefined">
-                    <senergy-reporting-object *ngFor="let element of data.children | keyvalue"
-                                              [requestObject]="requestObject"
-                                              [name]="name+element.key"
-                                              [data]="element.value"
-                                              [allDevices]="allDevices">
-                    </senergy-reporting-object>
-                </div>
+            <div role="group" class="form-grouping">
+                <mat-form-field fxFlex color="accent" appearance="outline">
+                    <mat-label>Timeframe</mat-label>
+                    <input matInput [(ngModel)]="timeframe.number" (ngModelChange)="setTimeframe()">
+                </mat-form-field>
+                <mat-form-field fxFlex color="accent" appearance="outline">
+                    <mat-label>TimeframeUnit</mat-label>
+                    <mat-select [(ngModel)]="timeframe.unit" (ngModelChange)="setTimeframe()">
+                        <mat-option *ngFor="let units of timeUnits" [value]="units.unit">{{units.desc}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
             </div>
+        </div>
+
+        <div *ngIf="inputType === 'value'" fxLayout="column">
+            <div *ngIf="data.valueType === 'string'">
+                <mat-form-field fxFlex color="accent" appearance="outline">
+                    <mat-label>{{ name }} string</mat-label>
+                    <input matInput [(ngModel)]="data.value">
+                </mat-form-field>
+            </div>
+            <div *ngIf="data.valueType === 'float64'">
+                <mat-form-field fxFlex color="accent" appearance="outline">
+                    <mat-label>{{ name }} float64</mat-label>
+                    <input matInput [(ngModel)]="data.value">
+                </mat-form-field>
+            </div>
+            <div *ngIf="data.valueType === 'object' && data.fields !== undefined">
+
+                <senergy-reporting-object *ngFor="let element of data.fields | keyvalue" [requestObject]="requestObject"
+                    [name]="name+element.key" [data]="element.value" [allDevices]="allDevices">
+                </senergy-reporting-object>
+            </div>
+            <div *ngIf="data.valueType === 'array' && data.children !== undefined">
+                <senergy-reporting-object *ngFor="let element of data.children | keyvalue"
+                    [requestObject]="requestObject" [name]="name+element.key" [data]="element.value"
+                    [allDevices]="allDevices">
+                </senergy-reporting-object>
+            </div>
+        </div>
     </div>
 </mat-expansion-panel>
