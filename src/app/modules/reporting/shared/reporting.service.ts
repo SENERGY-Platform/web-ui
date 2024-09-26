@@ -21,6 +21,7 @@ import { environment } from '../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import {
+    ReportCreateResponseModel,
     ReportListResponseModel, ReportModel,
     ReportResponseModel,
     TemplateListResponseModel,
@@ -53,10 +54,11 @@ export class ReportingService {
             );
     }
 
-    createReport(data: ReportModel = {} as ReportModel): Observable<HttpResponse<string> | null> {
-        return this.http.post<any>(environment.reportEngineUrl + '/report/create', data,{observe: 'response'})
+    createReport(data: ReportModel = {} as ReportModel): Observable<ReportCreateResponseModel | null> {
+        return this.http.post<ReportCreateResponseModel>(environment.reportEngineUrl + '/report/create', data)
             .pipe(
-                catchError(this.errorHandlerService.handleError(ReportingService.name, 'createReport: Error', null)),
+                map((resp: ReportCreateResponseModel) => resp || {}),
+                catchError(this.errorHandlerService.handleErrorWithSnackBar("Error",ReportingService.name, 'createReport: Error', null)),
             );
     }
 

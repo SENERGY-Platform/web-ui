@@ -25,7 +25,7 @@ import {
     TemplateResponseModel
 } from '../shared/reporting.model';
 import { ReportingService } from '../shared/reporting.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstancesModel } from '../../devices/device-instances/shared/device-instances.model';
 
@@ -49,7 +49,8 @@ export class ReportComponent implements OnInit {
         public snackBar: MatSnackBar,
         public utilsService: UtilService,
         private reportingService: ReportingService,
-        private deviceInstanceService: DeviceInstancesService
+        private deviceInstanceService: DeviceInstancesService,
+        private router: Router
     ) {
         this.reportId = this.route.snapshot.paramMap.get('reportId');
         this.templateId = this.route.snapshot.paramMap.get('templateId');
@@ -92,10 +93,12 @@ export class ReportComponent implements OnInit {
             templateName: this.template.name, data: this.template.data?.dataStructured
         } as ReportModel).subscribe(resp => {
             if (resp !== null) {
-                if (resp.status === 200) {
-                    this.snackBar.open('Report created', 'ReportCreate', {
-                        duration: 2000
-                    });
+                this.snackBar.open('Report created', 'ReportCreate', {
+                    duration: 2000
+                });
+                if (this.reportId == null) {
+                    this.reportId = resp.id;
+                    this.router.navigateByUrl('/reporting/edit/' + this.reportId);
                 }
             }
         });

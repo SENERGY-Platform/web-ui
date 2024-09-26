@@ -68,3 +68,7 @@ export interface ReportFileModel {
     id: string;
     type: string;
 }
+
+export interface ReportCreateResponseModel {
+    id: string | null;
+}
