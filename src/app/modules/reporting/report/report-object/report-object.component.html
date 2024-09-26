@@ -16,7 +16,7 @@
 <mat-expansion-panel *ngIf="data !== undefined" class="reporting-object" >
     <mat-expansion-panel-header>
         <mat-panel-title> {{ name }} </mat-panel-title>
-        <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value !== undefined"> {{data.valueType }} - {{inputType}} - {{data.value}} </mat-panel-description>
+        <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value !== undefined"> {{data.valueType }} - {{inputType}}:{{data.value}} </mat-panel-description>
         <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value === undefined"> {{data.valueType }} - {{inputType}}</mat-panel-description>
         <mat-panel-description *ngIf="data.valueType==='object'"> {{data.valueType }}</mat-panel-description>
         <mat-panel-description *ngIf="inputType==='query'"> {{data.valueType }} - {{inputType}} - {{data.query?.deviceId}}/{{data.query?.serviceId}}  </mat-panel-description>
@@ -45,10 +45,6 @@
                     </senergy-select-search>
                 </mat-form-field>
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>DeviceId</mat-label>
-                    <input matInput [(ngModel)]="data.query!.deviceId">
-                </mat-form-field>
-                <mat-form-field fxFlex color="accent" appearance="outline">
                     <mat-label>Service</mat-label>
                     <senergy-select-search (ngModelChange)="queryServiceChanged($event)" placeholder="Service"
                                            [(ngModel)]="queryService"
@@ -56,19 +52,15 @@
                                            useOptionViewProperty="name">
                     </senergy-select-search>
                 </mat-form-field>
-                <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>ServiceId</mat-label>
-                    <input matInput [(ngModel)]="data.query!.serviceId">
-                </mat-form-field>
                 <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
                     <mat-label>Path</mat-label>
-                    <senergy-select-search [(ngModel)]="data.query!.columns[0].name" placeholder="path"
-                                           [options]="queryServicePaths">
-                    </senergy-select-search>
-                </mat-form-field>
-                <mat-form-field fxFlex color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
-                    <mat-label>Field</mat-label>
-                    <input matInput [(ngModel)]="data.query!.columns[0].name">
+                    <input matInput
+                           [(ngModel)]="data.query!.columns[0].name"
+                           placeholder="Choose or write yourself"
+                           [matAutocomplete]="auto"/>
+                    <mat-autocomplete #auto="matAutocomplete">
+                            <mat-option *ngFor="let path of queryServicePaths | keyvalue" [value]="path.value">{{path.value}}</mat-option>
+                    </mat-autocomplete>
                 </mat-form-field>
                 <mat-form-field fxFlex color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
                     <mat-label>Field Group Type</mat-label>
@@ -76,7 +68,7 @@
                                            [options]="fieldGroupTypes">
                     </senergy-select-search>
                 </mat-form-field>
-                <div role="group">
+                <div role="group" class="form-grouping">
                     <mat-form-field fxFlex color="accent" appearance="outline">
                         <mat-label>GroupingTime</mat-label>
                         <input matInput [(ngModel)]="groupingTime.number" (ngModelChange)="setGroupingTime()">
@@ -88,7 +80,7 @@
                         </senergy-select-search>
                     </mat-form-field>
                 </div>
-                <div role="group">
+                <div role="group" class="form-grouping">
                     <mat-form-field fxFlex color="accent" appearance="outline">
                         <mat-label>Timeframe</mat-label>
                         <input matInput [(ngModel)]="timeframe.number" (ngModelChange)="setTimeframe()">

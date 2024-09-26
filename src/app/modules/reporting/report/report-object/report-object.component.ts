@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit, SimpleChanges} from '@angular/core';
 import {ReportObjectModel} from '../../shared/reporting.model';
 import {QueriesRequestTimeModel} from '../../../../widgets/shared/export-data.model';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
@@ -28,6 +28,7 @@ import {
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
 import {MatDialog} from '@angular/material/dialog';
 import {QueryPreviewDialogComponent} from './query-preview/query-preview-dialog.component';
+import { map, Observable, of } from 'rxjs';
 
 @Component({
     selector: 'senergy-reporting-object',
@@ -64,6 +65,27 @@ export class ReportObjectComponent implements OnInit{
             this.inputType = 'query';
             this.getGroupingTime();
             this.getTimeframe();
+            
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['allDevices']) {
+            if (this.data?.query?.deviceId !== undefined) {
+                this.allDevices.forEach(device => {
+                    if (device.id === this.data?.query?.deviceId) {
+                        this.queryDevice = device;
+                        this.queryDeviceChanged(device).subscribe(() => {
+                            this.queryDeviceType.services.forEach(service => {
+                                if (service.id === this.data?.query?.serviceId) {
+                                    this.queryService = service;
+                                    this.queryServiceChanged(service);
+                                }
+                            })  
+                        });
+                    }
+                })
+            }
         }
     }
 
@@ -113,15 +135,17 @@ export class ReportObjectComponent implements OnInit{
         }
     }
 
-    queryDeviceChanged(device: DeviceInstancesModel) {
+    queryDeviceChanged(device: DeviceInstancesModel): Observable<DeviceTypeModel | null>  {
         if (this.data !== undefined && this.data.query !== undefined) {
             this.data.query.deviceId = device.id;
-            this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((resp: DeviceTypeModel | null) => {
+            return this.deviceTypeService.getDeviceType(device.device_type.id).pipe(map((resp: DeviceTypeModel | null) => {
                 if (resp !== null) {
                     this.queryDeviceType = resp;
                 }
-            });
+                return this.queryDeviceType;
+            }));
         }
+        return of(null);
     }
 
     queryServiceChanged(service: DeviceTypeServiceModel) {
