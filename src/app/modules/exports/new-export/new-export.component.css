@@ -109,3 +109,8 @@
 .button-footer {
     margin-top: 8px;
 }
+
+.mat-mdc-form-field{
+    padding-bottom: 5pt;
+    padding-top: 2pt;
+}

@@ -40,8 +40,9 @@ th, td {
 
 mat-form-field {
     width: 100%;
-    min-width: 150px;
+    min-width: 80px;
     margin-right: 20px;
+    padding-top: 8px;
 }
 
 .mat-column-duplicate-delete {

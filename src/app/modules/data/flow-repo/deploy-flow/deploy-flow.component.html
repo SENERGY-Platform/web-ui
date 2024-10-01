@@ -32,7 +32,7 @@
                     </mat-panel-description>
                 </mat-expansion-panel-header>
                 <ng-template matExpansionPanelContent>
-                    <div fxLayout="column">
+                    <div class="panel_content" fxLayout="column">
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Name</mat-label>
                             <input matInput formControlName="name" placeholder="Name" required="true" />
@@ -59,7 +59,7 @@
                         {{node.get('id')?.value}}
                     </mat-panel-description>
                 </mat-expansion-panel-header>
-                <div fxLayout="column"
+                <div class="panel_content" fxLayout="column"
                      *ngFor="let input of getSubElementAsGroupArray(node, 'inputs'), let inputIndex = index"
                      [formGroup]="input">
                     <h4>{{ input.get('name')?.value }}</h4>
@@ -208,21 +208,23 @@
                         Only change, if you know what you are doing
                     </mat-panel-description>
                 </mat-expansion-panel-header>
-                <mat-form-field class="full-width" color="accent" appearance="outline">
-                    <mat-label>Window Time</mat-label>
-                    <input matInput formControlName="windowTime" placeholder="Window Time">
-                </mat-form-field>
-                <section class="checkbox-section">
-                    <mat-checkbox class="checkbox-margin" formControlName="enable_metrics">Enable Metrics</mat-checkbox>
-                    <mat-checkbox class="checkbox-margin" formControlName="consume_all_msgs">Consume all messages</mat-checkbox>
-                </section>
-                <mat-form-field appearance="outline">
-                    <mat-label>Merge Strategy</mat-label>
-                    <mat-select formControlName="mergeStrategy">
-                        <mat-option value="inner">Inner Join (Default)</mat-option>
-                        <mat-option value="outer">Outer Join</mat-option>
-                    </mat-select>
-                </mat-form-field>
+                <div class="panel_content">
+                    <mat-form-field class="full-width" color="accent" appearance="outline">
+                        <mat-label>Window Time</mat-label>
+                        <input matInput formControlName="windowTime" placeholder="Window Time">
+                    </mat-form-field>
+                    <section class="checkbox-section">
+                        <mat-checkbox class="checkbox-margin" formControlName="enable_metrics">Enable Metrics</mat-checkbox>
+                        <mat-checkbox class="checkbox-margin" formControlName="consume_all_msgs">Consume all messages</mat-checkbox>
+                    </section>
+                    <mat-form-field appearance="outline">
+                        <mat-label>Merge Strategy</mat-label>
+                        <mat-select formControlName="mergeStrategy">
+                            <mat-option value="inner">Inner Join (Default)</mat-option>
+                            <mat-option value="outer">Outer Join</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
             </mat-expansion-panel>
         </mat-accordion>
         <button mat-fab class="fab" (click)="startPipeline()"  matTooltip="{{editMode ? 'Update' : 'Start'}} Pipeline">

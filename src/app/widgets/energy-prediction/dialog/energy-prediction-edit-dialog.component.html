@@ -17,7 +17,7 @@
 <h2 mat-dialog-title>Edit Energy Prediction</h2>
 
 <mat-dialog-content>
-    <form fxLayout="column" [formGroup]="form">
+    <form class='form' fxLayout="column" [formGroup]="form">
         <div fxLayout="row" fxLayoutAlign="space-between">
             <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
                 <mat-label>Name</mat-label>
@@ -55,8 +55,9 @@
                     </mat-select>
                 </mat-form-field>
 
-                <mat-form-field appearance="outline" color="accent" hintLabel="For use in Angular pipes" fxFlex="47">
+                <mat-form-field class='smaller-hint' appearance="outline" color="accent" fxFlex="47">
                     <mat-label>Number format</mat-label>
+                    <mat-hint>For use in Angular pipe</mat-hint>
                     <input type="text" matInput formControlName="numberFormat">
                 </mat-form-field>
             </div>

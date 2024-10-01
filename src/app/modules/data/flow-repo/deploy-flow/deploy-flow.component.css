@@ -28,6 +28,10 @@ mat-grid-list {
     margin-bottom: 100px;
 }
 
+.panel_content {
+    padding-top: 10px;
+}
+
 .truncate {
     white-space: nowrap;
     overflow: hidden;

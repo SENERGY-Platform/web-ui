@@ -18,6 +18,7 @@
 
 mat-form-field {
     width: 100%;
+    padding-top: 8px;
 }
 
 .action_checkboxes {
