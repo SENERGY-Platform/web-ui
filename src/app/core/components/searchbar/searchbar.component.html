@@ -15,13 +15,13 @@
   -->
 
 <div class="searchbar-container">
-  <mat-form-field appearance="outline" color="accent" fxFlex>
+  <mat-form-field appearance="outline" color="accent" floatLabel="always" fxFlex>
     <mat-label>Search</mat-label>
-    <input (keyup)="changeSearchtext()" type="text" matInput placeholder="Please insert search text" [formControl]="formControl">
     <mat-icon matPrefix *ngIf="formControl.value === ''">search</mat-icon>
     <mat-icon class="pointer" matPrefix *ngIf="formControl.value !== ''" (click)="resetSearchtext()">close</mat-icon>
+    <input (keyup)="changeSearchtext()" type="text" matInput placeholder="Please insert search text" [formControl]="formControl">
     <button matSuffix matTooltip="refresh" mat-icon-button (click)="changeSearchtext()">
-      <mat-icon>refresh</mat-icon>
+        <mat-icon>refresh</mat-icon>
     </button>
   </mat-form-field>
 </div>
