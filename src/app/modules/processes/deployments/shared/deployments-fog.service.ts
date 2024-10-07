@@ -26,7 +26,7 @@ import { V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel } fr
 import { MatDialog } from '@angular/material/dialog';
 import { DeploymentsFogMetadataModel, DeploymentsFogModel } from './deployments-fog.model';
 import { NetworksService } from '../../../devices/networks/shared/networks.service';
-import {ExtendedHubModel, NetworksModel} from '../../../devices/networks/shared/networks.model';
+import {ExtendedHubModel, HubModel} from '../../../devices/networks/shared/networks.model';
 
 @Injectable({
     providedIn: 'root',
@@ -133,10 +133,9 @@ export class DeploymentsFogService {
         }
 
         return this.networksService.listExtendedHubs({limit:1000, offset: 0, sortBy: 'name'}).pipe(
-            map((resp) => {return resp ? resp.result : [] as ExtendedHubModel[]}),
-            map((list) => list.map(this.networksService.extendedHubToLegacyModel)),
+            map((resp) => resp ? resp.result : [] as ExtendedHubModel[]),
             mergeMap((networks) => {
-                const networkState = new Map<string, NetworksModel>();
+                const networkState = new Map<string, ExtendedHubModel>();
                 networks.forEach((value) => {
                     networkState.set(value.id, value);
                 });
@@ -145,7 +144,7 @@ export class DeploymentsFogService {
                     map((list) =>
                         list.map((element) => {
                             const network = networkState.get(element.network_id);
-                            element.online = !(network?.annotations?.connected === false); // hubs without state are online
+                            element.online = network?.connection_state === 'online'; // hubs without state are online
 
                             if (!element.online) {
                                 element.offline_reasons = [

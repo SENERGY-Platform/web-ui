@@ -34,7 +34,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CamundaVariable } from './shared/deployments-definition.model';
 import { DeploymentsStartParameterDialogComponent } from './dialogs/deployments-start-parameter-dialog.component';
 import { DeploymentsFogFactory } from './shared/deployments-fog.service';
-import { HubModel, NetworksModel } from '../../devices/networks/shared/networks.model';
+import { HubModel } from '../../devices/networks/shared/networks.model';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { DeploymentsFogModel } from './shared/deployments-fog.model';
 
@@ -73,8 +73,8 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     showGenerated = false;
     selectedItems: DeploymentsModel[] = [];
     rowHeight = 282;
-    hubList: NetworksModel[] = [];
-    hub: NetworksModel | undefined | null;
+    hubList: HubModel[] = [];
+    hub: HubModel | undefined | null;
 
     deploymentsService: {
         getAll(
@@ -144,7 +144,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.getRepoItems(true);
     }
 
-    selectHub(hub: NetworksModel | null) {
+    selectHub(hub: HubModel | null) {
         this.hub = hub;
         if (hub) {
             this.deploymentsService = this.fogDeploymentsFactory.withHubId(hub.id);

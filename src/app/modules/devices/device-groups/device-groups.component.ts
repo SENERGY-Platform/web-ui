@@ -19,7 +19,6 @@ import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {DeviceGroupsPermSearchModel} from './shared/device-groups-perm-search.model';
 import {DeviceGroupsService} from './shared/device-groups.service';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatSort, Sort, SortDirection} from '@angular/material/sort';
@@ -39,10 +38,10 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'show'];
     pageSize = 20;
-    selection = new SelectionModel<DeviceGroupsPermSearchModel>(true, []);
+    selection = new SelectionModel<DeviceGroupModel>(true, []);
     totalCount = 200;
     instances = [];
-    dataSource = new MatTableDataSource<DeviceGroupsPermSearchModel>();
+    dataSource = new MatTableDataSource<DeviceGroupModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
     offset = 0;
@@ -135,7 +134,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.selection.clear();
     }
 
-    deleteDeviceGroup(deviceGroup: DeviceGroupsPermSearchModel): boolean {
+    deleteDeviceGroup(deviceGroup: DeviceGroupModel): boolean {
         this.dialogsService
             .openDeleteDialog('device group ' + deviceGroup.name)
             .afterClosed()
@@ -159,7 +158,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         return false;
     }
 
-    editDeviceGroup(inputDeviceGroup: DeviceGroupsPermSearchModel): boolean {
+    editDeviceGroup(inputDeviceGroup: DeviceGroupModel): boolean {
         this.router.navigate(['devices/devicegroups/edit/' + inputDeviceGroup.id]);
         return false;
     }
@@ -169,14 +168,14 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.getDeviceGroups().subscribe();
     }
 
-    private getDeviceGroups(): Observable<DeviceGroupsPermSearchModel[]> {
+    private getDeviceGroups(): Observable<DeviceGroupModel[]> {
         let query =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection);
         if(this.hideGenerated) {
             query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection);
         }
 
         return query.pipe(
-            map((deviceGroups: DeviceGroupsPermSearchModel[]) => {
+            map((deviceGroups: DeviceGroupModel[]) => {
                 this.dataSource.data = deviceGroups;
                 return deviceGroups;
             }
@@ -204,7 +203,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
             .subscribe((deleteConcepts: boolean) => {
                 if (deleteConcepts) {
                     this.ready = false;
-                    this.selection.selected.forEach((deviceGroup: DeviceGroupsPermSearchModel) => {
+                    this.selection.selected.forEach((deviceGroup: DeviceGroupModel) => {
                         deletionJobs.push(this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id));
                     });
                 }
@@ -221,7 +220,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
             });
     }
 
-    showDevices(group: DeviceGroupsPermSearchModel) {
+    showDevices(group: DeviceGroupModel) {
         this.deviceGroupsService.getDeviceGroup(group.id).subscribe((deviceGroup: DeviceGroupModel | null) => {
             if(!deviceGroup?.device_ids || deviceGroup.device_ids.length == 0) {
                 this.snackBar.open('Device group has no devices', 'close', {panelClass: 'snack-bar-error'});
@@ -237,7 +236,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
-    shareDeviceGroup(group: DeviceGroupsPermSearchModel) {
+    shareDeviceGroup(group: DeviceGroupModel) {
         this.permissionsDialogService.openPermissionDialog('device-groups', group.id, group.name);
     }
 }

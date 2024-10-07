@@ -52,7 +52,7 @@
                 <ng-container matColumnDef="device_type">
                     <th mat-header-cell *matHeaderCellDef>Type</th>
                     <td mat-cell *matCellDef="let device">
-                        <a [routerLink]="'/metadata/devicetypesoverview/devicetypes/' + device.device_type_id" [queryParams]="{'function': 'details'}">{{device.device_type.name}}</a>
+                        <a [routerLink]="'/metadata/devicetypesoverview/devicetypes/' + device.device_type_id" [queryParams]="{'function': 'details'}">{{device.device_type_name}}</a>
                     </td>
                 </ng-container>
 
@@ -60,8 +60,8 @@
                     <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Connection
                     </th>
                     <td mat-cell *matCellDef="let device">
-                        <senergy-state-icon *ngIf="device.active == true" [state]="device.log_state"></senergy-state-icon>
-                        <senergy-state-icon *ngIf="device.active == false" [state]="'inactive'"></senergy-state-icon>
+                        <senergy-state-icon *ngIf="isActive(device)" [state]="device.connection_state"></senergy-state-icon>
+                        <senergy-state-icon *ngIf="!isActive(device)" [state]="'inactive'"></senergy-state-icon>
                     </td>
                 </ng-container>
 
@@ -156,7 +156,7 @@
                 </tr>
                 <tr mat-row
                     *matRowDef="let m; columns: displayedColumns;"
-                    [ngClass]="{'inactive': m.active == false}">
+                    [ngClass]="{'inactive': m.active === false}">
                 </tr>
             </table>
         </div>

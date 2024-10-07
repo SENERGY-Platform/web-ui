@@ -18,24 +18,19 @@ import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 
 import {DeviceInstancesService} from './shared/device-instances.service';
 import {
-    DeviceInstancesBaseModel,
-    DeviceInstancesModel,
+    DeviceInstanceModel,
     DeviceInstancesRouterStateTabEnum,
     DeviceInstancesTotalModel,
-    FilterSelection,
-    SelectedTag
-} from './shared/device-instances.model';
+    FilterSelection} from './shared/device-instances.model';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {Navigation, Router} from '@angular/router';
-import {NetworksModel} from '../networks/shared/networks.model';
-import {DeviceTypeBaseModel} from '../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeModel} from '../../metadata/device-types-overview/shared/device-type.model';
 import {LocationModel} from '../locations/shared/locations.model';
 import {MatTableDataSource} from '@angular/material/table';
 import {DeviceInstancesDialogService} from './shared/device-instances-dialog.service';
 import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
-import {DeviceInstancesUpdateModel} from './shared/device-instances-update.model';
 import {Sort, SortDirection} from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
@@ -44,10 +39,9 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 import { DeviceInstancesFilterDialogComponent } from './dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
-import {concatMap} from "rxjs/operators";
-import {PermissionsModel} from "../../metadata/device-types-overview/shared/device-type-perm-search.model";
-import {PermissionsService} from "../../permissions/shared/permissions.service";
-import { isNumber } from 'lodash';
+import {concatMap} from 'rxjs/operators';
+import {PermissionsService} from '../../permissions/shared/permissions.service';
+import { HubModel } from '../networks/shared/networks.model';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -86,8 +80,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
     displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'info', 'share'];
     pageSize = 20;
-    dataSource = new MatTableDataSource<DeviceInstancesModel>();
-    selection = new SelectionModel<DeviceInstancesModel>(true, []);
+    dataSource = new MatTableDataSource<DeviceInstanceModel>();
+    selection = new SelectionModel<DeviceInstanceModel>(true, []);
     totalCount = 200;
     offset = 0;
     ready = false;
@@ -170,17 +164,17 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     matSortChange($event: Sort) {
         this.sortBy = $event.active;
 
-        if (this.sortBy == 'log_state') {
+        if (this.sortBy === 'log_state') {
             this.sortBy = 'annotations.connected';
         }
         this.sortDirection = $event.direction;
         this.reload();
     }
 
-    private loadDevicesByIds(): Observable<DeviceInstancesModel[]> {
+    private loadDevicesByIds(): Observable<DeviceInstanceModel[]> {
         // Only called when beeing redirected from device group page
         if (this.routerDeviceIds) {
-            return this.deviceInstancesService.getDeviceInstancesByIds(this.routerDeviceIds, this.pageSize, this.offset).pipe(
+            return this.deviceInstancesService.getDeviceInstances({deviceIds: this.routerDeviceIds, limit: this.pageSize, offset: this.offset}).pipe(
                 map(result => {
                     this.setDevicesAndTotal(result);
                     return result.result;
@@ -203,12 +197,12 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             data: filterSelection
         });
         editDialogRef.afterClosed().subscribe({
-            next: (filterSelection: FilterSelection) => {
-                if (filterSelection != null) {
-                    this.routerConnectionState = filterSelection.connectionState;
-                    this.routerDeviceType = filterSelection.deviceTypes;
-                    this.routerNetwork = filterSelection.network;
-                    this.routerLocation = filterSelection.location;
+            next: (filterSelectionInner: FilterSelection) => {
+                if (filterSelectionInner != null) {
+                    this.routerConnectionState = filterSelectionInner.connectionState;
+                    this.routerDeviceType = filterSelectionInner.deviceTypes;
+                    this.routerNetwork = filterSelectionInner.network;
+                    this.routerLocation = filterSelectionInner.location;
                 }
                 this.reload();
             }
@@ -220,17 +214,17 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             return this.loadDevicesByIds();
         } else {
             return this.deviceInstancesService
-                .getDeviceInstancesWithTotal(
-                    this.pageSize,
-                    this.offset,
-                    this.sortBy,
-                    this.sortDirection == 'desc',
-                    this.searchText,
-                    this.routerLocation,
-                    this.routerNetwork,
-                    this.routerDeviceType,
-                    this.routerConnectionState
-                )
+                .getDeviceInstances({
+                    limit:           this.pageSize,
+                    offset:  this.offset,
+                    sortBy: this.sortBy,
+                    sortDesc: this.sortDirection === 'desc',
+                    searchText: this.searchText,
+                    locationId:     this.routerLocation,
+                    hubId: this.routerNetwork,
+                    deviceTypeIds: this.routerDeviceType,
+                    connectionState:  this.routerConnectionState
+                })
                 .pipe(
                     //if no result is found: try to interpret the search as shortDeviceId, convert it to a deviceId and load it
                     concatMap((deviceInstanceWithTotal: DeviceInstancesTotalModel): Observable<DeviceInstancesTotalModel> => {
@@ -238,21 +232,21 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                             return of(deviceInstanceWithTotal);
                         }
                         //we may also search for normal ids
-                        if (this.searchText.trim().startsWith("urn:infai:ses:device:")){
-                            return this.deviceInstancesService.getDeviceInstancesByIds([this.searchText.trim()], 1, 0);
+                        if (this.searchText.trim().startsWith('urn:infai:ses:device:')){
+                            return this.deviceInstancesService.getDeviceInstances({deviceIds: [this.searchText.trim()], limit: 1, offset: 0});
                         }
                         //short ids are expected to be 22 chars long
-                        if (this.searchText.trim().length != 22) {
+                        if (this.searchText.trim().length !== 22) {
                             return of(deviceInstanceWithTotal);
                         }
                         return this.deviceInstancesService.shortIdToUUID(this.searchText).pipe(
-                            concatMap((id: string):Observable<DeviceInstancesTotalModel> => {
-                                if (id == "" || this.searchText == id) {
+                            concatMap((id: string): Observable<DeviceInstancesTotalModel> => {
+                                if (id === '' || this.searchText === id) {
                                     return of(deviceInstanceWithTotal);
                                 }
-                                return this.deviceInstancesService.getDeviceInstancesByIds([id], 1, 0);
+                                return this.deviceInstancesService.getDeviceInstances({deviceIds: [id], limit: 1, offset: 0});
                             })
-                        )
+                        );
                     }),
                     //handle results
                     map((deviceInstancesWithTotal: DeviceInstancesTotalModel) => {
@@ -269,20 +263,20 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         }
     }
 
-    private loadUserNames(elements: {creator: string, shared: boolean}[]) {
-        let missingCreators: string[] = [];
+    private loadUserNames(elements: {owner_id: string; shared: boolean}[]) {
+        const missingCreators: string[] = [];
         elements?.forEach(element => {
-            if(element.shared && element.creator && !this.userIdToName[element.creator] && !missingCreators.includes(element.creator)) {
-                missingCreators.push(element.creator);
+            if(element.shared && element.owner_id && !this.userIdToName[element.owner_id] && !missingCreators.includes(element.owner_id)) {
+                missingCreators.push(element.owner_id);
             }
-        })
+        });
         missingCreators.forEach(creator => {
             this.permissionsService.getUserById(creator).subscribe(value => {
                 if(value) {
                     this.userIdToName[value.id] = value.username;
                 }
-            })
-        })
+            });
+        });
     }
 
     private setDevicesAndTotal(result: DeviceInstancesTotalModel) {
@@ -307,16 +301,18 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         });
     }
 
-    showInfoOfDevice(device: DeviceInstancesModel): void {
+    showInfoOfDevice(device: DeviceInstanceModel): void {
         this.deviceInstancesDialogService.openDeviceServiceDialog(device);
     }
 
-    editDevice(device: DeviceInstancesModel): void {
+    editDevice(device: DeviceInstanceModel): void {
         this.deviceInstancesDialogService.openDeviceEditDialog(
             device,
             this.userHasUpdateDisplayNameAuthorization,
             this.userHasUpdateAttributesAuthorization,
-            (spinnerState: boolean) => {this.ready = !spinnerState}).subscribe({
+            (spinnerState: boolean) => {
+                this.ready = !spinnerState;
+            }).subscribe({
             next: (newDevice) => {
                 if(newDevice != null) {
                     const index = this.dataSource.data.findIndex(element => element.id === device.id);
@@ -327,18 +323,18 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         });
     }
 
-    duplicateDevice(device: DeviceInstancesModel): void {
+    duplicateDevice(device: DeviceInstanceModel): void {
         this.deviceInstancesDialogService.openDeviceCreateDialog(undefined, device);
     }
 
-    deleteDevice(device: DeviceInstancesModel): void {
+    deleteDevice(device: DeviceInstanceModel): void {
         this.dialogsService
             .openDeleteDialog('device')
             .afterClosed()
             .subscribe((deviceDelete: boolean) => {
                 if (deviceDelete) {
                     this.ready = false;
-                    this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstancesUpdateModel | null) => {
+                    this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstanceModel | null) => {
                         this.ready = true;
                         if (resp !== null) {
                             this.snackBar.open('Device deleted successfully.', '', { duration: 2000 });
@@ -354,7 +350,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             });
     }
 
-    shareDevice(device: DeviceInstancesModel): void {
+    shareDevice(device: DeviceInstanceModel): void {
         this.permissionsDialogService.openPermissionDialog('devices', device.id, device.display_name || device.name);
     }
 
@@ -365,10 +361,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                 const state = navigation.extras.state as DeviceInstancesRouterState;
                 switch (state.type) {
                 case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
-                    this.routerDeviceType = [(state.value as DeviceTypeBaseModel).id];
+                    this.routerDeviceType = [(state.value as DeviceTypeModel).id];
                     break;
                 case DeviceInstancesRouterStateTypesEnum.NETWORK:
-                    this.routerNetwork = (state.value as NetworksModel).id;
+                    this.routerNetwork = (state.value as HubModel).id;
                     break;
                 case DeviceInstancesRouterStateTypesEnum.LOCATION:
                     this.routerLocation = (state.value as LocationModel).id;
@@ -410,7 +406,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             .subscribe((deleteConcepts: boolean) => {
                 if (deleteConcepts) {
                     this.ready = false;
-                    this.selection.selected.forEach((device: DeviceInstancesModel) => {
+                    this.selection.selected.forEach((device: DeviceInstanceModel) => {
                         deletionJobs.push(this.deviceInstancesService.deleteDeviceInstance(device.id));
                     });
                 }
@@ -427,7 +423,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             });
     }
 
-    getUsage(d: DeviceInstancesModel) {
+    getUsage(d: DeviceInstanceModel) {
         return this.usage.find(u => u.deviceId === d.id);
     }
 
@@ -448,7 +444,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
     }
 
-    getUsageTooltip(d: DeviceInstancesModel): string {
+    getUsageTooltip(d: DeviceInstanceModel): string {
         const usage = this.getUsage(d);
         if (usage === undefined) {
             return '';
@@ -456,4 +452,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         return this.formatBytes(usage?.bytesPerDay || 0) + '/day, ' + this.formatBytes((usage?.bytesPerDay || 0) * 30) + '/month';
     }
 
+
+    isActive(device: DeviceInstanceModel): boolean {
+        return device.attributes?.find(a => a.key === 'inactive' && a.value === 'true') === undefined;
+    }
 }

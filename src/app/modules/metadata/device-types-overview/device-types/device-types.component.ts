@@ -16,7 +16,6 @@
 
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {
-    Attribute,
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeContentModel,
@@ -54,6 +53,7 @@ import uuid = util.uuid;
 import {
     DeviceTypesContentVariableJsonDialogComponent
 } from './dialogs/device-types-content-variable-json-dialog.component';
+import { Attribute } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 
 interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     tree?: NestedTreeControl<DeviceTypeContentVariableModel>;

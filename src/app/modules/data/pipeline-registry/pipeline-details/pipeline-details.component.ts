@@ -22,7 +22,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
-import { DeviceInstancesBaseModel } from '../../../devices/device-instances/shared/device-instances.model';
+import { DeviceInstanceModel, DeviceInstancesBaseModel } from '../../../devices/device-instances/shared/device-instances.model';
 import { util } from 'jointjs';
 import string = util.format.string;
 
@@ -72,7 +72,7 @@ export class PipelineDetailsComponent implements OnInit {
                                 for (const [i, value] of devices.entries()) {
                                     this.deviceInstanceService
                                         .getDeviceInstance(value)
-                                        .subscribe((device: DeviceInstancesBaseModel | null) => {
+                                        .subscribe((device: DeviceInstanceModel | null) => {
                                             if (device !== null) {
                                                 devices[i] = device.display_name || device.name;
                                             }

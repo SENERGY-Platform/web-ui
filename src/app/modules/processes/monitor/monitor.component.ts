@@ -30,7 +30,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
-import { NetworksModel } from '../../devices/networks/shared/networks.model';
+import { HubModel } from '../../devices/networks/shared/networks.model';
 import { MonitorFogFactory, MonitorFogService } from './shared/monitor-fog.service';
 import { UtilService } from 'src/app/core/services/util.service';
 
@@ -66,8 +66,8 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     private reloadFinishedSub: EventEmitter<boolean> = new EventEmitter();
     private reloadRunningSub: EventEmitter<boolean> = new EventEmitter();
 
-    hubList: NetworksModel[] = [];
-    hub: NetworksModel | undefined | null;
+    hubList: HubModel[] = [];
+    hub: HubModel | undefined | null;
 
     private monitorService: {
         deleteInstances(id: string): Observable<string>;
@@ -117,7 +117,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         this.runningSub.unsubscribe();
     }
 
-    selectHub(hub: NetworksModel | null) {
+    selectHub(hub: HubModel | null) {
         this.hub = hub;
         if (hub) {
             this.monitorService = this.fogMonitorFactory.withHubId(hub.id);
@@ -126,7 +126,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         }
     }
 
-    selectHubWithReload(hub: NetworksModel | null) {
+    selectHubWithReload(hub: HubModel | null) {
         this.selectHub(hub);
         this.reload();
     }
@@ -346,7 +346,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         const navigation: Navigation | null = this.router.getCurrentNavigation();
         if (navigation !== null) {
             if (navigation.extras.state !== undefined) {
-                const params = navigation.extras.state as { deployment: DeploymentsModel; activeTab: number; hub?: NetworksModel };
+                const params = navigation.extras.state as { deployment: DeploymentsModel; activeTab: number; hub?: HubModel };
                 this.selectedDeployment = params.deployment;
                 this.activeIndex = params.activeTab;
                 if (params.hub) {

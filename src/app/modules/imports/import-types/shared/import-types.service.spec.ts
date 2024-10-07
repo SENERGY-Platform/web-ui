@@ -132,7 +132,7 @@ describe('ImportTypesService', () => {
     it('should correctly request lists', () => {
         service.listImportTypes('search', 10, 1, 'name.asc').subscribe((val) => expect(val).toEqual([]));
         expect(httpClientSpy.get.calls.mostRecent().args[0]).toEqual(
-            environment.permissionSearchUrl + '/v3/resources/import-types?&search=search&limit=10&offset=1&sort=name.asc',
+            environment.permissionSearchUrl + '/v3/resources/import-types?&search=search&limit=10&offset=1&sort=name.asc', //TODO
         );
     });
 

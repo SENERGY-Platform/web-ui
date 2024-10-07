@@ -30,7 +30,7 @@ import { PipelineRegistryService } from '../../data/pipeline-registry/shared/pip
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
 import { ImportInstancesService } from '../../imports/import-instances/shared/import-instances.service';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
-import { DeviceInstancesBaseModel } from '../../devices/device-instances/shared/device-instances.model';
+import { DeviceInstanceModel, DeviceInstancesTotalModel } from '../../devices/device-instances/shared/device-instances.model';
 import { ExportService } from '../../exports/shared/export.service';
 import { ExportModel } from '../../exports/shared/export.model';
 
@@ -53,7 +53,7 @@ export class CostOverviewComponent implements OnInit {
     pipelines: PipelineModel[] = [];
     operators: OperatorModel[] = [];
     imports: PipelineModel[] = [];
-    devices: DeviceInstancesBaseModel[] = [];
+    devices: DeviceInstanceModel[] = [];
     exports: ExportModel[] = [];
 
     constructor(
@@ -128,17 +128,17 @@ export class CostOverviewComponent implements OnInit {
             return forkJoin(obs).pipe(
                 mergeMap(_ => {
                     if (this.tree === undefined) {
-                        return of([]);
+                        return of({result: [], total: 0} as DeviceInstancesTotalModel);
                     }
                     const t = this.tree as any;
                     const devices = t["Devices"];
                     if (devices !== undefined) {
-                        return this.deviceInstancesService.getDeviceListByIds(Object.keys(devices.children));
+                        return this.deviceInstancesService.getDeviceInstances({limit: 100000, offset: 0, deviceIds: Object.keys(devices.children)});
                     }
-                    return of([]);
+                    return of({result: [], total: 0} as DeviceInstancesTotalModel);
                 }),
-                map(devices => {
-                    this.devices = devices;
+                map((devices: DeviceInstancesTotalModel) => {
+                    this.devices = devices.result;
                 })
             );
         }));

@@ -423,7 +423,7 @@ describe('DeviceGroupsEditComponent', () => {
         waitForAsync(() => {
             const deviceGroupServiceSpy: Spy<DeviceGroupsService> = createSpyFromClass<DeviceGroupsService>(DeviceGroupsService);
             deviceGroupServiceSpy.getDeviceGroup.and.returnValue(of(JSON.parse(JSON.stringify(exampleGroup as DeviceGroupModel))));
-            deviceGroupServiceSpy.getDeviceListByIds.and.callFake(function(ids: string[]) {
+            deviceGroupServiceSpy.getBaseDevicesByIds.and.callFake(function(ids: string[]) {
                 const result: DeviceInstancesBaseModel[] = [];
                 for (const id of ids) {
                     for (const device of knownDevices) {

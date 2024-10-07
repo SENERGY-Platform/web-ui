@@ -18,7 +18,7 @@ import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { ReportObjectModel } from '../../shared/reporting.model';
 import { QueriesRequestTimeModel } from '../../../../widgets/shared/export-data.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
-import { DeviceInstancesModel } from '../../../devices/device-instances/shared/device-instances.model';
+import { DeviceInstanceModel } from '../../../devices/device-instances/shared/device-instances.model';
 import {
     DeviceTypeContentModel,
     DeviceTypeContentVariableModel,
@@ -53,9 +53,9 @@ export class ReportObjectComponent implements OnInit {
     @Input() requestObject: Map<string, any> = new Map<string, any>();
     inputType = 'value';
     origData: ReportObjectModel = {} as ReportObjectModel;
-    @Input() allDevices: DeviceInstancesModel[] = [];
-    devices: DeviceInstancesModel[][][] = [[[]]];
-    queryDevice: DeviceInstancesModel = {} as DeviceInstancesModel;
+    @Input() allDevices: DeviceInstanceModel[] = [];
+    devices: DeviceInstanceModel[][][] = [[[]]];
+    queryDevice: DeviceInstanceModel = {} as DeviceInstanceModel;
     queryService: DeviceTypeServiceModel = {} as DeviceTypeServiceModel;
     queryServicePaths: string[] = [];
     queryDeviceType: DeviceTypeModel = {} as DeviceTypeModel;
@@ -157,15 +157,15 @@ export class ReportObjectComponent implements OnInit {
         }
     }
 
-    queryDeviceChanged(device: DeviceInstancesModel): Observable<DeviceTypeModel | null> {
+    queryDeviceChanged(device: DeviceInstanceModel) {
         if (this.data !== undefined && this.data.query !== undefined) {
             this.data.query.deviceId = device.id;
-            return this.deviceTypeService.getDeviceType(device.device_type.id).pipe(map((resp: DeviceTypeModel | null) => {
+            this.deviceTypeService.getDeviceType(device.device_type_id).subscribe((resp: DeviceTypeModel | null) => {
                 if (resp !== null) {
                     this.queryDeviceType = resp;
                 }
                 return this.queryDeviceType;
-            }));
+            });
         }
         return of(null);
     }

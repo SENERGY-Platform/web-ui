@@ -15,7 +15,7 @@
  */
 
 import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
-import {DeviceInstancesModel, DeviceInstancesPermSearchModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
+import {DeviceInstanceModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
 import {DeviceTypeServiceModel} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 
 export interface SingleValueModel {
@@ -44,7 +44,7 @@ export interface SingleValuePropertiesModel {
     format?: string;
     math?: string;
     sourceType?: string;
-    device?: DeviceInstancesPermSearchModel;
+    device?: DeviceInstanceModel;
     service?: DeviceTypeServiceModel;
     deviceGroupId?: string;
     deviceGroupCriteria?: DeviceGroupCriteriaModel;

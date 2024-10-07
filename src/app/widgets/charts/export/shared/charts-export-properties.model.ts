@@ -16,8 +16,8 @@
 
 import { ExportValueModel } from '../../../../modules/exports/shared/export.model';
 import { ChartsExportRequestPayloadGroupModel, ChartsExportRequestPayloadTimeModel } from './charts-export-request-payload.model';
-import {DeviceInstancesModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
-import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import {DeviceInstanceModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
+import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import {
     ApexAxisChartSeries,
     ApexChart,
@@ -30,7 +30,6 @@ import {
     ApexAnnotations,
     ApexMarkers
 } from 'ng-apexcharts';
-import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
 
 export interface ChartsExportPropertiesModel {
     chartType?: string;
@@ -41,7 +40,7 @@ export interface ChartsExportPropertiesModel {
     vAxes?: ChartsExportVAxesModel[];
     vAxisLabel?: string;
     secondVAxisLabel?: string;
-    exports?: (ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel)[];
+    exports?: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[];
     measurement?: ChartsExportMeasurementModel; // deprecated
     math?: string;
     curvedFunction?: boolean;

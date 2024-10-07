@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {NetworksService} from './shared/networks.service';
-import {ExtendedHubTotalModel, NetworksModel, NetworksPermModel} from './shared/networks.model';
+import {ExtendedHubTotalModel, HubModel} from './shared/networks.model';
 import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {Router} from '@angular/router';
 import {
@@ -36,20 +36,20 @@ import {SearchbarService} from 'src/app/core/components/searchbar/shared/searchb
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import {PermissionsService} from "../../permissions/shared/permissions.service";
+import {PermissionsService} from '../../permissions/shared/permissions.service';
 
 @Component({
     selector: 'senergy-networks',
     templateUrl: './networks.component.html',
     styleUrls: ['./networks.component.css'],
 })
-export class NetworksComponent implements OnInit, OnDestroy {
+export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'connection', 'shared', 'name', 'number_devices', 'show', 'clear'];
     pageSize = 20;
-    dataSource = new MatTableDataSource<NetworksModel>();
+    dataSource = new MatTableDataSource<HubModel>();
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
-    selection = new SelectionModel<NetworksModel>(true, []);
+    selection = new SelectionModel<HubModel>(true, []);
     searchText = '';
     totalCount = 200;
     offset = 0;
@@ -135,22 +135,22 @@ export class NetworksComponent implements OnInit, OnDestroy {
         });
     }
 
-    edit(network: NetworksModel) {
+    edit(network: HubModel) {
         this.networksService.openNetworkEditDialog(network);
     }
 
-    showDevices(network: NetworksModel) {
+    showDevices(network: HubModel) {
         this.router.navigateByUrl('/devices/deviceinstances', {
             state: { type: DeviceInstancesRouterStateTypesEnum.NETWORK, value: network } as DeviceInstancesRouterState,
         });
     }
 
-    clear(network: NetworksModel) {
+    clear(network: HubModel) {
         this.networksService.openNetworkClearDialog(network);
     }
 
-    delete(network: NetworksModel) {
-        this.deviceInstancesService.getDeviceInstances(9999, 0, this.sortBy, this.sortDirection == 'desc', undefined, undefined, network.id).subscribe((devices) => {
+    delete(network: HubModel) {
+        this.deviceInstancesService.getDeviceInstances({limit: 9999, offset: 0, sortBy: this.sortBy, sortDesc: this.sortDirection === 'desc', hubId: network.id}).subscribe((devices) => {
             this.dialog
                 .open(NetworksDeleteDialogComponent, { data: { networkId: network.id, devices }, minWidth: '300px' })
                 .afterClosed()
@@ -171,34 +171,33 @@ export class NetworksComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getNetworks(): Observable<NetworksModel[]> {
+    private getNetworks(): Observable<HubModel[]> {
         return this.networksService
-            .listExtendedHubs({limit: this.pageSize, offset: this.offset, sortBy: this.sortBy, sortDesc: this.sortDirection != 'asc', searchText: this.searchText})
+            .listExtendedHubs({limit: this.pageSize, offset: this.offset, sortBy: this.sortBy, sortDesc: this.sortDirection !== 'asc', searchText: this.searchText})
             .pipe(
                 map((networks: ExtendedHubTotalModel) => {
                     this.totalCount = networks.total;
-                    let list = networks.result.map(this.networksService.extendedHubToLegacyModel);
-                    this.loadUserNames(list);
-                    this.dataSource.data = list;
-                    return list;
+                    this.loadUserNames(networks.result.map(n => ({creator: n.owner_id, shared: n.shared})));
+                    this.dataSource.data = networks.result;
+                    return networks.result;
                 })
             );
     }
 
-    private loadUserNames(elements: {creator: string, shared: boolean}[]) {
-        let missingCreators: string[] = [];
+    private loadUserNames(elements: {creator: string; shared: boolean}[]) {
+        const missingCreators: string[] = [];
         elements?.forEach(element => {
             if(element.shared && element.creator && !this.userIdToName[element.creator] && !missingCreators.includes(element.creator)) {
                 missingCreators.push(element.creator);
             }
-        })
+        });
         missingCreators.forEach(creator => {
             this.permissionsService.getUserById(creator).subscribe(value => {
                 if(value) {
                     this.userIdToName[value.id] = value.username;
                 }
-            })
-        })
+            });
+        });
     }
 
     reload() {
@@ -250,9 +249,9 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
                 allNetworkIDs.forEach((networkID) => {
                     getDevicesJobs.push(
-                        this.deviceInstancesService.getDeviceInstances(9999, 0, this.sortBy, this.sortDirection == 'desc', undefined, undefined, networkID).pipe(
+                        this.deviceInstancesService.getDeviceInstances({limit: 9999, offset: 0, sortBy: this.sortBy, sortDesc: this.sortDirection === 'desc', hubId: networkID}).pipe(
                             map((devices) => {
-                                const deviceIds = devices.map((p) => p.id);
+                                const deviceIds = devices.result.map((p) => p.id);
                                 allDeviceIds = allDeviceIds.concat(deviceIds);
 
                                 if (deviceIds.length > 0) {
@@ -298,7 +297,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
         };
     }
 
-    shareNetwork(network: NetworksModel): void {
+    shareNetwork(network: HubModel): void {
         this.permissionsDialogService.openPermissionDialog('hubs', network.id, network.name );
     }
 }

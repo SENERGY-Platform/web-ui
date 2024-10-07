@@ -18,14 +18,10 @@ import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/c
 import {ProcessIoService} from '../shared/process-io.service';
 import {ProcessIoVariable} from '../shared/process-io.model';
 import {MatTableDataSource} from '@angular/material/table';
-import {MonitorProcessModel} from '../../monitor/shared/monitor-process.model';
-import {MatSort, Sort, SortDirection} from '@angular/material/sort';
+import {Sort, SortDirection} from '@angular/material/sort';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 import {DialogsService} from '../../../../core/services/dialogs.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DeviceInstancesEditDialogComponent} from '../../../devices/device-instances/dialogs/device-instances-edit-dialog.component';
-import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {ProcessIoVariableEditDialogComponent} from '../dialogs/process-io-variable-edit-dialog.component';
 import {MatPaginator} from '@angular/material/paginator';
 import {SearchbarService} from '../../../../core/components/searchbar/shared/searchbar.service';
@@ -40,7 +36,7 @@ import { UtilService } from 'src/app/core/services/util.service';
     templateUrl: './variables.component.html',
     styleUrls: ['./variables.component.css'],
 })
-export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
+export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, OnInit {
     pageSize = 20;
     sort = 'unix_timestamp_in_s.desc';
     keyRegex = '';

@@ -20,11 +20,10 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { environment } from '../../../../../environments/environment';
 import { catchError, map, mergeMap, retryWhen } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
-import {ProcessModel, ProcessPermModel} from './process.model';
+import {ProcessPermModel} from './process.model';
 import { DesignerProcessModel } from '../../designer/shared/designer.model';
 import { ProcessRepoConditionsModel } from './process-repo-conditions.model';
-import { DeviceTypeBaseModel } from '../../../metadata/device-types-overview/shared/device-type.model';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
@@ -43,7 +42,7 @@ export class ProcessRepoService {
     }
 
     list(kind: string, right: string) {
-        return this.http.get<any[]>(environment.permissionSearchUrl + '/v3/resources/' + kind + '?limit=9999&rights=' + right).pipe(
+        return this.http.get<any[]>(environment.permissionSearchUrl + '/v3/resources/' + kind + '?limit=9999&rights=' + right).pipe( //TODO
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'list', [])),
         );
@@ -58,7 +57,7 @@ export class ProcessRepoService {
         conditions: ProcessRepoConditionsModel | null,
     ): Observable<ProcessPermModel[]> {
         return this.http
-            .post<ProcessPermModel[]>(environment.permissionSearchUrl + '/v3/query/processmodel', {
+            .post<ProcessPermModel[]>(environment.permissionSearchUrl + '/v3/query/processmodel', { //TODO
                 resource: 'processmodel',
                 find: {
                     search: query,
@@ -116,7 +115,7 @@ export class ProcessRepoService {
         maxRetries: number,
         intervalInMs: number,
     ): Observable<boolean> {
-        return this.http.get<boolean>(environment.permissionSearchUrl + '/v3/resources/processmodel/' + id + '/access?rights=r').pipe(
+        return this.http.get<boolean>(environment.permissionSearchUrl + '/v3/resources/processmodel/' + id + '/access?rights=r').pipe( //TODO
             map((data) => {
                 if (data === !shouldIdExists) {
                     throw Error('');

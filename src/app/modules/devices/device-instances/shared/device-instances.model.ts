@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { DeviceTypePermSearchModel, PermissionsModel } from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
-import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeModel, DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
 import { ImportTypeModel } from '../../../imports/import-types/shared/import-types.model';
+import { PermissionsRightsModel } from 'src/app/modules/permissions/shared/permissions-rights.model';
 
 export interface Attribute {
     key: string;
@@ -26,62 +26,34 @@ export interface Attribute {
 }
 
 export interface DeviceInstancesBaseModel {
+    attributes?: Attribute[];
+    device_type_id: string;
     id: string;
     local_id: string;
     name: string;
-    attributes?: Attribute[];
-    display_name?: string;
-}
-
-export interface DeviceInstancesIntermediateModel extends DeviceInstancesBaseModel {
-    creator: string;
-    permissions: PermissionsModel;
-    shared: boolean;
-}
-
-export interface DeviceInstancesPermSearchModel extends DeviceInstancesIntermediateModel {
-    device_type_id: string;
-    annotations: any;
-}
-
-export interface DeviceInstancesPermSearchTotalModel {
-    result: DeviceInstancesPermSearchModel[];
-    total: number;
-}
-
-export interface DeviceInstancesModel extends DeviceInstancesIntermediateModel {
-    device_type: DeviceTypePermSearchModel;
-    log_state: boolean;
-    active: boolean;
-}
-
-export interface ExtendedDeviceInstancesTotalModel {
-    result: ExtendedDeviceInstanceModel[];
-    total: number;
-}
-
-export interface ExtendedDeviceInstanceModel {
-    id: string;
-    local_id: string;
-    name: string;
-    attributes?: Attribute[];
-    connection_state: ""|"online"|"offline";
-    device_type_id: string;
     owner_id: string;
-    display_name: string;
-    device_type_name: string;
-    shared: boolean;
-    permissions: {
-        read: boolean;
-        write: boolean;
-        execute: boolean;
-        administrate: boolean;
-    }
 }
 
 export interface DeviceInstancesTotalModel {
-    result: DeviceInstancesModel[];
+    result: DeviceInstanceModel[];
     total: number;
+}
+
+export interface DeviceInstancesWithDeviceTypeTotalModel {
+    result: DeviceInstanceWithDeviceTypeModel[];
+    total: number;
+}
+
+export interface DeviceInstanceModel extends DeviceInstancesBaseModel {
+    connection_state: '' | 'online' | 'offline';
+    device_type_name: string;
+    display_name: string;
+    permissions: PermissionsRightsModel;
+    shared: boolean;
+}
+
+export interface DeviceInstanceWithDeviceTypeModel extends DeviceInstanceModel {
+    device_type: DeviceTypeModel;
 }
 
 export interface DeviceFilterCriteriaModel {
@@ -92,12 +64,12 @@ export interface DeviceFilterCriteriaModel {
 }
 
 export interface DeviceSelectablesModel {
-    device: DeviceInstancesPermSearchModel;
+    device: DeviceInstanceModel; // some fields will be missing SNRGY-3518
     services: DeviceTypeServiceModel[];
 }
 
 export interface DeviceSelectablesFullModel {
-    device?: DeviceInstancesPermSearchModel;
+    device?: DeviceInstanceModel; // some fields will be missing SNRGY-3518
     services?: DeviceTypeServiceModel[];
     import?: ImportInstancesModel;
     importType?: ImportTypeModel;

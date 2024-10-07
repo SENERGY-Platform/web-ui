@@ -54,7 +54,7 @@ export class LocationsService {
             'search=' + encodeURIComponent(searchText),
         ].join('&');
 
-        return this.http.get<LocationModel[]>(environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe(
+        return this.http.get<LocationModel[]>(environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe( // TODO 
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations(search)', [])),
         );
@@ -69,7 +69,7 @@ export class LocationsService {
         }
         const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection].join('&');
 
-        return this.http.get<LocationModel[]>(environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe(
+        return this.http.get<LocationModel[]>(environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe( //TODO
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations(search)', [])),
         );
@@ -105,7 +105,7 @@ export class LocationsService {
             { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/locations', options)
+            .get(environment.permissionSearchUrl + '/v3/total/locations', options) //TODO
             .pipe(
                 catchError(
                     this.errorHandlerService.handleError(

@@ -17,26 +17,23 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {Attribute, DeviceInstancesModel} from './device-instances.model';
+import {DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel} from './device-instances.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
 import {
-    DeviceTypeAspectModel, DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel,
+    DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel
 } from '../../../metadata/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-edit-dialog.component';
-import {DeviceInstancesUpdateModel} from './device-instances-update.model';
-import {DeviceTypePermSearchModel} from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesService} from './device-instances.service';
 import {DeviceInstancesSelectDialogComponent} from '../dialogs/device-instances-select-dialog.component';
-import {combineLatest, concat, forkJoin, mergeMap, Observable, of} from 'rxjs';
-import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../../../widgets/shared/export-data.model';
+import {forkJoin, Observable, of} from 'rxjs';
+import {LastValuesRequestElementTimescaleModel} from '../../../../widgets/shared/export-data.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
-import {environment} from '../../../../../environments/environment';
-import {defaultIfEmpty, map, concatMap} from 'rxjs/operators';
+import {map, concatMap} from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root',
@@ -60,9 +57,9 @@ export class DeviceInstancesDialogService {
         return editDialogRef.afterClosed();
     }
 
-    openDeviceServiceDialog(device: DeviceInstancesModel): void {
+    openDeviceServiceDialog(device: DeviceInstanceModel): void {
         const obs: Observable<any>[] = [];
-        const deviceTypeId = device.device_type.id;
+        const deviceTypeId = device.device_type_id;
         const deviceId = device.id;
         obs.push(this.deviceTypeService.getMeasuringFunctions());
         obs.push(this.deviceTypeService.getAspectNodesWithMeasuringFunction());
@@ -131,9 +128,9 @@ export class DeviceInstancesDialogService {
         });
     }
 
-    openDeviceEditDialog(device: DeviceInstancesModel, userHasUpdateDisplayNameAuthorization: boolean, userHasUpdateAttributesAuthorization: boolean, setSpinnerState?: (state: boolean)=>void) {
+    openDeviceEditDialog(device: DeviceInstanceModel, userHasUpdateDisplayNameAuthorization: boolean, userHasUpdateAttributesAuthorization: boolean, setSpinnerState?: (state: boolean) => void) {
         const dialogConfig = new MatDialogConfig();
-        dialogConfig.width = "50vh";
+        dialogConfig.width = '50vh';
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             device: JSON.parse(JSON.stringify(device)), // create copy of object
@@ -145,7 +142,7 @@ export class DeviceInstancesDialogService {
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
 
         return editDialogRef.afterClosed().pipe(
-            concatMap((newDevice: DeviceInstancesModel) => {
+            concatMap((newDevice: DeviceInstanceModel) => {
                 let obs: Observable<any> = of(null);
                 // Display Name is an attribute, so if someone got attribute authorization, display name is also allowed
                 if (newDevice.attributes !== undefined && userHasUpdateAttributesAuthorization) {
@@ -162,7 +159,7 @@ export class DeviceInstancesDialogService {
                     obs = this.deviceInstancesService.updateDeviceInstanceDisplayName(device.id, newDevice.display_name);
                 }
                 return obs.pipe(
-                    map((resp: (DeviceInstancesUpdateModel | null)) => {
+                    map((resp: (DeviceInstanceModel | null)) => {
                         let errorOccured = false;
                         if(resp === null) {
                             errorOccured = true;
@@ -183,13 +180,13 @@ export class DeviceInstancesDialogService {
         );
     }
 
-    openDeviceCreateDialog(deviceType?: DeviceTypePermSearchModel, device?: DeviceInstancesModel): void {
+    openDeviceCreateDialog(deviceType?: DeviceTypeModel, device?: DeviceInstanceModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         if (device === undefined) {
-            device = {device_type: JSON.parse(JSON.stringify(deviceType))} as DeviceInstancesModel;
+            device = {device_type: JSON.parse(JSON.stringify(deviceType))} as DeviceInstanceWithDeviceTypeModel;
         } else {
-            device = JSON.parse(JSON.stringify(device)) as DeviceInstancesModel;
+            device = JSON.parse(JSON.stringify(device)) as DeviceInstanceModel;
             device.id = '';
         }
         dialogConfig.data = {
@@ -202,11 +199,11 @@ export class DeviceInstancesDialogService {
 
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((deviceOut: DeviceInstancesModel) => {
+        editDialogRef.afterClosed().subscribe((deviceOut: DeviceInstanceModel) => {
             if (deviceOut !== undefined) {
                 this.deviceInstancesService
-                    .saveDeviceInstance(this.convertDeviceInstance(deviceOut))
-                    .subscribe((deviceResp: DeviceInstancesUpdateModel | null) => {
+                    .saveDeviceInstance(deviceOut)
+                    .subscribe((deviceResp: DeviceInstanceModel | null) => {
                         if (deviceResp === null) {
                             this.snackBar.open('Error while saving the device instance!', 'close', { panelClass: 'snack-bar-error' });
                         } else {
@@ -215,15 +212,5 @@ export class DeviceInstancesDialogService {
                     });
             }
         });
-    }
-
-    private convertDeviceInstance(deviceOut: DeviceInstancesModel): DeviceInstancesUpdateModel {
-        return {
-            id: deviceOut.id,
-            local_id: deviceOut.local_id,
-            name: deviceOut.name,
-            device_type_id: deviceOut.device_type.id,
-            attributes: deviceOut.attributes,
-        };
     }
 }

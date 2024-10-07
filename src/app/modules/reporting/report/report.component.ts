@@ -27,7 +27,7 @@ import {
 import { ReportingService } from '../shared/reporting.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
-import { DeviceInstancesModel } from '../../devices/device-instances/shared/device-instances.model';
+import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 
 @Component({
     selector: 'senergy-reporting-new',
@@ -43,7 +43,7 @@ export class ReportComponent implements OnInit {
     ready = false;
     templateId: string | null = '';
     requestObject: Map<string, any> = new Map<string, any>();
-    allDevices: DeviceInstancesModel[] = [];
+    allDevices: DeviceInstanceModel[] = [];
     constructor(
         private route: ActivatedRoute,
         public snackBar: MatSnackBar,
@@ -54,9 +54,8 @@ export class ReportComponent implements OnInit {
     ) {
         this.reportId = this.route.snapshot.paramMap.get('reportId');
         this.templateId = this.route.snapshot.paramMap.get('templateId');
-        this.deviceInstanceService.getDeviceInstances(9999, 0).subscribe((devices: DeviceInstancesModel[]) => {
-            devices = this.deviceInstanceService.useDisplayNameAsName(devices) as DeviceInstancesModel[];
-            this.allDevices = devices;
+        this.deviceInstanceService.getDeviceInstances({limit: 9999, offset: 0}).subscribe((devices) => {
+            this.allDevices = devices.result;
         });
     }
 

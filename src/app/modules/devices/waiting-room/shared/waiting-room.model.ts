@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-export interface Attribute {
-    key: string;
-    value: string;
-}
+import { Attribute } from '../../device-instances/shared/device-instances.model';
+
+
 
 export interface WaitingDeviceModel {
     local_id: string;

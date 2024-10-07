@@ -20,13 +20,12 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
-import {DeviceGroupsPermSearchModel} from './device-groups-perm-search.model';
 import {DeviceGroupHelperResultModel, DeviceGroupModel} from './device-groups.model';
 import {DeviceTypeFunctionModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
 import {DeviceClassesPermSearchModel} from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
 import {AspectsPermSearchModel} from '../../../metadata/aspects/shared/aspects-perm-search.model';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
@@ -48,9 +47,9 @@ export class DeviceGroupsService {
         offset: number,
         feature: string,
         order: string,
-    ): Observable<DeviceGroupsPermSearchModel[]> {
+    ): Observable<DeviceGroupModel[]> {
         return this.http
-            .post<DeviceGroupsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/device-groups', {
+            .post<DeviceGroupModel[]>(environment.permissionSearchUrl + '/v3/query/device-groups', { // TODO
                 resource: 'device-groups',
                 find: {
                     search: query,
@@ -82,7 +81,7 @@ export class DeviceGroupsService {
         offset: number,
         feature: string,
         order: string,
-    ): Observable<DeviceGroupsPermSearchModel[]> {
+    ): Observable<DeviceGroupModel[]> {
         const params = [
             'limit=' + limit,
             'offset=' + offset,
@@ -91,7 +90,7 @@ export class DeviceGroupsService {
             'search=' + encodeURIComponent(query),
         ].join('&');
 
-        return this.http.get<DeviceGroupsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/device-groups?' + params).pipe(
+        return this.http.get<DeviceGroupModel[]>(environment.permissionSearchUrl + '/v3/resources/device-groups?' + params).pipe( // TODO
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceGroups(search)', [])),
         );
@@ -131,9 +130,9 @@ export class DeviceGroupsService {
             .pipe(catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'deleteDeviceGroup', false)));
     }
 
-    getDeviceListByIds(ids: string[]): Observable<DeviceInstancesBaseModel[]> {
+    getBaseDevicesByIds(ids: string[]): Observable<DeviceInstancesBaseModel[]> {
         return this.http
-            .post<DeviceInstancesBaseModel[]>(environment.permissionSearchUrl + '/v3/query/devices', {
+            .post<DeviceInstancesBaseModel[]>(environment.permissionSearchUrl + '/v3/query/devices', { // TODO
                 resource: 'devices',
                 list_ids: {
                     ids,
@@ -152,7 +151,7 @@ export class DeviceGroupsService {
 
     getDeviceGroupListByIds(ids: string[]): Observable<DeviceGroupModel[]> {
         return this.http
-            .post<DeviceGroupModel[]>(environment.permissionSearchUrl + '/v3/query/device-groups', {
+            .post<DeviceGroupModel[]>(environment.permissionSearchUrl + '/v3/query/device-groups', { // TODO
                 resource: 'device-groups',
                 list_ids: {
                     ids,
@@ -171,7 +170,7 @@ export class DeviceGroupsService {
 
     getFunctionListByIds(ids: string[]): Observable<DeviceTypeFunctionModel[]> {
         return this.http
-            .post<DeviceTypeFunctionModel[]>(environment.permissionSearchUrl + '/v3/query/functions', {
+            .post<DeviceTypeFunctionModel[]>(environment.permissionSearchUrl + '/v3/query/functions', { // TODO
                 resource: 'functions',
                 list_ids: {
                     ids,
@@ -190,7 +189,7 @@ export class DeviceGroupsService {
 
     getAspectListByIds(ids: string[]): Observable<AspectsPermSearchModel[]> {
         return this.http
-            .post<AspectsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/aspects', {
+            .post<AspectsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/aspects', { // TODO
                 resource: 'aspects',
                 list_ids: {
                     ids,
@@ -209,7 +208,7 @@ export class DeviceGroupsService {
 
     getDeviceClassListByIds(ids: string[]): Observable<DeviceClassesPermSearchModel[]> {
         return this.http
-            .post<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/device-classes', {
+            .post<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/device-classes', { // TODO
                 resource: 'device-classes',
                 list_ids: {
                     ids,
@@ -251,7 +250,7 @@ export class DeviceGroupsService {
             { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/device-groups', options)
+            .get(environment.permissionSearchUrl + '/v3/total/device-groups', options) // TODO
             .pipe(
                 catchError(
                     this.errorHandlerService.handleError(

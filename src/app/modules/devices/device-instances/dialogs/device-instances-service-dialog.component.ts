@@ -30,7 +30,7 @@ import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {environment} from '../../../../../environments/environment';
 import {AuthorizationService} from '../../../../core/services/authorization.service';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import { DeviceInstancesModel } from '../shared/device-instances.model';
+import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 
 @Component({
@@ -51,7 +51,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         from: [{value: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)), disabled: true}],
         to: [{value: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)), disabled: true}],
     });
-    device: DeviceInstancesModel;
+    device: DeviceInstanceModel;
     descriptions: string[][];
     availability: { serviceId: string; from?: Date; to?: Date; groupType?: string; groupTime?: string }[] = [];
     availabilityControl = new FormControl<{
@@ -65,7 +65,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesServiceDialogComponent>,
         @Inject(MAT_DIALOG_DATA) data: {
-            device: DeviceInstancesModel;
+            device: DeviceInstanceModel;
             services: DeviceTypeServiceModel[];
             lastValueElements: LastValuesRequestElementTimescaleModel[];
             deviceType: DeviceTypeModel;

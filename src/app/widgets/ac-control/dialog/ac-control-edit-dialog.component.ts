@@ -246,7 +246,7 @@ export class AcControlEditDialogComponent implements OnInit {
             obs.push(this.updateName());
         }
         forkJoin(obs).subscribe(results => {
-            const errorOccured = results.find((response) => response.message != 'OK');
+            const errorOccured = results.find((response) => response.message !== 'OK');
             if(errorOccured) {
                 this.ready = true;
             } else {

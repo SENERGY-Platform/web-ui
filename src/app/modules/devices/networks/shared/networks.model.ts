@@ -14,37 +14,15 @@
  * limitations under the License.
  */
 
-import {Attribute} from "../../device-instances/shared/device-instances.model";
-
-export interface NetworksModel {
-    id: string;
-    name: string;
-    device_local_ids: string[] | null;
-    annotations?: HubAnnotations;
-}
-
-export interface NetworksPermModel extends NetworksModel {
-    device_ids: string[];
-    creator: string;
-    shared: boolean;
-}
-
-export interface HubAnnotations {
-    connected?: boolean;
-}
-
-export interface ApiAggregatorNetworksModel extends NetworksModel {
-    log_state: boolean;
-}
-
-export interface LegacyNetworksModel extends ApiAggregatorNetworksModel, NetworksPermModel {
-}
+import { PermissionsRightsModel } from 'src/app/modules/permissions/shared/permissions-rights.model';
 
 export interface HubModel {
     id: string;
     name: string;
     hash: string;
+    owner_id: string;
     device_local_ids: string[] | null;
+    device_ids: string[] | null;
 }
 
 export interface ExtendedHubTotalModel {
@@ -52,19 +30,8 @@ export interface ExtendedHubTotalModel {
     total: number;
 }
 
-export interface ExtendedHubModel {
-    id: string;
-    name: string;
-    hash: string;
-    device_local_ids: string[] | null;
-    device_ids: string[] | null;
-    owner_id: string;
-    connection_state: "online" | "offline" | "";
+export interface ExtendedHubModel extends HubModel {
+    connection_state: 'online' | 'offline' | '';
     shared: boolean;
-    permissions: {
-        read: boolean;
-        write: boolean;
-        execute: boolean;
-        administrate: boolean;
-    }
+    permissions: PermissionsRightsModel;
 }

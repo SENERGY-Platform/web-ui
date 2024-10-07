@@ -19,7 +19,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
-import { DeviceInstancesModel } from '../../device-instances/shared/device-instances.model';
+import { DeviceInstanceModel } from '../../device-instances/shared/device-instances.model';
 import { NetworksService } from '../shared/networks.service';
 import { forkJoin, Observable } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -30,11 +30,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     styleUrls: ['./networks-delete-dialog.component.css'],
 })
 export class NetworksDeleteDialogComponent implements OnInit {
-    deviceSelection = new SelectionModel<DeviceInstancesModel>(true, []);
+    deviceSelection = new SelectionModel<DeviceInstanceModel>(true, []);
     ready = true;
 
     constructor(
-        @Inject(MAT_DIALOG_DATA) public data: { networkId: string; devices: DeviceInstancesModel[] },
+        @Inject(MAT_DIALOG_DATA) public data: { networkId: string; devices: DeviceInstanceModel[] },
         private dialogRef: MatDialogRef<NetworksDeleteDialogComponent>,
         private deviceInstancesService: DeviceInstancesService,
         private networksService: NetworksService,
@@ -42,7 +42,7 @@ export class NetworksDeleteDialogComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.deviceSelection = new SelectionModel<DeviceInstancesModel>(true, []);
+        this.deviceSelection = new SelectionModel<DeviceInstanceModel>(true, []);
         console.log(this.data);
     }
 
@@ -72,7 +72,7 @@ export class NetworksDeleteDialogComponent implements OnInit {
         this.dialogRef.close(val);
     }
 
-    checkboxed(value: DeviceInstancesModel, $event: MatCheckboxChange) {
+    checkboxed(value: DeviceInstanceModel, $event: MatCheckboxChange) {
         if ($event.checked) {
             this.deviceSelection.select(value);
         } else {

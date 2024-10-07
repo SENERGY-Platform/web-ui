@@ -41,10 +41,7 @@ import { DeviceStatusService } from '../shared/device-status.service';
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 import { ProcessSchedulerModel } from '../../process-scheduler/shared/process-scheduler.model';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
-import {
-    DeviceInstancesPermSearchModel,
-    DeviceSelectablesModel
-} from '../../../modules/devices/device-instances/shared/device-instances.model';
+import { DeviceSelectablesModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
 import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 
 @Component({

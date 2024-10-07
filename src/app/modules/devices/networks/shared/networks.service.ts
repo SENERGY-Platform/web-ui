@@ -18,14 +18,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
-import {catchError, concatMap, map} from 'rxjs/operators';
-import {Observable, of} from 'rxjs';
+import {catchError, map} from 'rxjs/operators';
+import {Observable} from 'rxjs';
 import {
-    ApiAggregatorNetworksModel, ExtendedHubModel,
-    ExtendedHubTotalModel, HubAnnotations,
-    HubModel, LegacyNetworksModel,
-    NetworksModel,
-    NetworksPermModel
+    ExtendedHubModel,
+    ExtendedHubTotalModel,
+    HubModel,
 } from './networks.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { NetworksEditDialogComponent } from '../dialogs/networks-edit-dialog.component';
@@ -33,13 +31,10 @@ import { NetworksHistoryModel } from './networks-history.model';
 import { NetworksClearDialogComponent } from '../dialogs/networks-clear-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import {
-    DeviceInstancesPermSearchModel,
-    DeviceInstancesPermSearchTotalModel,
-    DeviceInstancesRouterStateTabEnum, ExtendedDeviceInstanceModel,
-    ExtendedDeviceInstancesTotalModel
-} from "../../device-instances/shared/device-instances.model";
+    DeviceInstancesRouterStateTabEnum
+} from '../../device-instances/shared/device-instances.model';
 
 @Injectable({
     providedIn: 'root',
@@ -57,8 +52,8 @@ export class NetworksService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl);
     }
 
-    listSyncNetworks(): Observable<NetworksModel[]> {
-        return this.http.get<NetworksModel[]>(environment.processSyncUrl + '/networks').pipe(
+    listSyncNetworks(): Observable<HubModel[]> {
+        return this.http.get<HubModel[]>(environment.processSyncUrl + '/networks').pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'listSyncNetworks(search)', [])),
         );
@@ -92,7 +87,7 @@ export class NetworksService {
         );
     }
 
-    openNetworkEditDialog(network: NetworksModel): void {
+    openNetworkEditDialog(network: HubModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = network;
@@ -109,14 +104,14 @@ export class NetworksService {
         });
     }
 
-    openNetworkClearDialog(network: NetworksModel): void {
+    openNetworkClearDialog(network: HubModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(NetworksClearDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe((clearNetwork: boolean) => {
             if (clearNetwork) {
-                this.update({ id: network.id, name: network.name, hash: '', device_local_ids: [] }).subscribe(
+                this.update({ id: network.id, name: network.name, hash: '', device_local_ids: [], owner_id: network.owner_id, device_ids: [] }).subscribe(
                     (respMessage: HubModel | null) => {
                         if (respMessage) {
                             this.snackBar.open('Hub cleared successfully.', undefined, { duration: 2000 });
@@ -127,23 +122,6 @@ export class NetworksService {
                 );
             }
         });
-    }
-
-    extendedHubToLegacyModel(hub: ExtendedHubModel): LegacyNetworksModel {
-        let annotation = {};
-        if(hub.connection_state != "") {
-            annotation = {connected: hub.connection_state=="online"}
-        }
-        return {
-            id: hub.id,
-            name: hub.name,
-            device_local_ids: hub.device_local_ids,
-            annotations: annotation,
-            log_state: hub.connection_state=="online",
-            device_ids: hub.device_ids,
-            creator: hub.owner_id,
-            shared: hub.shared
-        } as LegacyNetworksModel
     }
 
     getExtendedHub(id: string): Observable<ExtendedHubModel|null> {
@@ -161,52 +139,52 @@ export class NetworksService {
         connectionState?: DeviceInstancesRouterStateTabEnum;
         ids?: string[];
     }): Observable<ExtendedHubTotalModel> {
-        let params = new HttpParams()
+        let params = new HttpParams();
         if(options.limit > 0) {
-            params = params.set("limit", options.limit.toString());
+            params = params.set('limit', options.limit.toString());
         }
         if(options.offset > 0) {
-            params = params.set("offset", options.offset.toString());
+            params = params.set('offset', options.offset.toString());
         }
-        let sort = options.sortBy || "name";
-        if(sort == "annotations.connected") {
-            sort = "connectionstate"
+        let sort = options.sortBy || 'name';
+        if(sort == 'annotations.connected') {
+            sort = 'connectionstate';
         }
         if(options.sortDesc){
-            sort = sort+".desc";
+            sort = sort+'.desc';
         }
-        if(sort != "") {
-            params = params.set("sort", sort);
+        if(sort != '') {
+            params = params.set('sort', sort);
         }
-        if (options.searchText && options.searchText != "") {
-            params = params.set("search", options.searchText);
+        if (options.searchText && options.searchText != '') {
+            params = params.set('search', options.searchText);
         }
         if(options.ids!==null && options.ids!==undefined && options.ids.join){
-            params = params.set("ids", options.ids.join(","));
+            params = params.set('ids', options.ids.join(','));
         }
         if(options.connectionState!==null && options.connectionState!==undefined) {
             switch (options.connectionState){
-                case DeviceInstancesRouterStateTabEnum.ONLINE: {
-                    params = params.set("connection-state", "online");
-                    break
-                }
-                case DeviceInstancesRouterStateTabEnum.OFFLINE: {
-                    params = params.set("connection-state", "offline");
-                    break
-                }
-                case DeviceInstancesRouterStateTabEnum.UNKNOWN: {
-                    params = params.set("connection-state", "");
-                    break
-                }
+            case DeviceInstancesRouterStateTabEnum.ONLINE: {
+                params = params.set('connection-state', 'online');
+                break;
+            }
+            case DeviceInstancesRouterStateTabEnum.OFFLINE: {
+                params = params.set('connection-state', 'offline');
+                break;
+            }
+            case DeviceInstancesRouterStateTabEnum.UNKNOWN: {
+                params = params.set('connection-state', '');
+                break;
+            }
             }
         }
         return this.http.get<ExtendedHubModel[]>(environment.deviceRepoUrl + '/extended-hubs', { observe: 'response', params: params }).pipe(
             map((resp) => {
-                let totalStr = resp.headers.get("X-Total-Count") || "0";
+                let totalStr = resp.headers.get('X-Total-Count') || '0';
                 return {
                     result: resp.body,
                     total: parseInt(totalStr)
-                } as ExtendedHubTotalModel
+                } as ExtendedHubTotalModel;
             }),
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'getExtendedHubs', {result: [], total: 0})),
         );

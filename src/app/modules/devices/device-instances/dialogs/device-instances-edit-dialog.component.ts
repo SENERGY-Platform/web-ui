@@ -16,19 +16,17 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {Attribute, DeviceInstancesModel} from '../shared/device-instances.model';
-import { DeviceInstancesService } from '../shared/device-instances.service';
-import {AbstractControl, FormControl, ValidationErrors} from '@angular/forms';
+import {Attribute, DeviceInstanceModel} from '../shared/device-instances.model';
+import {AbstractControl, ValidationErrors} from '@angular/forms';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {senergyConnectorLocalIdConstraint} from '../../../metadata/device-types-overview/shared/device-type.model';
-import {PermissionsService} from "../../../permissions/shared/permissions.service";
 
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',
     styleUrls: ['./device-instances-edit-dialog.component.css'],
 })
 export class DeviceInstancesEditDialogComponent implements OnInit {
-    device: DeviceInstancesModel;
+    device: DeviceInstanceModel;
     displayname = '';
     nicknameAttributeKey = 'shared/nickname';
     nicknameAttributeOrigin = 'shared';
@@ -44,11 +42,11 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
         private deviceTypeService: DeviceTypeService,
 
         @Inject(MAT_DIALOG_DATA) private data: {
-            device: DeviceInstancesModel,
-            userHasUpdateDisplayNameAuthorization: boolean,
-            userHasUpdateAttributesAuthorization: boolean,
-            action?: string
-            localIdIsEditable?: boolean
+            device: DeviceInstanceModel;
+            userHasUpdateDisplayNameAuthorization: boolean;
+            userHasUpdateAttributesAuthorization: boolean;
+            action?: string;
+            localIdIsEditable?: boolean;
         },
     ) {
         this.userHasUpdateDisplayNameAuthorization = data.userHasUpdateDisplayNameAuthorization;
@@ -67,7 +65,7 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
                     protocolsToConstraints.set(p.id, p.constraints);
                 });
             }
-            this.deviceTypeService.getDeviceType(this.device.device_type.id).subscribe(dt => {
+            this.deviceTypeService.getDeviceType(this.device.device_type_id).subscribe(dt => {
                 if(dt) {
                     dt.services.forEach(s => {
                         this.protocolConstraints = this.protocolConstraints.concat(protocolsToConstraints.get(s.protocol_id) || []);

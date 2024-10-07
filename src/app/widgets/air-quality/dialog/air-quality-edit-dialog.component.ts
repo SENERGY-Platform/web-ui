@@ -38,7 +38,7 @@ import { ImportInstancesModel } from '../../../modules/imports/import-instances/
 import { environment } from '../../../../environments/environment';
 import { ImportTypesService } from '../../../modules/imports/import-types/shared/import-types.service';
 import { mergeMap } from 'rxjs/operators';
-import {DeviceInstancesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
+import {DeviceInstanceModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
 import {
     DeviceTypeModel,
     DeviceTypeServiceModel
@@ -358,7 +358,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     searchFormControl = new FormControl();
     importInstances: ImportInstancesModel[] = [];
     ready = false;
-    devices: DeviceInstancesModel[] = [];
+    devices: DeviceInstanceModel[] = [];
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
 
     private static getEmptyExportValueModel(): ExportValueModel {
@@ -412,9 +412,9 @@ export class AirQualityEditDialogComponent implements OnInit {
         );
 
         obs.push(
-            this.deviceInstancesService.getDeviceInstances(9999, 0).pipe(
+            this.deviceInstancesService.getDeviceInstances({limit: 9999, offset: 0}).pipe(
                 map((resp) => {
-                    this.devices = resp;
+                    this.devices = resp.result;
                 }),
             ),
         );
@@ -572,18 +572,18 @@ export class AirQualityEditDialogComponent implements OnInit {
         if (device === undefined) {
             return of([]);
         }
-        if (this.deviceTypes.has(device.device_type.id)) {
-            return of(this.deviceTypes.get(device.device_type.id)?.services || []);
+        if (this.deviceTypes.has(device.device_type_id)) {
+            return of(this.deviceTypes.get(device.device_type_id)?.services || []);
         }
-        this.deviceTypes.set(device.device_type.id, {} as DeviceTypeModel);
+        this.deviceTypes.set(device.device_type_id, {} as DeviceTypeModel);
         return new Observable<DeviceTypeServiceModel[]>(obs => { // need to subscribe in function
-            this.deviceTypeService.getDeviceType(device.device_type.id).subscribe(dt => {
+            this.deviceTypeService.getDeviceType(device.device_type_id).subscribe(dt => {
                 if (dt === null) {
                     obs.next([]);
                     obs.complete();
                     return;
                 }
-                this.deviceTypes.set(device.device_type.id, dt);
+                this.deviceTypes.set(device.device_type_id, dt);
                 obs.next(dt.services);
                 obs.complete();
             });
@@ -598,7 +598,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         if (device === undefined) {
             return [];
         }
-        const service = this.deviceTypes.get(device.device_type.id)?.services?.find(x => x.id === serviceId);
+        const service = this.deviceTypes.get(device.device_type_id)?.services?.find(x => x.id === serviceId);
         if (service === undefined) {
             return [];
         }

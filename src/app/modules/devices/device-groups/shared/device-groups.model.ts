@@ -23,6 +23,8 @@ export interface DeviceGroupModel {
     device_ids: string[];
     criteria: DeviceGroupCriteriaModel[];
     attributes?: Attribute[];
+    auto_generated_by_device?: string;
+    criteria_short?: string[]; // TODO what is that??
 }
 
 export interface DeviceGroupCriteriaModel {

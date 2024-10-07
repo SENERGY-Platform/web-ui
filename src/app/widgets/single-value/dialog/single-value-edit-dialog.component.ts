@@ -24,18 +24,14 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {
-    DeviceInstancesModel,
-    DeviceInstancesPermSearchModel
-} from '../../../modules/devices/device-instances/shared/device-instances.model';
+import { DeviceInstanceModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
 import { DeviceTypeCharacteristicsModel, DeviceTypeFunctionModel, DeviceTypeServiceModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { ChartsExportRequestPayloadGroupModel } from '../../charts/export/shared/charts-export-request-payload.model';
 import { concatMap, forkJoin, map, mergeMap, Observable, of } from 'rxjs';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
-import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
-import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { DeviceGroupCriteriaModel, DeviceGroupHelperResultModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
 import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-classes/shared/device-classes-perm-search.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
@@ -76,8 +72,8 @@ export class SingleValueEditDialogComponent implements OnInit {
     ];
     aggregations = Object.values(SingleValueAggregations);
 
-    devices: DeviceInstancesModel[] = [];
-    deviceGroups: DeviceGroupsPermSearchModel[] = [];
+    devices: DeviceInstanceModel[] = [];
+    deviceGroups: DeviceGroupModel[] = [];
     services: DeviceTypeServiceModel[] = [];
     paths: { Name: string }[] = [];
     aspects: AspectsPermSearchModel[] = [];
@@ -183,7 +179,7 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     listenForDeviceSelectionChange() {
         this.form.get('device')?.valueChanges.pipe(
-            concatMap((device: DeviceInstancesPermSearchModel) => {
+            concatMap((device: DeviceInstanceModel) => {
                 this.dataSourceFieldsReady = false;
                 this.paths = [];
                 this.services = [];
@@ -201,7 +197,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         ).subscribe();
     }
 
-    loadDeviceServices(device: DeviceInstancesPermSearchModel) {
+    loadDeviceServices(device: DeviceInstanceModel) {
         return this.deviceTypeService.getDeviceType(device.device_type_id).pipe(
             map((dt) => {
                 this.services = dt?.services.filter(service => service.outputs.length === 1) || [];
@@ -353,7 +349,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.vAxisValues = dataExport?.values || [];
     }
 
-    setDeviceServiceOptions(device?: DeviceInstancesPermSearchModel) {
+    setDeviceServiceOptions(device?: DeviceInstanceModel) {
         // load and set device service options
         if(device == null) {
             return of(null);
@@ -394,8 +390,8 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     initDevices() {
-        return this.deviceInstancesService.getDeviceInstances(10000, 0).pipe(
-            map((devices => this.devices = devices)));
+        return this.deviceInstancesService.getDeviceInstances({limit: 10000, offset: 0}).pipe(
+            map((devices => this.devices = devices.result)));
     }
 
     initDeviceGroups() {
@@ -454,7 +450,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.widget.properties.threshold = this.form.get('threshold')?.value || undefined;
         this.widget.properties.math = this.form.get('math')?.value || undefined;
         this.widget.properties.group = this.form.get('group')?.value as ChartsExportRequestPayloadGroupModel || undefined;
-        this.widget.properties.device = this.form.get('device')?.value as DeviceInstancesPermSearchModel || undefined;
+        this.widget.properties.device = this.form.get('device')?.value as DeviceInstanceModel || undefined;
         this.widget.properties.service = this.form.get('service')?.value as DeviceTypeServiceModel || undefined;
         this.widget.properties.sourceType = this.form.get('sourceType')?.value || undefined;
         this.widget.properties.deviceGroupId = this.form.get('deviceGroupId')?.value || undefined;

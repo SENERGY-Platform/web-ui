@@ -18,7 +18,6 @@ import { Component } from '@angular/core';
 import { ParserService } from '../../shared/parser.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfigModel, ParseModel } from '../../shared/parse.model';
-import { DeviceInstancesModel } from '../../../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from '../../../../devices/device-instances/shared/device-instances.service';
 import {
     DeviceTypeContentModel,
@@ -30,6 +29,7 @@ import { DeviceTypeService } from '../../../../metadata/device-types-overview/sh
 import { FlowEngineService } from '../../shared/flow-engine.service';
 import { NodeInput, NodeModel, NodeValue, PipelineRequestModel } from '../shared/pipeline-request.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 
 @Component({
     selector: 'senergy-deploy-flow-classic',
@@ -46,8 +46,8 @@ export class DeployFlowClassicComponent {
     deviceTypes = [] as any;
     paths = [] as any;
 
-    allDevices: DeviceInstancesModel[] = [];
-    devices: DeviceInstancesModel[][][] = [[[]]];
+    allDevices: DeviceInstanceModel[] = [];
+    devices: DeviceInstanceModel[][][] = [[[]]];
 
     Arr = Array;
 
@@ -93,8 +93,8 @@ export class DeployFlowClassicComponent {
 
         this.parserService.getInputs(this.id).subscribe((resp: ParseModel[]) => {
             this.inputs = resp;
-            this.deviceInstanceService.getDeviceInstances(9999, 0).subscribe((devices: DeviceInstancesModel[]) => {
-                devices = this.deviceInstanceService.useDisplayNameAsName(devices) as DeviceInstancesModel[];
+            this.deviceInstanceService.getDeviceInstances({limit: 9999, offset: 0}).subscribe((deviceTotal) => {
+                const devices = deviceTotal.result;
                 this.allDevices = devices;
                 this.inputs?.forEach((input, operatorKey) => {
                     this.devices[operatorKey] = [];
@@ -121,7 +121,7 @@ export class DeployFlowClassicComponent {
             for (const formDeviceEntry of this.selectedValues.get(pipeReqNode.nodeId).entries()) {
                 const nodeValues = [] as NodeValue[];
                 const operatorFieldName = formDeviceEntry[0];
-                const formDeviceInfo: { device: DeviceInstancesModel[]; service: DeviceTypeServiceModel; path: string } =
+                const formDeviceInfo: { device: DeviceInstanceModel[]; service: DeviceTypeServiceModel; path: string } =
                     formDeviceEntry[1];
 
                 // check if device and service are selected
@@ -151,7 +151,7 @@ export class DeployFlowClassicComponent {
 
                     // check if node is local or cloud and set input topic accordingly
                     if (pipeReqNode.deploymentType === 'local') {
-                        formDeviceInfo.device.forEach((device: DeviceInstancesModel) => {
+                        formDeviceInfo.device.forEach((device: DeviceInstanceModel) => {
                             if (nodeInput.topicName === undefined) {
                                 nodeInput.topicName = 'event/' + device.local_id + '/' + formDeviceInfo.service.local_id;
                             } else {
@@ -182,16 +182,16 @@ export class DeployFlowClassicComponent {
         });
     }
 
-    deviceChanged(device: DeviceInstancesModel[], inputId: string, port: string, operatorKey: number, deviceKey: number) {
+    deviceChanged(device: DeviceInstanceModel[], inputId: string, port: string, operatorKey: number, deviceKey: number) {
         if (device.length === 0) {
             this.devices[operatorKey][deviceKey] = this.allDevices;
         } else {
-            this.deviceTypeService.getDeviceType(device[0].device_type.id).subscribe((resp: DeviceTypeModel | null) => {
+            this.deviceTypeService.getDeviceType(device[0].device_type_id).subscribe((resp: DeviceTypeModel | null) => {
                 if (resp !== null) {
                     this.deviceTypes[inputId][port] = resp;
                     this.paths[inputId][port] = [];
                     this.devices[operatorKey][deviceKey] = this.devices[operatorKey][deviceKey].filter(function(dev) {
-                        return dev.device_type.id === device[0].device_type.id;
+                        return dev.device_type_id === device[0].device_type_id;
                     });
                 }
             });
@@ -236,7 +236,7 @@ export class DeployFlowClassicComponent {
                         this.paths[parseModel.id] = [];
                     }
                     this.selectedValues.get(parseModel.id).set(port, {
-                        device: [] as DeviceInstancesModel[],
+                        device: [] as DeviceInstanceModel[],
                         service: {} as DeviceTypeServiceModel,
                         path: '',
                     });

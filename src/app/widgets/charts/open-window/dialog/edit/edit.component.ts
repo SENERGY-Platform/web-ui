@@ -6,11 +6,11 @@ import { forkJoin, Observable } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
-import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
-import { DeviceInstancesModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { ListRulesComponent } from '../../../export/dialog/list-rules/list-rules.component';
 import { ChartsExportConversion, ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../../../export/shared/charts-export-properties.model';
 import { DataSourceConfig } from '../../../shared/data-source-selector/data-source-selector.component';
+import { DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 
 @Component({
   selector: 'app-edit',
@@ -145,7 +145,7 @@ export class OpenWindowEditComponent implements OnInit {
     }
 
 
-    setVAxes(exports: (ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel)[]) {
+    setVAxes(exports: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[]) {
         const vAxes: ChartsExportVAxesModel[] = [];
 
         exports.forEach(dataExport => {

@@ -276,8 +276,7 @@ export class DeviceGroupsEditComponent implements OnInit {
         };
 
         if (idsForRepoSearch.length) {
-            this.deviceGroupService.getDeviceListByIds(idsForRepoSearch).subscribe((devices) => {
-                devices = this.deviceInstanceService.useDisplayNameAsName(devices);
+            this.deviceGroupService.getBaseDevicesByIds(idsForRepoSearch).subscribe((devices) => {
                 for (const device of devices) {
                     this.deviceCache.set(device.id, device);
                 }

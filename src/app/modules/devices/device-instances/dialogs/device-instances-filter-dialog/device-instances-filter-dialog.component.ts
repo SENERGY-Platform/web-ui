@@ -3,11 +3,11 @@ import { FormControl, FormGroup, UntypedFormBuilder, Validators } from '@angular
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SortDirection } from '@angular/material/sort';
 import { forkJoin, Observable, map, concatMap } from 'rxjs';
-import { DeviceTypeBaseModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
 import { LocationModel } from '../../../locations/shared/locations.model';
 import { LocationsService } from '../../../locations/shared/locations.service';
-import {ExtendedHubModel, NetworksModel} from '../../../networks/shared/networks.model';
+import {ExtendedHubModel, HubModel} from '../../../networks/shared/networks.model';
 import { NetworksService } from '../../../networks/shared/networks.service';
 import { DeviceConnectionState, DeviceInstancesRouterStateTabEnum, FilterSelection } from '../../shared/device-instances.model';
 import { DeviceInstancesService } from '../../shared/device-instances.service';
@@ -20,8 +20,8 @@ import { DeviceInstancesService } from '../../shared/device-instances.service';
 export class DeviceInstancesFilterDialogComponent implements OnInit {
     sortDirection: SortDirection = 'asc';
     locationOptions: LocationModel[] = [];
-    networkOptions: NetworksModel[] = [];
-    deviceTypeOptions: DeviceTypeBaseModel[] = [];
+    networkOptions: HubModel[] = [];
+    deviceTypeOptions: DeviceTypeModel[] = [];
     connectionOptions: DeviceConnectionState[] = [
         {name: 'connected', value: DeviceInstancesRouterStateTabEnum.ONLINE},
         {name: 'unconnected', value: DeviceInstancesRouterStateTabEnum.OFFLINE},
@@ -61,9 +61,8 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
 
         optionLoadObs.push(
             //100, 0, 'name', this.sortDirection
-            this.networksService.listExtendedHubs({limit:100, offset:0, sortBy:"name", sortDesc: this.sortDirection!="asc"}).pipe(
-                map((resp) => {return resp ? resp.result : [] as ExtendedHubModel[]}),
-                map((list) => list.map(this.networksService.extendedHubToLegacyModel)),
+            this.networksService.listExtendedHubs({limit:100, offset:0, sortBy:'name', sortDesc: this.sortDirection !== 'asc'}).pipe(
+                map((resp) => resp ? resp.result : [] as ExtendedHubModel[]),
                 map((value) => {
                     this.networkOptions = value;
                 })

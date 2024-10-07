@@ -22,26 +22,19 @@ import {catchError, map, reduce, share, concatMap} from 'rxjs/operators';
 import {
     Attribute,
     DeviceFilterCriteriaModel,
+    DeviceInstanceModel,
     DeviceInstancesBaseModel,
-    DeviceInstancesModel,
-    DeviceInstancesPermSearchModel,
-    DeviceInstancesPermSearchTotalModel,
     DeviceInstancesRouterStateTabEnum,
     DeviceInstancesTotalModel,
+    DeviceInstancesWithDeviceTypeTotalModel,
     DeviceSelectablesFullModel,
-    DeviceSelectablesModel, ExtendedDeviceInstanceModel, ExtendedDeviceInstancesTotalModel,
+    DeviceSelectablesModel,
 } from './device-instances.model';
 import {forkJoin, Observable, of} from 'rxjs';
 import {DeviceInstancesHistoryModel, DeviceInstancesHistoryModelWithId} from './device-instances-history.model';
-import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {UtilService} from '../../../../core/services/util.service';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
-import {
-    DeviceTypePermSearchModel,
-    PermissionsModel
-} from 'src/app/modules/metadata/device-types-overview/shared/device-type-perm-search.model';
-import { PermissionQueryRequest, Selection } from 'src/app/core/model/permissions/permissions';
 import { LocationsService } from '../../locations/shared/locations.service';
 import { NetworksService } from '../../networks/shared/networks.service';
 
@@ -72,7 +65,7 @@ export class DeviceInstancesService {
 
     listUsedDeviceTypeIds(): Observable<string[]> {
         return this.http
-            .post<{ term: string }[]>(environment.permissionSearchUrl + '/v3/query/devices', {
+            .post<{ term: string }[]>(environment.permissionSearchUrl + '/v3/query/devices', { //TODO
                 resource: 'devices',
                 term_aggregate: 'features.device_type_id',
             })
@@ -85,7 +78,7 @@ export class DeviceInstancesService {
 
     getDeviceListByIds(ids: string[]): Observable<DeviceInstancesBaseModel[]> {
         return this.http
-            .post<DeviceInstancesBaseModel[]>(environment.permissionSearchUrl + '/v3/query/devices', {
+            .post<DeviceInstancesBaseModel[]>(environment.permissionSearchUrl + '/v3/query/devices', { //TODO
                 resource: 'devices',
                 list_ids: {
                     ids,
@@ -102,70 +95,53 @@ export class DeviceInstancesService {
             );
     }
 
-    getDeviceInstance(id: string): Observable<DeviceInstancesBaseModel | null> {
-        return this.http.get<DeviceInstancesBaseModel>(environment.deviceManagerUrl + '/devices/' + id).pipe(
+    getDeviceInstance(id: string): Observable<DeviceInstanceModel | null> {
+        return this.http.get<DeviceInstanceModel>(environment.deviceManagerUrl + '/extended-devices/' + id).pipe(
             map((resp) => resp),
-            map(devices => this.addDisplayName(devices)),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstance', null)),
         );
     }
 
-    useDisplayNameAsName(devices: DeviceInstancesBaseModel[]): DeviceInstancesBaseModel[] {
-        return this.addDisplayNames(devices).map((device) => {
-            device.name = device.display_name || device.name;
-            return device;
-        });
+    getDeviceInstanceBaseModel(id: string): Observable<DeviceInstancesBaseModel | null> {
+        return this.http.get<DeviceInstancesBaseModel>(environment.deviceManagerUrl + '/devices/' + id).pipe(
+            map((resp) => resp),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstance', null)),
+        );
     }
 
-    addDisplayNames(devices: DeviceInstancesBaseModel[]): DeviceInstancesBaseModel[] {
-        return devices.map(device => this.addDisplayName(device));
-    }
-
-    addDisplayName(device: DeviceInstancesBaseModel): DeviceInstancesBaseModel {
-        if (!device.display_name) {
-            device.display_name = device.name;
-            device.attributes?.forEach((attr) => {
-                if (attr.key === this.nicknameAttributeKey) {
-                    device.display_name = attr.value;
-                }
-            });
-        }
-        return device;
-    }
-
-    updateDeviceInstance(device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel | null> {
+    updateDeviceInstance(device: DeviceInstanceModel): Observable<DeviceInstanceModel | null> {
         return this.http
-            .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(device.id), device)
+            .put<DeviceInstanceModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(device.id), device)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', null)));
     }
 
     updateDeviceInstanceDisplayName(deviceId: string, newDisplayName: string) {
         return this.http
-            .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/display_name', '"' + newDisplayName + '"')
+            .put<DeviceInstanceModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/display_name', '"' + newDisplayName + '"')
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
     }
 
     updateDeviceInstanceAttributes(deviceId: string, attributes: Attribute[]) {
         return this.http
-            .put<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes', attributes)
+            .put<DeviceInstanceModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes', attributes)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
     }
 
-    saveDeviceInstance(device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel | null> {
+    saveDeviceInstance(device: DeviceInstanceModel): Observable<DeviceInstanceModel | null> {
         return this.http
-            .post<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices', device)
+            .post<DeviceInstanceModel>(environment.deviceManagerUrl + '/devices', device)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'saveDeviceInstance', null)));
     }
 
-    deleteDeviceInstance(id: string): Observable<DeviceInstancesUpdateModel | null> {
+    deleteDeviceInstance(id: string): Observable<DeviceInstanceModel | null> {
         return this.http
-            .delete<DeviceInstancesUpdateModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(id))
+            .delete<DeviceInstanceModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(id))
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstance', null)));
     }
 
-    deleteDeviceInstances(ids: string[]): Observable<DeviceInstancesUpdateModel | null> {
+    deleteDeviceInstances(ids: string[]): Observable<DeviceInstanceModel | null> {
         return this.http
-            .request<DeviceInstancesUpdateModel>('DELETE', environment.deviceManagerUrl + '/devices', {body: ids})
+            .request<DeviceInstanceModel>('DELETE', environment.deviceManagerUrl + '/devices', {body: ids})
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstances', null)));
     }
 
@@ -185,7 +161,7 @@ export class DeviceInstancesService {
                 map((results) => {
                     results.forEach((result, i) => {
                         if(!!result) {
-                            if(i == 0) {
+                            if(i === 0) {
                                 deviceIDs = result.device_ids || [];
                             } else {
                                 deviceIDs = deviceIDs.filter((deviceID) => result.device_ids?.includes(deviceID));
@@ -200,37 +176,7 @@ export class DeviceInstancesService {
         return of([]);
     }
 
-    private extendedDeviceInstancesToLegacyModel(deviceListWrapper: ExtendedDeviceInstancesTotalModel):DeviceInstancesPermSearchTotalModel {
-        let result: DeviceInstancesPermSearchTotalModel = {
-            total: deviceListWrapper.total,
-            result: deviceListWrapper.result.map((value: ExtendedDeviceInstanceModel) => {
-                let annotation = {};
-                if(value.connection_state != "") {
-                    annotation = {connected: value.connection_state=="online"}
-                }
-                return {
-                    id: value.id,
-                    local_id: value.local_id,
-                    name: value.name,
-                    attributes: value.attributes,
-                    display_name: value.display_name,
-                    creator: value.owner_id,
-                    permissions: {
-                        a: value.permissions.administrate,
-                        w: value.permissions.write,
-                        r: value.permissions.read,
-                        x: value.permissions.execute
-                    },
-                    shared: value.shared,
-                    device_type_id: value.device_type_id,
-                    annotations: annotation,
-                } as DeviceInstancesPermSearchModel
-            })
-        }
-        return result
-    }
-
-    getExtendedDeviceInstances(options: {
+    getDeviceInstances(options: {
         limit: number;
         offset: number;
         sortBy?: string;
@@ -238,218 +184,122 @@ export class DeviceInstancesService {
         searchText?: string;
         deviceTypeIds?: string[];
         connectionState?: DeviceInstancesRouterStateTabEnum;
-        deviceIds?:string[];
+        deviceIds?: string[];
         hubId?: string;
         locationId?: string;
-    }): Observable<ExtendedDeviceInstancesTotalModel> {
+    }): Observable<DeviceInstancesTotalModel> {
+        return this._getDeviceInstances(options);
+    }
+
+    getDeviceInstancesWithDeviceType(options: {
+        limit: number;
+        offset: number;
+        sortBy?: string;
+        sortDesc?: boolean;
+        searchText?: string;
+        deviceTypeIds?: string[];
+        connectionState?: DeviceInstancesRouterStateTabEnum;
+        deviceIds?: string[];
+        hubId?: string;
+        locationId?: string;
+    }): Observable<DeviceInstancesWithDeviceTypeTotalModel> {
+        const opt = options as {
+            limit: number;
+            offset: number;
+            sortBy?: string;
+            sortDesc?: boolean;
+            searchText?: string;
+            deviceTypeIds?: string[];
+            connectionState?: DeviceInstancesRouterStateTabEnum;
+            deviceIds?: string[];
+            hubId?: string;
+            locationId?: string;
+            fulldt?: boolean;
+        };
+        opt.fulldt = true;
+        return this._getDeviceInstances(options) as Observable<DeviceInstancesWithDeviceTypeTotalModel>;
+    }
+
+    _getDeviceInstances(options: {
+        limit: number;
+        offset: number;
+        sortBy?: string;
+        sortDesc?: boolean;
+        searchText?: string;
+        deviceTypeIds?: string[];
+        connectionState?: DeviceInstancesRouterStateTabEnum;
+        deviceIds?: string[];
+        hubId?: string;
+        locationId?: string;
+        fulldt?: boolean;
+    }): Observable<DeviceInstancesTotalModel | DeviceInstancesWithDeviceTypeTotalModel> {
         if(options.hubId || options.locationId) {
             return this.getDeviceIds(options.hubId, options.locationId).pipe(
                 concatMap((deviceIds) => {
-                    if(deviceIds.length == 0) {
+                    if(deviceIds.length === 0) {
                         return of({result: [], total: 0});
                     }
                     options.hubId = undefined;
                     options.locationId = undefined;
                     options.deviceIds = deviceIds;
-                    return this.getExtendedDeviceInstances(options);
+                    return this.getDeviceInstances(options);
                 })
             );
         }
-        let params = new HttpParams()
+        let params = new HttpParams();
         if(options.limit > 0) {
-            params = params.set("limit", options.limit.toString());
+            params = params.set('limit', options.limit.toString());
         }
         if(options.offset > 0) {
-            params = params.set("offset", options.offset.toString());
+            params = params.set('offset', options.offset.toString());
         }
-        let sort = options.sortBy || "name";
-        if(sort == "annotations.connected") {
-            sort = "connection_state"
+        let sort = options.sortBy || 'name';
+        if(sort === 'annotations.connected') {
+            sort = 'connection_state';
         }
         if(options.sortDesc){
-            sort = sort+".desc";
+            sort = sort+'.desc';
         }
-        if(sort != "") {
-            params = params.set("sort", sort);
+        if(sort !== '') {
+            params = params.set('sort', sort);
         }
-        if (options.searchText && options.searchText != "") {
-            params = params.set("search", options.searchText);
+        if (options.searchText && options.searchText !== '') {
+            params = params.set('search', options.searchText);
         }
         if(options.deviceTypeIds!==null && options.deviceTypeIds!==undefined && options.deviceTypeIds.join){
-            params = params.set("device-type-ids", options.deviceTypeIds.join(","));
+            params = params.set('device-type-ids', options.deviceTypeIds.join(','));
         }
         if(options.deviceIds!==null && options.deviceIds!==undefined && options.deviceIds.join){
-            params = params.set("ids", options.deviceIds.join(","));
+            params = params.set('ids', options.deviceIds.join(','));
         }
         if(options.connectionState!==null && options.connectionState!==undefined) {
             switch (options.connectionState){
-                case DeviceInstancesRouterStateTabEnum.ONLINE: {
-                    params = params.set("connection-state", "online");
-                    break
-                }
-                case DeviceInstancesRouterStateTabEnum.OFFLINE: {
-                    params = params.set("connection-state", "offline");
-                    break
-                }
-                case DeviceInstancesRouterStateTabEnum.UNKNOWN: {
-                    params = params.set("connection-state", "");
-                    break
-                }
+            case DeviceInstancesRouterStateTabEnum.ONLINE: {
+                params = params.set('connection-state', 'online');
+                break;
+            }
+            case DeviceInstancesRouterStateTabEnum.OFFLINE: {
+                params = params.set('connection-state', 'offline');
+                break;
+            }
+            case DeviceInstancesRouterStateTabEnum.UNKNOWN: {
+                params = params.set('connection-state', '');
+                break;
+            }
             }
         }
-        return this.http.get<ExtendedDeviceInstanceModel[]>(environment.deviceRepoUrl + '/extended-devices', { observe: 'response', params: params }).pipe(
+        if (options.fulldt === true) {
+            params = params.set('fulldt', 'true');
+        }
+        return this.http.get<DeviceInstanceModel[]>(environment.deviceRepoUrl + '/extended-devices', { observe: 'response', params }).pipe(
             map((resp) => {
-                let totalStr = resp.headers.get("X-Total-Count") || "0";
+                const totalStr = resp.headers.get('X-Total-Count') || '0';
                 return {
                     result: resp.body,
-                    total: parseInt(totalStr)
-                } as ExtendedDeviceInstancesTotalModel
+                    total: parseInt(totalStr, 10)
+                } as DeviceInstancesTotalModel;
             }),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getExtendedDeviceInstances', {result: [], total: 0})),
-        );
-    }
-
-    //@deprecated use getExtendedDeviceInstances
-    loadDeviceInstances(
-        limit: number,
-        offset: number,
-        sortBy: string = 'name',
-        sortDesc: boolean = false,
-        searchText?: string,
-        locationId?: string,
-        hubId?: string,
-        deviceTypeIds?: string[],
-        connectionState?: DeviceInstancesRouterStateTabEnum,
-    ): Observable<DeviceInstancesTotalModel> {
-        return this.getExtendedDeviceInstances({
-            limit: limit,
-            offset:offset,
-            sortBy:sortBy,
-            sortDesc:sortDesc,
-            connectionState:connectionState,
-            deviceTypeIds:deviceTypeIds,
-            searchText:searchText,
-            hubId:hubId,
-            locationId:locationId,
-        }).pipe(
-            map(this.extendedDeviceInstancesToLegacyModel),
-            concatMap(result => {
-                return this.addDeviceType(result.result || []).pipe(
-                    map((devicesWithType) => ({
-                        result: devicesWithType,
-                        total: result.total
-                    } as DeviceInstancesTotalModel)))
-            }),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances', {result: [], total: 0})),
-        );
-    }
-
-    //@deprecated use getExtendedDeviceInstances
-    getDeviceInstancesWithTotal(
-        limit: number,
-        offset: number,
-        sortBy: string = 'name',
-        sortDesc: boolean = false,
-        searchText?: string,
-        locationId?: string,
-        hubId?: string,
-        deviceTypeIds?: string[],
-        connectionState?: DeviceInstancesRouterStateTabEnum,
-    ): Observable<DeviceInstancesTotalModel>  {
-        return this.loadDeviceInstances(limit, offset, sortBy, sortDesc, searchText, locationId, hubId, deviceTypeIds, connectionState);
-    }
-
-    //@deprecated use getExtendedDeviceInstances
-    getDeviceInstances(
-        limit: number,
-        offset: number,
-        sortBy: string = 'name',
-        sortDesc: boolean = false,
-        searchText?: string,
-        locationId?: string,
-        hubId?: string,
-        deviceTypeIds?: string[],
-        connectionState?: DeviceInstancesRouterStateTabEnum,
-    ): Observable<DeviceInstancesModel[]> {
-        return this.loadDeviceInstances(limit, offset, sortBy, sortDesc, searchText, locationId, hubId, deviceTypeIds, connectionState).pipe(
-            map((result) => result.result)
-        );
-    }
-
-    addDeviceType(devices: DeviceInstancesPermSearchModel[]): Observable<DeviceInstancesModel[]> {
-        const allDeviceTypeIds = devices.map((device) => device.device_type_id);
-
-        const queryRequest: PermissionQueryRequest = {
-            resource: 'device-types', list_ids: {
-                ids: allDeviceTypeIds
-            }
-        };
-
-        return this.queryPermissionSearch(queryRequest).pipe(
-            map((resp) => resp as DeviceTypePermSearchModel[] || []),
-            map((deviceTypes: DeviceTypePermSearchModel[]) => {
-                const devicesWithDeviceType: DeviceInstancesModel[] = [];
-
-                const deviceTypeIdToType: Record<string, DeviceTypePermSearchModel> = {};
-                deviceTypes.forEach(deviceType => {
-                    deviceTypeIdToType[deviceType.id] = deviceType;
-                });
-
-                devices.forEach(device => {
-                    let active = true;
-                    if(device.attributes) {
-                        device.attributes.forEach(attribute => {
-                            if(attribute.key == 'inactive' && attribute.value == 'true') {
-                                active = false;
-                            }
-                        });
-                    }
-
-                    const deviceWithDeviceType: DeviceInstancesModel = {
-                        ...device,
-                        device_type: deviceTypeIdToType[device.device_type_id],
-                        log_state: device.annotations ? device.annotations.connected : undefined,
-                        active
-                    };
-                    devicesWithDeviceType.push(deviceWithDeviceType);
-                });
-
-                return devicesWithDeviceType;
-            }),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'addDeviceType', [])),
-        );
-    }
-
-    queryPermissionSearch(queryRequest: PermissionQueryRequest): Observable<DeviceInstancesPermSearchModel[] | DeviceTypePermSearchModel[] | DeviceInstancesPermSearchTotalModel> {
-        return this.http.post<DeviceInstancesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query', queryRequest);
-    }
-
-    getDeviceInstancesByIds(
-        ids: string[],
-        limit: number,
-        offset: number,
-        sortBy: string = 'name',
-        sortDesc: boolean = false,
-    ): Observable<DeviceInstancesTotalModel> {
-        const queryRequest: PermissionQueryRequest = {
-            resource: 'devices', list_ids: {
-                ids,
-                limit,
-                with_total: true,
-                offset,
-                sort_by: sortBy,
-                sort_desc: sortDesc
-            }
-        };
-        return this.queryPermissionSearch(queryRequest).pipe(
-            map((resp) => resp as DeviceInstancesPermSearchTotalModel || []),
-            concatMap(result => this.addDeviceType(result.result).pipe(
-                map((devicesWithType) => ({
-                    result: devicesWithType,
-                    total: result.total
-                }))
-            )),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByIds', {result: [], total: 0})),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, '_getDeviceInstances', {result: [], total: 0})),
         );
     }
 
@@ -603,26 +453,10 @@ export class DeviceInstancesService {
     }
 
     shortIdToUUID(shortId: string): Observable<string> {
-        return this.http.get<string>(environment.deviceManagerUrl+'/helper/id?short_id='+encodeURIComponent(shortId)+'&prefix='+encodeURIComponent("urn:infai:ses:device:")).pipe(
-            map((resp) => resp || ""),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'shortIdToUUID', "")),
+        return this.http.get<string>(environment.deviceManagerUrl+'/helper/id?short_id='+encodeURIComponent(shortId)+'&prefix='+encodeURIComponent('urn:infai:ses:device:')).pipe(
+            map((resp) => resp || ''),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'shortIdToUUID', '')),
         );
-    }
-
-    getTotalCountOfDevices(searchText: string): Observable<any> {
-        const options = searchText ?
-            { params: new HttpParams().set('search', searchText) } : {};
-
-        return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/devices', options)
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(
-                        DeviceInstancesService.name,
-                        'getTotalCountOfDevices',
-                    ),
-                ),
-            );
     }
 
     userHasDeleteAuthorization(): boolean {

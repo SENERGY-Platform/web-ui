@@ -17,7 +17,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Location} from '@angular/common';
 import {DeviceInstancesService} from '../../devices/device-instances/shared/device-instances.service';
-import {DeviceInstancesModel} from '../../devices/device-instances/shared/device-instances.model';
+import {DeviceInstanceModel} from '../../devices/device-instances/shared/device-instances.model';
 import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
 import {
     DeviceTypeContentModel,
@@ -94,7 +94,7 @@ export class NewExportComponent implements OnInit {
     export = {} as ExportModel;
     deviceType = {} as DeviceTypeModel;
     operator = {} as PipelineOperatorModel;
-    devices: DeviceInstancesModel[] = [];
+    devices: DeviceInstanceModel[] = [];
     pipelines: PipelineModel[] = [];
     paths = new Map<string, string | undefined>();
     image: SafeHtml = {};
@@ -150,15 +150,15 @@ export class NewExportComponent implements OnInit {
             );
             this.exportForm.controls['targetSelector'].disable({onlySelf: true, emitEvent: false});
         }
-        const array: Observable<DeviceInstancesModel[] | PipelineModel[] | ImportInstancesModel[] | ExportDatabaseModel[]>[] = [];
+        const array: Observable<DeviceInstanceModel[] | PipelineModel[] | ImportInstancesModel[] | ExportDatabaseModel[]>[] = [];
 
-        array.push(this.deviceInstanceService.getDeviceInstances(9999, 0));
+        array.push(this.deviceInstanceService.getDeviceInstances({limit: 9999, offset: 0}).pipe(map(res => res.result)));
         array.push(this.pipelineRegistryService.getPipelines());
         array.push(this.importInstancesService.listImportInstances('', 9999, 0, 'name.asc'));
         array.push(this.exportService.getExportDatabases());
 
         forkJoin(array).subscribe((response) => {
-            this.devices = response[0] as DeviceInstancesModel[];
+            this.devices = response[0] as DeviceInstanceModel[];
             this.pipelines = response[1] as PipelineModel[];
             console.log(this.pipelines);
             this.imports = response[2] as ImportInstancesModel[];
@@ -194,7 +194,7 @@ export class NewExportComponent implements OnInit {
                                         if (device.id === exp.Filter) {
                                             this.exportForm.patchValue({device});
                                             this.deviceTypeService
-                                                .getDeviceType(device.device_type.id)
+                                                .getDeviceType(device.device_type_id)
                                                 .subscribe((resp: DeviceTypeModel | null) => {
                                                     if (resp !== null) {
                                                         this.deviceType = resp;
@@ -430,10 +430,10 @@ export class NewExportComponent implements OnInit {
                 }
             });
             if (this.exportForm.get('device')) {
-                this.exportForm.get('device')?.valueChanges.subscribe((device: DeviceInstancesModel) => {
+                this.exportForm.get('device')?.valueChanges.subscribe((device: DeviceInstanceModel) => {
                     if (!_.isEmpty(device)) {
                         if (this.exportForm.value.device !== device) {
-                            this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((resp: DeviceTypeModel | null) => {
+                            this.deviceTypeService.getDeviceType(device.device_type_id).subscribe((resp: DeviceTypeModel | null) => {
                                 if (resp !== null) {
                                     this.deviceType = resp;
                                     this.exportForm.controls.service.enable();

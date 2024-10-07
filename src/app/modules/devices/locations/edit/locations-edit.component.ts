@@ -21,7 +21,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LocationModel } from '../shared/locations.model';
 import { DeviceInstancesBaseModel } from '../../device-instances/shared/device-instances.model';
-import { debounceTime, delay } from 'rxjs/operators';
+import { delay } from 'rxjs/operators';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
 import { DeviceGroupModel } from '../../device-groups/shared/device-groups.model';
 import { DeviceGroupsService } from '../../device-groups/shared/device-groups.service';
@@ -306,7 +306,6 @@ export class LocationsEditComponent implements OnInit {
 
         if (idsForRepoSearch.length) {
             this.deviceService.getDeviceListByIds(idsForRepoSearch).subscribe((devices) => {
-                devices = this.deviceService.useDisplayNameAsName(devices);
                 for (const device of devices) {
                     this.deviceCache.set(device.id, device);
                 }

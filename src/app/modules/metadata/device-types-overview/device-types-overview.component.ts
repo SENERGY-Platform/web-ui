@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { DeviceTypeService } from './shared/device-type.service';
-import { DeviceTypePermSearchModel } from './shared/device-type-perm-search.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { Router } from '@angular/router';
 import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../../devices/device-instances/device-instances.component';
 import { DeviceInstancesDialogService } from '../../devices/device-instances/shared/device-instances-dialog.service';
-import { DeviceTypeDeviceClassModel } from './shared/device-type.model';
+import { DeviceTypeDeviceClassModel, DeviceTypeModel } from './shared/device-type.model';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatSort, Sort, SortDirection } from '@angular/material/sort';
+import { Sort, SortDirection } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UntypedFormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
@@ -36,13 +35,13 @@ import { MatPaginator } from '@angular/material/paginator';
     templateUrl: './device-types-overview.component.html',
     styleUrls: ['./device-types-overview.component.css'],
 })
-export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
+export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'info', 'copy', 'new', 'show'];
     pageSize = 20;
-    deviceTypes: DeviceTypePermSearchModel[] = [];
+    deviceTypes: DeviceTypeModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
-    dataSource = new MatTableDataSource<DeviceTypePermSearchModel>();
-    selection = new SelectionModel<DeviceTypePermSearchModel>(true, []);
+    dataSource = new MatTableDataSource<DeviceTypeModel>();
+    selection = new SelectionModel<DeviceTypeModel>(true, []);
     totalCount = 200;
     offset = 0;
     searchControl = new UntypedFormControl('');
@@ -110,7 +109,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         });
     }
 
-    delete(deviceTypeInput: DeviceTypePermSearchModel) {
+    delete(deviceTypeInput: DeviceTypeModel) {
         this.dialogsService
             .openDeleteDialog('device type: ' + deviceTypeInput.name)
             .afterClosed()
@@ -155,11 +154,11 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         });
     }
 
-    newInstance(deviceType: DeviceTypePermSearchModel): void {
+    newInstance(deviceType: DeviceTypeModel): void {
         this.deviceInstancesDialogService.openDeviceCreateDialog(deviceType);
     }
 
-    showDevices(deviceType: DeviceTypePermSearchModel) {
+    showDevices(deviceType: DeviceTypeModel) {
         this.router.navigate(['devices/deviceinstances'], {
             state: { type: DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE, value: deviceType } as DeviceInstancesRouterState,
         });
@@ -182,11 +181,11 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getDeviceTypes(): Observable<DeviceTypePermSearchModel[]> {
+    private getDeviceTypes(): Observable<DeviceTypeModel[]> {
         return this.deviceTypeService
             .getDeviceTypes(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .pipe(
-                map((deviceTypes: DeviceTypePermSearchModel[]) => {
+                map((deviceTypes: DeviceTypeModel[]) => {
                     this.dataSource.data = deviceTypes;
                     return deviceTypes;
                 })
@@ -220,7 +219,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
             .subscribe((deletePipelines: boolean) => {
                 if (deletePipelines) {
                     this.ready = false;
-                    this.selection.selected.forEach((deviceType: DeviceTypePermSearchModel) => {
+                    this.selection.selected.forEach((deviceType: DeviceTypeModel) => {
                         deletionJobs.push(this.deviceTypeService.deleteDeviceType(deviceType.id));
                     });
                 }

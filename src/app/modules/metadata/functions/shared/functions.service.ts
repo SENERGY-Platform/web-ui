@@ -36,8 +36,8 @@ export class FunctionsService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/functions';
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(permSearchURL);
+        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/functions'; // TODO
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(permSearchURL); // TODO
     }
 
     getFunctions(
@@ -59,7 +59,7 @@ export class FunctionsService {
         }
 
         return this.http
-            .get<FunctionsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/functions?' + params.join('&'))
+            .get<FunctionsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/functions?' + params.join('&')) // TODO
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctions(search)', [])),
@@ -99,7 +99,7 @@ export class FunctionsService {
         }
 
         return this.http
-            .get<FunctionsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/functions?' + params.join('&'))
+            .get<FunctionsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/functions?' + params.join('&')) // TODO
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctions(search)', [])),
@@ -136,7 +136,7 @@ export class FunctionsService {
             { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/functions', options)
+            .get(environment.permissionSearchUrl + '/v3/total/functions', options) // TODO
             .pipe(
                 catchError(
                     this.errorHandlerService.handleError(

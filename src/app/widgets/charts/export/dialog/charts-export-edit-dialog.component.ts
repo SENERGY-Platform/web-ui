@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {DashboardResponseMessageModel} from '../../../../modules/dashboard/shared/dashboard-response-message.model';
@@ -27,27 +27,21 @@ import {
     ValidatorFn
 } from '@angular/forms';
 import {ExportService} from '../../../../modules/exports/shared/export.service';
-import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../../modules/exports/shared/export.model';
 import {ChartsExportConversion, ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
 import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
 import {MatTableDataSource} from '@angular/material/table';
 import {MAT_DIALOG_DATA, MatDialogRef, MatDialog} from '@angular/material/dialog';
 import {forkJoin, Observable, of} from 'rxjs';
-import {map, mergeMap} from 'rxjs/operators';
-import {DeviceInstancesModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
-import {DeviceInstancesService} from '../../../../modules/devices/device-instances/shared/device-instances.service';
-import {DeviceTypeService} from '../../../../modules/metadata/device-types-overview/shared/device-type.service';
-import {DeviceTypeFunctionModel, DeviceTypeModel} from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
+import {map} from 'rxjs/operators';
+import {DeviceTypeFunctionModel} from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
 import {environment} from '../../../../../environments/environment';
-import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
-import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
 import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-classes/shared/device-classes-perm-search.model';
-import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
-import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { ListRulesComponent } from './list-rules/list-rules.component';
 import { DataSourceConfig } from '../../shared/data-source-selector/data-source-selector.component';
+import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
@@ -94,7 +88,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
 
-    deviceGroups: DeviceGroupsPermSearchModel[] = [];
+    deviceGroups: DeviceGroupModel[] = [];
     aspects: AspectsPermSearchModel[] = [];
     functions: DeviceTypeFunctionModel[] = [];
     deviceClasses: DeviceClassesPermSearchModel[] = [];
@@ -244,14 +238,14 @@ export class ChartsExportEditDialogComponent implements OnInit {
             }
         });
         widget.properties.exports?.forEach((exp) => {
-            if ((exp as DeviceInstancesModel).device_type === undefined &&
+            if ((exp as DeviceInstanceModel).device_type_id === undefined &&
                 ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb)) {
                 this.preloadExportTags(exp.id || '').subscribe();
             }
         });
-        this.formGroupController.get('properties.exports')?.valueChanges.subscribe((exports: (ChartsExportMeasurementModel | DeviceInstancesModel)[]) => {
+        this.formGroupController.get('properties.exports')?.valueChanges.subscribe((exports: (ChartsExportMeasurementModel | DeviceInstanceModel)[]) => {
             exports.forEach((exp) => {
-                if ((exp as DeviceInstancesModel).device_type === undefined &&
+                if ((exp as DeviceInstanceModel).device_type_id === undefined &&
                     ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb)) {
                     this.preloadExportTags(exp.id || '').subscribe();
                 }
@@ -328,7 +322,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
-        // bug patchValue leads to dataSource.data being empty ? 
+        // bug patchValue leads to dataSource.data being empty ?
         // this.formGroupController.patchValue({properties: {vAxes: this.dataSource.data}});
         const newProperties = (this.formGroupController.get('properties') as FormControl).value;
         newProperties['vAxes'] = this.dataSource.data;
@@ -346,7 +340,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         }
 
         forkJoin(obs).subscribe(responses => {
-            const errorOccured = responses.find((response) => response.message != 'OK');
+            const errorOccured = responses.find((response) => response.message !== 'OK');
             if(!errorOccured) {
                 this.dialogRef.close(this.formGroupController.value);
             }

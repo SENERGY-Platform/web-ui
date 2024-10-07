@@ -18,11 +18,10 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { MatTable } from '@angular/material/table';
-import {FormControl, UntypedFormControl} from '@angular/forms';
+import {UntypedFormControl} from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';
-import { DeviceGroupsPermSearchModel } from '../shared/device-groups-perm-search.model';
-import {Route} from '@angular/router';
+import { DeviceGroupModel } from '../shared/device-groups.model';
 
 @Component({
     templateUrl: './device-groups-select-dialog.component.html',
@@ -31,7 +30,7 @@ import {Route} from '@angular/router';
 export class DeviceGroupsSelectDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeviceGroupsSelectDialogComponent>;
 
-    deviceGroups: DeviceGroupsPermSearchModel[] = [];
+    deviceGroups: DeviceGroupModel[] = [];
     dataReady = false;
     sortBy = 'name';
     sortOrder = 'asc';

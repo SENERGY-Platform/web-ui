@@ -36,7 +36,7 @@ export class DeviceClassesService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-classes';
+        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-classes'; //TODO
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(permSearchURL);
 
     }
@@ -60,7 +60,7 @@ export class DeviceClassesService {
         }
 
         return this.http
-            .get<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/device-classes?' + params.join('&'))
+            .get<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/device-classes?' + params.join('&')) //TODO
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'getAspects(search)', [])),
@@ -90,7 +90,7 @@ export class DeviceClassesService {
             { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/device-classes', options)
+            .get(environment.permissionSearchUrl + '/v3/total/device-classes', options) //TODO
             .pipe(
                 catchError(
                     this.errorHandlerService.handleError(

@@ -1,4 +1,4 @@
-import { DeviceInstancesModel } from "src/app/modules/devices/device-instances/shared/device-instances.model";
+import { DeviceInstanceModel } from "src/app/modules/devices/device-instances/shared/device-instances.model";
 import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from "../../charts/export/shared/charts-export-properties.model";
 
 export interface DeviceValue {
@@ -14,7 +14,7 @@ export interface VentilationResult {
 
 export interface VentilationWidgetProperties {
     deviceConfig: {
-        exports: DeviceInstancesModel[];
+        exports: DeviceInstanceModel[];
         fields: ChartsExportVAxesModel[];
     };
     exportConfig: {

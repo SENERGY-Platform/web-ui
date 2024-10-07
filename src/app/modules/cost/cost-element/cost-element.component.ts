@@ -20,7 +20,7 @@ import { CostEntryModel, CostModel, } from '../shared/cost.model';
 import { Observable } from 'rxjs';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
 import { OperatorModel } from '../../data/operator-repo/shared/operator.model';
-import { DeviceInstancesBaseModel } from '../../devices/device-instances/shared/device-instances.model';
+import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 import { ExportModel } from '../../exports/shared/export.model';
 
 @Component({
@@ -37,7 +37,7 @@ export class CostElementComponent {
     @Input() pipelines: PipelineModel[] = [];
     @Input() operators: OperatorModel[] = [];
     @Input() imports: PipelineModel[] = [];
-    @Input() devices: DeviceInstancesBaseModel[] = [];
+    @Input() devices: DeviceInstanceModel[] = [];
     @Input() exports: ExportModel[] = [];
     @Input() parentName: string = '';
     @Input()

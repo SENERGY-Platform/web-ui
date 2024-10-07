@@ -1,9 +1,8 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { catchError, concatMap, defaultIfEmpty, EMPTY, forkJoin, map, mergeMap, Observable, of, Subject, throwError } from 'rxjs';
-import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
-import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
-import { DeviceInstancesModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { ExportModel, ExportResponseModel, ExportValueModel } from 'src/app/modules/exports/shared/export.model';
 import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
@@ -19,7 +18,7 @@ import { DeviceInstancesService } from 'src/app/modules/devices/device-instances
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 
 export interface DataSourceConfig {
-    exports?: (ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel)[];
+    exports?: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[];
     timeRange?: {
         time?: number;
         start?: string;
@@ -45,7 +44,7 @@ export class DataSourceSelectorComponent implements OnInit {
 
     form: any;
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
-    deviceGroups: DeviceGroupsPermSearchModel[] = [];
+    deviceGroups: DeviceGroupModel[] = [];
     aspects: AspectsPermSearchModel[] = [];
     functions: DeviceTypeFunctionModel[] = [];
     deviceClasses: DeviceClassesPermSearchModel[] = [];
@@ -54,7 +53,7 @@ export class DataSourceSelectorComponent implements OnInit {
 
     timeRangeEnum = ChartsExportRangeTimeTypeEnum;
     timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.RelativeAhead, this.timeRangeEnum.Absolute];
-    dataSourceOptions: Map<string, ChartsExportMeasurementModel[] | DeviceInstancesModel[] | DeviceGroupsPermSearchModel[]> = new Map();
+    dataSourceOptions: Map<string, ChartsExportMeasurementModel[] | DeviceInstanceModel[] | DeviceGroupModel[]> = new Map();
     ready = false;
     waitingForDataSourceChange = false;
     exportList: ChartsExportMeasurementModel[] = [];
@@ -211,7 +210,7 @@ export class DataSourceSelectorComponent implements OnInit {
         });
     }
 
-    private updateGroupFields(deviceGroup: DeviceGroupsPermSearchModel) {
+    private updateGroupFields(deviceGroup: DeviceGroupModel) {
         const observables: Observable<ChartsExportVAxesModel | undefined>[] = [];
 
         deviceGroup.criteria.forEach(criteria => {
@@ -277,16 +276,16 @@ export class DataSourceSelectorComponent implements OnInit {
         );
     }
 
-    private updateDeviceFields(selectedElement: DeviceInstancesModel) {
+    private updateDeviceFields(selectedElement: DeviceInstanceModel) {
         let observableDeviceType: Observable<DeviceTypeModel | undefined>;
-        if (this.deviceTypes.has(selectedElement.device_type.id)) {
-            observableDeviceType = of(this.deviceTypes.get(selectedElement.device_type.id));
+        if (this.deviceTypes.has(selectedElement.device_type_id)) {
+            observableDeviceType = of(this.deviceTypes.get(selectedElement.device_type_id));
         } else {
-            observableDeviceType = this.deviceTypeService.getDeviceType(selectedElement.device_type.id).pipe(map(dt => {
+            observableDeviceType = this.deviceTypeService.getDeviceType(selectedElement.device_type_id).pipe(map(dt => {
                 if (dt === null) {
                     return;
                 }
-                this.deviceTypes.set((selectedElement as DeviceInstancesModel).device_type.id, dt);
+                this.deviceTypes.set((selectedElement as DeviceInstanceModel).device_type_id, dt);
                 return dt;
             }));
         }
@@ -385,11 +384,9 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
     getDevices() {
-        return this.deviceInstancesService.getDeviceInstances(9999, 0).pipe(
-            map(devices => this.deviceInstancesService.useDisplayNameAsName(devices)),
-            map(devices => devices as DeviceInstancesModel[]),
+        return this.deviceInstancesService.getDeviceInstances({limit: 9999, offset: 0}).pipe(
             map(devices => {
-                this.dataSourceOptions.set('Devices', devices);
+                this.dataSourceOptions.set('Devices', devices.result);
             }),
             catchError(err => {
                 console.log("could not get devices");
@@ -457,7 +454,7 @@ export class DataSourceSelectorComponent implements OnInit {
         return forkJoin(obs).pipe(defaultIfEmpty(true)); // in case no datsa sources are selected
     }
 
-    dataSourceChanged(selectedDataSource: (ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel)[]) {
+    dataSourceChanged(selectedDataSource: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[]) {
         this.waitingForDataSourceChange = true;
         this.loadFieldOptions(selectedDataSource).pipe(
             map((fieldOptions) => {
@@ -480,7 +477,7 @@ export class DataSourceSelectorComponent implements OnInit {
         });
     }
 
-    filterSelectedFields(selectedDataSources: (ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel)[]) {
+    filterSelectedFields(selectedDataSources: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[]) {
         /* Filter the selected fields depending on the current selection of the data source 
         */
         const selectedFields = JSON.parse(JSON.stringify(this.form.value['fields']));
@@ -506,16 +503,16 @@ export class DataSourceSelectorComponent implements OnInit {
         return filteredFields;
     }
 
-    loadFieldOptions(selectedExports: (ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel)[]) {
+    loadFieldOptions(selectedExports: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[]) {
         /* Load available fields based on the choosen data source and set as options in the select-search */
         let observables: Observable<any>[] = [];
-        (selectedExports || []).forEach((selectedElement: ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel) => {
+        (selectedExports || []).forEach((selectedElement: ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel) => {
             if ((selectedElement as ChartsExportMeasurementModel).values !== undefined) { // is export
                 observables = observables.concat(this.updateExportFields(selectedElement as ChartsExportMeasurementModel));
-            } else if ((selectedElement as DeviceGroupsPermSearchModel)?.criteria !== undefined) { // is device group
-                observables = observables.concat(this.updateGroupFields(selectedElement as DeviceGroupsPermSearchModel));
+            } else if ((selectedElement as DeviceGroupModel)?.criteria !== undefined) { // is device group
+                observables = observables.concat(this.updateGroupFields(selectedElement as DeviceGroupModel));
             } else {
-                observables = observables.concat(this.updateDeviceFields(selectedElement as DeviceInstancesModel));
+                observables = observables.concat(this.updateDeviceFields(selectedElement as DeviceInstanceModel));
             }
         });
  
@@ -607,9 +604,9 @@ export class DataSourceSelectorComponent implements OnInit {
                 name: 'Difference-Median'
             }
         ];
-        const influxExp = (this.form.get('exports').value as (ChartsExportMeasurementModel | DeviceInstancesModel | DeviceGroupsPermSearchModel)[])
-            ?.find(exp => (exp as DeviceInstancesModel).device_type === undefined &&
-                (((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined && (exp as DeviceGroupsPermSearchModel).criteria === undefined) || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb));
+        const influxExp = (this.form.get('exports').value as (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[])
+            ?.find(exp => (exp as DeviceInstanceModel).device_type_id === undefined &&
+                (((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined && (exp as DeviceGroupModel).criteria === undefined) || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb));
         if (influxExp === undefined) {
             res.push({
                 value: 'time-weighted-mean-linear',

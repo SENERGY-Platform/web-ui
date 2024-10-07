@@ -29,7 +29,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeSet} from './shared/waiting-room.model';
 import {debounceTime, startWith, switchMap} from 'rxjs/operators';
 import {WaitingRoomService} from './shared/waiting-room.service';
-import {DeviceInstancesModel} from '../device-instances/shared/device-instances.model';
+import {DeviceInstanceModel} from '../device-instances/shared/device-instances.model';
 import {WaitingRoomDeviceEditDialogComponent} from './dialogs/waiting-room-device-edit-dialog.component';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {
@@ -164,7 +164,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         }
     }
 
-    openEditDialog(device: DeviceInstancesModel): void {
+    openEditDialog(device: DeviceInstanceModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {

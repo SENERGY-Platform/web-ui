@@ -35,7 +35,7 @@ import {FlowRepoService} from '../../../data/flow-repo/shared/flow-repo.service'
 import {FlowModel} from '../../../data/flow-repo/shared/flow.model';
 import {Observable} from 'rxjs';
 import {DeploymentsFogFactory} from '../shared/deployments-fog.service';
-import {HubModel, NetworksModel} from '../../../devices/networks/shared/networks.model';
+import {HubModel} from '../../../devices/networks/shared/networks.model';
 import {NetworksService} from '../../../devices/networks/shared/networks.service';
 import {OperatorRepoService} from '../../../data/operator-repo/shared/operator-repo.service';
 import {OperatorModel} from '../../../data/operator-repo/shared/operator.model';
@@ -67,7 +67,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null>;
     };
     selectedHubForm: FormControl = new FormControl(null);
-    hubList: NetworksModel[] = [];
+    hubList: HubModel[] = [];
     characteristicNames: Map<string, string> = new Map();
 
     constructor(
@@ -96,7 +96,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         this.handlerList = this.flowList;
         this.hubsService.listSyncNetworks().subscribe((result) => {
             if (result && result.length > 0) {
-                this.hubList.push({ id: '', name: 'Platform', device_local_ids: null });
+                this.hubList.push({ id: '', name: 'Platform', device_local_ids: null } as HubModel);
                 this.hubList.push(...result);
             }
         });

@@ -36,7 +36,7 @@ export class CharacteristicsService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        const characteristicPermSearchURL = environment.permissionSearchUrl + '/v3/resources/characteristics';
+        const characteristicPermSearchURL = environment.permissionSearchUrl + '/v3/resources/characteristics'; //TODO
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(characteristicPermSearchURL);
     }
 
@@ -103,7 +103,7 @@ export class CharacteristicsService {
         }
 
         return this.http
-            .get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/characteristics?' + params.join('&'))
+            .get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/characteristics?' + params.join('&')) //TODO
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristics(search)', [])),
@@ -115,7 +115,7 @@ export class CharacteristicsService {
             { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/characteristics', options)
+            .get(environment.permissionSearchUrl + '/v3/total/characteristics', options) //TODO
             .pipe(
                 catchError(
                     this.errorHandlerService.handleError(

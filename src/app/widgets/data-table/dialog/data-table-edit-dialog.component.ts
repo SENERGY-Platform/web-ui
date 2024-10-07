@@ -41,10 +41,7 @@ import {
     DeviceTypeInteractionEnum,
     DeviceTypeServiceModel,
 } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
-import {
-    DeviceInstancesPermSearchModel,
-    DeviceSelectablesModel,
-} from '../../../modules/devices/device-instances/shared/device-instances.model';
+import { DeviceInstanceModel, DeviceSelectablesModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
 import { DataTableHelperService } from '../shared/data-table-helper.service';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { PipelineModel, PipelineOperatorModel } from '../../../modules/data/pipeline-registry/shared/pipeline.model';
@@ -61,8 +58,7 @@ import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/
 import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
 import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-classes/shared/device-classes-perm-search.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
-import { DeviceGroupsPermSearchModel } from 'src/app/modules/devices/device-groups/shared/device-groups-perm-search.model';
-import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
@@ -135,7 +131,7 @@ export class DataTableEditDialogComponent implements OnInit {
     functions: DeviceTypeFunctionModel[] = [];
     deviceClasses: DeviceClassesPermSearchModel[] = [];
     concepts: Map<String, ConceptsCharacteristicsModel | null> = new Map();
-    deviceGroups: DeviceGroupsPermSearchModel[] = [];
+    deviceGroups: DeviceGroupModel[] = [];
     aggregations = Object.values(SingleValueAggregations);
 
 
@@ -200,7 +196,7 @@ export class DataTableEditDialogComponent implements OnInit {
         return of([]);
     }
 
-    compareSelectables(a: DeviceInstancesPermSearchModel, b: DeviceInstancesPermSearchModel) {
+    compareSelectables(a: DeviceInstanceModel, b: DeviceInstanceModel) {
         return a !== undefined && b !== undefined && a.id !== undefined && b.id !== undefined && a.id === b.id;
     }
 

@@ -22,7 +22,6 @@ import { catchError, map } from 'rxjs/operators';
 import { forkJoin, Observable, of } from 'rxjs';
 import {
     DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
-    DeviceTypeBaseModel,
     DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
@@ -30,18 +29,14 @@ import {
     DeviceTypeProtocolModel,
     DeviceTypeServiceModel,
 } from './device-type.model';
-import { DeviceTypePermSearchModel } from './device-type-perm-search.model';
 import { BpmnSkeletonModel } from './device-type-selection.model';
 import { flatMap } from 'rxjs/operators';
 import {flatten} from 'lodash';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { AllowedMethods } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import {UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement} from "./used-in-device-type.model";
-import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
-import {
-    DeviceTypesContentVariableDialogComponent
-} from "../device-types/dialogs/device-types-content-variable-dialog.component";
-import {UsedInDeviceTypesDialogComponent} from "../dialogs/used-in-device-types-dialog.component";
+import {UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement} from './used-in-device-type.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {UsedInDeviceTypesDialogComponent} from '../dialogs/used-in-device-types-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -59,7 +54,7 @@ export class DeviceTypeService {
         dialogConfig.autoFocus = true;
         dialogConfig.closeOnNavigation = true;
         dialogConfig.data = {
-            element: element,
+            element,
         };
         this.dialog.open(UsedInDeviceTypesDialogComponent, dialogConfig);
     }
@@ -82,19 +77,9 @@ export class DeviceTypeService {
             .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null)));
     }
 
-    getDeviceTypeListByIds(ids: string[]): Observable<DeviceTypeBaseModel[]> {
+    getDeviceTypeListByIds(ids: string[]): Observable<DeviceTypeModel[]> {
         return this.http
-            .post<DeviceTypeBaseModel[]>(environment.permissionSearchUrl + '/v3/query/device-types', {
-                resource: 'device-types',
-                list_ids: {
-                    ids,
-                    limit: ids.length,
-                    offset: 0,
-                    rights: 'r',
-                    sort_by: 'name',
-                    sort_desc: false,
-                },
-            })
+            .get<DeviceTypeModel[]>(environment.deviceRepoUrl + '/v3/device-types?ids=' + ids.join(',')+ '&limit=' + ids.length)
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeListByIds(ids)', [])),
@@ -135,20 +120,20 @@ export class DeviceTypeService {
         offset: number,
         sortBy: string,
         sortDirection: string,
-    ): Observable<DeviceTypePermSearchModel[]> {
+    ): Observable<DeviceTypeModel[]> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
             sortDirection = 'asc';
         }
         if (sortBy === '' || sortBy === null || sortBy === undefined) {
             sortBy = 'name';
         }
-        const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection];
+        const params = ['limit=' + limit, 'offset=' + offset, 'sort=' + sortBy + '.' + sortDirection];
         if (searchText) {
             params.push('search=' + encodeURIComponent(searchText));
         }
 
         return this.http
-            .get<DeviceTypePermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/device-types?' + params.join('&'))
+            .get<DeviceTypeModel[]>(environment.deviceRepoUrl + '/v3/device-types?' + params. join('&'))
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypes(search)', [])),
@@ -319,7 +304,7 @@ export class DeviceTypeService {
             { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/device-types', options)
+            .get(environment.permissionSearchUrl + '/v3/total/device-types', options) //TODO
             .pipe(
                 catchError(
                     this.errorHandlerService.handleError(
@@ -347,7 +332,7 @@ export class DeviceTypeService {
     }
 
     userHasPermSearchAuthorization(method: AllowedMethods): boolean {
-        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-types';
+        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-types'; //TODO
         return this.ladonService.getUserAuthorizationsForURI(permSearchURL)[method];
     }
 
@@ -358,6 +343,6 @@ export class DeviceTypeService {
 
     userHasUsedInAuthorization(): boolean {
         const endpoint = environment.deviceRepoUrl;
-        return this.ladonService.getUserAuthorizationsForURI(endpoint)["POST"];
+        return this.ladonService.getUserAuthorizationsForURI(endpoint)['POST'];
     }
 }

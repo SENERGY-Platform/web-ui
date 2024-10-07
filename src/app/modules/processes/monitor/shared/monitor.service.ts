@@ -17,7 +17,7 @@
 import { Injectable } from '@angular/core';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map, share } from 'rxjs/operators';
 import { MonitorProcessModel } from './monitor-process.model';
@@ -26,9 +26,8 @@ import { MonitorDetailsDialogComponent } from '../dialogs/monitor-details-dialog
 import { MonitorProcessTotalModel } from './monitor-process-total.model';
 import { ProcessIncidentsService } from '../../incidents/shared/process-incidents.service';
 import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.model';
-import { DeviceInstancesUpdateModel } from '../../../devices/device-instances/shared/device-instances-update.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',

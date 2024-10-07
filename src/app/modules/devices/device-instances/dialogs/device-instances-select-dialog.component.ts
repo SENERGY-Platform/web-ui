@@ -16,7 +16,7 @@
 
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { DeviceInstancesModel } from '../shared/device-instances.model';
+import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import { MatTable } from '@angular/material/table';
 import {FormControl, UntypedFormControl} from '@angular/forms';
@@ -28,9 +28,9 @@ import { Sort } from '@angular/material/sort';
     styleUrls: ['./device-instances-select-dialog.component.css'],
 })
 export class DeviceInstancesSelectDialogComponent implements OnInit {
-    @ViewChild(MatTable, { static: false }) table!: MatTable<DeviceInstancesModel>;
+    @ViewChild(MatTable, { static: false }) table!: MatTable<DeviceInstanceModel>;
 
-    devices: DeviceInstancesModel[] = [];
+    devices: DeviceInstanceModel[] = [];
     dataReady = false;
     sortBy = 'name';
     sortOrder = 'asc';
@@ -59,9 +59,9 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
 
     load() {
         this.deviceInstancesService
-            .getDeviceInstances(this.limit, this.offset, this.sortBy, this.sortOrder == 'desc', this.searchControl.value)
+            .getDeviceInstances({limit: this.limit, offset: this.offset, sortBy: this.sortBy, sortDesc: this.sortOrder === 'desc', searchText: this.searchControl.value})
             .subscribe((devices) => {
-                this.devices.push(...devices);
+                this.devices.push(...devices.result);
                 if (this.table !== undefined) {
                     this.table.renderRows();
                 }

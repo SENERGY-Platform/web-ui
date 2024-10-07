@@ -50,7 +50,7 @@ export class PermissionsService {
     getResourcePermissions(kind: string, id: string): Observable<PermissionsResourceModel> {
         return this.http
             .get<PermissionsResourceModel>(
-                environment.permissionSearchUrl + '/v3/administrate/rights/' + encodeURIComponent(kind) + '/' + encodeURIComponent(id),
+                environment.permissionSearchUrl + '/v3/administrate/rights/' + encodeURIComponent(kind) + '/' + encodeURIComponent(id), //TODO
             )
             .pipe(
                 map((resp) => resp || {} as PermissionsResourceModel),

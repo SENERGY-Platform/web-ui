@@ -42,7 +42,7 @@ export class ConceptsService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/concepts';
+        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/concepts'; //TODO
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(permSearchURL);
     }
 
@@ -126,7 +126,7 @@ export class ConceptsService {
         }
 
         return this.http
-            .get<ConceptsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/concepts?' + params.join('&'))
+            .get<ConceptsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/concepts?' + params.join('&')) //TODO
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(search)', [])),
@@ -138,7 +138,7 @@ export class ConceptsService {
             { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/concepts', options)
+            .get(environment.permissionSearchUrl + '/v3/total/concepts', options) //TODO
             .pipe(
                 catchError(
                     this.errorHandlerService.handleError(

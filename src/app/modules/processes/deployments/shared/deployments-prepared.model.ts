@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DeviceInstancesUpdateModel } from '../../../devices/device-instances/shared/device-instances-update.model';
+import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import {
     DeviceTypeAspectModel,
     DeviceTypeDeviceClassModel,
@@ -64,7 +64,7 @@ export interface DeploymentsPreparedLaneModel {
     bpmn_element_id: string;
     device_descriptions: DeploymentsPreparedDeviceDescriptionModel[];
     selectables: DeploymentsPreparedSelectableModel[];
-    selection: DeviceInstancesUpdateModel;
+    selection: DeviceInstanceModel;
     elements: DeploymentsPreparedLaneSubElementModel[];
 }
 
@@ -111,12 +111,12 @@ export interface DeploymentsPreparedMsgEventModel {
 }
 
 export interface DeploymentsPreparedSelectableModel {
-    device: DeviceInstancesUpdateModel;
+    device: DeviceInstanceModel;
     services: DeviceTypeServiceModel[];
 }
 
 export interface DeploymentsPreparedSelectionModel {
-    device: DeviceInstancesUpdateModel;
+    device: DeviceInstanceModel;
     service: DeviceTypeServiceModel;
     show: boolean;
 }

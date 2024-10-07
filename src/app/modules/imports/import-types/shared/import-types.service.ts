@@ -52,7 +52,7 @@ export class ImportTypesService {
         offset: number | undefined,
         sort: string,
     ): Observable<ImportTypePermissionSearchModel[]> {
-        let url = environment.permissionSearchUrl + '/v3/resources/import-types?';
+        let url = environment.permissionSearchUrl + '/v3/resources/import-types?'; //TODO
         if (search.length > 0) {
             url += '&search=' + search;
         }
@@ -171,6 +171,6 @@ export class ImportTypesService {
             { params: new HttpParams().set('search', searchText) } : {};
 
         return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/import-types', options);
+            .get(environment.permissionSearchUrl + '/v3/total/import-types', options); //TODO
     }
 }

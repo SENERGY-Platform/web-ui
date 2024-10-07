@@ -5,11 +5,11 @@ import { forkJoin, Observable, map, concatMap } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
-import { DeviceInstancesModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { ExportModel, ExportResponseModel } from 'src/app/modules/exports/shared/export.model';
 import { ExportService } from 'src/app/modules/exports/shared/export.service';
-import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
+import { ChartsExportMeasurementModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
 import { DataSourceConfig } from 'src/app/widgets/charts/shared/data-source-selector/data-source-selector.component';
 
 const visualizationTypeLine =  {
@@ -55,7 +55,7 @@ export class EditComponent implements OnInit {
     widget: WidgetModel = {} as WidgetModel;
     exports: ChartsExportMeasurementModel[] = [];
     ready = false;
-    devices: DeviceInstancesModel[] = [];
+    devices: DeviceInstanceModel[] = [];
     errorOccured = false;
     visualizationTypes = [visualizationTypeTimeline, visualizationTypeLine];
 
@@ -63,7 +63,7 @@ export class EditComponent implements OnInit {
     private dialogRef: MatDialogRef<EditComponent>,
     private exportService: ExportService,
     private dashboardService: DashboardService,
-    private deviceRepoService: DeviceInstancesService,
+    private deviceInstancesService: DeviceInstancesService,
     private formBuilder: UntypedFormBuilder,
     @Inject(MAT_DIALOG_DATA) data: {
             dashboardId: string;
@@ -83,7 +83,7 @@ export class EditComponent implements OnInit {
     }
 
     loadDevices() {
-        return this.deviceRepoService.loadDeviceInstances(9999, 0, undefined, undefined, undefined, undefined, undefined, undefined, undefined).pipe(
+        return this.deviceInstancesService.getDeviceInstances({limit: 9999, offset: 0}).pipe(
             map((devices) => {
                 this.devices = devices.result;
             })
@@ -109,7 +109,7 @@ export class EditComponent implements OnInit {
             map((widget: WidgetModel) => {
                 this.widget = widget;
 
-                //const filterDevices: DeviceInstancesModel[] = this.devices.filter(device => this.widget.properties.anomalyDetection?.filterDeviceIds.includes(device.id))
+                //const filterDevices: DeviceInstanceModel[] = this.devices.filter(device => this.widget.properties.anomalyDetection?.filterDeviceIds.includes(device.id))
 
                 const exportElement = this.exports.find((availableExport) => this.widget.properties.anomalyDetection?.export === availableExport.id);
 
@@ -172,7 +172,7 @@ export class EditComponent implements OnInit {
             obs.push(this.updateProperties());
         }
         forkJoin(obs).subscribe(responses => {
-            const errorOccured = responses.find((response) => response.message != 'OK');
+            const errorOccured = responses.find((response) => response.message !== 'OK');
             if(!errorOccured) {
                 this.dialogRef.close(this.widget);
             }

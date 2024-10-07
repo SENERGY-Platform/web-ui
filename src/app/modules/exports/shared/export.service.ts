@@ -29,8 +29,7 @@ import {
     ExportValueModel
 } from './export.model';
 import { DeviceTypeContentVariableModel, DeviceTypeServiceModel } from '../../metadata/device-types-overview/shared/device-type.model';
-import { DeviceInstancesModel } from '../../devices/device-instances/shared/device-instances.model';
-import { DeviceInstancesUpdateModel } from '../../devices/device-instances/shared/device-instances-update.model';
+import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
@@ -75,9 +74,9 @@ export class ExportService {
                 '/instance?internal_only=' + internalOnly +
                 (limit ? '&limit=' + limit : '') +
                 (offset ? '&offset=' + offset : '') +
-                (sort && order ? '&order=' + sort + ":" + order : '') +
+                (sort && order ? '&order=' + sort + ':' + order : '') +
                 (search ? '&search=' + searchField + ':' + search : '') +
-                (generated !== undefined ? '&generated=' + generated.valueOf() : '')       
+                (generated !== undefined ? '&generated=' + generated.valueOf() : '')
             )
             .pipe(
                 map((resp: ExportResponseModel) => resp || []),
@@ -101,9 +100,9 @@ export class ExportService {
                     '/admin/instance?internal_only=' + internalOnly +
                     (limit ? '&limit=' + limit : '') +
                     (offset ? '&offset=' + offset : '') +
-                    (sort && order ? '&order=' + sort + ":" + order : '') +
+                    (sort && order ? '&order=' + sort + ':' + order : '') +
                     (search ? '&search=' + searchField + ':' + search : '') +
-                    (generated !== undefined ? '&generated=' + generated.valueOf() : '')                    
+                    (generated !== undefined ? '&generated=' + generated.valueOf() : '')
             )
             .pipe(
                 map((resp: ExportModel[]) => resp || []),
@@ -152,10 +151,9 @@ export class ExportService {
     }
 
     prepareDeviceServiceExport(
-        deviceInstancesModel: DeviceInstancesModel | DeviceInstancesUpdateModel,
+        device: DeviceInstanceModel,
         service: DeviceTypeServiceModel,
     ): ExportModel[] {
-        const device = this.deviceService.addDisplayName(deviceInstancesModel);
         device.name = device.display_name || device.name;
         const exports: ExportModel[] = [];
         service.outputs.forEach((output, index) => {
@@ -169,21 +167,21 @@ export class ExportService {
                 if (trav.Path !== timePath.path) {
                     let type = '';
                     switch (trav.Type) {
-                        case this.typeString:
-                            type = 'string';
-                            break;
-                        case this.typeFloat:
-                            type = 'float';
-                            break;
-                        case this.typeInteger:
-                            type = 'int';
-                            break;
-                        case this.typeBoolean:
-                            type = 'bool';
-                            break;
-                        case this.typeList:
-                            type = 'string_json';
-                            break;
+                    case this.typeString:
+                        type = 'string';
+                        break;
+                    case this.typeFloat:
+                        type = 'float';
+                        break;
+                    case this.typeInteger:
+                        type = 'int';
+                        break;
+                    case this.typeBoolean:
+                        type = 'bool';
+                        break;
+                    case this.typeList:
+                        type = 'string_json';
+                        break;
                     }
                     exportValues.push({
                         Name: hasAmbiguousNames ? trav.Path : trav.Name,
@@ -194,12 +192,12 @@ export class ExportService {
             });
 
             exports.push({
-                Name: deviceInstancesModel.name + '_' + service.name + (service.outputs.length > 1 ? '_' + index : ''),
+                Name: device.name + '_' + service.name + (service.outputs.length > 1 ? '_' + index : ''),
                 TimePath: timePath.path,
                 TimePrecision: timePath.precision,
                 Values: exportValues,
-                EntityName: deviceInstancesModel.name,
-                Filter: deviceInstancesModel.id,
+                EntityName: device.name,
+                Filter: device.id,
                 FilterType: 'deviceId',
                 ServiceName: service.name,
                 Topic: service.id.replace(/#/g, '_').replace(/:/g, '_'),

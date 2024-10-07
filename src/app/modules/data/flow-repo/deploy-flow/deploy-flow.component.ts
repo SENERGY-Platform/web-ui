@@ -18,12 +18,13 @@ import { Component, OnInit } from '@angular/core';
 import { ParserService } from '../shared/parser.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ParseModel } from '../shared/parse.model';
-import { DeviceInstancesModel, DeviceSelectablesFullModel } from '../../../devices/device-instances/shared/device-instances.model';
+import { DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel, DeviceSelectablesFullModel } from '../../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import {
     DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
+    DeviceTypeModel,
     DeviceTypeServiceModel,
 } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
@@ -35,7 +36,6 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
 import { PathOptionsService } from '../shared/path-options.service';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
-import { DeviceTypePermSearchModel } from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
 import { MatOption } from '@angular/material/core';
 import { ConceptsService } from '../../../metadata/concepts/shared/concepts.service';
 import { OperatorInputTopic, PipelineModel, PipelineOperatorModel } from '../../pipeline-registry/shared/pipeline.model';
@@ -91,7 +91,7 @@ export class DeployFlowComponent implements OnInit {
     flowId = '';
     pipelineId = '';
     editMode = false;
-    allDevices: DeviceInstancesModel[] = [];
+    allDevices: DeviceInstanceWithDeviceTypeModel[] = [];
     pipelines: PipelineModel[] = [];
     aspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
     aspectFunctions = new Map<string, DeviceTypeFunctionModel[]>();
@@ -173,9 +173,9 @@ export class DeployFlowComponent implements OnInit {
 
                     this.parserService.getInputs(id).subscribe((parseModels: ParseModel[]) => {
                         this.deviceInstanceService
-                            .getDeviceInstances(9999, 0)
-                            .subscribe((devices: DeviceInstancesModel[]) => {
-                                this.allDevices = devices;
+                            .getDeviceInstancesWithDeviceType({limit: 9999, offset: 0})
+                            .subscribe(deviceTotal => {
+                                this.allDevices = deviceTotal.result;
                                 const observables: Observable<any>[] = [];
                                 parseModels.forEach((input) => {
                                     const operator = pipeline.operators.find((o) => o.id === input.id);
@@ -191,9 +191,9 @@ export class DeployFlowComponent implements OnInit {
                 this.flowId = id || '';
                 this.parserService.getInputs(this.flowId).subscribe((resp: ParseModel[]) => {
                     this.deviceInstanceService
-                        .getDeviceInstances(9999, 0)
-                        .subscribe((devices: DeviceInstancesModel[]) => {
-                            this.allDevices = devices;
+                        .getDeviceInstancesWithDeviceType({limit: 9999, offset: 0})
+                        .subscribe(deviceTotal => {
+                            this.allDevices = deviceTotal.result;
                             resp.forEach((input) => {
                                 this.addNode(input, []);
                             });
@@ -362,14 +362,14 @@ export class DeployFlowComponent implements OnInit {
                                                 selectableId: inputSelection.selectableId,
                                             });
                                             this.getDeviceTypes(inputGroup).forEach((deviceType) => {
-                                                if (!('service' in deviceType)) {
+                                                if (!('services' in deviceType)) {
                                                     return;
                                                 }
                                                 const serviceIds: string[] = [];
-                                                if (!Array.isArray(deviceType.service)) {
-                                                    serviceIds.push(deviceType.service);
+                                                if (!Array.isArray(deviceType.services)) {
+                                                    serviceIds.push(deviceType.services);
                                                 } else {
-                                                    serviceIds.push(...deviceType.service);
+                                                    serviceIds.push(...deviceType.services.map(s => s.id));
                                                 }
                                                 const matchingTopics = inputTopics?.filter((topic) =>
                                                     serviceIds.includes(topic.name.replace(/_/g, ':')),
@@ -558,17 +558,11 @@ export class DeployFlowComponent implements OnInit {
                                     return false;
                                 }
                                 const services: DeviceTypeServiceModel[] = [];
-                                if (!Array.isArray(device.device_type.service)) {
-                                    if (this.services.has(device.device_type.service)) {
-                                        services.push(this.services.get(device.device_type.service) || ({} as DeviceTypeServiceModel));
+                                device.device_type.services.forEach((service) => {
+                                    if (this.services.has(service.id)) {
+                                        services.push(this.services.get(service.id) || ({} as DeviceTypeServiceModel));
                                     }
-                                } else {
-                                    device.device_type.service.forEach((serviceId) => {
-                                        if (this.services.has(serviceId)) {
-                                            services.push(this.services.get(serviceId) || ({} as DeviceTypeServiceModel));
-                                        }
-                                    });
-                                }
+                                });
                                 const pathOptions = this.pathOptionsService.getPathOptionsLocal(services, false, characteristicIds);
                                 return pathOptions.length > 0;
                             });
@@ -678,7 +672,7 @@ export class DeployFlowComponent implements OnInit {
         }
     }
 
-    private getDeviceInstances(ids: string[]): DeviceInstancesModel[] {
+    private getDeviceInstances(ids: string[]): DeviceInstanceModel[] {
         return this.allDevices.filter((d) => ids.findIndex((id) => id === d.id) !== -1);
     }
 
@@ -970,12 +964,12 @@ export class DeployFlowComponent implements OnInit {
         return preparedOptions || new Map();
     }
 
-    getDeviceTypes(input: AbstractControl): (DeviceTypePermSearchModel | ImportInstancesModel)[] {
-        const anyTypes = input.get('devices')?.value?.map((x: DeviceInstancesModel) => x.device_type);
+    getDeviceTypes(input: AbstractControl): (DeviceTypeModel | ImportInstancesModel)[] {
+        const anyTypes = input.get('devices')?.value?.map((x: DeviceInstanceWithDeviceTypeModel) => x.device_type);
         if (anyTypes === undefined) {
             return [];
         }
-        const types = anyTypes as (DeviceTypePermSearchModel | ImportInstancesModel)[];
+        const types = anyTypes as (DeviceTypeModel | ImportInstancesModel)[];
         const selectableId = input.get('selectableId')?.value;
         if (selectableId !== undefined && selectableId !== null && (selectableId as string).startsWith(DeployFlowComponent.IMPORT_PREFIX)) {
             const instance = this.importInstances.find((i) => i.id === selectableId);
@@ -994,8 +988,8 @@ export class DeployFlowComponent implements OnInit {
         if (selection === null) {
             return;
         }
-        let devices = input.get('devices')?.value as DeviceInstancesModel[];
-        devices = devices.filter((d) => d.device_type.id === deviceTypeOrImportInstanceId);
+        let devices = input.get('devices')?.value as DeviceInstanceModel[];
+        devices = devices.filter((d) => d.device_type_id === deviceTypeOrImportInstanceId);
         const filter = input.get('filter')?.value as Map<string, { serviceId: string; path: string }[]>;
         const convertedSelection = selection.map((x) => ({ serviceId: x.service_id, path: x.path }));
         devices.forEach((d) => filter.set(d.id, convertedSelection));

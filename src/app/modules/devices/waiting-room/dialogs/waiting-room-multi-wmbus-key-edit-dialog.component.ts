@@ -16,10 +16,9 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Attribute, WaitingDeviceModel } from '../shared/waiting-room.model';
+import { WaitingDeviceModel } from '../shared/waiting-room.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DeviceTypeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { FormBuilder } from '@angular/forms';
 
 @Component({
     templateUrl: './waiting-room-multi-wmbus-key-edit-dialog.component.html',
