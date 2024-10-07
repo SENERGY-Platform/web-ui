@@ -64,35 +64,15 @@ export class DeviceInstancesService {
     }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
-        return this.http
-            .post<{ term: string }[]>(environment.permissionSearchUrl + '/v3/query/devices', { //TODO
-                resource: 'devices',
-                term_aggregate: 'features.device_type_id',
-            })
-            .pipe(
-                map((resp) => resp || []),
-                map((list) => list.map((value) => value.term)),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'listUsedDeviceTypeIds()', [])),
-            );
+        return this.getDeviceInstances({limit: 9999, offset: 0}).pipe(map(d => d.result.map(dd => dd.device_type_id).filter((v,i,a) => a.indexOf(v) === i))); //unique
     }
 
-    getDeviceListByIds(ids: string[]): Observable<DeviceInstancesBaseModel[]> {
-        return this.http
-            .post<DeviceInstancesBaseModel[]>(environment.permissionSearchUrl + '/v3/query/devices', { //TODO
-                resource: 'devices',
-                list_ids: {
-                    ids,
-                    limit: ids.length,
-                    offset: 0,
-                    rights: 'rx',
-                    sort_by: 'name',
-                    sort_desc: false,
-                },
-            })
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceListByIds(ids)', [])),
-            );
+    getDeviceListByIds(ids: string[]): Observable<DeviceInstanceModel[]> {
+        return this.getDeviceInstances({
+            limit: ids.length,
+            offset: 0,
+            deviceIds: ids,
+        }).pipe(map(d => d.result));
     }
 
     getDeviceInstance(id: string): Observable<DeviceInstanceModel | null> {
