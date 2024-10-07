@@ -41,7 +41,6 @@ describe('DeviceInstancesComponent', () => {
     deviceInstanceServiceSpy.userHasDeleteAuthorization.and.returnValue(true);
     deviceInstanceServiceSpy.userHasReadAuthorization.and.returnValue(true);
     deviceInstanceServiceSpy.userHasCreateAuthorization.and.returnValue(true);
-    deviceInstanceServiceSpy.getTotalCountOfDevices.and.returnValue(of(10));
     deviceInstanceServiceSpy.listUsedDeviceTypeIds.and.returnValue(of());
     const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass(DeviceTypeService);
     deviceTypeServiceSpy.userHasPermSearchAuthorization.and.returnValue(true);
