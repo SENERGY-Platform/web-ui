@@ -546,6 +546,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     }
 
     onLocationSelected(geoname: Geoname) {
+        this.autoLocationFailed = false;
         this.changeLocation = false;
         this.location = { latitude: Number(geoname.lat), longitude: Number(geoname.lng) };
         this.selectUBAStation();

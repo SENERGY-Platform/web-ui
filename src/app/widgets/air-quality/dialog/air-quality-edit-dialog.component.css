@@ -13,6 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+.nav-button {
+    margin-top: 2.5rem;
+    margin-right: 0.7rem;
+    margin-bottom: 0.5rem;
+}
+
+.step-content {
+    margin-top: 0.5em !important;
+}
 
 .center {
     margin-left: auto;
@@ -27,27 +36,110 @@
     left: 5px;
 }
 
-.boundary-input-field {
-    width: 15%;
+.addon-text {
+    padding-left: 1.3em;
+    padding-top: 0.1rem;
+    font-weight: 400;
+    letter-spacing: 0.4px;
+    line-height: 20px;
 }
 
-.unit {
-    margin-left: 1%;
-    margin-right: 5%;
+.small-text {
+    font-size: 12px;
 }
 
-.help-text {
-    font-size: smaller;
+.outside-warning {
+    padding: 0 1.55rem 0.7rem;
 }
 
-.small-error-text {
-    font-size: smaller;
+.mat-mdc-form-field {
+    padding-bottom: 0;
 }
 
-.searchbox {
-    min-width: 50%;
+.input-field {
+    width: 70%;
+}
+
+.button-alignment {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.buttons-container{
+    width: 30%;
+    float: right;
+    padding-bottom: 1.1rem;
+}
+
+.location-button {
+    margin-left: 0.4rem;
+}
+
+.panel-title {
+    font-size: 16px;
+}
+
+.toggle {
+    padding-top: 0.25rem;
+    padding-bottom: 1.5rem;
+    margin-top: 1%;
+}
+
+.headline {
+    padding-top: 1.2rem;
+    font-weight: 400;
+    letter-spacing: 0.03rem;
+}
+
+mat-divider {
+    padding-bottom: 0.7rem;
+}
+
+.right-aligned {
+    text-align: right;
+}
+
+.scale-heading {
+    padding-bottom: 0.1rem;
+}
+
+table {
+    align-items: center;
+    justify-content: space-between;
+    table-layout: fixed;
+    width: 740px;
+}
+
+td {
+    border: 2px saddlebrown;
+    width: 33% !important;
+    padding: 0.2rem 1.3rem 0.2rem
+
 }
 
 senergy-widget-spinner {
     margin-bottom: 64px;
+}
+
+.unit {
+    padding-right: 0.5em;
+}
+
+.threshold-field {
+    /*width: 80%;*/
+    width: calc(100% - 0.5em);
+}
+
+/* Hide arrows in number inputs */
+/* Chrome, Safari, Edge, Opera */
+input[matinput]::-webkit-outer-spin-button,
+input[matinput]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+/* Firefox */
+input[matinput][type=number] {
+    -moz-appearance: textfield;
 }

@@ -14,89 +14,102 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Edit Air Recommendation</h2>
+<h2 mat-dialog-title>Edit Air Quality Recommendation</h2>
 
 <mat-dialog-content>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <mat-vertical-stepper  *ngIf="ready" #stepper>
         <mat-step label="Give the widget a name" *ngIf="userHasUpdateNameAuthorization">
-            <mat-form-field appearance="outline" color="accent">
-                <input type="text" matInput placeholder="Name" [(ngModel)]="name" required>
-            </mat-form-field>
-            <div>
-                <button mat-button matStepperNext>Next</button>
+            <div class="step-content">
+                <mat-form-field appearance="outline" color="accent" class="input-field">
+                    <mat-label>Widget Name</mat-label>
+                    <input type="text" matInput [(ngModel)]="name" required>
+                </mat-form-field>
+                <div class="nav-button">
+                    <button mat-raised-button matStepperNext>Next</button>
+                </div>
             </div>
         </mat-step>
         <span *ngIf="userHasUpdatePropertiesAuthorization">
         <mat-step label="Select your location">
-            <div *ngIf="!changeLocation">
-                {{formatted_address}}
-                <button mat-icon-button (click)="autoLocation()">
-                    <mat-icon [inline]="true">gps_fixed</mat-icon>
-                </button>
-                <button mat-icon-button (click)="changeLocation = true">
-                    <mat-icon [inline]="true">edit</mat-icon>
-                </button>
-
-                <div *ngIf="hasValidUBAStation()" class="help-text color-accent">
+            <div class="step-content">
+                <div *ngIf="!changeLocation" class="button-alignment">
+                    <mat-form-field color="accent" appearance="outline" class="input-field location-field">
+                        <mat-label>Location</mat-label>
+                        <input matInput required [disabled]="true" value="{{formatted_address}}">
+                    </mat-form-field>
+                    <div class="buttons-container">
+                        <button mat-icon-button (click)="autoLocation()" class="location-button">
+                            <mat-icon>gps_fixed</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="changeLocation = true" class="location-button">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                    </div>
+                </div>
+                <div *ngIf="changeLocation" class="button-alignment">
+                    <mat-form-field color="accent" appearance="outline" class="input-field location-field">
+                        <mat-label>Location</mat-label>
+                        <input matInput required [matAutocomplete]="auto" [formControl]="searchFormControl">
+                        <mat-autocomplete #auto="matAutocomplete"
+                                          (optionSelected)="onLocationSelected($event.option.value)">
+                            <mat-option *ngFor="let option of geonamesSearchResults | async"
+                                        [value]="option">{{option.name}}, {{option.adminCodes1.ISO3166_2}}
+                                , {{option.countryCode}}</mat-option>
+                        </mat-autocomplete>
+                        <mat-hint>Search for landmarks or places near you</mat-hint>
+                    </mat-form-field>
+                    <div class="buttons-container">
+                        <button class="location-button" mat-icon-button (click)="autoLocation()">
+                            <mat-icon>gps_fixed</mat-icon>
+                        </button>
+                    </div>
+                </div>
+                <div *ngIf="autoLocationFailed" class="color-warn small-text addon-text">
+                        Could not detect your location, please set manually!
+                </div>
+                <div *ngIf="hasValidUBAStation()" class="color-accent small-text addon-text">
                     Next <span matTooltip="Umweltbundesamt">UBA</span> station: {{ubaStationSelected.station_name}},
                     distance: {{ubaStationSelected.distance | number}} km
                 </div>
-                <div *ngIf="!hasValidUBAStation()" class="small-error-text color-warn">
+                <div *ngIf="!hasValidUBAStation()" class="color-warn small-text addon-text">
                     No <span matTooltip="Umweltbundesamt">UBA</span> station within {{maxUBADistance}} km!
                 </div>
-            </div>
-            <div *ngIf="changeLocation">
-                <div *ngIf="autoLocationFailed" class="small-error-text color-warn">
-                    Could not detect your location, please set manually
+                <div>
+                    <button class="nav-button" mat-raised-button matStepperPrevious>Back</button>
+                    <button class="nav-button" mat-raised-button matStepperNext>Next</button>
                 </div>
-                <mat-form-field color="accent" appearance="outline" class="searchbox">
-                    <mat-label>Location</mat-label>
-                    <input matInput required [matAutocomplete]="auto" [formControl]="searchFormControl">
-                    <mat-autocomplete #auto="matAutocomplete"
-                                      (optionSelected)="onLocationSelected($event.option.value)">
-                        <mat-option *ngFor="let option of geonamesSearchResults | async"
-                                    [value]="option">{{option.name}}, {{option.adminCodes1.ISO3166_2}}
-                            , {{option.countryCode}}</mat-option>
-                    </mat-autocomplete>
-                    <mat-hint>Search for landmarks or places near you</mat-hint>
-                </mat-form-field>
-                <button mat-icon-button (click)="autoLocation()">
-                    <mat-icon [inline]="true">gps_fixed</mat-icon>
-                </button>
-            </div>
-            <div>
-                <button mat-button matStepperPrevious>Back</button>
-                <button mat-button matStepperNext>Next</button>
             </div>
         </mat-step>
 
         <mat-step label="Select additional measurements">
-            <div>
-                <mat-form-field color="accent" appearance="outline">
-                    <mat-label>Enable measurements</mat-label>
-                    <mat-select multiple [(ngModel)]="measurementSelected"
-                                (closed)="measurementsSelected(measurements, measurementSelected)">
-                        <mat-option *ngFor="let option of measurements" [value]="option.name_html">
-                            <div [innerHTML]="option.name_html"></div>
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
-            </div>
-            <div>
-                <mat-form-field color="accent" appearance="outline">
-                    <mat-label>Enable pollen warnings</mat-label>
-                    <mat-select multiple [(ngModel)]="pollenSelected"
-                                (closed)="measurementsSelected(pollen, pollenSelected)">
-                        <mat-option *ngFor="let option of pollen" [value]="option.name_html">
-                            <div [innerHTML]="option.name_html"></div>
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
-            </div>
-            <div>
-                <button mat-button matStepperPrevious>Back</button>
-                <button mat-button matStepperNext>Next</button>
+            <div class="step-content">
+                <div>
+                    <mat-form-field class="input-field" color="accent" appearance="outline">
+                        <mat-label>Enable Measurements</mat-label>
+                        <mat-select multiple [(ngModel)]="measurementSelected"
+                                    (closed)="measurementsSelected(measurements, measurementSelected)">
+                            <mat-option *ngFor="let option of measurements" [value]="option.name_html">
+                                <div [innerHTML]="option.name_html"></div>
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div>
+                    <mat-form-field class="input-field" color="accent" appearance="outline">
+                        <mat-label>Enable Pollen Warnings</mat-label>
+                        <mat-select multiple [(ngModel)]="pollenSelected"
+                                    (closed)="measurementsSelected(pollen, pollenSelected)">
+                            <mat-option *ngFor="let option of pollen" [value]="option.name_html">
+                                <div [innerHTML]="option.name_html"></div>
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div>
+                    <button class="nav-button" mat-raised-button matStepperPrevious>Back</button>
+                    <button class="nav-button" mat-raised-button matStepperNext>Next</button>
+                </div>
             </div>
         </mat-step>
 
@@ -106,7 +119,7 @@
                     <mat-expansion-panel *ngIf="option.is_enabled || option.can_web">
                         <mat-expansion-panel-header class="right-aligned-header">
                             <mat-panel-title>
-                                <div [innerHTML]="option.name_html"></div>
+                                <div class="panel-title" [innerHTML]="option.name_html"></div>
                             </mat-panel-title>
                             <mat-panel-description *ngIf="option.description_html !== undefined">
                                 <span [innerHTML]="option.description_html"></span>
@@ -116,14 +129,16 @@
                             </mat-panel-description>
                         </mat-expansion-panel-header>
                         <ng-template matExpansionPanelContent>
+                            <h4 class="headline">Choose the measurement area and it's data connector</h4>
+                            <mat-divider></mat-divider>
                             <div>
-                                <mat-slide-toggle [(ngModel)]="option.is_enabled">Enable inside measurement
+                                <mat-slide-toggle class="toggle" [(ngModel)]="option.is_enabled">Enable inside measurement
                                 </mat-slide-toggle>
                             </div>
                             <table *ngIf="option.is_enabled">
                                 <tr>
                                     <td>
-                                        <mat-form-field color="accent" appearance="outline">
+                                        <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Export</mat-label>
                                             <senergy-select-search placeholder="Export" [(ngModel)]="option.export" (ngModelChange)="insideExportChanged(option)"
                                                         [compareWith]="compareExports" [options]="exports" useOptionViewProperty="Name" noneView="--None--"
@@ -132,7 +147,7 @@
                                         </mat-form-field>
                                     </td>
                                     <td>
-                                        <mat-form-field color="accent" appearance="outline">
+                                        <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Value</mat-label>
                                             <senergy-select-search placeholder="Value" [(ngModel)]="option.data.column"
                                                         [compareWith]="compareExportValueModels" [options]="option.export?.Values || []"
@@ -141,7 +156,7 @@
                                         </mat-form-field>
                                     </td>
                                     <td>
-                                        <mat-form-field color="accent" appearance="outline">
+                                        <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Math</mat-label>
                                             <input matInput placeholder="Math" [(ngModel)]="option.math">
                                         </mat-form-field>
@@ -149,7 +164,7 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <mat-form-field color="accent" appearance="outline">
+                                        <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Device</mat-label>
                                             <senergy-select-search placeholder="Device" [(ngModel)]="option.insideDeviceId" (ngModelChange)="insideDeviceChanged(option)"
                                                                    [options]="devices" useOptionViewProperty="name" useOptionValueProperty="id" [disabled]="option.export != null" noneView="--None--">
@@ -157,7 +172,7 @@
                                         </mat-form-field>
                                     </td>
                                     <td>
-                                        <mat-form-field color="accent" appearance="outline">
+                                        <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Service</mat-label>
                                             <senergy-select-search placeholder="Service" [(ngModel)]="option.insideServiceId"
                                                                    [options]="(getServices(option.insideDeviceId) | async) || []" useOptionValueProperty="id"
@@ -166,7 +181,7 @@
                                         </mat-form-field>
                                     </td>
                                     <td>
-                                        <mat-form-field color="accent" appearance="outline">
+                                        <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Value</mat-label>
                                             <senergy-select-search placeholder="Value" [(ngModel)]="option.insideDeviceValuePath"
                                                                    [options]="getServiceValues(option.insideDeviceId, option.insideServiceId)"
@@ -180,12 +195,12 @@
 
                             </div>
                             <div>
-                                <mat-slide-toggle [(ngModel)]="option.has_outside">Enable outside measurement
+                                <mat-slide-toggle class="toggle" [(ngModel)]="option.has_outside">Enable outside measurement
                                 </mat-slide-toggle>
                             </div>
                             <div *ngIf="option.has_outside">
-                                <div *ngIf="option.can_web" class="help-text color-warn">
-                                    Enabling outside measurement will override web data
+                                <div *ngIf="option.can_web" class="small-text outside-warning color-warn">
+                                    ! Enabling outside measurement will override web data
                                 </div>
                                 <table>
                                     <tr>
@@ -248,32 +263,60 @@
                                     </tr>
                                 </table>
                             </div>
-                            <div>
-                                <mat-form-field color="accent" appearance="outline" class="boundary-input-field">
-                                    <input type="number" matInput placeholder="Min Warning"
-                                           [(ngModel)]="option.boundaries.warn.lower" required>
-                                </mat-form-field>
-                                <span [innerHTML]="option.unit_html" class="unit"></span>
-                                <mat-form-field color="accent" appearance="outline" class="boundary-input-field">
-                                    <input type="number" matInput placeholder="Max Warning"
-                                           [(ngModel)]="option.boundaries.warn.upper" required>
-                                </mat-form-field>
-                                <span [innerHTML]="option.unit_html" class="unit"></span>
-                            </div>
-                            <div>
-                                <mat-form-field color="accent" appearance="outline" class="boundary-input-field">
-                                    <input type="number" matInput placeholder="Min Critical"
-                                           [(ngModel)]="option.boundaries.critical.lower" required>
-                                </mat-form-field>
-                                <span [innerHTML]="option.unit_html" class="unit"></span>
-                                <mat-form-field color="accent" appearance="outline" class="boundary-input-field">
-                                    <input type="number" matInput placeholder="Max Critical"
-                                           [(ngModel)]="option.boundaries.critical.upper" required>
-                                </mat-form-field>
-                                <span [innerHTML]="option.unit_html" class="unit"></span>
-                            </div>
-                            <div class="help-text color-accent" matTooltip=
-                                    "Values above or below these thresholds will result in warnings or critical warnings">
+
+                            <h4 class="headline">Choose thresholds for warnings</h4>
+                            <mat-divider></mat-divider>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <p class="scale-heading">Warning Thresholds:</p></td>
+                                        <td>
+                                            <mat-form-field class="threshold-field" color="accent" appearance="outline">
+                                                <mat-label>Min. Warning</mat-label>
+                                                <input class="right-aligned" type="number" matInput
+                                                       [(ngModel)]="option.boundaries.warn.lower" required>
+                                            <div matSuffix>
+                                                 <span [innerHTML]="option.unit_html" class="unit"></span>
+                                            </div>
+                                            </mat-form-field>
+                                        </td>
+                                        <td>
+                                            <mat-form-field class="threshold-field" color="accent" appearance="outline">
+                                                <mat-label>Max. Warning</mat-label>
+                                                <input class="right-aligned" type="number" matInput
+                                                       [(ngModel)]="option.boundaries.warn.upper" required>
+                                                <div matSuffix>
+                                                 <span [innerHTML]="option.unit_html" class="unit"></span>
+                                                </div>
+                                            </mat-form-field>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td> <p class="scale-heading"> Critical Warning Thresholds: </p> </td>
+                                        <td >
+                                            <mat-form-field class="threshold-field" color="accent" appearance="outline">
+                                                <mat-label>Min. Critical Warning</mat-label>
+                                                <input class="right-aligned" type="number" matInput
+                                                       [(ngModel)]="option.boundaries.critical.lower" required>
+                                            <div matSuffix>
+                                                 <span [innerHTML]="option.unit_html" class="unit"></span>
+                                                </div>
+                                            </mat-form-field>
+                                        </td>
+                                        <td>
+                                            <mat-form-field class="threshold-field" color="accent" appearance="outline">
+                                                <mat-label>Max. Critical Warning</mat-label>
+                                                <input class="right-aligned" type="number" matInput
+                                                       [(ngModel)]="option.boundaries.critical.upper" required>
+                                            <div matSuffix>
+                                                 <span [innerHTML]="option.unit_html" class="unit"></span>
+                                                </div>
+                                            </mat-form-field>
+                                        </td>
+                                    </tr>
+                                </table>
+                            <div class="small-text color-accent" matTooltip=
+                                    "Values below or above these thresholds will result in warnings or critical warnings">
                                 What do those numbers mean?
                             </div>
                         </ng-template>
@@ -282,7 +325,7 @@
                 <div *ngFor="let option of pollen">
                     <mat-expansion-panel *ngIf="option.is_enabled || false">
                         <mat-expansion-panel-header class="right-aligned-header">
-                            <mat-panel-title>
+                            <mat-panel-title class="panel-title">
                                 <div [innerHTML]="option.name_html"></div>
                             </mat-panel-title>
                             <mat-panel-description *ngIf="option.description_html !== undefined">
@@ -291,8 +334,8 @@
                         </mat-expansion-panel-header>
                         <ng-template matExpansionPanelContent>
                             <div>
-                                <mat-form-field color="accent" appearance="outline">
-                                    <mat-label>Warning level</mat-label>
+                                <mat-form-field class="input-field" color="accent" appearance="outline">
+                                    <mat-label>Warning Level</mat-label>
                                     <mat-select required placeholder="Select warning level"
                                                 [(ngModel)]="option.boundaries.warn.upper">
                                         <mat-option *ngFor="let level of pollenLevel" [value]="level.value">
@@ -302,8 +345,8 @@
                                 </mat-form-field>
                             </div>
                             <div>
-                                <mat-form-field color="accent" appearance="outline">
-                                    <mat-label>Critical level</mat-label>
+                                <mat-form-field class="input-field" color="accent" appearance="outline">
+                                    <mat-label>Critical Level</mat-label>
                                     <mat-select required placeholder="Select critical level"
                                                 [(ngModel)]="option.boundaries.critical.upper">
                                         <mat-option *ngFor="let level of pollenLevel" [value]="level.value">
@@ -312,7 +355,7 @@
                                     </mat-select>
                                 </mat-form-field>
                             </div>
-                            <div class="help-text color-accent">
+                            <div class="small-text color-accent">
                                 Pollen levels from DWD. Find out more
                                 <a target="_blank" rel="noopener noreferrer"
                                    href="https://www.dwd.de/DE/leistungen/gefahrenindizespollen/erklaerungen.html;">here.</a>
@@ -322,8 +365,8 @@
                 </div>
             </mat-accordion>
             <div>
-                <button mat-button matStepperPrevious>Back</button>
-                <button mat-button matStepperNext>Next</button>
+                <button class="nav-button" mat-raised-button matStepperPrevious>Back</button>
+                <button class="nav-button" mat-raised-button matStepperNext>Next</button>
             </div>
         </mat-step>
         <mat-step label="Done">
@@ -351,7 +394,7 @@
                 </mat-list-item>
             </mat-list>
             <div>
-                <button mat-button matStepperPrevious>Back</button>
+                <button  class="nav-button" mat-raised-button matStepperPrevious>Back</button>
             </div>
         </mat-step>
         </span>
@@ -359,6 +402,6 @@
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center" *ngIf="ready">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()" [disabled]="disableSave">Save</button>
+    <button  class="nav-button" mat-raised-button color="primary" (click)="close()">Cancel</button>
+    <button  class="nav-button" mat-raised-button color="accent" (click)="save()" [disabled]="disableSave">Save</button>
 </mat-dialog-actions>
