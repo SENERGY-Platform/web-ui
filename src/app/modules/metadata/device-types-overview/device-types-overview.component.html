@@ -59,7 +59,7 @@
                 <ng-container matColumnDef="edit" *ngIf="userHasUpdateAuthorization">
                     <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
                     <td mat-cell *matCellDef="let deviceType">
-                        <button mat-icon-button color="accent" [disabled]="!deviceType.permissions.w"
+                        <button mat-icon-button color="accent" [disabled]="deviceType.permissions?.w"
                             (click)="editDeviceType(deviceType.id)">
                             <mat-icon>edit</mat-icon>
                         </button>
@@ -98,7 +98,7 @@
                         <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
                         <td mat-cell *matCellDef="let deviceType">
                             <button mat-icon-button color="accent" (click)="delete(deviceType)"
-                                [disabled]="!deviceType.permissions.a">
+                                [disabled]="deviceType.permissions?.a">
                                 <mat-icon>delete</mat-icon>
                             </button>
                         </td>
