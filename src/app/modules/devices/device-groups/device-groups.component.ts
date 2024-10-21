@@ -15,7 +15,7 @@
  */
 
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {forkJoin, Observable, Subscription, map} from 'rxjs';
+import {forkJoin, Observable, Subscription, map, concatMap} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
@@ -28,6 +28,8 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../device-instances/device-instances.component';
 import { DeviceGroupModel } from './shared/device-groups.model';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
+import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 
 
 @Component({
@@ -51,6 +53,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
+    permissionsPerInstance: PermissionsV2RightsAndIdModel[] = [];
 
     private searchSub: Subscription = new Subscription();
 
@@ -63,7 +66,8 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         private router: Router,
         private dialogsService: DialogsService,
         private searchbarService: SearchbarService,
-        private permissionsDialogService: PermissionsDialogService
+        private permissionsDialogService: PermissionsDialogService,
+        private permissionsService: PermissionsService,
     ) {}
 
     ngOnInit() {
@@ -163,18 +167,21 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private getDeviceGroups(): Observable<DeviceGroupModel[]> {
-        let query =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection);
+        let query: Observable<{result: DeviceGroupModel[]; total: number}>  =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection);
         if(this.hideGenerated) {
             query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection);
         }
 
         return query.pipe(
-            map((res: {result: DeviceGroupModel[]; total: number}) => {
+            concatMap(a => this.permissionsService.getComputedResourcePermissionsV2('device-groups', a.result.map(i => i.id)).pipe(
+                map(permissions => this.permissionsPerInstance = permissions),
+                map(_ => a)
+            )),
+            map(res => {
                 this.dataSource.data = res.result;
                 this.totalCount = res.total;
                 return res.result;
-            }
-            )
+            }),
         );
     }
 
@@ -231,6 +238,16 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     shareDeviceGroup(group: DeviceGroupModel) {
-        this.permissionsDialogService.openPermissionDialog('device-groups', group.id, group.name);
+        this.permissionsDialogService.openPermissionV2Dialog('device-groups', group.id, group.name);
     }
+
+    userHasEditPermission(groupId: string) {
+        return this.permissionsPerInstance.find(e => e.id === groupId)?.write || false;
+    }
+
+
+    userHasAdministratePermission(groupId: string) {
+        return this.permissionsPerInstance.find(e => e.id === groupId)?.administrate || false;
+    }
+
 }
