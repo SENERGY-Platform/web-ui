@@ -134,7 +134,7 @@ export class AcControlEditDialogComponent implements OnInit {
             this.widget.properties.acControl.deviceGroupId = selectable.device_group.id;
             observableMappings = this.deviceGroupsService.getDeviceGroup(selectable.device_group.id).pipe(map(group => {
                 const mappings: Map<string, { aspectId: string }[]> = new Map();
-                group?.criteria.forEach(c => {
+                group?.criteria?.forEach(c => {
                     if (!mappings.has(c.function_id)) {
                         mappings.set(c.function_id, []);
                     }

@@ -213,7 +213,7 @@ export class DataSourceSelectorComponent implements OnInit {
     private updateGroupFields(deviceGroup: DeviceGroupModel) {
         const observables: Observable<ChartsExportVAxesModel | undefined>[] = [];
 
-        deviceGroup.criteria.forEach(criteria => {
+        deviceGroup.criteria?.forEach(criteria => {
             const f = this.functions.find(func => func.id === criteria.function_id);
             if (f === undefined || f.concept_id == null || f.concept_id === '') {
                 return;
@@ -399,20 +399,20 @@ export class DataSourceSelectorComponent implements OnInit {
     getDeviceGroups() {
         return this.deviceGroupsService.getDeviceGroups('', 10000, 0, 'name', 'asc').pipe(
             mergeMap(deviceGroups => {
-                this.deviceGroups = deviceGroups;
+                this.deviceGroups = deviceGroups.result;
                 const ascpectIds: Map<string, null> = new Map();
                 const functionIds: Map<string, null> = new Map();
                 const deviceClassids: Map<string, null> = new Map();
                 const innerObs: Observable<any>[] = [];
                 this.deviceGroups.forEach(dg => {
-                    dg.criteria.forEach(c => {
+                    dg.criteria?.forEach(c => {
                         ascpectIds.set(c.aspect_id, null);
                         functionIds.set(c.function_id, null);
                         deviceClassids.set(c.device_class_id, null);
                     });
                     innerObs.push(this.deviceGroupsService.getDeviceGroup(dg.id, true).pipe(map(newDg => {
                         const criteria: DeviceGroupCriteriaModel[] = [];
-                        newDg?.criteria.forEach(c => {
+                        newDg?.criteria?.forEach(c => {
                             if (criteria.findIndex(c2 => c.aspect_id === c2.aspect_id && c.function_id === c2.function_id && c.device_class_id === c2.device_class_id) === -1) {
                                 // filters interaction, irrelevant for widget
                                 c.interaction = '';

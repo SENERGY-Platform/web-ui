@@ -195,7 +195,7 @@ describe('DataTableEditDialogComponent', () => {
             deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deploymentId' }));
             processSchedulerServiceSpy.createSchedule.and.returnValue(of({ id: 'scheduleId' }));
             exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'exportId' }));
-            deviceGroupServiceSpy.getDeviceGroups.and.returnValue(of([]));
+            deviceGroupServiceSpy.getDeviceGroups.and.returnValue(of({result: []}));
             deviceGroupServiceSpy.getAspectListByIds.and.returnValue(of([]));
             deviceGroupServiceSpy.getFunctionListByIds.and.returnValue(of([]));
             deviceGroupServiceSpy.getDeviceClassListByIds.and.returnValue(of([]));

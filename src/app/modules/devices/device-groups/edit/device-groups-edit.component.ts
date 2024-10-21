@@ -155,7 +155,7 @@ export class DeviceGroupsEditComponent implements OnInit {
         }
 
         const criteriaFc = this.deviceGroupForm.get('criteria');
-        if (criteriaFc) {
+        if (criteriaFc && deviceGroup.criteria !== undefined) {
             criteriaFc.valueChanges.subscribe((value) => {
                 that.updateCapabilities(value);
             });
@@ -276,11 +276,12 @@ export class DeviceGroupsEditComponent implements OnInit {
         };
 
         if (idsForRepoSearch.length) {
-            this.deviceGroupService.getBaseDevicesByIds(idsForRepoSearch).subscribe((devices) => {
-                for (const device of devices) {
+            this.deviceInstanceService.getDeviceInstances({limit: idsForRepoSearch.length, offset: 0, deviceIds: idsForRepoSearch}).subscribe((devices) => {
+                const d = devices.result;
+                for (const device of d) {
                     this.deviceCache.set(device.id, device);
                 }
-                const sortedResult = fromCache.concat(devices).sort(sortByName);
+                const sortedResult = fromCache.concat(d).sort(sortByName);
                 this.selectedForm.setValue(sortedResult);
             });
         } else {

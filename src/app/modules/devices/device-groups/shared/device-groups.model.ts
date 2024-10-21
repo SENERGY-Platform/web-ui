@@ -21,10 +21,10 @@ export interface DeviceGroupModel {
     image: string;
     name: string;
     device_ids: string[];
-    criteria: DeviceGroupCriteriaModel[];
+    criteria?: DeviceGroupCriteriaModel[];
     attributes?: Attribute[];
     auto_generated_by_device?: string;
-    criteria_short?: string[]; // TODO what is that??
+    criteria_short?: string[];
 }
 
 export interface DeviceGroupCriteriaModel {

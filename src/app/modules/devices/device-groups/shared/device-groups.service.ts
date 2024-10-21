@@ -20,9 +20,8 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
-import {DeviceGroupHelperResultModel, DeviceGroupModel} from './device-groups.model';
+import {DeviceGroupCriteriaModel, DeviceGroupHelperResultModel, DeviceGroupModel} from './device-groups.model';
 import {DeviceTypeFunctionModel} from '../../../metadata/device-types-overview/shared/device-type.model';
-import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
 import {DeviceClassesPermSearchModel} from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
 import {AspectsPermSearchModel} from '../../../metadata/aspects/shared/aspects-perm-search.model';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
@@ -47,32 +46,8 @@ export class DeviceGroupsService {
         offset: number,
         feature: string,
         order: string,
-    ): Observable<DeviceGroupModel[]> {
-        return this.http
-            .post<DeviceGroupModel[]>(environment.permissionSearchUrl + '/v3/query/device-groups', { // TODO
-                resource: 'device-groups',
-                find: {
-                    search: query,
-                    limit,
-                    offset,
-                    rights: 'r',
-                    sort_by: feature,
-                    sort_desc: order === 'desc',
-                    filter: {
-                        not: {
-                            condition: {
-                                feature: 'features.attribute_list',
-                                operation: '==',
-                                value: 'platform/generated=true'
-                            }
-                        }
-                    }
-                },
-            })
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceGroupsWithoutGenerated()', [])),
-            );
+    ): Observable<{result: DeviceGroupModel[]; total: number}> {
+        return this._getDeviceGroups({ignoreGenerated: true, limit, search: query, offset, sort: feature + '.' + order});
     }
 
     getDeviceGroups(
@@ -81,19 +56,8 @@ export class DeviceGroupsService {
         offset: number,
         feature: string,
         order: string,
-    ): Observable<DeviceGroupModel[]> {
-        const params = [
-            'limit=' + limit,
-            'offset=' + offset,
-            'rights=r',
-            'sort=' + feature + '.' + order,
-            'search=' + encodeURIComponent(query),
-        ].join('&');
-
-        return this.http.get<DeviceGroupModel[]>(environment.permissionSearchUrl + '/v3/resources/device-groups?' + params).pipe( // TODO
-            map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceGroups(search)', [])),
-        );
+    ): Observable<{result: DeviceGroupModel[]; total: number}> {
+        return this._getDeviceGroups({limit, search: query, offset, sort: feature + '.' + order});
     }
 
     getDeviceGroup(id: string, filterGenericDuplicateCriteria = false): Observable<DeviceGroupModel | null> {
@@ -109,6 +73,65 @@ export class DeviceGroupsService {
                 return resp;
             }),
             catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceGroup(id)', null)),
+        );
+    }
+
+    private _getDeviceGroups(options: {
+        limit?: number;
+        offset?: number;
+        search?: string;
+        sort?: string;
+        ids?: string[];
+        ignoreGenerated?: boolean;
+        attrKeys?: string[];
+        attrValues?: string[];
+        criertia?: DeviceGroupCriteriaModel[];
+        p?: string;
+    }): Observable<{result: DeviceGroupModel[]; total: number}> {
+        let params = new HttpParams();
+        if (options.limit !== undefined) {
+            params = params.set('limit', options.limit);
+        }
+        if (options.offset !== undefined) {
+            params = params.set('offset', options.offset);
+        }
+        if (options.search !== undefined) {
+            params = params.set('search', options.search);
+        }
+        if (options.sort !== undefined) {
+            params = params.set('sort', options.sort);
+        }
+        if (options.ids !== undefined) {
+            params = params.set('ids', options.ids.join(','));
+        }
+        if (options.ignoreGenerated !== undefined) {
+            params = params.set('ignore-generated', options.ignoreGenerated);
+        }
+        if (options.attrKeys !== undefined) {
+            params = params.set('attr-keys', options.attrKeys.join(','));
+        }
+        if (options.attrValues !== undefined) {
+            params = params.set('attr-values', options.attrValues.join(','));
+        }
+        if (options.criertia !== undefined) {
+            params = params.set('criteria', JSON.stringify(options.criertia));
+        }
+        if (options.p !== undefined) {
+            params = params.set('p', options.p);
+        }
+
+        return this.http.get<DeviceGroupModel[] | null>(environment.deviceRepoUrl + '/device-groups', { observe: 'response', params }).pipe(
+            map(resp => {
+                const totalStr = resp.headers.get('X-Total-Count') || '0';
+                return {
+                    result: resp.body || [],
+                    total: parseInt(totalStr, 10)
+                };
+            }),
+            catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, '_getDeviceGroups()', {
+                result: [],
+                total: 0,
+            })),
         );
     }
 
@@ -130,47 +153,13 @@ export class DeviceGroupsService {
             .pipe(catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'deleteDeviceGroup', false)));
     }
 
-    getBaseDevicesByIds(ids: string[]): Observable<DeviceInstancesBaseModel[]> {
-        return this.http
-            .post<DeviceInstancesBaseModel[]>(environment.permissionSearchUrl + '/v3/query/devices', { // TODO
-                resource: 'devices',
-                list_ids: {
-                    ids,
-                    limit: ids.length,
-                    offset: 0,
-                    rights: 'rx',
-                    sort_by: 'name',
-                    sort_desc: false,
-                },
-            })
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceListByIds(ids)', [])),
-            );
-    }
-
     getDeviceGroupListByIds(ids: string[]): Observable<DeviceGroupModel[]> {
-        return this.http
-            .post<DeviceGroupModel[]>(environment.permissionSearchUrl + '/v3/query/device-groups', { // TODO
-                resource: 'device-groups',
-                list_ids: {
-                    ids,
-                    limit: ids.length,
-                    offset: 0,
-                    rights: 'r',
-                    sort_by: 'name',
-                    sort_desc: false,
-                },
-            })
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceGroupListByIds(ids)', [])),
-            );
+        return this._getDeviceGroups({ids}).pipe(map(x => x.result));
     }
 
     getFunctionListByIds(ids: string[]): Observable<DeviceTypeFunctionModel[]> {
         return this.http
-            .post<DeviceTypeFunctionModel[]>(environment.permissionSearchUrl + '/v3/query/functions', { // TODO
+            .post<DeviceTypeFunctionModel[]>(environment.permissionSearchUrl + '/v3/query/functions', { // TODO SNRGY-3575
                 resource: 'functions',
                 list_ids: {
                     ids,
@@ -189,7 +178,7 @@ export class DeviceGroupsService {
 
     getAspectListByIds(ids: string[]): Observable<AspectsPermSearchModel[]> {
         return this.http
-            .post<AspectsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/aspects', { // TODO
+            .post<AspectsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/aspects', { // TODO SNRGY-3576
                 resource: 'aspects',
                 list_ids: {
                     ids,
@@ -208,7 +197,7 @@ export class DeviceGroupsService {
 
     getDeviceClassListByIds(ids: string[]): Observable<DeviceClassesPermSearchModel[]> {
         return this.http
-            .post<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/device-classes', { // TODO
+            .post<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/device-classes', { // TODO SNRGY-3577
                 resource: 'device-classes',
                 list_ids: {
                     ids,
@@ -242,22 +231,6 @@ export class DeviceGroupsService {
             .pipe(
                 map((resp) => resp || null),
                 catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'useDeviceSelectionDeviceGroupHelper()', null)),
-            );
-    }
-
-    getTotalCountOfDeviceGroups(searchText: string): Observable<any> {
-        const options = searchText ?
-            { params: new HttpParams().set('search', searchText) } : {};
-
-        return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/device-groups', options) // TODO
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(
-                        DeviceGroupsService.name,
-                        'getTotalCountOfDeviceGroups',
-                    ),
-                ),
             );
     }
 

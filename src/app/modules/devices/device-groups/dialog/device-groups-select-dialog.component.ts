@@ -57,8 +57,8 @@ export class DeviceGroupsSelectDialogComponent implements OnInit {
     load() {
         this.deviceGroupsService
             .getDeviceGroups(this.searchControl.value, this.limit, this.offset, this.sortBy, this.sortOrder)
-            .subscribe((groups) => {
-                this.deviceGroups.push(...groups);
+            .subscribe((res) => {
+                this.deviceGroups.push(...res.result);
                 if (this.table !== undefined) {
                     this.table.renderRows();
                 }

@@ -71,12 +71,6 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.checkAuthorization();
     }
 
-    getTotalCount(): Observable<number> {
-        return this.deviceGroupsService.getTotalCountOfDeviceGroups(this.searchText).pipe(
-            map(totalCount => this.totalCount = totalCount)
-        );
-    }
-
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize;
@@ -175,9 +169,10 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         return query.pipe(
-            map((deviceGroups: DeviceGroupModel[]) => {
-                this.dataSource.data = deviceGroups;
-                return deviceGroups;
+            map((res: {result: DeviceGroupModel[]; total: number}) => {
+                this.dataSource.data = res.result;
+                this.totalCount = res.total;
+                return res.result;
             }
             )
         );
@@ -188,8 +183,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.ready = false;
         this.selectionClear();
 
-        const jobs = [this.getDeviceGroups(), this.getTotalCount()];
-        forkJoin(jobs).subscribe(_ => {
+        this.getDeviceGroups().subscribe(_ => {
             this.ready = true;
         });
     }

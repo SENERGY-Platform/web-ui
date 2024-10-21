@@ -39,6 +39,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceClassesPermSearchModel } from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
 import { AspectsPermSearchModel } from '../../../metadata/aspects/shared/aspects-perm-search.model';
+import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
 
 describe('DeviceGroupsEditComponent', () => {
     let component: DeviceGroupsEditComponent;
@@ -443,16 +444,19 @@ describe('DeviceGroupsEditComponent', () => {
         waitForAsync(() => {
             const deviceGroupServiceSpy: Spy<DeviceGroupsService> = createSpyFromClass<DeviceGroupsService>(DeviceGroupsService);
             deviceGroupServiceSpy.getDeviceGroup.and.returnValue(of(JSON.parse(JSON.stringify(exampleGroup as DeviceGroupModel))));
-            deviceGroupServiceSpy.getBaseDevicesByIds.and.callFake(function(ids: string[]) {
+
+            const deviceInstanceServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass<DeviceInstancesService>(DeviceInstancesService);
+            deviceInstanceServiceSpy.getDeviceInstances.and.callFake(function(options: {deviceIds: string[]}) {
                 const result: DeviceInstancesBaseModel[] = [];
-                for (const id of ids) {
+                for (const id of options.deviceIds) {
                     for (const device of knownDevices) {
                         if (id === device.id) {
                             result.push(device);
                         }
                     }
                 }
-                return of(JSON.parse(JSON.stringify(result)));
+                const res = {result: JSON.parse(JSON.stringify(result))};
+                return of(res);
             });
             deviceGroupServiceSpy.getFunctionListByIds.and.callFake(function(ids: string[]) {
                 const result: DeviceTypeFunctionModel[] = [];
@@ -540,6 +544,7 @@ describe('DeviceGroupsEditComponent', () => {
                         },
                     },
                     { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
+                    { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
                 ],
             }).compileComponents();
             fixture = TestBed.createComponent(DeviceGroupsEditComponent);
