@@ -52,6 +52,10 @@
                         <mat-slide-toggle formControlName="calculateIntervals"> Calculate Intervals?
                         </mat-slide-toggle>
                     </td>
+                    <td *ngIf="chartType.value === 'ColumnChart'">
+                        <mat-slide-toggle formControlName="stacked"> Stacked?
+                        </mat-slide-toggle>
+                    </td>
                 </tr>
             </table>
 

@@ -83,6 +83,7 @@ export class ChartsModel {
             theme?: string;
             intervals?: any;
             interval?: any;
+            isStacked?: boolean;
         },
     ) {
     }

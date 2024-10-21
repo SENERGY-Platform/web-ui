@@ -557,6 +557,7 @@ export class ChartsExportService {
                 timeline: { groupByRowLabel: false},
                 pieSliceText: widget.properties.chartType !== 'PieChart' ? undefined : 'none',
                 sliceVisibilityThreshold: widget.properties.chartType !== 'PieChart' || dataTable.data.length > 5 ? undefined : 0,
+                isStacked: widget.properties.chartType !== 'ColumnChart' ? undefined : widget.properties.stacked,
             },
         );
         if (

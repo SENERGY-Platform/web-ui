@@ -50,6 +50,7 @@ export interface ChartsExportPropertiesModel {
     group?: ChartsExportRequestPayloadGroupModel;
     breakInterval?: string;
     zoomTimeFactor?: number;
+    stacked?: boolean;
 }
 
 export interface ChartsExportMeasurementModel {
