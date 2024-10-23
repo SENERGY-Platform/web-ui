@@ -95,7 +95,7 @@
                     <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
                     <td mat-cell *matCellDef="let device">
                         <button mat-icon-button color="accent" matTooltip="Share" (click)="shareDevice(device)"
-                            [disabled]="!device.permissions.a">
+                            [disabled]="!device.permissions.administrate">
                             <mat-icon>share</mat-icon>
 
                         </button>
@@ -106,7 +106,7 @@
                     <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Duplicate</th>
                     <td mat-cell *matCellDef="let device">
                         <button mat-icon-button color="accent" matTooltip="Duplicate" (click)="duplicateDevice(device)"
-                            [disabled]="!device.permissions.w">
+                            [disabled]="!device.permissions.write">
                             <mat-icon>content_copy</mat-icon>
                         </button>
                     </td>
@@ -116,7 +116,7 @@
                     <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
                     <td mat-cell *matCellDef="let device">
                         <button mat-icon-button color="accent" matTooltip="Edit" (click)="editDevice(device)"
-                            [disabled]="!device.permissions.w">
+                            [disabled]="!device.permissions.write">
                             <mat-icon>edit</mat-icon>
 
                         </button>
@@ -128,7 +128,7 @@
                         <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
                         <td mat-cell *matCellDef="let device">
                             <button mat-icon-button color="accent" matTooltip="Delete" (click)="deleteDevice(device)"
-                                [disabled]="!device.permissions.a">
+                                [disabled]="!device.permissions.administrate">
                                 <mat-icon>delete</mat-icon>
                             </button>
                         </td>

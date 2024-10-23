@@ -351,7 +351,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     shareDevice(device: DeviceInstanceModel): void {
-        this.permissionsDialogService.openPermissionDialog('devices', device.id, device.display_name || device.name);
+        this.permissionsDialogService.openPermissionV2Dialog('devices', device.id, device.display_name || device.name);
     }
 
     private getRouterParams(): void {
