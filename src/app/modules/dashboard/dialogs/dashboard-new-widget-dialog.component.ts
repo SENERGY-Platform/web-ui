@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../shared/dashboard-widget.model';
 import { DashboardTypesEnum } from '../shared/dashboard-types.enum';
@@ -38,7 +38,7 @@ export interface SwitchCategories extends Types {
     templateUrl: './dashboard-new-widget-dialog.component.html',
     styleUrls: ['./dashboard-new-widget-dialog.component.css'],
 })
-export class DashboardNewWidgetDialogComponent {
+export class DashboardNewWidgetDialogComponent implements OnInit{
     selectedType: Types = { value: '', viewValue: '', tooltip: '', disabled: false };
     selectedCategory: any = null;
     categories: Types[] | SwitchCategories[] = [];
@@ -197,5 +197,23 @@ export class DashboardNewWidgetDialogComponent {
                 t.disabled = !b;
             });
         }
+    }
+
+    private sortByViewValue(a: any, b: any) {
+        let nameA = a.viewValue.toUpperCase(); // ignore upper and lowercase
+        let nameB = b.viewValue.toUpperCase(); // ignore upper and lowercase
+        if (nameA < nameB) {
+            return -1;
+        }
+        if (nameA > nameB) {
+            return 1;
+        }
+
+        // names must be equal
+        return 0;
+    }
+
+    ngOnInit(): void {
+        this.types = this.types.sort(this.sortByViewValue)
     }
 }

@@ -29,9 +29,9 @@
             </mat-select>
         </mat-form-field>
 
-        <mat-form-field class="full-width" appearance="outline" color="accent">
+        <mat-form-field [class.cdk-visually-hidden]="categoryDisabled" class="full-width" appearance="outline" color="accent">
             <mat-label>Category</mat-label>
-            <mat-select [disabled]="categoryDisabled" placeholder="Category" [(ngModel)]="selectedCategory"
+            <mat-select placeholder="Category" [(ngModel)]="selectedCategory"
                         name="category">
                 <mat-option *ngFor="let category of categories" [value]="category" [disabled]="category.disabled">
                     <span fxFlex>{{category.viewValue}}</span>
