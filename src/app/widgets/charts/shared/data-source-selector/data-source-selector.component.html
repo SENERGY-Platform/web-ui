@@ -7,7 +7,7 @@
             <mat-label>{{dataSourcePlaceholder}}</mat-label>
             <senergy-select-search [required]="true" [multiple]="true" [compareWith]="compare" formControlName="exports"
                 (selectionChange)="dataSourceChanged($event.value)" [options]="dataSourceOptions"
-                useOptionViewProperty="name">
+                [getOptionViewValue]="getDataSourceName" >
             </senergy-select-search>
     
             <mat-error *ngIf="form.controls.exports.invalid">

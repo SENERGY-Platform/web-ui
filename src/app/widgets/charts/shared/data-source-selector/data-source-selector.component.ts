@@ -637,7 +637,7 @@ export class DataSourceSelectorComponent implements OnInit {
     };
 
     compare(a: any, b: any): boolean {
-        return a && b && a.id === b.id && a.name === b.name;
+        return a && b && a.id === b.id;
     }
 
     compareFields(a: any, b: any): boolean {
@@ -653,5 +653,9 @@ export class DataSourceSelectorComponent implements OnInit {
                                              a.deviceGroupId === b.deviceGroupId &&
                                              a.criteria.function_id === b.criteria.function_id);
         return exportsMatch || deviceMatch || deviceGroupMatch;
+    }
+
+    getDataSourceName(x: any): string {
+        return x.display_name || x.name;
     }
 }
