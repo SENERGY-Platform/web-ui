@@ -199,8 +199,9 @@ export class DeviceInstancesDialogService {
 
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((deviceOut: DeviceInstanceModel) => {
+        editDialogRef.afterClosed().subscribe((deviceOut: DeviceInstanceWithDeviceTypeModel) => {
             if (deviceOut !== undefined) {
+                deviceOut.device_type_id = deviceType?.id || '';
                 this.deviceInstancesService
                     .saveDeviceInstance(deviceOut)
                     .subscribe((deviceResp: DeviceInstanceModel | null) => {
