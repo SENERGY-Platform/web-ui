@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
-import {ChartSelectEvent, GoogleChartComponent,} from 'ng2-google-charts';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {ElementSizeService} from '../../../core/services/element-size.service';
-import {ChartsModel} from '../shared/charts.model';
-import {ChartsExportService} from './shared/charts-export.service';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {noop, of, Subscription, timeout} from 'rxjs';
-import {ErrorModel} from '../../../core/model/error.model';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {ChartsService} from '../shared/charts.service';
-import {ChartComponent} from 'ng-apexcharts';
-import { ApexChartOptions } from './shared/charts-export-properties.model';
+import { AfterViewInit, Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChartSelectEvent, GoogleChartComponent, } from 'ng2-google-charts';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { ElementSizeService } from '../../../core/services/element-size.service';
+import { ChartsModel } from '../shared/charts.model';
+import { ChartsExportService } from './shared/charts-export.service';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
+import { ErrorModel } from '../../../core/model/error.model';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { ChartsService } from '../shared/charts.service';
 
 @Component({
     selector: 'senergy-charts-export',
@@ -46,6 +44,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     errorMessage = '';
     sizeLimit = 10000;
     size = 0;
+    zoomedAfterRefesh = 0;
 
     private resizeTimeout = 0;
     private timeRgx = /(\d+)(ms|s|months|m|h|d|w|y)/;
@@ -74,8 +73,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     // Use a setter for the chart which will get called when then ngif from ready evaluates to true
     // This is needed so the element is not undefined when called later to draw
     private chartExport!: GoogleChartComponent;
-    @ViewChild('chartExport', {static: false}) set content(content: GoogleChartComponent) {
-        if(content) { // initially setter gets called with undefined
+    @ViewChild('chartExport', { static: false }) set content(content: GoogleChartComponent) {
+        if (content) { // initially setter gets called with undefined
             this.chartExport = content;
         }
     }
@@ -105,8 +104,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     setupInitialChartData() {
-        if(this.initialWidgetData != null) {
-            if(this.widget.properties.chartType === 'Timeline') {
+        if (this.initialWidgetData != null) {
+            if (this.widget.properties.chartType === 'Timeline') {
                 this.timelineChartData = this.initialWidgetData;
                 this.resizeApex();
             } else {
@@ -196,7 +195,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 lastOverride = Number(rgxRes[1]) * (this.widget.properties.zoomTimeFactor || 2) + rgxRes[2];
             }
 
-            if(this.widget.properties.chartType === 'Timeline') {
+            if (this.widget.properties.chartType === 'Timeline') {
                 this.getTimelineData();
                 return;
             }
@@ -208,6 +207,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.errorHandlerService.logError('Chart Export', 'getChartData', resp);
                     this.ready = true;
                     this.refreshing = false;
+                    this.zoomedAfterRefesh = 0;
                 } else {
                     this.errorHasOccured = false;
                     this.chartExportData = resp;
@@ -216,6 +216,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.setupZoomChartSettings(lastOverride);
                     this.ready = true;
                     this.refreshing = false;
+                    this.zoomedAfterRefesh = 0;
                     this.resizeChart();
                     this.chartExport?.draw();
                 }
@@ -227,6 +228,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         } else {
             this.ready = true;
             this.refreshing = false;
+            this.zoomedAfterRefesh = 0;
         }
 
     }
@@ -242,70 +244,97 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             this.chartExportData.options.displayLegendValues = true;
             if (lastOverride !== undefined && !this.ready) {
                 const start = (this.chartExportData.dataTable[1][0] as Date).valueOf();
-                const end = (this.chartExportData.dataTable[this.chartExportData.dataTable.length-1][0] as Date).valueOf();
+                const end = (this.chartExportData.dataTable[this.chartExportData.dataTable.length - 1][0] as Date).valueOf();
                 const range = end - start;
                 this.chartExportData.options.zoomStartTime = new Date(end - (range / (this.widget.properties.zoomTimeFactor || 2)));
             }
         }
     }
 
-    onChartSelect($event: ChartSelectEvent) {
-        const rgxRes = this.timeRgx.exec(this.groupTime || '');
-
-        if (this.widget.properties.chartType === 'ColumnChart' && this.widget.properties.group?.type !== undefined
-            && this.widget.properties.group?.type !== '' && rgxRes?.length === 3 && Number(rgxRes[1]) === 1 && this.widget.properties.time?.last !== null && this.widget.properties.time?.last !== '') {
-            this.ready = false;
-            this.from = ($event.selectedRowValues[0] as Date);
-            this.to = new Date(this.from.valueOf());
-
-            let timeUnit = rgxRes[2];
-            switch (timeUnit) {
-            case 'y':
-                timeUnit = 'months';
-                this.hAxisFormat = 'MMM';
-                this.to = new Date(this.to.setFullYear(this.to.getFullYear() + 1));
-                break;
-            case 'months':
-                timeUnit = 'd';
-                this.hAxisFormat = 'dd';
-                this.to = new Date(this.to.setMonth(this.to.getMonth() + 1));
-                break;
-            case 'w':
-                timeUnit = 'd';
-                this.hAxisFormat = 'dd';
-                this.to = new Date(this.to.valueOf() + 1000 * 60 * 60 * 24 * 7);
-                break;
-            case 'd':
-                timeUnit = 'h';
-                this.hAxisFormat = 'HH';
-                this.to = new Date(this.to.setDate(this.to.getDate() + 1));
-                break;
-            case 'h':
-                timeUnit = 'm';
-                this.hAxisFormat = 'mm';
-                this.to = new Date(this.to.setHours(this.to.getHours() + 1));
-                break;
-            case 'm':
-                timeUnit = 's';
-                this.hAxisFormat = 'ss';
-                this.to = new Date(this.to.setMinutes(this.to.getMinutes() + 1));
-                break;
-            case 's':
-                timeUnit = 'ms';
-                this.hAxisFormat = 'ss.SSS';
-                this.to = new Date(this.to.setSeconds(this.to.getSeconds() + 1));
-                break;
-            case 'ms':
-                return; // cant go smaller
-            }
-
-            this.groupTime = '1' + timeUnit;
-
-            this.refresh();
+    onChartReady() {
+        const htmlElem = (this.chartExport as any).HTMLel;
+        const wrapper = this.chartExport.wrapper;
+        if (wrapper.getChart() === undefined && htmlElem === undefined) {
+            console.error('unable to setup zoom listener');
+            return;
         }
+        if (this.widget.properties.group?.type === undefined || this.widget.properties.group?.type === '') {
+            return; //no aggregation --> no detail gained or lost after zoom
+        }
+        const getCoords = (): { min: Date; max: Date } => {
+            const chart = wrapper.getChart();
+
+            const chartLayout = chart.getChartLayoutInterface();
+            const chartBounds = chartLayout.getChartAreaBoundingBox();
+
+            const res = {
+                min: chartLayout.getHAxisValue(chartBounds.left),
+                max: chartLayout.getHAxisValue(chartBounds.width + chartBounds.left)
+            };
+            return res;
+        };
+
+        const msInS = 1000;
+        const msInM = msInS * 60;
+        const msInH = msInM * 60;
+        const msInD = msInH * 24;
+        const msInY = msInD * 365;
+        const observer = new MutationObserver(() => {
+            const zoomCurrent = getCoords();
+            if (this.chartExportData.dataTable.length === 0) {
+                return;
+            }
+            if (!this.refreshing && this.zoomedAfterRefesh > 2 /*&& (this.to?.valueOf() !== zoomCurrent.max.valueOf() || this.from?.valueOf() !== zoomCurrent.min.valueOf())*/) {
+                const diff = zoomCurrent.max.valueOf() - zoomCurrent.min.valueOf(); // diff in ms
+                let timeUnit = '';
+                let hAxisFormat = '';
+                if (diff < msInS) {
+                    timeUnit = 'ms';
+                    hAxisFormat = 'ss.SSS';
+                } else if (diff < 2 * msInM) {
+                    timeUnit = 's';
+                    hAxisFormat = 'ss';
+                } else if (diff < 2 * msInH) {
+                    timeUnit = 'm';
+                    hAxisFormat = 'mm';
+                } else if (diff < 2 * msInD) {
+                    timeUnit = 'h';
+                    hAxisFormat = 'HH';
+                } else if (diff < 45 * msInD) {
+                    timeUnit = 'd';
+                    hAxisFormat = 'dd';
+                } else if (diff < msInY) {
+                    timeUnit = 'months';
+                    hAxisFormat = 'MMM';
+                } else { // use years
+                    timeUnit = 'y';
+                    hAxisFormat = 'yyyy';
+                }
+                const groupTime = '1' + timeUnit;
+                if (this.detailLevel(groupTime) > this.detailLevel(this.groupTime)) {
+                    this.ready = false;
+                    this.groupTime = groupTime;
+                    this.hAxisFormat = hAxisFormat;
+                    this.to = zoomCurrent.max;
+                    this.from = zoomCurrent.min;
+                    this.refresh();
+                }
+            }
+            if (!this.refreshing) {
+                this.zoomedAfterRefesh++;
+            }
+        });
+        observer.observe(htmlElem, {
+            childList: true,
+            subtree: true
+        });
     }
 
-    drillUp() {
+    onChartSelect($event: ChartSelectEvent) {
+        console.log($event); // TODO
+    }
+
+    zoomOutTime() {
         const rgxRes = this.timeRgx.exec(this.groupTime || '');
         if (rgxRes === null) {
             return;
@@ -428,7 +457,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     getCustomIcons(header: boolean): { icons: string[]; disabled: boolean[]; tooltips: string[] } {
-        const res = {icons: [] as string[], disabled: [] as boolean[], tooltips: [] as string[]};
+        const res = { icons: [] as string[], disabled: [] as boolean[], tooltips: [] as string[] };
 
         if (this.zoomOutEnabled() && ((this.zoom && header) || (!this.zoom && !header))) {
             res.icons.push('zoom_out');
@@ -450,20 +479,40 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     customEvent($event: { index: number; icon: string }) {
-        if ($event.icon === 'zoom_out') {
-            this.drillUp();
-        } else if ($event.icon === 'undo') {
+        switch ($event.icon) {
+        case 'zoom_out':
+            this.zoomOutTime();
+            return;
+        case 'undo':
             this.ready = false;
             this.chartsService.cleanup(this.widget);
-            this.refresh();
+            setTimeout(() => this.refresh(), 1000);
+            return;
         }
     }
 
     getChartData = () => {
-        if(this.timelineChartData != null) {
+        if (this.timelineChartData != null) {
             return this.timelineChartData;
         } else {
             return this.chartExportData;
         }
     };
+
+    private detailLevel(groupTime: string | null): number {
+        const rgxRes = this.timeRgx.exec(groupTime || '');
+        if (rgxRes === null || rgxRes.length < 3) {
+            return -1;
+        }
+        switch (rgxRes[2]) {
+        case 'ms': return 6;
+        case 's': return 5;
+        case 'm': return 4;
+        case 'h': return 3;
+        case 'd': return 2;
+        case 'months': return 1;
+        case 'y': return 0;
+        default: return -1;
+        }
+    }
 }

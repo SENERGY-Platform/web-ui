@@ -48,7 +48,7 @@
                     <div *ngIf="widget.properties.chartType !== 'Timeline'">
                         <google-chart *ngIf="configureWidget === false && chartExportData.dataTable[0].length !== 0"
                         #chartExport [data]="chartExportData"
-                        (chartSelect)="onChartSelect($event)"></google-chart>
+                        (chartSelect)="onChartSelect($event)" (chartReadyOneTime)="onChartReady()"></google-chart>
                         <senergy-no-data
                         [showIf]="configureWidget === false && chartExportData.dataTable[0].length === 0"></senergy-no-data>
                     </div>
