@@ -36,7 +36,6 @@ import { DashboardManipulationEnum } from '../../modules/dashboard/shared/dashbo
 import { Sort, SortDirection } from '@angular/material/sort';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { ArrayDataSource } from '@angular/cdk/collections';
 import { SingleValueAggregations } from '../single-value/shared/single-value.model';
 
 interface DataTableComponentItem {

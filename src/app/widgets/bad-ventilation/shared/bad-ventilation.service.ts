@@ -60,7 +60,8 @@ export class BadVentilationService {
             };
         }
         return this.chartsExportService.getData(properties, undefined, undefined, undefined, undefined).pipe(
-            concatMap((result) => {
+            concatMap((r) => {
+                const result = r.data;
                 if (result != null && this.errorService.checkIfErrorExists(result)) {
                     return throwError(() => new Error(result.error));
                 } else if (result != null) {

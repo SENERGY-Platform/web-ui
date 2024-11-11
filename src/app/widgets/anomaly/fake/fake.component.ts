@@ -130,7 +130,8 @@ export class FakeAnomalyComponent implements AfterViewChecked {
         this.toTimestamp = undefined;
 
         this.chartsExportService.getData(this.properties).subscribe({
-            next: (resp) => {
+            next: (r) => {
+                const resp = r.data;
                 const threshold = 100;
                 if (resp != null && this.errorHandlerService.checkIfErrorExists(resp)) {
                     this.errorMessage = 'No data';
@@ -209,7 +210,8 @@ export class FakeAnomalyComponent implements AfterViewChecked {
     loadTimelineData(properties: any) {
         const timelineChartData: any = [];
         return this.chartsExportService.getData(properties).pipe(
-            concatMap((resp) => {
+            concatMap((r) => {
+                const resp = r.data;
                 if (resp != null && this.errorHandlerService.checkIfErrorExists(resp)) {
                     return throwError(() => new Error('No data'));
                 } else if (resp != null) {

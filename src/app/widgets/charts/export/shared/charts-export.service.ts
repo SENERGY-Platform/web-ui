@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { forkJoin, Observable, of, throwError, concatMap } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { ChartsModel } from '../../shared/charts.model';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
@@ -42,8 +42,10 @@ import {
     QueriesRequestTimeModel,
     QueriesRequestV2ElementTimescaleModel,
 } from '../../../shared/export-data.model';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, concatMap, map } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
+import { DeviceInstancesTotalModel, DeviceInstancesWithDeviceTypeTotalModel, DeviceInstanceWithDeviceTypeModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -57,8 +59,11 @@ export class ChartsExportService {
         private errorHandlerService: ErrorHandlerService,
         private dialog: MatDialog,
         private dashboardService: DashboardService,
+        private deviceInstancesService: DeviceInstancesService,
     ) {
     }
+
+    devices = new Map<string, DeviceInstanceWithDeviceTypeModel>();
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
@@ -79,7 +84,7 @@ export class ChartsExportService {
         });
     }
 
-    getData(properties: WidgetPropertiesModels, from?: string, to?: string, groupInterval?: string, lastOverride?: string): Observable<any[][][][] | null | ErrorModel> {
+    getData(properties: WidgetPropertiesModels, from?: string, to?: string, groupInterval?: string, lastOverride?: string): Observable<{ data: any[][][][] | null | ErrorModel; metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][] }> {
         const widgetProperties = properties as ChartsExportPropertiesModel;
         const time: QueriesRequestTimeModel = {};
         const limit = properties.chartType === 'PieChart' && properties.calculateIntervals !== true ? 1 : undefined;
@@ -164,21 +169,24 @@ export class ChartsExportService {
             }
         });
 
-        const obs: Observable<{ source: string; res: any[][][][] }>[] = [];
+        const obs: Observable<{ source: string; res: any[][][][]; metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][] }>[] = [];
 
         if (influxElements.length > 0) {
             obs.push(this.exportDataService.queryInflux(influxElements).pipe(
                 map(res => {
+                    const metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][] = [];
                     const responseTimescaleFormat: any = [];
-                    if(res != null) {
+                    if (res != null) {
                         res.forEach(responsePerRequest => {
                             responseTimescaleFormat.push([responsePerRequest]);
+                            metadata.push([]);
                         });
                     }
 
                     return {
                         source: 'influx',
-                        res: responseTimescaleFormat
+                        res: responseTimescaleFormat,
+                        metadata,
                     };
                 })
             ));
@@ -193,85 +201,97 @@ export class ChartsExportService {
                     return p;
                 }).requestIndex;
                 const res: any[][] = [];
+                const metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][] = [];
                 while (res.length < max + 1) {
                     res.push([]);
+                    metadata.push([]);
                 }
                 values.forEach((_, elementIndex) => {
                     const threeD = values[elementIndex].data;
+                    const columnNames = values[elementIndex].columnNames;
+                    const metadataElem = { exportId: values[elementIndex].exportId, deviceId: values[elementIndex].deviceId, serviceId: values[elementIndex].serviceId, columnName: columnNames !== undefined && columnNames.length === 1 ? columnNames[0] : undefined };
                     if (threeD !== null) {
                         switch ((properties.vAxes || [])[timescaleResultMapper[values[elementIndex].requestIndex]].deviceGroupMergingStrategy) {
-                        case ChartsExportDeviceGroupMergingStrategy.Merge:
-                            // merge into one table row
-                            if (res[values[elementIndex].requestIndex].length === 0) {
-                                res[values[elementIndex].requestIndex].push([]);
-                            }
-                            threeD.forEach(rows => {
-                                if (rows.length === 0) {
-                                    return;
+                            case ChartsExportDeviceGroupMergingStrategy.Merge:
+                                // merge into one table row
+                                if (res[values[elementIndex].requestIndex].length === 0) {
+                                    res[values[elementIndex].requestIndex].push([]);
                                 }
-                                if (rows[0].length > 2) {
-                                    rows.forEach(row => {
-                                        row.slice(1).forEach(r => {
-                                            res[values[elementIndex].requestIndex][0].push([row[0], r]);
+                                threeD.forEach(rows => {
+                                    if (rows.length === 0) {
+                                        return;
+                                    }
+                                    if (rows[0].length > 2) {
+                                        rows.forEach(row => {
+                                            row.slice(1).forEach(r => {
+                                                res[values[elementIndex].requestIndex][0].push([row[0], r]);
+                                            });
                                         });
-                                    });
-                                } else {
-                                    res[values[elementIndex].requestIndex][0].push(...rows);
-                                }
-                            });
-                            break;
-                        case ChartsExportDeviceGroupMergingStrategy.Sum:
-                            // sum by timestamp
-                            // can only be selected together with a group to ensure identical timestamps
-                            if (res[values[elementIndex].requestIndex].length === 0) {
-                                res[values[elementIndex].requestIndex].push([]);
-                            }
-                            threeD.forEach(rows => {
-                                rows.forEach(row => {
-                                    const elem = res[values[elementIndex].requestIndex][0].find((r: any) => r.length > 0 && r[0] === row[0]);
-                                    if (elem === undefined) {
-                                        res[values[elementIndex].requestIndex][0].push(row);
                                     } else {
-                                        let v = (elem[1] as number);
-                                        row.slice(1).forEach(n => v += n);
-                                        elem[1] = v;
+                                        res[values[elementIndex].requestIndex][0].push(...rows);
                                     }
                                 });
-                            });
-                            break;
-                        case ChartsExportDeviceGroupMergingStrategy.Separate:
-                        default:
-                            //preserve individual rows
-                            threeD.forEach(rows => {
-                                if (rows.length === 0) {
-                                    return;
+                                break;
+                            case ChartsExportDeviceGroupMergingStrategy.Sum:
+                                // sum by timestamp
+                                // can only be selected together with a group to ensure identical timestamps
+                                if (res[values[elementIndex].requestIndex].length === 0) {
+                                    res[values[elementIndex].requestIndex].push([]);
                                 }
-                                if (rows[0].length > 2) {
-                                    const off = res[values[elementIndex].requestIndex].length;
+                                threeD.forEach(rows => {
                                     rows.forEach(row => {
-                                        row.slice(1).forEach((r, i) => {
-                                            while (res[values[elementIndex].requestIndex].length <= off + i) {
-                                                res[values[elementIndex].requestIndex].push([]);
-                                            }
-                                            res[values[elementIndex].requestIndex][off + i].push([row[0], r]);
-                                        });
+                                        const elem = res[values[elementIndex].requestIndex][0].find((r: any) => r.length > 0 && r[0] === row[0]);
+                                        if (elem === undefined) {
+                                            res[values[elementIndex].requestIndex][0].push(row);
+                                        } else {
+                                            let v = (elem[1] as number);
+                                            row.slice(1).forEach(n => v += n);
+                                            elem[1] = v;
+                                        }
                                     });
-                                } else {
-                                    res[values[elementIndex].requestIndex].push(rows);
-                                }
-                            });
-                            break;
+                                });
+                                break;
+                            case ChartsExportDeviceGroupMergingStrategy.Separate:
+                            default:
+                                //preserve individual rows
+                                threeD.forEach(rows => {
+                                    if (rows.length === 0) {
+                                        return;
+                                    }
+                                    if (rows[0].length > 2) {
+                                        const off = res[values[elementIndex].requestIndex].length;
+                                        rows.forEach(row => {
+                                            row.slice(1).forEach((r, i) => {
+                                                while (res[values[elementIndex].requestIndex].length <= off + i) {
+                                                    res[values[elementIndex].requestIndex].push([]);
+                                                    metadata[values[elementIndex].requestIndex].push({});
+                                                }
+                                                res[values[elementIndex].requestIndex][off + i].push([row[0], r]);
+                                                metadata[values[elementIndex].requestIndex][off + i] = JSON.parse(JSON.stringify(metadataElem));
+                                                if (columnNames !== undefined && columnNames.length > i) {
+                                                    metadata[values[elementIndex].requestIndex][off + i].columnName = columnNames[i];
+                                                }
+                                            });
+                                        });
+                                    } else {
+                                        res[values[elementIndex].requestIndex].push(rows);
+                                        metadata[values[elementIndex].requestIndex].push(metadataElem);
+                                    }
+                                });
+                                break;
                         }
                     }
                 });
-                return { source: 'timescale', res };
+                return { source: 'timescale', res, metadata };
             })));
         }
-        
+
         return forkJoin(obs).pipe(map(res => {
             const table: any[][][][] = [];
+            const metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][] = [];
             for (let i = 0; i < timescaleElements.length + influxElements.length; i++) {
                 table.push([]);
+                metadata.push([]);
             }
             let mapper: number[] = [];
             res.forEach(r => {
@@ -285,33 +305,58 @@ export class ChartsExportService {
                 }
                 r.res.forEach((req, index) => {
                     table[mapper[index]] = req;
+                    if (r.metadata.length > index) {
+                        metadata[mapper[index]] = r.metadata[index];
+                    }
                 });
             });
             for (let i = 0; i < table.length; i++) {
                 for (let j = 0; j < table[i].length; j++) {
                     if (table[i][j].length > 0) {
-                        return table;
+                        return { data: table, metadata };
                     }
                 }
             }
-            return null;
+            return { data: null, metadata };
         }), catchError(err => {
             const error: ErrorModel = { error: err.message };
-            return of(error);
+            return of({ data: error, metadata: [] });
         }));
     }
 
 
     getChartData(widget: WidgetModel, from?: string, to?: string, groupInterval?: string, hAxisFormat?: string, lastOverride?: string): Observable<ChartsModel | ErrorModel> {
         return new Observable<ChartsModel | ErrorModel>((observer) => {
-            this.getData(widget.properties, from, to, groupInterval, lastOverride).subscribe((resp: any[][][] | null | ErrorModel) => {
+            this.getData(widget.properties, from, to, groupInterval, lastOverride).pipe(concatMap(r => {
+                let obs: Observable<DeviceInstancesWithDeviceTypeTotalModel> = of({result: [], total: 0});
+                const deviceIds: string[] = [];
+                r.metadata.forEach(m => {
+                    m.forEach(subM => {
+                        if (subM.deviceId !== undefined && !this.devices.has(subM.deviceId) && deviceIds.indexOf(subM.deviceId) === -1) {
+                            deviceIds.push(subM.deviceId);
+                        }
+                    });
+                });
+                if (deviceIds.length > 0) {
+                    obs = this.deviceInstancesService.getDeviceInstancesWithDeviceType({
+                        limit: deviceIds.length,
+                        offset: 0,
+                        deviceIds,
+                    });
+                }
+                return obs.pipe(map(devices => {
+                    devices.result.forEach(d => this.devices.set(d.id, d));
+                    return r;
+                }));
+            })).subscribe(r => {
+                const resp = r.data;
                 if (resp === null) {
                     // no data
                     observer.next(this.setProcessInstancesStatusValues(widget, new ChartDataTableModel([[]])));
                 } else if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     observer.next(resp as ErrorModel);
                 } else {
-                    const tableData = this.setData(resp, widget.properties);
+                    const tableData = this.setData(resp, widget.properties, r.metadata);
                     observer.next(this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors, hAxisFormat));
                 }
                 observer.complete();
@@ -319,7 +364,7 @@ export class ChartsExportService {
         });
     }
 
-    private setData(data: any[][][][], properties: WidgetPropertiesModels): {
+    private setData(data: any[][][][], properties: WidgetPropertiesModels, metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][]): {
         table: ChartDataTableModel;
         colors?: string[];
     } {
@@ -341,7 +386,7 @@ export class ChartsExportService {
         data.forEach(req => {
             req.forEach((series, seriesIndex) => {
                 let previousColumnsWithoutData = 0;
-                for (let i = 1; i < seriesIndex; i++ ) { //skip time column
+                for (let i = 1; i < seriesIndex; i++) { //skip time column
                     if (!columnHasData[i]) {
                         previousColumnsWithoutData++;
                     }
@@ -400,7 +445,29 @@ export class ChartsExportService {
                             conversionDefault: vAxis.conversionDefault,
                             type: vAxis.valueType,
                         });
-                        header.push(vAxis.valueAlias || vAxis.valueName);
+                        const metadataIndex = offset2 + i;
+                        let head = vAxis.valueAlias || vAxis.valueName;
+
+                        if (repeats[index] > 0) {
+                            // distinction required
+                            if (metadata.length > index && metadata[index].length > metadataIndex
+                                && metadata[index][metadataIndex].deviceId !== undefined) {
+
+                                const deviceId = metadata[index][metadataIndex].deviceId || ''; // just checked above
+                                const device = this.devices.get(deviceId);
+                                head += ' - ' + device?.display_name || device?.name;
+
+                                if (metadata[index].filter(m => m.deviceId === deviceId).length > 1 && metadata[index][metadataIndex].serviceId !== undefined) {
+                                    // distinction on service level required
+                                    head += ' - ' + device?.device_type.services.find(s => s.id === metadata[index][metadataIndex].serviceId)?.name;
+
+                                    if (metadata[index].filter(m => m.deviceId === deviceId && m.serviceId === metadata[index][metadataIndex].serviceId).length > 1 && metadata[index][metadataIndex].columnName !== undefined) {
+                                        head += ' - ' + metadata[index][metadataIndex].columnName;
+                                    }
+                                }
+                            }
+                        }
+                        header.push(head);
                         colors2.push(colors[index]);
                     }
                 }
@@ -501,7 +568,7 @@ export class ChartsExportService {
             dataTable.data = res.table;
             return { table: dataTable, colors: res.colors };
         }
-        return {table: dataTable, colors};
+        return { table: dataTable, colors };
     }
 
     private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[], hAxisFormat?: string): ChartsModel {
@@ -554,7 +621,7 @@ export class ChartsExportService {
                 legend: widget.properties.chartType !== 'PieChart' ? 'none' : {
                     position: 'labeled',
                 },
-                timeline: { groupByRowLabel: false},
+                timeline: { groupByRowLabel: false },
                 pieSliceText: widget.properties.chartType !== 'PieChart' ? undefined : 'none',
                 sliceVisibilityThreshold: widget.properties.chartType !== 'PieChart' || dataTable.data.length > 5 ? undefined : 0,
                 isStacked: widget.properties.chartType !== 'ColumnChart' ? undefined : widget.properties.stacked,
