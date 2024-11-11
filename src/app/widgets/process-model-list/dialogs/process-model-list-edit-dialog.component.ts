@@ -20,6 +20,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
 @Component({
     templateUrl: './process-model-list-edit-dialog.component.html',
@@ -30,8 +31,10 @@ export class ProcessModelListEditDialogComponent implements OnInit {
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
     userHasUpdateNameAuthorization = false;
+    formGroup: FormGroup;
 
     constructor(
+        private fb: FormBuilder,
         private dialogRef: MatDialogRef<ProcessModelListEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
@@ -40,15 +43,28 @@ export class ProcessModelListEditDialogComponent implements OnInit {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
+        this.formGroup = this.fb.group({
+            name: [this.widget.name, Validators.required],
+        });
     }
 
     ngOnInit() {
         this.getWidgetData();
+        this.onChanges();
+    }
+
+    onChanges(): void {
+        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+            this.widget.name = val;
+        });
     }
 
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
+            this.formGroup.patchValue({
+                name: this.widget.name,
+            });
         });
     }
 

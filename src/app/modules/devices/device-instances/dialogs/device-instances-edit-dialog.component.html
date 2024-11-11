@@ -21,14 +21,16 @@
         <div *ngIf="userHasUpdateDisplayNameAuthorization">
             <mat-form-field appearance="outline" class="full-width" color="accent">
                 <mat-label>Display Name</mat-label>
-                <input matInput placeholder="Display Name" [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}">
+                <input matInput [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}">
+                <mat-error senergyError label="Display Name"></mat-error>
             </mat-form-field>
         </div>
   
         <div *ngIf="localIdIsEditable">
             <mat-form-field appearance="outline" class="full-width" color="accent">
                 <mat-label>Local ID</mat-label>
-                <input matInput placeholder="Local ID" [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}" [generic_validator]="isValidLocalIdValidator">
+                <input matInput [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}" [generic_validator]="isValidLocalIdValidator">
+                <mat-error senergyError label="Local ID"></mat-error>
             </mat-form-field>
         </div>
 
@@ -40,11 +42,15 @@
             <div *ngFor="let attr of device.attributes; let i = index" class="attribute">
                 <ng-container *ngIf="attr.key !== nicknameAttributeKey">
                     <mat-form-field appearance="outline" class="third-width" color="accent">
-                        <input matInput placeholder="Key" [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
+                        <mat-label>Key</mat-label>
+                        <input matInput [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
+                        <mat-error senergyError label="Key"></mat-error>
                     </mat-form-field>
                     =
                     <mat-form-field appearance="outline" class="third-width" color="accent">
-                        <input matInput placeholder="Value" [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
+                        <mat-label>Value</mat-label>
+                        <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
+                        <mat-error senergyError label="Value"></mat-error>
                     </mat-form-field>
                     <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">
                         <mat-icon>delete</mat-icon>

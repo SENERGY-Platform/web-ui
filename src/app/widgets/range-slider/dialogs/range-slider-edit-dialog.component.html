@@ -17,51 +17,57 @@
 <h2 mat-dialog-title>Edit Range Slider</h2>
 
 <mat-dialog-content>
-    <div fxLayout="column" *ngIf="userHasUpdateNameAuthorization">
-        <mat-form-field appearance="outline" color="accent">
-            <mat-label>Name</mat-label>
-            <label>
-                <input matInput placeholder="Name" [(ngModel)]="widget.name">
-            </label>
-        </mat-form-field>
-    </div>
-    <span *ngIf="userHasUpdatePropertiesAuthorization">
-        <div [formGroup]="formGroup">
-            <mat-form-field appearance="outline" color="accent" class="user-input">
-                <mat-label>Choose Deployment</mat-label>
-                <senergy-select-search formControlName="deployment" [compareWith]="compareDeployments"
-                    [options]="deployments" useOptionViewProperty="name">
-                </senergy-select-search>
-            </mat-form-field>
-            <mat-form-field appearance="outline" color="accent" class="user-input">
-                <mat-label>Choose Parameter</mat-label>
-                <senergy-select-search formControlName="parameter" [options]="parameters">
-                </senergy-select-search>
-            </mat-form-field>
-            <mat-form-field appearance="outline" color="accent" class="unit">
-                <mat-label>Unit</mat-label>
-                <label>
-                    <input type="text" matInput formControlName="unit">
-                </label>
-            </mat-form-field>
-        </div>
-        <div [formGroup]="formGroup">
-            <mat-form-field appearance="outline" color="accent" class="user-input">
-                <mat-label>Choose minimum Value</mat-label>
-                <label>
-                    <input matInput type="number" formControlName="minValue">
-                </label>
-                <mat-error *ngIf="formGroup.value.minValue">Value must be between 0-100!</mat-error>
-            </mat-form-field>
-            <mat-form-field appearance="outline" color="accent" class="user-input">
-                <mat-label>Choose maximum Value</mat-label>
-                <label>
-                    <input matInput type="number" formControlName="maxValue">
-                </label>
-                <mat-error *ngIf="formGroup.value.maxValue">Value must be between 0-100!</mat-error>
-            </mat-form-field>
-        </div>
-    </span>
+	<form [formGroup]="formGroup">
+		<div fxLayout="column" *ngIf="userHasUpdateNameAuthorization">
+			<mat-form-field appearance="outline" color="accent">
+				<mat-label>Widget Name</mat-label>
+				<label>
+					<input matInput formControlName="name">
+				</label>
+				<mat-error senergyError label="Widget Name"></mat-error>
+			</mat-form-field>
+		</div>
+		<span *ngIf="userHasUpdatePropertiesAuthorization">
+			<div>
+				<mat-form-field appearance="outline" color="accent" class="user-input">
+					<mat-label>Deployment</mat-label>
+					<senergy-select-search placeholder="Choose Deployment" formControlName="deployment" [compareWith]="compareDeployments"
+						[options]="deployments" useOptionViewProperty="name">
+					</senergy-select-search>
+					<mat-error senergyError label="Deployment"></mat-error>
+				</mat-form-field>
+				<mat-form-field appearance="outline" color="accent" class="user-input">
+					<mat-label>Parameter</mat-label>
+					<senergy-select-search placeholder="Choose Parameter" formControlName="parameter" [options]="parameters">
+					</senergy-select-search>
+					<mat-error senergyError label="Parameter"></mat-error>
+				</mat-form-field>
+				<mat-form-field appearance="outline" color="accent" class="unit">
+					<mat-label>Unit</mat-label>
+					<label>
+						<input type="text" matInput formControlName="unit">
+					</label>
+					<mat-error senergyError label="Unit"></mat-error>
+				</mat-form-field>
+			</div>
+			<div [formGroup]="formGroup">
+				<mat-form-field appearance="outline" color="accent" class="user-input">
+					<mat-label>Minimum Value</mat-label>
+					<label>
+						<input placeholder="Choose Minimum Value" matInput type="number" formControlName="minValue">
+					</label>
+					<mat-error senergyError label="Minimum Value"></mat-error>
+				</mat-form-field>
+				<mat-form-field appearance="outline" color="accent" class="user-input">
+					<mat-label>Maximum Value</mat-label>
+					<label>
+						<input matInput placeholder="Choose Maximum Value" type="number" formControlName="maxValue">
+					</label>
+					<mat-error senergyError label="Maximum Value"></mat-error>
+				</mat-form-field>
+			</div>
+		</span>
+	</form>
 </mat-dialog-content>
 
 

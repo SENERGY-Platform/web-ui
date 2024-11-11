@@ -21,26 +21,30 @@
       <div class="smart-service-task-tab">
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
+            <mat-label>Task Name</mat-label>
+            <input matInput [(ngModel)]="result.name">
+            <mat-error senergyError label="Task Name"></mat-error>
           </mat-form-field>
         </div>
         <ng-container *ngFor="let input of result.inputs">
           <div *ngIf="input.name === 'process_deployment.process_model_id'">
             <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <mat-label>Process-Model</mat-label>
-              <senergy-select-search placeholder="Process-Model"
-                                     [(ngModel)]="input.value"
+              <mat-label>Process Model</mat-label>
+              <senergy-select-search [(ngModel)]="input.value"
                                      [options]="processModels || []"
                                      (selectionChange)="ensureProcessTaskParameter($event.value)"
                                      useOptionViewProperty="name"
                                      useOptionValueProperty="id">
               </senergy-select-search>
+              <mat-error senergyError label="Process Model"></mat-error>
             </mat-form-field>
           </div>
         </ng-container>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Deployment-Name" [(ngModel)]="processProcessName" required>
+            <mat-label>Deployment Name</mat-label>
+            <input matInput [(ngModel)]="processProcessName" required>
+            <mat-error senergyError label="Deployment Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
@@ -84,7 +88,9 @@
               <ng-container *ngFor="let input of result.inputs">
                 <div *ngIf="isProcessStartParam(input)">
                   <mat-form-field appearance="outline" class="full-width" color="accent">
+                    <mat-label>{{getProcessStartParameterName(input)}}</mat-label>
                     <input type="text"  matInput placeholder="{{getProcessStartParameterName(input)}}" [(ngModel)]="input.value">
+                    <mat-error senergyError></mat-error>
                   </mat-form-field>
                 </div>
               </ng-container>
@@ -111,33 +117,40 @@
                                              useOptionViewProperty="name"
                                              useOptionValueProperty="value">
                       </senergy-select-search>
+                      <mat-error senergyError label="IoT-Selection"></mat-error>
                     </mat-form-field>
                     <button mat-icon-button (click)="generateInputForProcessElement(input, taskId)" matTooltip="generate and use input from task criteria">
                       <mat-icon>playlist_add</mat-icon>
                     </button>
                     <mat-form-field appearance="outline"  color="accent" class="full-width">
-                      <input matInput placeholder="IoT-Selection Value" [(ngModel)]="input.value" required>
+                      <mat-label>IoT-Selection Value</mat-label>
+                      <input matInput [(ngModel)]="input.value" required>
+                      <mat-error senergyError label="Iot-Selection Value"></mat-error>
                     </mat-form-field>
                   </div>
                   <div *ngIf="processTaskMatches(input, taskId, 'time')">
                     <mat-form-field appearance="outline"  color="accent" class="full-width">
-                      <input matInput placeholder="Time-Event" [(ngModel)]="input.value" required>
+                      <mat-label>Time Event</mat-label>
+                      <input matInput [(ngModel)]="input.value" required>
+                      <mat-error senergyError label="Time Event"></mat-error>
                     </mat-form-field>
                   </div>
                   <div *ngIf="processTaskMatches(input, taskId, 'event.flow_id')">
                     <mat-form-field appearance="outline"  color="accent" class="full-width">
-                      <mat-label>Event-Flow</mat-label>
-                      <senergy-select-search placeholder="Event-Flow"
-                                             [(ngModel)]="input.value"
+                      <mat-label>Event Flow</mat-label>
+                      <senergy-select-search [(ngModel)]="input.value"
                                              [options]="flows || []"
                                              useOptionViewProperty="name"
                                              useOptionValueProperty="_id">
                       </senergy-select-search>
+                      <mat-error senergyError label="Event Flow"></mat-error>
                     </mat-form-field>
                   </div>
                   <div *ngIf="processTaskMatches(input, taskId, 'event.value')">
                     <mat-form-field appearance="outline"  color="accent" class="full-width">
-                      <input matInput placeholder="Event-Value" [(ngModel)]="input.value">
+                      <mat-label>Event Value</mat-label>
+                      <input matInput [(ngModel)]="input.value">
+                      <mat-error senergyError label="Event Value"></mat-error>
                     </mat-form-field>
                   </div>
                   <div *ngIf="processTaskMatches(input, taskId, 'event.use_marshaller')">
@@ -155,7 +168,9 @@
                   <ng-container *ngFor="let parameter of getProcessTaskParameter(taskId)">
                     <div *ngIf="processTaskMatches(input, taskId, 'parameter.'+parameter)">
                       <mat-form-field appearance="outline"  color="accent" class="full-width">
-                        <input matInput placeholder="{{parameter}}" [(ngModel)]="input.value">
+                        <mat-label>{{parameter}}</mat-label>
+                        <input matInput [(ngModel)]="input.value">
+                        <mat-error senergyError label="{{parameter}}"></mat-error>
                       </mat-form-field>
                     </div>
                   </ng-container>
@@ -163,7 +178,9 @@
                   <ng-container *ngFor="let variable of getProcessConditionalEventVariables(taskId)">
                     <div *ngIf="processTaskMatches(input, taskId, 'variables.'+variable)">
                       <mat-form-field appearance="outline"  color="accent" class="full-width">
+                        <mat-label>{{variable}}</mat-label>
                         <input matInput placeholder="{{variable}}" [(ngModel)]="input.value">
+                        <mat-error senergyError label="{{variable}}"></mat-error>
                       </mat-form-field>
                     </div>
                   </ng-container>
@@ -180,12 +197,15 @@
       <div class="smart-service-task-tab">
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
+            <mat-label>Task Name</mat-label>
+            <input matInput [(ngModel)]="result.name">
+            <mat-error senergyError label="Task Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Deployment-ID" [(ngModel)]="processStart.deployment_id">
+            <mat-label>Deployment-ID</mat-label>
+            <input matInput [(ngModel)]="processStart.deployment_id">
             <button mat-icon-button matSuffix [matMenuTriggerFor]="menuDeploymentId">
               <mat-icon>data_object</mat-icon>
             </button>
@@ -194,15 +214,19 @@
                 {{param.label || param.name}}
               </button>
             </mat-menu>
+            <mat-error senergyError label="Deployment-ID"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <div *ngFor="let input of processStart.inputs; let i = index" class="process-start-input">
             <mat-form-field appearance="outline" color="accent" class="process-start-input-field">
-                <input matInput placeholder="Input-Name" [(ngModel)]="input.key">
+                <mat-label>Input Name</mat-label>
+                <input matInput [(ngModel)]="input.key">
+                <mat-error senergyError label="Input Name"></mat-error>
             </mat-form-field>
             <mat-form-field appearance="outline" color="accent" class="process-start-input-field">
-              <input matInput placeholder="Input-Value" [(ngModel)]="input.value" #processStartInput>
+              <mat-label>Input Value</mat-label>
+              <input matInput [(ngModel)]="input.value" #processStartInput>
               <button mat-icon-button matSuffix [matMenuTriggerFor]="menuInputValue">
                 <mat-icon>data_object</mat-icon>
               </button>
@@ -229,6 +253,7 @@
                   IoT: {{param.label || param.name}}
                 </button>
               </mat-menu>
+              <mat-error senergyError label="Input Value"></mat-error>
             </mat-form-field>
             <button mat-icon-button class="process-start-input-delete" (click)="removeProcessStartInput(i)">
               <mat-icon>delete</mat-icon>
@@ -245,37 +270,48 @@
         <div class="smart-service-task-tab">
           <div>
             <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
+              <mat-label>Task Name</mat-label>
+              <input matInput [(ngModel)]="result.name">
+              <mat-error senergyError label="Task Name"></mat-error>
             </mat-form-field>
           </div>
           <div>
             <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <input matInput placeholder="Key" [(ngModel)]="analyticsKeyId" type="text" matTooltip="optional key used to reference the module for updates">
+              <mat-label>Key</mat-label>
+              <input matInput [(ngModel)]="analyticsKeyId" type="text" matTooltip="optional key used to reference the module for updates">
+              <mat-error senergyError label="Key"></mat-error>
             </mat-form-field>
           </div>
           <div>
             <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-              <senergy-select-search placeholder="Flow"
-                                     [(ngModel)]="analyticsFlowId"
+              <mat-label>Flow</mat-label>
+              <senergy-select-search [(ngModel)]="analyticsFlowId"
                                      [options]="flows || []"
                                      useOptionViewProperty="name"
                                      useOptionValueProperty="_id">
               </senergy-select-search>
+              <mat-error senergyError label="Flow"></mat-error>
             </mat-form-field>
           </div>
           <div>
             <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <input matInput placeholder="Pipeline-Name" [(ngModel)]="analyticsPipelineName" required>
+              <mat-label>Pipeline Name</mat-label>
+              <input matInput [(ngModel)]="analyticsPipelineName" required>
+              <mat-error senergyError label="Pipeline Name"></mat-error>
             </mat-form-field>
           </div>
           <div>
             <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <input matInput placeholder="Pipeline-Description" [(ngModel)]="analyticsPipelineDesc">
+              <mat-label>Pipeline Description</mat-label>
+              <input matInput [(ngModel)]="analyticsPipelineDesc">
+              <mat-error senergyError label="Pipeline Description"></mat-error>
             </mat-form-field>
           </div>
           <div>
             <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <input matInput placeholder="Pipeline Window-Time" [(ngModel)]="analyticsWindowTime" required>
+              <mat-label>Pipeline Window Time</mat-label>
+              <input matInput [(ngModel)]="analyticsWindowTime" required>
+              <mat-error senergyError label="Pipeline Window Time"></mat-error>
             </mat-form-field>
           </div>
           <div>
@@ -290,11 +326,12 @@
           </div>
           <div>
             <mat-form-field appearance="outline" class="full-width" color="accent">
-              <mat-label>Pipeline Merge-Strategy</mat-label>
+              <mat-label>Pipeline Merge Strategy</mat-label>
               <mat-select [(ngModel)]="analyticsMergeStrategy">
                 <mat-option value="inner">inner</mat-option>
                 <mat-option value="outer">outer</mat-option>
               </mat-select>
+              <mat-error senergyError label="Pipeline Merge Strategy"></mat-error>
             </mat-form-field>
           </div>
 
@@ -330,9 +367,12 @@
                                                    useOptionViewProperty="name"
                                                    useOptionValueProperty="value">
                             </senergy-select-search>
+                            <mat-error senergyError label="IoT-Selection"></mat-error>
                           </mat-form-field>
                           <mat-form-field appearance="outline"  color="accent" class="full-width">
-                            <input matInput placeholder="IoT-Selection Value" [(ngModel)]="input.value" required>
+                            <mat-label>IoT-Selection Value</mat-label>
+                            <input matInput [(ngModel)]="input.value" required>
+                            <mat-error senergyError label="IoT-Selection Value"></mat-error>
                           </mat-form-field>
                         </div>
                         <div *ngIf="analyticsInputMatchesIotCriteria(input, flowInput.id, port)">
@@ -366,6 +406,7 @@
                       <ng-container *ngFor="let input of result.inputs">
                         <div *ngIf="analyticsInputMatchesIotConfig(input, flowInput.id, config.name)">
                           <mat-form-field appearance="outline"  color="accent" class="full-width">
+                            <mat-label>{{config.name}}</mat-label>
                             <input matInput placeholder="{{config.name}}" [(ngModel)]="input.value" #configInput>
                             <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
                               <mat-icon>data_object</mat-icon>
@@ -393,6 +434,7 @@
                                 IoT: {{param.label || param.name}}
                               </button>
                             </mat-menu>
+                            <mat-error senergyError label="{{config.name}}"></mat-error>
                           </mat-form-field>
                         </div>
                       </ng-container>
@@ -409,32 +451,40 @@
       <div class="smart-service-task-tab">
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
+            <mat-label>Task Name</mat-label>
+            <input matInput [(ngModel)]="result.name">
+            <mat-error senergyError label="Task Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Name" [(ngModel)]="exportRequest.Name" type="text" required>
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="exportRequest.Name" type="text" required>
+            <mat-error senergyError label="Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Description" [(ngModel)]="exportRequest.Description" type="text">
+            <mat-label>Description</mat-label>
+            <input matInput [(ngModel)]="exportRequest.Description" type="text">
+            <mat-error senergyError label="Description"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>FilterType</mat-label>
+            <mat-label>Filter Type</mat-label>
             <mat-select [(ngModel)]="exportRequest.FilterType" required>
               <mat-option value="deviceId">deviceId</mat-option>
               <mat-option value="operatorId">operatorId</mat-option>
               <mat-option value="import_id">import_id</mat-option>
             </mat-select>
+            <mat-error senergyError label="Filter Type"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Filter" [(ngModel)]="exportRequest.Filter" type="text" #filterInput required>
+            <mat-label>Filter</mat-label>
+            <input matInput [(ngModel)]="exportRequest.Filter" type="text" #filterInput required>
             <button mat-icon-button matSuffix [matMenuTriggerFor]="menuFilter">
               <mat-icon>data_object</mat-icon>
             </button>
@@ -453,47 +503,61 @@
                 {{param.label || param.name}}
               </button>
             </mat-menu>
+            <mat-error senergyError label="Filter"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="EntityName" [(ngModel)]="exportRequest.EntityName" type="text" required>
+            <mat-label>Entity Name</mat-label>
+            <input matInput [(ngModel)]="exportRequest.EntityName" type="text" required>
+            <mat-error senergyError label="Entity Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Topic" [(ngModel)]="exportRequest.Topic" type="text" required>
+            <mat-label>Topic</mat-label>
+            <input matInput [(ngModel)]="exportRequest.Topic" type="text" required>
+            <mat-error senergyError label="Topic"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>ExportDatabaseID</mat-label>
-            <senergy-select-search placeholder="ExportDatabaseID"
+            <mat-label>Export Database ID</mat-label>
+            <senergy-select-search
                                    [(ngModel)]="exportRequest.ExportDatabaseID"
                                    [options]="exportDatabaseList || []"
                                    useOptionViewProperty="Name"
                                    useOptionValueProperty="ID">
             </senergy-select-search>
+            <mat-error senergyError label="Export Database ID"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="TimePath" [(ngModel)]="exportRequest.TimePath" type="text" required>
+            <mat-label>Time Path</mat-label>
+            <input matInput [(ngModel)]="exportRequest.TimePath" type="text" required>
+            <mat-error senergyError label="Time Path"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="TimestampFormat" [(ngModel)]="exportRequest.TimestampFormat" type="text">
+            <mat-label>Timestamp Format</mat-label>
+            <input matInput [(ngModel)]="exportRequest.TimestampFormat" type="text">
+            <mat-error senergyError label="Timestamp Format"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="TimePrecision" [(ngModel)]="exportRequest.TimePrecision" type="text">
+            <mat-label>Time Precision</mat-label>
+            <input matInput [(ngModel)]="exportRequest.TimePrecision" type="text">
+            <mat-error senergyError label="Time Precision"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="ServiceName" [(ngModel)]="exportRequest.ServiceName" type="text" required>
+            <mat-label>Service Name</mat-label>
+            <input matInput [(ngModel)]="exportRequest.ServiceName" type="text" required>
+            <mat-error senergyError label="Service Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
@@ -503,6 +567,7 @@
               <mat-option value="largest">largest</mat-option>
               <mat-option value="smallest">smallest</mat-option>
             </mat-select>
+            <mat-error senergyError label="Offset"></mat-error>
           </mat-form-field>
         </div>
         <div>
@@ -518,12 +583,16 @@
             <div>
               <div>
                 <mat-form-field appearance="outline"  color="accent" class="full-width">
-                  <input matInput placeholder="Name" [(ngModel)]="value.Name" type="text" required>
+                  <mat-label>Name</mat-label>
+                  <input matInput [(ngModel)]="value.Name" type="text" required>
+                  <mat-error senergyError label="Name"></mat-error>
                 </mat-form-field>
               </div>
               <div>
                 <mat-form-field appearance="outline"  color="accent" class="full-width">
-                  <input matInput placeholder="Path" [(ngModel)]="value.Path" type="text" required>
+                  <mat-label>Path</mat-label>
+                  <input matInput [(ngModel)]="value.Path" type="text" required>
+                  <mat-error senergyError label="Path"></mat-error>
                 </mat-form-field>
               </div>
               <div>
@@ -535,6 +604,7 @@
                     <mat-option value="bool">bool</mat-option>
                     <mat-option value="string_json">string_json</mat-option>
                   </mat-select>
+                  <mat-error senergyError label="Type"></mat-error>
                 </mat-form-field>
               </div>
               <div>
@@ -555,12 +625,16 @@
       <div class="smart-service-task-tab">
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
+            <mat-label>Task Name</mat-label>
+            <input matInput [(ngModel)]="result.name">
+            <mat-error senergyError label="Task Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Name" [(ngModel)]="importRequest.name" type="text">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="importRequest.name" type="text">
+            <mat-error senergyError label="Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
@@ -571,6 +645,7 @@
                 {{importType.name}}
               </mat-option>
             </mat-select>
+            <mat-error senergyError label="Import Type"></mat-error>
           </mat-form-field>
         </div>
       </div>
@@ -582,17 +657,24 @@
       </div>
       <div *ngFor="let config of importRequest.configs" class="input-with-overwrite">
         <mat-form-field appearance="outline"  color="accent" class="input-with-overwrite-value" *ngIf="isTextImportConfig(config)">
-          <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="text">
+          <mat-label>{{config.name}}</mat-label>
+          <input matInput [(ngModel)]="config.value" type="text">
+          <mat-error senergyError label="{{config.name}}"></mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline"  color="accent" class="input-with-overwrite-value" *ngIf="isNumberImportConfig(config)">
-          <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="number">
+          <mat-label>{{config.name}}</mat-label>
+          <input matInput [(ngModel)]="config.value" type="number">
+          <mat-error senergyError label="{{config.name}}"></mat-error>
         </mat-form-field>
         <mat-checkbox class="checkbox-margin" *ngIf="isBooleanImportConfig(config)" [(ngModel)]="importRequest.restart">{{config.name}}</mat-checkbox>
         <mat-form-field  appearance="outline" color="accent" class="input-with-overwrite-value" *ngIf="isUnknownImportConfig(config)">
-          <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="text" isValidJson>
+          <mat-label>{{config.name}}</mat-label>
+          <input matInput [(ngModel)]="config.value" type="text" isValidJson>
+          <mat-error senergyError label="{{config.name}}"></mat-error>
         </mat-form-field>
         <ng-container *ngFor="let overwrite of importOverwrites">
           <mat-form-field appearance="outline" *ngIf="overwrite.config_name === config.name" color="accent" class="input-with-overwrite-overwrite">
+            <mat-label>{{config.name}}</mat-label>
             <input matInput placeholder="{{config.name}} overwrite with placeholder evaluated as json" [(ngModel)]="overwrite.json_value" type="text" #overwriterJsonInput>
             <button mat-icon-button matSuffix [matMenuTriggerFor]="menuImportOverwrites">
               <mat-icon>data_object</mat-icon>
@@ -620,6 +702,7 @@
                 {{param.label || param.name}}
               </button>
             </mat-menu>
+            <mat-error senergyError label="{{config.name}}"></mat-error>
           </mat-form-field>
         </ng-container>
       </div>
@@ -628,17 +711,23 @@
       <div class="smart-service-task-tab">
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Task-Name" [(ngModel)]="result.name" type="text">
+            <mat-label>Task Name</mat-label>
+            <input matInput [(ngModel)]="result.name" type="text">
+            <mat-error senergyError label="Task Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Key" [(ngModel)]="infoKey" type="text" matTooltip="optional key used to reference the module for updates">
+            <mat-label>Key</mat-label>
+            <input matInput [(ngModel)]="infoKey" type="text" matTooltip="optional key used to reference the module for updates">
+            <mat-error senergyError label="Key"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Module-Type" [(ngModel)]="infoModuleType" type="text">
+            <mat-label>ModuleType</mat-label>
+            <input matInput [(ngModel)]="infoModuleType" type="text">
+            <mat-error senergyError label="Module Type"></mat-error>
           </mat-form-field>
         </div>
         <div class="module-data-editor">
@@ -651,12 +740,16 @@
       <div class="smart-service-task-tab">
         <div>
           <mat-form-field  appearance="outline" color="accent" class="full-width">
-            <input matInput placeholder="Task-Name" [(ngModel)]="result.name" type="text">
+            <mat-label>Task Name</mat-label>
+            <input matInput [(ngModel)]="result.name" type="text">
+            <mat-error senergyError label="Task Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Key" [(ngModel)]="deviceRepositoryWorkerInfo.key" type="text" matTooltip="optional key used to reference the module for updates">
+            <mat-label>Key</mat-label>
+            <input matInput [(ngModel)]="deviceRepositoryWorkerInfo.key" type="text" matTooltip="optional key used to reference the module for updates">
+            <mat-error senergyError label="Key"></mat-error>
           </mat-form-field>
         </div>
         <div>
@@ -665,17 +758,21 @@
             <mat-select [(ngModel)]="deviceRepositoryWorkerInfo.operation">
               <mat-option value="create_device_group">Create Device-Group</mat-option>
             </mat-select>
+            <mat-error senergyError label="Operation"></mat-error>
           </mat-form-field>
         </div>
         <ng-container *ngIf="deviceRepositoryWorkerInfo.operation === 'create_device_group'">
           <div>
             <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <input matInput placeholder="Device-Group Name" [(ngModel)]="deviceRepositoryWorkerInfo.name" type="text">
+              <mat-label>Device-Group Name</mat-label>
+              <input matInput [(ngModel)]="deviceRepositoryWorkerInfo.name" type="text">
+              <mat-error senergyError label="Device-Group Name"></mat-error>
             </mat-form-field>
           </div>
           <div >
             <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <input matInput placeholder="List of Devices" [(ngModel)]="deviceRepositoryWorkerInfo.create_device_group.ids" #configInput>
+              <mat-label>List of Devices</mat-label>
+              <input matInput [(ngModel)]="deviceRepositoryWorkerInfo.create_device_group.ids" #configInput>
               <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
                 <mat-icon>data_object</mat-icon>
               </button>
@@ -684,6 +781,7 @@
                   IoT: {{param.label || param.name}}
                 </button>
               </mat-menu>
+              <mat-error senergyError label="List of Devices"></mat-error>
             </mat-form-field>
           </div>
         </ng-container>
@@ -693,26 +791,33 @@
       <div class="smart-service-task-tab">
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Task-Name" [(ngModel)]="result.name" type="text">
+            <mat-label>Task Name</mat-label>
+            <input matInput [(ngModel)]="result.name" type="text">
+            <mat-error senergyError label="Task Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Interval" [(ngModel)]="watcherWorkerInfo.interval" type="text">
+            <mat-label>Interval</mat-label>
+            <input matInput [(ngModel)]="watcherWorkerInfo.interval" type="text">
+            <mat-error senergyError label="Interval"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Hash-Type</mat-label>
+            <mat-label>Hash Type</mat-label>
             <mat-select [(ngModel)]="watcherWorkerInfo.hash_type">
               <mat-option value="deviceids">deviceids</mat-option>
               <mat-option value="md5">md5</mat-option>
             </mat-select>
+            <mat-error senergyError label="Hash Type"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="Maintenance-Procedure Event-Msg-Name" [(ngModel)]="watcherWorkerInfo.maintenance_producer" type="text">
+            <mat-label>Maintenance-Procedure Event-Msg-Name</mat-label>
+            <input matInput [(ngModel)]="watcherWorkerInfo.maintenance_producer" type="text">
+            <mat-error senergyError label="Maintenance-Procedure Event-Msg-Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
@@ -722,11 +827,15 @@
           </div>
           <div *ngFor="let inp of watcherWorkerInfo.maintenance_procedure_inputs; let i = index" class="maintenanceInput">
             <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
-              <input matInput placeholder="Key" [(ngModel)]="inp.key" [ngModelOptions]="{standalone: true}">
+              <mat-label>Key</mat-label>
+              <input matInput [(ngModel)]="inp.key" [ngModelOptions]="{standalone: true}">
+              <mat-error senergyError label="Key"></mat-error>
             </mat-form-field>
             <span style="width: 2em"></span>
             <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
-              <input matInput placeholder="Value" [(ngModel)]="inp.value" [ngModelOptions]="{standalone: true}" matTooltip="preferred as json value">
+              <mat-label>Value</mat-label>
+              <input matInput [(ngModel)]="inp.value" [ngModelOptions]="{standalone: true}" matTooltip="preferred as json value">
+              <mat-error senergyError label="Value"></mat-error>
             </mat-form-field>
             <button mat-icon-button color="warn" (click)="watcherWorkerInfo.maintenance_procedure_inputs.splice(i, 1)">
               <mat-icon>delete</mat-icon>
@@ -739,11 +848,12 @@
         </div>
         <div>
           <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Watch-Operation</mat-label>
+            <mat-label>Watch Operation</mat-label>
             <mat-select [(ngModel)]="watcherWorkerInfo.operation">
               <mat-option value="devices_by_criteria">Watch Devices by Criteria</mat-option>
               <mat-option value="watch_request">Watch Generic Request</mat-option>
             </mat-select>
+            <mat-error senergyError label="Watch Operation"></mat-error>
           </mat-form-field>
         </div>
         <ng-container *ngIf="watcherWorkerInfo.operation === 'devices_by_criteria'">
@@ -766,40 +876,46 @@
                       <mat-option value="request">request</mat-option>
                       <mat-option value="event+request">event+request</mat-option>
                     </mat-select>
+                    <mat-error senergyError label="Interaction"></mat-error>
                   </mat-form-field>
                 </div>
                 <div>
                   <div>
                     <mat-form-field appearance="outline"  class="form-field full-width" color="accent">
-                      <senergy-select-search placeholder="Function"
-                                             [(ngModel)]="criteria.function_id"
+                      <mat-label>Function</mat-label>
+                      <senergy-select-search [(ngModel)]="criteria.function_id"
                                              [options]="functions"
                                              noneView="NONE"
                                              useOptionViewProperty="name"
                                              useOptionValueProperty="id">
                       </senergy-select-search>
+                      <mat-error senergyError label="Function"></mat-error>
                     </mat-form-field>
                   </div>
                   <div>
                     <mat-form-field appearance="outline"  class="form-field full-width" color="accent">
-                      <senergy-select-search placeholder="Aspect"
+                      <mat-label>Aspect</mat-label>
+                      <senergy-select-search
                                              [(ngModel)]="criteria.aspect_id"
                                              [options]="nestedAspects"
                                              noneView="NONE"
                                              useOptionViewProperty="name"
                                              useOptionValueProperty="id">
                       </senergy-select-search>
+                      <mat-error senergyError label="Aspect"></mat-error>
                     </mat-form-field>
                   </div>
                   <div>
                     <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                      <senergy-select-search placeholder="Device-Class"
+                      <mat-label>Device Class</mat-label>
+                      <senergy-select-search
                                              [(ngModel)]="criteria.device_class_id"
                                              [options]="deviceClasses"
                                              noneView="NONE"
                                              useOptionViewProperty="name"
                                              useOptionValueProperty="id">
                       </senergy-select-search>
+                      <mat-error senergyError label="Device Class"></mat-error>
                     </mat-form-field>
                   </div>
                 </div>
@@ -825,21 +941,28 @@
                 <mat-option value="DELETE">DELETE</mat-option>
                 <mat-option value="PATCH">PATCH</mat-option>
               </mat-select>
+              <mat-error senergyError label="Method"></mat-error>
             </mat-form-field>
           </div>
           <div>
             <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <input matInput placeholder="Endpoint" [(ngModel)]="watcherWorkerInfo.request.endpoint" type="text">
+              <mat-label>Endpoint</mat-label>
+              <input matInput [(ngModel)]="watcherWorkerInfo.request.endpoint" type="text">
+              <mat-error senergyError label="Endpoint"></mat-error>
             </mat-form-field>
           </div>
           <div>
             <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <input matInput placeholder="Body" [(ngModel)]="watcherWorkerInfo.request.body" type="text" matTooltip="as base64 encoded byte array">
+              <mat-label>Body</mat-label>
+              <input matInput [(ngModel)]="watcherWorkerInfo.request.body" type="text" matTooltip="as base64 encoded byte array">
+              <mat-error senergyError label="Body"></mat-error>
             </mat-form-field>
           </div>
           <div>
             <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <input matInput placeholder="Headers" [(ngModel)]="watcherWorkerInfoRequestHeader" type="text" isValidJson>
+              <mat-label>Headers</mat-label>
+              <input matInput [(ngModel)]="watcherWorkerInfoRequestHeader" type="text" isValidJson>
+              <mat-error senergyError label="Headers"></mat-error>
             </mat-form-field>
           </div>
           <div>

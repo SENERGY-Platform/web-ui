@@ -20,10 +20,14 @@
 
         <div *ngIf="deviceGroupForm" [formGroup]="deviceGroupForm">
             <mat-form-field appearance="outline" class="full-width" color="accent">
-                <input matInput placeholder="Name" formControlName="name" required>
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" required>
+                <mat-error senergyError label="Name"></mat-error>
             </mat-form-field>
             <mat-form-field appearance="outline" class="full-width" color="accent">
-                <input matInput placeholder="Image" formControlName="image">
+                <mat-label>Image</mat-label>
+                <input matInput formControlName="image">
+                <mat-error senergyError label=""></mat-error>
             </mat-form-field>
         </div>
 
@@ -68,13 +72,17 @@
             </div>
             <div *ngFor="let attr of attributes; let i = index" class="attribute">
                 <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
-                    <input matInput placeholder="Key" [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
+                    <mat-label>Key</mat-label>
+					<input matInput [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
                            [disabled]="!editableAttribute(attr)">
+                    <mat-error senergyError label="Key"></mat-error>
                 </mat-form-field>
                 <span style="width: 2em"></span>
                 <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
-                    <input matInput placeholder="Value" [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
+                    <mat-label>Value</mat-label>
+                    <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
                            [disabled]="!editableAttribute(attr)">
+                    <mat-error senergyError label="Value"></mat-error>
                 </mat-form-field>
                 <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">
                     <mat-icon>delete</mat-icon>
@@ -94,10 +102,12 @@
     <div fxLayout="column" Class="selectables" [ngClass.gt-xs]="'selectables-large'">
         <h2>Selectable-Devices</h2>
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="Search" [formControl]="searchText">
+            <mat-label>Search</mat-label>
+            <input matInput [formControl]="searchText">
             <mat-icon matPrefix *ngIf="searchText.value === ''">search</mat-icon>
             <mat-icon class="pointer" matPrefix *ngIf="searchText.value !== ''" (click)="resetSearchText()">close
             </mat-icon>
+            <mat-error senergyError label="Search"></mat-error>
         </mat-form-field>
         <div class="selectable-devices">
             <mat-card appearance="outlined" fxLayout="row" fxLayoutAlign="space-between center"

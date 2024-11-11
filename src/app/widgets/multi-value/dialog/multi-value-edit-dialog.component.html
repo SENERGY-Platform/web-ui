@@ -23,7 +23,8 @@
                 <td *ngIf="userHasUpdateNameAuthorization">
                     <mat-form-field appearance="outline" color="accent">
                         <mat-label>Widget Name</mat-label>
-                        <input type="text" matInput placeholder="Widget Name" formControlName="name">
+                        <input type="text" matInput formControlName="name">
+                        <mat-error senergyError label="Widget Name"></mat-error>
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
@@ -39,12 +40,14 @@
                             <mat-option [value]="orderValues.TimeAsc">Time</mat-option>
                             <mat-option [value]="orderValues.TimeDesc">Time desc</mat-option>
                         </mat-select>
+                        <mat-error senergyError label="Default Order"></mat-error>
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
                     <mat-form-field appearance="outline" color="accent">
                         <mat-label>Value Alias</mat-label>
                         <input type="text" matInput placeholder="Value" formControlName="valueAlias">
+                        <mat-error senergyError label="Value Alias"></mat-error>
                     </mat-form-field>
                 </td>
             </tr>
@@ -67,43 +70,50 @@
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Alias</mat-label>
-                                        <input type="text" matInput placeholder="Alias" required formControlName="name">
+                                        <input type="text" matInput required formControlName="name">
+                                        <mat-error senergyError label="Alias"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Export</mat-label>
                                         <mat-select formControlName="export" required [compareWith]="compareExports"
                                             placeholder="Choose Export">
                                             <mat-option *ngFor="let option of exports" [value]="option">
                                                 {{option.name}}
                                             </mat-option>
                                         </mat-select>
+                                        <mat-error senergyError label="Export"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
-                                        <mat-select placeholder="Value" [compareWith]="compare" formControlName="column"
+                                        <mat-label>Value</mat-label>
+                                        <mat-select [compareWith]="compare" formControlName="column"
                                             required>
                                             <mat-option *ngFor="let column of (tab.get('export')?.value.values)"
                                                 [value]="column">
                                                 {{column.Name}}
                                             </mat-option>
                                         </mat-select>
+                                        <mat-error senergyError label="Value"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Unit</mat-label>
-                                        <input type="text" matInput placeholder="Unit" formControlName="unit">
+                                        <input type="text" matInput formControlName="unit">
+                                        <mat-error senergyError label="Unit"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
-                                        <mat-select formControlName="type" placeholder="Type"
+                                        <mat-label>Type</mat-label>
+                                        <mat-select formControlName="type"
                                             [compareWith]="compareStrings" required>
                                             <mat-option [value]="'String'">String</mat-option>
                                             <mat-option [value]="'Number'">Number</mat-option>
@@ -112,18 +122,21 @@
                                             <mat-option [value]="'Percent'">Percent</mat-option>
                                             <mat-option [value]="'Boolean'">Boolean</mat-option>
                                         </mat-select>
+										<mat-error senergyError label="Type"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent" hintLabel="For use in Angular pipes">
                                         <mat-label>Format</mat-label>
-                                        <input type="text" matInput placeholder="Format" formControlName="format">
+                                        <input type="text" matInput formControlName="format">
+										<mat-error senergyError label="Format"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent" matTooltip="{{getMathWarningTooltip(index)}}">
                                         <mat-label>Math</mat-label>
-                                        <input type="text" matInput placeholder="Math" formControlName="math">
+                                        <input type="text" matInput formControlName="math">
+										<mat-error senergyError label="Math"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>
@@ -135,14 +148,16 @@
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Lower boundary</mat-label>
+                                        <mat-label>Lower Boundary</mat-label>
                                         <input matInput type="number" formControlName="lowerBoundary">
+										<mat-error senergyError label="Lower Boundary"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Upper boundary</mat-label>
+                                        <mat-label>Upper Boundary</mat-label>
                                         <input matInput type="number" formControlName="upperBoundary">
+										<mat-error senergyError label="Upper Boundary"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>

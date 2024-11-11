@@ -40,16 +40,18 @@
         <div *ngIf="inputType === 'query' && data.query !== undefined" fxLayout="column">
             <mat-form-field fxFlex color="accent" appearance="outline">
                 <mat-label>Device</mat-label>
-                <senergy-select-search [options]="allDevices" useOptionViewProperty="name" placeholder="Device"
+                <senergy-select-search [options]="allDevices" useOptionViewProperty="name"
                     ngDefaultControl (ngModelChange)="queryDeviceChanged($event)" [(ngModel)]="queryDevice"
                     [multiple]="false">
                 </senergy-select-search>
+                <mat-error senergyError label="Device"></mat-error>
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline">
                 <mat-label>Service</mat-label>
-                <senergy-select-search (ngModelChange)="queryServiceChanged($event)" placeholder="Service"
+                <senergy-select-search (ngModelChange)="queryServiceChanged($event)"
                     [(ngModel)]="queryService" [options]="queryDeviceType.services" useOptionViewProperty="name">
                 </senergy-select-search>
+                <mat-error senergyError label="Service"></mat-error>
             </mat-form-field>
             <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
                 <mat-label>Path</mat-label>
@@ -59,35 +61,41 @@
                     <mat-option *ngFor="let path of queryServicePaths | keyvalue"
                         [value]="path.value">{{path.value}}</mat-option>
                 </mat-autocomplete>
+                <mat-error senergyError label="Path"></mat-error>
             </mat-form-field>
             <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
                 <mat-label>Field Group Type</mat-label>
                 <mat-select [(ngModel)]="data.query!.columns[0].groupType">
                     <mat-option *ngFor="let type of fieldGroupTypes" [value]="type">{{type}}</mat-option>
                 </mat-select>
+                <mat-error senergyError label="Field Group Type"></mat-error>
             </mat-form-field>
             <div role="group" class="form-grouping">
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>GroupingTime</mat-label>
+                    <mat-label>Grouping Time</mat-label>
                     <input matInput [(ngModel)]="groupingTime.number" (ngModelChange)="setGroupingTime()">
+                    <mat-error senergyError label="Grouping Time"></mat-error>
                 </mat-form-field>
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>GroupingTimeUnit</mat-label>
+                    <mat-label>Grouping Time Unit</mat-label>
                     <mat-select [(ngModel)]="groupingTime.unit" (ngModelChange)="setGroupingTime()">
                         <mat-option *ngFor="let units of timeUnits" [value]="units.unit">{{units.desc}}</mat-option>
                     </mat-select>
+                    <mat-error senergyError label="Grouping Time Unit"></mat-error>
                 </mat-form-field>
             </div>
             <div role="group" class="form-grouping">
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>Timeframe</mat-label>
+                    <mat-label>Time Frame</mat-label>
                     <input matInput [(ngModel)]="timeframe.number" (ngModelChange)="setTimeframe()">
+                    <mat-error senergyError label="Time Frame"></mat-error>
                 </mat-form-field>
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>TimeframeUnit</mat-label>
+                    <mat-label>Time Frame Unit</mat-label>
                     <mat-select [(ngModel)]="timeframe.unit" (ngModelChange)="setTimeframe()">
                         <mat-option *ngFor="let units of timeUnits" [value]="units.unit">{{units.desc}}</mat-option>
                     </mat-select>
+                    <mat-error senergyError label="Time Frame Unit"></mat-error>
                 </mat-form-field>
             </div>
         </div>
@@ -95,14 +103,16 @@
         <div *ngIf="inputType === 'value'" fxLayout="column">
             <div *ngIf="data.valueType === 'string'">
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>{{ name }} string</mat-label>
+                    <mat-label>{{ name }} String</mat-label>
                     <input matInput [(ngModel)]="data.value">
+                    <mat-error senergyError label="{{ name }} String"></mat-error>
                 </mat-form-field>
             </div>
             <div *ngIf="data.valueType === 'float64'">
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>{{ name }} float64</mat-label>
+                    <mat-label>{{ name }} Float64</mat-label>
                     <input matInput [(ngModel)]="data.value">
+                    <mat-error senergyError label="{{ name }} Float64"></mat-error>
                 </mat-form-field>
             </div>
             <div *ngIf="data.valueType === 'object' && data.fields !== undefined">

@@ -20,7 +20,8 @@
     <form class="form">
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Name</mat-label>
-            <input [formControl]="nameControl" matInput placeholder="Name" required>
+            <input [formControl]="nameControl" matInput required>
+            <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
     </form>
 </mat-dialog-content>

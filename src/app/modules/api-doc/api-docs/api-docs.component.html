@@ -22,7 +22,9 @@
     <!--<mat-card [hidden]="!ready" class="search">
         <mat-icon class="material-icons">search</mat-icon>
         <mat-form-field appearance="outline">
+            <mat-label>Search</mat-label>
             <input (keyup)="search()" [(ngModel)]="query" [placeholder]="searchPlaceholder" matInput type="text">
+            <mat-error senergyError label="Search"></mat-error>
         </mat-form-field>
     </mat-card>-->
 

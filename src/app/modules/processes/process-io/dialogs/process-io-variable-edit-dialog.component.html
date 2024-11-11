@@ -14,24 +14,29 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Edit Process-IO Variable</h2>
+<h2 mat-dialog-title>Edit Process-Io Variable</h2>
 
 <mat-dialog-content>
     <div class="form">
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="Short-Key" value="{{variable.key | short_process_io_key:variable.process_definition_id:variable.process_instance_id}}" disabled>
+            <mat-label>Short-Key</mat-label>
+            <input matInput value="{{variable.key | short_process_io_key:variable.process_definition_id:variable.process_instance_id}}" disabled>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="Key"  [(ngModel)]="variable.key" [disabled]="!enableKey" required>
+            <mat-label>Key</mat-label>
+            <input matInput  [(ngModel)]="variable.key" [disabled]="!enableKey" required>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="Process-Definition-Id" disabled [(ngModel)]="variable.process_definition_id"  [disabled]="!enableDefinitionId">
+            <mat-label>Process-Definition-Id</mat-label>
+            <input matInput disabled [(ngModel)]="variable.process_definition_id"  [disabled]="!enableDefinitionId">
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="Process-Instance-Id" disabled [(ngModel)]="variable.process_instance_id" [disabled]="!enableInstanceId">
+            <mat-label>Process-Instance-Id</mat-label>
+            <input matInput disabled [(ngModel)]="variable.process_instance_id" [disabled]="!enableInstanceId">
         </mat-form-field>
         <mat-form-field appearance="outline" color="accent" class="full-width">
-            <textarea matInput rows="{{countRows(valueJson)}}" placeholder="Value as JSON" [(ngModel)]="valueJson" type="text" isValidJson></textarea>
+            <mat-label>Value as Json</mat-label>
+            <textarea matInput rows="{{countRows(valueJson)}}" [(ngModel)]="valueJson" type="text" isValidJson></textarea>
         </mat-form-field>
     </div>
 </mat-dialog-content>

@@ -22,6 +22,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MatTable } from '@angular/material/table';
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
 @Component({
     templateUrl: './devices-state-edit-dialog.component.html',
@@ -34,8 +35,10 @@ export class DevicesStateEditDialogComponent implements OnInit {
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
     userHasUpdateNameAuthorization = false;
+    formGroup: FormGroup = new FormGroup({});
 
     constructor(
+        private fb: FormBuilder,
         private dialogRef: MatDialogRef<DevicesStateEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
@@ -47,12 +50,25 @@ export class DevicesStateEditDialogComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.formGroup = this.fb.group({
+            name: ['', Validators.required],
+        });
         this.getWidgetData();
+        this.onChanges();
+    }
+
+    onChanges(): void {
+        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+            this.widget.name = val;
+        });
     }
 
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
+            this.formGroup.patchValue({
+                name: this.widget.name
+            });
         });
     }
 

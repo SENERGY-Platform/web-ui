@@ -16,6 +16,7 @@ import {UntypedFormBuilder, Validators} from '@angular/forms';
 import {AcControlElementModel} from '../shared/ac-control.model';
 import {Observable, of, concatMap, forkJoin} from 'rxjs';
 import {DeviceGroupsService} from '../../../modules/devices/device-groups/shared/device-groups.service';
+import {rangeValidator} from '../../../core/validators/range.validator';
 
 const INTEGER = 'https://schema.org/Integer';
 const FLOAT = 'https://schema.org/Float';
@@ -85,8 +86,8 @@ export class AcControlEditDialogComponent implements OnInit {
             this.form = this.fb.group({
                 name: [this.widget.name, Validators.required],
                 selectable: [this.widget.properties.acControl?.deviceGroupId || this.widget.properties.acControl?.deviceId, Validators.required],
-                minTarget: [this.widget.properties.acControl?.minTarget || 15, Validators.required],
-                maxTarget: [this.widget.properties.acControl?.maxTarget || 30, Validators.required],
+                minTarget: [this.widget.properties.acControl?.minTarget || 15, [Validators.required, rangeValidator(-270, 1000)]],
+                maxTarget: [this.widget.properties.acControl?.maxTarget || 30, [Validators.required, rangeValidator(-270, 1000)]],
             });
             this.ready = true;
         });

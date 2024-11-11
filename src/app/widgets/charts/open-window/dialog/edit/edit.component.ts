@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { forkJoin, Observable } from 'rxjs';
@@ -57,7 +57,7 @@ export class OpenWindowEditComponent implements OnInit {
 
         this.form = new FormGroup({
             id: new FormControl(this.widget.id),
-            name: new FormControl(this.widget.name),
+            name: new FormControl(this.widget.name, Validators.required),
             type: new FormControl(this.widget.type),
             properties: new FormGroup({
                 windowExports: new FormControl(this.widget.properties.windowExports),

@@ -17,18 +17,19 @@
 <h2 mat-dialog-title>Edit Process Schedule</h2>
 
 <mat-dialog-content>
-    <div fxLayout="column">
+    <form [formGroup]="formGroup" fxLayout="column">
         <mat-form-field appearance="outline" color="accent" *ngIf="userHasUpdateNameAuthorization">
-            <mat-label>Name</mat-label>
-            <input matInput placeholder="Name" [(ngModel)]="widget.name">
+            <mat-label>Widget Name</mat-label>
+            <input matInput formControlName="name">
+            <mat-error senergyError label="Widget Name"></mat-error>
         </mat-form-field>
         <span *ngIf="userHasUpdatePropertiesAuthorization">
-            <mat-checkbox class="checkbox-padding" [(ngModel)]="readAll">Show all schedules</mat-checkbox>
+            <mat-checkbox class="checkbox-padding" formControlName="readAll">Show all schedules</mat-checkbox>
         </span>
-    </div>
+    </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()">Save</button>
+    <button mat-raised-button color="accent" [disabled]="formGroup.invalid" (click)="save()">Save</button>
 </mat-dialog-actions>

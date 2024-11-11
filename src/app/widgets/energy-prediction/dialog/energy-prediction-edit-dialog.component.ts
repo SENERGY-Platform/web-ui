@@ -43,8 +43,8 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     thresholdOptions: string[] = ['Consumption', 'Price'];
 
     form = this.formBuilder.group({
-        name: [''],
-        export: ['', [chartsExportMeasurementModelValidator(), EnergyPredictionEditDialogComponent.estimationExportValidator()]],
+        name: ['', Validators.required],
+        export: ['', [Validators.required, chartsExportMeasurementModelValidator()]],  //, EnergyPredictionEditDialogComponent.estimationExportValidator()]],
         math: [''],
         unit: ['kWh'],
         predictionType: ['', Validators.required],

@@ -2,7 +2,8 @@
     <div [formGroup]="form" fxLayout="column" >
         <mat-form-field appearance="outline" color="accent">
             <mat-label>Threshold</mat-label>
-            <input matInput placeholder="Threshold" type="text" formControlName="threshold">
+            <input matInput type="text" formControlName="threshold">
+            <mat-error senergyError label="Threshold"></mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" color="accent">
@@ -11,11 +12,13 @@
                 <mat-option value="<="><=</mat-option>
                 <mat-option value=">=">>=</mat-option>
             </mat-select>        
+            <mat-error senergyError label="Direction"></mat-error>
         </mat-form-field>
         
         <mat-form-field appearance="outline" color="accent">
             <mat-label>Color</mat-label>
-            <input matInput placeholder="Color" type="text" formControlName="color">
+            <input matInput type="text" formControlName="color">
+            <mat-error senergyError label="Color"></mat-error>
         </mat-form-field>
     </div>
 </mat-dialog-content>

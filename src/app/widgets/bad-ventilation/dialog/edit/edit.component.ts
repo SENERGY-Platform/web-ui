@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { UntypedFormBuilder } from '@angular/forms';
+import {UntypedFormBuilder, Validators} from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { forkJoin, map } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -16,7 +16,7 @@ import { DataSourceConfig } from 'src/app/widgets/charts/shared/data-source-sele
 })
 export class EditVentilationWidgetComponent implements OnInit {
     form = this.formBuilder.group({
-        name: [''],
+        name: ['', Validators.required],
         exportConfig:  this.formBuilder.group({
             exports: [[]],
         }),

@@ -25,28 +25,30 @@
     <div id="id-container">
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>ID</mat-label>
-            <input matInput placeholder="ID" disabled value="{{device.id}}">
+            <input matInput disabled value="{{device.id}}">
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Short ID</mat-label>
             <input matInput placeholder="ShortID" disabled value="{{getShortId(device.id)}}">
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Devicetype ID</mat-label>
-            <input matInput placeholder="Devicetype ID" disabled value="{{device.device_type_id}}">
+            <mat-label>Device Type ID</mat-label>
+            <input matInput disabled value="{{device.device_type_id}}">
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Devicetype Name</mat-label>
-            <input matInput placeholder="Devicetype Name" disabled value="{{device.device_type_name}}">
+            <mat-label>Device Type Name</mat-label>
+            <input matInput disabled value="{{device.device_type_name}}">
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Origin Name</mat-label>
-            <input matInput placeholder="Origin Name" [(ngModel)]="device.name" disabled
+            <input matInput [(ngModel)]="device.name" disabled
                 [ngModelOptions]="{standalone: true}">
+            <mat-error senergyError label="Origin Name"></mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Local ID</mat-label>
-            <input matInput placeholder="Local ID" [(ngModel)]="device.local_id" disabled>
+            <input matInput [(ngModel)]="device.local_id" disabled>
+            <mat-error senergyError label="Local ID"></mat-error>
         </mat-form-field>
     </div>
 
@@ -99,9 +101,10 @@
                                             [getOptionValue]="valueAvailability" [formControl]="availabilityControl"
                                             [compareWith]="compareAvailabilityValue" placeholder="Device">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Data Format"></mat-error>
                                     </mat-form-field>
                                     <mat-form-field appearance="outline" fxFlex color="accent" (click)="picker.open()">
-                                        <mat-label>Enter a date range</mat-label>
+                                        <mat-label>Enter a Date Range</mat-label>
                                         <mat-date-range-input [formGroup]="timeControl" [rangePicker]="picker"
                                             [min]="getMin(i)" [max]="getMax(i)">
                                             <input matStartDate formControlName="from" placeholder="Start date">

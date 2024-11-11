@@ -19,8 +19,9 @@
 <mat-dialog-content class="form">
     <div fxLayout="column" [formGroup]="form" *ngIf="formIsReady">
         <mat-form-field appearance="outline" color="accent" *ngIf="userHasUpdateNameAuthorization">
-            <mat-label>Name</mat-label>
-            <input type="text" matInput placeholder="Name" formControlName="name">
+            <mat-label>Widget Name</mat-label>
+            <input type="text" matInput formControlName="name">
+            <mat-error senergyError label="Widget Name"></mat-error>
         </mat-form-field>
 
         <span *ngIf="userHasUpdatePropertiesAuthorization">
@@ -37,19 +38,21 @@
                     <span *ngIf="devices.length > 0">
                         <div>
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-label>Choose Device</mat-label>
-                                <senergy-select-search [options]="devices" formControlName="device"
+                                <mat-label>Device</mat-label>
+                                <senergy-select-search placeholder="Choose Device" [options]="devices" formControlName="device"
                                     useOptionViewProperty="display_name" [compareWith]="compareIds">
                                 </senergy-select-search>
+                                <mat-error senergyError label="Device"></mat-error>
                             </mat-form-field>
 
                         </div>
                         <div *ngIf="dataSourceFieldsReady">
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-label>Choose Service</mat-label>
-                                <senergy-select-search [options]="services" formControlName="service"
+                                <mat-label>Service</mat-label>
+                                <senergy-select-search placeholder="Choose Service" [options]="services" formControlName="service"
                                     useOptionViewProperty="name" [compareWith]="compareIds">
                                 </senergy-select-search>
+                                <mat-error senergyError label="Service"></mat-error>
                             </mat-form-field>
                         </div>
                     </span>
@@ -63,10 +66,11 @@
                     <span *ngIf="exports.length > 0">
                         <div>
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-label>Choose Export</mat-label>
-                                <senergy-select-search [options]="exports" formControlName="measurement"
+                                <mat-label>Export</mat-label>
+                                <senergy-select-search placeholder="Choose Export" [options]="exports" formControlName="measurement"
                                     useOptionViewProperty="name" [compareWith]="compareIds">
                                 </senergy-select-search>
+                                <mat-error senergyError label="Export"></mat-error>
                             </mat-form-field>
 
                         </div>
@@ -80,19 +84,21 @@
                     <span *ngIf="deviceGroups.length > 0">
                         <div>
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-label>Choose Device Group</mat-label>
-                                <senergy-select-search [options]="deviceGroups" formControlName="deviceGroupId"
+                                <mat-label>Device Group</mat-label>
+                                <senergy-select-search placeholder="Choose Device Group" [options]="deviceGroups" formControlName="deviceGroupId"
                                     useOptionViewProperty="name" useOptionValueProperty="id">
                                 </senergy-select-search>
+                                <mat-error senergyError label="Device Group"></mat-error>
                             </mat-form-field>
 
                         </div>
                         <div *ngIf="dataSourceFieldsReady">
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-label>Choose Criteria</mat-label>
-                                <senergy-select-search [options]="getCriteria()" formControlName="deviceGroupCriteria"
+                                <mat-label>Criteria</mat-label>
+                                <senergy-select-search placeholder="Choose Criteria" [options]="getCriteria()" formControlName="deviceGroupCriteria"
                                     [getOptionViewValue]="describeCriteria()" [compareWith]="compareCriteria">
                                 </senergy-select-search>
+                                <mat-error senergyError label="Criteria"></mat-error>
                             </mat-form-field>
                         </div>
                     </span>
@@ -107,74 +113,87 @@
                 <div *ngIf="dataSourceFieldsReady">
                     <div *ngIf="form.get('sourceType')?.value === 'export' && exports.length > 0">
                         <mat-form-field appearance="outline" color="accent">
-                            <senergy-select-search placeholder="Value" [options]="vAxisValues"
+                            <mat-label>Value</mat-label>
+                            <senergy-select-search placeholder="Choose Value" [options]="vAxisValues"
                                 [compareWith]="compareValues" useOptionViewProperty="Name" formControlName="vAxis">
                             </senergy-select-search>
+                            <mat-error senergyError label="Value"></mat-error>
                         </mat-form-field>
                     </div>
                     <div *ngIf="form.get('sourceType')?.value === 'device'  && devices.length > 0">
                         <mat-form-field appearance="outline" color="accent">
-                            <senergy-select-search placeholder="Value" useOptionViewProperty="Name" [options]="paths"
+                            <mat-label>Value</mat-label>
+                            <senergy-select-search placeholder="Choose Value" useOptionViewProperty="Name" [options]="paths"
                                 formControlName="vAxis" [compareWith]="compareNames">
                             </senergy-select-search>
+                            <mat-error senergyError label="Value"></mat-error>
                         </mat-form-field>
                     </div>
                     <div>
                         <mat-form-field appearance="outline" color="accent"
                             *ngIf="form.get('sourceType')?.value !== 'deviceGroup'">
                             <mat-label>Unit</mat-label>
-                            <input type="text" matInput placeholder="Unit" formControlName="vAxisLabel">
+                            <input type="text" matInput formControlName="vAxisLabel">
+							<mat-error senergyError label="Unit"></mat-error>
                         </mat-form-field>
                         <mat-form-field appearance="outline" color="accent"
                             *ngIf="form.get('sourceType')?.value === 'deviceGroup' && deviceGroups.length > 0">
                             <mat-label>Unit</mat-label>
-                            <senergy-select-search [options]="concept?.characteristics || []"
+                            <senergy-select-search  placeholder="Choose Unit" [options]="concept?.characteristics || []"
                                 formControlName="vAxisLabel" [getOptionValue]="getDisplay"
                                 [getOptionViewValue]="getDisplay">
                             </senergy-select-search>
+							<mat-error senergyError label="Unit"></mat-error>
                         </mat-form-field>
                     </div>
                     <div>
                         <mat-form-field appearance="outline" color="accent" *ngIf="form.get('sourceType')?.value === 'deviceGroup'">
                             <mat-label>Aggregation</mat-label>
-                            <senergy-select-search [options]="aggregations" formControlName="deviceGroupAggregation">
+                            <senergy-select-search  placeholder="Choose Aggregation" [options]="aggregations" formControlName="deviceGroupAggregation">
                             </senergy-select-search>
+                            <mat-error senergyError label="Aggregation"></mat-error>
                         </mat-form-field>
                     </div>
                     <div class="one-line-form-container">
                         <div>
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-select formControlName="type" placeholder="Type" [compareWith]="compareStrings">
+                                <mat-label>Type</mat-label>
+                                <mat-select  placeholder="Choose Type" formControlName="type" [compareWith]="compareStrings">
                                     <mat-option [value]="'String'">String</mat-option>
                                     <mat-option [value]="'Number'">Number</mat-option>
                                     <mat-option [value]="'Date'">Date</mat-option>
                                     <mat-option [value]="'Currency'">Currency</mat-option>
                                     <mat-option [value]="'Percent'">Percent</mat-option>
                                 </mat-select>
+                                <mat-error senergyError label="Type"></mat-error>
                             </mat-form-field>
                         </div>
                         <div>
                             <mat-form-field appearance="outline" color="accent" hintLabel="For use in Angular pipes">
                                 <mat-label>Format</mat-label>
-                                <input type="text" matInput placeholder="Format" formControlName="format">
+                                <input type="text" matInput formControlName="format">
+                                <mat-error senergyError label="Format"></mat-error>
                             </mat-form-field>
                         </div>
                     </div>
                     <div formGroupName="group" class="one-line-form-container">
                         <div>
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-select placeholder="Group Type" formControlName="type">
+                                <mat-label>Group Type</mat-label>
+                                <mat-select  placeholder="Choose Group Type" formControlName="type">
                                     <mat-option [value]="">none</mat-option>
                                     <mat-option *ngFor="let t of groupTypes" [value]="t">
                                         {{t}}
                                     </mat-option>
                                 </mat-select>
+                                <mat-error senergyError label="Group Type"></mat-error>
                             </mat-form-field>
                         </div>
                         <div>
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-label>Group time</mat-label>
+                                <mat-label>Group Time</mat-label>
                                 <input type="string" matInput formControlName="time">
+                                <mat-error senergyError label="Group Time"></mat-error>
                             </mat-form-field>
                         </div>
                     </div>
@@ -182,12 +201,14 @@
                         <mat-form-field appearance="outline" color="accent">
                             <mat-label>Math</mat-label>
                             <input type="text" matInput formControlName="math">
+                            <mat-error senergyError label="Math"></mat-error>
                         </mat-form-field>
                     </div>
                     <div>
                         <mat-form-field appearance="outline" color="accent">
-                            <mat-label>Max. font size (px)</mat-label>
+                            <mat-label>Max. Font Size (px)</mat-label>
                             <input type="number" matInput formControlName="threshold">
+                            <mat-error senergyError label="Max. Font Size (px)"></mat-error>
                         </mat-form-field>
                     </div>
 
@@ -209,20 +230,22 @@
                         *ngIf="form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true">
                         <div>
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-label>Maximum age for warning</mat-label>
+                                <mat-label>Maximum Age for Warning</mat-label>
                                 <input type="number" matInput formControlName="warningAge">
+                                <mat-error senergyError label="Maximum Age"></mat-error>
                             </mat-form-field>
                         </div>
                         <div>
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-label></mat-label>
-                                <mat-select formControlName="warningTimeLevel">
+                                <mat-label>Warning Time Level</mat-label>
+                                <mat-select  placeholder="Choose Warning Time Level" formControlName="warningTimeLevel">
                                     <mat-option value="s">Seconds</mat-option>
                                     <mat-option value="min">Minutes</mat-option>
                                     <mat-option value="h">Hours</mat-option>
                                     <mat-option value="d">Days</mat-option>
                                     <mat-option value="m">Months</mat-option>
                                 </mat-select>
+                                <mat-error senergyError label="Time Warning Level"></mat-error>
                             </mat-form-field>
                         </div>
                     </div>
@@ -231,20 +254,22 @@
                         *ngIf="form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true">
                         <div>
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-label>Maximum age for problem</mat-label>
+                                <mat-label>Maximum Age for Problem</mat-label>
                                 <input type="number" matInput formControlName="problemAge">
+                                <mat-error senergyError label="Maximum Age"></mat-error>
                             </mat-form-field>
                         </div>
                         <div>
                             <mat-form-field appearance="outline" color="accent">
-                                <mat-label></mat-label>
-                                <mat-select formControlName="problemTimeLevel">
+                                <mat-label>Problem Time Level</mat-label>
+                                <mat-select  placeholder="Choose Problem Time Level" formControlName="problemTimeLevel">
                                     <mat-option value="s">Seconds</mat-option>
                                     <mat-option value="min">Minutes</mat-option>
                                     <mat-option value="h">Hours</mat-option>
                                     <mat-option value="d">Days</mat-option>
                                     <mat-option value="m">Months</mat-option>
                                 </mat-select>
+                                <mat-error senergyError label="Problem Time Level"></mat-error>
                             </mat-form-field>
                         </div>
                     </div>

@@ -19,32 +19,34 @@
 <mat-dialog-content *ngIf="ready">
     <form class="form" fxLayout="column">
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <mat-label>Id</mat-label>
-            <input matInput placeholder="Id" [formControl]="idFormControl">
+            <mat-label>ID</mat-label>
+            <input matInput [formControl]="idFormControl">
+            <mat-error senergyError label="ID"></mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Name</mat-label>
-            <input matInput placeholder="Name" [formControl]="nameFormControl" required>
+            <input matInput [formControl]="nameFormControl" required>
+            <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
         <mat-form-field fxFlex color="accent" appearance="outline">
             <mat-label>Characteristics</mat-label>
             <senergy-select-search [options]="characteristics"
                                    useOptionViewProperty="name"
-                                   placeholder="Characteristics"
                                    [formControl]="characteristicsControl"
                                    [multiple]="true"
                                    [compareWith]="compareIds">
             </senergy-select-search>
+            <mat-error senergyError label="Characteristics"></mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Base Characteristic</mat-label>
-            <mat-select placeholder="Base Characteristic"
-                        [formControl]="baseCharacteristicControl" required>
+            <mat-select [formControl]="baseCharacteristicControl" required>
                 <mat-option *ngFor="let characteristic of characteristicsControl.value"
                             [value]="characteristic.id">
                     {{characteristic.name}}
                 </mat-option>
             </mat-select>
+            <mat-error senergyError label="Base Characteristic"></mat-error>
         </mat-form-field>
         <div class="conversions">
             <div class="divider">
@@ -60,6 +62,7 @@
                                 {{characteristic.name}}
                             </mat-option>
                         </mat-select>
+                        <mat-error senergyError label="From"></mat-error>
                     </mat-form-field>
                     <mat-form-field appearance="outline" class="forth-width">
                         <mat-label>To</mat-label>
@@ -68,9 +71,12 @@
                                 {{characteristic.name}}
                             </mat-option>
                         </mat-select>
+                        <mat-error senergyError label="To"></mat-error>
                     </mat-form-field>
                     <mat-form-field appearance="outline" class="third-width" color="accent">
-                        <input matInput placeholder="f({{conversion.placeholder_name}})" [(ngModel)]="conversion.formula" [ngModelOptions]="{standalone: true}" required>
+                        <mat-label>f({{conversion.placeholder_name}})</mat-label>
+                        <input matInput [(ngModel)]="conversion.formula" [ngModelOptions]="{standalone: true}" required>
+                        <mat-error senergyError label="f({{conversion.placeholder_name}})"></mat-error>
                     </mat-form-field>
                     <button mat-icon-button color="warn" (click)="removeConversion(i)" [disabled]="disabled">
                         <mat-icon>delete</mat-icon>
@@ -86,19 +92,27 @@
                 </mat-expansion-panel-header>
                 <div>
                     <mat-form-field appearance="outline" class="full-width" color="accent">
-                        <input matInput placeholder="json input" [(ngModel)]="testinput" [ngModelOptions]="{standalone: true}" isValidJson required>
+                        <mat-label>Json Input</mat-label>
+                        <input matInput [(ngModel)]="testinput" [ngModelOptions]="{standalone: true}" isValidJson required>
+                        <mat-error senergyError label="Json Input"></mat-error>
                     </mat-form-field>
                     <mat-form-field appearance="outline" class="full-width" color="accent">
-                        <input matInput placeholder="f(x)" [(ngModel)]="testformula" [ngModelOptions]="{standalone: true}" required>
+                        <mat-label>f(x)</mat-label>
+                        <input matInput [(ngModel)]="testformula" [ngModelOptions]="{standalone: true}" required>
                         <button matSuffix mat-icon-button color="accent" (click)="tryFormula()">
                             <mat-icon>play_arrow</mat-icon>
                         </button>
+                        <mat-error senergyError label="f(x)"></mat-error>
                     </mat-form-field>
                     <mat-form-field appearance="outline" class="full-width" color="warn" *ngIf="testerr">
-                        <input matInput placeholder="output error" [(ngModel)]="testerr" [ngModelOptions]="{standalone: true}" disabled>
+                        <mat-label>Output Error</mat-label>
+                        <input matInput [(ngModel)]="testerr" [ngModelOptions]="{standalone: true}" disabled>
+                        <mat-error senergyError label="Output Error"></mat-error>
                     </mat-form-field>
                     <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!testerr">
-                        <input matInput placeholder="output json" [(ngModel)]="testoutput" [ngModelOptions]="{standalone: true}" disabled>
+                        <mat-label>Output Json</mat-label>
+                        <input matInput [(ngModel)]="testoutput" [ngModelOptions]="{standalone: true}" disabled>
+                        <mat-error senergyError label="Output Json"></mat-error>
                     </mat-form-field>
                 </div>
             </mat-expansion-panel>

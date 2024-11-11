@@ -28,7 +28,8 @@
       <div>
         <div *ngFor="let set of info.set; let i = index" class="variables">
           <mat-form-field appearance="outline" color="accent">
-            <mat-select placeholder="Binding" [(ngModel)]="set.binding" required>
+            <mat-label>Binding</mat-label>
+            <mat-select [(ngModel)]="set.binding" required>
               <mat-option value="global">
                 global
               </mat-option>
@@ -39,12 +40,17 @@
                 definition
               </mat-option>
             </mat-select>
+            <mat-error senergyError label="Binding"></mat-error>
           </mat-form-field>
           <mat-form-field appearance="outline" class="third-width" color="accent">
-            <input matInput placeholder="Key" [(ngModel)]="set.key" type="text" required>
+            <mat-label>Key</mat-label>
+            <input matInput [(ngModel)]="set.key" type="text" required>
+            <mat-error senergyError label="Key"></mat-error>
           </mat-form-field>
           <mat-form-field appearance="outline" class="third-width" color="accent">
-            <input matInput placeholder="Value" [(ngModel)]="set.value" type="text">
+            <mat-label>Value</mat-label>
+            <input matInput [(ngModel)]="set.value" type="text">
+            <mat-error senergyError label="Value"></mat-error>
           </mat-form-field>
           <button mat-icon-button (click)="removeSet(i)">
             <mat-icon>delete</mat-icon>
@@ -64,7 +70,8 @@
       <div>
         <div *ngFor="let get of info.get; let i = index" class="variables">
           <mat-form-field appearance="outline" color="accent">
-            <mat-select placeholder="Binding" [(ngModel)]="get.binding" required>
+            <mat-label>Binding</mat-label>
+            <mat-select [(ngModel)]="get.binding" required>
               <mat-option value="global">
                 global
               </mat-option>
@@ -75,15 +82,22 @@
                 definition
               </mat-option>
             </mat-select>
+            <mat-error senergyError label="Binding"></mat-error>
           </mat-form-field>
           <mat-form-field appearance="outline" class="fifth-width" color="accent">
-            <input matInput placeholder="Key" [(ngModel)]="get.key" type="text" required>
+            <mat-label>Key</mat-label>
+            <input matInput [(ngModel)]="get.key" type="text" required>
+            <mat-error senergyError label="Key"></mat-error>
           </mat-form-field>
           <mat-form-field appearance="outline" class="fifth-width" color="accent">
-            <input matInput placeholder="Output-Name" [(ngModel)]="get.outputVariableName" type="text" required>
+            <mat-label>Output Name</mat-label>
+            <input matInput [(ngModel)]="get.outputVariableName" type="text" required>
+            <mat-error senergyError label="Output Name"></mat-error>
           </mat-form-field>
           <mat-form-field appearance="outline" class="fifth-width" color="accent">
-            <input matInput placeholder="Default-Value" [(ngModel)]="get.defaultValue" type="text" required>
+            <mat-label>Default Value</mat-label>
+            <input matInput [(ngModel)]="get.defaultValue" type="text" required>
+            <mat-error senergyError label="Default Value"></mat-error>
           </mat-form-field>
           <button mat-icon-button  (click)="removeGet(i)">
             <mat-icon>delete</mat-icon>

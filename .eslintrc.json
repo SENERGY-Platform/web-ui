@@ -30,12 +30,22 @@
             "accessibility": "explicit"
           }
         ],
+        "@angular-eslint/component-class-suffix": [
+          "error",
+          {
+            "suffixes": [
+              "Directive",
+              "Component",
+              "View"
+            ]
+          }
+        ],
         "@angular-eslint/component-selector": [
           "error",
           {
-            "type": "element",
+            "type": "attribute",
             "prefix": "senergy",
-            "style": "kebab-case"
+            "style": "camelCase"
           }
         ],
         "brace-style": [

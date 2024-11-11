@@ -21,24 +21,31 @@
                 <ng-template matStepLabel>Information</ng-template>
                 <div class="form">
                     <mat-form-field appearance="outline" class="full-width" color="accent">
-                        <input matInput placeholder="Id" formControlName="id">
+                        <mat-label>ID</mat-label>
+                        <input matInput formControlName="id">
+                        <mat-error senergyError label="ID"></mat-error>
                     </mat-form-field>
                     <mat-form-field appearance="outline" class="full-width" color="accent">
-                        <input matInput placeholder="Name" formControlName="name" required>
+                        <mat-label>Name</mat-label>
+                        <input matInput formControlName="name" required>
+                        <mat-error senergyError label="Name"></mat-error>
                     </mat-form-field>
                     <mat-form-field appearance="outline" class="full-width" color="accent">
-                        <input matInput placeholder="Description" formControlName="description">
+                        <mat-label>Description</mat-label>
+                        <input matInput formControlName="description">
+                        <mat-error senergyError label="Description"></mat-error>
                     </mat-form-field>
                     <table class="full-width">
                         <tr>
                             <td>
                                 <mat-form-field appearance="outline" class="full-width" color="accent">
-                                    <senergy-select-search placeholder="Device class"
-                                                           formControlName="device_class_id" [required]="true"
+                                    <mat-label>Device Class</mat-label>
+                                    <senergy-select-search formControlName="device_class_id" [required]="true"
                                                            [options]="deviceTypeDeviceClasses"
                                                            useOptionViewProperty="name"
                                                            useOptionValueProperty="id">
                                     </senergy-select-search>
+                                    <mat-error senergyError label="Device Class"></mat-error>
                                 </mat-form-field>
                             </td>
                     </table>
@@ -53,11 +60,15 @@
                     <div [formGroupName]="i" *ngFor="let attr of deviceTypeAttributes.controls; let i = index"
                          class="attribute">
                         <mat-form-field appearance="outline" class="third-width" color="accent">
-                            <input matInput placeholder="Key" formControlName="key">
+                            <mat-label>Key</mat-label>
+                            <input matInput formControlName="key">
+                            <mat-error senergyError label="Key"></mat-error>
                         </mat-form-field>
                         =
                         <mat-form-field appearance="outline" class="third-width" color="accent">
-                            <input matInput placeholder="Value" formControlName="value">
+                            <mat-label>Value</mat-label>
+                            <input matInput formControlName="value">
+                            <mat-error senergyError label="Value"></mat-error>
                         </mat-form-field>
                         <button mat-icon-button color="warn" [disabled]="!editable" (click)="removeDeviceTypeAttr(i)">
                             <mat-icon>delete</mat-icon>
@@ -82,10 +93,14 @@
                             <ng-template matExpansionPanelContent>
                                 <div *ngIf="group.isGroup" [formGroup]="getServiceGroup(group.key)">
                                     <mat-form-field appearance="outline" class="full-width" color="accent">
-                                        <input matInput placeholder="Name" formControlName="name">
+                                        <mat-label>Name</mat-label>
+                                        <input matInput formControlName="name">
+                                        <mat-error senergyError label="Name"></mat-error>
                                     </mat-form-field>
                                     <mat-form-field appearance="outline" class="full-width" color="accent">
-                                        <input matInput placeholder="Description" formControlName="description">
+                                        <mat-label>Description</mat-label>
+                                        <input matInput formControlName="description">
+                                        <mat-error senergyError label="Description"></mat-error>
                                     </mat-form-field>
                                 </div>
 
@@ -102,38 +117,46 @@
                                                 <mat-tab label="Information">
                                                     <div class="form">
                                                         <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                            <input matInput placeholder="Id" formControlName="id">
+                                                            <mat-label>ID</mat-label>
+                                                            <input matInput formControlName="id">
+                                                            <mat-error senergyError label="ID"></mat-error>
                                                         </mat-form-field>
                                                         <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                            <input matInput placeholder="Name" formControlName="name" required>
+                                                            <mat-label>Name</mat-label>
+                                                            <input matInput formControlName="name" required>
+                                                            <mat-error senergyError label="Name"></mat-error>
                                                         </mat-form-field>
                                                         <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                            <input matInput placeholder="Description" formControlName="description">
+                                                            <mat-label>Description</mat-label>
+                                                            <input matInput formControlName="description">
+                                                            <mat-error senergyError label="Description"></mat-error>
                                                         </mat-form-field>
                                                         <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                            <input matInput placeholder="Local Id" formControlName="local_id" required>
+                                                            <mat-label>Local ID</mat-label>
+                                                            <input matInput formControlName="local_id" required>
+                                                            <mat-error senergyError label="Local ID"></mat-error>
                                                         </mat-form-field>
                                                         <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                            <mat-select placeholder="Protocol"
-                                                                        formControlName="protocol_id"
-                                                                        required>
+                                                            <mat-label>Protocol</mat-label>
+                                                            <mat-select formControlName="protocol_id" required>
                                                                 <mat-option
                                                                         *ngFor="let item of protocols"
                                                                         [value]="item.id">
                                                                     {{item.name}}
                                                                 </mat-option>
                                                             </mat-select>
+                                                            <mat-error senergyError label="Protocol"></mat-error>
                                                         </mat-form-field>
                                                         <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                            <mat-select placeholder="Interaction"
-                                                                        formControlName="interaction"
-                                                                        required>
+                                                            <mat-label>Interaction</mat-label>
+                                                            <mat-select formControlName="interaction" required>
                                                                 <mat-option
                                                                         *ngFor="let item of interactionList"
                                                                         [value]="item">
                                                                     {{item}}
                                                                 </mat-option>
                                                             </mat-select>
+                                                            <mat-error senergyError label="Interaction"></mat-error>
                                                         </mat-form-field>
                                                     </div>
                                                 </mat-tab>
@@ -142,16 +165,20 @@
                                                          *ngFor="let attr of serviceAttributeArray(serviceAndIndex.service).controls; let i = index"
                                                          class="attribute">
                                                         <mat-form-field appearance="outline" class="third-width" color="accent">
-                                                            <input matInput placeholder="Key" formControlName="key">
+                                                            <mat-label>Key</mat-label>
+                                                            <input matInput formControlName="key">
+                                                            <mat-error senergyError label="Key"></mat-error>
                                                         </mat-form-field>
                                                         =
                                                         <mat-form-field appearance="outline" class="third-width" color="accent">
+                                                            <mat-label>Value</mat-label>
                                                             <input matInput placeholder="Value" formControlName="value" *ngIf="attr.get('key')?.value !== timeAttributeKey">
                                                             <senergy-select-search [options]="getTimePathOptions(serviceAndIndex.index)" *ngIf="attr.get('key')?.value === timeAttributeKey"
                                                                                    placeholder="Path"
                                                                                    formControlName="value"
                                                                                    noneView="--- None ---">
                                                             </senergy-select-search>
+                                                            <mat-error senergyError label="Value"></mat-error>
                                                         </mat-form-field>
 
                                                         <button mat-icon-button color="warn" [disabled]="!editable || attr.get('key')?.value === timeAttributeKey"
@@ -178,12 +205,13 @@
                                                         <div fxLayout="row" [fxShow]="inOut.show === true">
                                                             <div fxFlex>
                                                                 <mat-form-field appearance="outline" class="full-width" color="accent">
+                                                                    <mat-label>Serialization</mat-label>
                                                                     <senergy-select-search
                                                                             [options]="serializations"
-                                                                            placeholder="Serialization"
                                                                             formControlName="serialization"
                                                                             [required]="inOut.dataSource && inOut.dataSource.data.length > 0"
                                                                             noneView="-- None --"></senergy-select-search>
+                                                                    <mat-error senergyError label="Serialization"></mat-error>
                                                                 </mat-form-field>
                                                                 <div *ngIf="inOut.dataSource">
                                                                     <button mat-raised-button color="accent" class="button-margin"

@@ -63,6 +63,7 @@ import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/share
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
 import { ConceptsNewDialogComponent } from 'src/app/modules/metadata/concepts/dialogs/concepts-new-dialog.component';
+import {required} from "yargs";
 
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
@@ -123,7 +124,7 @@ export class DataTableEditDialogComponent implements OnInit {
         refreshTime: [undefined],
         elements: this.fb.array([]),
         convertRules: this.fb.array([]),
-        valuesPerElement: [1, Validators.min(1)],
+        valuesPerElement: [1, [Validators.min(1)]],
     });
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;

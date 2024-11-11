@@ -20,24 +20,21 @@
     <mat-label>Date</mat-label>
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker #picker></mat-datepicker>
-    <mat-error *ngIf="date.hasError('required')">
-      Please use datepicker to enter a valid date!
-    </mat-error>
+    <mat-error senergyError label="Date"
+			   codeToOverwrite="required"
+			   customMessage="Please use datepicker to enter a valid date!"
+	></mat-error>
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="form-field" color="accent">
     <input matInput [formControl]="hour" type="number" min="0" max="23" step="1">
     <mat-label>Hours</mat-label>
-    <mat-error *ngIf="hour.hasError('max') || hour.hasError('min')">
-      Please enter a valid number between and including 0 and 23!
-    </mat-error>
+    <mat-error senergyError></mat-error>
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="form-field" color="accent">
     <input matInput [formControl]="minute" type="number" min="0" max="59" step="1">
     <mat-label>Minutes</mat-label>
-    <mat-error *ngIf="minute.hasError('max') || minute.hasError('min')">
-      Please enter a valid number between and including 0 and 59!
-    </mat-error>
+    <mat-error senergyError label="Minutes"></mat-error>
   </mat-form-field>
 </form>

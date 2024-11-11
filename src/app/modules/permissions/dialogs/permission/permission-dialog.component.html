@@ -31,9 +31,10 @@
     <form class="user-input">
         <mat-form-field color="accent" appearance="outline" class="selector">
             <mat-label>User</mat-label>
-            <senergy-select-search placeholder="User" [options]="adddableUsers" [formControl]="userFormControl"
+            <senergy-select-search [options]="adddableUsers" [formControl]="userFormControl"
               useOptionValueProperty="id" useOptionViewProperty="username">
             </senergy-select-search> 
+            <mat-error senergyError label="User"></mat-error>
         </mat-form-field>
         <button [disabled]="adddableUsers.length === 0" class="margin add-button" mat-icon-button color="accent" (click)="addUser()">
             <mat-icon>add</mat-icon>
@@ -43,8 +44,9 @@
     <form class="user-input">
         <mat-form-field color="accent" appearance="outline" class="selector">
             <mat-label>Group</mat-label>
-            <senergy-select-search placeholder="Group" [options]="adddableGroups" [formControl]="groupFormControl">
+            <senergy-select-search [options]="adddableGroups" [formControl]="groupFormControl">
             </senergy-select-search> 
+            <mat-error senergyError label="Group"></mat-error>
         </mat-form-field>
         <button [disabled]="adddableGroups.length === 0" class="margin add-button" mat-icon-button color="accent" (click)="addGroup()">
             <mat-icon>add</mat-icon>
@@ -54,8 +56,9 @@
     <form *ngIf="isAdmin" class="user-input">
         <mat-form-field color="accent" appearance="outline" class="selector">
             <mat-label>Role</mat-label>
-            <senergy-select-search placeholder="Role" [options]="adddableRoles" [formControl]="roleFormControl">
+            <senergy-select-search [options]="adddableRoles" [formControl]="roleFormControl">
             </senergy-select-search> 
+            <mat-error senergyError label="Role"></mat-error>
         </mat-form-field>
         <button [disabled]="adddableRoles.length === 0" class="margin add-button" mat-icon-button color="accent" (click)="addRole()">
             <mat-icon>add</mat-icon>

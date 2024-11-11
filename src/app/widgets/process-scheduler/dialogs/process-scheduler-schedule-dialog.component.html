@@ -23,11 +23,13 @@
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Alias</mat-label>
             <input formControlName="process_alias" matInput type="text">
+            <mat-error senergyError label="Alias"></mat-error>
         </mat-form-field>
 
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Time</mat-label>
             <input formControlName="time" matInput type="time" required>
+            <mat-error senergyError label="Time"></mat-error>
         </mat-form-field>
 
         <section formArrayName="days">
@@ -45,6 +47,7 @@
             <senergy-select-search formControlName="processId" [required]="true" [compareWith]="compare"
                     [options]="deployments" useOptionViewProperty="name" useOptionValueProperty="id">
             </senergy-select-search>
+            <mat-error senergyError label="Deployment"></mat-error>
         </mat-form-field>
     </div>
 </mat-dialog-content>

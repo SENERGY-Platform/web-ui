@@ -18,35 +18,40 @@
 
     <mat-form-field class="full-width" appearance="outline" color="accent">
         <mat-label>Name</mat-label>
-        <input matInput placeholder="Name" formControlName="name" required>
+        <input matInput formControlName="name" required>
+        <mat-error senergyError label="Name"></mat-error>
     </mat-form-field>
     <mat-form-field class="full-width" appearance="outline" color="accent">
         <mat-label>Displayed Unit</mat-label>
-        <input matInput placeholder="Displayed Unit" formControlName="display_unit">
+        <input matInput formControlName="display_unit">
+        <mat-error senergyError label="Displayed Unit"></mat-error>
     </mat-form-field>
     <mat-form-field class="full-width" appearance="outline" color="accent">
         <mat-label>Type</mat-label>
-        <mat-select placeholder="Type"
-                    formControlName="type" required>
+        <mat-select formControlName="type" required>
             <mat-option *ngFor="let type of types"
                         [value]="type.type">
                 {{type.typeShort}}
             </mat-option>
         </mat-select>
+        <mat-error senergyError label="Type"></mat-error>
     </mat-form-field>
     <span *ngIf="isNumeric()">
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Min Value</mat-label>
-            <input [type]="getType()" matInput placeholder="Min Value" formControlName="min_value">
+            <input [type]="getType()" matInput formControlName="min_value">
+            <mat-error senergyError label="Min Value"></mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Max Value</mat-label>
-            <input [type]="getType()" matInput placeholder="Max Value" formControlName="max_value">
+            <input [type]="getType()" matInput formControlName="max_value">
+            <mat-error senergyError label="Max Value"></mat-error>
         </mat-form-field>
     </span>
     <mat-form-field *ngIf="showValue()" class="full-width" appearance="outline" color="accent">
         <mat-label>Value</mat-label>
-        <input [type]="getType()" matInput placeholder="Value" formControlName="value">
+        <input [type]="getType()" matInput formControlName="value">
+        <mat-error senergyError label="Value"></mat-error>
     </mat-form-field>
 
     <mat-accordion *ngIf="showAllowedValues()" class="characteristics-allowed-values-wrapper">
@@ -59,10 +64,12 @@
             <div>
                 <div *ngFor="let _ of allowedValues; let i = index; trackBy: trackByFn" class="allowed-value-container">
                     <mat-form-field *ngIf="showValue()" appearance="outline" color="accent" class="full-width">
+                        <mat-label>Value</mat-label>
                         <input [type]="getType()" matInput [(ngModel)]="allowedValues[i]" [ngModelOptions]="{standalone: true}" (ngModelChange)="refreshFormAllowedValues()">
                         <button mat-icon-button matSuffix (click)="removeAllowedValue(i)" [disabled]="disabled">
                             <mat-icon>delete</mat-icon>
                         </button>
+                        <mat-error senergyError label="Value"></mat-error>
                     </mat-form-field>
 
                 </div>

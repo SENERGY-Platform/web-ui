@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 .form {
     min-width: 150px;
     max-width: 500px;
@@ -30,7 +29,7 @@
 }
 
 .forth-width {
-    width: 25%;
+    width: 28%;
 }
 
 .conversions {
@@ -41,6 +40,7 @@
     justify-content: space-between;
     display: flex;
     align-items: baseline;
+    padding-bottom: 0.3rem
 }
 .divider {
     margin-top: 20px;

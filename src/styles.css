@@ -74,5 +74,6 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
 }
 
 .mat-mdc-form-field {
-    padding-top: 4pt;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
 }

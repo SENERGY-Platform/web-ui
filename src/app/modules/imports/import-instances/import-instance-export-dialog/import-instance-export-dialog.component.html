@@ -20,12 +20,14 @@
         <mat-form-field color="accent" appearance="outline" fxFill>
             <mat-label>Name</mat-label>
             <input matInput [formControl]="nameControl" required>
+            <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
     </div>
     <div>
         <mat-form-field color="accent" appearance="outline" fxFill>
             <mat-label>Description</mat-label>
             <input matInput [formControl]="descControl">
+            <mat-error senergyError label="Description"></mat-error>
         </mat-form-field>
     </div>
 

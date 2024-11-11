@@ -24,7 +24,7 @@ import {
     FormControl,
     UntypedFormBuilder,
     UntypedFormGroup,
-    ValidatorFn
+    ValidatorFn, Validators
 } from '@angular/forms';
 import {ExportService} from '../../../../modules/exports/shared/export.service';
 import {ChartsExportConversion, ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
@@ -203,7 +203,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     initFormGroup(widget: WidgetModel): void {
         this.formGroupController = this._formBuilder.group({
             id: widget.id,
-            name: widget.name,
+            name: [widget.name, Validators.required],
             type: widget.type,
             properties: this._formBuilder.group({
                 chartType: widget.properties.chartType,

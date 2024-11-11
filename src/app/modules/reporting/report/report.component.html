@@ -31,8 +31,9 @@
                         Template Name: {{ template.name }} Id: {{templateId}}
                     </div>
                     <mat-form-field fxFlex color="accent" appearance="outline">
-                        <mat-label>Reportname</mat-label>
+                        <mat-label>Report Name</mat-label>
                         <input matInput [(ngModel)]="reportName">
+                        <mat-error senergyError label="Report Name"></mat-error>
                     </mat-form-field>
                 </div>
             </mat-card-content>

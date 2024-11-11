@@ -21,6 +21,7 @@ import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { forkJoin, Observable } from 'rxjs';
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
 @Component({
     templateUrl: './process-scheduler-schedule-edit-dialog.component.html',
@@ -33,8 +34,10 @@ export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
     readAll = false;
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
+    formGroup: FormGroup;
 
     constructor(
+        private fb: FormBuilder,
         private dialogRef: MatDialogRef<ProcessSchedulerScheduleEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
@@ -49,16 +52,34 @@ export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
         this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
+        this.formGroup = this.fb.group({
+            name: [this.widget.name, Validators.required],
+            readAll: [false],
+        });
     }
 
     ngOnInit() {
         this.getWidgetData();
+        this.onChanges();
+    }
+
+    onChanges(): void {
+        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+            this.widget.name = val;
+        });
+        this.formGroup.controls['readAll'].valueChanges.subscribe(val => {
+            this.readAll = val;
+        });
     }
 
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
             this.readAll = this.widget.properties.readAll === true;
+            this.formGroup.patchValue({
+                name: this.widget.name,
+                readAll: this.readAll,
+            });
         });
     }
 

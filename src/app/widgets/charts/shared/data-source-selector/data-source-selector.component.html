@@ -9,10 +9,7 @@
                 (selectionChange)="dataSourceChanged($event.value)" [options]="dataSourceOptions"
                 [getOptionViewValue]="getDataSourceName" >
             </senergy-select-search>
-    
-            <mat-error *ngIf="form.controls.exports.invalid">
-                Please make a selection!
-            </mat-error>
+			<mat-error senergyError [label]="dataSourcePlaceholder"></mat-error>
         </mat-form-field>
     </div>
    
@@ -20,30 +17,29 @@
 
     <span *ngIf="!waitingForDataSourceChange">
         <span [hidden]="form.get('exports').value.length === 0" *ngIf="enableFieldSelection">
-            <h2>Choose the exported fields</h2>
+            <h2>Choose the Exported Fields</h2>
             <mat-form-field appearance="outline" color="accent">
                 <mat-label>Fields</mat-label>
                 <senergy-select-search [required]="true" [multiple]="true" formControlName="fields"
                     [options]="fieldOptionsTMP" useOptionViewProperty="valueName" [compareWith]="compareFields">
                 </senergy-select-search>
-                <mat-error *ngIf="(form.get('fieldOptions')?.value || []).length ===  0">
-                    Please make a selection!
-                </mat-error>
+				<mat-error senergyError [label]="'Fields'"></mat-error>
             </mat-form-field>
         </span>
 
 
         <div *ngIf="showTimeRange">
-            <h2>Choose a time range</h2>
+            <h2>Choose a Time Range</h2>
             <div formGroupName="timeRange" class="one-line-form-container">
                 <div>
                     <mat-form-field color="accent" class="full-width" appearance="outline">
-                        <mat-label>Type</mat-label>
-                        <mat-select formControlName="type" placeholder="Time Range Type" required>
+                        <mat-label>Time Range Type</mat-label>
+                        <mat-select formControlName="type" required>
                             <mat-option *ngFor="let timeRange of timeRangeTypes" [value]="timeRange">
                                 {{timeRange}}
                             </mat-option>
                         </mat-select>
+						<mat-error senergyError [label]="'Time Range Type'"></mat-error>
                     </mat-form-field>
                 </div>
                 <div
@@ -51,6 +47,7 @@
                     <mat-form-field color="accent" class="full-width" appearance="outline">
                         <mat-label>Time</mat-label>
                         <input type="text" matInput placeholder="e.g. 15, 1" formControlName="time">
+                        <mat-error senergyError label="Time"></mat-error>
                     </mat-form-field>
                 </div>
                 <div
@@ -63,25 +60,28 @@
                                 {{level.name}}
                             </mat-option>
                         </mat-select>
+                        <mat-error senergyError label="Interval"></mat-error>
                     </mat-form-field>
                 </div>
                 <div *ngIf="form.get('timeRange').get('type').value === timeRangeEnum.Absolute">
                     <mat-form-field color="accent" class="full-width" appearance="outline">
                         <mat-label>Start</mat-label>
-                        <input type="datetime-local" matInput placeholder="Start" formControlName="start">
+                        <input type="datetime-local" matInput formControlName="start">
+                        <mat-error senergyError label="Start"></mat-error>
                     </mat-form-field>
                 </div>
                 <div *ngIf="form.get('timeRange').get('type').value === timeRangeEnum.Absolute">
                     <mat-form-field color="accent" class="full-width" appearance="outline">
                         <mat-label>End</mat-label>
                         <input type="datetime-local" matInput placeholder="Start" formControlName="end">
+                        <mat-error senergyError label="End"></mat-error>
                     </mat-form-field>
                 </div>
             </div>
         </div>
 
         <div *ngIf="enableAggretationConfig">
-            <h2>Choose an aggregation</h2>
+            <h2>Choose an Aggregation</h2>
             <div formGroupName="group" class="one-line-form-container">
                 <div>
                     <mat-form-field color="accent" class="full-width" appearance="outline">
@@ -92,6 +92,7 @@
                                 {{groupLevel.name}}
                             </mat-option>
                         </mat-select>
+                        <mat-error senergyError label="Type"></mat-error>
                     </mat-form-field>
                 </div>
 
@@ -100,6 +101,7 @@
                         <mat-label>Time</mat-label>
                         <input type="text" matInput placeholder="e.g. 15, 1" formControlName="time">
 
+                        <mat-error senergyError label="Time"></mat-error>
                     </mat-form-field>
                 </div>
                 <div>
@@ -111,6 +113,7 @@
                                 {{level.name}}
                             </mat-option>
                         </mat-select>
+                        <mat-error senergyError label="Interval"></mat-error>
                     </mat-form-field>
                 </div>
             </div>

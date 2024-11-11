@@ -17,12 +17,13 @@
 <h2 mat-dialog-title>Edit Ranking List</h2>
 
 <mat-dialog-content>
-    <div fxLayout="column">
+    <form [formGroup]="formGroup" fxLayout="column">
        <mat-form-field appearance="outline" color="accent" *ngIf="userHasUpdateNameAuthorization">
-            <mat-label>Name</mat-label>
-            <input matInput placeholder="Name" [(ngModel)]="widget.name">
+            <mat-label>Widget Name</mat-label>
+            <input matInput formControlName="name">
+            <mat-error senergyError label="Widget Name"></mat-error>
         </mat-form-field>
-    </div>
+    </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

@@ -62,6 +62,7 @@ import {GenericValidator} from './validators/generc-validator.directive';
 import {FitTextComponent} from './components/fit-text/fit-text.component';
 import {KeycloakService} from 'keycloak-angular';
 import {KeycloakConfidentialService} from './services/keycloak-confidential.service';
+import {MatErrorMessagesDirective} from "./directives/matError.directive";
 
 export const keycloakServiceToken = new InjectionToken<KeycloakService>('KeycloakService');
 
@@ -115,6 +116,7 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         IsJsonValidatorDirective,
         GenericValidator,
         FitTextComponent,
+        MatErrorMessagesDirective,
     ],
     exports: [
         SidenavComponent,
@@ -134,6 +136,7 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         IsJsonValidatorDirective,
         GenericValidator,
         FitTextComponent,
+        MatErrorMessagesDirective,
     ],
     providers: [
         {

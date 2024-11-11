@@ -36,6 +36,7 @@ import {
 import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
 import {ConceptsService} from '../../../../metadata/concepts/shared/concepts.service';
 import {ConceptsCharacteristicsModel} from '../../../../metadata/concepts/shared/concepts-characteristics.model';
+import {rangeValidator} from '../../../../../core/validators/range.validator';
 
 @Component({
     templateUrl: './task-config-dialog.component.html',
@@ -47,7 +48,7 @@ export class TaskConfigDialogComponent implements OnInit {
     aspectFormControl = new UntypedFormControl('');
     functionFormControl = new UntypedFormControl({ value: '', disabled: true });
     completionStrategyFormControl = new UntypedFormControl('');
-    retriesFormControl = new UntypedFormControl({ value: 0, disabled: true }, [Validators.min(-1), Validators.max(100)]);
+    retriesFormControl = new UntypedFormControl({ value: 0, disabled: true }, [rangeValidator(-1, 100)]);
     preferEventsFormControl = new UntypedFormControl({ value: false, disabled: true });
 
 

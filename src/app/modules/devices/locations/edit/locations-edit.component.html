@@ -18,13 +18,19 @@
 
     <div *ngIf="locationForm" [formGroup]="locationForm">
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="Name" formControlName="name" required>
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" required>
+            <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <textarea matInput placeholder="Description" formControlName="name" required></textarea>
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description"></textarea>
+            <mat-error senergyError label="Description"></mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="Image" formControlName="image">
+            <mat-label>Image</mat-label>
+            <input matInput formControlName="image">
+            <mat-error senergyError label="Image"></mat-error>
         </mat-form-field>
     </div>
 

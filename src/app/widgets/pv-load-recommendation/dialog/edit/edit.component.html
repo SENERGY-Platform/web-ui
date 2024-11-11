@@ -21,18 +21,20 @@
     <div *ngIf="ready">
         <form fxLayout="column" [formGroup]="form">
                 <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
-                    <mat-label>Name</mat-label>
-                    <input type="text" matInput placeholder="Name" formControlName="name">
+                    <mat-label>Widget Name</mat-label>
+                    <input type="text" matInput formControlName="name">
+                    <mat-error senergyError label="Widget Name"></mat-error>
                 </mat-form-field>
     
                 <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-label>Choose Export</mat-label>
-                    <input type="text" matInput formControlName="export" [matAutocomplete]="auto" required>
+                    <mat-label>Export</mat-label>
+                    <input type="text" matInput placeholder="Choose Export" formControlName="export" [matAutocomplete]="auto" required>
                     <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
                         <mat-option *ngFor="let option of exports" [value]="option">
                             {{option.name}}
                         </mat-option>
                     </mat-autocomplete>
+                    <mat-error senergyError label="Export"></mat-error>
                 </mat-form-field>
         </form>
     </div>

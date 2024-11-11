@@ -21,18 +21,20 @@
     <div *ngIf="ready">
         <form fxLayout="column" [formGroup]="form">
                 <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
-                    <mat-label>Name</mat-label>
-                    <input type="text" matInput placeholder="Name" formControlName="name">
+                    <mat-label>Widget Name</mat-label>
+                    <input type="text" matInput formControlName="name">
+                    <mat-error senergyError label="Widget Name"></mat-error>
                 </mat-form-field>
     
                 <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-label>Choose Export</mat-label>
-                    <input type="text" matInput formControlName="export" [matAutocomplete]="auto" required>
+                    <mat-label>Export</mat-label>
+                    <input type="text" matInput placeholder="Export" formControlName="export" [matAutocomplete]="auto" required>
                     <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
                         <mat-option *ngFor="let option of exports" [value]="option">
                             {{option.name}}
                         </mat-option>
                     </mat-autocomplete>
+                    <mat-error senergyError label="Export"></mat-error>
                 </mat-form-field>
 
                 <p>Predictions are available for the next 48 hours</p>
@@ -40,10 +42,11 @@
                 <mat-checkbox formControlName="displayNextValue">Show next prediction as single value?</mat-checkbox>
 
                 <div *ngIf="form.controls.displayNextValue.value === true" formGroupName="nextValueConfig">
-                    <p>Show prediction of the next ?</p>
+                    <p>Show prediction of the next?</p>
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Time</mat-label>
                         <input type="number" matInput placeholder="e.g. 15, 1" formControlName="time">
+                        <mat-error senergyError label="Time"></mat-error>
                     </mat-form-field>
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Interval</mat-label>
@@ -53,6 +56,7 @@
                                 {{level.name}}
                             </mat-option>
                         </mat-select>
+                        <mat-error senergyError label="Interval"></mat-error>
                     </mat-form-field>
                 </div>
         </form>

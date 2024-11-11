@@ -21,11 +21,13 @@
         </div>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Name</mat-label>
-            <input disabled="{{!write}}" matInput [(ngModel)]="flow.name" placeholder="Name">
+            <input disabled="{{!write}}" matInput [(ngModel)]="flow.name">
+            <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
         <mat-form-field fxFill color="accent" appearance="outline">
-            <mat-label>Beschreibung</mat-label>
-            <input disabled="{{!write}}" matInput [(ngModel)]="flow.description" placeholder="Beschreibung">
+            <mat-label>Description</mat-label>
+            <input disabled="{{!write}}" matInput [(ngModel)]="flow.description">
+            <mat-error senergyError label="Description"></mat-error>
         </mat-form-field>
         <section class="checkbox-section">
             Share Flow:

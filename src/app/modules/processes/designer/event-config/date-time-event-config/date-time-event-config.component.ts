@@ -16,6 +16,7 @@
 
 import {Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output} from '@angular/core';
 import {UntypedFormControl, Validators} from '@angular/forms';
+import {rangeValidator} from "../../../../../core/validators/range.validator";
 
 @Component({
     selector: 'senergy-date-time-event-config',
@@ -27,8 +28,8 @@ export class DateTimeEventConfigComponent implements OnInit {
     @Output() update = new EventEmitter<{ iso: string; text: string }>();
 
     date = new UntypedFormControl(new Date(), Validators.required);
-    hour = new UntypedFormControl(0, [Validators.max(23), Validators.min(0)]);
-    minute = new UntypedFormControl(0, [Validators.max(59), Validators.min(0)]);
+    hour = new UntypedFormControl(0, [rangeValidator(0, 23)]);
+    minute = new UntypedFormControl(0, [rangeValidator(0, 59)]);
 
     constructor(@Inject(LOCALE_ID) private localeId: string) {}
 

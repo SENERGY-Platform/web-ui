@@ -23,26 +23,35 @@
     </mat-radio-group>
     <form class="form" [formGroup]="functionFormGroup">
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <input matInput placeholder="Id" formControlName="id">
+            <mat-label>ID</mat-label>
+            <input matInput formControlName="id">
+            <mat-error senergyError label="ID"></mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <input matInput placeholder="Name" formControlName="name">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name">
+            <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <input matInput placeholder="Display Name" formControlName="display_name">
+            <mat-label>Display Name</mat-label>
+            <input matInput formControlName="display_name">
+            <mat-error senergyError label="Display Name"></mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <input matInput placeholder="Description" formControlName="description">
+            <mat-label>Description</mat-label>
+            <input matInput formControlName="description">
+            <mat-error senergyError label="Description"></mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Concept</mat-label>
-            <senergy-select-search placeholder="Concept"
+            <senergy-select-search
                                    formControlName="concept_id"
                                    [options]="concepts"
                                    useOptionViewProperty="name"
                                    useOptionValueProperty="id"
                                    noneView="-- None --">
             </senergy-select-search>
+            <mat-error senergyError label="Concept"></mat-error>
         </mat-form-field>
     </form>
 </mat-dialog-content>

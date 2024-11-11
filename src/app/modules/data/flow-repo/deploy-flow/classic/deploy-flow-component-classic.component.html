@@ -32,11 +32,13 @@
                     <div fxLayout="column">
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Name</mat-label>
-                            <input matInput [(ngModel)]="name" placeholder="Name">
+                            <input matInput [(ngModel)]="name">
+                            <mat-error senergyError label="Name"></mat-error>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Description</mat-label>
-                            <input matInput [(ngModel)]="description" placeholder="Description">
+                            <input matInput [(ngModel)]="description">
+                            <mat-error senergyError label="Description"></mat-error>
                         </mat-form-field>
                     </div>
                 </ng-template>
@@ -62,25 +64,28 @@
                                 <senergy-select-search [options]="devices[operatorKey][deviceKey]"
                                     useOptionViewProperty="name"
                                     (ngModelChange)="deviceChanged($event, input.id, port, operatorKey, deviceKey)"
-                                    placeholder="Device" ngDefaultControl
+                                    ngDefaultControl
                                     [(ngModel)]="selectedValues.get(input.id).get(port).device"
                                                        [multiple]="true">
                                 </senergy-select-search>
+                                <mat-error senergyError label="Device"></mat-error>
                             </mat-form-field>
                         </div>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Service</mat-label>
-                            <senergy-select-search (ngModelChange)="serviceChanged($event, input.id, port)" placeholder="Service"
+                            <senergy-select-search (ngModelChange)="serviceChanged($event, input.id, port)"
                                         [(ngModel)]="selectedValues.get(input.id).get(port).service" [options]="deviceTypes[input.id][port].services"
                             useOptionViewProperty="name">
                             </senergy-select-search>
+                            <mat-error senergyError label="Service"></mat-error>
                         </mat-form-field>
 
                         <mat-form-field fxFill color="accent" appearance="outline">
                             <mat-label>Path</mat-label>
-                            <senergy-select-search [(ngModel)]="selectedValues.get(input.id).get(port).path" placeholder="path"
+                            <senergy-select-search [(ngModel)]="selectedValues.get(input.id).get(port).path"
                             [options]="paths[input.id][port]">
                             </senergy-select-search>
+                            <mat-error senergyError label="Path"></mat-error>
                         </mat-form-field>
                     </div>
                     <h4 *ngIf="input.config !== undefined && input.config !== null">Configuration</h4>
@@ -90,6 +95,7 @@
                             <input matInput [ngModel]="selectedValues.get(input.id).get('_config').get(conf.name)"
                                    (ngModelChange)="selectedValues.get(input.id).get('_config').set(conf.name, $event)"
                                    placeholder="conf.name">
+                            <mat-error senergyError label="{{ conf.name }}"></mat-error>
                         </mat-form-field>
                     </div>
                 </ng-template>
@@ -111,7 +117,8 @@
                 </mat-expansion-panel-header>
                 <mat-form-field class="full-width" color="accent" appearance="outline">
                     <mat-label>Window Time</mat-label>
-                    <input matInput [(ngModel)]="windowTime" placeholder="Window Time">
+                    <input matInput [(ngModel)]="windowTime">
+                    <mat-error senergyError label="Window Time"></mat-error>
                 </mat-form-field>
                 <section class="checkbox-section">
                     <mat-checkbox class="checkbox-margin" [(ngModel)]="metrics" disabled>Enable Metrics</mat-checkbox>

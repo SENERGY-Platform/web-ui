@@ -23,6 +23,7 @@ import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared
 import { MatTable } from '@angular/material/table';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { forkJoin, Observable } from 'rxjs';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 
 @Component({
     templateUrl: './ranking-list-edit-dialog.component.html',
@@ -36,8 +37,10 @@ export class RankingListEditDialogComponent implements OnInit {
     widget: WidgetModel = {} as WidgetModel;
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
+    formGroup: FormGroup;
 
     constructor(
+        private fb: FormBuilder,
         private dialogRef: MatDialogRef<RankingListEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
@@ -52,15 +55,28 @@ export class RankingListEditDialogComponent implements OnInit {
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
         this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
+        this.formGroup = this.fb.group({
+            name: [this.widget.name, Validators.required],
+        });
     }
 
     ngOnInit() {
         this.getWidgetData();
+        this.onChanges();
+    }
+
+    onChanges(): void {
+        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+            this.widget.name = val;
+        });
     }
 
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
+            this.formGroup.patchValue({
+                name: this.widget.name,
+            });
         });
     }
 

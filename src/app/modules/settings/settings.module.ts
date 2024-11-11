@@ -27,21 +27,23 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import {CoreModule} from "../../core/core.module";
 
 @NgModule({
-    imports: [
-        MatDialogModule,
-        MatTableModule,
-        MatCheckboxModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        CommonModule,
-        FormsModule,
-        MatIconModule,
-        MatButtonModule,
-        MatInputModule,
-        FlexLayoutModule,
-    ],
+	imports: [
+		MatDialogModule,
+		MatTableModule,
+		MatCheckboxModule,
+		ReactiveFormsModule,
+		MatFormFieldModule,
+		CommonModule,
+		FormsModule,
+		MatIconModule,
+		MatButtonModule,
+		MatInputModule,
+		FlexLayoutModule,
+		CoreModule,
+	],
     declarations: [SettingsChangeDialogComponent],
 })
 export class SettingsModule {}

@@ -84,16 +84,6 @@ export class SettingsChangeDialogComponent implements OnInit {
             });
     }
 
-    getErrorMessageNew(): string {
-        return this.passwordNew.hasError('forbiddenName')
-            ? 'You can\'t use the username!'
-            : this.passwordNew.hasError('minlength')
-                ? 'You must enter at least 8 characters!'
-                : this.passwordNew.hasError('pattern')
-                    ? 'You must enter at least 1 special character (?|!|#|%|$)!'
-                    : '';
-    }
-
     forbiddenNameValidator(): ValidatorFn {
         return (control: AbstractControl): { [key: string]: any } | null => {
             if (this.profile.username === control.value) {

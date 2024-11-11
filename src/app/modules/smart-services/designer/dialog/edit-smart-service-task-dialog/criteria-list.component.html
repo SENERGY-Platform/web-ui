@@ -15,12 +15,14 @@
                         <mat-option value="request">request</mat-option>
                         <mat-option value="event+request">event+request</mat-option>
                     </mat-select>
+                    <mat-error senergyError label="Interaction"></mat-error>
                 </mat-form-field>
             </div>
             <div>
                 <div>
                     <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                        <senergy-select-search placeholder="Function"
+                        <mat-label>Function</mat-label>
+                        <senergy-select-search
                                                [(ngModel)]="criteria.function_id"
                                                [options]="functions"
                                                (selectionChange)="emitUpdate()"
@@ -28,11 +30,13 @@
                                                useOptionViewProperty="name"
                                                useOptionValueProperty="id">
                         </senergy-select-search>
+                        <mat-error senergyError label="Function"></mat-error>
                     </mat-form-field>
                 </div>
                 <div>
                     <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                        <senergy-select-search placeholder="Aspect"
+                        <mat-label>Aspect</mat-label>
+                        <senergy-select-search
                                                [(ngModel)]="criteria.aspect_id"
                                                [options]="nestedAspects"
                                                (selectionChange)="emitUpdate()"
@@ -40,11 +44,13 @@
                                                useOptionViewProperty="name"
                                                useOptionValueProperty="id">
                         </senergy-select-search>
+                        <mat-error senergyError label="Aspect"></mat-error>
                     </mat-form-field>
                 </div>
                 <div>
                     <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                        <senergy-select-search placeholder="Device-Class"
+                        <mat-label>Device Class</mat-label>
+                        <senergy-select-search
                                                [(ngModel)]="criteria.device_class_id"
                                                [options]="deviceClasses"
                                                (selectionChange)="emitUpdate()"
@@ -52,6 +58,7 @@
                                                useOptionViewProperty="name"
                                                useOptionValueProperty="id">
                         </senergy-select-search>
+                        <mat-error senergyError label="Device Class"></mat-error>
                     </mat-form-field>
                 </div>
             </div>

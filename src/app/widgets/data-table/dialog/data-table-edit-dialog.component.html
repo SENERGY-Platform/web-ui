@@ -25,7 +25,8 @@
                 <td *ngIf="userHasUpdateNameAuthorization">
                     <mat-form-field appearance="outline" color="accent">
                         <mat-label>Widget Name</mat-label>
-                        <input type="text" matInput placeholder="Widget Name" formControlName="name">
+                        <input type="text" matInput formControlName="name" required>
+						<mat-error senergyError label="Widget Name"></mat-error>
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
@@ -41,25 +42,28 @@
                             <mat-option [value]="orderValues.TimeAsc">Time</mat-option>
                             <mat-option [value]="orderValues.TimeDesc">Time desc</mat-option>
                         </mat-select>
+						<mat-error senergyError label="Default Order"></mat-error>
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
                     <mat-form-field appearance="outline" color="accent">
                         <mat-label>Value Alias</mat-label>
                         <input type="text" matInput placeholder="Value" formControlName="valueAlias">
+                        <mat-error senergyError label="Value Alias"></mat-error>
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
                     <mat-form-field appearance="outline" color="accent">
-                        <mat-label>Refresh time</mat-label>
-                        <input type="number" matInput placeholder="Refresh Time" formControlName="refreshTime">
+                        <mat-label>Refresh Time</mat-label>
+                        <input type="number" matInput formControlName="refreshTime">
+                        <mat-error senergyError label="Refresh Time"></mat-error>
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
                     <mat-form-field appearance="outline" color="accent">
                         <mat-label>Values per Element</mat-label>
-                        <input type="number" matInput placeholder="Values per Element"
-                            formControlName="valuesPerElement">
+                        <input type="number" matInput formControlName="valuesPerElement">
+						<mat-error senergyError label="Values per Element"></mat-error>
                     </mat-form-field>
                 </td>
             </tr>
@@ -72,11 +76,13 @@
                     <td>
                         <mat-form-field appearance="outline" color="accent">
                             <mat-label>Status</mat-label>
-                            <input class="convert-input" type="text" matInput placeholder="Status" formControlName="status">
+                            <input class="convert-input" type="text" matInput formControlName="status">
+                            <mat-error senergyError label="Status"></mat-error>
                         </mat-form-field>
                     </td>
                     <td>
                         <mat-form-field appearance="outline" color="accent">
+                            <mat-label>Icon</mat-label>
                             <mat-select formControlName="icon"
                                     placeholder="Choose Icon" class="convert-input">
                                 <mat-select-trigger>
@@ -89,12 +95,14 @@
                                     {{icon}}
                                 </mat-option>
                             </mat-select>
+                            <mat-error senergyError label="Icon"></mat-error>
                         </mat-form-field>
                     </td>
                     <td>
                         <mat-form-field appearance="outline" color="accent">
                             <mat-label>Color</mat-label>
-                            <input class="convert-input" type="text" matInput placeholder="Color" formControlName="color">
+                            <input class="convert-input" type="text" matInput formControlName="color">
+                            <mat-error senergyError label="Color"></mat-error>
                         </mat-form-field>
                     </td>
                     <td>
@@ -132,8 +140,9 @@
                                 <td colspan="1">
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Alias</mat-label>
-                                        <input type="text" matInput placeholder="Alias" required
+                                        <input type="text" matInput required
                                            formControlName="name">
+										<mat-error senergyError label="Alias"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td colspan="2" formGroupName="elementDetails">
@@ -151,132 +160,157 @@
                             <tr formGroupName="elementDetails" *ngIf="isDevice(tab)">
                                 <td formGroupName="device">
                                     <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Aspect</mat-label>
                                         <senergy-select-search formControlName="aspectId" [required]="true"
                                             placeholder="Choose Aspect"
                                             [options]="dataTableHelperService.getAspectsWithMeasuringFunction()"
                                             useOptionViewProperty="name"
                                                            useOptionValueProperty="id">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Aspect"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td formGroupName="device">
                                     <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Function</mat-label>
                                         <senergy-select-search formControlName="functionId" [required]="true"
                                             placeholder="Choose Function" [compareWith]="compareStrings"
                                             [options]="getFunctions(tab)" useOptionValueProperty="id"
                                             useOptionViewProperty="name">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Function"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td formGroupName="device">
                                     <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Device</mat-label>
                                         <senergy-select-search [compareWith]="compareStrings"
                                                            formControlName="deviceId" placeholder="Choose Device"
                                                            [required]="true" [options]="getSelectables(tab)"
                                                            useOptionViewProperty="device.display_name"
                                             useOptionValueProperty="device.id">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Device"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>
                             <tr *ngIf="isDevice(tab)">
                                 <td formGroupName="elementDetails">
                                     <mat-form-field appearance="outline" color="accent" formGroupName="device">
+                                        <mat-label>Service</mat-label>
                                         <senergy-select-search formControlName="serviceId" [required]="true"
                                             placeholder="Choose Service" [compareWith]="compareStrings"
                                             [options]="getServices(tab)" useOptionValueProperty="id"
                                             useOptionViewProperty="name">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Service"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Value</mat-label>
                                         <senergy-select-search formControlName="exportValuePath" [required]="true"
                                             placeholder="Choose Value" [compareWith]="compareStrings"
                                             [options]="getServiceValues(tab)"
                                                            useOptionViewProperty="Name"
                                             useOptionValueProperty="Path">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Value"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>
                             <tr *ngIf="isPipeline(tab)">
                                 <td formGroupName="elementDetails">
                                     <mat-form-field appearance="outline" color="accent" formGroupName="pipeline">
+                                        <mat-label>Pipeline</mat-label>
                                         <senergy-select-search formControlName="pipelineId" [required]="true"
                                             placeholder="Choose Pipeline" [compareWith]="compareStrings"
                                             [options]="dataTableHelperService.getPipelines()"
                                             useOptionValueProperty="id" useOptionViewProperty="name">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Pipeline"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td formGroupName="elementDetails">
                                     <mat-form-field appearance="outline" color="accent" formGroupName="pipeline">
+                                        <mat-label>Operator</mat-label>
                                         <senergy-select-search formControlName="operatorId" [required]="true"
                                             placeholder="Choose Operator" [compareWith]="compareStrings"
                                             [options]="getOperators(tab)" useOptionValueProperty="id"
                                             [getOptionViewValue]="getOperatorViewValue">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Operator"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Value</mat-label>
                                         <senergy-select-search formControlName="exportValuePath" [required]="true"
                                             placeholder="Choose Value" [compareWith]="compareStrings"
                                             [options]="getOperatorValues(tab)"
                                                            useOptionValueProperty="Path"
                                             useOptionViewProperty="Name">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Value"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>
                             <tr *ngIf="isImport(tab)">
                                 <td formGroupName="elementDetails">
                                     <mat-form-field appearance="outline" color="accent" formGroupName="import">
+                                        <mat-label>Type</mat-label>
                                         <senergy-select-search formControlName="typeId" [required]="true"
                                             placeholder="Choose Type"
                                             [options]="dataTableHelperService.getImportTypes()"
                                             useOptionValueProperty="id" useOptionViewProperty="name">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Type"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td formGroupName="elementDetails">
                                     <mat-form-field appearance="outline" color="accent" formGroupName="import">
+                                        <mat-label>Instance</mat-label>
                                         <senergy-select-search formControlName="instanceId" [required]="true"
                                             placeholder="Choose Instance"
                                             [options]="dataTableHelperService.getImportInstancesOfType(tab.get('elementDetails.import.typeId')?.value)"
                                             useOptionValueProperty="id"
                                                            useOptionViewProperty="name">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Instance"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline"  color="accent">
+                                        <mat-label>Value</mat-label>
                                         <senergy-select-search formControlName="exportValuePath" [required]="true"
                                             placeholder="Choose Value"
                                             [options]="dataTableHelperService.getImportTypeValues(tab.get('elementDetails.import.typeId')?.value)"
                                             useOptionValueProperty="Path" useOptionViewProperty="Name">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Value"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>
                             <tr *ngIf="isDeviceGroup(tab)" formGroupName="elementDetails">
                                 <td formGroupName="deviceGroup">
                                     <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Choose Device Group</mat-label>
-                                        <senergy-select-search [options]="deviceGroups" formControlName="deviceGroupId"
+                                        <mat-label>Device Group</mat-label>
+                                        <senergy-select-search placeholder="Choose Device Group"
+												[options]="deviceGroups" formControlName="deviceGroupId"
                                             useOptionViewProperty="name" useOptionValueProperty="id">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Device Group"></mat-error>
                                     </mat-form-field>
 
                                 </td>
                                 <td formGroupName="deviceGroup">
                                     <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Choose Criteria</mat-label>
-                                        <senergy-select-search [options]="getCriteria(tab)"
+                                        <mat-label>Criteria</mat-label>
+                                        <senergy-select-search [options]="getCriteria(tab)" placeholder="Choose Criteria"
                                             formControlName="deviceGroupCriteria"
                                             [getOptionViewValue]="describeCriteria()" [compareWith]="compareCriteria">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Criteria"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>
@@ -288,6 +322,7 @@
                                             formControlName="unit" [getOptionValue]="getDisplayUnit"
                                             [getOptionViewValue]="getDisplayUnit">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Unit"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td formGroupName="elementDetails">
@@ -296,21 +331,25 @@
                                         <senergy-select-search [options]="aggregations"
                                             formControlName="deviceGroupAggregation">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Aggregation"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>
                             <tr>
                                 <td *ngIf="!isDevice(tab) && !isDeviceGroup(tab)">
                                     <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Export</mat-label>
                                         <senergy-select-search formControlName="exportId" [required]="true"
                                             placeholder="Choose Export" [options]="getExports(tab)"
                                             useOptionViewProperty="Name" useOptionValueProperty="ID">
                                         </senergy-select-search>
+										<mat-error senergyError label="Export"></mat-error>
                                     </mat-form-field>
                                 </td>
 
                                 <td *ngIf="!isDevice(tab) && tab.get('exportId')?.value !== undefined && getTags(tab).size > 0">
                                     <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Tags</mat-label>
                                         <senergy-select-search placeholder="Choose Tags" [multiple]="true"
                                             [options]="getTags(tab)"
                                                            formControlName="exportTagSelection"
@@ -318,13 +357,15 @@
                                             [getOptionValue]="getTagValue"
                                                            useOptionViewProperty="value">
                                         </senergy-select-search>
+                                        <mat-error senergyError label="Tags"></mat-error>
                                     </mat-form-field>
                                 </td>
 
                                 <td *ngIf="!isDeviceGroup(tab)">
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Unit</mat-label>
-                                        <input type="text" matInput placeholder="Unit" formControlName="unit">
+                                        <input type="text" matInput formControlName="unit">
+                                        <mat-error senergyError label="Unit"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>
@@ -332,20 +373,24 @@
                                 <td>
                                     <mat-form-field appearance="outline" color="accent" hintLabel="For use in Angular pipes">
                                         <mat-label>Format</mat-label>
-                                        <input type="text" matInput placeholder="Format" formControlName="format">
-                                    </mat-form-field>
+                                        <input type="text" matInput formControlName="format">
+                                        <mat-error senergyError label="Format"></mat-error>
+									</mat-form-field>
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
-                                        <senergy-select-search placeholder="Group Type" [options]="groupTypes"
+                                        <mat-label>Group Type</mat-label>
+                                        <senergy-select-search [options]="groupTypes"
                                             [noneView]="'none'" formControlName="groupType">
                                         </senergy-select-search>
+										<mat-error senergyError label="Group Type"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Group time</mat-label>
+                                        <mat-label>Group Time</mat-label>
                                         <input type="text" matInput formControlName="groupTime">
+										<mat-error senergyError label="Group Time"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>
@@ -355,14 +400,16 @@
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Lower boundary</mat-label>
+                                        <mat-label>Lower Boundary</mat-label>
                                         <input matInput type="number" formControlName="lowerBoundary">
+										<mat-error senergyError label="Lower Boundary"></mat-error>
                                     </mat-form-field>
                                 </td>
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Upper boundary</mat-label>
+                                        <mat-label>Upper Boundary</mat-label>
                                         <input matInput type="number" formControlName="upperBoundary">
+										<mat-error senergyError label="Upper Boundary"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </tr>

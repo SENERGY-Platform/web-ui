@@ -21,6 +21,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { forkJoin, Observable } from 'rxjs';
+import {FormBuilder, FormGroup,  Validators} from '@angular/forms';
 
 @Component({
     templateUrl: './process-incident-list-edit-dialog.component.html',
@@ -32,8 +33,10 @@ export class ProcessIncidentListEditDialogComponent implements OnInit {
     widget: WidgetModel = {} as WidgetModel;
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
+    formGroup: FormGroup;
 
     constructor(
+        private fb: FormBuilder,
         private dialogRef: MatDialogRef<ProcessIncidentListEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
@@ -48,15 +51,33 @@ export class ProcessIncidentListEditDialogComponent implements OnInit {
         this.widgetId = data.widgetId;
         this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
+        this.formGroup = this.fb.group({
+            name: ['', [Validators.required]],
+            limit: ['', [Validators.min(0)]]
+        });
     }
 
     ngOnInit() {
         this.getWidgetData();
+        this.onChanges();
+    }
+
+    onChanges(): void {
+        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+            this.widget.name = val;
+        });
+        this.formGroup.controls['limit'].valueChanges.subscribe(val => {
+            this.widget.properties.limit = val;
+        });
     }
 
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
+            this.formGroup.patchValue({
+                name: this.widget.name,
+                limit: this.widget.properties.limit,
+            });
         });
     }
 

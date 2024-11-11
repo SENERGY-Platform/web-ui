@@ -22,6 +22,7 @@
             <mat-form-field color="accent" appearance="outline" fxFill [hintLabel]="nameHint()">
                 <mat-label>Name</mat-label>
                 <input matInput formControlName="name" required>
+                <mat-error senergyError label="Name"></mat-error>
             </mat-form-field>
         </div>
 
@@ -32,6 +33,7 @@
                                        useOptionValueProperty="id"
                                        useOptionViewProperty="name"
                                        formControlName="aspect_id"></senergy-select-search>
+                <mat-error senergyError label="Aspect"></mat-error>
             </mat-form-field>
         </div>
 
@@ -42,6 +44,7 @@
                                        useOptionValueProperty="id"
                                        useOptionViewProperty="name"
                                        formControlName="function_id"></senergy-select-search>
+                <mat-error senergyError label="Function"></mat-error>
             </mat-form-field>
         </div>
 
@@ -51,6 +54,7 @@
                 <mat-select formControlName="type" required>
                     <mat-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mat-option>
                 </mat-select>
+                <mat-error senergyError label="Type"></mat-error>
             </mat-form-field>
         </div>
 
@@ -61,6 +65,7 @@
                                        useOptionValueProperty="id"
                                        useOptionViewProperty="name"
                                        formControlName="characteristic_id"></senergy-select-search>
+                <mat-error senergyError label="Characteristic"></mat-error>
             </mat-form-field>
         </div>
 

@@ -26,24 +26,32 @@
                 <div>
                     <div>
                         <mat-form-field appearance="outline" class="full-width" color="accent" >
-                            <input matInput placeholder="ID" [(ngModel)]="input.id" [generic_validator]="isValidCamundaVariableNameValidator">
+                            <mat-label>ID</mat-label>
+                            <input matInput [(ngModel)]="input.id" [generic_validator]="isValidCamundaVariableNameValidator">
+                            <mat-error senergyError label="ID"></mat-error>
                         </mat-form-field>
                     </div>
                     <div>
                         <mat-form-field appearance="outline" class="full-width" color="accent" >
-                            <input matInput placeholder="Label" [(ngModel)]="input.label">
+                            <mat-label>Label</mat-label>
+                            <input matInput [(ngModel)]="input.label">
+                            <mat-error senergyError label="Label"></mat-error>
                         </mat-form-field>
                     </div>
 
                     <div>
                         <mat-form-field appearance="outline" class="full-width" color="accent" >
-                            <input matInput placeholder="Description" [(ngModel)]="input.description">
+                            <mat-label>Description</mat-label>
+                            <input matInput [(ngModel)]="input.description">
+                            <mat-error senergyError label="Description"></mat-error>
                         </mat-form-field>
                     </div>
 
                     <div>
                         <mat-form-field appearance="outline" class="full-width" color="accent" >
-                            <input matInput placeholder="Order" [(ngModel)]="input.order" type="number">
+                            <mat-label>Order</mat-label>
+                            <input matInput [(ngModel)]="input.order" type="number">
+                            <mat-error senergyError label="Order"></mat-error>
                         </mat-form-field>
                     </div>
 
@@ -85,13 +93,14 @@
                         </div>
                         <div>
                             <mat-form-field appearance="outline" class="full-width" color="accent" >
-                                <mat-label>Iot-Selectors</mat-label>
+                                <mat-label>IoT-Selectors</mat-label>
                                 <mat-select [(ngModel)]="input.iot_selectors" multiple>
                                     <mat-option value="device">Device</mat-option>
                                     <mat-option value="device_service_group">Service-Group Device</mat-option>
                                     <mat-option value="group">Device-Group</mat-option>
                                     <mat-option value="import">Import</mat-option>
                                 </mat-select>
+                                <mat-error senergyError label="IoT-Selectors"></mat-error>
                             </mat-form-field>
                         </div>
                         <mat-divider [inset]="true"></mat-divider>
@@ -113,40 +122,44 @@
                                                 <mat-option value="request">request</mat-option>
                                                 <mat-option value="event+request">event+request</mat-option>
                                             </mat-select>
+                                            <mat-error senergyError label="Interaction"></mat-error>
                                         </mat-form-field>
                                     </div>
                                     <div>
                                         <div>
                                             <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                                                <senergy-select-search placeholder="Function"
-                                                                       [(ngModel)]="criteria.function_id"
+                                                <mat-label>Function</mat-label>
+                                                <senergy-select-search [(ngModel)]="criteria.function_id"
                                                                        [options]="functions"
                                                                        noneView="NONE"
                                                                        useOptionViewProperty="name"
                                                                        useOptionValueProperty="id">
                                                 </senergy-select-search>
+                                                <mat-error senergyError label="Function"></mat-error>
                                             </mat-form-field>
                                         </div>
                                         <div>
                                             <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                                                <senergy-select-search placeholder="Aspect"
-                                                                       [(ngModel)]="criteria.aspect_id"
+                                                <mat-label>Aspect</mat-label>
+                                                <senergy-select-search [(ngModel)]="criteria.aspect_id"
                                                                        [options]="nestedAspects"
                                                                        noneView="NONE"
                                                                        useOptionViewProperty="name"
                                                                        useOptionValueProperty="id">
                                                 </senergy-select-search>
+                                                <mat-error senergyError label="Aspect"></mat-error>
                                             </mat-form-field>
                                         </div>
                                         <div>
                                             <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                                                <senergy-select-search placeholder="Device-Class"
-                                                                       [(ngModel)]="criteria.device_class_id"
+                                                <mat-label>Device-Class</mat-label>
+                                                <senergy-select-search [(ngModel)]="criteria.device_class_id"
                                                                        [options]="deviceClasses"
                                                                        noneView="NONE"
                                                                        useOptionViewProperty="name"
                                                                        useOptionValueProperty="id">
                                                 </senergy-select-search>
+                                                <mat-error senergyError label="Device-Class"></mat-error>
                                             </mat-form-field>
                                         </div>
                                     </div>
@@ -170,17 +183,22 @@
                                     <mat-option value="long">number</mat-option>
                                     <mat-option value="boolean">boolean</mat-option>
                                 </mat-select>
+                                <mat-error senergyError label="Type"></mat-error>
                             </mat-form-field>
                         </div>
 
                         <div *ngIf="input.type === 'string'">
                             <mat-form-field appearance="outline" class="full-width">
-                                <input matInput placeholder="Default Value" [(ngModel)]="input.default_value" type="text">
+                                <mat-label>Default Value</mat-label>
+                                <input matInput [(ngModel)]="input.default_value" type="text">
+                                <mat-error senergyError label="Default Value"></mat-error>
                             </mat-form-field>
                         </div>
                         <div *ngIf="input.type === 'long'">
                             <mat-form-field appearance="outline" class="full-width">
-                                <input matInput placeholder="Default Value" [(ngModel)]="input.default_value" type="number">
+                                <mat-label>Default Value</mat-label>
+                                <input matInput [(ngModel)]="input.default_value" type="number">
+                                <mat-error senergyError label="Default Value"></mat-error>
                             </mat-form-field>
                         </div>
                         <div *ngIf="input.type === 'boolean'">
@@ -192,13 +210,14 @@
 
                         <div>
                             <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                                <senergy-select-search placeholder="Characteristic"
-                                                       [(ngModel)]="input.characteristic_id"
+                                <mat-label>Characteristic</mat-label>
+                                <senergy-select-search [(ngModel)]="input.characteristic_id"
                                                        [options]="characteristics"
                                                        noneView="NONE"
                                                        useOptionViewProperty="name"
                                                        useOptionValueProperty="id">
                                 </senergy-select-search>
+                                <mat-error senergyError label="Characteristic"></mat-error>
                             </mat-form-field>
                         </div>
 
@@ -207,13 +226,19 @@
                             <h4 class="mat-h4">Options</h4>
                             <div *ngFor="let option of input.options" class="full-width">
                                 <mat-form-field appearance="outline">
-                                    <input matInput placeholder="Name" [(ngModel)]="option.key">
+                                    <mat-label>Name</mat-label>
+                                    <input matInput [(ngModel)]="option.key">
+                                    <mat-error senergyError label="Name"></mat-error>
                                 </mat-form-field>
                                 <mat-form-field appearance="outline" *ngIf="input.type === 'string'">
-                                    <input matInput placeholder="Value" [(ngModel)]="option.value" type="text">
+                                    <mat-label>Value</mat-label>
+                                    <input matInput [(ngModel)]="option.value" type="text">
+                                    <mat-error senergyError label="Value"></mat-error>
                                 </mat-form-field>
                                 <mat-form-field appearance="outline" *ngIf="input.type === 'long'">
-                                    <input matInput placeholder="Value" [(ngModel)]="option.value" type="number">
+                                    <mat-label>Value</mat-label>
+                                    <input matInput [(ngModel)]="option.value" type="number">
+                                    <mat-error senergyError label="Value"></mat-error>
                                 </mat-form-field>
                                 <mat-radio-group aria-label="Value" [(ngModel)]="option.value" *ngIf="input.type === 'boolean'">
                                     <mat-radio-button [value]="true">True</mat-radio-button>

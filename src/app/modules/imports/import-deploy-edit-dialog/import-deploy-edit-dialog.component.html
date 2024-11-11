@@ -21,6 +21,7 @@
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>ID</mat-label>
                 <input matInput formControlName="id">
+                <mat-error senergyError label="ID"></mat-error>
             </mat-form-field>
         </div>
 
@@ -28,6 +29,7 @@
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Image</mat-label>
                 <input matInput formControlName="image" required>
+                <mat-error senergyError label="Image"></mat-error>
             </mat-form-field>
         </div>
 
@@ -35,6 +37,7 @@
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Topic</mat-label>
                 <input matInput formControlName="kafka_topic">
+                <mat-error senergyError label="Topic"></mat-error>
             </mat-form-field>
         </div>
 
@@ -42,6 +45,7 @@
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Name</mat-label>
                 <input matInput formControlName="name" required>
+                <mat-error senergyError label="Name"></mat-error>
             </mat-form-field>
         </div>
 
@@ -72,6 +76,7 @@
                     <mat-form-field fxFlex class="inline" color="accent" appearance="outline">
                         <mat-label>Value</mat-label>
                         <input matInput required formControlName="value">
+                        <mat-error senergyError label="Value"></mat-error>
                     </mat-form-field>
                 </td>
             </ng-container>

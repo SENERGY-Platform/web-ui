@@ -17,71 +17,75 @@
 <h2 mat-dialog-title>Edit Switch</h2>
 
 <mat-dialog-content>
-    <div fxLayout="column">
-        <mat-form-field appearance="outline" color="accent" *ngIf="userHasUpdateNameAuthorization">
-            <mat-label>Name</mat-label>
-            <input matInput placeholder="Name" [(ngModel)]="widget.name">
-        </mat-form-field>
-        <mat-form-field appearance="outline" color="accent" *ngIf="userHasUpdatePropertiesAuthorization">
-            <mat-label>Image URL</mat-label>
-            <input matInput placeholder="Image URL" [(ngModel)]="widget.properties.imgUrl">
-        </mat-form-field>
-    </div>
+	<form [formGroup]="formGroup">
+		<div fxLayout="column">
+			<mat-form-field appearance="outline" color="accent" *ngIf="userHasUpdateNameAuthorization">
+				<mat-label>Widget Name</mat-label>
+				<input matInput formControlName="name">
+				<mat-error senergyError label="Widget Name"></mat-error>
+			</mat-form-field>
+			<mat-form-field appearance="outline" color="accent" *ngIf="userHasUpdatePropertiesAuthorization">
+				<mat-label>Image URL</mat-label>
+				<input matInput formControlName="imgUrl">
+				<mat-error senergyError label="Image URL"></mat-error>
+			</mat-form-field>
+		</div>
 
-    <span *ngIf="userHasUpdatePropertiesAuthorization">
-        <table #table mat-table [dataSource]="data">
-            <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Deployment</th>
-                <td mat-cell *matCellDef="let element"> {{element.name}}</td>
-                <td mat-footer-cell *matFooterCellDef>
-                    <mat-form-field appearance="outline" color="accent" class="user-input">
-                        <mat-label>Choose Deployment</mat-label>
-                        <input type="text" matInput [formControl]="formControl" [matAutocomplete]="auto">
-                        <mat-error *ngIf="formControl.hasError('valid') === false">
-                            Please enter a valid deployment!
-                        </mat-error>
-                        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                            <mat-option *ngFor="let option of filteredDeployments | async" [value]="option">
-                                {{option.name}}
-                            </mat-option>
-                        </mat-autocomplete>
-                    </mat-form-field>
-                </td>
-            </ng-container>
-            <ng-container matColumnDef="trigger">
-                <th mat-header-cell *matHeaderCellDef>Trigger</th>
-                <td mat-cell *matCellDef="let element" class="trigger-size">
-                    <mat-select [(value)]="element.trigger" class="select-size">
-                        <mat-option value="on">On</mat-option>
-                        <mat-option value="off">Off</mat-option>
-                    </mat-select>
-                </td>
-                <td mat-footer-cell *matFooterCellDef>
-                    <mat-select [(value)]="newTrigger" class="select-size">
-                        <mat-option value="on">On</mat-option>
-                        <mat-option value="off">Off</mat-option>
-                    </mat-select>
-                </td>
-            </ng-container>
-            <ng-container matColumnDef="delete">
-                <th mat-header-cell *matHeaderCellDef></th>
-                <td mat-cell *matCellDef="let i = index;">
-                    <button class="margin" mat-icon-button color="accent" (click)="deleteRow(i)">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </td>
-                <td mat-footer-cell *matFooterCellDef>
-                    <button class="margin" mat-icon-button color="accent" (click)="addColumn()">
-                        <mat-icon>add</mat-icon>
-                    </button>
-                </td>
-            </ng-container>
+		<span *ngIf="userHasUpdatePropertiesAuthorization">
+			<table #table mat-table [dataSource]="data">
+				<ng-container matColumnDef="name">
+					<th mat-header-cell *matHeaderCellDef>Deployment</th>
+					<td mat-cell *matCellDef="let element"> {{element.name}}</td>
+					<td mat-footer-cell *matFooterCellDef>
+						<mat-form-field appearance="outline" color="accent" class="user-input">
+							<mat-label>Deployment</mat-label>
+							<input type="text" placeholder="Choose Deployment" matInput formControlName="deployment" [matAutocomplete]="auto">
+							<mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+								<mat-option *ngFor="let option of filteredDeployments | async" [value]="option">
+									{{option.name}}
+								</mat-option>
+							</mat-autocomplete>
+							<mat-error *ngIf="formGroup.get('deployment')?.hasError('valid') === false">
+								Please enter a valid deployment!
+                        	</mat-error>
+						</mat-form-field>
+					</td>
+				</ng-container>
+				<ng-container matColumnDef="trigger">
+					<th mat-header-cell *matHeaderCellDef>Trigger</th>
+					<td mat-cell *matCellDef="let element" class="trigger-size">
+						<mat-select [(value)]="element.trigger" class="select-size">
+							<mat-option value="on">On</mat-option>
+							<mat-option value="off">Off</mat-option>
+						</mat-select>
+					</td>
+					<td mat-footer-cell *matFooterCellDef>
+						<mat-select [(value)]="newTrigger" class="select-size">
+							<mat-option value="on">On</mat-option>
+							<mat-option value="off">Off</mat-option>
+						</mat-select>
+					</td>
+				</ng-container>
+				<ng-container matColumnDef="delete">
+					<th mat-header-cell *matHeaderCellDef></th>
+					<td mat-cell *matCellDef="let i = index;">
+						<button class="margin" mat-icon-button color="accent" (click)="deleteRow(i)">
+							<mat-icon>delete</mat-icon>
+						</button>
+					</td>
+					<td mat-footer-cell *matFooterCellDef>
+						<button class="margin" mat-icon-button color="accent" (click)="addColumn()">
+							<mat-icon>add</mat-icon>
+						</button>
+					</td>
+				</ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-            <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
-            <tr mat-footer-row *matFooterRowDef="columnsToDisplay" class="example-first-footer-row"></tr>
-        </table>
-    </span>
+				<tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+				<tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+				<tr mat-footer-row *matFooterRowDef="columnsToDisplay" class="example-first-footer-row"></tr>
+			</table>
+		</span>
+	</form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

@@ -28,7 +28,8 @@ import {DeploymentsService} from '../../../modules/processes/deployments/shared/
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {CamundaVariable} from '../../../modules/processes/deployments/shared/deployments-definition.model';
 import {checkValueValidator} from './range-slider-edit-dialog.validators';
-import { forkJoin, Observable } from 'rxjs';
+import {forkJoin, Observable } from 'rxjs';
+import {rangeValidator} from '../../../core/validators/range.validator';
 
 @Component({
     templateUrl: './range-slider-edit-dialog.component.html',
@@ -39,10 +40,11 @@ export class RangeSliderEditDialogComponent implements OnInit {
 
     formGroup = this.formBuilder.group(
         {
+            name: ['', Validators.required],
             deployment: '',
             parameter: '',
-            minValue: [{ value: '' }, [Validators.required, Validators.min(0), Validators.max(100)]],
-            maxValue: [{ value: '' }, [Validators.required, Validators.min(0), Validators.max(100)]],
+            minValue: [{ value: '' }, [Validators.required, rangeValidator(0, 100)]],
+            maxValue: [{ value: '' }, [Validators.required, rangeValidator(0, 100)]],
             unit: '',
         },
         { validators: [checkValueValidator()] },
@@ -91,6 +93,9 @@ export class RangeSliderEditDialogComponent implements OnInit {
                 });
             }
         });
+        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+            this.widget.name = val;
+        });
         this.getWidgetData();
         this.initDeployments();
     }
@@ -99,6 +104,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
             this.formGroup.patchValue({
+                name: this.widget.name,
                 deployment: this.widget.properties.deployment,
                 parameter: this.widget.properties.selectedParameter,
                 minValue: this.widget.properties.selectedMinValue,
@@ -117,6 +123,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
+        this.widget.name = this.formGroup.get('name')?.value;
         this.widget.properties.deployment = this.formGroup.get('deployment')?.value;
         this.widget.properties.selectedParameter = this.formGroup.get('parameter')?.value;
         this.widget.properties.selectedMinValue = this.formGroup.get('minValue')?.value;

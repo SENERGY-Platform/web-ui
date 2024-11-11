@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnInit } from '@angular/core';
-import { Form, FormControl, FormGroup, UntypedFormBuilder } from '@angular/forms';
+import {Form, FormControl, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -129,7 +129,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.form = this.fb.group({
             vAxis: {},
             vAxisLabel: '',
-            name: '',
+            name: ['', Validators.required],
             type: '',
             format: '',
             threshold: 128,

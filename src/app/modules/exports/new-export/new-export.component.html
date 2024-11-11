@@ -41,9 +41,10 @@
                 <mat-form-field fxFlex color="accent" appearance="outline"
                                 *ngIf="exportForm.getRawValue().targetSelector === targetDb">
                     <mat-label>Database</mat-label>
-                    <mat-select placeholder="Database" formControlName="exportDatabaseId" required>
+                    <mat-select formControlName="exportDatabaseId" required>
                         <mat-option *ngFor="let db of exportDatabases" [value]="db.ID">{{db.Name}}</mat-option>
                     </mat-select>
+					<mat-error senergyError label="Database"></mat-error>
                 </mat-form-field>
                 <div fxLayout="row" class="source-container"
                      *ngIf="exportForm.controls.targetSelector.value === targetBroker">
@@ -53,30 +54,34 @@
                     <mat-form-field fxFill color="accent" appearance="outline">
                         <mat-label>Mqtt Broker Address</mat-label>
                         <input matInput formControlName="customMqttBroker" placeholder="Broker"/>
+                        <mat-error senergyError label="Mqtt Broker Address"></mat-error>
                     </mat-form-field>
                     <mat-form-field fxFill color="accent" appearance="outline">
                         <mat-label>Mqtt User</mat-label>
                         <input matInput formControlName="customMqttUser" placeholder="User"/>
+                        <mat-error senergyError label="Mqtt User"></mat-error>
                     </mat-form-field>
                     <mat-form-field fxFill color="accent" appearance="outline">
                         <mat-label>Mqtt Password</mat-label>
                         <input matInput formControlName="customMqttPassword" placeholder="Password"/>
+                        <mat-error senergyError label="Mqtt Password"></mat-error>
                     </mat-form-field>
                     <mat-form-field fxFill color="accent" appearance="outline">
                         <mat-label>Mqtt Base Topic</mat-label>
                         <input matInput formControlName="customMqttBaseTopic" placeholder="Base Topic"/>
+                        <mat-error senergyError label="Mqtt Base Topic"></mat-error>
                     </mat-form-field>
                 </div>
                 <mat-form-field fxFill color="accent" appearance="outline">
                     <mat-label>Name</mat-label>
-                    <input matInput formControlName="name" placeholder="Name" required="true"/>
-                    <mat-error *ngIf="exportForm.controls.name.errors?.required">Please enter a name for the export.
-                    </mat-error>
+                    <input matInput formControlName="name" required="true"/>
+                    <mat-error senergyError label="Name"></mat-error>
                 </mat-form-field>
 
                 <mat-form-field fxFill color="accent" appearance="outline">
                     <mat-label>Description</mat-label>
-                    <input matInput formControlName="description" placeholder="Description"/>
+                    <input matInput formControlName="description"/>
+                    <mat-error senergyError label="Description"></mat-error>
                 </mat-form-field>
 
                 <mat-form-field fxFlex color="accent" appearance="outline"
@@ -85,10 +90,7 @@
                     <senergy-select-search formControlName="device"
                                            [options]="devices" useOptionViewProperty="display_name" [required]="true">
                     </senergy-select-search>
-                    <mat-error
-                            *ngIf="exportForm.controls.device.invalid && (exportForm.controls.device.dirty || exportForm.controls.device.touched) && exportForm.controls.device.errors?.required">
-                        Please select a device.
-                    </mat-error>
+					<mat-error senergyError label="Device"></mat-error>
                 </mat-form-field>
 
                 <mat-form-field fxFlex color="accent" appearance="outline"
@@ -97,10 +99,7 @@
                     <senergy-select-search formControlName="pipeline"
                                            [options]="pipelines" useOptionViewProperty="name" [required]="true">
                     </senergy-select-search>
-                    <mat-error
-                            *ngIf="exportForm.controls.pipeline.invalid && (exportForm.controls.pipeline.dirty || exportForm.controls.pipeline.touched) && exportForm.controls.pipeline.errors?.required">
-                        Please select a pipeline.
-                    </mat-error>
+					<mat-error senergyError label="Pipeline"></mat-error>
                 </mat-form-field>
 
                 <mat-form-field fxFlex color="accent" appearance="outline"
@@ -109,10 +108,7 @@
                     <senergy-select-search formControlName="import"
                                            [options]="imports" useOptionViewProperty="name" [required]="true">
                     </senergy-select-search>
-                    <mat-error
-                            *ngIf="exportForm.controls.import.invalid && (exportForm.controls.import.dirty || exportForm.controls.import.touched) && exportForm.controls.import.errors?.required">
-                        Please select an import.
-                    </mat-error>
+					<mat-error senergyError label="Import"></mat-error>
                 </mat-form-field>
 
                 <mat-form-field fxFlex color="accent" appearance="outline"
@@ -122,10 +118,7 @@
                                            [options]="deviceType.services"
                                            useOptionViewProperty="name" [required]="true">
                     </senergy-select-search>
-                    <mat-error
-                            *ngIf="exportForm.controls.service.invalid && (exportForm.controls.service.dirty || exportForm.controls.service.touched) && exportForm.controls.service.errors?.required">
-                        Please select a service.
-                    </mat-error>
+					<mat-error senergyError label="Service"></mat-error>
                 </mat-form-field>
 
                 <mat-accordion fxFlex *ngIf="exportForm.getRawValue().selector ==='pipe'" class="operator-accordion"
@@ -159,6 +152,7 @@
                     <mat-label>Time Path</mat-label>
                     <senergy-select-search formControlName="timePath" [options]="getPathsKeyOptions()">
                     </senergy-select-search>
+					<mat-error senergyError label="Time Path"></mat-error>
                 </mat-form-field>
 
                 <mat-form-field fxFill color="accent" appearance="outline" *ngIf="isTimescaleSelected()">
@@ -171,6 +165,7 @@
                     <mat-autocomplete #auto="matAutocomplete">
                         <mat-option *ngFor='let format of filtered_formats| async' [value]="format">{{format}}</mat-option>
                     </mat-autocomplete>
+                    <mat-error senergyError label="Timestamp Format"></mat-error>
                 </mat-form-field>
 
                 <mat-checkbox formControlName="allMessages">Consume all messages</mat-checkbox>
@@ -179,23 +174,26 @@
                      fxLayout="row" class="layout-value">
                     <div [formGroupName]="key+offset" fxFlex fxLayoutAlign="center center">
                         <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
+                            <mat-label>Name</mat-label>
                             <mat-label>{{exportForm.getRawValue().targetSelector === targetDb ? 'Name' : 'Topic'}}</mat-label>
-                            <input #input matInput formControlName="Name" placeholder="Name"/>
+                            <input #input matInput formControlName="Name"/>
+                            <mat-error senergyError label="Name"></mat-error>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
                             <mat-label>Path</mat-label>
                             <senergy-select-search formControlName="Path" (ngModelChange)="pathChanged(key+offset)"
-                                                   placeholder="Path"
                                                    [options]="getPathsKeyOptions()">
                             </senergy-select-search>
+                            <mat-error senergyError label="Path"></mat-error>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
                             <mat-label>Type</mat-label>
-                            <mat-select placeholder="Type" formControlName="Type">
+                            <mat-select formControlName="Type">
                                 <mat-option *ngFor="let option of dropdown | keyvalue" [value]="option.value">
                                     {{option.value}}
                                 </mat-option>
                             </mat-select>
+                            <mat-error senergyError label="Type"></mat-error>
                         </mat-form-field>
                         <mat-checkbox formControlName="Tag" (ngModelChange)="pathChanged(key+offset)"
                                       class="inline layout-value pad-right"

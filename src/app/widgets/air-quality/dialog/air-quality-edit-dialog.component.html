@@ -24,6 +24,7 @@
                 <mat-form-field appearance="outline" color="accent" class="input-field">
                     <mat-label>Widget Name</mat-label>
                     <input type="text" matInput [(ngModel)]="name" required>
+                    <mat-error senergyError label="Widget Name"></mat-error>
                 </mat-form-field>
                 <div class="nav-button">
                     <button mat-raised-button matStepperNext>Next</button>
@@ -51,6 +52,7 @@
                     <mat-form-field color="accent" appearance="outline" class="input-field location-field">
                         <mat-label>Location</mat-label>
                         <input matInput required [matAutocomplete]="auto" [formControl]="searchFormControl">
+                        <mat-error senergyError label="Location"></mat-error>
                         <mat-autocomplete #auto="matAutocomplete"
                                           (optionSelected)="onLocationSelected($event.option.value)">
                             <mat-option *ngFor="let option of geonamesSearchResults | async"
@@ -93,6 +95,7 @@
                                 <div [innerHTML]="option.name_html"></div>
                             </mat-option>
                         </mat-select>
+                        <mat-error senergyError label="Enable Measurements"></mat-error>
                     </mat-form-field>
                 </div>
                 <div>
@@ -104,6 +107,7 @@
                                 <div [innerHTML]="option.name_html"></div>
                             </mat-option>
                         </mat-select>
+                        <mat-error senergyError label="Enable Pollen Warnings"></mat-error>
                     </mat-form-field>
                 </div>
                 <div>
@@ -140,25 +144,28 @@
                                     <td>
                                         <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Export</mat-label>
-                                            <senergy-select-search placeholder="Export" [(ngModel)]="option.export" (ngModelChange)="insideExportChanged(option)"
+                                            <senergy-select-search [(ngModel)]="option.export" (ngModelChange)="insideExportChanged(option)"
                                                         [compareWith]="compareExports" [options]="exports" useOptionViewProperty="Name" noneView="--None--"
                                                         [disabled]="option.insideDeviceId != null">
                                             </senergy-select-search>
+                                            <mat-error senergyError label="Export"></mat-error>
                                         </mat-form-field>
                                     </td>
                                     <td>
                                         <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Value</mat-label>
-                                            <senergy-select-search placeholder="Value" [(ngModel)]="option.data.column"
+                                            <senergy-select-search [(ngModel)]="option.data.column"
                                                         [compareWith]="compareExportValueModels" [options]="option.export?.Values || []"
                                                         useOptionViewProperty="Name" [disabled]="option.insideDeviceId != null">
                                             </senergy-select-search>
+                                            <mat-error senergyError label="Value"></mat-error>
                                         </mat-form-field>
                                     </td>
                                     <td>
                                         <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Math</mat-label>
-                                            <input matInput placeholder="Math" [(ngModel)]="option.math">
+                                            <input matInput [(ngModel)]="option.math">
+                                            <mat-error senergyError label="Math"></mat-error>
                                         </mat-form-field>
                                     </td>
                                 </tr>
@@ -166,27 +173,30 @@
                                     <td>
                                         <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Device</mat-label>
-                                            <senergy-select-search placeholder="Device" [(ngModel)]="option.insideDeviceId" (ngModelChange)="insideDeviceChanged(option)"
+                                            <senergy-select-search [(ngModel)]="option.insideDeviceId" (ngModelChange)="insideDeviceChanged(option)"
                                                                    [options]="devices" useOptionViewProperty="name" useOptionValueProperty="id" [disabled]="option.export != null" noneView="--None--">
                                             </senergy-select-search>
+                                            <mat-error senergyError label="Device"></mat-error>
                                         </mat-form-field>
                                     </td>
                                     <td>
                                         <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Service</mat-label>
-                                            <senergy-select-search placeholder="Service" [(ngModel)]="option.insideServiceId"
+                                            <senergy-select-search [(ngModel)]="option.insideServiceId"
                                                                    [options]="(getServices(option.insideDeviceId) | async) || []" useOptionValueProperty="id"
                                                                    [disabled]="option.export != null" useOptionViewProperty="name">
                                             </senergy-select-search>
+                                            <mat-error senergyError label="Service"></mat-error>
                                         </mat-form-field>
                                     </td>
                                     <td>
                                         <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Value</mat-label>
-                                            <senergy-select-search placeholder="Value" [(ngModel)]="option.insideDeviceValuePath"
+                                            <senergy-select-search [(ngModel)]="option.insideDeviceValuePath"
                                                                    [options]="getServiceValues(option.insideDeviceId, option.insideServiceId)"
                                                                    [disabled]="option.export != null">
                                             </senergy-select-search>
+                                            <mat-error senergyError label="Value"></mat-error>
                                         </mat-form-field>
                                     </td>
                                 </tr>
@@ -207,30 +217,33 @@
                                         <td>
                                             <mat-form-field color="accent" appearance="outline">
                                                 <mat-label>Export</mat-label>
-                                                <senergy-select-search placeholder="Export"
+                                                <senergy-select-search
                                                             [(ngModel)]="option.outsideExport"
                                                             [compareWith]="compareExports"
                                                             [options]="exports" useOptionViewProperty="Name" (ngModelChange)="outsideExportChanged(option)"
                                                             [disabled]="option.outsideDeviceId != null" noneView="--None--">
                                                 </senergy-select-search>
+                                                <mat-error senergyError label="Export"></mat-error>
                                             </mat-form-field>
                                         </td>
                                         <td>
                                             <mat-form-field color="accent" appearance="outline">
                                                 <mat-label>Value</mat-label>
-                                                <senergy-select-search placeholder="Value"
+                                                <senergy-select-search
                                                             [(ngModel)]="option.outsideData.column"
                                                             [compareWith]="compareExportValueModels"
                                                             [options]="option.outsideExport?.Values || []"
                                                             [disabled]="option.outsideDeviceId != null"
                                                             useOptionViewProperty="Name">
                                                 </senergy-select-search>
+                                                <mat-error senergyError label="Value"></mat-error>
                                             </mat-form-field>
                                         </td>
                                         <td>
                                             <mat-form-field color="accent" appearance="outline">
                                                 <mat-label>Math</mat-label>
-                                                <input matInput placeholder="Math" [(ngModel)]="option.outsideMath">
+                                                <input matInput [(ngModel)]="option.outsideMath">
+                                                <mat-error senergyError label="Math"></mat-error>
                                             </mat-form-field>
                                         </td>
                                     </tr>
@@ -238,26 +251,29 @@
                                         <td>
                                             <mat-form-field color="accent" appearance="outline">
                                                 <mat-label>Device</mat-label>
-                                                <senergy-select-search placeholder="Device" [(ngModel)]="option.outsideDeviceId" (ngModelChange)="outsideDeviceChanged(option)"
+                                                <senergy-select-search [(ngModel)]="option.outsideDeviceId" (ngModelChange)="outsideDeviceChanged(option)"
                                                                        [options]="devices" useOptionViewProperty="name" useOptionValueProperty="id" [disabled]="option.outsideExport !== null" noneView="--None--">
                                                 </senergy-select-search>
+                                                <mat-error senergyError label="Device"></mat-error>
                                             </mat-form-field>
                                         </td>
                                         <td>
                                             <mat-form-field color="accent" appearance="outline">
                                                 <mat-label>Service</mat-label>
-                                                <senergy-select-search placeholder="Service" [(ngModel)]="option.outsideServiceId"
+                                                <senergy-select-search [(ngModel)]="option.outsideServiceId"
                                                                        [options]="(getServices(option.outsideDeviceId) | async) || []" useOptionValueProperty="id"
                                                                        [disabled]="option.outsideExport != null" useOptionViewProperty="name">
                                                 </senergy-select-search>
+                                                <mat-error senergyError label="Service"></mat-error>
                                             </mat-form-field>
                                         </td>
                                         <td>
                                             <mat-form-field color="accent" appearance="outline">
                                                 <mat-label>Value</mat-label>
-                                                <senergy-select-search placeholder="Value" [(ngModel)]="option.outsideDeviceValuePath"
+                                                <senergy-select-search [(ngModel)]="option.outsideDeviceValuePath"
                                                                        [disabled]="option.outsideExport != null" [options]="getServiceValues(option.outsideDeviceId, option.outsideServiceId)">
                                                 </senergy-select-search>
+                                                <mat-error senergyError label="Value"></mat-error>
                                             </mat-form-field>
                                         </td>
                                     </tr>
@@ -275,9 +291,10 @@
                                                 <mat-label>Min. Warning</mat-label>
                                                 <input class="right-aligned" type="number" matInput
                                                        [(ngModel)]="option.boundaries.warn.lower" required>
-                                            <div matSuffix>
-                                                 <span [innerHTML]="option.unit_html" class="unit"></span>
-                                            </div>
+                                                <mat-error senergyError label="Min. Warning"></mat-error>
+                                                <div matSuffix>
+                                                     <span [innerHTML]="option.unit_html" class="unit"></span>
+                                                </div>
                                             </mat-form-field>
                                         </td>
                                         <td>
@@ -286,8 +303,9 @@
                                                 <input class="right-aligned" type="number" matInput
                                                        [(ngModel)]="option.boundaries.warn.upper" required>
                                                 <div matSuffix>
-                                                 <span [innerHTML]="option.unit_html" class="unit"></span>
+                                                    <span [innerHTML]="option.unit_html" class="unit"></span>
                                                 </div>
+                                                <mat-error senergyError label="Max. Warning"></mat-error>
                                             </mat-form-field>
                                         </td>
                                     </tr>
@@ -298,8 +316,9 @@
                                                 <mat-label>Min. Critical Warning</mat-label>
                                                 <input class="right-aligned" type="number" matInput
                                                        [(ngModel)]="option.boundaries.critical.lower" required>
-                                            <div matSuffix>
-                                                 <span [innerHTML]="option.unit_html" class="unit"></span>
+                                                <mat-error senergyError label="Min. Crit. Warning"></mat-error>
+                                                <div matSuffix>
+                                                    <span [innerHTML]="option.unit_html" class="unit"></span>
                                                 </div>
                                             </mat-form-field>
                                         </td>
@@ -308,8 +327,9 @@
                                                 <mat-label>Max. Critical Warning</mat-label>
                                                 <input class="right-aligned" type="number" matInput
                                                        [(ngModel)]="option.boundaries.critical.upper" required>
-                                            <div matSuffix>
-                                                 <span [innerHTML]="option.unit_html" class="unit"></span>
+                                                <mat-error senergyError label="Max. Crit. Warning"></mat-error>
+                                                <div matSuffix>
+                                                     <span [innerHTML]="option.unit_html" class="unit"></span>
                                                 </div>
                                             </mat-form-field>
                                         </td>
@@ -342,6 +362,7 @@
                                             {{level.name}}
                                         </mat-option>
                                     </mat-select>
+                                    <mat-error senergyError label="Warning Level"></mat-error>
                                 </mat-form-field>
                             </div>
                             <div>
@@ -353,6 +374,7 @@
                                             {{level.name}}
                                         </mat-option>
                                     </mat-select>
+                                    <mat-error senergyError label="Critical Level"></mat-error>
                                 </mat-form-field>
                             </div>
                             <div class="small-text color-accent">

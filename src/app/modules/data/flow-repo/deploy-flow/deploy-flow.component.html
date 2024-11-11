@@ -35,13 +35,13 @@
                     <div class="panel_content" fxLayout="column">
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Name</mat-label>
-                            <input matInput formControlName="name" placeholder="Name" required="true" />
-                            <mat-error *ngIf="form.controls.name.errors?.required">Please enter a name for the pipeline.
-                            </mat-error>
+                            <input matInput formControlName="name" required="true" />
+                            <mat-error senergyError label="Name"></mat-error>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Description</mat-label>
-                            <input matInput formControlName="description" placeholder="Description">
+                            <input matInput formControlName="description">
+                            <mat-error senergyError label="Description"></mat-error>
                         </mat-form-field>
                     </div>
                 </ng-template>
@@ -71,12 +71,13 @@
                          [formGroup]="pipeline">
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Pipeline</mat-label>
-                            <senergy-select-search placeholder="Pipeline"
+                            <senergy-select-search
                                                    [options]="pipelines"
                                                    formControlName="pipelineId"
                                                    useOptionValueProperty="id"
                                                    useOptionViewProperty="name">
                             </senergy-select-search>
+                            <mat-error senergyError label="Pipeline"></mat-error>
                         </mat-form-field>
                         <mat-accordion class="operator-accordion">
                             <mat-expansion-panel style="margin-bottom: 10px;" fxFlex
@@ -99,12 +100,13 @@
                         </mat-accordion>
 
                         <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-label>Path</mat-label>
                             <senergy-select-search
                                     [options]="getOperatorPaths(pipeline.get('pipelineId')?.value, pipeline.get('operatorId')?.value)"
-                                    placeholder="Path"
                                     formControlName="path"
                                     [autoSelectSingleElement]="true">
                             </senergy-select-search>
+                            <mat-error senergyError label="Path"></mat-error>
                         </mat-form-field>
                         <div fxLayout="row">
                             <span class="fill-delete"></span>
@@ -118,38 +120,40 @@
                         <mat-label>Aspect</mat-label>
                         <senergy-select-search [options]="this.aspects"
                                                useOptionViewProperty="name"
-                                               placeholder="Aspect"
+                                              
                                                useOptionValueProperty="id"
                                                formControlName="aspectId">
                         </senergy-select-search>
+                        <mat-error senergyError label="Aspect"></mat-error>
                     </mat-form-field>
                     <mat-form-field fxFlex color="accent" appearance="outline">
                         <mat-label>Function</mat-label>
                         <senergy-select-search
                                 [options]="getAspectFunctions(input.get('aspectId')?.value)"
                                 useOptionViewProperty="name"
-                                placeholder="Function"
+                               
                                 useOptionValueProperty="id"
                                 formControlName="functionId"
                                 [autoSelectSingleElement]="true"
                         >
                         </senergy-select-search>
+                        <mat-error senergyError label="Function"></mat-error>
                     </mat-form-field>
                     <mat-form-field fxFlex color="accent" appearance="outline">
                         <mat-label>Characteristics</mat-label>
                         <senergy-select-search
                                 [options]="getFunctionCharacteristics(input.get('functionId')?.value)"
                                 useOptionViewProperty="name"
-                                placeholder="characteristics"
                                 useOptionValueProperty="id"
                                 formControlName="characteristics"
                                 [autoSelectSingleElement]="true"
                                 [multiple]="true"
                         >
                         </senergy-select-search>
+                        <mat-error senergyError label="Characteristics"></mat-error>
                     </mat-form-field>
                     <mat-form-field fxFlex color="accent" appearance="outline">
-                        <mat-label>Device/Group/Import</mat-label>
+                        <mat-label>Device/group/import</mat-label>
                         <senergy-select-search
                                 [options]="getSelectables(input.get('aspectId')?.value, input.get('functionId')?.value, input.get('characteristics')?.value)"
                                 useOptionViewProperty="name"
@@ -158,6 +162,7 @@
                                 formControlName="selectableId"
                         >
                         </senergy-select-search>
+                        <mat-error senergyError label="Device/group/import"></mat-error>
                     </mat-form-field>
                     <div fxFlex fxLayout="row"
                          *ngFor="let deviceType of getSubElementAsGroupArray(input, 'deviceTypes')"
@@ -177,6 +182,7 @@
                                                    formControlName="selection"
                                                    useOptionViewProperty="path">
                             </senergy-select-search>
+                            <mat-error senergyError label=""></mat-error>
                         </mat-form-field>
                     </div>
                 </div>
@@ -187,9 +193,12 @@
                 <div fxLayout="column" *ngFor="let config of getSubElementAsGroupArray(node, 'configs')"
                      [formGroup]="config">
                     <mat-form-field fxFill color="accent" appearance="outline">
+                        <mat-label></mat-label>
+                        <mat-label></mat-label>
                         <mat-label>{{ config.get('name')?.value }}</mat-label>
                         <input matInput formControlName="value"
                                placeholder="{{config.get('name')?.value}}">
+                        <mat-error senergyError label=""></mat-error>
                     </mat-form-field>
                 </div>
             </mat-expansion-panel>
@@ -211,7 +220,8 @@
                 <div class="panel_content">
                     <mat-form-field class="full-width" color="accent" appearance="outline">
                         <mat-label>Window Time</mat-label>
-                        <input matInput formControlName="windowTime" placeholder="Window Time">
+                        <input matInput formControlName="windowTime">
+                        <mat-error senergyError label="Window Time"></mat-error>
                     </mat-form-field>
                     <section class="checkbox-section">
                         <mat-checkbox class="checkbox-margin" formControlName="enable_metrics">Enable Metrics</mat-checkbox>
@@ -223,6 +233,7 @@
                             <mat-option value="inner">Inner Join (Default)</mat-option>
                             <mat-option value="outer">Outer Join</mat-option>
                         </mat-select>
+                        <mat-error senergyError label="Merge Strategy"></mat-error>
                     </mat-form-field>
                 </div>
             </mat-expansion-panel>

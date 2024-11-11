@@ -25,26 +25,32 @@
         </div>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Name</mat-label>
-            <input matInput [(ngModel)]="operator.name" placeholder="Name" [disabled]="!operator.editable">
+            <input matInput [(ngModel)]="operator.name" [disabled]="!operator.editable">
+            <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Image</mat-label>
-            <input matInput [(ngModel)]="operator.image" placeholder="Image" [disabled]="!operator.editable">
+            <input matInput [(ngModel)]="operator.image" [disabled]="!operator.editable">
+            <mat-error senergyError label="Image"></mat-error>
         </mat-form-field>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Description</mat-label>
-            <input matInput [(ngModel)]="operator.description" placeholder="Description" [disabled]="!operator.editable">
+            <input matInput [(ngModel)]="operator.description" [disabled]="!operator.editable">
+            <mat-error senergyError label="Description"></mat-error>
         </mat-form-field>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Cost</mat-label>
             <input matInput [(ngModel)]="operator.cost" placeholder="0" [disabled]="!operator.editable" type="number" [min]="0">
+            <mat-error senergyError label="Cost"></mat-error>
         </mat-form-field>
         <mat-form-field fxFlex color="accent" appearance="outline">
-            <mat-select placeholder="Deployment type" [(ngModel)]="operator.deploymentType" [disabled]="!operator.editable">
+            <mat-label>Deployment Type</mat-label>
+            <mat-select [(ngModel)]="operator.deploymentType" [disabled]="!operator.editable">
                 <mat-option  value="cloud">cloud</mat-option>
                 <mat-option  value="local">local</mat-option>
                 <mat-option  value="both">both</mat-option>
             </mat-select>
+            <mat-error senergyError label="Deployment Type"></mat-error>
         </mat-form-field>
         <mat-checkbox [(ngModel)]="operator.pub" [disabled]="!operator.editable">Public</mat-checkbox>
         <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">
@@ -53,14 +59,17 @@
         <div *ngFor="let item of operator.inputs" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name" placeholder="Name" [disabled]="!operator.editable">
+                <input matInput [(ngModel)]="item.name" [disabled]="!operator.editable">
+                <mat-error senergyError label="Name"></mat-error>
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type" [disabled]="!operator.editable">
+                <mat-label>Type</mat-label>
+                <mat-select [(ngModel)]="item.type" [(value)]="item.type" [disabled]="!operator.editable">
                     <mat-option *ngFor="let option of dropdown"  [value]="option">
                         {{option}}
                     </mat-option>
                 </mat-select>
+                <mat-error senergyError label="Type"></mat-error>
             </mat-form-field>
             <button mat-icon-button *ngIf="operator.editable" (click)="deleteInput(item)">
                 <mat-icon color="warn">
@@ -74,14 +83,17 @@
         <div *ngFor="let item of operator.outputs" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name" placeholder="Name" [disabled]="!operator.editable">
+                <input matInput [(ngModel)]="item.name" [disabled]="!operator.editable">
+                <mat-error senergyError label="Name"></mat-error>
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type" [disabled]="!operator.editable">
+                <mat-label>Type</mat-label>
+                <mat-select [(ngModel)]="item.type" [(value)]="item.type" [disabled]="!operator.editable">
                     <mat-option *ngFor="let option of dropdown"  [value]="option">
                         {{option}}
                     </mat-option>
                 </mat-select>
+                <mat-error senergyError label="Type"></mat-error>
             </mat-form-field>
             <button mat-icon-button *ngIf="operator.editable" (click)="deleteOutput(item)">
                 <mat-icon color="warn">
@@ -95,14 +107,17 @@
         <div *ngFor="let item of operator.config_values" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name" placeholder="Name" [disabled]="!operator.editable">
+                <input matInput [(ngModel)]="item.name" [disabled]="!operator.editable">
+                <mat-error senergyError label="Name"></mat-error>
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type" [disabled]="!operator.editable">
+                <mat-label>Type</mat-label>
+                <mat-select [(ngModel)]="item.type" [(value)]="item.type" [disabled]="!operator.editable">
                     <mat-option *ngFor="let option of dropdown"  [value]="option">
                         {{option}}
                     </mat-option>
                 </mat-select>
+                <mat-error senergyError label="Type"></mat-error>
             </mat-form-field>
             <button mat-icon-button *ngIf="operator.editable" (click)="deleteConfig(item)">
                 <mat-icon color="warn">

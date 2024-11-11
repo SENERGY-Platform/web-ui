@@ -21,7 +21,8 @@
         <mat-card-content>
             <div>
                 <mat-form-field appearance="outline">
-                    <mat-select (valueChange)="setTestUser($event)" placeholder="User">
+                    <mat-label>User</mat-label>
+                    <mat-select (valueChange)="setTestUser($event)">
                         <mat-option *ngFor="let user of users" [value]="user">
                             {{user.username}}
                         </mat-option>
@@ -29,7 +30,8 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
-                    <mat-select (valueChange)="setTestRole($event)" placeholder="Role">
+                    <mat-label>Role</mat-label>
+                    <mat-select (valueChange)="setTestRole($event)" required>
                         <mat-option *ngFor="let role of roles" [value]="role.name">
                             {{role.name}}
                         </mat-option>
@@ -39,7 +41,8 @@
 
             <div>
                 <mat-form-field appearance="outline">
-                    <mat-select (valueChange)="setTestClient($event)" placeholder="Client">
+                    <mat-label>Client</mat-label>
+                    <mat-select (valueChange)="setTestClient($event)">
                         <mat-option *ngFor="let client of clients" [value]="client.clientId">
                             {{client.clientId}}
                         </mat-option>
@@ -47,13 +50,15 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="endpoint">
+                    <mat-label>Endpoint</mat-label>
                     <input [formControl]="endpointControl" [matAutocomplete]="auto" aria-label="Number" matInput
-                        placeholder="Endpoint" type="text">
+						   type="text">
                     <mat-autocomplete #auto="matAutocomplete">
                         <mat-option *ngFor="let uri of filteredOptions | async" [value]="uri">
                             {{uri}}
                         </mat-option>
                     </mat-autocomplete>
+                    <mat-error senergyError label="Endpoint"></mat-error>
                 </mat-form-field>
             </div>
 
@@ -72,37 +77,46 @@
     <mat-card appearance="outlined" *ngIf="ready" class="search-card">
         <mat-card-content class="search">
             <mat-form-field appearance="outline">
+                <mat-label>Search</mat-label>
                 <mat-icon matPrefix>search</mat-icon>
                 <input (ngModelChange)="filter($event)" [(ngModel)]="query"
                     [placeholder]="'Search (for users, roles, actions or resources)'" matInput type="text">
                 <button (click)="clearSearch()" *ngIf="query.length > 0" mat-icon-button matSuffix>
                     <mat-icon>clear</mat-icon>
                 </button>
+                <mat-error senergyError label="Search"></mat-error>
             </mat-form-field>
 
             <div id="filter">
                 <mat-form-field appearance="outline">
-                    <mat-select placeholder="User" [(ngModel)]="selectedUser" (ngModelChange)="filter($event)">
+                    <mat-label>User</mat-label>
+                    <mat-select [(ngModel)]="selectedUser" (ngModelChange)="filter($event)">
                         <mat-option *ngFor="let user of users" [value]="user.username">
                             {{user.username}}
                         </mat-option>
                     </mat-select>
+                    <mat-error senergyError label="User"></mat-error>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-select placeholder="Role" [(ngModel)]="selectedRole" (ngModelChange)="filter($event)">
+                    <mat-label>Role</mat-label>
+                    <mat-select [(ngModel)]="selectedRole" (ngModelChange)="filter($event)">
                         <mat-option *ngFor="let role of roles" [value]="role.name">
                             {{role.name}}
                         </mat-option>
                     </mat-select>
+                    <mat-error senergyError label="Role"></mat-error>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-select placeholder="Client" [(ngModel)]="selectedClientID" (ngModelChange)="filter($event)">
+                    <mat-label>Client</mat-label>
+                    <mat-select [(ngModel)]="selectedClientID" (ngModelChange)="filter($event)">
                         <mat-option *ngFor="let client of clients" [value]="client.clientId">
                             {{client.clientId}}
                         </mat-option>
                     </mat-select>
+                    <mat-error senergyError label="Client"></mat-error>
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="endpoint">
+                    <mat-label>Endpoint</mat-label>
                     <input [matAutocomplete]="auto" aria-label="Number" matInput
                            placeholder="Endpoint"
                            type="text" [(ngModel)]="selectedEndpoint" (ngModelChange)="filter($event)">
@@ -111,6 +125,7 @@
                             {{uri}}
                         </mat-option>
                     </mat-autocomplete>
+					<mat-error senergyError label="Endpoint"></mat-error>
                 </mat-form-field>
             </div>
         </mat-card-content>

@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Extract JSON</h2>
+<h2 mat-dialog-title>Extract Json</h2>
 <mat-dialog-content class="edit-smart-service-json-extraction-dialog">
   <mat-accordion>
     <mat-expansion-panel *ngFor="let exportInfo of exports; let i = index" [expanded]="opened[i]">
@@ -26,24 +26,29 @@
       <div>
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <input matInput placeholder="name of the new variable" [(ngModel)]="exportInfo.OutputName">
+            <mat-label>Name</mat-label>
+            <input matInput placeholder="Name of the new variable" [(ngModel)]="exportInfo.OutputName">
+            <mat-error senergyError label="Name"></mat-error>
           </mat-form-field>
         </div>
         <div>
           <div>
             <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-              <senergy-select-search placeholder="variable with json string"
-                                     [(ngModel)]="exportInfo.JsonSource"
+              <mat-label>Variable</mat-label>
+              <senergy-select-search placeholder="Variable with json string" [(ngModel)]="exportInfo.JsonSource"
                                      [options]="availableProcessVariables.get('all') || []"
                                      useOptionViewProperty="name"
                                      useOptionValueProperty="name">
               </senergy-select-search>
+              <mat-error senergyError label="Variable"></mat-error>
             </mat-form-field>
           </div>
         </div>
         <div>
           <mat-form-field  appearance="outline" color="accent" class="full-width">
-            <input matInput placeholder="path to the value in the source json string" [(ngModel)]="exportInfo.FieldPath">
+            <mat-label>Path</mat-label>
+            <input matInput placeholder="Path to the value in the source json string" [(ngModel)]="exportInfo.FieldPath">
+            <mat-error senergyError label="Path"></mat-error>
           </mat-form-field>
         </div>
         <div>

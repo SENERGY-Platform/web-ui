@@ -17,25 +17,28 @@
     <div class="layout-margin" fxLayout="column">
         <div *ngIf="ready">
             <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="hubList && hubList.length">
-                <senergy-select-search placeholder="Deployment Destination"
-                                       [formControl]="selectedHubForm"
+                <mat-label>Deployment Destination</mat-label>
+                <senergy-select-search [formControl]="selectedHubForm"
                                        [autoSelectSingleElement]="true"
                                        [options]="hubList"
                                        useOptionViewProperty="name">
                 </senergy-select-search>
+                <mat-error senergyError label="Deployment Destination"></mat-error>
             </mat-form-field>
 
             <form [formGroup]="deploymentFormGroup">
                 <mat-card appearance="outlined" class="deployment-description">
                     <mat-card-content>
                         <mat-form-field appearance="outline" class="full-width" color="accent">
-                            <input type="text" matInput placeholder="Prozessname"
-                                   formControlName="name">
+                            <mat-label>Process Name</mat-label>
+                            <input type="text" matInput formControlName="name">
+                            <mat-error senergyError label="Process Name"></mat-error>
                         </mat-form-field>
                         <mat-form-field appearance="outline" class="full-width" color="accent">
-                    <textarea type="text" matInput placeholder="Process Description"
-                              formControlName="description" cdkTextareaAutosize
+                    <mat-label>Process Description</mat-label>
+                    <textarea type="text" matInput formControlName="description" cdkTextareaAutosize
                               #autosize="cdkTextareaAutosize"></textarea>
+                    <mat-error senergyError label="Process Description"></mat-error>
                         </mat-form-field>
                     </mat-card-content>
                 </mat-card>
@@ -67,7 +70,9 @@
                     <mat-card-content>
                         <div [formGroupName]="paramIndex" *ngFor="let param of start_parameter; let paramIndex = index; trackBy:trackByFn">
                             <mat-form-field appearance="outline" class="full-width" color="accent">
-                                <input type="text"  matInput placeholder="{{param.label}}" formControlName="default">
+                                <mat-label>{{param.label}}</mat-label>
+                                <input type="text"  matInput formControlName="default">
+                                <mat-error senergyError label="{{param.label}}"></mat-error>
                             </mat-form-field>
                         </div>
                     </mat-card-content>
@@ -80,28 +85,31 @@
                         <div formGroupName="conditional_event" *ngIf="element.conditional_event !== null">
                             <div formGroupName="selection">
                                 <mat-form-field appearance="outline" class="full-width" color="accent">
-                                    <senergy-select-search placeholder="{{element.name}}" [required]="true"
-                                                           formControlName="selection_options_index"
+                                    <mat-label>{{element.name}}</mat-label>
+                                    <senergy-select-search [required]="true" formControlName="selection_options_index"
                                                            [scrollWindowSize]="10000"
                                                            [options]="optionGroups.get(elementIndex) || []"
                                                            [getOptionValue]="getConditionalEventIndex(element)"
                                                            (selectionChange)="changeConditionalEventSelectionOption(elementIndex, $event.value)"
                                                            [getOptionViewValue]="getViewValue">
                                     </senergy-select-search>
+                                    <mat-error senergyError label="{{element.name}}"></mat-error>
                                 </mat-form-field>
 
                                 <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="element.conditional_event.selection.show === true">
-                                    <senergy-select-search placeholder="Service" [required]="true"
-                                                           formControlName="selected_service_id"
+                                    <mat-label>Service</mat-label>
+                                    <senergy-select-search [required]="true" formControlName="selected_service_id"
                                                            [options]="element.conditional_event.selection.selection_options[element.conditional_event.selection.selection_options_index || 0].services || []"
                                                            useOptionValueProperty="id"
                                                            useOptionViewProperty="name">
                                     </senergy-select-search>
+                                    <mat-error senergyError label="Service"></mat-error>
                                 </mat-form-field>
 
                                 <mat-form-field appearance="outline" class="full-width" color="accent"
                                                 [fxShow]="getPathOptions(elementIndex, 'conditional_event').length > 1">
-                                    <senergy-select-search placeholder="Path" [required]="true"
+									<mat-label>Path</mat-label>
+									<senergy-select-search [required]="true"
                                                            (selectionChange)="setSelectedPathOptionByElementIndex('conditional_event', elementIndex, $event.value)"
                                                            [autoSelectSingleElement]="true"
                                                            [options]="getPathOptions(elementIndex, 'conditional_event')"
@@ -112,7 +120,9 @@
                             <div formGroupName="variables">
                                 <td *ngFor="let item of element.conditional_event.variables | keyvalue; trackBy:trackByFn">
                                     <mat-form-field appearance="outline" class="full-width" color="accent">
-                                        <input type="text" matInput placeholder="{{item.key}}" [formControlName]="'' + item.key">
+                                        <mat-label>{{item.key}}</mat-label>
+                                        <input type="text" matInput [formControlName]="'' + item.key">
+                                        <mat-error senergyError label="{{item.key}}"></mat-error>
                                     </mat-form-field>
                                 </td>
                             </div>
@@ -123,28 +133,32 @@
                                     <td formGroupName="selection">
 
                                         <mat-form-field appearance="outline" class="full-width" color="accent">
-                                            <senergy-select-search placeholder="{{element.name}}" [required]="true"
-                                                                   formControlName="selection_options_index"
+                                            <mat-label>{{element.name}}</mat-label>
+                                            <senergy-select-search [required]="true" formControlName="selection_options_index"
                                                                    [scrollWindowSize]="10000"
                                                                    [options]="optionGroups.get(elementIndex) || []"
                                                                    [getOptionValue]="getTaskIndex(element)"
                                                                    (selectionChange)="changeTaskSelectionOption(elementIndex, $event.value)"
                                                                    [getOptionViewValue]="getViewValue">
                                             </senergy-select-search>
+                                            <mat-error senergyError label="{{element.name}}"></mat-error>
                                         </mat-form-field>
 
                                         <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="element.task.selection.show === true">
-                                            <senergy-select-search placeholder="Service" [required]="true"
+                                            <mat-label>Service</mat-label>
+                                            <senergy-select-search [required]="true"
                                                                    formControlName="selected_service_id"
                                                                    [options]="element.task.selection.selection_options[element.task.selection.selection_options_index || 0].services || []"
                                                                    useOptionValueProperty="id"
                                                                    useOptionViewProperty="name">
                                             </senergy-select-search>
+                                            <mat-error senergyError label="Service"></mat-error>
                                         </mat-form-field>
 
                                         <mat-form-field appearance="outline" class="full-width" color="accent"
                                                         [fxShow]="getPathOptions(elementIndex, 'task').length > 1">
-                                            <senergy-select-search placeholder="Path" [required]="true"
+											<mat-label>Path</mat-label>
+                                            <senergy-select-search [required]="true"
                                                                    (selectionChange)="setSelectedPathOptionByElementIndex('task', elementIndex, $event.value)"
                                                                    [autoSelectSingleElement]="true"
                                                                    [options]="getPathOptions(elementIndex, 'task')"
@@ -154,7 +168,9 @@
                                     </td>
                                     <td formGroupName="parameter" *ngFor="let item of element.task.parameter | keyvalue; trackBy:trackByFn">
                                         <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="displayParameter(item.value)">
-                                            <input type="text" matInput placeholder="{{item.key}}" [formControlName]="'' + item.key">
+                                            <mat-label>{{item.key}}</mat-label>
+                                            <input type="text" matInput [formControlName]="'' + item.key">
+                                            <mat-error senergyError label="{{item.key}}"></mat-error>
                                         </mat-form-field>
                                     </td>
                                     <td formGroupName="selection" *ngFor="let configurable of element.task.selection.selected_path?.configurables; let configurableIndex = index; trackBy:trackByFn">
@@ -162,10 +178,14 @@
                                             <ng-container formGroupName="configurables">
                                                 <div [formGroupName]="configurableIndex">
                                                     <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="configurable.type==='https://schema.org/Text'">
+                                                        <mat-label>{{configurable.path}}</mat-label>
                                                         <input type="text"  matInput placeholder="{{configurable.path}}" formControlName="value">
+                                                        <mat-error senergyError></mat-error>
                                                     </mat-form-field>
                                                     <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="configurable.type==='https://schema.org/Integer' || configurable.type==='https://schema.org/Float'">
+                                                        <mat-label>{{configurable.path}}</mat-label>
                                                         <input type="number"  matInput placeholder="{{configurable.path}}" formControlName="value">
+                                                        <mat-error senergyError></mat-error>
                                                     </mat-form-field>
                                                     <mat-checkbox *ngIf="configurable.type==='https://schema.org/Boolean'" formControlName="value">
                                                         {{configurable.path}}
@@ -182,6 +202,7 @@
                                 <tr>
                                     <td formGroupName="selection">
                                         <mat-form-field appearance="outline" class="full-width" color="accent">
+                                            <mat-label>{{element.name}}</mat-label>
                                             <senergy-select-search placeholder="{{element.name}}" [required]="true"
                                                                    [scrollWindowSize]="10000"
                                                                    formControlName="selection_options_index"
@@ -190,22 +211,26 @@
                                                                    (selectionChange)="changeEventSelectionOption(elementIndex, $event.value)"
                                                                    [getOptionViewValue]="getViewValue">
                                             </senergy-select-search>
+                                            <mat-error senergyError label="{{element.name}}"></mat-error>
                                         </mat-form-field>
 
                                         <mat-form-field appearance="outline" class="full-width" color="accent"
                                                         *ngIf="element.message_event.selection.show === true">
-                                            <senergy-select-search placeholder="Service" [required]="true"
+											<mat-label>Service</mat-label>
+                                            <senergy-select-search [required]="true"
                                                                    formControlName="selected_service_id"
                                                                    [autoSelectSingleElement]="true"
                                                                    [options]="getServiceOptions(elementIndex)"
                                                                    useOptionViewProperty="name"
                                                                    useOptionValueProperty="id">
                                             </senergy-select-search>
+											<mat-error senergyError label="Service"></mat-error>
                                         </mat-form-field>
 
                                         <mat-form-field appearance="outline" class="full-width" color="accent"
                                                         [fxShow]="getPathOptions(elementIndex, 'message_event').length > 1">
-                                            <senergy-select-search placeholder="Path" [required]="true"
+											<mat-label>Path</mat-label>
+                                            <senergy-select-search [required]="true"
                                                                    (selectionChange)="setSelectedPathOptionByElementIndex('message_event', elementIndex, $event.value)"
                                                                    [autoSelectSingleElement]="true"
                                                                    [options]="getPathOptions(elementIndex, 'message_event')"
@@ -215,18 +240,22 @@
                                     </td>
                                     <td>
                                         <mat-form-field appearance="outline" class="full-width" color="accent">
-                                            <senergy-select-search placeholder="Handler" [required]="true"
+                                            <mat-label>Handler</mat-label>
+                                            <senergy-select-search [required]="true"
                                                                    formControlName="flow_id"
                                                                    [options]="handlerList"
                                                                    useOptionValueProperty="_id"
                                                                    useOptionViewProperty="name">
                                             </senergy-select-search>
+                                            <mat-error senergyError label="Handler"></mat-error>
                                         </mat-form-field>
                                     </td>
                                     <td>
                                         <mat-form-field appearance="outline" class="full-width" color="accent">
+                                            <mat-label>Value {{characteristicNames.get(element.message_event.selection.filter_criteria.characteristic_id || '')}}</mat-label>
                                             <input type="text" matInput placeholder="Value {{characteristicNames.get(element.message_event.selection.filter_criteria.characteristic_id || '')}}"
                                                    formControlName="value">
+                                            <mat-error senergyError></mat-error>
                                         </mat-form-field>
                                     </td>
                                     <td>

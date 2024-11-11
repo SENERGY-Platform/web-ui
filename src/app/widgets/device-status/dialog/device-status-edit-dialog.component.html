@@ -23,13 +23,15 @@
                 <td *ngIf="userHasUpdateNameAuthorization">
                     <mat-form-field appearance="outline" color="accent">
                         <mat-label>Widget Name</mat-label>
-                        <input type="text" matInput placeholder="Widget Name" formControlName="name">
+                        <input type="text" matInput formControlName="name">
+                        <mat-error senergyError label="Widget Name"></mat-error>
                     </mat-form-field>
                 </td>
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
                     <mat-form-field appearance="outline" color="accent">
-                        <mat-label>Refresh time</mat-label>
-                        <input type="number" matInput placeholder="Refresh Time" formControlName="refreshTime">
+                        <mat-label>Refresh Time</mat-label>
+                        <input type="number" matInput formControlName="refreshTime">
+                        <mat-error senergyError label="Refresh Time"></mat-error>
                     </mat-form-field>
                 </td>
             </tr>
@@ -45,11 +47,13 @@
                 <td>
                     <mat-form-field appearance="outline" color="accent">
                         <mat-label>Status</mat-label>
-                        <input class="convert-input" type="text" matInput placeholder="Status" formControlName="status">
+                        <input class="convert-input" type="text" matInput formControlName="status">
+                        <mat-error senergyError label="Status"></mat-error>
                     </mat-form-field>
                 </td>
                 <td>
                     <mat-form-field appearance="outline" color="accent">
+                        <mat-label>Icon</mat-label>
                         <mat-select formControlName="icon"
                                     placeholder="Choose Icon" class="convert-input">
                             <mat-select-trigger>
@@ -61,12 +65,14 @@
                                 {{icon}}
                             </mat-option>
                         </mat-select>
+                        <mat-error senergyError label="Icon"></mat-error>
                     </mat-form-field>
                 </td>
                 <td>
                     <mat-form-field appearance="outline" color="accent">
                         <mat-label>Color</mat-label>
                         <input class="convert-input" type="text" matInput placeholder="Icon" formControlName="color">
+                        <mat-error senergyError label="Color"></mat-error>
                     </mat-form-field>
                 </td>
                 <td>
@@ -95,62 +101,73 @@
                             <td>
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Alias</mat-label>
-                                    <input type="text" matInput placeholder="Alias" required
+                                    <input type="text" matInput required
                                            formControlName="name">
+                                    <mat-error senergyError label="Alias"></mat-error>
                                 </mat-form-field>
                             </td>
                         </tr>
                         <tr>
                             <td>
                                 <mat-form-field appearance="outline" color="accent">
+                                    <mat-label>Aspect</mat-label>
                                     <mat-select formControlName="aspectId" required
                                                 placeholder="Choose Aspect">
                                         <mat-option *ngFor="let aspect of aspects" [value]="aspect.id">
                                             {{aspect.name}}
                                         </mat-option>
                                     </mat-select>
+                                    <mat-error senergyError label="Aspect"></mat-error>
                                 </mat-form-field>
                             </td>
                             <td>
                                 <mat-form-field appearance="outline" color="accent">
+                                    <mat-label>Function</mat-label>
                                     <mat-select formControlName="function" required
                                                 placeholder="Choose Function" [compareWith]="compareFunc">
                                         <mat-option *ngFor="let func of funcArray[elementIndex]" [value]="func">
                                             {{func.name}}
                                         </mat-option>
                                     </mat-select>
+                                    <mat-error senergyError label="Function"></mat-error>
                                 </mat-form-field>
                             </td>
                             <td>
                                 <mat-form-field appearance="outline" color="accent">
+                                    <mat-label>Device</mat-label>
                                     <mat-select formControlName="selectable" required
                                                 placeholder="Choose Device" [compareWith]="compareSelectables">
                                         <mat-option *ngFor="let selectable of selectablesArray[elementIndex]" [value]="selectable">
                                             {{selectable.device.display_name}}
                                         </mat-option>
                                     </mat-select>
+                                    <mat-error senergyError label="Device"></mat-error>
                                 </mat-form-field>
                             </td>
                         </tr>
                         <tr>
                             <td>
                                 <mat-form-field appearance="outline" color="accent">
+                                    <mat-label>Service</mat-label>
                                     <mat-select formControlName="service" required
                                                 placeholder="Choose Service" [compareWith]="compareServices">
                                         <mat-option *ngFor="let item of serviceExportValueArray[elementIndex]" [value]="item.service">
                                             {{item.service.name}}
                                         </mat-option>
                                     </mat-select>
+                                    <mat-error senergyError label="Service"></mat-error>
                                 </mat-form-field>
                             </td>
                             <td>
                                 <mat-form-field appearance="outline" color="accent">
+                                    <mat-label>Value</mat-label>
                                     <mat-select formControlName="exportValues" required
                                                 placeholder="Choose Value" [compareWith]="compareValues">
                                         <mat-option *ngFor="let exportValue of getServiceExportValues(elementIndex)" [value]="exportValue">
                                             {{exportValue.Name}}
                                         </mat-option>
                                     </mat-select>
+									<mat-error senergyError label="Value"></mat-error>
                                 </mat-form-field>
                             </td>
                             <td>

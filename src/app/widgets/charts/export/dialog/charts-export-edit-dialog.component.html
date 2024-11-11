@@ -20,8 +20,9 @@
 
     <div *ngIf="ready" fxLayout="column" [formGroup]="formGroupController">
         <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
-            <mat-label>Name</mat-label>
-            <input type="text" matInput placeholder="Name" formControlName="name">
+            <mat-label>Widget Name</mat-label>
+            <input type="text" matInput placeholder="Name" formControlName="name" required>
+			<mat-error senergyError label="Widget Name"></mat-error>
         </mat-form-field>
 
         <div formGroupName="properties" *ngIf="userHasUpdatePropertiesAuthorization">
@@ -30,14 +31,12 @@
                     <td>
                         <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>Chart Type</mat-label>
-                            <mat-select formControlName="chartType" placeholder="Chart Type" required>
+                            <mat-select formControlName="chartType" required>
                                 <mat-option *ngFor="let chartType of chartTypes" [value]="chartType">
                                     {{chartType}}
                                 </mat-option>
                             </mat-select>
-                            <mat-error *ngIf="chartType.errors">
-                                Please choose a Chart Type!
-                            </mat-error>
+                            <mat-error senergyError label="Chart Type"></mat-error>
                         </mat-form-field>
                     </td>
                     <td *ngIf="chartType.value === 'LineChart'">
@@ -46,6 +45,7 @@
                         <mat-form-field color="accent" appearance="outline" style="width: 140px">
                             <mat-label>Zoom Time Factor</mat-label>
                             <input type="number" matInput formControlName="zoomTimeFactor">
+                            <mat-error senergyError label="Zoom Time Factor"></mat-error>
                         </mat-form-field>
                     </td>
                     <td *ngIf="chartType.value === 'PieChart'">
@@ -73,26 +73,30 @@
                     <td>
                         <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>X-Axis</mat-label>
-                            <input type="text" matInput placeholder="X-Axis" value="time" disabled>
+                            <input type="text" matInput value="time" disabled>
+                            <mat-error senergyError label="X-Axis"></mat-error>
                         </mat-form-field>
                     </td>
                     <td>
                         <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>X-Axis-Label</mat-label>
-                            <input type="text" matInput placeholder="X-Axis-Label" formControlName="hAxisLabel">
+                            <input type="text" matInput formControlName="hAxisLabel">
+                            <mat-error senergyError label="X-Axis-Label"></mat-error>
                         </mat-form-field>
                     </td>
                     <td>
                         <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>X-Axis-Format</mat-label>
-                            <input type="text" matInput placeholder="X-Axis-Format" formControlName="hAxisFormat"
+                            <input type="text" matInput formControlName="hAxisFormat"
                                 matTooltip="Date format string">
+                            <mat-error senergyError label="X-Axis-Format"></mat-error>
                         </mat-form-field>
                     </td>
                     <td>
                         <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>Y-Axis-Label</mat-label>
-                            <input type="text" matInput placeholder="Y-Axis-Label" formControlName="vAxisLabel">
+                            <input type="text" matInput formControlName="vAxisLabel">
+                            <mat-error senergyError label="Y-Axis-Label"></mat-error>
                         </mat-form-field>
                     </td>
                     <td>
@@ -100,6 +104,7 @@
                             <mat-label>Second Y-Axis-Label</mat-label>
                             <input type="text" matInput placeholder="Second-Y-Axis-Label"
                                 formControlName="secondVAxisLabel">
+                            <mat-error senergyError label="Second Y-Axis-Label"></mat-error>
                         </mat-form-field>
                     </td>
                 </tr>
@@ -133,7 +138,9 @@
             <th mat-header-cell *matHeaderCellDef>Alias</th>
             <td mat-cell *matCellDef="let element">
                 <mat-form-field color="accent" appearance="outline">
+                    <mat-label>Value Alias</mat-label>
                     <input type="text" matInput [(ngModel)]="element.valueAlias">
+                    <mat-error senergyError label="Value Alias"></mat-error>
                 </mat-form-field>
             </td>
         </ng-container>
@@ -142,7 +149,9 @@
             <th mat-header-cell *matHeaderCellDef>Color</th>
             <td mat-cell *matCellDef="let element">
                 <mat-form-field color="accent" appearance="outline">
+                    <mat-label>Color</mat-label>
                     <input type="text" matInput placeholder="e.g. red, #004411" [(ngModel)]="element.color">
+                    <mat-error senergyError label="Color"></mat-error>
                 </mat-form-field>
             </td>
         </ng-container>
@@ -151,8 +160,10 @@
             <th mat-header-cell *matHeaderCellDef>Math</th>
             <td mat-cell *matCellDef="let element">
                 <mat-form-field color="accent" appearance="outline">
+                    <mat-label>Math</mat-label>
                     <input type="text" matInput placeholder="e.g. / 1000" [(ngModel)]="element.math"
                         [disabled]="groupTypeIsDifference">
+                    <mat-error senergyError label="Math"></mat-error>
                 </mat-form-field>
             </td>
         </ng-container>
@@ -171,23 +182,27 @@
             <th mat-header-cell *matHeaderCellDef>Filter</th>
             <td mat-cell *matCellDef="let element">
                 <mat-form-field color="accent" appearance="outline">
+                    <mat-label>Filter</mat-label>
                     <mat-select [compareWith]="compareFilterTypes" [(ngModel)]="element.filterType"
                         (valueChange)="filerTypeSelected(element)">
                         <mat-option [value]="undefined">None</mat-option>
                         <mat-option *ngFor="let option of [ '=', '!=', '>', '>=', '<' ,'<=']" [value]="option">
                             {{option}}</mat-option>
                     </mat-select>
+                    <mat-error senergyError label="Filter"></mat-error>
                 </mat-form-field>
             </td>
         </ng-container>
 
         <ng-container matColumnDef="filterValue">
-            <th mat-header-cell *matHeaderCellDef>Filtervalue</th>
+            <th mat-header-cell *matHeaderCellDef>Filter Value</th>
             <td mat-cell *matCellDef="let element">
                 <mat-form-field color="accent" appearance="outline">
+                    <mat-label>Filter Value</mat-label>
                     <input [type]="element.valueType === 'string' ? 'text' : 'number'" matInput
                         placeholder="e.g. 1000, filter" [disabled]="element.filterType === undefined"
                         [(ngModel)]="element.filterValue">
+                    <mat-error senergyError label="Filter Value"></mat-error>
                 </mat-form-field>
             </td>
         </ng-container>
@@ -196,11 +211,13 @@
             <th mat-header-cell *matHeaderCellDef>Tags</th>
             <td mat-cell *matCellDef="let element">
                 <mat-form-field color="accent" appearance="outline">
+                    <mat-label>Tags</mat-label>
                     <senergy-select-search placeholder="Choose Tags" [multiple]="true"
                         [disabled]="getTags(element).size === 0" [options]="getTags(element)"
                         [getOptionDisabled]="getTagOptionDisabledFunction(element)" [getOptionValue]="getTagValue"
                         [(ngModel)]="element.tagSelection" useOptionViewProperty="value">
                     </senergy-select-search>
+                    <mat-error senergyError label="Tags"></mat-error>
                 </mat-form-field>
             </td>
         </ng-container>
@@ -209,6 +226,7 @@
             <th mat-header-cell *matHeaderCellDef>Merging Strategy</th>
             <td mat-cell *matCellDef="let element">
                 <mat-form-field color="accent" appearance="outline">
+                    <mat-label>Merging Strategy</mat-label>
                     <mat-select placeholder="Choose Tags" [disabled]="element.criteria === undefined"
                         [(ngModel)]="element.deviceGroupMergingStrategy">
                         <mat-option [value]="chartsExportDeviceGroupMergingStrategy.Separate">Separate</mat-option>
@@ -216,6 +234,7 @@
                         <mat-option *ngIf="formGroupController.get('properties.group.type')?.value !== undefined"
                             [value]="chartsExportDeviceGroupMergingStrategy.Sum">Sum</mat-option>
                     </mat-select>
+					<mat-error senergyError label="Merging Strategy"></mat-error>
                 </mat-form-field>
             </td>
         </ng-container>

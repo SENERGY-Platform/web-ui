@@ -21,17 +21,21 @@
 <mat-dialog-content>
     <form class="form">
         <mat-form-field appearance="outline" class="form-field" color="accent">
-            <senergy-select-search placeholder="Aspect"
+            <mat-label>Aspect</mat-label>
+            <senergy-select-search
                         [formControl]="aspectFormControl" [required]="true"
                         [options]="this.aspects" useOptionViewProperty="name" useOptionValueProperty="id">
             </senergy-select-search>
+            <mat-error senergyError label="Aspect"></mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="form-field" color="accent">
-            <senergy-select-search placeholder="Function" [compareWith]="compare"
+            <mat-label>Function</mat-label>
+            <senergy-select-search [compareWith]="compare"
                         [formControl]="functionFormControl" [required]="true"
                         [options]="functions" useOptionViewProperty="name">
             </senergy-select-search>
+            <mat-error senergyError label="Function"></mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="form-field" color="accent">
@@ -40,10 +44,13 @@
                 <mat-option value="0">0</mat-option>
                 <mat-option value="1">1</mat-option>
             </mat-select>
+            <mat-error senergyError label="Qos"></mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="form-field" color="accent">
-            <input matInput placeholder="Script" [(ngModel)]="result.script" [ngModelOptions]="{standalone: true}">
+            <mat-label>Script</mat-label>
+            <input matInput [(ngModel)]="result.script" [ngModelOptions]="{standalone: true}">
+            <mat-error senergyError label="Script"></mat-error>
         </mat-form-field>
     </form>
 </mat-dialog-content>

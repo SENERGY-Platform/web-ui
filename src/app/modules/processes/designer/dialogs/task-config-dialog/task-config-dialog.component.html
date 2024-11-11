@@ -26,24 +26,30 @@
 
     <form class="form">
         <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Controlling'">
-            <senergy-select-search placeholder="Device class" [compareWith]="compare"
+            <mat-label>Device Class</mat-label>
+            <senergy-select-search [compareWith]="compare"
                                    [formControl]="deviceClassFormControl" [required]="true"
                                    [options]="deviceClasses" useOptionViewProperty="name">
             </senergy-select-search>
+            <mat-error senergyError label="Device Class"></mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Measuring'">
-            <senergy-select-search placeholder="Aspect" [compareWith]="compare"
+            <mat-label>Aspect</mat-label>
+            <senergy-select-search [compareWith]="compare"
                                    [formControl]="aspectFormControl" [required]="true"
                                    [options]="aspects" useOptionViewProperty="name">
             </senergy-select-search>
+            <mat-error senergyError label="Aspect"></mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value !== ''">
-            <senergy-select-search placeholder="Function" [compareWith]="compare"
+            <mat-label>Function</mat-label>
+            <senergy-select-search [compareWith]="compare"
                                    [formControl]="functionFormControl" [required]="true"
                                    [options]="functions" useOptionViewProperty="name">
             </senergy-select-search>
+            <mat-error senergyError label="Function"></mat-error>
         </mat-form-field>
     </form>
 
@@ -54,8 +60,10 @@
 
     <form>
         <mat-form-field appearance="outline" class="form-field" color="accent">
-            <input type="number" matInput placeholder="Retries"
+            <mat-label>Retries</mat-label>
+            <input type="number" matInput
                    [formControl]="retriesFormControl">
+            <mat-error senergyError label="Retries"></mat-error>
         </mat-form-field>
     </form>
 

@@ -20,29 +20,30 @@
     <form class="form">
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Type</mat-label>
-            <mat-select #select (selectionChange)="activateCategory()" placeholder="Type" [(ngModel)]="selectedType"
+            <mat-select #select (selectionChange)="activateCategory()" [(ngModel)]="selectedType"
                         name="type">
                 <mat-option *ngFor="let type of types" [value]="type" [disabled]="type.disabled">
                     <span fxFlex>{{type.viewValue}}</span>
                     <mat-icon *ngIf="type.disabled && type.tooltip !== ''" matTooltip="{{type.tooltip}}" inline>help_outlined</mat-icon>
                 </mat-option>
             </mat-select>
+            <mat-error senergyError label="Type"></mat-error>
         </mat-form-field>
 
         <mat-form-field [class.cdk-visually-hidden]="categoryDisabled" class="full-width" appearance="outline" color="accent">
             <mat-label>Category</mat-label>
-            <mat-select placeholder="Category" [(ngModel)]="selectedCategory"
-                        name="category">
+            <mat-select [(ngModel)]="selectedCategory" name="category">
                 <mat-option *ngFor="let category of categories" [value]="category" [disabled]="category.disabled">
                     <span fxFlex>{{category.viewValue}}</span>
                     <mat-icon *ngIf="category.disabled && category.tooltip !== ''" matTooltip="{{category.tooltip}}" inline>help_outlined</mat-icon>
                 </mat-option>
             </mat-select>
+            <mat-error senergyError label="Category"></mat-error>
         </mat-form-field>
 
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Name</mat-label>
-            <input #inputName matInput placeholder="Name">
+            <input #inputName matInput>
         </mat-form-field>
     </form>
 </mat-dialog-content>

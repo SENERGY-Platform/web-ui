@@ -23,12 +23,14 @@
             <input [formControl]="nameControl" matInput placeholder="Name">
             <input [formControl]="displayNameControl" matInput placeholder="Display Name">
             <input [formControl]="descriptionControl" matInput placeholder="Description">
+            <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline"  color="accent">
-            <senergy-select-search placeholder="Concept" [compareWith]="compare"
-                        [formControl]="conceptControl" [required]="true" [options]="concepts"
-                        useOptionViewProperty="name">
+            <mat-label>Concept</mat-label>
+            <senergy-select-search [compareWith]="compare" [formControl]="conceptControl" [required]="true"
+								   [options]="concepts" useOptionViewProperty="name">
             </senergy-select-search>
+            <mat-error senergyError label="Concept"></mat-error>
         </mat-form-field>
     </form>
 </mat-dialog-content>

@@ -25,6 +25,7 @@
         <senergy-select-search placeholder="Pipeline" [options]="users" [formControl]="selectedUser"
           useOptionValueProperty="id" useOptionViewProperty="username">
         </senergy-select-search>
+        <mat-error senergyError label="User"></mat-error>
       </mat-form-field>
       <div class="spacer-w20" *ngIf="isAdmin"></div>
       <mat-form-field color="accent" appearance="outline" *ngIf="options.length > 0">
@@ -34,6 +35,7 @@
             {{o.created_at| date:'dd.MM.yy HH:mm:ss'}}
           </mat-option>
         </mat-select>
+        <mat-error senergyError label="Bill Creation Date"></mat-error>
       </mat-form-field>
       <div class="spacer-w20"></div>
       <mat-form-field appearance="outline" color="accent" (click)="dp.open()" *ngIf="dates.length > 0">
@@ -42,6 +44,7 @@
         <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
         <mat-datepicker #dp startView="multi-year" (monthSelected)="setMonthAndYear($event, dp)">
         </mat-datepicker>
+        <mat-error senergyError label="Month and Year"></mat-error>
       </mat-form-field>
     </div>
     <div class="help">

@@ -16,30 +16,34 @@
 
 <h2 mat-dialog-title>Edit AC Control</h2>
 
-<mat-dialog-content >
+<mat-dialog-content>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <form *ngIf="ready" [formGroup]="form" fxLayout="column">
         <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
             <mat-label>Widget Name</mat-label>
-            <input type="text" matInput placeholder="Widget Name" formControlName="name" required>
+            <input type="text" matInput formControlName="name" required>
+            <mat-error senergyError [label]="'Widget Name'"></mat-error>
         </mat-form-field>
         <div *ngIf="userHasUpdatePropertiesAuthorization" fxLayout="column">
             <mat-form-field color="accent" appearance="outline">
-                <mat-label>Device/Group</mat-label>
+                <mat-label>Device/group</mat-label>
                 <senergy-select-search [options]="selectables"
                                        [getOptionViewValue]="getSelectableName"
-                                       placeholder="Device/Group" ngDefaultControl formControlName="selectable"
+                                       ngDefaultControl formControlName="selectable"
                                        [getOptionValue]="getSelectableId"
                                        [required]="true">
                 </senergy-select-search>
+				<mat-error senergyError [label]="'Device/Group'"></mat-error>
             </mat-form-field>
             <mat-form-field color="accent" appearance="outline">
                 <mat-label>Min. Temperature</mat-label>
-                <input type="number" matInput placeholder="15" formControlName="minTarget" required>
+                <input type="number" matInput formControlName="minTarget" required>
+                <mat-error senergyError [label]="'Min. Temperature'"></mat-error>
             </mat-form-field>
             <mat-form-field color="accent" appearance="outline">
                 <mat-label>Max. Temperature</mat-label>
-                <input type="number" matInput placeholder="30" formControlName="maxTarget" required>
+                <input type="number" matInput formControlName="maxTarget" required>
+                <mat-error senergyError [label]="'Max. Temperature'"></mat-error>
             </mat-form-field>
         </div>
     </form>

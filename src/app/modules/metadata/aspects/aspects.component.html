@@ -26,7 +26,9 @@
                     <mat-icon cdkDragHandle>drag_handle</mat-icon>
                 </button>
                 <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
-                    <input matInput placeholder="Name" [(ngModel)]="node.name" required [disabled]="!userIsAdmin">
+                    <mat-label>Name</mat-label>
+                    <input matInput [(ngModel)]="node.name" required [disabled]="!userIsAdmin">
+                    <mat-error senergyError label="Name"></mat-error>
                 </mat-form-field>
                 <button (click)="showUsedInDialog(usedIn?.get(node.id))" class="linkbutton tree-inline" matTooltip="uses of aspect in device-types" *ngIf="userHasUsedInAuthorization">
                     {{usedIn?.get(node.id)?.count || 0}}
@@ -62,7 +64,9 @@
                             <mat-icon cdkDragHandle>drag_handle</mat-icon>
                         </button>
                         <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
-                            <input matInput placeholder="Name" [(ngModel)]="node.name" [disabled]="!userIsAdmin">
+                            <mat-label>Name</mat-label>
+                            <input matInput [(ngModel)]="node.name" [disabled]="!userIsAdmin">
+                            <mat-error senergyError label="Name"></mat-error>
                         </mat-form-field>
                         <button (click)="showUsedInDialog(usedIn?.get(node.id))" class="linkbutton nested-tree-inline" matTooltip="uses of aspect in device-types" *ngIf="userHasUsedInAuthorization">
                             {{usedIn?.get(node.id)?.count || 0}}

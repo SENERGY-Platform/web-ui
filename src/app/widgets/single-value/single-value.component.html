@@ -51,8 +51,9 @@
         </div>
         <div *ngIf="zoom" class="datepick">
             <mat-form-field appearance="outline" fxFlex color="accent">
-                <mat-label>Select a date</mat-label>
-                <input type="datetime-local" matInput [formControl]="dateControl">
+                <mat-label>Date</mat-label>
+                <input placeholder="Select a Date" type="datetime-local" matInput [formControl]="dateControl">
+                <mat-error senergyError label="Date"></mat-error>
             </mat-form-field>
         </div>
     </mat-card-content>

@@ -21,8 +21,9 @@
     <div *ngIf="ready">
         <form fxLayout="column" [formGroup]="form">
                 <mat-form-field color="accent" appearance="outline" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
-                    <mat-label>Name</mat-label>
-                    <input type="text" matInput placeholder="Name" formControlName="name">
+                    <mat-label>Widget Name</mat-label>
+                    <input type="text" matInput formControlName="name" required>
+					<mat-error senergyError [label]="'Widget name'"></mat-error>
                 </mat-form-field>
     
                 <div *ngIf="exports.length > 0 && userHasUpdatePropertiesAuthorization" fxLayout="column">
@@ -30,6 +31,7 @@
                     <mat-form-field  color="accent" appearance="outline" fxFlex="47">
                         <mat-label>Choose Export</mat-label>
                         <input type="text" matInput formControlName="export" [matAutocomplete]="auto" required>
+						<mat-error senergyError [label]="'Export'"></mat-error>
                         <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
                             <mat-option *ngFor="let option of exports" [value]="option">
                                 {{option.name}}
@@ -50,6 +52,7 @@
                                 {{visOption.name}}
                             </mat-option>
                         </mat-select>
+                        <mat-error senergyError label="Choose Visualization"></mat-error>
                     </mat-form-field>
 
                     <div *ngIf="form.controls.visualizationType.value.id === 'timeline'">

@@ -24,22 +24,30 @@
     </mat-radio-group>
     <form [formGroup]="firstFormGroup" class="form">
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="Id" formControlName="id">
+            <mat-label>ID</mat-label>
+            <input matInput formControlName="id">
+            <mat-error senergyError label="ID"></mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isVoidType()">
-            <input matInput placeholder="Name" formControlName="name" required>
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" required>
+            <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
 
         <mat-checkbox formControlName="omit_empty">Omit Empty</mat-checkbox>
 
         <mat-form-field appearance="outline" class="full-width" color="accent">
+            <mat-label>Aspect</mat-label>
             <senergy-select-search [options]="aspectOptions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
-                                   placeholder="Aspect" formControlName="aspect_id" [getOptionDisabled]="aspectDisabled"></senergy-select-search>
+                                   formControlName="aspect_id" [getOptionDisabled]="aspectDisabled"></senergy-select-search>
+            <mat-error senergyError label="Aspect"></mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width" color="accent">
+            <mat-label>Function</mat-label>
             <senergy-select-search [options]="functions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
-                                   placeholder="Function" formControlName="function_id" useOptionClassProperty="class"></senergy-select-search>
+                                   formControlName="function_id" useOptionClassProperty="class"></senergy-select-search>
+            <mat-error senergyError label="Function"></mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isVoidType()">
@@ -51,31 +59,39 @@
             <mat-error *ngIf="firstFormGroup.get('characteristic_id')?.invalid">{{getCharacteristicError(firstFormGroup.get('characteristic_id')) || ''}}</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
-            <mat-select placeholder="Type"
-                        formControlName="type" required>
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type" required>
                 <mat-option *ngFor="let primitive of primitiveTypes"
                             [value]="primitive.type">
                     {{primitive.typeShort}}
                 </mat-option>
             </mat-select>
+            <mat-error senergyError label="Type"></mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isPrimitiveType() && !isVoidType()">
-            <mat-select placeholder="Type"
-                        formControlName="type" required>
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type" required>
                 <mat-option *ngFor="let nonPrimitive of nonPrimitiveTypes"
                             [value]="nonPrimitive.type">
                     {{nonPrimitive.typeShort}}
                 </mat-option>
             </mat-select>
+            <mat-error senergyError label="Type"></mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
-            <input matInput placeholder="Serialization Options" formControlName="serialization_options">
+            <mat-label>Serialization Options</mat-label>
+            <input matInput formControlName="serialization_options">
+            <mat-error senergyError label="Serialization Options"></mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
-            <input matInput placeholder="Unit reference" formControlName="unit_reference">
+            <mat-label>Unit reference</mat-label>
+            <input matInput formControlName="unit_reference">
+            <mat-error senergyError label="Unit reference"></mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType() && !isOmitEmpty()">
-            <input matInput placeholder="Value" formControlName="value">
+            <mat-label>Value</mat-label>
+            <input matInput formControlName="value">
+            <mat-error senergyError label="Value"></mat-error>
         </mat-form-field>
     </form>
 </mat-dialog-content>

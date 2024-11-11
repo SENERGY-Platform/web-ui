@@ -37,6 +37,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { CoreModule } from '../../core/core.module';
 
 @NgModule({
     imports: [
@@ -60,6 +61,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
         MatTooltipModule,
         ReactiveFormsModule,
         DragDropModule,
+        CoreModule,
     ],
     declarations: [DashboardComponent, DashboardNewDialogComponent, DashboardNewWidgetDialogComponent, DashboardEditDialogComponent],
 })

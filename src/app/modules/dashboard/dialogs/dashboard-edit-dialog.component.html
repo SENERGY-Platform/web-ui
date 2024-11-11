@@ -19,7 +19,9 @@
 <mat-dialog-content>
     <form class="form">
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <input matInput placeholder="Name" [formControl]="formControl">
+            <mat-label>Dashboard Name</mat-label>
+            <input matInput [formControl]="formControl">
+            <mat-error senergyError label="Dashboard Name"></mat-error>
         </mat-form-field>
     </form>
 </mat-dialog-content>

@@ -19,13 +19,19 @@
 <mat-dialog-content>
     <form class="form" [formGroup]="deviceClassFormGroup">
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <input matInput placeholder="Id" formControlName="id">
+            <mat-label>ID</mat-label>
+            <input matInput formControlName="id">
+            <mat-error senergyError label="ID"></mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <input matInput placeholder="Name" formControlName="name">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name">
+            <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <input matInput placeholder="Image" formControlName="image">
+            <mat-label>Image</mat-label>
+            <input matInput formControlName="image">
+            <mat-error senergyError label="Image"></mat-error>
         </mat-form-field>
     </form>
 </mat-dialog-content>

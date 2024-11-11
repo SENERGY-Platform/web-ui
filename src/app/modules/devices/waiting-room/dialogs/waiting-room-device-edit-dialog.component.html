@@ -19,16 +19,21 @@
 <mat-dialog-content>
     <form class="form">
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="ID" disabled value="{{device.local_id}}">
+            <mat-label>ID</mat-label>
+            <input matInput disabled value="{{device.local_id}}">
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="Devicetype ID" disabled value="{{device.device_type_id}}">
+            <mat-label>Device Type ID</mat-label>
+            <input matInput disabled value="{{device.device_type_id}}">
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="Devicetype Name" disabled value="{{deviceType.name}}">
+            <mat-label>Device Type Name</mat-label>
+            <input matInput disabled value="{{deviceType.name}}">
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <input matInput placeholder="Name" required [(ngModel)]="device.name" [ngModelOptions]="{standalone: true}" #name="ngModel">
+            <mat-label>Name</mat-label>
+            <input matInput required [(ngModel)]="device.name" [ngModelOptions]="{standalone: true}" #name="ngModel">
+            <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
 
         <mat-checkbox class="checkbox-margin" *ngIf="!useDialog" [(ngModel)]="device.hidden" [ngModelOptions]="{standalone: true}">Hide</mat-checkbox>
@@ -41,11 +46,15 @@
             <div formArrayName="attributes">
                 <div [formGroupName]="i" *ngFor="let _ of attributes.controls; let i = index" class="attribute">
                     <mat-form-field appearance="outline" class="third-width" color="accent">
-                        <input matInput placeholder="Key" formControlName="key">
+                        <mat-label>Key</mat-label>
+                        <input matInput formControlName="key">
+                        <mat-error senergyError label="Key"></mat-error>
                     </mat-form-field>
                     =
                     <mat-form-field appearance="outline" class="third-width" color="accent">
-                        <input matInput placeholder="Value" formControlName="value" >
+                        <mat-label>Value</mat-label>
+                        <input matInput formControlName="value" >
+                        <mat-error senergyError label="Value"></mat-error>
                     </mat-form-field>
                     <button mat-icon-button color="warn" (click)="removeAttr(i)">
                         <mat-icon>delete</mat-icon>

@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
 import {filter, map, startWith} from 'rxjs/operators';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
@@ -39,8 +39,6 @@ export interface TableElement {
 })
 export class SwitchEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
-
-    formControl = new FormControl<string | DeploymentsModel>('');
     deployments: DeploymentsModel[] = [];
     filteredDeployments: Observable<DeploymentsModel[]> = new Observable();
 
@@ -53,8 +51,10 @@ export class SwitchEditDialogComponent implements OnInit {
     newTrigger = 'on';
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
+    formGroup: FormGroup;
 
     constructor(
+        private fb: FormBuilder,
         private dialogRef: MatDialogRef<SwitchEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
@@ -69,17 +69,35 @@ export class SwitchEditDialogComponent implements OnInit {
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
         this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
+        this.formGroup = this.fb.group({
+            name: [this.widget.name, Validators.required],
+            imgUrl: [this.widget.properties.imgUrl],
+            deployment: [this.widget.properties.deployment],
+        });
     }
 
     ngOnInit() {
         this.getWidgetData();
         this.initDeployments();
+        this.onChanges();
+    }
+
+    onChanges(): void {
+        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+            this.widget.name = val;
+        });
+        this.formGroup.controls['imgUrl'].valueChanges.subscribe(val => {
+            this.widget.properties.imgUrl = val;
+        });
     }
 
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
-
+            this.formGroup.patchValue({
+                name: this.widget.name,
+                imgUrl: this.widget.properties.imgUrl,
+            });
             if (widget.properties.deployments) {
                 widget.properties.deployments.forEach((deploy: SwitchPropertiesDeploymentsModel) => {
                     this.data.push({ name: deploy.name, id: deploy.id, trigger: deploy.trigger });
@@ -92,7 +110,7 @@ export class SwitchEditDialogComponent implements OnInit {
     initDeployments() {
         this.deploymentsService.getAll('', 99999, 0, 'deploymentTime', 'desc', '').subscribe((deployments: DeploymentsModel[]) => {
             this.deployments = deployments;
-            this.filteredDeployments = this.formControl.valueChanges.pipe(
+            this.filteredDeployments = this.formGroup.controls['deployment'].valueChanges.pipe(
                 startWith(''),
                 map((value) => (typeof value === 'string' || value === null ? value : value.name)),
                 map((name) => (name ? this._filter(name) : this.deployments.slice())),
@@ -140,7 +158,7 @@ export class SwitchEditDialogComponent implements OnInit {
     }
 
     addColumn() {
-        let value = this.formControl.value;
+        let value = this.formGroup.controls['deployment'].value;
         if (value === null || this.deployments.indexOf(value as DeploymentsModel) >= 0) {
             value = value as DeploymentsModel;
             this.data.push({
@@ -149,9 +167,9 @@ export class SwitchEditDialogComponent implements OnInit {
                 trigger: this.newTrigger,
             });
             this.table.renderRows();
-            this.formControl.reset('');
+            this.formGroup.controls['deployment'].reset('');
         } else {
-            this.formControl.setErrors({ valid: false });
+            this.formGroup.controls['deployment'].setErrors({ valid: false });
         }
     }
 
