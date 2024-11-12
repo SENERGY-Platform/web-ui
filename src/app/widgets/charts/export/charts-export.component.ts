@@ -291,7 +291,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             if (this.chartExportData.dataTable.length === 0) {
                 return;
             }
-            if (!this.refreshing && this.zoomedAfterRefesh > 2 /*&& (this.to?.valueOf() !== zoomCurrent.max.valueOf() || this.from?.valueOf() !== zoomCurrent.min.valueOf())*/) {
+            if (!this.refreshing && this.zoomedAfterRefesh > 2) {
                 const diff = zoomCurrent.max.valueOf() - zoomCurrent.min.valueOf(); // diff in ms
                 let timeUnit = '';
                 let hAxisFormat = '';
@@ -341,11 +341,12 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         if($event.column === null || this.widget.properties.vAxes === undefined) {
             return;
         }
-        if (this.widget.properties.vAxes.length < $event.column) {
+        const axes = this.modifiedVaxes || this.widget.properties.vAxes;
+        if (axes.length < $event.column) {
             return;
         }
-        const axis = this.widget.properties.vAxes[$event.column - 1]; // time column
-        if (axis.deviceGroupId !== undefined && axis.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum) {
+        const axis = axes[$event.column - 1]; // time column
+        if (axis.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum && (axis.deviceGroupId !== undefined || axis.locationId !== undefined)) {
             // we can split this!
             const cpy = JSON.parse(JSON.stringify(axis)) as ChartsExportVAxesModel;
             cpy.deviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy.Separate;

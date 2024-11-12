@@ -8,7 +8,7 @@ import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-classes/shared/device-classes-perm-search.model';
-import { DeviceTypeFunctionModel, DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeContentVariableModel, DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
 import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../../export/shared/charts-export-properties.model';
 import { environment } from 'src/environments/environment';
@@ -16,9 +16,13 @@ import { ChartsExportRangeTimeTypeEnum } from '../../export/shared/charts-export
 import { ExportService } from 'src/app/modules/exports/shared/export.service';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
+import { LocationModel } from 'src/app/modules/devices/locations/shared/locations.model';
+import { LocationsService } from 'src/app/modules/devices/locations/shared/locations.service';
+import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
+import { FunctionsPermSearchModel } from 'src/app/modules/metadata/functions/shared/functions-perm-search.model';
 
 export interface DataSourceConfig {
-    exports?: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[];
+    exports?: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel | LocationModel)[];
     timeRange?: {
         time?: number;
         start?: string;
@@ -46,7 +50,7 @@ export class DataSourceSelectorComponent implements OnInit {
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
     deviceGroups: DeviceGroupModel[] = [];
     aspects: AspectsPermSearchModel[] = [];
-    functions: DeviceTypeFunctionModel[] = [];
+    functions: FunctionsPermSearchModel[] = [];
     deviceClasses: DeviceClassesPermSearchModel[] = [];
     concepts: Map<string, ConceptsCharacteristicsModel | null> = new Map();
     fieldOptionsTMP: Map<string, ChartsExportVAxesModel[]> = new Map();
@@ -100,6 +104,7 @@ export class DataSourceSelectorComponent implements OnInit {
     @Input() showExportsAsSource = true;
     @Input() showDeviceGroupsAsSource = true;
     @Input() showDevicesAsSource = true;
+    @Input() showLocationsAsSource = false;
     @Input() showTimeRange = true;
     @Input() showSource = true;
     @Output() updatedDataSourceConfig = new EventEmitter<DataSourceConfig>();
@@ -110,7 +115,9 @@ export class DataSourceSelectorComponent implements OnInit {
         private conceptsService: ConceptsService,
         private exportService: ExportService,
         private deviceInstancesService: DeviceInstancesService,
-        private deviceGroupsService: DeviceGroupsService
+        private deviceGroupsService: DeviceGroupsService,
+        private locationsService: LocationsService,
+        private functionsService: FunctionsService,
     ) {}
 
     ngOnInit(): void {
@@ -157,6 +164,13 @@ export class DataSourceSelectorComponent implements OnInit {
                 this.dataSourcePlaceholder += '/';
             }
             this.dataSourcePlaceholder += 'Export';
+        }
+
+        if(this.showLocationsAsSource) {
+            if(seperatorNeeded) {
+                this.dataSourcePlaceholder += '/';
+            }
+            this.dataSourcePlaceholder += 'Location';
         }
     }
 
@@ -210,7 +224,7 @@ export class DataSourceSelectorComponent implements OnInit {
         });
     }
 
-    private updateGroupFields(deviceGroup: DeviceGroupModel) {
+    private updateGroupFields(deviceGroup: DeviceGroupModel): Observable<{ name: string; fieldOptions: ChartsExportVAxesModel[] } | null> {
         const observables: Observable<ChartsExportVAxesModel | undefined>[] = [];
 
         deviceGroup.criteria?.forEach(criteria => {
@@ -276,7 +290,77 @@ export class DataSourceSelectorComponent implements OnInit {
         );
     }
 
-    private updateDeviceFields(selectedElement: DeviceInstanceModel) {
+    private updateLocationFields(location: LocationModel): Observable<{ name: string; fieldOptions: ChartsExportVAxesModel[] } | null> {
+        const observables: Observable<{ name: string; fieldOptions: ChartsExportVAxesModel[] } | null>[] = [];
+        const devices = this.dataSourceOptions.get('Devices') as DeviceInstanceModel[] | undefined;
+        if (devices === undefined) {
+            return of(null);
+        }
+
+        location.device_ids.forEach(deviceId => {
+            const device = devices.find(d => d.id === deviceId);
+            if (device === undefined) {
+                return;
+            }
+            const deviceType = this.deviceTypes.get(device.device_type_id);
+            if (deviceType === undefined) {
+                return;
+            }
+            observables.push(this.updateDeviceFields(device as DeviceInstanceModel).pipe(map(options => {
+                options?.fieldOptions.forEach(f => {
+                    const service = deviceType.services.find(s => s.id === f.serviceId);
+                    const pathParts = (f.valuePath || '').split('.');
+                    let contentVariable: DeviceTypeContentVariableModel | undefined = service?.outputs[0].content_variable;
+                    for (let i = 0; i < pathParts.length; i++) {
+                        contentVariable = contentVariable?.sub_content_variables?.find(s => s.name === pathParts[i]);
+                    }
+                    f.criteria = {
+                        aspect_id: contentVariable?.aspect_id || '',
+                        device_class_id: deviceType.device_class_id,
+                        function_id: contentVariable?.function_id || '',
+                        interaction: service?.interaction || '',
+                    };
+                    f.deviceId = undefined;
+                    f.serviceId = undefined;
+                    f.valuePath = undefined;
+                });
+                return options;
+            })));
+        });
+
+        location.device_group_ids.forEach(deviceGroupId => {
+            const deviceGroup = this.deviceGroups.find(d => d.id === deviceGroupId);
+            if (deviceGroup === undefined) {
+                return;
+            }
+            observables.push(this.updateGroupFields(deviceGroup).pipe(map(options => {
+                options?.fieldOptions.forEach(o => o.deviceGroupId = undefined);
+                return options;
+            })));
+        });
+
+        return forkJoin(observables).pipe(map(options => {
+            const res: { name: string; fieldOptions: ChartsExportVAxesModel[] } = {name: location.name, fieldOptions: []};
+            options.forEach(o => {
+                if (o === null) {
+                    return;
+                }
+                o.fieldOptions.forEach(f => {
+                    f.exportName = location.name;
+                    f.locationId = location.id;
+                    res.fieldOptions.push(f);
+                });
+            });
+            if (res.fieldOptions.length === 0) {
+                return null;
+            }
+            const unique = [...new Set(res.fieldOptions)];
+            res.fieldOptions = unique;
+            return res;
+        }));
+    }
+
+    private updateDeviceFields(selectedElement: DeviceInstanceModel): Observable<{ name: string; fieldOptions: ChartsExportVAxesModel[] } | null> {
         let observableDeviceType: Observable<DeviceTypeModel | undefined>;
         if (this.deviceTypes.has(selectedElement.device_type_id)) {
             observableDeviceType = of(this.deviceTypes.get(selectedElement.device_type_id));
@@ -345,7 +429,10 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
     describeCriteria(): (criteria: DeviceGroupCriteriaModel) => string {
-        return criteria => (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
+        return criteria => {
+            const func = this.functions.find(f => f.id === criteria.function_id);
+            return (func?.display_name || func?.name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
+        };
     }
 
     getExports() {
@@ -424,7 +511,6 @@ export class DataSourceSelectorComponent implements OnInit {
                 });
                 this.dataSourceOptions.set('Device Groups', this.deviceGroups);
                 innerObs.push(this.deviceGroupsService.getAspectListByIds(Array.from(ascpectIds.keys())).pipe(map(aspects => this.aspects = aspects)));
-                innerObs.push(this.deviceGroupsService.getFunctionListByIds(Array.from(functionIds.keys())).pipe(map(functions => this.functions = functions)));
                 innerObs.push(this.deviceGroupsService.getDeviceClassListByIds(Array.from(deviceClassids.keys())).pipe(map(deviceClasses => this.deviceClasses = deviceClasses)));
                 return forkJoin(innerObs);
             }),
@@ -434,6 +520,10 @@ export class DataSourceSelectorComponent implements OnInit {
                 return throwError(() => err);
             })
         );
+    }
+
+    getLocations(): Observable<unknown> {
+        return this.locationsService.listLocations(9999, 0, 'name', 'asc').pipe(map(locations => this.dataSourceOptions.set('Locations', locations)));
     }
 
     setupDataSources(): Observable<any> {
@@ -448,6 +538,10 @@ export class DataSourceSelectorComponent implements OnInit {
         if(this.showDeviceGroupsAsSource) {
             obs.push(this.getDeviceGroups());
         }
+        if(this.showLocationsAsSource) {
+            obs.push(this.getLocations());
+        }
+        obs.push(this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').pipe(map(functions => this.functions = functions)))
         if(obs.length === 0) {
             obs.push(of(true));
         }
@@ -511,6 +605,8 @@ export class DataSourceSelectorComponent implements OnInit {
                 observables = observables.concat(this.updateExportFields(selectedElement as ChartsExportMeasurementModel));
             } else if ((selectedElement as DeviceGroupModel)?.criteria !== undefined) { // is device group
                 observables = observables.concat(this.updateGroupFields(selectedElement as DeviceGroupModel));
+            } else if (selectedElement.id.startsWith('urn:infai:ses:location:')) {
+                observables = observables.concat(this.updateLocationFields(selectedElement as LocationModel));
             } else {
                 observables = observables.concat(this.updateDeviceFields(selectedElement as DeviceInstanceModel));
             }
@@ -650,9 +746,12 @@ export class DataSourceSelectorComponent implements OnInit {
                                         a.serviceId === b.serviceId && 
                                         a.valuePath === b.valuePath);
         const deviceGroupMatch = (a.deviceGroupId != null && b.deviceGroupId != null &&
-                                             a.deviceGroupId === b.deviceGroupId &&
-                                             a.criteria.function_id === b.criteria.function_id);
-        return exportsMatch || deviceMatch || deviceGroupMatch;
+                                        a.deviceGroupId === b.deviceGroupId &&
+                                        a.criteria.function_id === b.criteria.function_id);
+        const locationsMatch = (a.locationId != null && b.locationId != null &&
+                                        a.locationId === b.locationId &&
+                                        a.criteria.function_id === b.criteria.function_id);
+        return exportsMatch || deviceMatch || deviceGroupMatch || locationsMatch;
     }
 
     getDataSourceName(x: any): string {

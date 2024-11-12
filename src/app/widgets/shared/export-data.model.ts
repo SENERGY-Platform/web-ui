@@ -47,6 +47,7 @@ export interface QueriesRequestElementTimescaleModel extends QueriesRequestEleme
 
 export interface QueriesRequestV2ElementTimescaleModel extends QueriesRequestElementTimescaleModel{
     deviceGroupId?: string;
+    locationid?: string;
 }
 
 export interface QueriesRequestElementBaseModel {
