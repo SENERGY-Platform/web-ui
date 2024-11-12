@@ -25,6 +25,7 @@ import { Subscription } from 'rxjs';
 import { ErrorModel } from '../../../core/model/error.model';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { ChartsService } from '../shared/charts.service';
+import { ChartsExportDeviceGroupMergingStrategy, ChartsExportVAxesModel } from './shared/charts-export-properties.model';
 
 @Component({
     selector: 'senergy-charts-export',
@@ -200,7 +201,13 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 return;
             }
 
-            this.chartsExportService.getChartData(this.widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride).subscribe((resp: ChartsModel | ErrorModel) => {
+            const widget = JSON.parse(JSON.stringify(this.widget)) as WidgetModel;
+
+            if (this.modifiedVaxes !== null) {
+                widget.properties.vAxes = this.modifiedVaxes;
+            }
+
+            this.chartsExportService.getChartData(widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride).subscribe((resp: ChartsModel | ErrorModel) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     this.errorHasOccured = true;
                     this.errorMessage = 'No data';
@@ -331,7 +338,21 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     onChartSelect($event: ChartSelectEvent) {
-        console.log($event); // TODO
+        if($event.column === null || this.widget.properties.vAxes === undefined) {
+            return;
+        }
+        if (this.widget.properties.vAxes.length < $event.column) {
+            return;
+        }
+        const axis = this.widget.properties.vAxes[$event.column - 1]; // time column
+        if (axis.deviceGroupId !== undefined && axis.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum) {
+            // we can split this!
+            const cpy = JSON.parse(JSON.stringify(axis)) as ChartsExportVAxesModel;
+            cpy.deviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy.Separate;
+            this.modifiedVaxes = [cpy];
+            this.ready = false;
+            this.refresh();
+        }
     }
 
     zoomOutTime() {
@@ -456,6 +477,22 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
+    private get modifiedVaxes(): ChartsExportVAxesModel[] | null {
+        const str = localStorage.getItem(this.widget.id + '_modifiedvAxes');
+        if (str === null) {
+            return null;
+        }
+        return JSON.parse(str);
+    }
+
+    private set modifiedVaxes(axes: ChartsExportVAxesModel[] | null) {
+        if (axes === null) {
+            localStorage.removeItem(this.widget.id + '_modifiedvAxes');
+        } else {
+            localStorage.setItem(this.widget.id + '_modifiedvAxes', JSON.stringify(axes));
+        }
+    }
+
     getCustomIcons(header: boolean): { icons: string[]; disabled: boolean[]; tooltips: string[] } {
         const res = { icons: [] as string[], disabled: [] as boolean[], tooltips: [] as string[] };
 
@@ -469,7 +506,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 if (localStorage.key(i)?.startsWith(this.widget.id)) {
                     res.icons.push('undo');
                     res.disabled.push(!this.ready);
-                    res.tooltips.push('reset zoom');
+                    res.tooltips.push('reset');
                     break;
                 }
             }
