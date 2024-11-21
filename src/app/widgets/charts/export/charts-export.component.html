@@ -61,6 +61,6 @@
                            (editEvent)="edit()" [refreshing]="refreshing"
                            [optionCustomIcon]="getCustomIcons(false).icons" [optionCustomTooltip]="getCustomIcons(false).tooltips"
                            (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(false).disabled"
-                           [reloadAfterZoom]="false" [getInitialWidgetData]="getChartData"></senergy-widget-footer>
+                           [reloadAfterZoom]="changesTimeframeOnZoom()" [getInitialWidgetData]="getChartData"></senergy-widget-footer>
 </mat-card>
 

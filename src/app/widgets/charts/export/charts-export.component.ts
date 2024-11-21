@@ -38,7 +38,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     timelineWidth = 0;
     timelineHeight = 0;
     ready = false;
-    refreshing = true;
+    refreshing = false;
     destroy = new Subscription();
     configureWidget = false;
     errorHasOccured = false;
@@ -186,13 +186,21 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
+    changesTimeframeOnZoom(): boolean {
+        const rgxRes = this.timeRgx.exec(this.widget.properties.time?.last || '');
+        return this.widget.properties.chartType === 'LineChart' && this.from === null && this.to === null && rgxRes?.length === 3;
+    }
+
     private refresh() {
         this.refreshing = true;
         this.checkConfiguration();
         if (this.configureWidget === false) {
             let lastOverride: string | undefined;
-            const rgxRes = this.timeRgx.exec(this.widget.properties.time?.last || '');
-            if (this.zoom && this.widget.properties.chartType === 'LineChart' && this.from === null && this.to === null && rgxRes?.length === 3) {
+            if (this.zoom && this.changesTimeframeOnZoom()) {
+                const rgxRes = this.timeRgx.exec(this.widget.properties.time?.last || '');
+                if (rgxRes?.length !== 3) {
+                    return;
+                }
                 lastOverride = Number(rgxRes[1]) * (this.widget.properties.zoomTimeFactor || 2) + rgxRes[2];
             }
 
@@ -338,7 +346,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     onChartSelect($event: ChartSelectEvent) {
-        if($event.column === null || this.widget.properties.vAxes === undefined) {
+        if ($event.column === null || this.widget.properties.vAxes === undefined) {
             return;
         }
         const axes = this.modifiedVaxes || this.widget.properties.vAxes;
@@ -367,46 +375,46 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         }
         let timeUnit = rgxRes[2];
         switch (timeUnit) {
-        case 'y':
-            return;
-        case 'months':
-            timeUnit = 'y';
-            this.hAxisFormat = 'yyyy';
-            this.from = new Date(0);
-            this.to = new Date('2999-01-01T00:00:00Z');
-            break;
-        case 'w':
-        case 'd':
-            timeUnit = 'months';
-            this.hAxisFormat = 'MMM';
-            this.from = new Date(this.from.setMonth(0, 0));
-            this.from = new Date(this.from.setHours(0, 0, 0, 0));
-            this.to = new Date(this.from.setFullYear(this.from.getFullYear() + 1));
-            break;
-        case 'h':
-            timeUnit = 'd';
-            this.hAxisFormat = 'dd';
-            this.from = new Date(this.from.setDate(0));
-            this.from = new Date(this.from.setHours(0, 0, 0, 0));
-            this.to = new Date(this.from.setMonth(this.from.getMonth() + 1));
-            break;
-        case 'm':
-            timeUnit = 'h';
-            this.hAxisFormat = 'HH';
-            this.from = new Date(this.from.setHours(0, 0, 0, 0));
-            this.to = new Date(this.from.setDate(this.from.getDate() + 1));
-            break;
-        case 's':
-            timeUnit = 'm';
-            this.hAxisFormat = 'mm';
-            this.from = new Date(this.from.setMinutes(0, 0, 0));
-            this.to = new Date(this.from.setHours(this.from.getHours() + 1));
-            break;
-        case 'ms':
-            timeUnit = 's';
-            this.hAxisFormat = 'ss';
-            this.from = new Date(this.from.setSeconds(0, 0));
-            this.to = new Date(this.from.setMinutes(this.from.getMinutes() + 1));
+            case 'y':
+                return;
+            case 'months':
+                timeUnit = 'y';
+                this.hAxisFormat = 'yyyy';
+                this.from = new Date(0);
+                this.to = new Date('2999-01-01T00:00:00Z');
+                break;
+            case 'w':
+            case 'd':
+                timeUnit = 'months';
+                this.hAxisFormat = 'MMM';
+                this.from = new Date(this.from.setMonth(0, 0));
+                this.from = new Date(this.from.setHours(0, 0, 0, 0));
+                this.to = new Date(this.from.setFullYear(this.from.getFullYear() + 1));
+                break;
+            case 'h':
+                timeUnit = 'd';
+                this.hAxisFormat = 'dd';
+                this.from = new Date(this.from.setDate(0));
+                this.from = new Date(this.from.setHours(0, 0, 0, 0));
+                this.to = new Date(this.from.setMonth(this.from.getMonth() + 1));
+                break;
+            case 'm':
+                timeUnit = 'h';
+                this.hAxisFormat = 'HH';
+                this.from = new Date(this.from.setHours(0, 0, 0, 0));
+                this.to = new Date(this.from.setDate(this.from.getDate() + 1));
+                break;
+            case 's':
+                timeUnit = 'm';
+                this.hAxisFormat = 'mm';
+                this.from = new Date(this.from.setMinutes(0, 0, 0));
+                this.to = new Date(this.from.setHours(this.from.getHours() + 1));
+                break;
+            case 'ms':
+                timeUnit = 's';
+                this.hAxisFormat = 'ss';
+                this.from = new Date(this.from.setSeconds(0, 0));
+                this.to = new Date(this.from.setMinutes(this.from.getMinutes() + 1));
         }
 
         this.groupTime = '1' + timeUnit;
@@ -518,14 +526,14 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
     customEvent($event: { index: number; icon: string }) {
         switch ($event.icon) {
-        case 'zoom_out':
-            this.zoomOutTime();
-            return;
-        case 'undo':
-            this.ready = false;
-            this.chartsService.cleanup(this.widget);
-            setTimeout(() => this.refresh(), 1000);
-            return;
+            case 'zoom_out':
+                this.zoomOutTime();
+                return;
+            case 'undo':
+                this.ready = false;
+                this.chartsService.cleanup(this.widget);
+                setTimeout(() => this.refresh(), 1000);
+                return;
         }
     }
 
@@ -543,14 +551,14 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             return -1;
         }
         switch (rgxRes[2]) {
-        case 'ms': return 6;
-        case 's': return 5;
-        case 'm': return 4;
-        case 'h': return 3;
-        case 'd': return 2;
-        case 'months': return 1;
-        case 'y': return 0;
-        default: return -1;
+            case 'ms': return 6;
+            case 's': return 5;
+            case 'm': return 4;
+            case 'h': return 3;
+            case 'd': return 2;
+            case 'months': return 1;
+            case 'y': return 0;
+            default: return -1;
         }
     }
 }
