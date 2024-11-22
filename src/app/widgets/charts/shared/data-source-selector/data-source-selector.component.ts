@@ -523,7 +523,7 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
     getLocations(): Observable<unknown> {
-        return this.locationsService.listLocations(9999, 0, 'name', 'asc').pipe(map(locations => this.dataSourceOptions.set('Locations', locations)));
+        return this.locationsService.getLocations({limit: 9999, offset: 0}).pipe(map(locations => this.dataSourceOptions.set('Locations', locations.result)));
     }
 
     setupDataSources(): Observable<any> {

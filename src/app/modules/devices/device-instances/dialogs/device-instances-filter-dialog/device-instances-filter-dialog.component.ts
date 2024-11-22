@@ -54,8 +54,8 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
         const optionLoadObs: Observable<any>[] = [];
 
         optionLoadObs.push(
-            this.locationsService.listLocations(100, 0, 'name', this.sortDirection).pipe(map((value) => {
-                this.locationOptions = value;
+            this.locationsService.getLocations({sortBy: 'name', sortDirection: this.sortDirection}).pipe(map((value) => {
+                this.locationOptions = value.result;
             }))
         );
 
