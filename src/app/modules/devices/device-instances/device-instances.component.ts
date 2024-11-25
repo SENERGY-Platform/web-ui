@@ -106,6 +106,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     sortDirection: SortDirection = 'asc';
 
     userHasDeleteAuthorization = false;
+    userHasUpdateAuthorization = false;
     userHasReadDeviceUsageAuthorization = false;
     userHasUpdateDisplayNameAuthorization = false;
     userHasUpdateAttributesAuthorization = false;
@@ -148,6 +149,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
         this.userHasUpdateDisplayNameAuthorization = this.deviceInstancesService.userHasUpdateDisplayNameAuthorization();
         this.userHasUpdateAttributesAuthorization = this.deviceInstancesService.userHasUpdateAttributesAuthorization();
+        this.userHasUpdateAuthorization = this.deviceInstancesService.userHasUpdateAuthorization();
 
         if (this.userHasUpdateDisplayNameAuthorization || this.userHasUpdateAttributesAuthorization) {
             this.displayedColumns.push('edit');
@@ -308,6 +310,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     editDevice(device: DeviceInstanceModel): void {
         this.deviceInstancesDialogService.openDeviceEditDialog(
             device,
+            this.userHasUpdateAuthorization,
             this.userHasUpdateDisplayNameAuthorization,
             this.userHasUpdateAttributesAuthorization,
             (spinnerState: boolean) => {

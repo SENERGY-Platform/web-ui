@@ -128,7 +128,7 @@ export class DeviceInstancesDialogService {
         });
     }
 
-    openDeviceEditDialog(device: DeviceInstanceModel, userHasUpdateDisplayNameAuthorization: boolean, userHasUpdateAttributesAuthorization: boolean, setSpinnerState?: (state: boolean) => void) {
+    openDeviceEditDialog(device: DeviceInstanceModel, userHasUpdateAuthorization: boolean, userHasUpdateDisplayNameAuthorization: boolean, userHasUpdateAttributesAuthorization: boolean, setSpinnerState?: (state: boolean) => void) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.width = '50vh';
         dialogConfig.disableClose = false;
@@ -145,21 +145,28 @@ export class DeviceInstancesDialogService {
             concatMap((newDevice: DeviceInstanceModel) => {
                 let obs: Observable<any> = of(null);
                 // Display Name is an attribute, so if someone got attribute authorization, display name is also allowed
-                if (newDevice.attributes !== undefined && userHasUpdateAttributesAuthorization) {
-                    if(setSpinnerState) {
+                if (newDevice !== undefined && userHasUpdateAuthorization) {
+                    if (setSpinnerState) {
                         setSpinnerState(true);
                     }
-                    obs = this.deviceInstancesService.updateDeviceInstanceAttributes(device.id, newDevice.attributes);
-                }
+                    obs = (this.deviceInstancesService.updateDeviceInstance(newDevice));
+                } else {
+                    if (newDevice !== undefined && newDevice.attributes !== undefined && userHasUpdateAttributesAuthorization) {
+                        if (setSpinnerState) {
+                            setSpinnerState(true);
+                        }
+                        obs = this.deviceInstancesService.updateDeviceInstanceAttributes(device.id, newDevice.attributes);
+                    }
 
-                if(newDevice.display_name != null && userHasUpdateDisplayNameAuthorization && !userHasUpdateAttributesAuthorization) {
-                    if(setSpinnerState) {
-                        setSpinnerState(true);
+                    if (newDevice !== undefined && newDevice.display_name != null && userHasUpdateDisplayNameAuthorization && !userHasUpdateAttributesAuthorization) {
+                        if (setSpinnerState) {
+                            setSpinnerState(true);
+                        }
+                        obs = this.deviceInstancesService.updateDeviceInstanceDisplayName(device.id, newDevice.display_name);
                     }
-                    obs = this.deviceInstancesService.updateDeviceInstanceDisplayName(device.id, newDevice.display_name);
                 }
                 return obs.pipe(
-                    map((resp: (DeviceInstanceModel | null)) => {
+                    map((resp) => {
                         let errorOccured = false;
                         if(resp === null) {
                             errorOccured = true;
