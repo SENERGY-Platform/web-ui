@@ -22,3 +22,8 @@ export interface LocationModel {
     device_ids: string[];
     device_group_ids: string[];
 }
+
+export interface LocationTotalModel {
+    result: LocationModel[];
+    total: number;
+}

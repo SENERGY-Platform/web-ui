@@ -72,12 +72,6 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.searchSub.unsubscribe();
     }
 
-    getTotalCounts(): Observable<number> {
-        return this.locationsService.getTotalCountOfLocations(this.searchText).pipe(
-            map((totalCount: number) => this.totalCount = totalCount)
-        );
-    }
-
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize;
@@ -152,11 +146,12 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private getLocations(): Observable<LocationModel[]> {
         return this.locationsService
-            .searchLocations(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
+            .getLocations({search: this.searchText, limit: this.pageSize, offset: this.offset, sortBy: this.sortBy, sortDirection: this.sortDirection})
             .pipe(
-                map((locations: LocationModel[]) => {
-                    this.dataSource.data = locations;
-                    return locations;
+                map((locations) => {
+                    this.dataSource.data = locations.result;
+                    this.totalCount = locations.total;
+                    return locations.result;
                 })
             );
     }
@@ -172,7 +167,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.ready = false;
         this.selectionClear();
 
-        forkJoin([this.getLocations(), this.getTotalCounts()]).subscribe(_ => {
+        this.getLocations().subscribe(_ => {
             this.ready = true;
         });
     }

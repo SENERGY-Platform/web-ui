@@ -259,9 +259,10 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     }
                     return resp;
                 }),
-                concatMap((resp: ExportResponseModel | null) => {
-                    if (resp !=null && resp?.instances !== undefined && resp.instances.length > 0) {
-                        const exportIds = resp.instances.filter(e => e.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb && e.ID !== undefined).map(e => e.ID) as string[];
+                concatMap(_ => this.loadExportPermissions()),
+                concatMap(_ => {
+                    if (this.exports !=null && this.exports !== undefined && this.exports.length > 0) {
+                        const exportIds = this.exports.filter(e => e.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb && e.ID !== undefined && this.permissionsPerExports.find(x => x.id === e.ID)?.execute === true).map(e => e.ID) as string[]; // TODO also filter for permissions (must contain x)
                         return this.exportDataService.getTimescaleExportUsage(exportIds).pipe(map(usage => {
                             this.usage = usage;
                         }));
@@ -270,7 +271,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 })
             );
         }
-        return obs.pipe(concatMap(_ => this.loadExportPermissions()));
+        return obs;
     }
 
     private initSearchAndGetExports() {

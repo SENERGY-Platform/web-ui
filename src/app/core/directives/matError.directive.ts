@@ -62,7 +62,9 @@ export class MatErrorMessagesDirective implements AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        this.formControl.markAsTouched = this.formControl['_markAsTouched'];
+        if (this.formControl !== null) {
+            this.formControl.markAsTouched = this.formControl['_markAsTouched'];
+        }
     }
 
     private subscribeToTouched(){

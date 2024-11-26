@@ -17,13 +17,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
-import { LocationModel } from './locations.model';
+import { LocationModel, LocationTotalModel } from './locations.model';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
@@ -39,39 +38,36 @@ export class LocationsService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl);
     }
 
-    searchLocations(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<LocationModel[]> {
-        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
-            sortDirection = 'asc';
+    getLocations(options?: {limit?: number; offset?: number; search?: string; sortBy?: string; sortDirection?: string; ids?: string[]; permission?: string}): Observable<LocationTotalModel> {
+        let params = new HttpParams();
+        if(options?.limit !== undefined) {
+            params = params.set('limit', options.limit.toString());
         }
-        if (sortBy === '' || sortBy === null || sortBy === undefined) {
-            sortBy = 'name';
+        if(options?.offset !== undefined) {
+            params = params.set('offset', options.offset.toString());
         }
-        const params = [
-            'limit=' + limit,
-            'offset=' + offset,
-            'rights=r',
-            'sort=' + sortBy + '.' + sortDirection,
-            'search=' + encodeURIComponent(searchText),
-        ].join('&');
+        if(options?.search !== undefined) {
+            params = params.set('search', options.search);
+        }
+        if(options?.sortBy !== undefined) {
+            params = params.set('sort', options.sortBy + '.' + (options.sortDirection || 'desc'));
+        }
+        if(options?.ids !== undefined) {
+            params = params.set('ids', options.ids.join(','));
+        }
+        if(options?.permission !== undefined) {
+            params = params.set('p', options.permission);
+        }
 
-        return this.http.get<LocationModel[]>(environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe( // TODO 
-            map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations(search)', [])),
-        );
-    }
-
-    listLocations(limit: number, offset: number, sortBy: string, sortDirection: string): Observable<LocationModel[]> {
-        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
-            sortDirection = 'asc';
-        }
-        if (sortBy === '' || sortBy === null || sortBy === undefined) {
-            sortBy = 'name';
-        }
-        const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection].join('&');
-
-        return this.http.get<LocationModel[]>(environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe( //TODO
-            map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations(search)', [])),
+        return this.http.get<LocationModel[]>(environment.deviceRepoUrl + '/locations', {observe: 'response', params}).pipe(
+            map((resp) => {
+                const totalStr = resp.headers.get('X-Total-Count') || '0';
+                return {
+                    result: resp.body || [],
+                    total: parseInt(totalStr, 10)
+                } as LocationTotalModel;
+            }),
+            catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations()', {result: [], total: 0})),
         );
     }
 
@@ -98,22 +94,6 @@ export class LocationsService {
         return this.http
             .put<LocationModel>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(location.id), location)
             .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'updateLocation', null)));
-    }
-
-    getTotalCountOfLocations(searchText: string): Observable<any> {
-        const options = searchText ?
-            { params: new HttpParams().set('search', searchText) } : {};
-
-        return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/locations', options) //TODO
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(
-                        LocationsService.name,
-                        'getTotalCountOfLocations',
-                    ),
-                ),
-            );
     }
 
     userHasDeleteAuthorization(): boolean {
