@@ -41,7 +41,7 @@
             <mat-form-field fxFlex color="accent" appearance="outline">
                 <mat-label>Device</mat-label>
                 <senergy-select-search [options]="allDevices" [getOptionViewValue]="getDeviceName"
-                    ngDefaultControl (ngModelChange)="queryDeviceChanged($event)" [(ngModel)]="queryDevice"
+                    ngDefaultControl (ngModelChange)="queryDeviceChanged($event).subscribe()" [(ngModel)]="queryDevice"
                     [multiple]="false">
                 </senergy-select-search>
                 <mat-error senergyError label="Device"></mat-error>
