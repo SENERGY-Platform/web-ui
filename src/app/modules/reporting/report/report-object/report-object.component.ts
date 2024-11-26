@@ -256,4 +256,8 @@ export class ReportObjectComponent implements OnInit {
         }
     }
 
+    getDeviceName(device: DeviceInstanceModel){
+        return device.display_name || device.name;
+    }
+
 }

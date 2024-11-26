@@ -40,7 +40,7 @@
         <div *ngIf="inputType === 'query' && data.query !== undefined" fxLayout="column">
             <mat-form-field fxFlex color="accent" appearance="outline">
                 <mat-label>Device</mat-label>
-                <senergy-select-search [options]="allDevices" useOptionViewProperty="name"
+                <senergy-select-search [options]="allDevices" [getOptionViewValue]="getDeviceName"
                     ngDefaultControl (ngModelChange)="queryDeviceChanged($event)" [(ngModel)]="queryDevice"
                     [multiple]="false">
                 </senergy-select-search>
