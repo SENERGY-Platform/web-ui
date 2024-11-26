@@ -34,7 +34,7 @@ export class TemplatesComponent implements OnInit {
 
     templates: TemplateModel[] = [] as TemplateModel[];
     templatesDataSource = new MatTableDataSource<TemplateModel>();
-    displayedColumns: string[] = ['id', 'name', 'edit'];
+    displayedColumns: string[] = ['id', 'name', 'type', 'edit'];
     ready = false;
 
     constructor(

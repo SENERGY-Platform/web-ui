@@ -27,6 +27,7 @@ export interface TemplateResponseModel {
 export interface TemplateModel {
     id: string;
     name: string;
+    type: string;
     data: TemplateDataModel | undefined;
 }
 
