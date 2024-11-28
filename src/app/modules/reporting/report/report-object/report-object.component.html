@@ -22,7 +22,7 @@
             {{data.valueType }} - {{inputType}}</mat-panel-description>
         <mat-panel-description *ngIf="data.valueType==='object'"> {{data.valueType }}</mat-panel-description>
         <mat-panel-description *ngIf="inputType==='query'"> {{data.valueType }} - {{inputType}} -
-            {{data.query?.deviceId}}/{{data.query?.serviceId}} </mat-panel-description>
+            {{queryDevice.display_name || queryDevice?.display_name}}/{{queryService.name}}/{{data.query!.columns[0].name}} </mat-panel-description>
     </mat-expansion-panel-header>
     <div fxLayout="column">
         <div fxLayout="row">
@@ -118,12 +118,12 @@
             <div *ngIf="data.valueType === 'object' && data.fields !== undefined">
 
                 <senergy-reporting-object *ngFor="let element of data.fields | keyvalue" [requestObject]="requestObject"
-                    [name]="name+element.key" [data]="element.value" [allDevices]="allDevices">
+                    [name]="element.key" [data]="element.value" [allDevices]="allDevices">
                 </senergy-reporting-object>
             </div>
             <div *ngIf="data.valueType === 'array' && data.children !== undefined">
                 <senergy-reporting-object *ngFor="let element of data.children | keyvalue"
-                    [requestObject]="requestObject" [name]="name+element.key" [data]="element.value"
+                    [requestObject]="requestObject" [name]="element.key" [data]="element.value"
                     [allDevices]="allDevices">
                 </senergy-reporting-object>
             </div>
