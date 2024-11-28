@@ -15,14 +15,21 @@
   -->
 <mat-expansion-panel *ngIf="data !== undefined" class="reporting-object">
     <mat-expansion-panel-header>
-        <mat-panel-title> {{ name }} </mat-panel-title>
+        <mat-panel-title> {{ name }} ({{data.valueType}}) </mat-panel-title>
         <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value !== undefined">
-            {{data.valueType }} - {{inputType}}:{{data.value}} </mat-panel-description>
+            <mat-icon aria-hidden="false" aria-label="Input" fontIcon="input"></mat-icon> {{data.value}}
+        </mat-panel-description>
         <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value === undefined">
-            {{data.valueType }} - {{inputType}}</mat-panel-description>
-        <mat-panel-description *ngIf="data.valueType==='object'"> {{data.valueType }}</mat-panel-description>
-        <mat-panel-description *ngIf="inputType==='query'"> {{data.valueType }} - {{inputType}} -
-            {{queryDevice.display_name || queryDevice?.display_name}}/{{queryService.name}}/{{data.query!.columns[0].name}} </mat-panel-description>
+            <mat-icon aria-hidden="false" aria-label="Input" fontIcon="input"></mat-icon></mat-panel-description>
+        <mat-panel-description *ngIf="data.valueType==='object'"></mat-panel-description>
+        <mat-panel-description *ngIf="inputType==='query' && data.valueType==='array'">
+            <mat-icon aria-hidden="false" aria-label="Query" fontIcon="list"></mat-icon>
+            {{queryDevice.display_name || queryDevice?.display_name}}/{{queryService.name}}/{{data.query!.columns[0].name}}
+        </mat-panel-description>
+        <mat-panel-description *ngIf="inputType==='query' && data.valueType!=='array'">
+            <mat-icon aria-hidden="false" aria-label="Query" fontIcon="build"></mat-icon>
+            {{queryDevice.display_name || queryDevice?.display_name}}/{{queryService.name}}/{{data.query!.columns[0].name}}
+        </mat-panel-description>
     </mat-expansion-panel-header>
     <div fxLayout="column">
         <div fxLayout="row">
