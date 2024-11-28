@@ -105,6 +105,22 @@
                     <mat-error senergyError label="Time Frame Unit"></mat-error>
                 </mat-form-field>
             </div>
+            <div role="group" class="form-grouping">
+                <mat-form-field fxFlex color="accent" appearance="outline">
+                    <mat-label>Start Date</mat-label>
+                    <input matInput [matDatepicker]="picker_start" [(ngModel)]="data.query!.time!.start">
+                    <mat-hint>DD/MM/YYYY</mat-hint>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker_start"></mat-datepicker-toggle>
+                    <mat-datepicker #picker_start></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field fxFlex color="accent" appearance="outline">
+                    <mat-label>End Date</mat-label>
+                    <input matInput [matDatepicker]="picker_end" [(ngModel)]="data.query!.time!.end">
+                    <mat-hint>DD/MM/YYYY</mat-hint>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker_end"></mat-datepicker-toggle>
+                    <mat-datepicker #picker_end></mat-datepicker>
+                </mat-form-field>
+            </div>
         </div>
 
         <div *ngIf="inputType === 'value'" fxLayout="column">

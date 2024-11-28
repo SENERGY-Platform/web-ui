@@ -62,7 +62,7 @@ export class ReportObjectComponent implements OnInit, OnChanges {
     queryDeviceType: DeviceTypeModel = {} as DeviceTypeModel;
     queryPreview = '';
     fieldGroupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median', 'time-weighted-mean-linear', 'time-weighted-mean-locf'];
-    groupingTime = {number: '12', unit: 'months'};
+    groupingTime = {number: '', unit: ''};
     timeUnits = [
         new TimeUnit('ms', 'Milliseconds'),
         new TimeUnit('s', 'Seconds'),
@@ -73,7 +73,7 @@ export class ReportObjectComponent implements OnInit, OnChanges {
         new TimeUnit('months', 'Months'),
         new TimeUnit('y', 'Years'),
     ];
-    timeframe = {number: '1', unit: 'months'};
+    timeframe = {number: '', unit: ''};
 
 
     constructor(
@@ -230,7 +230,12 @@ export class ReportObjectComponent implements OnInit, OnChanges {
 
     setGroupingTime() {
         if (this.data?.query !== undefined) {
-            this.data.query.groupTime = this.groupingTime.number + this.groupingTime.unit;
+            if (this.groupingTime.number === '') {
+                delete this.data.query.groupTime;
+                this.getGroupingTime();
+            } else {
+                this.data.query.groupTime = this.groupingTime.number + this.groupingTime.unit;
+            }
         }
     }
 
@@ -245,7 +250,12 @@ export class ReportObjectComponent implements OnInit, OnChanges {
 
     setTimeframe() {
         if (this.data?.query?.time !== undefined) {
-            this.data.query.time.last = this.timeframe.number + this.timeframe.unit;
+            if(this.timeframe.number === ''){
+                delete this.data.query.time.last;
+                this.getTimeframe();
+            } else {
+                this.data.query.time.last = this.timeframe.number + this.timeframe.unit;
+            }
         }
     }
 

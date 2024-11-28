@@ -41,6 +41,7 @@ import {QueryPreviewDialogComponent} from './report/report-object/query-preview/
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatDatepickerModule} from "@angular/material/datepicker";
 
 const templateList: Route = { path: 'reporting/templates', pathMatch: 'full', component: TemplatesComponent, data: { header: 'Templates' } };
 const reportsList: Route = { path: 'reporting/reports', pathMatch: 'full', component: ReportsComponent, data: { header: 'Reports' } };
@@ -71,7 +72,8 @@ const reportFilesList: Route = { path: 'reporting/files/:reportId', pathMatch: '
         MatRadioModule,
         CoreModule,
         MatDialogModule,
-        MatExpansionModule
+        MatExpansionModule,
+        MatDatepickerModule
     ]
 })
 export class ReportingModule { }
