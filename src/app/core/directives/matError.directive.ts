@@ -51,7 +51,13 @@ export class MatErrorMessagesDirective implements AfterViewInit, OnDestroy {
         const container = this._inj.get(MatFormField);
         this.inputRef = container._control;
         if (this.formControl == null) {
-            this.formControl = this.inputRef.ngControl.control;
+            try {
+                this.formControl = this.inputRef.ngControl.control;
+            } catch (e) {
+                throw new Error('FormControl must be provided to mat-error with label: ' + this.label + '\n This ' +
+                    'can be done by using formControlName, formControl, or ngModel in the relevant mat-form-field. ' +
+                    'If there is no FormControl needed for the mat-form-field, then the mat-error is redundant, too.');
+            }
         }
 
         //console.log(this.label, ' inputRef: ', this.inputRef);
