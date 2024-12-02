@@ -98,6 +98,7 @@ export class SingleValueService {
                     criteria: widget.properties.deviceGroupCriteria,
                     targetCharacteristicId: widget.properties.targetCharacteristic,
                 },],
+                orderColumnIndex: 0,
             }];
             if (date !== undefined) {
                 requestPayload[0].time = {
@@ -139,6 +140,7 @@ export class SingleValueService {
                 // eslint-disable-next-line
                 requestPayload[1].time!.end = '2099-01-01T00:00:00Z';
                 requestPayload[1].orderDirection = 'asc';
+                requestPayload[1].orderColumnIndex = 0;
             };
 
 
