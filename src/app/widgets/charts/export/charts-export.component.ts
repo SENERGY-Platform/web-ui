@@ -172,7 +172,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
         this.chartsExportService.getData(this.widget.properties, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined).subscribe({
             next: (data) => {
-                this.timelineChartData = data;
+                this.timelineChartData = data.data;
                 this.ready = true;
                 this.refreshing = false;
             },
