@@ -65,7 +65,7 @@ export class AnomalyReconstructionComponent implements OnInit {
         valueList.sort((a: any,b: any) => new Date(b[0] as string).getTime() - new Date(a[0] as string).getTime());
 
 
-        console.log(valueList)
+        // console.log(valueList)
 
         dataTable = dataTable.concat(valueList);
 

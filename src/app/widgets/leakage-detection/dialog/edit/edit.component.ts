@@ -54,7 +54,7 @@ export class LeakageDetectionEditComponent implements OnInit {
         this.exportService.getAvailableExports().pipe(
             concatMap((exports) => {
                 this.exports = exports;
-                console.log(exports)
+                // console.log(exports)
                 return this.getWidgetData();
             })
         ).subscribe({
@@ -95,7 +95,7 @@ export class LeakageDetectionEditComponent implements OnInit {
             }
         };
 
-        console.log(leakageDetection)
+        // console.log(leakageDetection)
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], leakageDetection);
     }
 

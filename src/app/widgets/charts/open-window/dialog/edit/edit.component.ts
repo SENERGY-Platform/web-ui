@@ -203,7 +203,7 @@ export class OpenWindowEditComponent implements OnInit {
             }
         });
         this.vAxesDataSource.data = this.vAxesDataSource.data;
-        console.log(this.vAxesDataSource)
+        // console.log(this.vAxesDataSource)
     }
 
     listRules(element: ChartsExportVAxesModel) {

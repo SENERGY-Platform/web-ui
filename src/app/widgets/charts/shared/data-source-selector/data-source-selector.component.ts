@@ -121,7 +121,7 @@ export class DataSourceSelectorComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        console.log(this.dataSourceConfig)
+        // console.log(this.dataSourceConfig)
         this.setDataSourcePlaceholder();
         this.setupDataSources().pipe(
             concatMap((_) => this.loadFieldOptions(this.dataSourceConfig?.exports || [])),
@@ -131,7 +131,7 @@ export class DataSourceSelectorComponent implements OnInit {
                 this.form.get('fieldOptions').patchValue(fieldOptions);
                 this.setupOutput();
                 this.setupGroupTypes();
-                console.log(this.form)
+                // console.log(this.form)
             })
         ).subscribe({
             next: (_) => {
