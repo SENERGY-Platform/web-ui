@@ -276,16 +276,18 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.widget.properties.group?.type === undefined || this.widget.properties.group?.type === '') {
             return; //no aggregation --> no detail gained or lost after zoom
         }
-        const getCoords = (): { min: Date; max: Date } => {
+        const getCoords = (): { min: Date; max: Date } | undefined => {
             const chart = wrapper.getChart();
 
-            const chartLayout = chart.getChartLayoutInterface();
-            const chartBounds = chartLayout.getChartAreaBoundingBox();
-
-            const res = {
-                min: chartLayout.getHAxisValue(chartBounds.left),
-                max: chartLayout.getHAxisValue(chartBounds.width + chartBounds.left)
-            };
+            let res;
+            if (chart && chart.hasOwnProperty('getChartLayoutInterface')) {
+                const chartLayout = chart.getChartLayoutInterface();
+                const chartBounds = chartLayout.getChartAreaBoundingBox();
+                res = {
+                    min: chartLayout.getHAxisValue(chartBounds.left),
+                    max: chartLayout.getHAxisValue(chartBounds.width + chartBounds.left)
+                };
+            }
             return res;
         };
 
@@ -296,47 +298,50 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         const msInY = msInD * 365;
         const observer = new MutationObserver(() => {
             const zoomCurrent = getCoords();
-            if (this.chartExportData.dataTable.length === 0) {
-                return;
-            }
-            if (!this.refreshing && this.zoomedAfterRefesh > 2) {
-                const diff = zoomCurrent.max.valueOf() - zoomCurrent.min.valueOf(); // diff in ms
-                let timeUnit = '';
-                let hAxisFormat = '';
-                if (diff < msInS) {
-                    timeUnit = 'ms';
-                    hAxisFormat = 'ss.SSS';
-                } else if (diff < 2 * msInM) {
-                    timeUnit = 's';
-                    hAxisFormat = 'ss';
-                } else if (diff < 2 * msInH) {
-                    timeUnit = 'm';
-                    hAxisFormat = 'mm';
-                } else if (diff < 2 * msInD) {
-                    timeUnit = 'h';
-                    hAxisFormat = 'HH';
-                } else if (diff < 45 * msInD) {
-                    timeUnit = 'd';
-                    hAxisFormat = 'dd';
-                } else if (diff < msInY) {
-                    timeUnit = 'months';
-                    hAxisFormat = 'MMM';
-                } else { // use years
-                    timeUnit = 'y';
-                    hAxisFormat = 'yyyy';
+            if (zoomCurrent !== undefined) {
+                if (this.chartExportData.dataTable.length === 0) {
+                    return;
                 }
-                const groupTime = '1' + timeUnit;
-                if (this.detailLevel(groupTime) > this.detailLevel(this.groupTime)) {
-                    this.ready = false;
-                    this.groupTime = groupTime;
-                    this.hAxisFormat = hAxisFormat;
-                    this.to = zoomCurrent.max;
-                    this.from = zoomCurrent.min;
-                    this.refresh();
+                if (!this.refreshing && this.zoomedAfterRefesh > 2) {
+                    const diff = zoomCurrent.max.valueOf() - zoomCurrent.min.valueOf(); // diff in ms
+                    console.log(diff);
+                    let timeUnit = '';
+                    let hAxisFormat = '';
+                    if (diff < msInS) {
+                        timeUnit = 'ms';
+                        hAxisFormat = 'ss.SSS';
+                    } else if (diff < 2 * msInM) {
+                        timeUnit = 's';
+                        hAxisFormat = 'ss';
+                    } else if (diff < 2 * msInH) {
+                        timeUnit = 'm';
+                        hAxisFormat = 'mm';
+                    } else if (diff < 2 * msInD) {
+                        timeUnit = 'h';
+                        hAxisFormat = 'HH';
+                    } else if (diff < 45 * msInD) {
+                        timeUnit = 'd';
+                        hAxisFormat = 'dd';
+                    } else if (diff < msInY) {
+                        timeUnit = 'months';
+                        hAxisFormat = 'MMM';
+                    } else { // use years
+                        timeUnit = 'y';
+                        hAxisFormat = 'yyyy';
+                    }
+                    const groupTime = '1' + timeUnit;
+                    if (this.detailLevel(groupTime) > this.detailLevel(this.groupTime)) {
+                        this.ready = false;
+                        this.groupTime = groupTime;
+                        this.hAxisFormat = hAxisFormat;
+                        this.to = zoomCurrent.max;
+                        this.from = zoomCurrent.min;
+                        this.refresh();
+                    }
                 }
-            }
-            if (!this.refreshing) {
-                this.zoomedAfterRefesh++;
+                if (!this.refreshing) {
+                    this.zoomedAfterRefesh++;
+                }
             }
         });
         observer.observe(htmlElem, {
