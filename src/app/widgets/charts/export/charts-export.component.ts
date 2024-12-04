@@ -114,7 +114,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.resizeChart();
             }
             this.setupZoomChartSettings();
-            this.ready = true;
+            setTimeout(() => {
+                this.ready = true;
+            });
         }
     }
 
