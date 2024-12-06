@@ -57,11 +57,11 @@
                                             </mat-checkbox>
                                             <div fxFlex></div>
                                             <button *ngIf="userHasUpdateAuthorization" mat-icon-button color="accent" matTooltip="Edit"
-                                                routerLink="/processes/designer/{{item.value.id}}">
+                                                routerLink="/processes/designer/{{item.value._id}}">
                                                 <mat-icon>edit</mat-icon>
                                             </button>
                                             <button mat-icon-button matTooltip="Deploy" color="accent"
-                                                (click)="deployProcess(item.value.id)"
+                                                (click)="deployProcess(item.value._id)"
                                                 [disabled]="!hasXPermission(item.value)">
                                                 <mat-icon>publish</mat-icon>
                                             </button>
