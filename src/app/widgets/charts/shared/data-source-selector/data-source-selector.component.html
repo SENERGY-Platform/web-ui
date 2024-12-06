@@ -2,14 +2,23 @@
 
 <form fxLayout="column" [formGroup]="form" *ngIf="ready">
     <div *ngIf="showSource">
-        <h2>Choose a {{dataSourcePlaceholder}}</h2>
-        <mat-form-field appearance="outline" color="accent">
-            <mat-label>{{dataSourcePlaceholder}}</mat-label>
+        <h2>Choose a Data Source</h2>
+		<mat-form-field appearance="outline" color="accent">
+			<mat-label>Data Source Class</mat-label>
+			<mat-select #dataSourceClass formControlName="dataSourceClass">
+				<mat-option *ngFor="let entity of getSortedDataSourceClasses()" [value]="entity">
+					{{entity}}
+				</mat-option>
+			</mat-select>
+			<mat-error senergyError label="Data Source Class"></mat-error>
+		</mat-form-field>
+        <mat-form-field [class.cdk-visually-hidden]="!dataSourceClass.value" appearance="outline" color="accent">
+            <mat-label>{{getLabelFromCurrentDataSource()}}</mat-label>
             <senergy-select-search [required]="true" [multiple]="true" [compareWith]="compare" formControlName="exports"
-                (selectionChange)="dataSourceChanged($event.value)" [options]="dataSourceOptions"
-                [getOptionViewValue]="getDataSourceName" >
+                (selectionChange)="dataSourceChanged($event.value)" [options]="currentDataSourceOptions"
+                [getOptionViewValue]="getDataSourceName">
             </senergy-select-search>
-			<mat-error senergyError [label]="dataSourcePlaceholder"></mat-error>
+			<mat-error senergyError></mat-error>
         </mat-form-field>
     </div>
    
