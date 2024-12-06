@@ -103,7 +103,7 @@ export class CharacteristicsService {
         }
 
         return this.http
-            .get<DeviceTypeCharacteristicsModel[]>(environment.deviceRepoUrl + '/characteristics?' + params.join('&'), { observe: 'response'}).pipe(
+            .get<DeviceTypeCharacteristicsModel[]>(environment.deviceRepoUrl + '/v2/characteristics?' + params.join('&'), { observe: 'response'}).pipe(
                 map(resp => {
                     const totalStr = resp.headers.get('X-Total-Count') || '0';
                     return {result: resp.body || [], total: parseInt(totalStr, 10)};
