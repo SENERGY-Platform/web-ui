@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {QueriesRequestV2ElementTimescaleModel} from '../../../widgets/shared/export-data.model';
+import {
+    QueriesRequestTimeModel,
+    QueriesRequestV2ElementTimescaleModel
+} from '../../../widgets/shared/export-data.model';
 
 export interface TemplateListResponseModel {
     data: TemplateModel[];
@@ -46,6 +49,14 @@ export interface ReportObjectModel {
      children: Map<string, ReportObjectModel> | undefined;
      length: number | undefined;
      query?:  QueriesRequestV2ElementTimescaleModel | undefined;
+     queryOptions?: ReportObjectModelQueryOptions;
+}
+
+export interface ReportObjectModelQueryOptions {
+    rollingStartDate: string | undefined;
+    rollingEndDate: string | undefined;
+    startOffset: number | undefined;
+    endOffset: number | undefined;
 }
 
 export interface ReportListResponseModel {

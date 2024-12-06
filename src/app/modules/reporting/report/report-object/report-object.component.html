@@ -108,17 +108,41 @@
             <div role="group" class="form-grouping">
                 <mat-form-field fxFlex color="accent" appearance="outline">
                     <mat-label>Start Date</mat-label>
-                    <input matInput [matDatepicker]="picker_start" [(ngModel)]="data.query!.time!.start">
+                    <input matInput [matDatepicker]="picker_start" [(ngModel)]="data.query!.time!.start"
+                           (ngModelChange)="setStartOffset()">
                     <mat-hint>DD/MM/YYYY</mat-hint>
                     <mat-datepicker-toggle matIconSuffix [for]="picker_start"></mat-datepicker-toggle>
                     <mat-datepicker #picker_start></mat-datepicker>
+                    <mat-error senergyError label="Start Date"></mat-error>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Rolling Start Date</mat-label>
+                    <mat-select [(ngModel)]="data.queryOptions!.rollingStartDate"
+                                (ngModelChange)="setStartOffset()">
+                        <mat-option [value]="''"></mat-option>
+                        <mat-option [value]="'month'">Monat</mat-option>
+                        <mat-option [value]="'year'">Jahr</mat-option>
+                    </mat-select>
+                    <mat-error senergyError label="Rolling Start Date"></mat-error>
                 </mat-form-field>
                 <mat-form-field fxFlex color="accent" appearance="outline">
                     <mat-label>End Date</mat-label>
-                    <input matInput [matDatepicker]="picker_end" [(ngModel)]="data.query!.time!.end">
+                    <input matInput [matDatepicker]="picker_end" [(ngModel)]="data.query!.time!.end"
+                           (ngModelChange)="setEndOffset()">
                     <mat-hint>DD/MM/YYYY</mat-hint>
                     <mat-datepicker-toggle matIconSuffix [for]="picker_end"></mat-datepicker-toggle>
                     <mat-datepicker #picker_end></mat-datepicker>
+                    <mat-error senergyError label="End Date"></mat-error>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Rolling End Date</mat-label>
+                    <mat-select [(ngModel)]="data.queryOptions!.rollingEndDate"
+                                (ngModelChange)="setEndOffset()">
+                        <mat-option [value]="''"></mat-option>
+                        <mat-option [value]="'month'">Monat</mat-option>
+                        <mat-option [value]="'year'">Jahr</mat-option>
+                    </mat-select>
+                    <mat-error senergyError label="Rolling End Date"></mat-error>
                 </mat-form-field>
             </div>
         </div>

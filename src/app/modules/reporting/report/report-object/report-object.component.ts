@@ -15,7 +15,7 @@
  */
 
 import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
-import {ReportObjectModel} from '../../shared/reporting.model';
+import {ReportObjectModel, ReportObjectModelQueryOptions} from '../../shared/reporting.model';
 import {QueriesRequestTimeModel} from '../../../../widgets/shared/export-data.model';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstanceModel} from '../../../devices/device-instances/shared/device-instances.model';
@@ -75,7 +75,6 @@ export class ReportObjectComponent implements OnInit, OnChanges {
     ];
     timeframe = {number: '', unit: ''};
 
-
     constructor(
         private deviceTypeService: DeviceTypeService,
         private exportDataService: ExportDataService,
@@ -87,7 +86,9 @@ export class ReportObjectComponent implements OnInit, OnChanges {
             this.inputType = 'query';
             this.getGroupingTime();
             this.getTimeframe();
-
+            if (this.data?.queryOptions === undefined) {
+                this.data.queryOptions = {} as ReportObjectModelQueryOptions;
+            }
         }
     }
 
@@ -137,6 +138,7 @@ export class ReportObjectComponent implements OnInit, OnChanges {
                     deviceId: '',
                     serviceId: ''
                 };
+                this.data.queryOptions = {} as ReportObjectModelQueryOptions;
                 this.getGroupingTime();
                 this.getTimeframe();
             } else {
@@ -153,6 +155,7 @@ export class ReportObjectComponent implements OnInit, OnChanges {
                     this.data.length = this.origData.length;
                 }
                 delete this.data.query;
+                delete this.data.queryOptions;
             }
         }
     }
@@ -183,7 +186,43 @@ export class ReportObjectComponent implements OnInit, OnChanges {
 
     previewQuery() {
         if (this.data !== undefined && this.data.query !== undefined) {
-            this.exportDataService.queryTimescaleV2([this.data.query]).subscribe((resp) => {
+            const query = this.data.query;
+            const now = new Date(Date.now());
+            const month = now.getMonth();
+            const year = now.getFullYear();
+            switch (this.data.queryOptions?.rollingStartDate) {
+            case 'month':
+                if (query.time?.start !== undefined) {
+                    let startDate = new Date(query.time?.start);
+                    startDate = new Date(startDate.setMonth(month));
+                    query.time.start = startDate.toISOString();
+                }
+                break;
+            case 'year':
+                if (query.time?.start !== undefined) {
+                    let startDate = new Date(query.time?.start);
+                    startDate = new Date(startDate.setFullYear(year));
+                    query.time.start = startDate.toISOString();
+                }
+                break;
+            }
+            switch (this.data.queryOptions?.rollingEndDate) {
+            case 'month':
+                if (query.time?.end !== undefined) {
+                    let endDate = new Date(query.time?.end);
+                    endDate = new Date(endDate.setMonth(month));
+                    query.time.end = endDate.toISOString();
+                }
+                break;
+            case 'year':
+                if (query.time?.end !== undefined) {
+                    let endDate = new Date(query.time?.end);
+                    endDate = new Date(endDate.setFullYear(year));
+                    query.time.end = endDate.toISOString();
+                }
+                break;
+            }
+            this.exportDataService.queryTimescaleV2([query]).subscribe((resp) => {
                 if (resp !== undefined) {
                     const response: any = {};
                     // eslint-disable-next-line guard-for-in
@@ -272,4 +311,21 @@ export class ReportObjectComponent implements OnInit, OnChanges {
         return device.display_name || device.name;
     }
 
+    setStartOffset(){
+        if (this.data?.query?.time?.start !== undefined) {
+            const date = new Date(this.data?.query?.time?.start);
+            if (this.data?.queryOptions !== undefined) {
+                this.data.queryOptions.startOffset = date.getTimezoneOffset();
+            }
+        }
+    }
+
+    setEndOffset(){
+        if (this.data?.query?.time?.end !== undefined) {
+            const date = new Date(this.data?.query?.time?.end);
+            if (this.data?.queryOptions !== undefined) {
+                this.data.queryOptions.endOffset = date.getTimezoneOffset();
+            }
+        }
+    }
 }
