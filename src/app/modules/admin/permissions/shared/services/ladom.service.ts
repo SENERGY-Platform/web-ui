@@ -94,17 +94,10 @@ export class LadonService {
         const requests: AuthorizationRequest[] = [];
         const methods: AllowedMethods[] = ['GET', 'DELETE', 'POST', 'PUT', 'PATCH'];
 
-        const ServiceEndpoints = [
+        const serviceEndpoints = [
             environment.flowRepoUrl,
             environment.flowEngineUrl,
             environment.flowParserUrl,
-
-            environment.permissionSearchUrl,
-            environment.permissionSearchUrl + '/v3/resources/characteristics',
-            environment.permissionSearchUrl + '/v3/resources/device-classes',
-            environment.permissionSearchUrl + '/v3/resources/functions',
-            environment.permissionSearchUrl + '/v3/resources/concepts',
-            environment.permissionSearchUrl + '/v3/resources/device-types',
 
             environment.apiAggregatorUrl,
             environment.deviceRepoUrl,
@@ -127,6 +120,11 @@ export class LadonService {
 
             environment.deviceRepoUrl,
             environment.deviceRepoUrl + '/aspects',
+            environment.deviceRepoUrl + '/v2/device-classes',
+            environment.deviceRepoUrl + '/characteristics',
+            environment.deviceRepoUrl + '/v2/concepts',
+            environment.deviceRepoUrl + '/device-types',
+            environment.deviceRepoUrl + '/functions',
 
             environment.deviceManagerUrl,
             environment.deviceManagerUrl + '/device-types',
@@ -149,7 +147,7 @@ export class LadonService {
             environment.reportEngineUrl,
         ];
 
-        ServiceEndpoints.forEach(endpointURL => {
+        serviceEndpoints.forEach(endpointURL => {
             const endpoint = new URL(endpointURL).pathname;
 
             methods.forEach(method => {
@@ -160,7 +158,7 @@ export class LadonService {
         return new Promise((resolve, _) => {
             this.userIsAuthorized(requests).subscribe(authResponse => {
                 const allRules: Record<string, PermissionTestResponse> = {};
-                ServiceEndpoints.forEach((endpointURL, endpointIndex) => {
+                serviceEndpoints.forEach((endpointURL, endpointIndex) => {
                     allRules[endpointURL] = {
                         GET: true,
                         POST: false,

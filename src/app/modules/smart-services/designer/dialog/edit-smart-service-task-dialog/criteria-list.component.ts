@@ -16,14 +16,12 @@
 
 
 
-import {Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation} from '@angular/core';
-import {FormBuilder} from '@angular/forms';
-import {DeviceTypeAspectNodeModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
 import {FunctionsService} from '../../../../metadata/functions/shared/functions.service';
 import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
 import {FunctionsPermSearchModel} from '../../../../metadata/functions/shared/functions-perm-search.model';
-import {DeviceClassesPermSearchModel} from '../../../../metadata/device-classes/shared/device-classes-perm-search.model';
 
 interface Criteria {
     interaction?: string;
@@ -43,7 +41,7 @@ export class CriteriaListComponent implements OnInit {
     @Output() changed: EventEmitter<string> = new EventEmitter<string>();
 
     functions: (FunctionsPermSearchModel | {id?: string; name: string})[] = [];
-    deviceClasses: (DeviceClassesPermSearchModel | {id?: string; name: string})[] = [];
+    deviceClasses: (DeviceTypeDeviceClassModel | {id?: string; name: string})[] = [];
     nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
 
     criteriaList: Criteria[] = [];
@@ -52,10 +50,10 @@ export class CriteriaListComponent implements OnInit {
                 private deviceTypesService: DeviceTypeService,
                 private deviceClassService: DeviceClassesService) {
         this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').subscribe(value => {
-            this.functions = value;
+            this.functions = value.result;
         });
         this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').subscribe(value => {
-            this.deviceClasses = value;
+            this.deviceClasses = value.result;
         });
         this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
             const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();

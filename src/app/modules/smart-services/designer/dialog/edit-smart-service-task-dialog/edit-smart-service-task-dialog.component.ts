@@ -44,7 +44,6 @@ import {ImportInstanceConfigModel, ImportInstancesModel} from '../../../../impor
 import {
     ImportTypeContentVariableModel,
     ImportTypeModel,
-    ImportTypePermissionSearchModel
 } from '../../../../imports/import-types/shared/import-types.model';
 import {ImportTypesService} from '../../../../imports/import-types/shared/import-types.service';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
@@ -55,8 +54,7 @@ import {
     smartServiceInputsDescriptionToAbstractSmartServiceInput
 } from '../edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
 import {FunctionsPermSearchModel} from '../../../../metadata/functions/shared/functions-perm-search.model';
-import {DeviceClassesPermSearchModel} from '../../../../metadata/device-classes/shared/device-classes-perm-search.model';
-import {DeviceTypeAspectNodeModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
 import {FunctionsService} from '../../../../metadata/functions/shared/functions.service';
 import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
@@ -106,7 +104,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     exportRequest: ServingRequest;
     importRequest: ImportInstancesModel;
     importRequestConfigValueType: Map<string,string> = new Map();
-    importTypes: ImportTypePermissionSearchModel[] = [];
+    importTypes: ImportTypeModel[] = [];
     knownImportTypes: Map<string, ImportTypeModel> = new Map();
     importOverwrites: {config_name: string; json_value: string}[] = [];
     availableAnalyticsIotSelections: {name: string; value: string}[];
@@ -201,7 +199,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         this.addImportIotEntityWithPathToAvailableVariables();
         this.exportRequest = this.parseExport(this.result.inputs.find(value => value.name === 'export.request')?.value || '{"generated": true}');
         this.importRequest = this.parseImport(this.result.inputs.find(value => value.name === 'import.request')?.value || '{}');
-        this.importTypeService.listImportTypes('', 9999, 0, 'name.asc').subscribe(value => this.importTypes = value);
+        this.importTypeService.listImportTypes('', 9999, 0, 'name.asc').subscribe(value => this.importTypes = value.result);
         if(this.importRequest.import_type_id) {
             this.loadImportType(false);
         }
@@ -214,10 +212,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         this.initWatcherInfo(dialogParams.info.inputs);
 
         this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').subscribe(value => {
-            this.functions = value;
+            this.functions = value.result;
         });
         this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').subscribe(value => {
-            this.deviceClasses = value;
+            this.deviceClasses = value.result;
         });
         this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
             const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
@@ -327,7 +325,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                 });
             });
 
-            that.nestedAspects.forEach((list, _) => {
+            that.nestedAspects.forEach(list => {
                 list.forEach(value => {
                     completers.push({
                         caption: 'aspect: '+value.name,
@@ -337,7 +335,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                 });
             });
 
-            const interactions: String[] = ['event', 'request', 'event+request'];
+            const interactions: string[] = ['event', 'request', 'event+request'];
             interactions.forEach(value => {
                 completers.push({
                     caption: 'interaction: '+value,
@@ -390,7 +388,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     ensureResultFields() {
         const processDeploymentTopic = this.tabs[0];
         if(!this.processModels && this.result.topic === processDeploymentTopic) {
-            this.processRepo.getProcessModels('', 9999, 0, 'date', 'asc', null).subscribe(value => this.processModels = value);
+            this.processRepo.getProcessModels('', 9999, 0, 'date', 'asc').subscribe(value => this.processModels = value.result);
         }
         this.ensureFlowList();
         this.ensureExportDatabaseList();
@@ -1361,7 +1359,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         case 'create_device_group': {
             result.push({name: this.deviceRepositoryCreateDeviceGroupFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.create_device_group.ids});
             result.push({name: this.deviceRepositoryNameFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.name});
-            result.push({name: this.deviceRepositoryWaitFieldKey, type: 'text', value: "true"});
+            result.push({name: this.deviceRepositoryWaitFieldKey, type: 'text', value: 'true'});
             if (this.deviceRepositoryWorkerInfo.key) {
                 result.push({name: this.deviceRepositoryKeyFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.key});
             }
@@ -1373,7 +1371,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
 
     functions: (FunctionsPermSearchModel | {id?: string; name: string})[] = [];
-    deviceClasses: (DeviceClassesPermSearchModel | {id?: string; name: string})[] = [];
+    deviceClasses: (DeviceTypeDeviceClassModel | {id?: string; name: string})[] = [];
     nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
 
     removeCriteria(list: Criteria[], index: number): Criteria[] {

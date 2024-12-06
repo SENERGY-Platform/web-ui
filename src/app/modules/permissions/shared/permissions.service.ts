@@ -20,7 +20,7 @@ import { environment } from '../../../../environments/environment';
 import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import { PermissionsResourceBaseModel, PermissionsResourceModel, PermissionsV2ResourceBaseModel, PermissionsV2ResourceModel, PermissionsV2RightsAndIdModel} from './permissions-resource.model';
+import { PermissionsResourceBaseModel, PermissionsV2ResourceBaseModel, PermissionsV2ResourceModel, PermissionsV2RightsAndIdModel} from './permissions-resource.model';
 import { PermissionsUserModel } from './permissions-user.model';
 import { PermissionsRightsModel } from './permissions-rights.model';
 
@@ -45,19 +45,6 @@ export class PermissionsService {
             result += 'a';
         }
         return result;
-    }
-
-    getResourcePermissions(kind: string, id: string): Observable<PermissionsResourceModel> {
-        return this.http
-            .get<PermissionsResourceModel>(
-                environment.permissionSearchUrl + '/v3/administrate/rights/' + encodeURIComponent(kind) + '/' + encodeURIComponent(id), //TODO
-            )
-            .pipe(
-                map((resp) => resp || {} as PermissionsResourceModel),
-                catchError(
-                    this.errorHandlerService.handleError(PermissionsService.name, 'getResourcePermissions', {} as PermissionsResourceModel),
-                ),
-            );
     }
 
     getResourcePermissionsV2(topicID: string, ressourceId: string): Observable<PermissionsV2ResourceModel> {
@@ -140,7 +127,7 @@ export class PermissionsService {
 
     getSharableUsers(): Observable<PermissionsUserModel[] | null> {
         return this.http
-        .get<PermissionsUserModel[] | null>(environment.usersServiceUrl + '/user-list?excludeCaller=true')
-        .pipe(catchError(this.errorHandlerService.handleError(PermissionsService.name, 'getSharableUsers', [] as PermissionsUserModel[])));
+            .get<PermissionsUserModel[] | null>(environment.usersServiceUrl + '/user-list?excludeCaller=true')
+            .pipe(catchError(this.errorHandlerService.handleError(PermissionsService.name, 'getSharableUsers', [] as PermissionsUserModel[])));
     }
 }

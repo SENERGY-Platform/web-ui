@@ -16,12 +16,11 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {FormControl, UntypedFormControl, Validators} from '@angular/forms';
-import { DeviceTypeFunctionModel, DeviceTypeFunctionType } from '../../shared/device-type.model';
+import {UntypedFormControl, Validators} from '@angular/forms';
+import { DeviceTypeConceptModel, DeviceTypeFunctionModel, DeviceTypeFunctionType } from '../../shared/device-type.model';
 import { util } from 'jointjs';
 import uuid = util.uuid;
 import { ConceptsService } from '../../../concepts/shared/concepts.service';
-import { ConceptsPermSearchModel } from '../../../concepts/shared/concepts-perm-search.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
@@ -33,7 +32,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     displayNameControl = new UntypedFormControl('');
     descriptionControl = new UntypedFormControl('');
     conceptControl = new UntypedFormControl('');
-    concepts: ConceptsPermSearchModel[] = [];
+    concepts: DeviceTypeConceptModel[] = [];
     functionType = {} as DeviceTypeFunctionType;
 
     constructor(
@@ -66,8 +65,8 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: ConceptsPermSearchModel[]) => {
-            this.concepts = concepts;
+        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe(concepts => {
+            this.concepts = concepts.result;
         });
     }
 

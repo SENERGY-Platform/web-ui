@@ -17,30 +17,15 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
-    SmartServiceTaskInputDescription,
-    SmartServiceTaskDescription,
     SmartServiceInputsDescription,
     SmartServiceInput, SmartServiceInputProperty
 } from '../../shared/designer.model';
-import {ProcessRepoService} from '../../../../processes/process-repo/shared/process-repo.service';
-import {DeploymentsService} from '../../../../processes/deployments/shared/deployments.service';
-import {ProcessModel} from '../../../../processes/process-repo/shared/process.model';
-import {V2DeploymentsPreparedModel} from '../../../../processes/deployments/shared/deployments-prepared-v2.model';
-import {FlowRepoService} from '../../../../data/flow-repo/shared/flow-repo.service';
-import {FlowModel} from '../../../../data/flow-repo/shared/flow.model';
-import {FlowEngineService} from '../../../../data/flow-repo/shared/flow-engine.service';
-import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
-import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
-import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../processes/designer/shared/designer.model';
-import {AspectsPermSearchModel} from '../../../../metadata/aspects/shared/aspects-perm-search.model';
+import {BpmnElement} from '../../../../processes/designer/shared/designer.model';
 import {FunctionsPermSearchModel} from '../../../../metadata/functions/shared/functions-perm-search.model';
-import {DeviceClassesPermSearchModel} from '../../../../metadata/device-classes/shared/device-classes-perm-search.model';
 import {FunctionsService} from '../../../../metadata/functions/shared/functions.service';
-import {AspectsService} from '../../../../metadata/aspects/shared/aspects.service';
 import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
 import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
-import {DeviceTypeAspectModel, DeviceTypeAspectNodeModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
-import {CharacteristicsPermSearchModel} from '../../../../metadata/characteristics/shared/characteristics-perm-search.model';
+import {DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel, DeviceTypeDeviceClassModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
 import {CharacteristicsService} from '../../../../metadata/characteristics/shared/characteristics.service';
 import {AbstractControl, ValidationErrors} from '@angular/forms';
 
@@ -52,10 +37,10 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
     abstract: AbstractSmartServiceInput[] = [];
 
     functions: (FunctionsPermSearchModel | {id?: string; name: string})[] = [];
-    deviceClasses: (DeviceClassesPermSearchModel | {id?: string; name: string})[] = [];
+    deviceClasses: (DeviceTypeDeviceClassModel | {id?: string; name: string})[] = [];
     nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
 
-    characteristics: CharacteristicsPermSearchModel[] = [];
+    characteristics: DeviceTypeCharacteristicsModel[] = [];
 
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceInputDialogComponent>,
@@ -66,13 +51,13 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceInputsDescription; element: BpmnElement},
     ) {
         this.characteristicsService.getCharacteristics('', 9999, 0, 'name', 'asc').subscribe(value => {
-            this.characteristics = value;
+            this.characteristics = value.result;
         });
         this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').subscribe(value => {
-            this.functions = value;
+            this.functions = value.result;
         });
         this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').subscribe(value => {
-            this.deviceClasses = value;
+            this.deviceClasses = value.result;
         });
         this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
             const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();

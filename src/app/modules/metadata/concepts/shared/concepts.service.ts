@@ -42,8 +42,8 @@ export class ConceptsService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/concepts'; //TODO
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(permSearchURL);
+        const url = environment.deviceRepoUrl + '/v2/concepts';
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(url);
     }
 
     tryConverterExtension(extensionTryRequest: ConverterExtensionTryRequest): Observable<ConverterExtensionTryResult | null> {
@@ -81,7 +81,7 @@ export class ConceptsService {
         return new Observable<ConceptsCharacteristicsModel[]>((obs) => {
             this.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts) => {
                 const observables: Observable<ConceptsCharacteristicsModel | null>[] = [];
-                concepts.forEach((permConcept) =>
+                concepts.result.forEach((permConcept) =>
                     observables.push(
                         this.getConceptWithCharacteristics(permConcept.id).pipe(
                             map((concept) => {
@@ -113,39 +113,25 @@ export class ConceptsService {
         offset: number,
         sortBy: string,
         sortDirection: string,
-    ): Observable<ConceptsPermSearchModel[]> {
+    ): Observable<{result: DeviceTypeConceptModel[]; total: number}> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
             sortDirection = 'asc';
         }
         if (sortBy === '' || sortBy === null || sortBy === undefined) {
             sortBy = 'name';
         }
-        const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection];
+        const params = ['limit=' + limit, 'offset=' + offset, 'sort=' + sortBy + '.' + sortDirection];
         if (query) {
             params.push('search=' + encodeURIComponent(query));
         }
 
         return this.http
-            .get<ConceptsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/concepts?' + params.join('&')) //TODO
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(search)', [])),
-            );
-    }
-
-    getTotalCountOfConcepts(searchText: string): Observable<any> {
-        const options = searchText ?
-            { params: new HttpParams().set('search', searchText) } : {};
-
-        return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/concepts', options) //TODO
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(
-                        ConceptsService.name,
-                        'getTotalCountOfConcepts',
-                    ),
-                ),
+            .get<DeviceTypeConceptModel[]>(environment.deviceRepoUrl + '/v2/concepts?' + params.join('&'), { observe: 'response'}).pipe(
+                map(resp => {
+                    const totalStr = resp.headers.get('X-Total-Count') || '0';
+                    return {result: resp.body || [], total: parseInt(totalStr, 10)};
+                }),
+                catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(search)', {result: [], total: 0})),
             );
     }
 

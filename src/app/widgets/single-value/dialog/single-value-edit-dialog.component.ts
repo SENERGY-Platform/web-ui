@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnInit } from '@angular/core';
-import {Form, FormControl, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
+import {FormControl, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -25,15 +25,13 @@ import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DeviceInstanceModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
-import { DeviceTypeCharacteristicsModel, DeviceTypeFunctionModel, DeviceTypeServiceModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeAspectModel, DeviceTypeCharacteristicsModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeServiceModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { ChartsExportRequestPayloadGroupModel } from '../../charts/export/shared/charts-export-request-payload.model';
 import { concatMap, forkJoin, map, mergeMap, Observable, of } from 'rxjs';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
-import { DeviceGroupCriteriaModel, DeviceGroupHelperResultModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
-import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
-import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-classes/shared/device-classes-perm-search.model';
+import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations, ValueHighlightConfig } from '../shared/single-value.model';
@@ -76,9 +74,9 @@ export class SingleValueEditDialogComponent implements OnInit {
     deviceGroups: DeviceGroupModel[] = [];
     services: DeviceTypeServiceModel[] = [];
     paths: { Name: string }[] = [];
-    aspects: AspectsPermSearchModel[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
     functions: DeviceTypeFunctionModel[] = [];
-    deviceClasses: DeviceClassesPermSearchModel[] = [];
+    deviceClasses: DeviceTypeDeviceClassModel[] = [];
     concept?: ConceptsCharacteristicsModel | null;
 
     form: FormGroup = new FormGroup({});

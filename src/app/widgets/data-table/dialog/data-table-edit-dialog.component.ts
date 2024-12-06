@@ -36,7 +36,9 @@ import {
     ExportValueTypes
 } from '../shared/data-table.model';
 import {
+    DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
+    DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
     DeviceTypeInteractionEnum,
     DeviceTypeServiceModel,
@@ -55,15 +57,11 @@ import { util } from 'jointjs';
 import { environment } from '../../../../environments/environment';
 import uuid = util.uuid;
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
-import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
-import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-classes/shared/device-classes-perm-search.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
-import { ConceptsNewDialogComponent } from 'src/app/modules/metadata/concepts/dialogs/concepts-new-dialog.component';
-import {required} from "yargs";
 
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
@@ -128,10 +126,10 @@ export class DataTableEditDialogComponent implements OnInit {
     });
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
-    aspects: AspectsPermSearchModel[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
     functions: DeviceTypeFunctionModel[] = [];
-    deviceClasses: DeviceClassesPermSearchModel[] = [];
-    concepts: Map<String, ConceptsCharacteristicsModel | null> = new Map();
+    deviceClasses: DeviceTypeDeviceClassModel[] = [];
+    concepts: Map<string, ConceptsCharacteristicsModel | null> = new Map();
     deviceGroups: DeviceGroupModel[] = [];
     aggregations = Object.values(SingleValueAggregations);
 

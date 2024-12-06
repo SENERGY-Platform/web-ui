@@ -21,9 +21,7 @@ import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {DeviceGroupCriteriaModel, DeviceGroupHelperResultModel, DeviceGroupModel} from './device-groups.model';
-import {DeviceTypeFunctionModel} from '../../../metadata/device-types-overview/shared/device-type.model';
-import {DeviceClassesPermSearchModel} from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
-import {AspectsPermSearchModel} from '../../../metadata/aspects/shared/aspects-perm-search.model';
+import {DeviceTypeAspectModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
@@ -159,55 +157,25 @@ export class DeviceGroupsService {
 
     getFunctionListByIds(ids: string[]): Observable<DeviceTypeFunctionModel[]> {
         return this.http
-            .post<DeviceTypeFunctionModel[]>(environment.permissionSearchUrl + '/v3/query/functions', { // TODO SNRGY-3575
-                resource: 'functions',
-                list_ids: {
-                    ids,
-                    limit: ids.length,
-                    offset: 0,
-                    rights: 'r',
-                    sort_by: 'name',
-                    sort_desc: false,
-                },
-            })
+            .get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/functions?ids='+ids.join(','))
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getFunctionListByIds(ids)', [])),
             );
     }
 
-    getAspectListByIds(ids: string[]): Observable<AspectsPermSearchModel[]> {
+    getAspectListByIds(ids: string[]): Observable<DeviceTypeAspectModel[]> {
         return this.http
-            .post<AspectsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/aspects', { // TODO SNRGY-3576
-                resource: 'aspects',
-                list_ids: {
-                    ids,
-                    limit: ids.length,
-                    offset: 0,
-                    rights: 'r',
-                    sort_by: 'name',
-                    sort_desc: false,
-                },
-            })
+            .get<DeviceTypeAspectModel[]>(environment.deviceRepoUrl + '/v2/aspects?ids='+ids.join(','))
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getAspectListByIds(ids)', [])),
             );
     }
 
-    getDeviceClassListByIds(ids: string[]): Observable<DeviceClassesPermSearchModel[]> {
+    getDeviceClassListByIds(ids: string[]): Observable<DeviceTypeDeviceClassModel[]> {
         return this.http
-            .post<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query/device-classes', { // TODO SNRGY-3577
-                resource: 'device-classes',
-                list_ids: {
-                    ids,
-                    limit: ids.length,
-                    offset: 0,
-                    rights: 'r',
-                    sort_by: 'name',
-                    sort_desc: false,
-                },
-            })
+            .get<DeviceTypeDeviceClassModel[]>(environment.deviceRepoUrl + '/v2/device-classes?ids='+ids.join(','))
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceClassListByIds(ids)', [])),

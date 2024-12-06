@@ -70,15 +70,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
         this.checkAuthorization();
     }
 
-    getTotalCounts() {
-        return this.deviceTypeService.getTotalCountOfDevicesTypes(this.searchText).pipe(
-            map((totalCount: number) => {
-                this.totalCount = totalCount;
-                return totalCount;
-            })
-        );
-    }
-
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
@@ -185,9 +176,10 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
         return this.deviceTypeService
             .getDeviceTypes(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .pipe(
-                map((deviceTypes: DeviceTypeModel[]) => {
-                    this.dataSource.data = deviceTypes;
-                    return deviceTypes;
+                map(deviceTypes => {
+                    this.totalCount = deviceTypes.total;
+                    this.dataSource.data = deviceTypes.result;
+                    return deviceTypes.result;
                 })
             );
     }
@@ -198,7 +190,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
         this.ready = false;
         this.selectionClear();
 
-        forkJoin([this.getDeviceTypes(), this.getTotalCounts()]).subscribe(_ => {
+        this.getDeviceTypes().subscribe(_ => {
             this.ready = true;
         });
     }

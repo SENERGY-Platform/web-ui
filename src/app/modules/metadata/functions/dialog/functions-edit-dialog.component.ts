@@ -16,10 +16,10 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
-import { ConceptsPermSearchModel } from '../../concepts/shared/concepts-perm-search.model';
 import { FunctionsPermSearchModel } from '../shared/functions-perm-search.model';
+import { DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './functions-edit-dialog.component.html',
@@ -28,7 +28,7 @@ import { FunctionsPermSearchModel } from '../shared/functions-perm-search.model'
 export class FunctionsEditDialogComponent implements OnInit {
     functionFormGroup!: FormGroup;
 
-    concepts: ConceptsPermSearchModel[] = [];
+    concepts: DeviceTypeConceptModel[] = [];
 
     disabled: boolean;
 
@@ -43,8 +43,8 @@ export class FunctionsEditDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: ConceptsPermSearchModel[]) => {
-            this.concepts = concepts;
+        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe(concepts => {
+            this.concepts = concepts.result;
         });
     }
 

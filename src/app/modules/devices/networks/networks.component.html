@@ -60,7 +60,7 @@
                 <ng-container matColumnDef="shared">
                     <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Shared</th>
                     <td mat-cell *matCellDef="let network">
-                        <mat-icon matTooltip="Device is shared by {{userIdToName[network.creator]}}" *ngIf="network.shared" class="color-sidenav info-icon">
+                        <mat-icon matTooltip="Network is shared by {{userIdToName[network.creator]}}" *ngIf="network.shared" class="color-sidenav info-icon">
                             share
                         </mat-icon>
                     </td>

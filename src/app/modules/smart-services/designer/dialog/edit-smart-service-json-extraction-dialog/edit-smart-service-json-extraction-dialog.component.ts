@@ -18,29 +18,9 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     SmartServiceTaskInputDescription,
-    SmartServiceTaskDescription,
-    ServingRequest,
     SmartServiceTaskInputOutputDescription
 } from '../../shared/designer.model';
-import {ProcessRepoService} from '../../../../processes/process-repo/shared/process-repo.service';
-import {DeploymentsService} from '../../../../processes/deployments/shared/deployments.service';
-import {ProcessModel} from '../../../../processes/process-repo/shared/process.model';
-import {V2DeploymentsPreparedModel} from '../../../../processes/deployments/shared/deployments-prepared-v2.model';
-import {FlowRepoService} from '../../../../data/flow-repo/shared/flow-repo.service';
-import {FlowModel} from '../../../../data/flow-repo/shared/flow.model';
-import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
-import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
 import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../processes/designer/shared/designer.model';
-import {ImportInstanceConfigModel, ImportInstancesModel} from '../../../../imports/import-instances/shared/import-instances.model';
-import {
-    ImportTypeContentVariableModel,
-    ImportTypeModel,
-    ImportTypePermissionSearchModel
-} from '../../../../imports/import-types/shared/import-types.model';
-import {ImportTypesService} from '../../../../imports/import-types/shared/import-types.service';
-import {AbstractControl, FormGroup, ValidationErrors, ValidatorFn} from '@angular/forms';
-import {subtract} from 'lodash';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 
 @Component({
     templateUrl: './edit-smart-service-json-extraction-dialog.component.html',

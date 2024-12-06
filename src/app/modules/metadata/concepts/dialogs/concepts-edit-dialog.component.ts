@@ -16,14 +16,12 @@
 
 import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {FormArray, FormControl, UntypedFormControl, Validators} from '@angular/forms';
+import {UntypedFormControl, Validators} from '@angular/forms';
 import {
-    ConverterExtensionTryRequest,
     DeviceTypeCharacteristicsModel,
     DeviceTypeConceptModel
 } from '../../device-types-overview/shared/device-type.model';
 import { ConceptsService } from '../shared/concepts.service';
-import { ConceptsCharacteristicsModel } from '../shared/concepts-characteristics.model';
 import {CharacteristicsService} from '../../characteristics/shared/characteristics.service';
 import {CharacteristicsPermSearchModel} from '../../characteristics/shared/characteristics-perm-search.model';
 import {forkJoin, Observable} from 'rxjs';
@@ -39,7 +37,7 @@ export class ConceptsEditDialogComponent implements OnInit {
     idFormControl = new UntypedFormControl({ value: '', disabled: true });
     characteristicsControl = new UntypedFormControl('', [Validators.required]);
     baseCharacteristicControl = new UntypedFormControl('', [Validators.required]);
-    characteristics: CharacteristicsPermSearchModel[] = [];
+    characteristics: DeviceTypeCharacteristicsModel[] = [];
     concept: DeviceTypeConceptModel|undefined;
     ready = false;
 
@@ -69,7 +67,7 @@ export class ConceptsEditDialogComponent implements OnInit {
             }
         })));
         obs.push(this.characteristicsService.getCharacteristics('', 9999, 0, 'name', 'asc').pipe(map(characteristics => {
-            this.characteristics = characteristics;
+            this.characteristics = characteristics.result;
         })));
         forkJoin(obs).subscribe(() => {
             this.baseCharacteristicControl.setValue(this.concept?.base_characteristic_id);

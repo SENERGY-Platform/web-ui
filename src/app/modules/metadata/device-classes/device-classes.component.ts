@@ -14,45 +14,37 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { debounceTime, forkJoin, Observable, Subscription, map } from 'rxjs';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ResponsiveService } from '../../../core/services/responsive.service';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { DeviceClassesPermSearchModel } from './shared/device-classes-perm-search.model';
 import { DeviceClassesService } from './shared/device-classes.service';
 import { DeviceClassesEditDialogComponent } from './dialog/device-classes-edit-dialog.component';
 import { DeviceTypeDeviceClassModel } from '../device-types-overview/shared/device-type.model';
-import uuid = util.uuid;
-import { util } from 'jointjs';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import { MatSort, Sort, SortDirection } from '@angular/material/sort';
+import { Sort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { UntypedFormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import {
     UsedInDeviceTypeQuery,
     UsedInDeviceTypeResponseElement
-} from "../device-types-overview/shared/used-in-device-type.model";
-import {DeviceTypeService} from "../device-types-overview/shared/device-type.service";
-import {FunctionsPermSearchModel} from "../functions/shared/functions-perm-search.model";
+} from '../device-types-overview/shared/used-in-device-type.model';
+import {DeviceTypeService} from '../device-types-overview/shared/device-type.service';
 
 @Component({
     selector: 'senergy-device-classes',
     templateUrl: './device-classes.component.html',
     styleUrls: ['./device-classes.component.css'],
 })
-export class DeviceClassesComponent implements OnInit, OnDestroy {
+export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];
     pageSize = 20;
     ready = false;
-    dataSource = new MatTableDataSource<DeviceClassesPermSearchModel>();
-    selection = new SelectionModel<DeviceClassesPermSearchModel>(true, []);
+    dataSource = new MatTableDataSource<DeviceTypeDeviceClassModel>();
+    selection = new SelectionModel<DeviceTypeDeviceClassModel>(true, []);
     totalCount = 200;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     userIsAdmin = false;
@@ -65,33 +57,22 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
     userHasUsedInAuthorization = false;
-    usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>()
+    usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>();
 
     constructor(
         private dialog: MatDialog,
-        private responsiveService: ResponsiveService,
         private deviceClassesService: DeviceClassesService,
         private searchbarService: SearchbarService,
         private snackBar: MatSnackBar,
-        private router: Router,
         private dialogsService: DialogsService,
         private authService: AuthorizationService,
-        private deviceTypeService: DeviceTypeService
+        private deviceTypeService: DeviceTypeService,
     ) {}
 
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initSearch();
         this.checkAuthorization();
-    }
-
-    getTotalCounts() {
-        return this.deviceClassesService.getTotalCountOfDevicesClasses(this.searchText).pipe(
-            map((totalCount: number) => {
-                this.totalCount = totalCount;
-                return totalCount;
-            })
-        );
     }
 
     ngAfterViewInit(): void {
@@ -107,7 +88,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.userHasUsedInAuthorization = this.deviceTypeService.userHasUsedInAuthorization()
+        this.userHasUsedInAuthorization = this.deviceTypeService.userHasUsedInAuthorization();
         if(this.userHasUsedInAuthorization) {
             this.displayedColumns.push('useCount');
         }
@@ -132,7 +113,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         });
     }
 
-    editDeviceClass(inputDeviceClass: DeviceClassesPermSearchModel): void {
+    editDeviceClass(inputDeviceClass: DeviceTypeDeviceClassModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
@@ -152,7 +133,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         });
     }
 
-    deleteDeviceClass(deviceClass: DeviceClassesPermSearchModel): void {
+    deleteDeviceClass(deviceClass: DeviceTypeDeviceClassModel): void {
         this.dialogsService
             .openDeleteDialog('device class ' + deviceClass.name)
             .afterClosed()
@@ -193,14 +174,15 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getDeviceClasses(): Observable<DeviceClassesPermSearchModel[]> {
+    private getDeviceClasses(): Observable<DeviceTypeDeviceClassModel[]> {
         return this.deviceClassesService
             .getDeviceClasses(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .pipe(
-                map((deviceClasses: DeviceClassesPermSearchModel[]) => {
-                    this.dataSource = new MatTableDataSource(deviceClasses);
-                    this.updateDeviceClassInDeviceTypes(deviceClasses)
-                    return deviceClasses;
+                map((deviceClasses) => {
+                    this.totalCount = deviceClasses.total;
+                    this.dataSource = new MatTableDataSource(deviceClasses.result);
+                    this.updateDeviceClassInDeviceTypes(deviceClasses.result);
+                    return deviceClasses.result;
                 })
             );
     }
@@ -210,7 +192,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.selectionClear();
 
-        forkJoin([this.getDeviceClasses(), this.getTotalCounts()]).subscribe(_ => {
+        this.getDeviceClasses().subscribe(_ => {
             this.ready = true;
         });
     }
@@ -257,7 +239,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
             .subscribe((deleteDeviceClass: boolean) => {
                 if (deleteDeviceClass) {
                     this.ready = false;
-                    this.selection.selected.forEach((deviceClass: DeviceClassesPermSearchModel) => {
+                    this.selection.selected.forEach((deviceClass: DeviceTypeDeviceClassModel) => {
                         deletionJobs.push(this.deviceClassesService.deleteDeviceClasses(deviceClass.id));
                     });
                 }
@@ -274,19 +256,19 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
             });
     }
 
-    private updateDeviceClassInDeviceTypes(list: DeviceClassesPermSearchModel[]) {
+    private updateDeviceClassInDeviceTypes(list: DeviceTypeDeviceClassModel[]) {
         if (!this.userHasUsedInAuthorization) {
             return;
         }
-        let query: UsedInDeviceTypeQuery = {
-            resource: "device-classes",
+        const query: UsedInDeviceTypeQuery = {
+            resource: 'device-classes',
             ids: list.map(f => f.id)
-        }
+        };
         this.deviceTypeService.getUsedInDeviceType(query).subscribe(result => {
             result?.forEach((value, key) => {
                 this.usedIn.set(key, value);
-            })
-        })
+            });
+        });
     }
 
     public showUsedInDialog(usedIn: UsedInDeviceTypeResponseElement | undefined) {

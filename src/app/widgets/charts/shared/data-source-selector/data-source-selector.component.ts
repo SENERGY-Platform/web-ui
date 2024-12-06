@@ -1,14 +1,12 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { catchError, concatMap, defaultIfEmpty, EMPTY, forkJoin, map, mergeMap, Observable, of, Subject, throwError } from 'rxjs';
+import { catchError, concatMap, defaultIfEmpty, forkJoin, map, mergeMap, Observable, of, throwError } from 'rxjs';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { ExportModel, ExportResponseModel, ExportValueModel } from 'src/app/modules/exports/shared/export.model';
-import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
-import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-classes/shared/device-classes-perm-search.model';
-import { DeviceTypeContentVariableModel, DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeAspectModel, DeviceTypeContentVariableModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
 import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../../export/shared/charts-export-properties.model';
 import { environment } from 'src/environments/environment';
@@ -19,7 +17,6 @@ import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/share
 import { LocationModel } from 'src/app/modules/devices/locations/shared/locations.model';
 import { LocationsService } from 'src/app/modules/devices/locations/shared/locations.service';
 import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
-import { FunctionsPermSearchModel } from 'src/app/modules/metadata/functions/shared/functions-perm-search.model';
 
 export interface DataSourceConfig {
     exports?: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel | LocationModel)[];
@@ -40,18 +37,18 @@ export interface DataSourceConfig {
 };
 
 @Component({
-  selector: 'data-source-selector',
-  templateUrl: './data-source-selector.component.html',
-  styleUrls: ['./data-source-selector.component.css']
+    selector: 'data-source-selector',
+    templateUrl: './data-source-selector.component.html',
+    styleUrls: ['./data-source-selector.component.css']
 })
 export class DataSourceSelectorComponent implements OnInit {
 
     form: any;
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
     deviceGroups: DeviceGroupModel[] = [];
-    aspects: AspectsPermSearchModel[] = [];
-    functions: FunctionsPermSearchModel[] = [];
-    deviceClasses: DeviceClassesPermSearchModel[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
+    functions: DeviceTypeFunctionModel[] = [];
+    deviceClasses: DeviceTypeDeviceClassModel[] = [];
     concepts: Map<string, ConceptsCharacteristicsModel | null> = new Map();
     fieldOptionsTMP: Map<string, ChartsExportVAxesModel[]> = new Map();
 
@@ -520,7 +517,7 @@ export class DataSourceSelectorComponent implements OnInit {
         if(this.showLocationsAsSource) {
             obs.push(this.getLocations());
         }
-        obs.push(this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').pipe(map(functions => this.functions = functions)));
+        obs.push(this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').pipe(map(functions => this.functions = functions.result)));
         if(obs.length === 0) {
             obs.push(of(true));
         }

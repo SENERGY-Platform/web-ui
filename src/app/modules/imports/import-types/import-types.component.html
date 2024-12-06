@@ -55,11 +55,11 @@
                 <ng-container matColumnDef="cost">
                     <th mat-header-cell mat-sort-header *matHeaderCellDef>Cost</th>
                     <td mat-cell *matCellDef="let m">
-                        <div *ngIf=" m.cost.max > 0" matTooltipClass="multiline-tooltip" matTooltip="Median: {{m.cost.median | currency:'EUR'}}; Mean: {{m.cost.mean | currency:'EUR'}}">
-                            {{m.cost.min | currency:'EUR'}} - {{m.cost.max |
+                        <div *ngIf=" m.costEstimation.max > 0" matTooltipClass="multiline-tooltip" matTooltip="Median: {{m.costEstimation.median | currency:'EUR'}}; Mean: {{m.costEstimation.mean | currency:'EUR'}}">
+                            {{m.costEstimation.min | currency:'EUR'}} - {{m.costEstimation.max |
                             currency:'EUR'}}
                         </div>
-                        <div *ngIf=" m.cost.max === 0">
+                        <div *ngIf=" m.costEstimation.max === 0">
                             Unknown cost
                         </div>
                     </td>
@@ -75,7 +75,7 @@
                 <ng-container matColumnDef="start">
                     <th mat-header-cell *matHeaderCellDef class="button-column">Start</th>
                     <td mat-cell *matCellDef="let m">
-                        <button mat-icon-button (click)="start(m)" color="accent" [disabled]="!m.permissions.x">
+                        <button mat-icon-button (click)="start(m)" color="accent" [disabled]="!hasXPermission(m)">
                             <mat-icon>play_arrow</mat-icon>
                         </button>
                     </td>
@@ -83,7 +83,7 @@
                 <ng-container matColumnDef="share">
                     <th mat-header-cell *matHeaderCellDef class="button-column">Share</th>
                     <td mat-cell *matCellDef="let m">
-                        <button mat-icon-button (click)="share(m)" color="accent" [disabled]="!m.permissions.a">
+                        <button mat-icon-button (click)="share(m)" color="accent" [disabled]="!hasAPermission(m)">
                             <mat-icon>share</mat-icon>
                         </button>
                     </td>
@@ -91,7 +91,7 @@
                 <ng-container *ngIf="userHasUpdateAuthorization" matColumnDef="edit">
                     <th mat-header-cell *matHeaderCellDef class="button-column">Edit</th>
                     <td mat-cell *matCellDef="let m">
-                        <button mat-icon-button (click)="edit(m)" color="accent" [disabled]="!m.permissions.w">
+                        <button mat-icon-button (click)="edit(m)" color="accent" [disabled]="!hasWPermission(m)">
                             <mat-icon>edit</mat-icon>
                         </button>
                     </td>
@@ -101,7 +101,7 @@
                     <ng-container matColumnDef="delete">
                         <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
                         <td mat-cell *matCellDef="let m">
-                            <button mat-icon-button (click)="delete(m)" color="accent" [disabled]="!m.permissions.w">
+                            <button mat-icon-button (click)="delete(m)" color="accent" [disabled]="!hasWPermission(m)">
                                 <mat-icon>delete</mat-icon>
                             </button>
                         </td>

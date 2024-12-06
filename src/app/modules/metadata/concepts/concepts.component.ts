@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {Router} from '@angular/router';
@@ -22,11 +22,10 @@ import {ConceptsService} from './shared/concepts.service';
 import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ConceptsEditDialogComponent} from './dialogs/concepts-edit-dialog.component';
-import {ConceptsPermSearchModel} from './shared/concepts-perm-search.model';
 import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatSort, Sort, SortDirection} from '@angular/material/sort';
+import {Sort, SortDirection} from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -36,13 +35,13 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     templateUrl: './concepts.component.html',
     styleUrls: ['./concepts.component.css'],
 })
-export class ConceptsComponent implements OnInit, OnDestroy {
+export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'info', 'characteristic'];
     pageSize = 20;
-    concepts: ConceptsPermSearchModel[] = [];
+    concepts: DeviceTypeConceptModel[] = [];
     ready = false;
     dataSource = new MatTableDataSource(this.concepts);
-    selection = new SelectionModel<ConceptsPermSearchModel>(true, []);
+    selection = new SelectionModel<DeviceTypeConceptModel>(true, []);
     totalCount = 200;
     offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -70,15 +69,6 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
-    }
-
-    getTotalCounts() {
-        return this.conceptsService.getTotalCountOfConcepts(this.searchText).pipe(
-            map((totalCount: number) => {
-                this.totalCount = totalCount;
-                return totalCount;
-            })
-        );
     }
 
     checkAuthorization() {
@@ -128,7 +118,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         });
     }
 
-    editConcept(conceptInput: ConceptsPermSearchModel) {
+    editConcept(conceptInput: DeviceTypeConceptModel) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
@@ -150,7 +140,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         });
     }
 
-    showConcept(conceptInput: ConceptsPermSearchModel) {
+    showConcept(conceptInput: DeviceTypeConceptModel) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
@@ -173,7 +163,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         });
     }
 
-    deleteConcept(concept: ConceptsPermSearchModel): void {
+    deleteConcept(concept: DeviceTypeConceptModel): void {
         this.dialogsService
             .openDeleteDialog('concept ' + concept.name)
             .afterClosed()
@@ -193,17 +183,18 @@ export class ConceptsComponent implements OnInit, OnDestroy {
             });
     }
 
-    showCharacteristics(concept: ConceptsPermSearchModel) {
+    showCharacteristics(concept: DeviceTypeConceptModel) {
         this.router.navigateByUrl('/metadata/characteristics', { state: concept });
     }
 
-    private getConcepts(): Observable<ConceptsPermSearchModel[]> {
+    private getConcepts(): Observable<DeviceTypeConceptModel[]> {
         return this.conceptsService
             .getConcepts(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .pipe(
-                map((concepts: ConceptsPermSearchModel[]) => {
-                    this.dataSource.data = concepts;
-                    return concepts;
+                map(concepts => {
+                    this.totalCount = concepts.total;
+                    this.dataSource.data = concepts.result;
+                    return concepts.result;
                 })
             );
     }
@@ -213,7 +204,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.selectionClear();
 
-        forkJoin([this.getConcepts(), this.getTotalCounts()]).subscribe(_ => {
+        this.getConcepts().subscribe(_ => {
             this.ready = true;
         });
     }
@@ -251,7 +242,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
             .subscribe((deleteConcepts: boolean) => {
                 if (deleteConcepts) {
                     this.ready = false;
-                    this.selection.selected.forEach((concept: ConceptsPermSearchModel) => {
+                    this.selection.selected.forEach((concept: DeviceTypeConceptModel) => {
                         deletionJobs.push(this.conceptsService.deleteConcept(concept.id));
                     });
                 }

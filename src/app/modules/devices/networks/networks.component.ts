@@ -28,7 +28,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {NetworksDeleteDialogComponent} from './dialogs/networks-delete-dialog.component';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatSort, Sort, SortDirection} from '@angular/material/sort';
+import {Sort, SortDirection} from '@angular/material/sort';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatPaginator} from '@angular/material/paginator';
 import {DialogsService} from 'src/app/core/services/dialogs.service';
@@ -111,9 +111,9 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
         this.sortBy = $event.active;
 
         // TODO Ingo suche connection
-        if (this.sortBy == 'connection') {
+        if (this.sortBy === 'connection') {
             this.sortBy = 'annotations.connected';
-        } else if (this.sortBy == 'number_devices') {
+        } else if (this.sortBy === 'number_devices') {
             this.sortBy = 'device_local_ids';
         }
         this.sortDirection = $event.direction;
@@ -298,6 +298,6 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     shareNetwork(network: HubModel): void {
-        this.permissionsDialogService.openPermissionDialog('hubs', network.id, network.name );
+        this.permissionsDialogService.openPermissionV2Dialog('hubs', network.id, network.name );
     }
 }

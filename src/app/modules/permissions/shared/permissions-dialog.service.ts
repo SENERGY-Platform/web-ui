@@ -15,39 +15,26 @@
  */
 
 import { Injectable } from '@angular/core';
-import {PermissionsResourceBaseModel, PermissionsResourceModel, PermissionsV2ResourceBaseModel, PermissionsV2ResourceModel} from './permissions-resource.model';
+import {PermissionsV2ResourceBaseModel, PermissionsV2ResourceModel} from './permissions-resource.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { PermissionDialogComponent, PermissionDialogComponentData } from '../dialogs/permission/permission-dialog.component';
 import { PermissionsService } from './permissions.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class PermissionsDialogService {
     constructor(
-        private errorHandlerService: ErrorHandlerService,
         private dialog: MatDialog,
         private permissionsService: PermissionsService,
         public snackBar: MatSnackBar,
     ) {}
 
-    //key is the kafka key this permission command will be published to. is optional
-    openPermissionDialog(kind: string, id: string, name: string, key?: string): void {
-        this.permissionsService.getResourcePermissions(kind, id).subscribe((permissionsModel: PermissionsResourceModel) => {
-            this.openPermDialog(name, permissionsModel, kind, id, key);
-        });
-    }
-
     openPermissionV2Dialog(topicID: string, ressourceID: string, name: string) {
         this.permissionsService.getResourcePermissionsV2(topicID, ressourceID).subscribe((permissionsModel: PermissionsV2ResourceModel) => {
             this.openPermV2Dialog(name, permissionsModel, topicID, ressourceID);
         });
-    }
-
-    private openPermDialog(_: string, __: PermissionsResourceBaseModel, ___: string, ____: string, _____?: string) {
-        this.errorHandlerService.showErrorInSnackBar("Currently not supported");
     }
 
     private openPermV2Dialog(name: string, permissionsIn: PermissionsV2ResourceBaseModel, topicID: string, ressourceID: string) {

@@ -13,35 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ImportTypePermissionSearchModel, ImportTypePermissionSearchModelWithCosts} from './shared/import-types.model';
-import {ImportTypesService} from './shared/import-types.service';
-import {Sort} from '@angular/material/sort';
-import {Router} from '@angular/router';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ImportInstancesModel} from '../import-instances/shared/import-instances.model';
-import {ImportDeployEditDialogComponent} from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
-import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import { forkJoin, Observable, map, Subscription, of, mergeMap } from 'rxjs';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ImportTypeModel, ImportTypeModelWithCostEstimation } from './shared/import-types.model';
+import { ImportTypesService } from './shared/import-types.service';
+import { Sort } from '@angular/material/sort';
+import { Router } from '@angular/router';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ImportInstancesModel } from '../import-instances/shared/import-instances.model';
+import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { forkJoin, Observable, map, Subscription, of, mergeMap, concatMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { CostService } from '../../cost/shared/cost.service';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
+import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 
 @Component({
     selector: 'senergy-import-types',
     templateUrl: './import-types.component.html',
     styleUrls: ['./import-types.component.css'],
 })
-export class ImportTypesComponent implements OnInit {
+export class ImportTypesComponent implements OnInit, AfterViewInit {
     displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share'];
     pageSize = 20;
-    dataSource = new MatTableDataSource<ImportTypePermissionSearchModelWithCosts>();
+    dataSource = new MatTableDataSource<ImportTypeModelWithCostEstimation>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    selection = new SelectionModel<ImportTypePermissionSearchModel>(true, []);
+    selection = new SelectionModel<ImportTypeModel>(true, []);
     dataReady = false;
     sort = 'name.asc';
     searchText = '';
@@ -51,6 +53,7 @@ export class ImportTypesComponent implements OnInit {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
+    permissionsPerType: PermissionsV2RightsAndIdModel[] = [];
 
     constructor(
         private importTypesService: ImportTypesService,
@@ -61,21 +64,16 @@ export class ImportTypesComponent implements OnInit {
         private deleteDialog: DialogsService,
         private searchbarService: SearchbarService,
         private costService: CostService,
-    ) {}
+        private permissionsService: PermissionsService,
+    ) { }
 
     ngOnInit(): void {
         this.initSearch();
         this.checkAuthorization();
     }
 
-    getTotalNumberOfTypes(): Observable<number> {
-        return this.importTypesService.getTotalCountOfTypes(this.searchText).pipe(
-            map((totalCount: number) => this.totalCount = totalCount)
-        );
-    }
-
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe(() => {
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load().subscribe();
@@ -84,12 +82,12 @@ export class ImportTypesComponent implements OnInit {
 
     checkAuthorization() {
         this.userHasUpdateAuthorization = this.importTypesService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
+        if (this.userHasUpdateAuthorization) {
             this.displayedColumns.push('edit');
         }
 
         this.userHasDeleteAuthorization = this.importTypesService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
+        if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
 
@@ -107,11 +105,11 @@ export class ImportTypesComponent implements OnInit {
         });
     }
 
-    details(m: ImportTypePermissionSearchModel) {
+    details(m: ImportTypeModel) {
         this.router.navigateByUrl('/imports/types/details/' + m.id);
     }
 
-    start(m: ImportTypePermissionSearchModel) {
+    start(m: ImportTypeModel) {
         const config: MatDialogConfig = {
             data: {
                 name: m.name,
@@ -130,15 +128,15 @@ export class ImportTypesComponent implements OnInit {
             });
     }
 
-    share(m: ImportTypePermissionSearchModel) {
-        this.permissionsDialogService.openPermissionDialog('import-types', m.id, m.name);
+    share(m: ImportTypeModel) {
+        this.permissionsDialogService.openPermissionV2Dialog('import-types', m.id, m.name);
     }
 
-    edit(m: ImportTypePermissionSearchModel) {
+    edit(m: ImportTypeModel) {
         this.router.navigateByUrl('/imports/types/edit/' + m.id);
     }
 
-    delete(m: ImportTypePermissionSearchModel) {
+    delete(m: ImportTypeModel) {
         this.deleteDialog
             .openDeleteDialog('import type')
             .afterClosed()
@@ -164,23 +162,28 @@ export class ImportTypesComponent implements OnInit {
         this.reload();
     }
 
-    load(): Observable<ImportTypePermissionSearchModelWithCosts[]> {
+    load(): Observable<ImportTypeModelWithCostEstimation[]> {
         this.dataReady = false;
         return this.importTypesService.listImportTypes(this.searchText, this.pageSize, this.offset, this.sort).pipe(
-            mergeMap((types: ImportTypePermissionSearchModelWithCosts[]) => {
+            mergeMap((types) => {
+                this.totalCount = types.total;
                 if (this.costService.userMayGetImportCostEstimations()) {
-                    return this.costService.getImportCostEstimations(types.map(t => t.id)).pipe(map(costs => {
+                    return this.costService.getImportCostEstimations(types.result.map(t => t.id)).pipe(map(costs => {
                         costs.forEach((cost, i) => {
-                            types[i].cost = cost;
+                            (types.result[i] as ImportTypeModelWithCostEstimation).costEstimation = cost;
                         });
-                        this.dataSource.data = types;
-                        return types;
+                        this.dataSource.data = types.result;
+                        return types.result;
                     }));
                 } else {
-                    this.dataSource.data = types;
-                    return of(types);
+                    this.dataSource.data = types.result;
+                    return of(types.result);
                 }
-            })
+            }),
+            concatMap(a => this.permissionsService.getComputedResourcePermissionsV2('import-types', this.dataSource.data.map(t => t.id)).pipe(map(perm => {
+                this.permissionsPerType = perm;
+                return a;
+            }))),
         );
     }
 
@@ -189,7 +192,7 @@ export class ImportTypesComponent implements OnInit {
         this.dataReady = false;
         this.selectionClear();
 
-        forkJoin([this.load(), this.getTotalNumberOfTypes()]).subscribe(_ => {
+        this.load().subscribe(_ => {
             this.dataReady = true;
         });
     }
@@ -226,7 +229,7 @@ export class ImportTypesComponent implements OnInit {
             .subscribe((deletePipelines: boolean) => {
                 if (deletePipelines) {
                     this.dataReady = false;
-                    this.selection.selected.forEach((importType: ImportTypePermissionSearchModel) => {
+                    this.selection.selected.forEach((importType: ImportTypeModel) => {
                         deletionJobs.push(this.importTypesService.deleteImportInstance(importType.id));
                     });
                 }
@@ -234,12 +237,24 @@ export class ImportTypesComponent implements OnInit {
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
                     if (ok) {
-                        this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
+                        this.snackBar.open(text + ' deleted successfully.', undefined, { duration: 2000 });
                     } else {
-                        this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                        this.snackBar.open('Error while deleting ' + text + '!', 'close', { panelClass: 'snack-bar-error' });
                     }
                     this.reload();
                 });
             });
+    }
+
+    hasWPermission(m: ImportTypeModel): boolean {
+        return this.permissionsPerType.find(t => t.id === m.id)?.write || false;
+    }
+
+    hasAPermission(m: ImportTypeModel): boolean {
+        return this.permissionsPerType.find(t => t.id === m.id)?.administrate || false;
+    }
+
+    hasXPermission(m: ImportTypeModel): boolean {
+        return this.permissionsPerType.find(t => t.id === m.id)?.execute || false;
     }
 }

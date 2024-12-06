@@ -69,7 +69,7 @@
                     <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
                     <td mat-cell *matCellDef="let characteristic">
                         <button mat-icon-button color="accent" (click)="editCharacteristic(characteristic)"
-                            [disabled]="!characteristic.permissions.w" matTooltip="Edit">
+                            [disabled]="!userHasUpdateAuthorization" matTooltip="Edit">
                             <mat-icon>edit</mat-icon>
                         </button>
                     </td>
@@ -80,7 +80,7 @@
                         <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
                         <td mat-cell *matCellDef="let characteristic">
                             <button mat-icon-button color="accent" (click)="deleteCharacteristic(characteristic)"
-                                [disabled]="!characteristic.permissions.a" matTooltip="Delete">
+                                [disabled]="!userHasDeleteAuthorization" matTooltip="Delete">
                                 <mat-icon>delete</mat-icon>
                             </button>
                         </td>

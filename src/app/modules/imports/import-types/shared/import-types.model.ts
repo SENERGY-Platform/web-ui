@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CostEstimationModel } from "src/app/modules/cost/shared/cost.model";
+import { CostEstimationModel } from 'src/app/modules/cost/shared/cost.model';
 
 export interface ImportTypeModel {
     id: string;
@@ -45,25 +45,6 @@ export interface ImportTypeContentVariableModel {
     function_id?: string;
 }
 
-export interface ImportTypePermissionSearchModel {
-    aspect_functions: string[];
-    content_aspect_ids: string[];
-    creator: string;
-    default_restart: boolean;
-    description: string;
-    content_function_ids: string[];
-    id: string;
-    image: string;
-    name: string;
-    permissions: {
-        a: boolean;
-        r: boolean;
-        w: boolean;
-        x: boolean;
-    };
-    shared: boolean;
-}
-
-export interface ImportTypePermissionSearchModelWithCosts extends ImportTypePermissionSearchModel {
-    cost?:  CostEstimationModel;
+export interface ImportTypeModelWithCostEstimation extends ImportTypeModel {
+    costEstimation?: CostEstimationModel;
 }
