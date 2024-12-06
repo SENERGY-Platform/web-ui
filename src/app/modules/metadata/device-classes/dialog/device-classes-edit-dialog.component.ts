@@ -18,7 +18,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
-import { DeviceClassesPermSearchModel } from '../shared/device-classes-perm-search.model';
+import { DeviceTypeDeviceClassModel } from '../../device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './device-classes-edit-dialog.component.html',
@@ -31,7 +31,7 @@ export class DeviceClassesEditDialogComponent implements OnInit {
         private conceptsService: ConceptsService,
         private dialogRef: MatDialogRef<DeviceClassesEditDialogComponent>,
         private _formBuilder: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: { deviceClass: DeviceClassesPermSearchModel },
+        @Inject(MAT_DIALOG_DATA) data: { deviceClass: DeviceTypeDeviceClassModel },
     ) {
         this.initDeviceClassFormGroup(data.deviceClass);
     }
@@ -50,7 +50,7 @@ export class DeviceClassesEditDialogComponent implements OnInit {
         return a.id === b.id;
     }
 
-    private initDeviceClassFormGroup(deviceClass: DeviceClassesPermSearchModel): void {
+    private initDeviceClassFormGroup(deviceClass: DeviceTypeDeviceClassModel): void {
         this.deviceClassFormGroup = this._formBuilder.group({
             id: [{ value: deviceClass.id, disabled: true }],
             name: [deviceClass.name, Validators.required],

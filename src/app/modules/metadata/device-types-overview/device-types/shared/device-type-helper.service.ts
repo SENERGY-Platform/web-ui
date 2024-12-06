@@ -15,9 +15,8 @@
  */
 
 import { Injectable } from '@angular/core';
-import { DeviceTypeCharacteristicsModel, DeviceTypeConceptModel, DeviceTypeContentVariableModel } from '../../shared/device-type.model';
+import { DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel } from '../../shared/device-type.model';
 import * as _ from 'lodash';
-import { ConceptsCharacteristicsModel } from '../../../concepts/shared/concepts-characteristics.model';
 
 @Injectable({
     providedIn: 'root',

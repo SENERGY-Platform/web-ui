@@ -50,7 +50,6 @@ export const environment = {
     flowRepoUrl: 'http://localhost',
     flowEngineUrl: 'http://localhost',
     flowParserUrl: 'http://localhost',
-    permissionSearchUrl: 'http://localhost', //TODO
     permissionCommandUrl: 'http://localhost',
     apiAggregatorUrl: 'http://localhost',
     iotRepoUrl: 'http://localhost',

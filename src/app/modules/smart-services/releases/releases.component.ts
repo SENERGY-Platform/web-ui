@@ -232,7 +232,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
                 if (deleteProcess) {
                     this.releasesService.deleteRelease(release.id).subscribe((resp: { status: number }) => {
                         if (resp.status === 200) {
-                            this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => release.id === item.id));
+                            this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => release.id === item._id));
                         } else {
                             this.showSnackBarError('deleting the release!');
                         }

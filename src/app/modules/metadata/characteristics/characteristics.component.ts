@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeCharacteristicsModel} from '../device-types-overview/shared/device-type.model';
 import {Navigation, Router} from '@angular/router';
@@ -25,29 +25,25 @@ import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-sear
 import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ConceptsPermSearchModel} from '../concepts/shared/concepts-perm-search.model';
-import {MatSort, Sort, SortDirection} from '@angular/material/sort';
+import {Sort, SortDirection} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import {DeviceClassesPermSearchModel} from "../device-classes/shared/device-classes-perm-search.model";
-import {
-    UsedInDeviceTypeQuery,
-    UsedInDeviceTypeResponseElement
-} from "../device-types-overview/shared/used-in-device-type.model";
-import {DeviceTypeService} from "../device-types-overview/shared/device-type.service";
+import { UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement } from '../device-types-overview/shared/used-in-device-type.model';
+import {DeviceTypeService} from '../device-types-overview/shared/device-type.service';
 
 @Component({
     selector: 'senergy-characteristic',
     templateUrl: './characteristics.component.html',
     styleUrls: ['./characteristics.component.css'],
 })
-export class CharacteristicsComponent implements OnInit, OnDestroy {
+export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];
     pageSize = 20;
     ready = false;
-    dataSource = new MatTableDataSource<CharacteristicsPermSearchModel>();
-    selection = new SelectionModel<CharacteristicsPermSearchModel>(true, []);
+    dataSource = new MatTableDataSource<DeviceTypeCharacteristicsModel>();
+    selection = new SelectionModel<DeviceTypeCharacteristicsModel>(true, []);
     totalCount = 200;
     offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -80,15 +76,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.checkAuthorization();
     }
 
-    getTotalCounts(): Observable<number> {
-        return this.characteristicsService.getTotalCountOfCharacteristics(this.searchText).pipe(
-            map((totalCount: number) => {
-                this.totalCount = totalCount;
-                return totalCount;
-            })
-        );
-    }
-
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
@@ -101,7 +88,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
 
     checkAuthorization() {
-        this.userHasUsedInAuthorization = this.deviceTypeService.userHasUsedInAuthorization()
+        this.userHasUsedInAuthorization = this.deviceTypeService.userHasUsedInAuthorization();
         if(this.userHasUsedInAuthorization) {
             this.displayedColumns.push('useCount');
         }
@@ -241,22 +228,23 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getCharacteristics(): Observable<CharacteristicsPermSearchModel[]> {
+    private getCharacteristics(): Observable<DeviceTypeCharacteristicsModel[]> {
         if (this.routerConcept !== null) {
             this.selectedTag = this.routerConcept.name;
         }
         return this.characteristicsService
             .getCharacteristics(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection, this.routerConcept?.characteristic_ids || [])
             .pipe(
-                map((characteristics: CharacteristicsPermSearchModel[]) => {
-                    this.setCharacteristics(characteristics);
-                    this.updateCharacteristicInDeviceTypes(characteristics);
-                    return characteristics;
+                map((characteristics) => {
+                    this.totalCount = characteristics.total;
+                    this.setCharacteristics(characteristics.result);
+                    this.updateCharacteristicInDeviceTypes(characteristics.result);
+                    return characteristics.result;
                 })
             );
     }
 
-    private setCharacteristics(characteristics: CharacteristicsPermSearchModel[]) {
+    private setCharacteristics(characteristics: DeviceTypeCharacteristicsModel[]) {
         this.dataSource.data = characteristics;
     }
 
@@ -275,7 +263,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.selectionClear();
 
-        forkJoin([this.getCharacteristics(), this.getTotalCounts()]).subscribe(_ => {
+        this.getCharacteristics().subscribe(_ => {
             this.ready = true;
         });
     }
@@ -307,8 +295,8 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             .subscribe((deleteConcepts: boolean) => {
                 if (deleteConcepts) {
                     this.ready = false;
-                    this.selection.selected.forEach((characteristic: CharacteristicsPermSearchModel) => {
-                        const job = this.characteristicsService.deleteCharacteristic(characteristic.id);
+                    this.selection.selected.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
+                        const job = this.characteristicsService.deleteCharacteristic(characteristic.id || '');
                         deletionJobs.push(job);
                     });
                 }
@@ -325,19 +313,19 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             });
     }
 
-    private updateCharacteristicInDeviceTypes(list: CharacteristicsPermSearchModel[]) {
+    private updateCharacteristicInDeviceTypes(list: DeviceTypeCharacteristicsModel[]) {
         if (!this.userHasUsedInAuthorization) {
             return;
         }
-        let query: UsedInDeviceTypeQuery = {
-            resource: "characteristics",
-            ids: list.map(f => f.id)
-        }
+        const query: UsedInDeviceTypeQuery = {
+            resource: 'characteristics',
+            ids: list.map(f => f.id || '')
+        };
         this.deviceTypeService.getUsedInDeviceType(query).subscribe(result => {
             result?.forEach((value, key) => {
                 this.usedIn.set(key, value);
-            })
-        })
+            });
+        });
     }
 
     public showUsedInDialog(usedIn: UsedInDeviceTypeResponseElement | undefined) {

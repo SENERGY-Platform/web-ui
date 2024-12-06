@@ -36,8 +36,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
-import { DeviceClassesPermSearchModel } from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
+import { DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { AspectsPermSearchModel } from '../../../metadata/aspects/shared/aspects-perm-search.model';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
 
@@ -137,11 +136,8 @@ describe('DeviceGroupsEditComponent', () => {
             id: 'device-class:id-1',
             name: 'controller-type',
             image: '',
-            creator: '',
-            permissions: { r: true, w: true, x: true, a: true },
-            shared: false,
         },
-    ] as DeviceClassesPermSearchModel[];
+    ] as DeviceTypeDeviceClassModel[];
 
     const knownAspects = [
         {
@@ -481,7 +477,7 @@ describe('DeviceGroupsEditComponent', () => {
                 return of(JSON.parse(JSON.stringify(result)));
             });
             deviceGroupServiceSpy.getDeviceClassListByIds.and.callFake(function(ids: string[]) {
-                const result: DeviceClassesPermSearchModel[] = [];
+                const result: DeviceTypeDeviceClassModel[] = [];
                 for (const id of ids) {
                     for (const dc of knownDeviceClasses) {
                         if (id === dc.id) {

@@ -120,7 +120,7 @@ export class DeviceTypeService {
         offset: number,
         sortBy: string,
         sortDirection: string,
-    ): Observable<DeviceTypeModel[]> {
+    ): Observable<{result: DeviceTypeModel[]; total: number}> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
             sortDirection = 'asc';
         }
@@ -133,10 +133,15 @@ export class DeviceTypeService {
         }
 
         return this.http
-            .get<DeviceTypeModel[]>(environment.deviceRepoUrl + '/v3/device-types?' + params. join('&'))
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypes(search)', [])),
+            .get<DeviceTypeModel[]>(environment.deviceRepoUrl + '/v3/device-types?' + params. join('&'), { observe: 'response' }).pipe(
+                map(resp => {
+                    const totalStr = resp.headers.get('X-Total-Count') || '0';
+                    return {
+                        result: resp.body || [],
+                        total: parseInt(totalStr, 10)
+                    };
+                }),
+                catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypes(search)', {result: [], total: 0})),
             );
     }
 
@@ -299,22 +304,6 @@ export class DeviceTypeService {
         }
     }
 
-    getTotalCountOfDevicesTypes(searchText: string): Observable<any> {
-        const options = searchText ?
-            { params: new HttpParams().set('search', searchText) } : {};
-
-        return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/device-types', options) //TODO
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(
-                        DeviceTypeService.name,
-                        'getTotalCountOfDevicesTypes',
-                    ),
-                ),
-            );
-    }
-
     userHasDeleteAuthorization(): boolean {
         return this.userHasDeviceManagerAuthorization('DELETE');
     }
@@ -328,11 +317,11 @@ export class DeviceTypeService {
     }
 
     userHasReadAuthorization(): boolean {
-        return this.userHasPermSearchAuthorization('GET');
+        return this.userHasListAuthorization('GET');
     }
 
-    userHasPermSearchAuthorization(method: AllowedMethods): boolean {
-        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-types'; //TODO
+    userHasListAuthorization(method: AllowedMethods): boolean {
+        const permSearchURL = environment.deviceRepoUrl + '/device-types';
         return this.ladonService.getUserAuthorizationsForURI(permSearchURL)[method];
     }
 

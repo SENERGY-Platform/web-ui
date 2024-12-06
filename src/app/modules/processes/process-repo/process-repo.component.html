@@ -38,7 +38,7 @@
                             <mat-grid-tile class="mat-elevation-z1"
                                 *ngFor="let item of repoItems.controls, let i = index" [formGroupName]="i">
                                 <div fxFill>
-                                    <mat-icon matTooltip="Process is shared by {{userIdToName[item.value.creator]}}" *ngIf="item.value.shared" class="color-sidenav shared-icon">
+                                    <mat-icon matTooltip="Process is shared by {{userIdToName[item.value.owner]}}" *ngIf="item.value.owner !== userID" class="color-sidenav shared-icon">
                                         share
                                     </mat-icon>
                                     <img class="widget-image" [src]="item.value.image">
@@ -57,12 +57,12 @@
                                             </mat-checkbox>
                                             <div fxFlex></div>
                                             <button *ngIf="userHasUpdateAuthorization" mat-icon-button color="accent" matTooltip="Edit"
-                                                routerLink="/processes/designer/{{item.value.id}}">
+                                                routerLink="/processes/designer/{{item.value._id}}">
                                                 <mat-icon>edit</mat-icon>
                                             </button>
                                             <button mat-icon-button matTooltip="Deploy" color="accent"
-                                                (click)="deployProcess(item.value.id)"
-                                                [disabled]="item.value.permissions.x === false">
+                                                (click)="deployProcess(item.value._id)"
+                                                [disabled]="!hasXPermission(item.value)">
                                                 <mat-icon>publish</mat-icon>
                                             </button>
                                             <button *ngIf="userHasDeleteAuthorization" mat-icon-button matTooltip="Delete" color="accent"
@@ -81,7 +81,7 @@
                                                     <span>Copy</span>
                                                 </button>
                                                 <button mat-menu-item (click)="permission(item.value)"
-                                                    [disabled]="item.value.permissions.a === false">
+                                                    [disabled]="!hasAPermission(item.value)">
                                                     <mat-icon>share</mat-icon>
                                                     <span>Share</span>
                                                 </button>

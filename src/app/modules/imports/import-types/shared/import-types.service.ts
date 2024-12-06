@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { Injectable, OnInit } from '@angular/core';
-import { ImportTypeContentVariableModel, ImportTypeModel, ImportTypePermissionSearchModel } from './import-types.model';
+import { ImportTypeContentVariableModel, ImportTypeModel } from './import-types.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { Observable, catchError } from 'rxjs';
@@ -51,8 +51,8 @@ export class ImportTypesService {
         limit: number | undefined,
         offset: number | undefined,
         sort: string,
-    ): Observable<ImportTypePermissionSearchModel[]> {
-        let url = environment.permissionSearchUrl + '/v3/resources/import-types?'; //TODO
+    ): Observable<{ result: ImportTypeModel[]; total: number }> {
+        let url = environment.importRepoUrl + '/import-types?';
         if (search.length > 0) {
             url += '&search=' + search;
         }
@@ -66,18 +66,14 @@ export class ImportTypesService {
             url += '&sort=' + sort;
         }
         return this.http
-            .get<ImportTypePermissionSearchModel[]>(url)
-            .pipe(map((types) => types || []))
-            .pipe(
-                map((types) => {
-                    types.forEach((type) => {
-                        type.aspect_functions = type.aspect_functions || [];
-                        type.content_aspect_ids = type.content_aspect_ids || [];
-                        type.content_function_ids = type.content_function_ids || [];
-                    });
-                    return types;
-                }),
-            );
+            .get<ImportTypeModel[]>(url, { observe: 'response' }).pipe(
+                map(resp => {
+                    const totalStr = resp?.headers.get('X-Total-Count') || '0';
+                    return {
+                        total: parseInt(totalStr, 10),
+                        result: resp?.body || [],
+                    };
+                }));
     }
 
     getImportType(id: string): Observable<ImportTypeModel> {
@@ -164,13 +160,5 @@ export class ImportTypesService {
 
     userHasReadAuthorization(): boolean {
         return this.authorizations['GET'];
-    }
-
-    getTotalCountOfTypes(searchText: string): Observable<any> {
-        const options = searchText ?
-            { params: new HttpParams().set('search', searchText) } : {};
-
-        return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/import-types', options); //TODO
     }
 }

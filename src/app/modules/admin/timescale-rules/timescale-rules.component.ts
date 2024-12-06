@@ -18,7 +18,7 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {TimescaleRulesService} from './shared/timescale-rules.service';
 import {TimescaleRuleModel, TimescaleRuleTemplateModel} from './shared/timescale-rule.model';
 import {MatTable} from '@angular/material/table';
-import {ImportTypePermissionSearchModel} from '../../imports/import-types/shared/import-types.model';
+import {ImportTypeModel} from '../../imports/import-types/shared/import-types.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {TimescaleRulesCreateEditComponent} from './timescale-rules-create-edit/timescale-rules-create-edit.component';
 import {DialogsService} from '../../../core/services/dialogs.service';
@@ -35,7 +35,7 @@ import {
     styleUrls: ['./timescale-rules.component.css']
 })
 export class TimescaleRulesComponent implements OnInit {
-    @ViewChild(MatTable, {static: false}) table!: MatTable<ImportTypePermissionSearchModel>;
+    @ViewChild(MatTable, {static: false}) table!: MatTable<ImportTypeModel>;
 
     constructor(
         private timescaleRuleService: TimescaleRulesService,

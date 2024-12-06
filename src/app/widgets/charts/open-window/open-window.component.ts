@@ -204,7 +204,6 @@ export class OpenWindowComponent implements OnInit {
 
         return this.exportDataService.queryTimescaleV2(timescaleElements).pipe(
             concatMap((resp: any) => {
-                console.log(resp)
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     this.errorHandlerService.logError('OpenWindow', 'getTimelineData', resp);
                     return throwError(() => resp.error);

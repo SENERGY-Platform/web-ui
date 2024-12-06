@@ -43,7 +43,7 @@ describe('DeviceInstancesComponent', () => {
     deviceInstanceServiceSpy.userHasCreateAuthorization.and.returnValue(true);
     deviceInstanceServiceSpy.listUsedDeviceTypeIds.and.returnValue(of());
     const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass(DeviceTypeService);
-    deviceTypeServiceSpy.userHasPermSearchAuthorization.and.returnValue(true);
+    deviceTypeServiceSpy.userHasListAuthorization.and.returnValue(true);
 
     const exportDataServiceSpy: Spy<ExportDataService> = createSpyFromClass(ExportDataService);
     exportDataServiceSpy.userHasUsageAuthroization.and.returnValue(false);

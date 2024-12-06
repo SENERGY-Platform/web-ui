@@ -14,40 +14,39 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {forkJoin, Observable, Subscription, map} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {MatDialogConfig} from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {FunctionsPermSearchModel} from './shared/functions-perm-search.model';
 import {FunctionsService} from './shared/functions.service';
 import {DeviceTypeFunctionModel} from '../device-types-overview/shared/device-type.model';
 import {FunctionsEditDialogComponent} from './dialog/functions-edit-dialog.component';
 import {FunctionsCreateDialogComponent} from './dialog/functions-create-dialog.component';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatSort, Sort, SortDirection} from '@angular/material/sort';
+import {Sort, SortDirection} from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import {DeviceTypeService} from "../device-types-overview/shared/device-type.service";
+import {DeviceTypeService} from '../device-types-overview/shared/device-type.service';
 import {
     UsedInDeviceTypeQuery,
     UsedInDeviceTypeResponseElement
-} from "../device-types-overview/shared/used-in-device-type.model";
+} from '../device-types-overview/shared/used-in-device-type.model';
 
 @Component({
     selector: 'senergy-functions',
     templateUrl: './functions.component.html',
     styleUrls: ['./functions.component.css'],
 })
-export class FunctionsComponent implements OnInit, OnDestroy {
+export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];
     pageSize = 20;
-    dataSource = new MatTableDataSource<FunctionsPermSearchModel>();
+    dataSource = new MatTableDataSource<DeviceTypeFunctionModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    selection = new SelectionModel<FunctionsPermSearchModel>(true, []);
+    selection = new SelectionModel<DeviceTypeFunctionModel>(true, []);
     totalCount = 200;
     offset = 0;
     ready = false;
@@ -78,15 +77,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         this.checkAuthorization();
     }
 
-    getTotalCounts() {
-        return this.functionsService.getTotalCountOfFunctions(this.searchText).pipe(
-            map((totalCount: number) => {
-                this.totalCount = totalCount;
-                return totalCount;
-            })
-        );
-    }
-
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=> {
             this.pageSize = this.paginator.pageSize;
@@ -100,7 +90,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     }
 
     checkAuthorization() {
-        this.userHasUsedInAuthorization = this.deviceTypeService.userHasUsedInAuthorization()
+        this.userHasUsedInAuthorization = this.deviceTypeService.userHasUsedInAuthorization();
         if(this.userHasUsedInAuthorization) {
             this.displayedColumns.push('useCount');
         }
@@ -125,7 +115,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         });
     }
 
-    editFunction(inputFunction: FunctionsPermSearchModel): void {
+    editFunction(inputFunction: DeviceTypeFunctionModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
@@ -143,7 +133,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         });
     }
 
-    showFunction(inputFunction: FunctionsPermSearchModel): void {
+    showFunction(inputFunction: DeviceTypeFunctionModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
@@ -178,7 +168,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         });
     }
 
-    deleteFunction(func: FunctionsPermSearchModel): void {
+    deleteFunction(func: DeviceTypeFunctionModel): void {
         this.dialogsService
             .openDeleteDialog('function ' + func.name)
             .afterClosed()
@@ -197,14 +187,15 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             });
     }
 
-    private getFunctions(): Observable<FunctionsPermSearchModel[]> {
+    private getFunctions(): Observable<DeviceTypeFunctionModel[]> {
         return this.functionsService
             .getFunctions(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .pipe(
-                map((functions: FunctionsPermSearchModel[]) => {
-                    this.dataSource = new MatTableDataSource(functions);
-                    this.updateFunctionUsedInDeviceTypes(functions);
-                    return functions;
+                map(functions => {
+                    this.totalCount = functions.total;
+                    this.dataSource = new MatTableDataSource(functions.result);
+                    this.updateFunctionUsedInDeviceTypes(functions.result);
+                    return functions.result;
                 })
             );
     }
@@ -213,7 +204,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.offset = 0;
         this.selectionClear();
-        forkJoin([this.getFunctions(), this.getTotalCounts()]).subscribe(_ => {
+        this.getFunctions().subscribe(_ => {
             this.ready = true;
         });
     }
@@ -261,7 +252,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             .subscribe((deleteExports: boolean) => {
                 if (deleteExports) {
                     this.ready = false;
-                    this.selection.selected.forEach((func: FunctionsPermSearchModel) => {
+                    this.selection.selected.forEach((func: DeviceTypeFunctionModel) => {
                         deletionJobs.push(this.functionsService.deleteFunction(func.id));
                     });
                 }
@@ -278,19 +269,19 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             });
     }
 
-    private updateFunctionUsedInDeviceTypes(functions: FunctionsPermSearchModel[]) {
+    private updateFunctionUsedInDeviceTypes(functions: DeviceTypeFunctionModel[]) {
         if (!this.userHasUsedInAuthorization) {
             return;
         }
-        let query: UsedInDeviceTypeQuery = {
-            resource: "functions",
+        const query: UsedInDeviceTypeQuery = {
+            resource: 'functions',
             ids: functions.map(f => f.id)
-        }
+        };
         this.deviceTypeService.getUsedInDeviceType(query).subscribe(result => {
             result?.forEach((value, key) => {
                 this.usedIn.set(key, value);
-            })
-        })
+            });
+        });
     }
 
     public showUsedInDialog(usedIn: UsedInDeviceTypeResponseElement | undefined) {

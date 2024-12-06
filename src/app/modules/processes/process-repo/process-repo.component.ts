@@ -17,10 +17,10 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { concatMap, forkJoin, map, Observable, Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { ResponsiveService } from '../../../core/services/responsive.service';
-import {ProcessModel, ProcessPermModel} from './shared/process.model';
+import { ProcessModel } from './shared/process.model';
 import { ProcessRepoService } from './shared/process-repo.service';
 import { UtilService } from '../../../core/services/util.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -32,7 +32,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProcessRepoConditionModel, ProcessRepoConditionsModel } from './shared/process-repo-conditions.model';
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
-import {PermissionsService} from "../../permissions/shared/permissions.service";
+import { PermissionsService } from '../../permissions/shared/permissions.service';
+import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -61,6 +62,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     searchText = '';
     selectedItems: ProcessModel[] = [];
     rowHeight = 282;
+    permissionsPerModel: PermissionsV2RightsAndIdModel[] = [];
 
     userHasCreateAuthorization = false;
     userHasUpdateAuthorization = false;
@@ -75,7 +77,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     private gridColChangeTimeout: number | undefined;
     private knownMainPanelOffsetHeight = 0;
 
-    userIdToName: {[key: string]: string} = {};
+    userIdToName: { [key: string]: string } = {};
 
     @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
 
@@ -134,11 +136,11 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     permission(process: ProcessModel): void {
-        this.permissionsDialogService.openPermissionDialog('processmodel', process.id, process.name);
+        this.permissionsDialogService.openPermissionV2Dialog('processmodel', process._id, process.name);
     }
 
     downloadDiagram(process: ProcessModel): void {
-        this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel | null) => {
+        this.processRepoService.getProcessModel(process._id).subscribe((processModel: DesignerProcessModel | null) => {
             if (processModel) {
                 const xml = processModel.bpmn_xml;
                 const file = new Blob([xml], { type: 'application/bpmn-xml' });
@@ -158,18 +160,12 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
             .afterClosed()
             .subscribe((deleteProcess: boolean) => {
                 if (deleteProcess) {
-                    this.processRepoService.deleteProcess(process.id).subscribe((resp: { status: number }) => {
+                    this.processRepoService.deleteProcess(process._id).subscribe((resp: { status: number }) => {
                         if (resp.status === 200) {
-                            this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => process.id === item.id));
-                            this.processRepoService.checkForDeletedProcess(process.id, 10, 100).subscribe((exists) => {
-                                if (exists) {
-                                    this.showSnackBarError('deleting the process!');
-                                } else {
-                                    this.showSnackBarSuccess('Process deleted');
-                                }
-                                this.setRepoItemsParams(1);
-                                this.getRepoItems(false);
-                            });
+                            this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => process._id === item._id));
+                            this.showSnackBarSuccess('Process deleted');
+                            this.setRepoItemsParams(1);
+                            this.getRepoItems(false);
                         } else {
                             this.showSnackBarError('deleting the process!');
                         }
@@ -180,7 +176,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     copyProcess(process: ProcessModel): void {
         this.reset();
-        this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel | null) => {
+        this.processRepoService.getProcessModel(process._id).subscribe((processModel: DesignerProcessModel | null) => {
             if (processModel) {
                 const newProcess = processModel.bpmn_xml;
                 this.processRepoService
@@ -190,14 +186,8 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                             this.showSnackBarError('copying the process!');
                             this.getRepoItems(true);
                         } else {
-                            this.processRepoService.checkForCopiedProcess(processResp._id, 10, 100).subscribe((exists) => {
-                                if (exists) {
-                                    this.showSnackBarSuccess('Process copied');
-                                } else {
-                                    this.showSnackBarError('copying the process!');
-                                }
-                                this.getRepoItems(true);
-                            });
+                            this.showSnackBarSuccess('Process copied');
+                            this.getRepoItems(true);
                         }
                     });
             }
@@ -233,8 +223,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.ready = false;
                     const array: Observable<boolean>[] = [];
                     this.selectedItems.forEach((item: ProcessModel) => {
-                        array.push(this.processRepoService.checkForDeletedProcess(item.id, 15, 200));
-                        this.processRepoService.deleteProcess(item.id).subscribe((resp: { status: number }) => {
+                        this.processRepoService.deleteProcess(item._id).subscribe((resp: { status: number }) => {
                             if (resp.status !== 200) {
                                 this.showSnackBarError(
                                     this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!',
@@ -257,6 +246,14 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     countCheckboxes(): void {
         this.selectedItems = this.repoItems.value.filter((item: ProcessModel) => item.selected === true);
+    }
+
+    hasAPermission(m: {_id: string}): boolean {
+        return this.permissionsPerModel.find(t => t.id === m._id)?.administrate || false;
+    }
+
+    hasXPermission(m: {_id: string}): boolean {
+        return this.permissionsPerModel.find(t => t.id === m._id)?.execute || false;
     }
 
     private initGridCols(): void {
@@ -291,51 +288,60 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.limit,
                 this.offset,
                 this.sortAttribute.value,
-                this.sortAttribute.order,
-                this.getConditions(),
-            )
-            .subscribe((repoItems: ProcessPermModel[]) => {
-                this.loadUserNames(repoItems);
+                this.sortAttribute.order
+            ).pipe(concatMap(x => this.permissionsService.getComputedResourcePermissionsV2('processmodel', x.result.map(e => e._id)).pipe(map(perm => this.permissionsPerModel = perm), map(_ => x))))
+            .subscribe(repoItems => {
+                this.loadUserNames(repoItems.result);
                 this.animationDone = true;
-                this.addToFormArray(repoItems);
-                if (repoItems.length !== this.limit) {
+                switch (this.activeIndex) {
+                case 0:
+                    //all
+                    break;
+                case 1:
+                    //own
+                    repoItems.result = repoItems.result.filter(r => r.owner === this.userID);
+                    break;
+                case 2:
+                    // shared
+                    repoItems.result = repoItems.result.filter(r => r.owner !== this.userID);
+                    break;
+                }
+                this.addToFormArray(repoItems.result);
+                if (repoItems.result.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.ready = true;
             });
     }
 
-    private loadUserNames(elements: {creator: string, shared: boolean}[]) {
-        let missingCreators: string[] = [];
+    private loadUserNames(elements: { owner: string }[]) {
+        const missingCreators: string[] = [];
         elements?.forEach(element => {
-            if(element.shared && element.creator && !this.userIdToName[element.creator] && !missingCreators.includes(element.creator)) {
-                missingCreators.push(element.creator);
+            if (element.owner !== this.userID && !this.userIdToName[element.owner] && !missingCreators.includes(element.owner)) {
+                missingCreators.push(element.owner);
             }
-        })
+        });
         missingCreators.forEach(creator => {
             this.permissionsService.getUserById(creator).subscribe(value => {
-                if(value) {
+                if (value) {
                     this.userIdToName[value.id] = value.username;
                 }
-            })
-        })
+            });
+        });
     }
 
-    private addToFormArray(repoItems: ProcessPermModel[]): void {
-        repoItems.forEach((repoItem: ProcessPermModel) => {
+    private addToFormArray(repoItems: ProcessModel[]): void {
+        repoItems.forEach((repoItem: ProcessModel) => {
             this.repoItems.push(
                 this._formBuilder.group({
-                    id: repoItem.id,
+                    _id: repoItem._id,
                     name: repoItem.name,
                     date: repoItem.date,
                     svgXML: repoItem.svgXML,
                     bpmn_xml: repoItem.bpmn_xml,
                     publish: repoItem.publish,
-                    shared: repoItem.shared,
-                    creator: repoItem.creator,
-                    parent_id: repoItem.parent_id,
+                    owner: repoItem.owner,
                     image: this.provideImg(repoItem.svgXML),
-                    permissions: repoItem.permissions,
                     selected: false,
                 }),
             );

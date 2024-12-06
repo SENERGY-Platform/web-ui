@@ -46,11 +46,11 @@
                 <div *ngIf="!errorHasOccured">
                     <div *ngIf="configureWidget === true">Please configure widget!</div>
                     <div *ngIf="widget.properties.chartType !== 'Timeline'">
-                        <google-chart *ngIf="configureWidget === false && chartExportData.dataTable[0].length !== 0"
+                        <google-chart *ngIf="configureWidget === false && chartExportData.dataTable !== undefined && chartExportData.dataTable[0].length !== 0"
                         #chartExport [data]="chartExportData"
                         (chartSelect)="onChartSelect($event)" (chartReadyOneTime)="onChartReady()"></google-chart>
                         <senergy-no-data
-                        [showIf]="configureWidget === false && chartExportData.dataTable[0].length === 0"></senergy-no-data>
+                        [showIf]="configureWidget === false && (chartExportData.dataTable === undefined || chartExportData.dataTable[0].length === 0)"></senergy-no-data>
                     </div>
                     
                 </div>

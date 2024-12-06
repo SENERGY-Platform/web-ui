@@ -262,7 +262,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 concatMap(_ => this.loadExportPermissions()),
                 concatMap(_ => {
                     if (this.exports !=null && this.exports !== undefined && this.exports.length > 0) {
-                        const exportIds = this.exports.filter(e => e.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb && e.ID !== undefined && this.permissionsPerExports.find(x => x.id === e.ID)?.execute === true).map(e => e.ID) as string[]; // TODO also filter for permissions (must contain x)
+                        const exportIds = this.exports.filter(e => e.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb && e.ID !== undefined && this.permissionsPerExports.find(x => x.id === e.ID)?.execute === true).map(e => e.ID) as string[];
                         return this.exportDataService.getTimescaleExportUsage(exportIds).pipe(map(usage => {
                             this.usage = usage;
                         }));

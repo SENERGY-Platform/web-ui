@@ -33,11 +33,10 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MAT_DIALOG_DATA, MatDialogRef, MatDialog} from '@angular/material/dialog';
 import {forkJoin, Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {DeviceTypeFunctionModel} from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeDeviceClassModel, DeviceTypeFunctionModel} from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
 import {environment} from '../../../../../environments/environment';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
-import { DeviceClassesPermSearchModel } from 'src/app/modules/metadata/device-classes/shared/device-classes-perm-search.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { ListRulesComponent } from './list-rules/list-rules.component';
 import { DataSourceConfig } from '../../shared/data-source-selector/data-source-selector.component';
@@ -91,7 +90,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     deviceGroups: DeviceGroupModel[] = [];
     aspects: AspectsPermSearchModel[] = [];
     functions: DeviceTypeFunctionModel[] = [];
-    deviceClasses: DeviceClassesPermSearchModel[] = [];
+    deviceClasses: DeviceTypeDeviceClassModel[] = [];
     concepts: Map<string, ConceptsCharacteristicsModel | null> = new Map();
 
     constructor(
@@ -170,7 +169,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         this.formGroupController.get('properties.exports')?.patchValue(updatedDataSourceConfig.exports);
         this.formGroupController.get('properties.timeRangeType')?.patchValue(updatedDataSourceConfig.timeRange?.type);
         const timeRangeType = updatedDataSourceConfig.timeRange?.type;
-        const timeRangeLevel = updatedDataSourceConfig.timeRange?.level || "";
+        const timeRangeLevel = updatedDataSourceConfig.timeRange?.level || '';
 
         if(timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute) {
             const start = updatedDataSourceConfig.timeRange?.start;

@@ -21,6 +21,7 @@ import {ConceptsService} from '../../concepts/shared/concepts.service';
 import {ConceptsPermSearchModel} from '../../concepts/shared/concepts-perm-search.model';
 import {util} from 'jointjs';
 import uuid = util.uuid;
+import { DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './functions-create-dialog.component.html',
@@ -30,7 +31,7 @@ export class FunctionsCreateDialogComponent implements OnInit {
     optionsFormControl = new UntypedFormControl('Controlling');
     functionFormGroup!: FormGroup;
 
-    concepts: ConceptsPermSearchModel[] = [];
+    concepts: DeviceTypeConceptModel[] = [];
 
     constructor(
         private conceptsService: ConceptsService,
@@ -42,8 +43,8 @@ export class FunctionsCreateDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: ConceptsPermSearchModel[]) => {
-            this.concepts = concepts;
+        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe(concepts => {
+            this.concepts = concepts.result;
         });
     }
 

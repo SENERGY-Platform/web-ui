@@ -50,8 +50,8 @@ export class ProcessModelListService {
 
     getProcesses(): Observable<ProcessModelListModel[]> {
         return new Observable<ProcessModelListModel[]>((observer) => {
-            this.processRepoService.getProcessModels('', 10, 0, 'date', 'desc', null).subscribe((processes: ProcessModel[]) => {
-                observer.next(this.prettifyProcessData(processes));
+            this.processRepoService.getProcessModels('', 10, 0, 'date', 'desc').subscribe(processes => {
+                observer.next(this.prettifyProcessData(processes.result));
                 observer.complete();
             });
         });
@@ -61,7 +61,7 @@ export class ProcessModelListService {
         const processesArray: ProcessModelListModel[] = [];
         if (processes !== null) {
             processes.forEach((process) => {
-                processesArray.push(new ProcessModelListModel(process.name, process.id, new Date(process.date)));
+                processesArray.push(new ProcessModelListModel(process.name, process._id, new Date(process.date)));
             });
         }
         return processesArray;

@@ -1,4 +1,14 @@
-import { AfterContentInit, AfterViewChecked, AfterViewInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+    AfterContentChecked,
+    AfterContentInit,
+    AfterViewChecked,
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    Input,
+    OnDestroy,
+    OnInit
+} from '@angular/core';
 import moment from 'moment';
 import { Subscription, concatMap, Observable, map, of, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
@@ -13,7 +23,7 @@ import { AnomalyService } from './shared/anomaly.service';
     templateUrl: './anomaly.component.html',
     styleUrls: ['./anomaly.component.css']
 })
-export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
+export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
     ready = false;
     refreshing = false;
     destroy = new Subscription();
@@ -42,12 +52,12 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
         private elementSizeService: ElementSizeService,
     ) {}
 
-    ngAfterViewChecked(): void {
-        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget?.id||"");
+    ngAfterContentChecked(): void {
+        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget?.id||'');
         this.widgetWidth = element.width;
         this.widgetHeight = element.height;
     }
-    
+
     ngOnInit(): void {
         this.configured = this.widget.properties.anomalyDetection !== undefined;
         if(!this.configured) {
@@ -75,114 +85,114 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
 
         return {
             'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e6': [{
-                'value': '350',
-                'type': 'curve',
-                'subType': '',
-                'timestamp': '2024-06-27T09:47:14.058Z',
-                'start_time': curve3Start,
-                'end_time': curve3End,
-                'threshold': 0,
-                'mean': 0,
-                'initial_phase': '',
-                'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
-                'original_reconstructed_curves': [
-                    [new Date(curve3Start).getTime(), 260, 270], 
-                    [new Date(curve3End).getTime(), 250, 260], 
+                value: '350',
+                type: 'curve',
+                subType: '',
+                timestamp: '2024-06-27T09:47:14.058Z',
+                start_time: curve3Start,
+                end_time: curve3End,
+                threshold: 0,
+                mean: 0,
+                initial_phase: '',
+                device_id: 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
+                original_reconstructed_curves: [
+                    [new Date(curve3Start).getTime(), 260, 270],
+                    [new Date(curve3End).getTime(), 250, 260],
                 ]
             },
             {
-                'value': '0.7',
-                'type': 'curve',
-                'subType': '',
-                'timestamp': '2024-06-27T09:47:14.058Z',
-                'start_time': curve1Start,
-                'end_time': curve1End,
-                'threshold': 0,
-                'mean': 0,
-                'initial_phase': '',
-                'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
-                'original_reconstructed_curves': [
-                    [new Date(curve1Start).getTime(), 260, 270], 
-                    [new Date(curve1End).getTime(), 240, 250], 
+                value: '0.7',
+                type: 'curve',
+                subType: '',
+                timestamp: '2024-06-27T09:47:14.058Z',
+                start_time: curve1Start,
+                end_time: curve1End,
+                threshold: 0,
+                mean: 0,
+                initial_phase: '',
+                device_id: 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
+                original_reconstructed_curves: [
+                    [new Date(curve1Start).getTime(), 260, 270],
+                    [new Date(curve1End).getTime(), 240, 250],
                 ],
             },
             ],
             'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5': [{
-                'value': '350',
-                'type': 'extreme_value',
-                'subType': '',
-                'timestamp': extreme1,
-                'start_time': '2024-06-27T12:30:14.058Z',
-                'end_time': '2024-06-26T12:50:14.058Z',
-                'threshold': 0,
-                'mean': 0,
-                'initial_phase': '',
-                'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
-                'original_reconstructed_curves': [],
-                'upper_bound': 500,
-                'lower_bound': 800
+                value: '350',
+                type: 'extreme_value',
+                subType: '',
+                timestamp: extreme1,
+                start_time: '2024-06-27T12:30:14.058Z',
+                end_time: '2024-06-26T12:50:14.058Z',
+                threshold: 0,
+                mean: 0,
+                initial_phase: '',
+                device_id: 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
+                original_reconstructed_curves: [],
+                upper_bound: 500,
+                lower_bound: 800
             },
             {
-                'value': '0.8',
-                'type': 'curve',
-                'subType': '',
-                'timestamp': '2024-06-27T09:47:14.058Z',
-                'start_time': curve3Start,
-                'end_time': curve3End,
-                'threshold': 0,
-                'mean': 0,
-                'initial_phase': '',
-                'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
-                'original_reconstructed_curves': [
-                    [new Date(curve3Start).getTime(), 270, 280], 
-                    [new Date(curve3End).getTime(), 240, 250], 
+                value: '0.8',
+                type: 'curve',
+                subType: '',
+                timestamp: '2024-06-27T09:47:14.058Z',
+                start_time: curve3Start,
+                end_time: curve3End,
+                threshold: 0,
+                mean: 0,
+                initial_phase: '',
+                device_id: 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
+                original_reconstructed_curves: [
+                    [new Date(curve3Start).getTime(), 270, 280],
+                    [new Date(curve3End).getTime(), 240, 250],
                 ]
             },
             {
-                'value': '0.9',
-                'type': 'curve',
-                'subType': '',
-                'timestamp': '2024-06-27T09:47:14.058Z',
-                'start_time': curve1Start,
-                'end_time': curve1End,
-                'threshold': 0,
-                'mean': 0,
-                'initial_phase': '',
-                'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
-                'original_reconstructed_curves': [
-                    [new Date(curve1Start).getTime(), 240, 250], 
-                    [new Date(curve1End).getTime(), 240, 250], 
+                value: '0.9',
+                type: 'curve',
+                subType: '',
+                timestamp: '2024-06-27T09:47:14.058Z',
+                start_time: curve1Start,
+                end_time: curve1End,
+                threshold: 0,
+                mean: 0,
+                initial_phase: '',
+                device_id: 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
+                original_reconstructed_curves: [
+                    [new Date(curve1Start).getTime(), 240, 250],
+                    [new Date(curve1End).getTime(), 240, 250],
                 ],
-            
+
             },
             {
-                'value': '0.8',
-                'type': 'curve',
-                'subType': '',
-                'timestamp': '2024-06-27T09:47:14.058Z',
-                'start_time': curve2Start,
-                'end_time': curve2End,
-                'threshold': 0,
-                'mean': 0,
-                'initial_phase': '',
-                'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
-                'original_reconstructed_curves': [
-                    [new Date(curve2Start).getTime(),240, 250], 
-                    [new Date(curve2End).getTime(), 240, 250], 
+                value: '0.8',
+                type: 'curve',
+                subType: '',
+                timestamp: '2024-06-27T09:47:14.058Z',
+                start_time: curve2Start,
+                end_time: curve2End,
+                threshold: 0,
+                mean: 0,
+                initial_phase: '',
+                device_id: 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
+                original_reconstructed_curves: [
+                    [new Date(curve2Start).getTime(),240, 250],
+                    [new Date(curve2End).getTime(), 240, 250],
                 ]
             },
             {
-                'value': '10',
-                'type': 'freq',
-                'subType': '',
-                'timestamp': freq1,
-                'start_time': '2024-06-27T13:30:14.058Z',
-                'end_time': '2024-06-27T13:59:14.058Z',
-                'threshold': 0,
-                'mean': 0,
-                'initial_phase': '',
-                'device_id': 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
-                'original_reconstructed_curves': []
+                value: '10',
+                type: 'freq',
+                subType: '',
+                timestamp: freq1,
+                start_time: '2024-06-27T13:30:14.058Z',
+                end_time: '2024-06-27T13:59:14.058Z',
+                threshold: 0,
+                mean: 0,
+                initial_phase: '',
+                device_id: 'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e5',
+                original_reconstructed_curves: []
             }]
         };
     }
@@ -262,7 +272,7 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterViewChecked {
                 this.refreshing = false;
             },
             error: (err) => {
-                console.log(err)
+                console.log(err);
                 this.error = true;
                 this.ready = true;
                 this.refreshing = false;

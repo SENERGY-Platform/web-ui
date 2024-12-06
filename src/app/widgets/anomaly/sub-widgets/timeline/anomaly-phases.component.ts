@@ -59,7 +59,7 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
     }
 
     ngOnInit(): void {
-        console.log(this.curveAnomaliesPerDevice)
+        // console.log(this.curveAnomaliesPerDevice)
         this.filterCurveAnomalies();
 
         // data must be sorted by descending time for timeline chart
@@ -109,8 +109,8 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
     }
 
     // I have to use arrow function, so that `this` is accesible from within the timeline apex chart code
-    onClick = (_: any, chartContext: any, config: any) => {
-        console.log(chartContext, config);
+    onClick = (_: any, config: any) => {
+        // console.log(chartContext, config);
         const selection = config.w.config.series[config.seriesIndex].data[config.dataPointIndex];
         const deviceID = selection['x'];
         const timestamp = selection['y'];

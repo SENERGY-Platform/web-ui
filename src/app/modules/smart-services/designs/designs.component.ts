@@ -225,7 +225,7 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
                 if (deleteProcess) {
                     this.designsService.deleteDesign(design.id).subscribe((resp: { status: number }) => {
                         if (resp.status === 200) {
-                            this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => design.id === item.id));
+                            this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => design.id === item._id));
                         } else {
                             this.showSnackBarError('deleting the design');
                         }

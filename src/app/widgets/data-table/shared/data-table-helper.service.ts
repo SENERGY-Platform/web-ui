@@ -40,10 +40,7 @@ import {ExportValueTypes} from './data-table.model';
 import {ImportInstancesService} from '../../../modules/imports/import-instances/shared/import-instances.service';
 import {ImportTypesService} from '../../../modules/imports/import-types/shared/import-types.service';
 import {ImportInstancesModel} from '../../../modules/imports/import-instances/shared/import-instances.model';
-import {
-    ImportTypeModel,
-    ImportTypePermissionSearchModel
-} from '../../../modules/imports/import-types/shared/import-types.model';
+import {ImportTypeModel} from '../../../modules/imports/import-types/shared/import-types.model';
 
 @Injectable({
     providedIn: 'root',
@@ -59,7 +56,7 @@ export class DataTableHelperService {
     operatorCache = new Map<string, OperatorModel>();
     serviceExportValueCache = new Map<string, ExportValueCharacteristicModel[]>();
     importInstances: ImportInstancesModel[] = [];
-    importTypes: ImportTypePermissionSearchModel[] = [];
+    importTypes: ImportTypeModel[] = [];
     fullImportTypes = new Map<string, ImportTypeModel>();
     importTypeValues = new Map<string, ExportValueModel[]>();
 
@@ -304,16 +301,16 @@ export class DataTableHelperService {
         );
     }
 
-    preloadImportTypes(): Observable<ImportTypePermissionSearchModel[]> {
+    preloadImportTypes(): Observable<ImportTypeModel[]> {
         return this.importTypesService.listImportTypes('', undefined, undefined, 'name.asc').pipe(
             map((types) => {
-                this.importTypes = types;
-                return types;
+                this.importTypes = types.result;
+                return types.result;
             }),
         );
     }
 
-    getImportTypes(): ImportTypePermissionSearchModel[] {
+    getImportTypes(): ImportTypeModel[] {
         return this.importTypes;
     }
 

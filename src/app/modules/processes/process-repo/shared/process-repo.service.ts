@@ -15,14 +15,13 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponseBase } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponseBase } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map, mergeMap, retryWhen } from 'rxjs/operators';
-import { Observable, timer } from 'rxjs';
-import {ProcessPermModel} from './process.model';
+import { catchError, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { ProcessModel } from './process.model';
 import { DesignerProcessModel } from '../../designer/shared/designer.model';
-import { ProcessRepoConditionsModel } from './process-repo-conditions.model';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
@@ -41,37 +40,29 @@ export class ProcessRepoService {
 
     }
 
-    list(kind: string, right: string) {
-        return this.http.get<any[]>(environment.permissionSearchUrl + '/v3/resources/' + kind + '?limit=9999&rights=' + right).pipe( //TODO
-            map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'list', [])),
-        );
-    }
-
     getProcessModels(
         query: string,
         limit: number,
         offset: number,
-        feature: string,
+        sortBy: string,
         order: string,
-        conditions: ProcessRepoConditionsModel | null,
-    ): Observable<ProcessPermModel[]> {
+    ): Observable<{result: ProcessModel[]; total: number}> {
+        let params = new HttpParams();
+        params = params.set('search', query);
+        params = params.set('limit', limit);
+        params = params.set('offset', offset);
+        params = params.set('sort', sortBy + '.' + order);
+
         return this.http
-            .post<ProcessPermModel[]>(environment.permissionSearchUrl + '/v3/query/processmodel', { //TODO
-                resource: 'processmodel',
-                find: {
-                    search: query,
-                    limit,
-                    offset,
-                    rights: 'r',
-                    sort_by: feature,
-                    sort_desc: order !== 'asc',
-                    filter: conditions,
-                },
-            })
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(search)', [])),
+            .get<ProcessModel[]>(environment.processRepoUrl.slice(0, -10) + '/v2/processes', { observe: 'response', params }).pipe(
+                map(resp => {
+                    const totalStr = resp.headers.get('X-Total-Count') || '0';
+                    return {
+                        result: resp.body || [],
+                        total: parseInt(totalStr, 10)
+                    };
+                }),
+                catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(search)', {result: [], total: 0})),
             );
     }
 
@@ -79,14 +70,6 @@ export class ProcessRepoService {
         return this.http
             .get<DesignerProcessModel>(environment.processRepoUrl + '/' + id)
             .pipe(catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModel()', null)));
-    }
-
-    checkForCopiedProcess(id: string, maxRetries: number, intervalInMs: number): Observable<boolean> {
-        return this.checkForProcessModelWithRetries(id, true, maxRetries, intervalInMs);
-    }
-
-    checkForDeletedProcess(id: string, maxRetries: number, intervalInMs: number): Observable<boolean> {
-        return this.checkForProcessModelWithRetries(id, false, maxRetries, intervalInMs);
     }
 
     deleteProcess(id: string): Observable<{ status: number }> {
@@ -107,32 +90,6 @@ export class ProcessRepoService {
                 .put<DesignerProcessModel>(environment.processRepoUrl + '/' + id, processModel)
                 .pipe(catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'updateProcess', null)));
         }
-    }
-
-    private checkForProcessModelWithRetries(
-        id: string,
-        shouldIdExists: boolean,
-        maxRetries: number,
-        intervalInMs: number,
-    ): Observable<boolean> {
-        return this.http.get<boolean>(environment.permissionSearchUrl + '/v3/resources/processmodel/' + id + '/access?rights=r').pipe( //TODO
-            map((data) => {
-                if (data === !shouldIdExists) {
-                    throw Error('');
-                }
-                return data;
-            }),
-            retryWhen(
-                mergeMap((error, i) => {
-                    const retryAttempt = i + 1;
-                    if (retryAttempt > maxRetries) {
-                        throw error;
-                    }
-                    return timer(retryAttempt * intervalInMs);
-                }),
-            ),
-            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'checkForProcessModelWithRetries', !shouldIdExists)),
-        );
     }
 
     userHasDeleteAuthorization(): boolean {

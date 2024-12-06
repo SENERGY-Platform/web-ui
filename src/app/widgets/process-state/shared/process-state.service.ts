@@ -22,7 +22,7 @@ import { ProcessStateEditDialogComponent } from '../dialog/process-state-edit-di
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { ProcessRepoService } from '../../../modules/processes/process-repo/shared/process-repo.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -76,7 +76,7 @@ export class ProcessStateService {
     private getRawData(): Observable<any[][]> {
         const array: Observable<any[]>[] = [];
 
-        array.push(this.processRepoService.list('processmodel', 'r'));
+        array.push(this.processRepoService.getProcessModels('', 9999, 0, 'name', 'asc').pipe(map(x => x.result)));
         array.push(this.deploymentService.getAll('', 99999, 0, 'deploymentTime', 'desc', ''));
 
         return forkJoin(array).pipe(catchError(this.errorHandlerService.handleError(ProcessStateService.name, 'getRawData', [])));

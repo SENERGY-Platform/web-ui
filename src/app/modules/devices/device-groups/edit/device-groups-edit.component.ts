@@ -27,9 +27,7 @@ import {
 } from '../shared/device-groups.model';
 import {Attribute, DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
 import { debounceTime, delay } from 'rxjs/operators';
-import { DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
-import { AspectsPermSearchModel } from '../../../metadata/aspects/shared/aspects-perm-search.model';
-import { DeviceClassesPermSearchModel } from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
+import { DeviceTypeAspectModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
 import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/pipeline-registry.service';
@@ -52,8 +50,8 @@ export class DeviceGroupsEditComponent implements OnInit {
 
     deviceCache: Map<string, DeviceInstancesBaseModel> = new Map<string, DeviceInstancesBaseModel>();
     functionsCache: Map<string, DeviceTypeFunctionModel> = new Map<string, DeviceTypeFunctionModel>();
-    aspectCache: Map<string, AspectsPermSearchModel> = new Map<string, AspectsPermSearchModel>();
-    deviceClassCache: Map<string, DeviceClassesPermSearchModel> = new Map<string, DeviceClassesPermSearchModel>();
+    aspectCache: Map<string, DeviceTypeAspectModel> = new Map<string, DeviceTypeAspectModel>();
+    deviceClassCache: Map<string, DeviceTypeDeviceClassModel> = new Map<string, DeviceTypeDeviceClassModel>();
 
     debounceTimeInMs = 500;
     rerouteAfterSaveDelayInMs = 2000;
@@ -307,8 +305,8 @@ export class DeviceGroupsEditComponent implements OnInit {
         Promise.all([this.loadIotFunctions(functionIds), this.loadAspects(aspectIds), this.loadDeviceClasses(deviceClassIds)]).then(
             (infos) => {
                 const functions: Map<string, DeviceTypeFunctionModel> = infos[0];
-                const aspects: Map<string, AspectsPermSearchModel> = infos[1];
-                const deviceClasses: Map<string, DeviceClassesPermSearchModel> = infos[2];
+                const aspects: Map<string, DeviceTypeAspectModel> = infos[1];
+                const deviceClasses: Map<string, DeviceTypeDeviceClassModel> = infos[2];
                 let result: DeviceGroupCapability[] = [];
                 for (const c of criteria) {
                     const element: DeviceGroupCapability = {
@@ -418,8 +416,8 @@ export class DeviceGroupsEditComponent implements OnInit {
         }
     }
 
-    private loadAspects(aspectIds: string[]): Promise<Map<string, AspectsPermSearchModel>> {
-        const result: Map<string, AspectsPermSearchModel> = new Map<string, AspectsPermSearchModel>();
+    private loadAspects(aspectIds: string[]): Promise<Map<string, DeviceTypeAspectModel>> {
+        const result: Map<string, DeviceTypeAspectModel> = new Map<string, DeviceTypeAspectModel>();
         const idsForRepoSearch: string[] = [];
         for (const id of aspectIds) {
             const cachedElement = this.aspectCache.get(id);
@@ -430,7 +428,7 @@ export class DeviceGroupsEditComponent implements OnInit {
             }
         }
         if (idsForRepoSearch.length) {
-            return new Promise<Map<string, AspectsPermSearchModel>>((resolve) => {
+            return new Promise<Map<string, DeviceTypeAspectModel>>((resolve) => {
                 this.deviceGroupService.getAspectListByIds(idsForRepoSearch).subscribe((value) => {
                     for (const element of value) {
                         result.set(element.id, element);
@@ -443,8 +441,8 @@ export class DeviceGroupsEditComponent implements OnInit {
         }
     }
 
-    private loadDeviceClasses(deviceClassIds: string[]): Promise<Map<string, DeviceClassesPermSearchModel>> {
-        const result: Map<string, DeviceClassesPermSearchModel> = new Map<string, DeviceClassesPermSearchModel>();
+    private loadDeviceClasses(deviceClassIds: string[]): Promise<Map<string, DeviceTypeDeviceClassModel>> {
+        const result: Map<string, DeviceTypeDeviceClassModel> = new Map<string, DeviceTypeDeviceClassModel>();
         const idsForRepoSearch: string[] = [];
         for (const id of deviceClassIds) {
             const cachedElement = this.deviceClassCache.get(id);
@@ -455,7 +453,7 @@ export class DeviceGroupsEditComponent implements OnInit {
             }
         }
         if (idsForRepoSearch.length) {
-            return new Promise<Map<string, DeviceClassesPermSearchModel>>((resolve) => {
+            return new Promise<Map<string, DeviceTypeDeviceClassModel>>((resolve) => {
                 this.deviceGroupService.getDeviceClassListByIds(idsForRepoSearch).subscribe((value) => {
                     for (const element of value) {
                         result.set(element.id, element);

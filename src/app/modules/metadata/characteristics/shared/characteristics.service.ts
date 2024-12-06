@@ -36,8 +36,8 @@ export class CharacteristicsService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        const characteristicPermSearchURL = environment.permissionSearchUrl + '/v3/resources/characteristics'; //TODO
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(characteristicPermSearchURL);
+        const characteristicsURL = environment.deviceRepoUrl + '/characteristics';
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(characteristicsURL);
     }
 
     createCharacteristic(
@@ -87,14 +87,14 @@ export class CharacteristicsService {
         sortBy: string,
         sortDirection: string,
         ids: string[] = [],
-    ): Observable<CharacteristicsPermSearchModel[]> {
+    ): Observable<{result: DeviceTypeCharacteristicsModel[]; total: number}> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
             sortDirection = 'asc';
         }
         if (sortBy === '' || sortBy === null || sortBy === undefined) {
             sortBy = 'name';
         }
-        const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection];
+        const params = ['limit=' + limit, 'offset=' + offset, 'sort=' + sortBy + '.' + sortDirection];
         if (query) {
             params.push('search=' + encodeURIComponent(query));
         }
@@ -103,26 +103,12 @@ export class CharacteristicsService {
         }
 
         return this.http
-            .get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/characteristics?' + params.join('&')) //TODO
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristics(search)', [])),
-            );
-    }
-
-    getTotalCountOfCharacteristics(searchText: string): Observable<any> {
-        const options = searchText ?
-            { params: new HttpParams().set('search', searchText) } : {};
-
-        return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/characteristics', options) //TODO
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(
-                        CharacteristicsService.name,
-                        'getTotalCountOfCharacteristics',
-                    ),
-                ),
+            .get<DeviceTypeCharacteristicsModel[]>(environment.deviceRepoUrl + '/v2/characteristics?' + params.join('&'), { observe: 'response'}).pipe(
+                map(resp => {
+                    const totalStr = resp.headers.get('X-Total-Count') || '0';
+                    return {result: resp.body || [], total: parseInt(totalStr, 10)};
+                }),
+                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristics(search)', {result: [], total: 0})),
             );
     }
 

@@ -128,7 +128,7 @@ export class LineComponent implements OnInit, OnChanges {
         }
         this.valueChartData.chart.width = this.chartWidth;
         this.valueChartData.chart.height = this.chartHeight;
-   
+
         this.cdr.detectChanges();
         this.render = true;
     }
@@ -181,7 +181,7 @@ export class LineComponent implements OnInit, OnChanges {
     }
 
     private combineCurveAnomalies(curveAnomalies: AnomalyResultModel[]) {
-        /* Curve Anomalies can overlap. The interval bounds and reconstructions need to be merged 
+        /* Curve Anomalies can overlap. The interval bounds and reconstructions need to be merged
            Assumption: curveAnomalies is sorted by ascending occurence
         */
         let anomalyIntervals: any[] = [];
@@ -202,7 +202,7 @@ export class LineComponent implements OnInit, OnChanges {
                 if(overlapFound) {
                     break;
                 }
-                console.log('last anomaly without overlap');
+                // console.log('last anomaly without overlap');
 
                 point.x = new Date(currentAnomaly.start_time).getTime();
                 point.x2 = new Date(currentAnomaly.end_time).getTime();
@@ -213,14 +213,14 @@ export class LineComponent implements OnInit, OnChanges {
             const nextAnomaly = curveAnomalies[index+1];
             if(new Date(nextAnomaly.start_time).getTime() < new Date(currentAnomaly.end_time).getTime()) {
                 // Case: Overlap with the next anomaly
-                console.log('overlap');
+                // console.log('overlap');
                 overlapFound = true;
                 currentAnomaly.end_time = nextAnomaly.end_time;
                 anomaliesWithOverlap.push(currentAnomaly);
-                startTimesOfFirstOverlaps.push(nextAnomaly.start_time)
+                startTimesOfFirstOverlaps.push(nextAnomaly.start_time);
             } else {
                 // Case: No Overlap, Interval can be directly created from anomaly
-                console.log('no overlap');
+                // console.log('no overlap');
                 point.x = new Date(currentAnomaly.start_time).getTime();
                 point.x2 = new Date(currentAnomaly.end_time).getTime();
                 anomalyIntervals.push(point);
@@ -365,34 +365,32 @@ export class LineComponent implements OnInit, OnChanges {
                 }
                 const self = this;
 
-                chartData.tooltip.custom = function({series, seriesIndex, dataPointIndex, w}) {
-                    console.log(w)
+                chartData.tooltip.custom = function({series, seriesIndex, dataPointIndex}) {
+                    // console.log(w)
                     const value = series[seriesIndex][dataPointIndex].toFixed(2);
                     let tooltipMsg;
                     switch(seriesIndex) {
-                        case 0:
-                            tooltipMsg = "<b>Device Output:</b> " + value;
-                            break;
-                        case 1:
-                            const anomaly = self.extremeOutliers[dataPointIndex];
-                            tooltipMsg = "<b>Extreme Outlier:</b> " + anomaly.value + " [" + anomaly.lower_bound + "-" + anomaly.upper_bound + "]";
-                            break;
-                        case 2:
-                            tooltipMsg = '<b>Predicted Value:</b> ' + value;
-                            break;
-                        case 3:
-                            tooltipMsg = '<b>Preprocessed Value:</b> ' + value;
-                            break;
-                        default:
-                            tooltipMsg = value;
+                    case 0:
+                        tooltipMsg = '<b>Device Output:</b> ' + value;
+                        break;
+                    case 1:
+                        const anomaly = self.extremeOutliers[dataPointIndex];
+                        tooltipMsg = '<b>Extreme Outlier:</b> ' + anomaly.value + ' [' + anomaly.lower_bound + '-' + anomaly.upper_bound + ']';
+                        break;
+                    case 2:
+                        tooltipMsg = '<b>Predicted Value:</b> ' + value;
+                        break;
+                    case 3:
+                        tooltipMsg = '<b>Preprocessed Value:</b> ' + value;
+                        break;
+                    default:
+                        tooltipMsg = value;
                     }
-                    
+
                     return '<div class="arrow_box">' +
                       '<span>' + tooltipMsg + '</span>' +
                       '</div>';
                 };
-
-                console.log(chartData)
                 return chartData;
             })
         );
@@ -491,11 +489,11 @@ export class LineComponent implements OnInit, OnChanges {
     }
 
     private getChartPointsWithBounds(data: DeviceValue[]) {
-         Each device value point needs to get the bounds from the next anomaly. 
+         Each device value point needs to get the bounds from the next anomaly.
            This is needed so that the interval band can be drawn.
            Note, this is can take some time if lots of data points are present e.g. when multiple days of data are displayed.
            E.g Anomaly at 10 with bounds [0,20] -> Device Value at 9 gets bounds [0,20]
-        
+
         const dataTable: any[] = [];
         const anomalyStack: any[] = JSON.parse(JSON.stringify(this.anomalies?.[Object.keys(this.anomalies)[0]]));
         data.forEach(row => {

@@ -15,14 +15,13 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { FunctionsPermSearchModel } from './functions-perm-search.model';
 import { DeviceTypeFunctionModel } from '../../device-types-overview/shared/device-type.model';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
@@ -36,8 +35,8 @@ export class FunctionsService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/functions'; // TODO
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(permSearchURL); // TODO
+        const url = environment.deviceRepoUrl + '/functions';
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(url);
     }
 
     getFunctions(
@@ -46,63 +45,28 @@ export class FunctionsService {
         offset: number,
         sortBy: string,
         sortDirection: string,
-    ): Observable<FunctionsPermSearchModel[]> {
+    ): Observable<{result: DeviceTypeFunctionModel[]; total: number}> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
             sortDirection = 'asc';
         }
         if (sortBy === '' || sortBy === null || sortBy === undefined) {
             sortBy = 'name';
         }
-        const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection];
+        const params = ['limit=' + limit, 'offset=' + offset, 'sort=' + sortBy + '.' + sortDirection];
         if (query) {
             params.push('search=' + encodeURIComponent(query));
         }
 
         return this.http
-            .get<FunctionsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/functions?' + params.join('&')) // TODO
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctions(search)', [])),
-            );
-    }
-
-    getFunctionsAfter(
-        query: string,
-        limit: number,
-        sortBy: string,
-        sortDirection: string,
-        after: FunctionsPermSearchModel,
-    ): Observable<FunctionsPermSearchModel[]> {
-        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
-            sortDirection = 'asc';
-        }
-        if (sortBy === '' || sortBy === null || sortBy === undefined) {
-            sortBy = 'name';
-        }
-
-        let sortFieldValue = '';
-        switch (sortBy) {
-        case 'name': {
-            sortFieldValue = encodeURIComponent(JSON.stringify(after.name));
-        }
-        }
-
-        const params = [
-            'limit=' + limit,
-            'rights=r',
-            'sort=' + sortBy + '.' + sortDirection,
-            'after.id=' + after.id,
-            'after.sort_field_value=' + sortFieldValue,
-        ];
-        if (query) {
-            params.push('search=' + encodeURIComponent(query));
-        }
-
-        return this.http
-            .get<FunctionsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/functions?' + params.join('&')) // TODO
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctions(search)', [])),
+            .get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/functions?' + params.join('&'), { observe: 'response' }).pipe(
+                map(resp => {
+                    const totalStr = resp.headers.get('X-Total-Count') || '0';
+                    return {
+                        result: resp.body || [],
+                        total: parseInt(totalStr, 10)
+                    };
+                }),
+                catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctions(search)', {result: [], total: 0})),
             );
     }
 
@@ -130,23 +94,6 @@ export class FunctionsService {
             .pipe(catchError(this.errorHandlerService.handleError(FunctionsService.name, 'createFunction', null)));
     }
 
-
-    getTotalCountOfFunctions(searchText: string): Observable<any> {
-        const options = searchText ?
-            { params: new HttpParams().set('search', searchText) } : {};
-
-        return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/functions', options) // TODO
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(
-                        FunctionsService.name,
-                        'getTotalCountOfFunctions',
-                    ),
-                ),
-            );
-    }
-
     userHasDeleteAuthorization(): boolean {
         return this.authorizations['DELETE'];
     }
@@ -162,6 +109,4 @@ export class FunctionsService {
     userHasReadAuthorization(): boolean {
         return this.authorizations['GET'];
     }
-
-
 }

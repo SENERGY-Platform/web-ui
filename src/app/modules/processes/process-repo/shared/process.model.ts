@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-import { SafeUrl } from '@angular/platform-browser';
 
 export interface ProcessModel {
-    id: string;
+    _id: string;
     name: string;
     date: number;
     svgXML: string;
     bpmn_xml: string;
     publish: boolean;
-    shared: boolean;
-    parent_id: string;
-    image: SafeUrl;
-    permissions: {
-        a: boolean;
-        x: boolean;
-        r: boolean;
-        w: boolean;
-    };
-    selected: boolean;
-}
-
-export interface ProcessPermModel extends ProcessModel {
-    creator: string;
+    selected?: boolean; // only for internal use, not set by API
+    owner: string;
 }

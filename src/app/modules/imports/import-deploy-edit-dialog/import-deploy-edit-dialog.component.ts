@@ -19,10 +19,9 @@ import { ImportInstanceConfigModel, ImportInstancesModel } from '../import-insta
 import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
 import { ImportTypesService } from '../import-types/shared/import-types.service';
 import { ImportTypeConfigModel, ImportTypeModel } from '../import-types/shared/import-types.model';
-import {FormArray, FormBuilder, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
+import {FormArray, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { typeValueValidator } from '../validators/type-value-validator';
-import {HttpErrorResponse} from '@angular/common/http';
 
 @Component({
     selector: 'senergy-import-deploy-dialog',

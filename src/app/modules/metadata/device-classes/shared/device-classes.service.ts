@@ -20,10 +20,9 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { DeviceTypeAspectModel, DeviceTypeDeviceClassModel } from '../../device-types-overview/shared/device-type.model';
-import { DeviceClassesPermSearchModel } from './device-classes-perm-search.model';
+import { DeviceTypeDeviceClassModel } from '../../device-types-overview/shared/device-type.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
@@ -36,9 +35,8 @@ export class DeviceClassesService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        const permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-classes'; //TODO
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(permSearchURL);
-
+        const uri = environment.deviceRepoUrl + '/v2/device-classes';
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(uri);
     }
 
     getDeviceClasses(
@@ -47,35 +45,41 @@ export class DeviceClassesService {
         offset: number,
         sortBy: string,
         sortDirection: string,
-    ): Observable<DeviceClassesPermSearchModel[]> {
+    ): Observable<{ result: DeviceTypeDeviceClassModel[]; total: number; }> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
             sortDirection = 'asc';
         }
         if (sortBy === '' || sortBy === null || sortBy === undefined) {
             sortBy = 'name';
         }
-        const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection];
+        const params = ['limit=' + limit, 'offset=' + offset, 'sort=' + sortBy + '.' + sortDirection];
         if (query) {
             params.push('search=' + encodeURIComponent(query));
         }
 
         return this.http
-            .get<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/device-classes?' + params.join('&')) //TODO
+            .get<DeviceTypeDeviceClassModel[]>(environment.deviceRepoUrl + '/v2/device-classes?' + params.join('&'), { observe: 'response' })
             .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'getAspects(search)', [])),
+                map(resp => {
+                    const totalStr = resp.headers.get('X-Total-Count') || '0';
+                    return {
+                        result: resp.body || [],
+                        total: parseInt(totalStr, 10)
+                    };
+                }),
+                catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'getAspects(search)', { result: [], total: 0 })),
             );
     }
 
     updateDeviceClasses(deviceClass: DeviceTypeDeviceClassModel): Observable<DeviceTypeDeviceClassModel | null> {
         return this.http
-            .put<DeviceTypeDeviceClassModel>(environment.deviceManagerUrl + '/device-classes/' + deviceClass.id , deviceClass)
+            .put<DeviceTypeDeviceClassModel>(environment.deviceManagerUrl + '/device-classes/' + deviceClass.id, deviceClass)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'updateDeviceClasses', null)));
     }
 
     deleteDeviceClasses(deviceClassId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/device-classes/' + deviceClassId )
+            .delete<boolean>(environment.deviceManagerUrl + '/device-classes/' + deviceClassId)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'deleteDeviceClasses', false)));
     }
 
@@ -83,22 +87,6 @@ export class DeviceClassesService {
         return this.http
             .post<DeviceTypeDeviceClassModel>(environment.deviceManagerUrl + '/device-classes', deviceClass)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'createDeviceClass', null)));
-    }
-
-    getTotalCountOfDevicesClasses(searchText: string): Observable<any> {
-        const options = searchText ?
-            { params: new HttpParams().set('search', searchText) } : {};
-
-        return this.http
-            .get(environment.permissionSearchUrl + '/v3/total/device-classes', options) //TODO
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(
-                        DeviceClassesService.name,
-                        'getTotalCountOfDevicesClasses',
-                    ),
-                ),
-            );
     }
 
     userHasDeleteAuthorization(): boolean {
