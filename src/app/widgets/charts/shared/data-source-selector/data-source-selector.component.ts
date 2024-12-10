@@ -1,5 +1,5 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AbstractControl, FormControl, FormGroup, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { catchError, concatMap, defaultIfEmpty, forkJoin, map, mergeMap, Observable, of, throwError } from 'rxjs';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
@@ -43,7 +43,7 @@ export interface DataSourceConfig {
 })
 export class DataSourceSelectorComponent implements OnInit {
 
-    form: any;
+    form: UntypedFormGroup = new UntypedFormGroup({});;
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
     deviceGroups: DeviceGroupModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
@@ -117,7 +117,7 @@ export class DataSourceSelectorComponent implements OnInit {
         private deviceGroupsService: DeviceGroupsService,
         private locationsService: LocationsService,
         private functionsService: FunctionsService,
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.setupDataSources().pipe(
@@ -125,7 +125,10 @@ export class DataSourceSelectorComponent implements OnInit {
             map((fieldOptions) => {
                 this.fieldOptionsTMP = fieldOptions;
                 this.initForm();
-                this.form.get('fieldOptions').patchValue(fieldOptions);
+                const f = this.form.get('fieldOptions');
+                if (f !== null) {
+                    f.patchValue(fieldOptions);
+                }
                 this.setupOutput();
                 this.setupGroupTypes();
                 this.form.controls['dataSourceClass'].valueChanges.subscribe((val: string) => {
@@ -149,7 +152,7 @@ export class DataSourceSelectorComponent implements OnInit {
     initForm() {
         this.form = new FormGroup({
             dataSourceClass: new FormControl(this.getDataSourceClassFromExports(this.dataSourceConfig?.exports) || '', Validators.required),
-            exports: new FormControl(this.dataSourceConfig?.exports || [],  Validators.required),
+            exports: new FormControl(this.dataSourceConfig?.exports || [], Validators.required),
             timeRange: new FormGroup({
                 type: new FormControl(this.dataSourceConfig?.timeRange?.type || '', Validators.required),
                 start: new FormControl(this.dataSourceConfig?.timeRange?.start || ''),
@@ -166,7 +169,7 @@ export class DataSourceSelectorComponent implements OnInit {
             fieldOptions: new FormControl([])
         });
         setTimeout(() => {
-            this.currentDataSourceOptions = this.getDataSourceOptions(this.getDataSourceClassFromExports(this.dataSourceConfig?.exports)||'');
+            this.currentDataSourceOptions = this.getDataSourceOptions(this.getDataSourceClassFromExports(this.dataSourceConfig?.exports) || '');
         }, 0);
     }
 
@@ -208,15 +211,15 @@ export class DataSourceSelectorComponent implements OnInit {
             if (f === undefined || f.concept_id == null || f.concept_id === '') {
                 return;
             }
-            let conceptSubs: Observable<ConceptsCharacteristicsModel|null|undefined>;
+            let conceptSubs: Observable<ConceptsCharacteristicsModel | null | undefined>;
             const conceptTmp = this.concepts.get(f.concept_id);
 
-            if(conceptTmp !== undefined) {
+            if (conceptTmp !== undefined) {
                 conceptSubs = of(conceptTmp);
             } else {
                 conceptSubs = this.conceptsService.getConceptWithCharacteristics(f.concept_id).pipe(
                     map(c => {
-                        if (c!==null) {
+                        if (c !== null) {
                             this.concepts.set(c?.id, c);
                         }
                         return c;
@@ -251,11 +254,11 @@ export class DataSourceSelectorComponent implements OnInit {
             map((fieldOptions) => {
                 const filteredFieldOptions: ChartsExportVAxesModel[] = [];
                 fieldOptions.forEach(fieldOption => {
-                    if(fieldOption != null) {
+                    if (fieldOption != null) {
                         filteredFieldOptions.push(fieldOption);
                     }
                 });
-                if(filteredFieldOptions.length !== 0) {
+                if (filteredFieldOptions.length !== 0) {
                     return {
                         name: deviceGroup.name,
                         fieldOptions: filteredFieldOptions
@@ -316,7 +319,7 @@ export class DataSourceSelectorComponent implements OnInit {
         });
 
         return forkJoin(observables).pipe(map(options => {
-            const res: { name: string; fieldOptions: ChartsExportVAxesModel[] } = {name: location.name, fieldOptions: []};
+            const res: { name: string; fieldOptions: ChartsExportVAxesModel[] } = { name: location.name, fieldOptions: [] };
             options.forEach(o => {
                 if (o === null) {
                     return;
@@ -356,7 +359,7 @@ export class DataSourceSelectorComponent implements OnInit {
                     service.outputs.forEach(output => {
                         this.deviceTypeService.getValuePathsAndTypes(output.content_variable).forEach(path => {
                             const newVAxis = {
-                                exportName: selectedElement.name,
+                                exportName: selectedElement.display_name || selectedElement.name,
                                 valueName: service.name + ': ' + path.path,
                                 valuePath: path.path,
                                 serviceId: service.id,
@@ -372,7 +375,7 @@ export class DataSourceSelectorComponent implements OnInit {
                     });
                 });
                 return {
-                    name: selectedElement.name,
+                    name: selectedElement.display_name || selectedElement.name,
                     fieldOptions: deviceFieldOptions
                 };;
             })
@@ -447,7 +450,7 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
     getDevices() {
-        return this.deviceInstancesService.getDeviceInstances({limit: 9999, offset: 0}).pipe(
+        return this.deviceInstancesService.getDeviceInstances({ limit: 9999, offset: 0 }).pipe(
             map(devices => {
                 this.dataSourceOptions.set('Devices', devices.result);
             }),
@@ -499,26 +502,26 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
     getLocations(): Observable<unknown> {
-        return this.locationsService.getLocations({limit: 9999, offset: 0}).pipe(map(locations => this.dataSourceOptions.set('Locations', locations.result)));
+        return this.locationsService.getLocations({ limit: 9999, offset: 0 }).pipe(map(locations => this.dataSourceOptions.set('Locations', locations.result)));
     }
 
     setupDataSources(): Observable<any> {
         const obs: Observable<any>[] = [];
 
-        if(this.showExportsAsSource) {
+        if (this.showExportsAsSource) {
             obs.push(this.getExports());
         }
-        if(this.showDevicesAsSource) {
+        if (this.showDevicesAsSource) {
             obs.push(this.getDevices());
         }
-        if(this.showDeviceGroupsAsSource) {
+        if (this.showDeviceGroupsAsSource) {
             obs.push(this.getDeviceGroups());
         }
-        if(this.showLocationsAsSource) {
+        if (this.showLocationsAsSource) {
             obs.push(this.getLocations());
         }
         obs.push(this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').pipe(map(functions => this.functions = functions.result)));
-        if(obs.length === 0) {
+        if (obs.length === 0) {
             obs.push(of(true));
         }
         return forkJoin(obs).pipe(defaultIfEmpty(true)); // in case no datsa sources are selected
@@ -529,10 +532,16 @@ export class DataSourceSelectorComponent implements OnInit {
         this.loadFieldOptions(selectedDataSource).pipe(
             map((fieldOptions) => {
                 this.fieldOptionsTMP = fieldOptions;
-                this.form.get('fieldOptions').value = fieldOptions;
+                let f = this.form.get('fieldOptions');
+                if (f !== null) {
+                    f.setValue(fieldOptions);
+                }
 
                 const filteredFields = this.filterSelectedFields(selectedDataSource);
-                this.form.get('fields').setValue(filteredFields);
+                f = this.form.get('fields');
+                if (f !== null) {
+                    f.setValue(filteredFields);
+                }
 
                 return null;
             })
@@ -557,14 +566,14 @@ export class DataSourceSelectorComponent implements OnInit {
 
             selectedDataSources.forEach(dataSource => {
                 const exportDataSourceExists = (field.instanceId != null &&
-                                                field.instanceId === dataSource.id &&
-                                                field.exportName === dataSource.name);
+                    field.instanceId === dataSource.id &&
+                    field.exportName === dataSource.name);
                 const deviceDataSourceExists = (field.deviceId != null &&
-                                                field.deviceId === dataSource.id);
+                    field.deviceId === dataSource.id);
                 const deviceGroupDataSourceExists = (field.deviceGroupId != null &&
-                                                     field.deviceGroupId === dataSource.id);
+                    field.deviceGroupId === dataSource.id);
                 dataSourceIsSelected = exportDataSourceExists || deviceDataSourceExists || deviceGroupDataSourceExists;
-                if(dataSourceIsSelected) {
+                if (dataSourceIsSelected) {
                     filteredFields.push(field);
                     return;
                 }
@@ -594,7 +603,7 @@ export class DataSourceSelectorComponent implements OnInit {
             map((results: any) => {
                 const options: Map<string, ChartsExportVAxesModel[]> = new Map();
                 results.forEach((result: any) => {
-                    if(result != null) {
+                    if (result != null) {
                         options.set(result.name, result.fieldOptions);
                     }
                 });
@@ -676,7 +685,7 @@ export class DataSourceSelectorComponent implements OnInit {
                 name: 'Difference-Median'
             }
         ];
-        const influxExp = (this.form.get('exports').value as (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[])
+        const influxExp = (this.form.get('exports')?.value as (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[])
             ?.find(exp => (exp as DeviceInstanceModel).device_type_id === undefined &&
                 (((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined && (exp as DeviceGroupModel).criteria === undefined) || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb));
         if (influxExp === undefined) {
@@ -693,17 +702,17 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
     validateInterval: ValidatorFn = (control: AbstractControl) => {
-        const type = this.form.control.get('group.type')?.value;
+        const type = this.form.get('group.type')?.value;
         if (type === undefined || type === null || type.length === 0) {
             return null;
         }
         if (control.value === undefined || control.value === null || control.value.length === 0) {
-            return {validateInterval: {value: control.value}};
+            return { validateInterval: { value: control.value } };
         }
         const re = new RegExp('\\d+(ns|u|µ|ms|s|months|y|m|h|d|w)');
         const matches = re.exec(control.value);
         if (matches == null || matches.length === 0 || matches[0].length !== control.value.length) {
-            return {validateInterval: {value: control.value}};
+            return { validateInterval: { value: control.value } };
         }
         return null;
     };
@@ -714,19 +723,19 @@ export class DataSourceSelectorComponent implements OnInit {
 
     compareFields(a: any, b: any): boolean {
         const exportsMatch = (a.instanceId != null && b.instanceId != null &&
-                                        a.instanceId === b.instanceId &&
-                                        a.exportName === b.exportName &&
-                                        a.valueName === b.valueName);
+            a.instanceId === b.instanceId &&
+            a.exportName === b.exportName &&
+            a.valueName === b.valueName);
         const deviceMatch = (a.deviceId != null && b.deviceId != null &&
-                                        a.deviceId === b.deviceId &&
-                                        a.serviceId === b.serviceId &&
-                                        a.valuePath === b.valuePath);
+            a.deviceId === b.deviceId &&
+            a.serviceId === b.serviceId &&
+            a.valuePath === b.valuePath);
         const deviceGroupMatch = (a.deviceGroupId != null && b.deviceGroupId != null &&
-                                        a.deviceGroupId === b.deviceGroupId &&
-                                        a.criteria.function_id === b.criteria.function_id);
+            a.deviceGroupId === b.deviceGroupId &&
+            a.criteria.function_id === b.criteria.function_id);
         const locationsMatch = (a.locationId != null && b.locationId != null &&
-                                        a.locationId === b.locationId &&
-                                        a.criteria.function_id === b.criteria.function_id);
+            a.locationId === b.locationId &&
+            a.criteria.function_id === b.criteria.function_id);
         return exportsMatch || deviceMatch || deviceGroupMatch || locationsMatch;
     }
 
@@ -738,7 +747,7 @@ export class DataSourceSelectorComponent implements OnInit {
         let classes: string[] = [];
         Array.from(this.dataSourceOptions.keys()).forEach(cl => {
             const exports: any = this.dataSourceOptions.get(cl as string);
-            if (exports.length>0) {
+            if (exports.length > 0) {
                 classes.push(cl as string);
             }
         });
@@ -756,7 +765,7 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
     updateCurrentDataSourceOptions(dataSourceClass: string) {
-        if (dataSourceClass!== this.currentDataSourceClass) {
+        if (dataSourceClass !== this.currentDataSourceClass) {
             this.form.controls['exports'].reset([]);
         }
         this.currentDataSourceClass = dataSourceClass;
@@ -764,7 +773,7 @@ export class DataSourceSelectorComponent implements OnInit {
         this.cdref.detectChanges();
     }
 
-    getLabelFromCurrentDataSource(){
+    getLabelFromCurrentDataSource() {
         const val = this.form.controls['dataSourceClass'].value;
         const dataSourceSingular: Map<string, string> = new Map([
             ['Device Groups', 'Device Group'],
@@ -775,8 +784,8 @@ export class DataSourceSelectorComponent implements OnInit {
         return dataSourceSingular.get(val) as string;
     }
 
-    getDataSourceClassFromExports(exports: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[] | undefined){
-        if (!exports){
+    getDataSourceClassFromExports(exports: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[] | undefined) {
+        if (!exports) {
             return null;
         }
         const searchItem = exports[0];
@@ -788,7 +797,7 @@ export class DataSourceSelectorComponent implements OnInit {
         return null;
     }
 
-    getExportIDs(exportValues: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel) []){
+    getExportIDs(exportValues: (ChartsExportMeasurementModel | DeviceInstanceModel | DeviceGroupModel)[]) {
         const ids: string[] = [];
         exportValues.forEach(item => {
             if ('id' in item) {
@@ -796,5 +805,9 @@ export class DataSourceSelectorComponent implements OnInit {
             }
         });
         return ids;
+    }
+
+    patchFields(fields: ChartsExportVAxesModel[]) {
+        this.form.patchValue({ fields });
     }
 }

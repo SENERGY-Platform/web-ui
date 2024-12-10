@@ -96,6 +96,7 @@ export interface ChartsExportVAxesModel {
     deviceGroupId?: string;
     deviceGroupMergingStrategy?: ChartsExportDeviceGroupMergingStrategy;
     locationId?: string;
+    subAxes?: ChartsExportVAxesModel[];
 }
 
 export interface ApexChartOptions {

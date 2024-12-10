@@ -217,7 +217,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 widget.properties.vAxes = this.modifiedVaxes;
             }
 
-            this.chartsExportService.getChartData(widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride).subscribe((resp: ChartsModel | ErrorModel) => {
+            widget.properties.stacked = this.stacked;
+
+            this.chartsExportService.getChartData(widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride, this.chooseColors).subscribe((resp: ChartsModel | ErrorModel) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     this.errorHasOccured = true;
                     this.errorMessage = 'No data';
@@ -361,11 +363,20 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
         }
         const axis = axes[$event.column - 1]; // time column
-        if (axis.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum && (axis.deviceGroupId !== undefined || axis.locationId !== undefined)) {
+        if (axis.subAxes !== undefined && axis.subAxes.length > 0) {
+            const cpy = JSON.parse(JSON.stringify(axis.subAxes)) as ChartsExportVAxesModel[];
+            cpy.forEach(sub => sub.displayOnSecondVAxis = axis.displayOnSecondVAxis);
+            this.modifiedVaxes = cpy;
+            this.stacked = true;
+            this.ready = false;
+            this.refresh();
+        } else if (axis.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum && (axis.deviceGroupId !== undefined || axis.locationId !== undefined)) {
             // we can split this!
+            this.chooseColors = true;
             const cpy = JSON.parse(JSON.stringify(axis)) as ChartsExportVAxesModel;
             cpy.deviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy.Separate;
             this.modifiedVaxes = [cpy];
+            this.stacked = true;
             this.ready = false;
             this.refresh();
         }
@@ -508,6 +519,39 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             localStorage.setItem(this.widget.id + '_modifiedvAxes', JSON.stringify(axes));
         }
     }
+
+    private get stacked(): boolean {
+        const str = localStorage.getItem(this.widget.id + '_stacked');
+        if (str === null) {
+            return this.widget.properties.stacked || false;
+        }
+        return JSON.parse(str);
+    }
+
+    private set stacked(stacked: boolean | null) {
+        if (stacked === null) {
+            localStorage.removeItem(this.widget.id + '_stacked');
+        } else {
+            localStorage.setItem(this.widget.id + '_stacked', '' + stacked);
+        }
+    }
+
+    private get chooseColors(): boolean {
+        const str = localStorage.getItem(this.widget.id + '_chooseColors');
+        if (str === null) {
+            return false;
+        }
+        return JSON.parse(str);
+    }
+
+    private set chooseColors(chooseColors: boolean | null) {
+        if (chooseColors === null) {
+            localStorage.removeItem(this.widget.id + '_chooseColors');
+        } else {
+            localStorage.setItem(this.widget.id + '_chooseColors', '' + chooseColors);
+        }
+    }
+
 
     getCustomIcons(header: boolean): { icons: string[]; disabled: boolean[]; tooltips: string[] } {
         const res = { icons: [] as string[], disabled: [] as boolean[], tooltips: [] as string[] };

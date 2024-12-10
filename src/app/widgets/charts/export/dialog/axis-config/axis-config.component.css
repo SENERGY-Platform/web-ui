@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 InfAI (CC SES)
+ * Copyright 2024 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,58 +14,52 @@
  * limitations under the License.
  */
 
-.full-width {
+.column {
+    display: flex;
+    flex-direction: column;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+}
+
+.w-100 {
     width: 100%;
 }
 
-.form {
-    min-width: 500px;
+.w-50 {
+    width: 50%;
 }
 
-table {
-    width: 100%;
-    table-layout: fixed;
-    border-spacing: 0px;
-}
-
-th, td {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.mat-mdc-cell {
-    padding: 0 8px 0 0;
-}
-
-mat-form-field {
-    width: 100%;
-    min-width: 80px;
-    margin-right: 20px;
-    padding-top: 8px;
-}
-
-.mat-column-duplicate-delete {
-    width: 40px;
-}
-
-.from-to {
-    display: inline-block;
-    width: 37%;
-}
-
-.from-to-color {
-    display: inline-block;
-    width:  100px;
-}
-
-senergy-axis-config {
-    width: 100%;
+.pb {
     padding-bottom: 0.5em;
 }
 
-.root-drop-zone {
-    height: 2em;
+.mat-mdc-card-title {
+    font-size: 16px;
+}
+
+.mat-mdc-card-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.cpy-delete {
+    margin-top: -0.75rem;
+}
+
+.mat-mdc-form-field {
+    padding-right: 1rem;
+}
+
+.rules-btn-spacer {
+    padding-left: 2rem;
+    margin-top: -0.25rem;
+}
+
+.drop-zone {
+    height: 4em;
     border-top: dotted;
     text-align: center;
 }

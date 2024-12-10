@@ -88,7 +88,7 @@ export class UtilService {
     }
 
 
-    dateIsToday(dateTime: string | number): Boolean {
+    dateIsToday(dateTime: string | number): boolean {
         const today = new Date();
         today.setHours(0,0,0,0);
 
@@ -99,4 +99,21 @@ export class UtilService {
         date.setHours(0,0,0,0);
         return date.getTime() === today.getTime();
     }
+}
+
+export function hashCode(s: string): number {
+    let hash = 0;
+    let i = 0;
+    let chr = 0;
+    if (s.length === 0) {
+        return hash;
+    }
+    for (i = 0; i < s.length; i++) {
+        chr = s.charCodeAt(i);
+        // eslint-disable-next-line no-bitwise
+        hash = ((hash << 5) - hash) + chr;
+        // eslint-disable-next-line no-bitwise
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
 }

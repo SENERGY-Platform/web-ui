@@ -1,0 +1,132 @@
+<li class="mat-tree-node" cdkDrag [cdkDragData]="element" (cdkDragStarted)="dragStart.emit(null)"
+    (cdkDragEnded)="dragEnd.emit(null)">
+    <button cdkDragHandle mat-icon-button color="accent" disableRipple class="tree-inline" [hidden]="!enableDragDrop">
+        <mat-icon>drag_handle</mat-icon>
+    </button>
+    <button mat-icon-button (click)="treeControl?.toggle(element)" class="nested-tree-inline">
+        <mat-icon class="mat-icon-rtl-mirror">
+            {{(treeControl !== undefined ? treeControl!.isExpanded(element) : false) ? 'expand_more' : 'chevron_right'}}
+        </mat-icon>
+    </button>
+
+    <div *ngIf="element !== undefined" class="column w-100">
+        <mat-card appearance="outlined">
+            <mat-card-header>
+                <mat-card-title [ngClass]="{'pb': !expanded}" (click)="treeControl?.toggle(element)">
+                    {{element.exportName}} - {{element.valueName}} ({{element.valueType}})
+                </mat-card-title>
+                <div *ngIf="!subElement" class="cpy-delete">
+                    <button mat-icon-button *ngIf="element.isDuplicate === false || element.isDuplicate === undefined"
+                        (click)="copyClicked.emit(null)">
+                        <mat-icon>content_copy</mat-icon>
+                    </button>
+                    <button mat-icon-button *ngIf="element.isDuplicate === true" (click)="deleteClicked.emit(null)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+            </mat-card-header>
+            <mat-card-content *ngIf="expanded">
+                <div class="row w-100">
+                    <div>
+                        <mat-form-field color="accent" appearance="outline">
+                            <mat-label>Value Alias</mat-label>
+                            <input type="text" matInput [(ngModel)]="element.valueAlias">
+                            <mat-error senergyError label="Value Alias"></mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div>
+                        <mat-form-field color="accent" appearance="outline">
+                            <mat-label>Color</mat-label>
+                            <input type="text" matInput placeholder="e.g. red, #004411" [(ngModel)]="element.color">
+                            <mat-error senergyError label="Color"></mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div [hidden]="groupTypeIsDifference">
+                        <mat-form-field color="accent" appearance="outline">
+                            <mat-label>Math</mat-label>
+                            <input type="text" matInput placeholder="e.g. / 1000" [(ngModel)]="element.math"
+                                [disabled]="groupTypeIsDifference">
+                            <mat-error senergyError label="Math"></mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="row w-100">
+
+                    <div>
+                        <mat-form-field color="accent" appearance="outline">
+                            <mat-label>Filter</mat-label>
+                            <mat-select [compareWith]="compareFilterTypes" [(ngModel)]="element.filterType"
+                                (valueChange)="filerTypeSelected(element)">
+                                <mat-option [value]="undefined">None</mat-option>
+                                <mat-option *ngFor="let option of [ '=', '!=', '>', '>=', '<' ,'<=']" [value]="option">
+                                    {{option}}</mat-option>
+                            </mat-select>
+                            <mat-error senergyError label="Filter"></mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div>
+                        <mat-form-field color="accent" appearance="outline">
+                            <mat-label>Filter Value</mat-label>
+                            <input [type]="element.valueType === 'string' ? 'text' : 'number'" matInput
+                                placeholder="e.g. 1000, filter" [disabled]="element.filterType === undefined"
+                                [(ngModel)]="element.filterValue">
+                            <mat-error senergyError label="Filter Value"></mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="row w-100">
+                    <div [hidden]="getTags(element).size === 0">
+                        <mat-form-field color="accent" appearance="outline">
+                            <mat-label>Tags</mat-label>
+                            <senergy-select-search placeholder="Choose Tags" [multiple]="true"
+                                [disabled]="getTags(element).size === 0" [options]="getTags(element)"
+                                [getOptionDisabled]="getTagOptionDisabledFunction(element)"
+                                [getOptionValue]="getTagValue" [(ngModel)]="element.tagSelection"
+                                useOptionViewProperty="value">
+                            </senergy-select-search>
+                            <mat-error senergyError label="Tags"></mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div [hidden]="element.criteria === undefined">
+                        <mat-form-field color="accent" appearance="outline">
+                            <mat-label>Merging Strategy</mat-label>
+                            <mat-select placeholder="Choose Tags" [disabled]="element.criteria === undefined"
+                                [(ngModel)]="element.deviceGroupMergingStrategy">
+                                <mat-option
+                                    [value]="chartsExportDeviceGroupMergingStrategy.Separate">Separate</mat-option>
+                                <mat-option [value]="chartsExportDeviceGroupMergingStrategy.Merge">Merge</mat-option>
+                                <mat-option *ngIf="groupType !== undefined"
+                                    [value]="chartsExportDeviceGroupMergingStrategy.Sum">Sum</mat-option>
+                            </mat-select>
+                            <mat-error senergyError label="Merging Strategy"></mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="row w-100">
+                    <div [hidden]="subElement">
+                        <mat-checkbox [(ngModel)]="element.displayOnSecondVAxis"> Use second Y-Axis
+                        </mat-checkbox>
+                    </div>
+                    <div [ngClass]="{'rules-btn-spacer': !subElement}">
+                        <button mat-icon-button (click)="listRules(element)">
+                            <mat-icon color="accent">swap_horiz</mat-icon>
+                        </button>
+                    </div>
+                </div>
+                <div class="column w-100" cdkDropList (cdkDropListDropped)="dropped.emit({$event, target: element})"
+                    [id]="getId()" [cdkDropListConnectedTo]="connectedNodes(element)">
+                    <senergy-axis-config *ngFor="let child of element.subAxes" class="w-100" [element]="child"
+                        [treeControl]="treeControl" [groupTypeIsDifference]="groupTypeIsDifference"
+                        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"
+                        [subElement]="true" [exportTags]="exportTags" [groupType]="groupType"
+                        (dragStart)="dragStart.emit(null)" (dragEnd)="dragEnd.emit(null)"
+                        [enableDragDrop]="enableDragDrop" (dropped)="dropped.emit($event)"
+                        [connectedNodes]="connectedNodes" [dragging]="dragging">
+                    </senergy-axis-config>
+                    <div [hidden]="!dragging" style="height: 3rem">
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</li>

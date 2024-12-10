@@ -59,7 +59,7 @@
                 </tr>
             </table>
 
-            <data-source-selector
+            <data-source-selector #datasourceselector
             [dataSourceConfig]="dataSourceConfig"
             [enableAggretationConfig]="true"
             (updatedDataSourceConfig)="dataSourceConfigChanged($event)"
@@ -71,12 +71,6 @@
 
             <table>
                 <tr>
-                    <td>
-                        <mat-form-field color="accent" appearance="outline" class="full-width">
-                            <mat-label>X-Axis</mat-label>
-                            <input type="text" matInput value="time" disabled>
-                        </mat-form-field>
-                    </td>
                     <td>
                         <mat-form-field color="accent" appearance="outline" class="full-width">
                             <mat-label>X-Axis-Label</mat-label>
@@ -113,158 +107,31 @@
 
     </div>
 
-    <table *ngIf="ready && userHasUpdatePropertiesAuthorization && dataSource.data.length > 0" mat-table [dataSource]="dataSource">
-
-        <ng-container matColumnDef="exportName">
-            <th mat-header-cell *matHeaderCellDef>Source</th>
-            <td mat-cell *matCellDef="let element" matTooltip="{{element.exportName}}" matTooltipPosition="right">
-                {{element.exportName}}
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="valueName">
-            <th mat-header-cell *matHeaderCellDef>Value</th>
-            <td mat-cell *matCellDef="let element" matTooltip="{{element.valueName}}" matTooltipPosition="right">
-                {{element.valueName}}
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="valueType">
-            <th mat-header-cell *matHeaderCellDef>Type</th>
-            <td mat-cell *matCellDef="let element"> {{element.valueType}} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="valueAlias">
-            <th mat-header-cell *matHeaderCellDef>Alias</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent" appearance="outline">
-                    <mat-label>Value Alias</mat-label>
-                    <input type="text" matInput [(ngModel)]="element.valueAlias">
-                    <mat-error senergyError label="Value Alias"></mat-error>
-                </mat-form-field>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="color">
-            <th mat-header-cell *matHeaderCellDef>Color</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent" appearance="outline">
-                    <mat-label>Color</mat-label>
-                    <input type="text" matInput placeholder="e.g. red, #004411" [(ngModel)]="element.color">
-                    <mat-error senergyError label="Color"></mat-error>
-                </mat-form-field>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="math">
-            <th mat-header-cell *matHeaderCellDef>Math</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent" appearance="outline">
-                    <mat-label>Math</mat-label>
-                    <input type="text" matInput placeholder="e.g. / 1000" [(ngModel)]="element.math"
-                        [disabled]="groupTypeIsDifference">
-                    <mat-error senergyError label="Math"></mat-error>
-                </mat-form-field>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="conversions">
-            <th mat-header-cell *matHeaderCellDef>Rules</th>
-            <td mat-cell *matCellDef="let element">
-                <button mat-icon-button (click)="listRules(element)">
-                    <mat-icon color="accent">swap_horiz</mat-icon>
-                </button>
-                    <!--<div *ngIf="chartType.value === 'Timeline' || chartType.value === 'PieChart' ">--> 
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="filterType">
-            <th mat-header-cell *matHeaderCellDef>Filter</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent" appearance="outline">
-                    <mat-label>Filter</mat-label>
-                    <mat-select [compareWith]="compareFilterTypes" [(ngModel)]="element.filterType"
-                        (valueChange)="filerTypeSelected(element)">
-                        <mat-option [value]="undefined">None</mat-option>
-                        <mat-option *ngFor="let option of [ '=', '!=', '>', '>=', '<' ,'<=']" [value]="option">
-                            {{option}}</mat-option>
-                    </mat-select>
-                    <mat-error senergyError label="Filter"></mat-error>
-                </mat-form-field>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="filterValue">
-            <th mat-header-cell *matHeaderCellDef>Filter Value</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent" appearance="outline">
-                    <mat-label>Filter Value</mat-label>
-                    <input [type]="element.valueType === 'string' ? 'text' : 'number'" matInput
-                        placeholder="e.g. 1000, filter" [disabled]="element.filterType === undefined"
-                        [(ngModel)]="element.filterValue">
-                    <mat-error senergyError label="Filter Value"></mat-error>
-                </mat-form-field>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="tags">
-            <th mat-header-cell *matHeaderCellDef>Tags</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent" appearance="outline">
-                    <mat-label>Tags</mat-label>
-                    <senergy-select-search placeholder="Choose Tags" [multiple]="true"
-                        [disabled]="getTags(element).size === 0" [options]="getTags(element)"
-                        [getOptionDisabled]="getTagOptionDisabledFunction(element)" [getOptionValue]="getTagValue"
-                        [(ngModel)]="element.tagSelection" useOptionViewProperty="value">
-                    </senergy-select-search>
-                    <mat-error senergyError label="Tags"></mat-error>
-                </mat-form-field>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="deviceGroupMergingStrategy">
-            <th mat-header-cell *matHeaderCellDef>Merging Strategy</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-form-field color="accent" appearance="outline">
-                    <mat-label>Merging Strategy</mat-label>
-                    <mat-select placeholder="Choose Tags" [disabled]="element.criteria === undefined"
-                        [(ngModel)]="element.deviceGroupMergingStrategy">
-                        <mat-option [value]="chartsExportDeviceGroupMergingStrategy.Separate">Separate</mat-option>
-                        <mat-option [value]="chartsExportDeviceGroupMergingStrategy.Merge">Merge</mat-option>
-                        <mat-option *ngIf="formGroupController.get('properties.group.type')?.value !== undefined"
-                            [value]="chartsExportDeviceGroupMergingStrategy.Sum">Sum</mat-option>
-                    </mat-select>
-					<mat-error senergyError label="Merging Strategy"></mat-error>
-                </mat-form-field>
-            </td>
-        </ng-container>
-
-
-        <ng-container matColumnDef="displayOnSecondVAxis">
-            <th mat-header-cell *matHeaderCellDef>Use second Y-Axis</th>
-            <td mat-cell *matCellDef="let element">
-                <mat-checkbox [(ngModel)]="element.displayOnSecondVAxis">
-                </mat-checkbox>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="duplicate-delete">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let element, let i = index">
-                <button mat-icon-button *ngIf="element.isDuplicate === false || element.isDuplicate === undefined"
-                    (click)="duplicate(element, i)">
-                    <mat-icon>content_copy</mat-icon>
-                </button>
-                <button mat-icon-button *ngIf="element.isDuplicate === true" (click)="deleteDuplicate(element, i)">
-                    <mat-icon>delete</mat-icon>
-                </button>
-            </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;">
-        </tr>
-    </table>
+    <div>
+        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree" cdkDropList (cdkDropListDropped)="dropped($event)" [cdkDropListConnectedTo]="getConnectedNodesFn()(undefined)" [cdkDropListEnterPredicate]="dontDropPredicate">
+          <mat-tree-node *matTreeNodeDef="let node"
+            matTreeNodePadding>
+            <senergy-axis-config [element]="node" [treeControl]="treeControl" [groupTypeIsDifference]="groupTypeIsDifference"
+              [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [exportTags]="exportTags"
+              [groupType]="formGroupController.get('properties.group-type')?.value" (copyClicked)="duplicate(node)" (deleteClicked)="deleteDuplicate(node)"
+              (dragStart)="startDrag()" (dragEnd)="stopDrag()" [enableDragDrop]="formGroupController.get('properties.chartType')?.value === 'ColumnChart'"
+              (dropped)="dropped($event.$event, $event.target)" [connectedNodes]="getConnectedNodesFn()" [dragging]="dragging">
+            </senergy-axis-config>
+          </mat-tree-node>
+      
+          <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+            <senergy-axis-config [element]="node" [treeControl]="treeControl" [groupTypeIsDifference]="groupTypeIsDifference"
+              [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [exportTags]="exportTags"
+              [groupType]="formGroupController.get('properties.group-type')?.value" (copyClicked)="duplicate(node)" (deleteClicked)="deleteDuplicate(node)"
+              (dragStart)="startDrag()" (dragEnd)="stopDrag()" [enableDragDrop]="formGroupController.get('properties.chartType')?.value === 'ColumnChart'"
+              (dropped)="dropped($event.$event, $event.target)" [connectedNodes]="getConnectedNodesFn()" [dragging]="dragging">
+            </senergy-axis-config>
+          </mat-nested-tree-node>
+        </mat-tree>
+        <div [hidden]="!dragging" id="rootDropZone" cdkDropList (cdkDropListDropped)="dropped($event)" [cdkDropListConnectedTo]="getConnectedNodesFn()(undefined)">
+          <h3 class="root-drop-zone color-accent">Move to top level</h3>
+        </div>
+      </div>
 
 </mat-dialog-content>
 

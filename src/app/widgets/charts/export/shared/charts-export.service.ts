@@ -46,6 +46,7 @@ import { catchError, concatMap, map } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
 import { DeviceInstancesTotalModel, DeviceInstancesWithDeviceTypeTotalModel, DeviceInstanceWithDeviceTypeModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
+import { hashCode } from 'src/app/core/services/util.service';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -213,73 +214,73 @@ export class ChartsExportService {
                     const metadataElem = { exportId: values[elementIndex].exportId, deviceId: values[elementIndex].deviceId, serviceId: values[elementIndex].serviceId, columnName: columnNames !== undefined && columnNames.length === 1 ? columnNames[0] : undefined };
                     if (threeD !== null) {
                         switch ((properties.vAxes || [])[timescaleResultMapper[values[elementIndex].requestIndex]].deviceGroupMergingStrategy) {
-                        case ChartsExportDeviceGroupMergingStrategy.Merge:
-                            // merge into one table row
-                            if (res[values[elementIndex].requestIndex].length === 0) {
-                                res[values[elementIndex].requestIndex].push([]);
-                            }
-                            threeD.forEach(rows => {
-                                if (rows.length === 0) {
-                                    return;
+                            case ChartsExportDeviceGroupMergingStrategy.Merge:
+                                // merge into one table row
+                                if (res[values[elementIndex].requestIndex].length === 0) {
+                                    res[values[elementIndex].requestIndex].push([]);
                                 }
-                                if (rows[0].length > 2) {
-                                    rows.forEach(row => {
-                                        row.slice(1).forEach(r => {
-                                            res[values[elementIndex].requestIndex][0].push([row[0], r]);
+                                threeD.forEach(rows => {
+                                    if (rows.length === 0) {
+                                        return;
+                                    }
+                                    if (rows[0].length > 2) {
+                                        rows.forEach(row => {
+                                            row.slice(1).forEach(r => {
+                                                res[values[elementIndex].requestIndex][0].push([row[0], r]);
+                                            });
                                         });
-                                    });
-                                } else {
-                                    res[values[elementIndex].requestIndex][0].push(...rows);
-                                }
-                            });
-                            break;
-                        case ChartsExportDeviceGroupMergingStrategy.Sum:
-                            // sum by timestamp
-                            // can only be selected together with a group to ensure identical timestamps
-                            if (res[values[elementIndex].requestIndex].length === 0) {
-                                res[values[elementIndex].requestIndex].push([]);
-                            }
-                            threeD.forEach(rows => {
-                                rows.forEach(row => {
-                                    const elem = res[values[elementIndex].requestIndex][0].find((r: any) => r.length > 0 && r[0] === row[0]);
-                                    if (elem === undefined) {
-                                        res[values[elementIndex].requestIndex][0].push(row);
                                     } else {
-                                        let v = (elem[1] as number);
-                                        row.slice(1).forEach(n => v += n);
-                                        elem[1] = v;
+                                        res[values[elementIndex].requestIndex][0].push(...rows);
                                     }
                                 });
-                            });
-                            break;
-                        case ChartsExportDeviceGroupMergingStrategy.Separate:
-                        default:
-                            //preserve individual rows
-                            threeD.forEach(rows => {
-                                if (rows.length === 0) {
-                                    return;
+                                break;
+                            case ChartsExportDeviceGroupMergingStrategy.Sum:
+                                // sum by timestamp
+                                // can only be selected together with a group to ensure identical timestamps
+                                if (res[values[elementIndex].requestIndex].length === 0) {
+                                    res[values[elementIndex].requestIndex].push([]);
                                 }
-                                if (rows[0].length > 2) {
-                                    const off = res[values[elementIndex].requestIndex].length;
+                                threeD.forEach(rows => {
                                     rows.forEach(row => {
-                                        row.slice(1).forEach((r, i) => {
-                                            while (res[values[elementIndex].requestIndex].length <= off + i) {
-                                                res[values[elementIndex].requestIndex].push([]);
-                                                metadata[values[elementIndex].requestIndex].push({});
-                                            }
-                                            res[values[elementIndex].requestIndex][off + i].push([row[0], r]);
-                                            metadata[values[elementIndex].requestIndex][off + i] = JSON.parse(JSON.stringify(metadataElem));
-                                            if (columnNames !== undefined && columnNames.length > i) {
-                                                metadata[values[elementIndex].requestIndex][off + i].columnName = columnNames[i];
-                                            }
-                                        });
+                                        const elem = res[values[elementIndex].requestIndex][0].find((r: any) => r.length > 0 && r[0] === row[0]);
+                                        if (elem === undefined) {
+                                            res[values[elementIndex].requestIndex][0].push(row);
+                                        } else {
+                                            let v = (elem[1] as number);
+                                            row.slice(1).forEach(n => v += n);
+                                            elem[1] = v;
+                                        }
                                     });
-                                } else {
-                                    res[values[elementIndex].requestIndex].push(rows);
-                                    metadata[values[elementIndex].requestIndex].push(metadataElem);
-                                }
-                            });
-                            break;
+                                });
+                                break;
+                            case ChartsExportDeviceGroupMergingStrategy.Separate:
+                            default:
+                                //preserve individual rows
+                                threeD.forEach(rows => {
+                                    if (rows.length === 0) {
+                                        return;
+                                    }
+                                    if (rows[0].length > 2) {
+                                        const off = res[values[elementIndex].requestIndex].length;
+                                        rows.forEach(row => {
+                                            row.slice(1).forEach((r, i) => {
+                                                while (res[values[elementIndex].requestIndex].length <= off + i) {
+                                                    res[values[elementIndex].requestIndex].push([]);
+                                                    metadata[values[elementIndex].requestIndex].push({});
+                                                }
+                                                res[values[elementIndex].requestIndex][off + i].push([row[0], r]);
+                                                metadata[values[elementIndex].requestIndex][off + i] = JSON.parse(JSON.stringify(metadataElem));
+                                                if (columnNames !== undefined && columnNames.length > i) {
+                                                    metadata[values[elementIndex].requestIndex][off + i].columnName = columnNames[i];
+                                                }
+                                            });
+                                        });
+                                    } else {
+                                        res[values[elementIndex].requestIndex].push(rows);
+                                        metadata[values[elementIndex].requestIndex].push(metadataElem);
+                                    }
+                                });
+                                break;
                         }
                     }
                 });
@@ -297,12 +298,12 @@ export class ChartsExportService {
             let mapper: number[] = [];
             res.forEach(r => {
                 switch (r.source) {
-                case 'influx':
-                    mapper = influxResultMapper;
-                    break;
-                case 'timescale':
-                    mapper = timescaleResultMapper;
-                    break;
+                    case 'influx':
+                        mapper = influxResultMapper;
+                        break;
+                    case 'timescale':
+                        mapper = timescaleResultMapper;
+                        break;
                 }
                 r.res.forEach((req, index) => {
                     table[mapper[index]] = req;
@@ -326,10 +327,10 @@ export class ChartsExportService {
     }
 
 
-    getChartData(widget: WidgetModel, from?: string, to?: string, groupInterval?: string, hAxisFormat?: string, lastOverride?: string): Observable<ChartsModel | ErrorModel> {
+    getChartData(widget: WidgetModel, from?: string, to?: string, groupInterval?: string, hAxisFormat?: string, lastOverride?: string, chooseColors = false): Observable<ChartsModel | ErrorModel> {
         return new Observable<ChartsModel | ErrorModel>((observer) => {
             this.getData(widget.properties, from, to, groupInterval, lastOverride).pipe(concatMap(r => {
-                let obs: Observable<DeviceInstancesWithDeviceTypeTotalModel> = of({result: [], total: 0});
+                let obs: Observable<DeviceInstancesWithDeviceTypeTotalModel> = of({ result: [], total: 0 });
                 const deviceIds: string[] = [];
                 r.metadata.forEach(m => {
                     m.forEach(subM => {
@@ -358,6 +359,10 @@ export class ChartsExportService {
                     observer.next(resp as ErrorModel);
                 } else {
                     const tableData = this.setData(resp, widget.properties, r.metadata);
+                    if (chooseColors) {
+                        tableData.colors = tableData.table.data[0].slice(1).map(title =>
+                            '#' + Math.abs(hashCode(JSON.stringify(title))).toString(16).slice(0, 6)); // semi-random color that is always the same for the same title
+                    }
                     observer.next(this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors, hAxisFormat));
                 }
                 observer.complete();

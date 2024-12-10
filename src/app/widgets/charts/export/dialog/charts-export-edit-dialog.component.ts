@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
-import {DashboardResponseMessageModel} from '../../../../modules/dashboard/shared/dashboard-response-message.model';
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
+import { DashboardResponseMessageModel } from '../../../../modules/dashboard/shared/dashboard-response-message.model';
 import {
     AbstractControl,
     FormArray,
@@ -26,21 +26,22 @@ import {
     UntypedFormGroup,
     ValidatorFn, Validators
 } from '@angular/forms';
-import {ExportService} from '../../../../modules/exports/shared/export.service';
-import {ChartsExportConversion, ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
-import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
-import {MatTableDataSource} from '@angular/material/table';
-import {MAT_DIALOG_DATA, MatDialogRef, MatDialog} from '@angular/material/dialog';
-import {forkJoin, Observable, of} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {DeviceTypeDeviceClassModel, DeviceTypeFunctionModel} from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
-import {environment} from '../../../../../environments/environment';
+import { ExportService } from '../../../../modules/exports/shared/export.service';
+import { ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../shared/charts-export-properties.model';
+import { ChartsExportRangeTimeTypeEnum } from '../shared/charts-export-range-time-type.enum';
+import { MatTableDataSource } from '@angular/material/table';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
+import { forkJoin, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
+import { environment } from '../../../../../environments/environment';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
-import { ListRulesComponent } from './list-rules/list-rules.component';
-import { DataSourceConfig } from '../../shared/data-source-selector/data-source-selector.component';
+import { DataSourceConfig, DataSourceSelectorComponent } from '../../shared/data-source-selector/data-source-selector.component';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { NestedTreeControl } from '@angular/cdk/tree';
+import { hashCode } from 'src/app/core/services/util.service';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
@@ -93,6 +94,8 @@ export class ChartsExportEditDialogComponent implements OnInit {
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     concepts: Map<string, ConceptsCharacteristicsModel | null> = new Map();
 
+    @ViewChild('datasourceselector', {static: false}) dataSourceSelector?: DataSourceSelectorComponent;
+
     constructor(
         private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
         private dialog: MatDialog,
@@ -130,7 +133,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         let timeRangeValue = '';
         let timeRangeLevel = '';
         const timeRange = widget.properties.time?.ahead || widget.properties.time?.last;
-        if(timeRange != null) {
+        if (timeRange != null) {
             const timeRangeSplit = timeRange.match(/[a-zA-Z]+|[0-9]+/g);
             timeRangeValue = timeRangeSplit?.[0] || '';
             timeRangeLevel = timeRangeSplit?.[1] || '';
@@ -139,7 +142,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         let groupValue = '';
         let groupLevel = '';
         const group = widget.properties.group?.time;
-        if(group != null) {
+        if (group != null) {
             const groupSplit = group.match(/[a-zA-Z]+|[0-9]+/g);
             groupValue = groupSplit?.[0] || '';
             groupLevel = groupSplit?.[1] || '';
@@ -171,23 +174,23 @@ export class ChartsExportEditDialogComponent implements OnInit {
         const timeRangeType = updatedDataSourceConfig.timeRange?.type;
         const timeRangeLevel = updatedDataSourceConfig.timeRange?.level || '';
 
-        if(timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute) {
+        if (timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute) {
             const start = updatedDataSourceConfig.timeRange?.start;
-            if(start != null && start !== '') {
+            if (start != null && start !== '') {
                 this.formGroupController.get('properties.time.start')?.patchValue(start + timeRangeLevel);
             }
             const end = updatedDataSourceConfig.timeRange?.end;
-            if(end != null && end !== '') {
+            if (end != null && end !== '') {
                 this.formGroupController.get('properties.time.end')?.patchValue(end + timeRangeLevel);
             }
-        } else if(timeRangeType === ChartsExportRangeTimeTypeEnum.Relative) {
+        } else if (timeRangeType === ChartsExportRangeTimeTypeEnum.Relative) {
             const last = updatedDataSourceConfig.timeRange?.time;
-            if(last != null) {
+            if (last != null) {
                 this.formGroupController.get('properties.time.last')?.patchValue(last + timeRangeLevel);
             }
-        } else if(timeRangeType === ChartsExportRangeTimeTypeEnum.RelativeAhead) {
+        } else if (timeRangeType === ChartsExportRangeTimeTypeEnum.RelativeAhead) {
             const ahead = updatedDataSourceConfig.timeRange?.time;;
-            if(ahead != null) {
+            if (ahead != null) {
                 this.formGroupController.get('properties.time.ahead')?.patchValue(ahead + timeRangeLevel);
             }
         }
@@ -308,10 +311,6 @@ export class ChartsExportEditDialogComponent implements OnInit {
         return a && b && a.id === b.id && a.name === b.name;
     }
 
-    compareFilterTypes(a: string, b: string): boolean {
-        return a === b;
-    }
-
     close(): void {
         this.dialogRef.close();
     }
@@ -331,40 +330,21 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     save(): void {
         const obs = [];
-        if(this.userHasUpdateNameAuthorization) {
+        if (this.userHasUpdateNameAuthorization) {
             obs.push(this.updateName());
         }
 
-        if(this.userHasUpdatePropertiesAuthorization) {
+        if (this.userHasUpdatePropertiesAuthorization) {
             obs.push(this.updateProperties());
         }
 
         forkJoin(obs).subscribe(responses => {
             const errorOccured = responses.find((response) => response.message !== 'OK');
-            if(!errorOccured) {
+            if (!errorOccured) {
                 this.dialogRef.close(this.formGroupController.value);
             }
         });
     }
-
-    filerTypeSelected(element: ChartsExportVAxesModel) {
-        if (element.filterType === undefined) {
-            element.filterValue = undefined;
-        }
-    }
-
-    duplicate(element: ChartsExportVAxesModel, index: number) {
-        const newElement = JSON.parse(JSON.stringify(element)) as ChartsExportVAxesModel;
-        newElement.isDuplicate = true;
-        this.dataSource.data.splice(index + 1, 0, newElement);
-        this.reloadTable();
-    }
-
-    deleteDuplicate(_: ChartsExportVAxesModel, index: number) {
-        this.dataSource.data.splice(index, 1);
-        this.reloadTable();
-    }
-
     private reloadTable() {
         this.dataSource._updateChangeSubscription();
     }
@@ -404,25 +384,6 @@ export class ChartsExportEditDialogComponent implements OnInit {
         return this.formGroupController.get(['properties', 'timeRangeType']) as FormControl;
     }
 
-    listRules(element: ChartsExportVAxesModel) {
-        const dialog = this.dialog.open(ListRulesComponent, {
-            data: element.conversions || []
-        });
-
-        dialog.afterClosed().subscribe({
-            next: (rules: ChartsExportConversion[]) => {
-                if(rules != null) {
-                    element.conversions = rules;
-                }
-            },
-            error: (_) => {
-
-            }
-        });
-    }
-
-
-
     addConversion(element: any) {
         if (element.conversions === undefined) {
             element.conversions = [];
@@ -435,15 +396,11 @@ export class ChartsExportEditDialogComponent implements OnInit {
         if (this.chartType.value !== 'Timeline' && this.chartType.value !== 'PieChart') {
             to = JSON.parse(to);
         }
-        element.conversions.push({from, to, color: element.__color, alias: element.__alias});
+        element.conversions.push({ from, to, color: element.__color, alias: element.__alias });
         element.__from = undefined;
         element.__to = undefined;
         element.__color = undefined;
         element.__alias = undefined;
-    }
-
-    getTags(element: ChartsExportVAxesModel): Map<string, { value: string; parent: string }[]> {
-        return this.exportTags.get(element.instanceId || '') || this.emptyMap;
     }
 
     private preloadExportTags(exportId: string): Observable<any> {
@@ -457,7 +414,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 res.forEach((v, k) =>
                     m.set(
                         k,
-                        v.map((t) => ({value: t, parent: k})),
+                        v.map((t) => ({ value: t, parent: k })),
                     ),
                 );
                 this.exportTags?.set(exportId, m);
@@ -466,38 +423,152 @@ export class ChartsExportEditDialogComponent implements OnInit {
         );
     }
 
-    getTagOptionDisabledFunction(tab: ChartsExportVAxesModel): (option: { value: string; parent: string }) => boolean {
-        return (option: { value: string; parent: string }) => {
-            const selection = tab.tagSelection;
-            if (selection === null || selection === undefined || Object.keys(selection).length === 0) {
-                return false;
-            }
-            const existing = selection.find((s) => s.startsWith(option.parent) && this.getTagValue(option) !== s);
-            return existing !== undefined;
-        };
-    }
-
-    getTagValue(a: { value: string; parent: string }): string {
-        return a.parent + '!' + a.value;
-    }
-
     validateInterval: ValidatorFn = (control: AbstractControl) => {
         const type = this.formGroupController.get('properties.group.type')?.value;
         if (type === undefined || type === null || type.length === 0) {
             return null;
         }
         if (control.value === undefined || control.value === null || control.value.length === 0) {
-            return {validateInterval: {value: control.value}};
+            return { validateInterval: { value: control.value } };
         }
         const re = new RegExp('\\d+(ns|u|µ|ms|s|months|y|m|h|d|w)');
         const matches = re.exec(control.value);
         if (matches == null || matches.length === 0 || matches[0].length !== control.value.length) {
-            return {validateInterval: {value: control.value}};
+            return { validateInterval: { value: control.value } };
         }
         return null;
     };
 
     describeCriteria(): (criteria: DeviceGroupCriteriaModel) => string {
         return criteria => (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
+    }
+
+    treeControl = new NestedTreeControl<ChartsExportVAxesModel>((node) => node.subAxes);
+
+    dragging = false;
+
+    hasChild(_: number, node: ChartsExportVAxesModel): boolean {
+        return node.subAxes !== undefined && node.subAxes.length > 0;
+    }
+
+    deleteDuplicate(node: ChartsExportVAxesModel) {
+        const stringified = JSON.stringify(node);
+        const index = this.dataSource.data.findIndex(x => JSON.stringify(x) === stringified);
+        this.dataSource.data.splice(index, 1);
+        const t = this.dataSource.data; // required for change detection
+        this.dataSource.data = t;
+    }
+
+    duplicate(node: ChartsExportVAxesModel) {
+        const stringified = JSON.stringify(node);
+        const newElement = JSON.parse(stringified) as ChartsExportVAxesModel;
+        newElement.isDuplicate = true;
+        const index = this.dataSource.data.findIndex(x => JSON.stringify(x) === stringified);
+        this.dataSource.data.splice(index + 1, 0, newElement);
+        this.redraw();
+    }
+
+    dropped($event: any, target?: ChartsExportVAxesModel) {
+        const node = $event.item.data as ChartsExportVAxesModel;
+        if (node === target) {
+            console.warn('Can\'t move node into itself');
+            return;
+        }
+        const expanded = this.treeControl.isExpanded(node);
+
+        const clone = JSON.parse(JSON.stringify(node));
+        if (target !== undefined) {
+            if (target.subAxes === undefined || target.subAxes === null) {
+                target.subAxes = [clone];
+            } else {
+                target.subAxes.push(clone);
+            }
+        } else {
+            this.dataSource.data.push(clone);
+        }
+        this.deleteNode(node);
+        if (expanded) {
+            this.treeControl.expand(clone);
+        }
+        this.redraw();
+    }
+
+    deleteNode(node: ChartsExportVAxesModel) {
+        this.dataSource.data.forEach((sub, i) => {
+            if (sub === node) {
+                const del = (dele: boolean) => {
+                    if (dele) {
+                        this.dataSource.data.splice(i, 1);
+                        this.redraw();
+                    }
+                };
+                del(true);
+
+            } else {
+                this.findAndDeleteChild(sub, node);
+            }
+        });
+        this.redraw();
+    }
+
+    startDrag() {
+        this.dragging = true;
+    }
+
+    stopDrag() {
+        this.dragging = false;
+    }
+
+    private findAndDeleteChild(data: ChartsExportVAxesModel, searchElement: ChartsExportVAxesModel) {
+        if (data.subAxes === null || data.subAxes === undefined) {
+            return;
+        }
+        const i = data.subAxes.indexOf(searchElement);
+        if (i === -1) {
+            data.subAxes.forEach((sub) => this.findAndDeleteChild(sub, searchElement));
+        } else {
+            data.subAxes?.splice(i, 1);
+            this.redraw();
+        }
+    }
+
+    private redraw() {
+        const data = this.dataSource.data;
+        if (this.dataSourceSelector !== undefined) {
+            this.dataSourceSelector?.patchFields(this.dataSource.data);
+        }
+        const expanded = this.treeControl.expansionModel.selected;
+        this.dataSource.data = [];
+        this.dataSource.data = data;
+        data.filter(f => expanded.some(e => e === f)).forEach(n => this.treeControl.expand(n));
+    }
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    dontDropPredicate = (_: any, __: any) => false;
+
+    getConnectedNodesFn() {
+        const that = this;
+        return (not: ChartsExportVAxesModel | undefined) => ChartsExportEditDialogComponent.connectedNodes(not, that);
+    }
+
+    static connectedNodes(not: ChartsExportVAxesModel | undefined, that: ChartsExportEditDialogComponent): string[] {
+        const res: string[] = [];
+        if (not !== undefined) {
+            res.push('rootDropZone');
+        }
+        res.push(...ChartsExportEditDialogComponent.connectedChildNodes(that.dataSource.data, not));
+        return res;
+    }
+    static connectedChildNodes(nodes: ChartsExportVAxesModel[], not?: ChartsExportVAxesModel): string[] {
+        const res: string[] = [];
+        nodes.forEach(n => {
+            if (n !== not) {
+                res.push('' + hashCode(JSON.stringify(n)));
+            }
+            if (n.subAxes !== undefined) {
+                res.push(...ChartsExportEditDialogComponent.connectedChildNodes(n.subAxes, not));
+            }
+        });
+        return res;
     }
 }

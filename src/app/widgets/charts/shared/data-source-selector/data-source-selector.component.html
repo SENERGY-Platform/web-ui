@@ -25,7 +25,7 @@
     <mat-spinner *ngIf="waitingForDataSourceChange" [diameter]="50" [strokeWidth]="5" color="accent"></mat-spinner>
 
     <span *ngIf="!waitingForDataSourceChange">
-        <span [hidden]="form.get('exports').value.length === 0" *ngIf="enableFieldSelection">
+        <span [hidden]="(form.get('exports')?.value || '').length === 0" *ngIf="enableFieldSelection">
             <h2>Choose the Exported Fields</h2>
             <mat-form-field appearance="outline" color="accent">
                 <mat-label>Fields</mat-label>
@@ -52,7 +52,7 @@
                     </mat-form-field>
                 </div>
                 <div
-                    *ngIf="form.get('timeRange').get('type').value === timeRangeEnum.RelativeAhead || form.get('timeRange').get('type').value === timeRangeEnum.Relative">
+                    *ngIf="form.get('timeRange.type')?.value === timeRangeEnum.RelativeAhead || form.get('timeRange.type')?.value === timeRangeEnum.Relative">
                     <mat-form-field color="accent" class="full-width" appearance="outline">
                         <mat-label>Time</mat-label>
                         <input type="text" matInput placeholder="e.g. 15, 1" formControlName="time">
@@ -60,7 +60,7 @@
                     </mat-form-field>
                 </div>
                 <div
-                    *ngIf="form.get('timeRange').get('type').value === timeRangeEnum.RelativeAhead || form.get('timeRange').get('type').value === timeRangeEnum.Relative">
+                    *ngIf="form.get('timeRange.type')?.value === timeRangeEnum.RelativeAhead || form.get('timeRange.type')?.value === timeRangeEnum.Relative">
                     <mat-form-field color="accent" class="full-width" appearance="outline">
                         <mat-label>Interval</mat-label>
                         <mat-select formControlName="level" placeholder="Group Type">
@@ -72,14 +72,14 @@
                         <mat-error senergyError label="Interval"></mat-error>
                     </mat-form-field>
                 </div>
-                <div *ngIf="form.get('timeRange').get('type').value === timeRangeEnum.Absolute">
+                <div *ngIf="form.get('timeRange.type')?.value === timeRangeEnum.Absolute">
                     <mat-form-field color="accent" class="full-width" appearance="outline">
                         <mat-label>Start</mat-label>
                         <input type="datetime-local" matInput formControlName="start">
                         <mat-error senergyError label="Start"></mat-error>
                     </mat-form-field>
                 </div>
-                <div *ngIf="form.get('timeRange').get('type').value === timeRangeEnum.Absolute">
+                <div *ngIf="form.get('timeRange.type')?.value === timeRangeEnum.Absolute">
                     <mat-form-field color="accent" class="full-width" appearance="outline">
                         <mat-label>End</mat-label>
                         <input type="datetime-local" matInput placeholder="Start" formControlName="end">

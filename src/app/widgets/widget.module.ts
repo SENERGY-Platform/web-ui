@@ -125,6 +125,9 @@ import { AnomalyReconstructionComponent } from './anomaly/reconstruction/reconst
 import { LineComponent } from './anomaly/sub-widgets/line/line.component';
 import { BadVentilationComponent } from './bad-ventilation/bad-ventilation.component';
 import { EditVentilationWidgetComponent } from './bad-ventilation/dialog/edit/edit.component';
+import { MatTreeModule } from '@angular/material/tree';
+import { AxisConfigComponent } from './charts/export/dialog/axis-config/axis-config.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 registerLocaleData(localeDe, 'de');
 
@@ -162,7 +165,9 @@ registerLocaleData(localeDe, 'de');
         MatSortModule,
         MatSliderModule,
         MatDatepickerModule,
-        NgApexchartsModule
+        NgApexchartsModule,
+        MatTreeModule,
+        DragDropModule,
     ],
     declarations: [
         RangeSliderComponent,
@@ -241,7 +246,8 @@ registerLocaleData(localeDe, 'de');
         AnomalyReconstructionComponent,
         LineComponent,
         BadVentilationComponent,
-        EditVentilationWidgetComponent
+        EditVentilationWidgetComponent,
+        AxisConfigComponent,
     ],
     exports: [
         SwitchComponent,
