@@ -361,26 +361,14 @@ export class DeviceInstancesService {
             );
     }
 
-    getDeviceHistoryAfter(limit: number, afterId: string, afterName: string, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
-        return this.http
-            .get<DeviceInstancesHistoryModelWithId[]>(environment.apiAggregatorUrl + '/devices?after.id=' + afterId + '&after.sort_field_value=' + encodeURIComponent(JSON.stringify(afterName)) + '&limit=' + limit + '&log=' + logDuration)
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory', [])),
-                share(),
-            );
-    }
-
     getDeviceHistoryAll(batchsize: number, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
         return new Observable<DeviceInstancesHistoryModelWithId[]>(subscriber => {
             const limit = batchsize;
-            let last: DeviceInstancesHistoryModelWithId | null = null;
             let offset = 0;
             // eslint-disable-next-line prefer-const
             let getDeviceHistoryBatch: () => void;
             const next = (value: DeviceInstancesHistoryModelWithId[]) => {
                 if (value && value.length) {
-                    last = value[value.length - 1];
                     offset = offset + limit;
                     subscriber.next(value);
                 }
@@ -391,13 +379,7 @@ export class DeviceInstancesService {
                 }
             };
             getDeviceHistoryBatch = () => {
-                //use this if clause if you want to switch later to search with after parameter
-                //if (last && offset+limit > 10000) {
-                if (last) {
-                    this.getDeviceHistoryAfter(limit, last.id, last.name, logDuration).subscribe(next);
-                } else {
-                    this.getDeviceHistory(limit, offset, logDuration).subscribe(next);
-                }
+                this.getDeviceHistory(limit, offset, logDuration).subscribe(next);
             };
             getDeviceHistoryBatch();
         });
