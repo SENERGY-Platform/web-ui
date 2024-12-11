@@ -246,7 +246,7 @@ export class DeviceInstancesService {
         if (options.searchText && options.searchText !== '') {
             params = params.set('search', options.searchText);
         }
-        if(options.deviceTypeIds!==null && options.deviceTypeIds!==undefined && options.deviceTypeIds.join){
+        if(options.deviceTypeIds!==null && options.deviceTypeIds!==undefined && options.deviceTypeIds.join && options.deviceTypeIds.length > 0){
             params = params.set('device-type-ids', options.deviceTypeIds.join(','));
         }
         if(options.deviceIds!==null && options.deviceIds!==undefined && options.deviceIds.join){
