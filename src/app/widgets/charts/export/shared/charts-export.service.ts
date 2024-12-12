@@ -520,7 +520,7 @@ export class ChartsExportService {
                 }
                 const matchingRule = resp.conversions.find((rule) => rule.from === value);
                 if (matchingRule !== undefined) {
-                    value = matchingRule.to;
+                    value = JSON.parse(matchingRule.to);
                 } else if (resp.type === 'string' || resp.type === 'boolean' && resp.conversionDefault !== undefined) {
                     value = resp.conversionDefault;
                 }
