@@ -54,8 +54,9 @@ export class DeviceGroupsService {
         offset: number,
         feature: string,
         order: string,
+        filterGenericDuplicateCriteria = false,
     ): Observable<{result: DeviceGroupModel[]; total: number}> {
-        return this._getDeviceGroups({limit, search: query, offset, sort: feature + '.' + order});
+        return this._getDeviceGroups({limit, search: query, offset, sort: feature + '.' + order, filterGenericDuplicateCriteria});
     }
 
     getDeviceGroup(id: string, filterGenericDuplicateCriteria = false): Observable<DeviceGroupModel | null> {
@@ -85,6 +86,7 @@ export class DeviceGroupsService {
         attrValues?: string[];
         criertia?: DeviceGroupCriteriaModel[];
         p?: string;
+        filterGenericDuplicateCriteria?: boolean;
     }): Observable<{result: DeviceGroupModel[]; total: number}> {
         let params = new HttpParams();
         if (options.limit !== undefined) {
@@ -116,6 +118,9 @@ export class DeviceGroupsService {
         }
         if (options.p !== undefined) {
             params = params.set('p', options.p);
+        }
+        if (options.filterGenericDuplicateCriteria !== undefined) {
+            params = params.set('filter_generic_duplicate_criteria', options.filterGenericDuplicateCriteria);
         }
 
         return this.http.get<DeviceGroupModel[] | null>(environment.deviceRepoUrl + '/device-groups', { observe: 'response', params }).pipe(
