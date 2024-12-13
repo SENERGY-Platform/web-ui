@@ -379,6 +379,10 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             this.stacked = true;
             this.ready = false;
             this.refresh();
+        } else if (axes.length > 1 && this.widget.properties.chartType === 'ColumnChart') {
+            this.modifiedVaxes = [axis];
+            this.ready = false;
+            this.refresh();
         }
     }
 
