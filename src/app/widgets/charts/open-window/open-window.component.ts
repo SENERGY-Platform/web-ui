@@ -156,6 +156,7 @@ export class OpenWindowComponent implements OnInit {
 
     resize() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
+        // console.log('resize open window', element.width, element.height);
         this.timelineWidth = element.width;
         this.timelineHeight = element.height;
     }

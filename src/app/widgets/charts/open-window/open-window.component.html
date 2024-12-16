@@ -17,28 +17,15 @@
 <mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"></senergy-widget-header>
     <mat-card-content>
-        <timeline-chart *ngIf="chartDataReady" [data]="timelineChartData"
-        [hAxisLabel]="widget?.properties?.hAxisLabel || ''" [vAxisLabel]="widget?.properties?.vAxisLabel || ''"
-        [enableToolbar]="false" [vAxes]="widget?.properties?.vAxes || []" [width]="timelineWidth"
-        [height]="timelineHeight">
-    </timeline-chart>
-
-        <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
-            <div *ngIf="notConfigured">Please configure widget!</div>
-
-            <div *ngIf="!notConfigured">
-                <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-                <div *ngIf="ready">
-                    <div *ngIf="chartDataReady">
-                      
-                    </div>
-                    <div *ngIf="!chartDataReady">
-                        {{message}}
-                    </div>
-                </div>
-            </div>
-
-        </div>
+		<div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
+			<timeline-chart class="timeline" *ngIf="chartDataReady" [data]="timelineChartData"
+			[hAxisLabel]="widget?.properties?.hAxisLabel || ''" [vAxisLabel]="widget?.properties?.vAxisLabel || ''"
+			[enableToolbar]="false" [vAxes]="widget?.properties?.vAxes || []" [width]="timelineWidth"
+			[height]="timelineHeight"><
+			</timeline-chart>
+			<senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+			<div *ngIf="notConfigured">Please configure widget!</div>
+		</div>
     </mat-card-content>
     <senergy-widget-footer [widgetHasUpdateableProperties]="true"
         [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization"

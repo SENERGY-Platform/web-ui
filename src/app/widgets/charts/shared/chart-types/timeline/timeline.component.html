@@ -1,7 +1,6 @@
-<div id="container" [style.width.px]="width" [style.height.px]="height">
-    <apx-chart *ngIf="render" #apexChart [tooltip]="apexChartOptions.tooltip!" [legend]="apexChartOptions.legend!"
-        [colors]="apexChartOptions.colors!" [series]="apexChartOptions.series!" [chart]="apexChartOptions.chart!"
-        [plotOptions]="apexChartOptions.plotOptions!" [xaxis]="apexChartOptions.xaxis!"
-        [yaxis]="apexChartOptions.yaxis!">
-    </apx-chart>
-</div>
+
+<apx-chart *ngIf="render" class="chart" [tooltip]="apexChartOptions.tooltip!" [legend]="apexChartOptions.legend!"
+	[colors]="apexChartOptions.colors!" [series]="apexChartOptions.series!" [chart]="apexChartOptions.chart!"
+	[plotOptions]="apexChartOptions.plotOptions!" [xaxis]="apexChartOptions.xaxis!"
+	[yaxis]="apexChartOptions.yaxis!">
+</apx-chart>

@@ -1,4 +1,18 @@
-import { ChangeDetectorRef, Component, ComponentFactoryResolver, ComponentRef, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChanges, ViewChild, ViewContainerRef } from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    ComponentFactoryResolver,
+    ComponentRef,
+    ElementRef,
+    Input,
+    OnChanges,
+    OnInit,
+    Renderer2,
+    SimpleChanges,
+    ViewChild,
+    ViewContainerRef
+} from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { AnomalyReconstructionComponent } from 'src/app/widgets/anomaly/reconstruction/reconstruction.component';
@@ -9,7 +23,7 @@ import { ApexChartOptions, ChartsExportVAxesModel } from '../../../export/shared
   templateUrl: './timeline.component.html',
   styleUrls: ['./timeline.component.css']
 })
-export class TimelineComponent implements OnInit, OnChanges {
+export class TimelineComponent implements OnInit{
     /* 
     Data is expected to be in shape
     [NUMBER_TIMELINE_ROWS, NUMBER_COLUMNS, NUMBER_TIMESTAMPS, 2]
@@ -30,8 +44,10 @@ export class TimelineComponent implements OnInit, OnChanges {
     apexChartOptions: Partial<ApexChartOptions> = {
         series: [],
         chart: {
+            redrawOnParentResize: true,
+            redrawOnWindowResize: true,
             width: '100%',
-            height: 'auto',
+            height: '100%',
             animations: {
                 enabled: false
             },
@@ -39,11 +55,11 @@ export class TimelineComponent implements OnInit, OnChanges {
             toolbar: {
                 show: false
             },
-            redrawOnWindowResize: true,
             events: {}
         },
         plotOptions: {
             bar: {
+                barHeight: '95%',
                 horizontal: true,
                 rangeBarGroupRows: true
             }
@@ -60,11 +76,14 @@ export class TimelineComponent implements OnInit, OnChanges {
         yaxis: {
             title: {
                 text: ''
-            }
+            },
         },
         colors: [],
         legend: {
-            show: true
+            position: 'top',
+            show: true,
+            offsetY: 25,
+            offsetX: 50
         },
         tooltip: {
             x: {
@@ -75,7 +94,8 @@ export class TimelineComponent implements OnInit, OnChanges {
 
     constructor(
         private errorHandlerService: ErrorHandlerService,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private elementRef: ElementRef
     ) {}
 
     ngOnInit() {
@@ -85,16 +105,10 @@ export class TimelineComponent implements OnInit, OnChanges {
         }
     }
 
-    ngOnChanges(changes: SimpleChanges) {
-        // trick to force the chart to reload -> could not find a programatic way of redrawing it
-        if(changes["height"] != null && changes["width"] != null){
-            this.render = false;
-            this.height = changes["height"].currentValue;
-            this.width = changes["width"].currentValue;
-            this.cdr.detectChanges();
-            this.render = true;
-        }
-    }
+    // ngOnChanges(changes: SimpleChanges) {
+    //     console.log(changes);
+    //     console.log('timeline sizes', this.width, this.height);
+    // }
 
     /*
     resize(height: number, width: number) {
