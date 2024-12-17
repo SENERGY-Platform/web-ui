@@ -172,11 +172,13 @@ export class OpenWindowComponent implements OnInit {
         if(timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute) {
             const start = this.widget.properties.windowTimeRange?.start;
             if(start != null && start !== '') {
-                time['start'] = start + timeRangeLevel;
+                const date = new Date(start);
+                time['start'] =  date.toISOString();
             }
             const end = this.widget.properties.windowTimeRange?.end;
             if(end != null && end !== '') {
-                time['end'] = end + timeRangeLevel;
+                const date = new Date(end);
+                time['end'] =  date.toISOString();
             }
         } else if(timeRangeType === ChartsExportRangeTimeTypeEnum.Relative) {
             const last = this.widget.properties.windowTimeRange?.time;
@@ -244,23 +246,26 @@ export class OpenWindowComponent implements OnInit {
     }
 
     parseDeviceDataToTimeline(deviceData: any[][][], exportID: string) {
-        let deviceDataWithoutColumn = deviceData[0];
-        if(deviceDataWithoutColumn.length === 0) {
-            return this.getLastDetectionValue(exportID).pipe(
-                map(lastDetectedValue => {
-                    const timeRange = this.widget.properties.windowTimeRange?.time || 2;
-                    const timeRangeLevel = this.widget.properties.windowTimeRange?.level || 'days';
-                    const startTimestamp = moment().subtract(timeRange as DurationInputArg1, timeRangeLevel as unitOfTime.DurationConstructor).toISOString();
-                    const paddingData = [[startTimestamp, lastDetectedValue], [new Date().toISOString(), lastDetectedValue]];
-                    deviceDataWithoutColumn = paddingData.concat(deviceDataWithoutColumn);
-                    return [deviceDataWithoutColumn];
-                })
-            );
-        }
+        console.log('parse data:', deviceData, exportID);
+        const deviceDataWithoutColumn = deviceData[0];
+        // if(deviceDataWithoutColumn.length === 0) {
+        //     return this.getLastDetectionValue(exportID).pipe(
+        //         map(lastDetectedValue => {
+        //             const timeRange = this.widget.properties.windowTimeRange?.time || 2;
+        //             const timeRangeLevel = this.widget.properties.windowTimeRange?.level || 'days';
+        //             const startTimestamp = moment().subtract(timeRange as DurationInputArg1, timeRangeLevel as unitOfTime.DurationConstructor).toISOString();
+        //             const paddingData = [[startTimestamp, lastDetectedValue], [new Date().toISOString(), lastDetectedValue]];
+        //             deviceDataWithoutColumn = paddingData.concat(deviceDataWithoutColumn);
+        //             console.log('if clause parseDeviceDataToTimeline: ', deviceDataWithoutColumn);
+        //             return [deviceDataWithoutColumn];
+        //         })
+        //     );
+        // }
 
         // Last value in timeline should always be the current time with the last/newest detected value
-        const lastValue = deviceDataWithoutColumn[0][1];
-        deviceDataWithoutColumn = [[new Date().toISOString(), lastValue]].concat(deviceDataWithoutColumn);
+        // const lastValue = deviceDataWithoutColumn[0][1];
+        // console.log('last value', lastValue);
+        // deviceDataWithoutColumn = [[new Date().toISOString(), lastValue]].concat(deviceDataWithoutColumn);
         return of([deviceDataWithoutColumn]);
     }
 
