@@ -19,7 +19,7 @@
   <mat-card-content>
     <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
       <div *ngIf="style === 'timeline'">
-        <timeline-chart *ngIf="chartDataReady" [data]="timelineChartData" [hAxisLabel]="'Zeit'" [vAxisLabel]="'c163d155'"
+        <timeline-chart chartId="fake" *ngIf="chartDataReady" [data]="timelineChartData" [hAxisLabel]="'Zeit'" [vAxisLabel]="'c163d155'"
           [enableToolbar]="false" [vAxes]="properties.vAxes" [width]="timelineWidth" [height]="timelineHeight">
         </timeline-chart>
       </div>

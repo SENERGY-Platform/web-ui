@@ -17,13 +17,14 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { AnomalyReconstructionComponent } from 'src/app/widgets/anomaly/reconstruction/reconstruction.component';
 import { ApexChartOptions, ChartsExportVAxesModel } from '../../../export/shared/charts-export-properties.model';
+import ApexCharts from 'apexcharts';
 
 @Component({
   selector: 'timeline-chart',
   templateUrl: './timeline.component.html',
   styleUrls: ['./timeline.component.css']
 })
-export class TimelineComponent implements OnInit{
+export class TimelineComponent implements OnInit, OnChanges{
     /* 
     Data is expected to be in shape
     [NUMBER_TIMELINE_ROWS, NUMBER_COLUMNS, NUMBER_TIMESTAMPS, 2]
@@ -31,7 +32,7 @@ export class TimelineComponent implements OnInit{
     The last dimension is expected to be [timestamp string, value] and has to be sorted descending by timestamp
     */
     @Input() data = [];
-
+    @Input() chartId = '';
     @Input() hAxisLabel = '';
     @Input() vAxisLabel = '';
     @Input() enableToolbar = false;
@@ -40,13 +41,16 @@ export class TimelineComponent implements OnInit{
     @Input() width = 0;
     @Input() OnClickFnc = (_: any, _2: any, _3: any) => {};
     render = false;
+    private chartInstance: ApexCharts | null = null;
+    private series: any[] = [];
+    private colors: string[] = [];
 
     apexChartOptions: Partial<ApexChartOptions> = {
-        series: [],
+        series: this.series,
         chart: {
             redrawOnParentResize: true,
             redrawOnWindowResize: true,
-            width: '100%',
+            width: 0.95*this.width,
             height: '100%',
             animations: {
                 enabled: false
@@ -59,7 +63,7 @@ export class TimelineComponent implements OnInit{
         },
         plotOptions: {
             bar: {
-                barHeight: '95%',
+                barHeight: '100%',
                 horizontal: true,
                 rangeBarGroupRows: true
             }
@@ -78,7 +82,7 @@ export class TimelineComponent implements OnInit{
                 text: ''
             },
         },
-        colors: [],
+        colors: this.colors,
         legend: {
             position: 'top',
             show: true,
@@ -99,17 +103,38 @@ export class TimelineComponent implements OnInit{
     ) {}
 
     ngOnInit() {
+        // id must clearly identify apx-chart in case multiple widgets of the same type are used
+        this.chartId = this.chartId + `_chart_${Math.random().toString(35).substring(2, 7)}`;
         this.renderTimelineChart();
         if(this.apexChartOptions.chart != null && this.apexChartOptions.chart.events != null) {
             this.apexChartOptions.chart.events['dataPointSelection'] = this.OnClickFnc;
         }
     }
 
-    // ngOnChanges(changes: SimpleChanges) {
-    //     console.log(changes);
-    //     console.log('timeline sizes', this.width, this.height);
-    // }
+    ngOnChanges(changes: SimpleChanges) {
+        let shouldRebuild = false;
+        let shouldReloadData = false;
 
+        if (changes['data']) {
+            shouldRebuild = true;
+            shouldReloadData = true;
+        }
+        if (changes['height'] || changes['width']) {
+            shouldRebuild = true;
+        }
+        if (shouldRebuild) {
+            this.destroyChart();
+            this.renderTimelineChart(shouldReloadData);
+            this.cdr.detectChanges(); // Ensure Angular detects and applies the changes
+        }
+    }
+
+    destroyChart() {
+        if (this.chartInstance) {
+            this.chartInstance.destroy(); // Destroy the ApexCharts instance
+            this.chartInstance = null; // Reset the chart instance
+        }
+    }
     /*
     resize(height: number, width: number) {
         if(this.apexChartOptions.chart !== undefined) {
@@ -119,10 +144,14 @@ export class TimelineComponent implements OnInit{
         }
     }*/
 
-    private renderTimelineChart() {
-        const chartData = this.prepareTimelineChartData();
-        this.apexChartOptions.series = chartData.data;
-        this.apexChartOptions.colors = chartData.colors;
+    private renderTimelineChart(reloadData=true) {
+        if (reloadData || this.series.length === 0) {
+            const chartData = this.prepareTimelineChartData();
+            this.series = chartData.data;
+            this.colors = chartData.colors;
+            this.apexChartOptions.series = chartData.data;
+            this.apexChartOptions.colors = chartData.colors;
+        }
         if(this.enableToolbar && this.apexChartOptions.chart?.toolbar !== undefined) {
             this.apexChartOptions.chart.toolbar.show = true;
         }
@@ -132,7 +161,20 @@ export class TimelineComponent implements OnInit{
         if(this.apexChartOptions.yaxis?.title !== undefined) {
             this.apexChartOptions.yaxis.title.text = this.vAxisLabel;
         }
+        // Ensure valid chart dimensions
+        if (this.height && this.width) {
+            this.apexChartOptions.chart!.height = `${0.95*this.height}px`;
+            this.apexChartOptions.chart!.width = `${0.95*this.width}px`;
+        } else {
+            console.error('Chart dimensions are not properly set.');
+        }
+
         this.render = true;
+        const chartElement = this.elementRef.nativeElement.querySelector(`#${this.chartId}`);
+        if (chartElement) {
+            this.chartInstance = new ApexCharts(chartElement, this.apexChartOptions);
+            const promise = this.chartInstance.render();
+        }
     }
 
     prepareTimelineChartData() {

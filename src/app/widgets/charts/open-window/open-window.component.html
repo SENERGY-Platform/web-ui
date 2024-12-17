@@ -18,7 +18,7 @@
     <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"></senergy-widget-header>
     <mat-card-content>
 		<div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
-			<timeline-chart class="timeline" *ngIf="chartDataReady" [data]="timelineChartData"
+			<timeline-chart chartId='openWindow' class="timeline" *ngIf="chartDataReady" [data]="timelineChartData"
 			[hAxisLabel]="widget?.properties?.hAxisLabel || ''" [vAxisLabel]="widget?.properties?.vAxisLabel || ''"
 			[enableToolbar]="false" [vAxes]="widget?.properties?.vAxes || []" [width]="timelineWidth"
 			[height]="timelineHeight"><

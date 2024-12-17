@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, OnInit } from '@angular/core';
+import {Component, HostListener, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import moment from 'moment';
 import { DurationInputArg1, unitOfTime } from 'moment';
@@ -23,7 +23,7 @@ interface InitCheck {
   templateUrl: './open-window.component.html',
   styleUrls: ['./open-window.component.css']
 })
-export class OpenWindowComponent implements OnInit {
+export class OpenWindowComponent implements OnInit, OnChanges {
     ready = false;
     init = false;
     refreshing = false;
@@ -68,6 +68,10 @@ export class OpenWindowComponent implements OnInit {
         if(!this.notConfigured) {
             this.update();
         }
+    }
+
+    ngOnChanges() {
+        this.resize();
     }
 
     widgetIsConfigured() {
@@ -156,7 +160,7 @@ export class OpenWindowComponent implements OnInit {
 
     resize() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
-        // console.log('resize open window', element.width, element.height);
+
         this.timelineWidth = element.width;
         this.timelineHeight = element.height;
     }
@@ -246,8 +250,8 @@ export class OpenWindowComponent implements OnInit {
     }
 
     parseDeviceDataToTimeline(deviceData: any[][][], exportID: string) {
-        console.log('parse data:', deviceData, exportID);
         const deviceDataWithoutColumn = deviceData[0];
+        const expid = exportID;
         // if(deviceDataWithoutColumn.length === 0) {
         //     return this.getLastDetectionValue(exportID).pipe(
         //         map(lastDetectedValue => {

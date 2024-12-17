@@ -3,7 +3,7 @@
 </div>
 
 <div *ngIf="anomaliePhases.length > 0 && chartDataReady === true">
-    <timeline-chart [data]="anomaliePhases" [hAxisLabel]="hAxisLabel" [vAxisLabel]="vAxisLabel"
+    <timeline-chart chartId='anomalyPhases' [data]="anomaliePhases" [hAxisLabel]="hAxisLabel" [vAxisLabel]="vAxisLabel"
     [enableToolbar]="false" [vAxes]="vAxes" [width]="timelineWidth" [height]="timelineHeight" [OnClickFnc]="onClick">
     </timeline-chart>
 </div>

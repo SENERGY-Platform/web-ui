@@ -26,8 +26,9 @@
                              ' interval or use an aggregation function!' : ''"></senergy-widget-header>
     <mat-card-content>
         
-        <timeline-chart 
-            *ngIf="widget.properties.chartType === 'Timeline' && ready" 
+        <timeline-chart
+            *ngIf="widget.properties.chartType === 'Timeline' && ready"
+			chartId = 'chartsExport'
             [data]="timelineChartData"
             [hAxisLabel]="widget?.properties?.hAxisLabel || ''"
             [vAxisLabel]="widget?.properties?.vAxisLabel || ''"
