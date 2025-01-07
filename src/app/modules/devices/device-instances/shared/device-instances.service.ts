@@ -289,7 +289,7 @@ export class DeviceInstancesService {
         protocolBlocklist?: string[] | null | undefined,
         interactionFilter?: string | null | undefined,
     ): Observable<DeviceSelectablesModel[]> {
-        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter, false) as Observable<DeviceSelectablesModel[]>;
+        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter, true, false) as Observable<DeviceSelectablesModel[]>;
     }
 
     getDeviceSelectionsFull(
@@ -300,7 +300,7 @@ export class DeviceInstancesService {
         includeGroups: boolean = true,
         includeImports: boolean = true,
     ): Observable<DeviceSelectablesFullModel[]> {
-        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter, includeGroups, includeImports).pipe(
+        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter, true, includeGroups, includeImports).pipe(
             map((selectables) => {
                 selectables = selectables as DeviceSelectablesFullModel[];
                 selectables.forEach((s: any) => {
@@ -323,10 +323,11 @@ export class DeviceInstancesService {
         completeServices: boolean,
         protocolBlocklist?: string[] | null | undefined,
         interactionFilter?: string | null | undefined,
+        includeDevices?: boolean,
         includeGroups?: boolean,
         includeImports?: boolean,
     ): Observable<DeviceSelectablesFullModel[] | DeviceSelectablesModel[]> {
-        let path = '/selectables';
+        let path = '/v2/selectables';
         if (completeServices) {
             path += '?complete_services=true&';
         } else {
@@ -338,6 +339,9 @@ export class DeviceInstancesService {
         }
         if (interactionFilter) {
             path = path + '&filter_interaction=' + encodeURIComponent(interactionFilter);
+        }
+        if (includeDevices === true) {
+            path += '&include_devices=true';
         }
         if (includeGroups === true) {
             path += '&include_groups=true';
