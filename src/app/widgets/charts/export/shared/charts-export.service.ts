@@ -525,6 +525,7 @@ export class ChartsExportService {
                     try {
                         value = JSON.parse(matchingRule.to);
                     } catch (_) {
+                        value = matchingRule.to;
                         // this is fine, we just need to ensure correct data types for primitives
                     }
                 } else if (resp.type === 'string' || resp.type === 'boolean' && resp.conversionDefault !== undefined) {
