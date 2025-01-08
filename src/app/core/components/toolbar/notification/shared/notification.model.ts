@@ -57,3 +57,34 @@ export interface NotificationBrokerListModel {
 export interface NotificationPlatformBrokerModel {
     enabled: boolean;
 }
+
+export type NotificationTopic = string;
+
+export const notificationTopicProcesses: NotificationTopic = 'processes';
+export const notificationTopicSmartService: NotificationTopic = 'smart_service';
+export const notificationTopicDeviceOffline: NotificationTopic = 'device_offline';
+export const notificationTopicDeveloper: NotificationTopic = 'developer';
+export const notificationTopicConnector: NotificationTopic = 'connector';
+export const notificationTopicMGW: NotificationTopic = 'mgw';
+export const notificationTopicUnknown: NotificationTopic = 'unknown';
+
+export function getAllTopics(): NotificationTopic[] {
+    return [
+        notificationTopicProcesses,
+        notificationTopicSmartService,
+        notificationTopicDeviceOffline,
+        notificationTopicDeveloper,
+        notificationTopicConnector,
+        notificationTopicMGW,
+        notificationTopicUnknown,
+    ];
+}
+
+export interface NotificationSettingsModel {
+    channel_topic_config: {
+        websoket: NotificationTopic[];
+        mqtt: NotificationTopic[];
+        push: NotificationTopic[];
+        email: NotificationTopic[];
+    };
+}

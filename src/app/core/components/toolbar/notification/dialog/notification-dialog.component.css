@@ -63,3 +63,8 @@ table {
 .notification-content{
     white-space:pre-wrap;
 }
+
+.channelTopicConfigForm {
+    display: flex;
+    justify-content: space-between;
+}

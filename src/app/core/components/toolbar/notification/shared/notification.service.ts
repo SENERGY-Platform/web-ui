@@ -21,6 +21,7 @@ import {
     NotificationBrokerModel,
     NotificationModel,
     NotificationPlatformBrokerModel,
+    NotificationSettingsModel,
     NotificationUpdateModel
 } from './notification.model';
 import {environment} from '../../../../../../environments/environment';
@@ -123,6 +124,14 @@ export class NotificationService implements OnDestroy {
 
     updatePlatformBrokerConfig(config: NotificationPlatformBrokerModel): Observable<NotificationPlatformBrokerModel> {
         return this.http.put<NotificationPlatformBrokerModel>(environment.notificationsUrl + '/platform-broker', config);
+    }
+
+    getSettings(): Observable<NotificationSettingsModel> {
+        return this.http.get<NotificationSettingsModel>(environment.notificationsUrl + '/settings');
+    }
+
+    updateSettings(settings: NotificationSettingsModel): Observable<NotificationSettingsModel> {
+        return this.http.put<NotificationSettingsModel>(environment.notificationsUrl + '/settings', settings);
     }
 
     private initWs() {

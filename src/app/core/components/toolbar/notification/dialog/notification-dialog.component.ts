@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import {
     MAT_DIALOG_DATA,
     MatDialogRef
 } from '@angular/material/dialog';
-import {NotificationBrokerModel, NotificationModel} from '../shared/notification.model';
-import {NotificationService} from '../shared/notification.service';
-import {PageEvent} from '@angular/material/paginator';
-import {UntypedFormBuilder, UntypedFormControl, Validators} from '@angular/forms';
-import {forkJoin, Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {MatTableDataSource} from '@angular/material/table';
-import {environment} from '../../../../../../environments/environment';
-import {AuthorizationService} from '../../../../services/authorization.service';
+import { getAllTopics, NotificationBrokerModel, NotificationModel, NotificationSettingsModel } from '../shared/notification.model';
+import { NotificationService } from '../shared/notification.service';
+import { PageEvent } from '@angular/material/paginator';
+import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
+import { forkJoin, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { MatTableDataSource } from '@angular/material/table';
+import { environment } from '../../../../../../environments/environment';
+import { AuthorizationService } from '../../../../services/authorization.service';
 
 // eslint-disable-next-line no-shadow
 export enum Modes {
@@ -47,7 +47,7 @@ export class NotificationDialogComponent implements OnInit {
     notificationService: NotificationService;
     defaultPageSize = 25;
     lastNotificationPageEvent: PageEvent | undefined;
-    lastBrokerPageEvent: PageEvent = {pageIndex: 0, pageSize: this.defaultPageSize} as PageEvent;
+    lastBrokerPageEvent: PageEvent = { pageIndex: 0, pageSize: this.defaultPageSize } as PageEvent;
     brokers = new MatTableDataSource<NotificationBrokerModel>();
     totalBrokers = 0;
 
@@ -63,9 +63,19 @@ export class NotificationDialogComponent implements OnInit {
         updated_at: [undefined],
     });
 
+    channelTopicConfigForm = this.fb.group({
+        websoket: [],
+        mqtt: [],
+        push: [],
+        email: [],
+    });
+    settingsLoaded = false;
+
     platformBrokerTooltip = environment.brokerExportBroker + ', Topic: notifications/' + this.authorizationService.getUserId() + ', Use platform credentials';
 
     platformBrokerActive = new UntypedFormControl(false);
+
+    allTopics = getAllTopics();
 
     constructor(
         private dialogRef: MatDialogRef<NotificationDialogComponent>,
@@ -85,6 +95,15 @@ export class NotificationDialogComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.channelTopicConfigForm.valueChanges.subscribe(s => {
+            if (this.mode === Modes.SETTINGS && this.settingsLoaded) {
+                this.settingsLoaded = false;
+                this.notificationService.updateSettings({channel_topic_config: s}).subscribe(saved => {
+                    this.channelTopicConfigForm.setValue(saved.channel_topic_config);
+                    setTimeout(() => this.settingsLoaded = true);
+                });
+            }
+        });
     }
 
     close(): void {
@@ -145,13 +164,18 @@ export class NotificationDialogComponent implements OnInit {
     toggleSettings() {
         if (this.mode !== Modes.SETTINGS) {
             this.mode = Modes.SETTINGS;
+            this.notificationService.getSettings().subscribe(s => {
+                this.channelTopicConfigForm.setValue(s.channel_topic_config);
+                setTimeout(() => this.settingsLoaded = true);
+            });
         } else {
             this.mode = Modes.NOTIFICATIONS;
+            this.settingsLoaded = false;
         }
     }
 
     private registerChanges() {
-        this.platformBrokerActive.valueChanges.subscribe(v => this.notificationService.updatePlatformBrokerConfig({enabled: v}).subscribe());
+        this.platformBrokerActive.valueChanges.subscribe(v => this.notificationService.updatePlatformBrokerConfig({ enabled: v }).subscribe());
     }
 
     editBroker(element: NotificationBrokerModel) {
