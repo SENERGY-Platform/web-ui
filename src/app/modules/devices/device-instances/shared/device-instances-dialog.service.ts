@@ -34,6 +34,7 @@ import {concat, forkJoin, Observable, of} from 'rxjs';
 import {LastValuesRequestElementTimescaleModel} from '../../../../widgets/shared/export-data.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
 import {map, concatMap} from 'rxjs/operators';
+import { DeviceInstancesReplaceDialogComponent } from '../dialogs/device-instances-replace-dialog/device-instances-replace-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -217,5 +218,15 @@ export class DeviceInstancesDialogService {
                     });
             }
         });
+    }
+
+    openDeviceReplaceDialog(device: DeviceInstanceModel): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {
+            device,
+        };
+
+        this.dialog.open(DeviceInstancesReplaceDialogComponent, dialogConfig);
     }
 }

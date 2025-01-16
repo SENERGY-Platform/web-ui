@@ -102,6 +102,16 @@
                     </td>
                 </ng-container>
 
+                <ng-container matColumnDef="replace">
+                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Replace</th>
+                    <td mat-cell *matCellDef="let device">
+                        <button mat-icon-button color="accent" matTooltip="Replace" (click)="replaceDevice(device)"
+                            [disabled]="!device.permissions.write">
+                            <mat-icon>build_circle</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
                 <ng-container matColumnDef="duplicate">
                     <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Duplicate</th>
                     <td mat-cell *matCellDef="let device">

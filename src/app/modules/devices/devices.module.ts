@@ -67,6 +67,7 @@ import { WaitingRoomMultiWmbusKeyEditDialogComponent } from './waiting-room/dial
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { DeviceInstancesFilterDialogComponent } from './device-instances/dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
+import { DeviceInstancesReplaceDialogComponent } from './device-instances/dialogs/device-instances-replace-dialog/device-instances-replace-dialog.component';
 
 const networks: Route = { path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: { header: 'Networks' } };
 const deviceInstances: Route = {
@@ -187,6 +188,7 @@ const locationsEdit: Route = {
         WaitingRoomDeviceEditDialogComponent,
         WaitingRoomMultiWmbusKeyEditDialogComponent,
         DeviceInstancesFilterDialogComponent,
+        DeviceInstancesReplaceDialogComponent,
     ],
 })
 export class DevicesModule {}

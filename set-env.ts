@@ -49,8 +49,6 @@ export const environment = {
   flowRepoUrl: '${process.env.FLOW_REPO_URL}',
   flowEngineUrl: '${process.env.FLOW_ENGINE_URL}',
   flowParserUrl: '${process.env.FLOW_PARSER_URL}',
-  permissionSearchUrl: '${process.env.PERMISSION_SEARCH_URL}',
-  permissionCommandUrl: '${process.env.PERMISSION_COMMAND_URL}',
   apiAggregatorUrl: '${process.env.API_AGGREGATOR_URL}',
   iotRepoUrl: '${process.env.IOT_REPO_URL}',
   dashboardServiceUrl: '${process.env.DASHBOARD_SERVICE_URL}',

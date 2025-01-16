@@ -144,6 +144,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
         this.userHasCreateAuthoriation = this.deviceInstancesService.userHasCreateAuthorization();
         if (this.userHasCreateAuthoriation) {
+            this.displayedColumns.push('replace');
             this.displayedColumns.push('duplicate');
         }
 
@@ -328,6 +329,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     duplicateDevice(device: DeviceInstanceModel): void {
         this.deviceInstancesDialogService.openDeviceCreateDialog(undefined, device);
+    }
+
+    replaceDevice(device: DeviceInstanceModel): void {
+        this.deviceInstancesDialogService.openDeviceReplaceDialog(device);
     }
 
     deleteDevice(device: DeviceInstanceModel): void {

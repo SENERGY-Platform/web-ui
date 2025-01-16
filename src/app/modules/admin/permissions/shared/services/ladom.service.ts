@@ -102,7 +102,6 @@ export class LadonService {
             environment.apiAggregatorUrl,
             environment.deviceRepoUrl,
             environment.iotRepoUrl,
-            environment.permissionCommandUrl,
             environment.operatorRepoUrl,
             environment.smartServiceRepoUrl,
             environment.processDeploymentUrl,

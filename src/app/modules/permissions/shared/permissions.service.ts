@@ -86,25 +86,6 @@ export class PermissionsService {
             );
     }
 
-    //key is the kafka key this permission command will be published to. is optional
-    setResourcePermissions(kind: string, id: string, rights: PermissionsResourceBaseModel, key?: string): Observable<boolean> {
-        let query = '';
-        if(key){
-            query = '?key='+encodeURIComponent(key);
-        }
-        return this.http
-            .put<PermissionsResourceBaseModel>(
-                environment.permissionCommandUrl + '/v3/administrate/rights/' + encodeURIComponent(kind) + '/' + encodeURIComponent(id)+query,
-                rights
-            )
-            .pipe(
-                map((_) => true),
-                catchError(
-                    this.errorHandlerService.handleError(PermissionsService.name, 'getResourcePermissions', false),
-                ),
-            );
-    }
-
     setResourcePermissionsV2(topicID: string, ressourceID: string, rights: PermissionsV2ResourceBaseModel): Observable<boolean> {
         return this.http
             .put<PermissionsResourceBaseModel>(
