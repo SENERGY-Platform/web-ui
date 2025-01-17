@@ -19,9 +19,9 @@ interface InitCheck {
 }
 
 @Component({
-  selector: 'senergy-open-window',
-  templateUrl: './open-window.component.html',
-  styleUrls: ['./open-window.component.css']
+    selector: 'senergy-open-window',
+    templateUrl: './open-window.component.html',
+    styleUrls: ['./open-window.component.css']
 })
 export class OpenWindowComponent implements OnInit, OnChanges {
     ready = false;
@@ -220,7 +220,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
                     this.message = 'No data';
                     return throwError(() => new Error('no data'));
                 }
-                return this.parseToTimelineFormat(resp);
+                return this.parseToTimelineFormat(resp, time);
             }),
             map(chartData => {
                 this.timelineChartData = chartData;
@@ -229,56 +229,92 @@ export class OpenWindowComponent implements OnInit, OnChanges {
         );
     }
 
-    getLastDetectionValue(exportID: string) {
-        const requestPayloads: any[] = [];
-
-        requestPayloads.push({
-            exportId: exportID,
-            measurement: exportID,
-            columnName: 'window_open'
-        });
-
-        return this.exportDataService.getLastValuesTimescale(requestPayloads).pipe(
-            map((lastValuePerExport: TimeValuePairModel[]) => {
-                if(lastValuePerExport.length === 0) {
-                    throw(new Error('No last value'));
+    getMediumTimeGap(deviceData: any[][]): number {
+        const testSet = deviceData.length>1000 ? deviceData.slice(0, 1000) : deviceData;
+        let pred = new Date(deviceData[0][0]);
+        const timeGaps = new Map<number, number>();
+        for (let i = 1; i < testSet.length; i++) {
+            const current = new Date(deviceData[i][0]);
+            const diffTime = Math.abs(current.getTime() - pred.getTime());
+            const gapSec = Math.floor(diffTime / (1000));
+            if (timeGaps.has(gapSec)) {
+                const num = timeGaps.get(gapSec);
+                if (num !== undefined) {
+                    timeGaps.set(gapSec, num + 1);
                 }
-
-                return lastValuePerExport[0].value as boolean;
-            })
-        );
+            } else {
+                timeGaps.set(gapSec, 1);
+            }
+            pred = current;
+        }
+        const mostKey = [...timeGaps.entries()].reduce((a, e ) => e[1] > a[1] ? e : a);
+        return mostKey[0];
     }
 
-    parseDeviceDataToTimeline(deviceData: any[][][], exportID: string) {
+    fillDataGaps(deviceData: any[][], timeRequest: QueriesRequestTimeModel, resolution: number = 30): any[][] {
+        const thresh = this.getGapThreshold(resolution);
+        const endTime = timeRequest['end'];
+        const startTime = timeRequest['start'];
+        let succ: Date = new Date(endTime as string);
+        const updates: any [][] = [];
+        for (let i = 0; i < deviceData.length+1; i++) {
+            const current = i < deviceData.length ? new Date(deviceData[i][0]): new Date(startTime as string);
+            const diffTime = Math.abs(succ.getTime() - current.getTime());
+            const gapSec = Math.floor(diffTime / (1000));
+            if (gapSec > thresh) {
+                const succTimeDiff = i===0 ? 0: (resolution * 1000); // end point can be taken as it is, else create new point with timediff
+                const newEndDate = new Date(succ.getTime() - succTimeDiff);
+                const newEndDp = [newEndDate.toISOString(), null];
+                updates.push([i, newEndDp]);
+
+                const startTimeDiff = i===deviceData.length ? 0: (resolution * 1000); //start point can be taken as it is
+                const newStartDate = new Date(current.getTime() + startTimeDiff);
+                const newStartDp = [newStartDate.toISOString(), null];
+                updates.push([i, newStartDp]);
+            }
+            succ = current;
+        }
+        let counter = 0;
+        updates.forEach((update) => {
+            deviceData.splice(update[0]+counter, 0, update[1]);
+            counter = counter + 1;
+        });
+        return deviceData;
+    }
+
+    getGapThreshold(res: number): number {
+        const resolutionToGapThreshold = {
+            '1min' : (5*60), //in seconds
+            '5min' : (15*60),
+            '15min' : (30*60),
+        };
+        if (res<=(60)) {
+            return resolutionToGapThreshold['1min'];
+        } else if (res<=(5*60)) {
+            return resolutionToGapThreshold['5min'];
+        } else if (res<=(15*60)) {
+            return resolutionToGapThreshold['15min'];
+        } else {
+            return 3*res;
+        }
+    }
+
+    parseDeviceDataToTimeline(deviceData: any[][][], timeRequest: QueriesRequestTimeModel) {
         const deviceDataWithoutColumn = deviceData[0];
-        const expid = exportID;
-        // if(deviceDataWithoutColumn.length === 0) {
-        //     return this.getLastDetectionValue(exportID).pipe(
-        //         map(lastDetectedValue => {
-        //             const timeRange = this.widget.properties.windowTimeRange?.time || 2;
-        //             const timeRangeLevel = this.widget.properties.windowTimeRange?.level || 'days';
-        //             const startTimestamp = moment().subtract(timeRange as DurationInputArg1, timeRangeLevel as unitOfTime.DurationConstructor).toISOString();
-        //             const paddingData = [[startTimestamp, lastDetectedValue], [new Date().toISOString(), lastDetectedValue]];
-        //             deviceDataWithoutColumn = paddingData.concat(deviceDataWithoutColumn);
-        //             console.log('if clause parseDeviceDataToTimeline: ', deviceDataWithoutColumn);
-        //             return [deviceDataWithoutColumn];
-        //         })
-        //     );
-        // }
-
-        // Last value in timeline should always be the current time with the last/newest detected value
-        // const lastValue = deviceDataWithoutColumn[0][1];
-        // console.log('last value', lastValue);
-        // deviceDataWithoutColumn = [[new Date().toISOString(), lastValue]].concat(deviceDataWithoutColumn);
-        return of([deviceDataWithoutColumn]);
+        let filledData = deviceData;
+        if (deviceDataWithoutColumn.length > 1) {
+            const mediumTimeGap = this.getMediumTimeGap(deviceDataWithoutColumn);
+            filledData = this.fillDataGaps(deviceDataWithoutColumn, timeRequest, mediumTimeGap);
+        } else {
+            filledData = this.fillDataGaps(deviceDataWithoutColumn, timeRequest);
+        }
+        return of([filledData]);
     }
 
-    parseToTimelineFormat(response: any) {
-        const exports = this.widget.properties?.windowExports || [];
+    parseToTimelineFormat(response: any, timeRequest: QueriesRequestTimeModel) {
         const obs: Observable<any[][][]>[] = [];
-        response.forEach((dataPerExport: any, index: number) => {
-            const exportID = exports[index].id;
-            obs.push(this.parseDeviceDataToTimeline(dataPerExport['data'], exportID));
+        response.forEach((dataPerExport: any) => {
+            obs.push(this.parseDeviceDataToTimeline(dataPerExport['data'], timeRequest));
         });
 
         return forkJoin(obs);

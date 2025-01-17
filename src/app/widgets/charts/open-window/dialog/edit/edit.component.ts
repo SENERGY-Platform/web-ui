@@ -160,12 +160,17 @@ export class OpenWindowEditComponent implements OnInit {
                     from: 'false',
                     to: 'false',
                     color: '#097969',
-                    alias: 'zu'
+                    alias: 'Closed'
                 }, {
                     from: 'true',
                     to: 'true',
                     color: '#C41E3A',
-                    alias: 'offen'
+                    alias: 'Open'
+                }, {
+                    from: 'null',
+                    to: 'null',
+                    color: '#f3f3f1',
+                    alias: 'No Data'
                 }]
             });
         });

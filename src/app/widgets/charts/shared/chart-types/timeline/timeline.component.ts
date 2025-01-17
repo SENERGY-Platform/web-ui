@@ -87,7 +87,8 @@ export class TimelineComponent implements OnInit, OnChanges{
             position: 'top',
             show: true,
             offsetY: 25,
-            offsetX: 50
+            offsetX: 50,
+            showForSingleSeries: true,
         },
         tooltip: {
             x: {
