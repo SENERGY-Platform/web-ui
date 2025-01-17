@@ -124,10 +124,14 @@ export class TimelineComponent implements OnInit, OnChanges{
             shouldRebuild = true;
         }
         if (shouldRebuild) {
-            this.destroyChart();
-            this.renderTimelineChart(shouldReloadData);
-            this.cdr.detectChanges(); // Ensure Angular detects and applies the changes
+            this.rebuildChart(shouldReloadData);
         }
+    }
+
+    rebuildChart(reloadData=true) {
+        this.destroyChart();
+        this.renderTimelineChart(reloadData);
+        this.cdr.detectChanges(); // Ensure Angular detects and applies the changes
     }
 
     destroyChart() {

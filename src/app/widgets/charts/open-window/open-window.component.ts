@@ -1,4 +1,4 @@
-import {Component, HostListener, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, HostListener, Input, OnChanges, OnInit, SimpleChanges, ViewChild} from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import moment from 'moment';
 import { DurationInputArg1, unitOfTime } from 'moment';
@@ -12,6 +12,7 @@ import { QueriesRequestTimeModel, QueriesRequestV2ElementTimescaleModel, TimeVal
 import { ExportDataService } from '../../shared/export-data.service';
 import { ChartsExportRangeTimeTypeEnum } from '../export/shared/charts-export-range-time-type.enum';
 import { OpenWindowEditComponent } from './dialog/edit/edit.component';
+import {TimelineComponent} from '../shared/chart-types/timeline/timeline.component';
 
 interface InitCheck {
   message: string;
@@ -63,11 +64,14 @@ export class OpenWindowComponent implements OnInit, OnChanges {
         }
     }
 
+    @ViewChild(TimelineComponent) timelineChart!: TimelineComponent;
+
     ngOnInit(): void {
         this.widgetIsConfigured();
         if(!this.notConfigured) {
             this.update();
         }
+        this.scheduleRefresh();
     }
 
     ngOnChanges() {
@@ -137,6 +141,25 @@ export class OpenWindowComponent implements OnInit, OnChanges {
                 return initCheck;
             })
         );
+    }
+
+    private scheduleRefresh() {
+        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+            if (event === 'reloadAll' || event === this.widget.id) {
+                this.refresh();
+            }
+        });
+    }
+
+    private refresh() {
+        this.refreshing = true;
+        if (this.timelineChart) {
+            this.getTimelineData();
+            this.timelineChart.rebuildChart();      // in single cases, apx chart is build incorrectly
+            this.timelineChart.rebuildChart(false); // building the chart twice resets the bug, no need to load data twice though
+        }
+        this.ready = true;
+        this.refreshing = false;
     }
 
     edit() {
