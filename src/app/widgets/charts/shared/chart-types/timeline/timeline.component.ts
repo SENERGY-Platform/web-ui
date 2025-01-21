@@ -20,18 +20,18 @@ import { ApexChartOptions, ChartsExportVAxesModel } from '../../../export/shared
 import ApexCharts from 'apexcharts';
 
 @Component({
-  selector: 'timeline-chart',
-  templateUrl: './timeline.component.html',
-  styleUrls: ['./timeline.component.css']
+    selector: 'timeline-chart',
+    templateUrl: './timeline.component.html',
+    styleUrls: ['./timeline.component.css']
 })
 export class TimelineComponent implements OnInit, OnChanges{
-    /* 
+    /*
     Data is expected to be in shape
     [NUMBER_TIMELINE_ROWS, NUMBER_COLUMNS, NUMBER_TIMESTAMPS, 2]
     where NUMBER_TIMELINE_ROWS comes mostly from the number of exports, the index has to match with the vAxes list to find the corresponding alias
     The last dimension is expected to be [timestamp string, value] and has to be sorted descending by timestamp
     */
-    @Input() data = [];
+    @Input() data: any[] = [];
     @Input() chartId = '';
     @Input() hAxisLabel = '';
     @Input() vAxisLabel = '';
@@ -44,6 +44,7 @@ export class TimelineComponent implements OnInit, OnChanges{
     private chartInstance: ApexCharts | null = null;
     private series: any[] = [];
     private colors: string[] = [];
+    isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent.toLowerCase());
 
     apexChartOptions: Partial<ApexChartOptions> = {
         series: this.series,
@@ -63,7 +64,7 @@ export class TimelineComponent implements OnInit, OnChanges{
         },
         plotOptions: {
             bar: {
-                barHeight: '100%',
+                barHeight: '90%',
                 horizontal: true,
                 rangeBarGroupRows: true
             }
@@ -75,7 +76,7 @@ export class TimelineComponent implements OnInit, OnChanges{
             },
             title: {
                 text: ''
-            }
+            },
         },
         yaxis: {
             title: {
@@ -86,8 +87,8 @@ export class TimelineComponent implements OnInit, OnChanges{
         legend: {
             position: 'top',
             show: true,
-            offsetY: 25,
-            offsetX: 50,
+            horizontalAlign: this.isSafari? 'center' : 'right',
+            offsetY: 15,
             showForSingleSeries: true,
         },
         tooltip: {
@@ -149,6 +150,35 @@ export class TimelineComponent implements OnInit, OnChanges{
         }
     }*/
 
+    private getXRange() {
+        const xMax: Date[] = [];
+        const xMin: Date[] = [];
+
+        for (let i = 0; i < this.data.length; i++) {
+            const dataEntity = this.data[i];
+            if (dataEntity.length > 0) {
+                const endSeries = dataEntity[dataEntity.length - 1];
+                const startSeries = dataEntity[0];
+                const maxSeries = endSeries[0][0];
+                const minSeries = startSeries[(startSeries.length - 1)][0];
+                xMin.push(new Date(minSeries));
+                xMax.push(new Date(maxSeries));
+            }
+        }
+
+        if (xMax.length > 0 && xMin.length > 0) {
+            const maxPoint = xMax.reduce(function(a, b) {
+                return a > b ? a : b;
+            });
+            const minPoint = xMin.reduce(function(a, b) {
+                return a < b ? a : b;
+            });
+            return [minPoint.getTime(), maxPoint.getTime()];
+        } else {
+            return [undefined, undefined];
+        }
+    }
+
     private renderTimelineChart(reloadData=true) {
         if (reloadData || this.series.length === 0) {
             const chartData = this.prepareTimelineChartData();
@@ -156,6 +186,22 @@ export class TimelineComponent implements OnInit, OnChanges{
             this.colors = chartData.colors;
             this.apexChartOptions.series = chartData.data;
             this.apexChartOptions.colors = chartData.colors;
+
+            const xRange = this.getXRange();
+            const chartOpt:  Partial<ApexChartOptions> = {
+                xaxis:{
+                    type: 'datetime',
+                    labels: {
+                        datetimeUTC: false,
+                    },
+                    title: {
+                        text: ''
+                    },
+                    min: xRange[0],
+                    max: xRange[1],
+                }
+            };
+            this.apexChartOptions.xaxis = chartOpt.xaxis;
         }
         if(this.enableToolbar && this.apexChartOptions.chart?.toolbar !== undefined) {
             this.apexChartOptions.chart.toolbar.show = true;
@@ -168,8 +214,8 @@ export class TimelineComponent implements OnInit, OnChanges{
         }
         // Ensure valid chart dimensions
         if (this.height && this.width) {
-            this.apexChartOptions.chart!.height = `${0.95*this.height}px`;
-            this.apexChartOptions.chart!.width = `${0.95*this.width}px`;
+            this.apexChartOptions.chart!.height = `${0.9*this.height}px`;
+            this.apexChartOptions.chart!.width = `${0.9*this.width}px`;
         } else {
             console.error('Chart dimensions are not properly set.');
         }
@@ -259,7 +305,7 @@ export class TimelineComponent implements OnInit, OnChanges{
            [3.5 false]
            [2.5 false]
            [1.5 false]
-           => [3.5 false], [1.5 false] 
+           => [3.5 false], [1.5 false]
         */
         const mergedData: any = [];
         data = data[0];
