@@ -234,4 +234,18 @@ export class DeploymentsFogService {
                 catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'v2deleteDeployment', { status: 500 })),
             );
     }
+
+    refreshSync(): Observable<{ status: number }> {
+        return this.http.post(
+                environment.processSyncUrl + '/sync/deployments/' + encodeURIComponent(this.hubId),
+                null,
+                {
+                    responseType: 'text',
+                    observe: 'response',
+                }
+            ).pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'refreshSync', { status: 500 })),
+            );
+    }
 }

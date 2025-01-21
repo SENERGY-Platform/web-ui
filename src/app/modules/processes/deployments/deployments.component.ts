@@ -91,6 +91,8 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         v2deleteDeployment(deploymentId: string): Observable<{ status: number }>;
     };
 
+    refreshSyncF: undefined | null | (()=>Observable<{ status: number }>);
+
     @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
 
     constructor(
@@ -147,9 +149,12 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     selectHub(hub: HubModel | null) {
         this.hub = hub;
         if (hub) {
-            this.deploymentsService = this.fogDeploymentsFactory.withHubId(hub.id);
+            const service = this.fogDeploymentsFactory.withHubId(hub.id);
+            this.deploymentsService = service;
+            this.refreshSyncF = service.refreshSync;
         } else {
             this.deploymentsService = this.platformDeploymentsService;
+            this.refreshSyncF = null;
         }
         this.getRepoItems(true);
     }
@@ -188,6 +193,18 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     navigateToMonitorSection(deployment: DeploymentsModel, activeTab: number) {
         this.router.navigateByUrl('/processes/monitor', { state: { deployment, activeTab, hub: this.hub } });
+    }
+
+    refreshSync(): void {
+        if(this.refreshSyncF) {
+            this.refreshSyncF().subscribe((result) => {
+                if (result.status !== 200) {
+                    this.showSnackBarError('refreshing fog deployment sync!');
+                } else {
+                    this.getRepoItems(true);
+                }
+            });
+        }
     }
 
     deleteDeployment(deployment: DeploymentsModel): void {

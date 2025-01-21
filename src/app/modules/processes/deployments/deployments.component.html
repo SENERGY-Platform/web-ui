@@ -40,6 +40,10 @@
         </button>
         <senergy-sort [sortAttributes]="sortAttributes" class="suffix-sort"
             (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        <button matTooltip="refresh fog deployment sync" mat-icon-button color="accent" (click)="refreshSync()"
+                *ngIf="this.refreshSyncF" class="suffix">
+            <mat-icon>refresh</mat-icon>
+        </button>
     </div>
     <div class="deployments-scroll" #mainPanel>
         <div infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
