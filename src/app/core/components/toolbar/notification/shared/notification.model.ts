@@ -66,6 +66,7 @@ export const notificationTopicDeviceOffline: NotificationTopic = 'device_offline
 export const notificationTopicDeveloper: NotificationTopic = 'developer';
 export const notificationTopicConnector: NotificationTopic = 'connector';
 export const notificationTopicMGW: NotificationTopic = 'mgw';
+export const notificationTopicIncident: NotificationTopic = 'incident';
 export const notificationTopicUnknown: NotificationTopic = 'unknown';
 
 export function getAllTopics(): NotificationTopic[] {
@@ -76,6 +77,7 @@ export function getAllTopics(): NotificationTopic[] {
         notificationTopicDeveloper,
         notificationTopicConnector,
         notificationTopicMGW,
+        notificationTopicIncident,
         notificationTopicUnknown,
     ];
 }
