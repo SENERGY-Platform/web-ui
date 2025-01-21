@@ -91,7 +91,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         v2deleteDeployment(deploymentId: string): Observable<{ status: number }>;
     };
 
-    refreshSyncF: undefined | null | (()=>Observable<{ status: number }>);
+    refreshSyncF: undefined | null | {refreshSync():Observable<{ status: number }>};
 
     @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
 
@@ -151,7 +151,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         if (hub) {
             const service = this.fogDeploymentsFactory.withHubId(hub.id);
             this.deploymentsService = service;
-            this.refreshSyncF = service.refreshSync;
+            this.refreshSyncF = service;
         } else {
             this.deploymentsService = this.platformDeploymentsService;
             this.refreshSyncF = null;
@@ -197,7 +197,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     refreshSync(): void {
         if(this.refreshSyncF) {
-            this.refreshSyncF().subscribe((result) => {
+            this.refreshSyncF.refreshSync().subscribe((result) => {
                 if (result.status !== 200) {
                     this.showSnackBarError('refreshing fog deployment sync!');
                 } else {
