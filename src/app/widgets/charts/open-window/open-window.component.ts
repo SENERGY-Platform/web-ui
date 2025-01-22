@@ -261,29 +261,33 @@ export class OpenWindowComponent implements OnInit, OnChanges {
         );
     }
 
-    getMediumTimeGap(deviceData: any[][]): number {
+    getMedianTimeGap(deviceData: any[][]): number {
+        if (deviceData.length < 2){
+            return 0;
+        }
         const testSet = deviceData.length>1000 ? deviceData.slice(0, 1000) : deviceData;
         let pred = new Date(deviceData[0][0]);
-        const timeGaps = new Map<number, number>();
+        const timeGaps = [];
         for (let i = 1; i < testSet.length; i++) {
             const current = new Date(deviceData[i][0]);
             const diffTime = Math.abs(current.getTime() - pred.getTime());
             const gapSec = Math.floor(diffTime / (1000));
-            if (timeGaps.has(gapSec)) {
-                const num = timeGaps.get(gapSec);
-                if (num !== undefined) {
-                    timeGaps.set(gapSec, num + 1);
-                }
-            } else {
-                timeGaps.set(gapSec, 1);
+            if (gapSec !== 0) {
+                timeGaps.push(gapSec);
             }
             pred = current;
         }
-        const mostKey = [...timeGaps.entries()].reduce((a, e ) => e[1] > a[1] ? e : a);
-        return mostKey[0];
+        if (timeGaps.length > 0) {
+            return timeGaps.slice().sort((a, b) => a - b)[Math.floor(timeGaps.length / 2)]; // median
+        } else {
+            return 0;
+        }
     }
 
     fillDataGaps(deviceData: any[][], timeRequest: QueriesRequestTimeModel, resolution: number = 30): any[][] {
+        if (resolution === 0) {
+            throw new RangeError('Open Window Widget: resolution to fill data gaps must not be 0.');
+        }
         const thresh = this.getGapThreshold(resolution);
         const endTime = timeRequest['end'];
         const startTime = timeRequest['start'];
@@ -333,10 +337,10 @@ export class OpenWindowComponent implements OnInit, OnChanges {
 
     parseDeviceDataToTimeline(deviceData: any[][][], timeRequest: QueriesRequestTimeModel) {
         const deviceDataWithoutColumn = deviceData[0];
-        let filledData = deviceData;
-        if (deviceDataWithoutColumn.length > 1) {
-            const mediumTimeGap = this.getMediumTimeGap(deviceDataWithoutColumn);
-            filledData = this.fillDataGaps(deviceDataWithoutColumn, timeRequest, mediumTimeGap);
+        let filledData = deviceDataWithoutColumn;
+        const medianTimeGap = this.getMedianTimeGap(deviceDataWithoutColumn);
+        if (medianTimeGap > 0) {
+            filledData = this.fillDataGaps(deviceDataWithoutColumn, timeRequest, medianTimeGap);
         } else {
             filledData = this.fillDataGaps(deviceDataWithoutColumn, timeRequest);
         }
