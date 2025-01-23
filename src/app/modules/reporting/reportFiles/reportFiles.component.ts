@@ -42,7 +42,7 @@ export class ReportFilesComponent implements OnInit {
 
     report: ReportModel = {} as ReportModel;
     reportsDataSource = new MatTableDataSource<ReportFileModel>();
-    displayedColumns: string[] = ['id', 'download', 'delete'];
+    displayedColumns: string[] = ['id','type','createdAt', 'download', 'delete'];
     ready = false;
 
     constructor(

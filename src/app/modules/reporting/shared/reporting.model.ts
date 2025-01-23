@@ -15,7 +15,6 @@
  */
 
 import {
-    QueriesRequestTimeModel,
     QueriesRequestV2ElementTimescaleModel
 } from '../../../widgets/shared/export-data.model';
 
@@ -81,6 +80,7 @@ export interface ReportModel {
 export interface ReportFileModel {
     id: string;
     type: string;
+    createdAt: string;
 }
 
 export interface ReportCreateResponseModel {
