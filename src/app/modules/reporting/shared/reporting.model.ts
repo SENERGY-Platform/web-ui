@@ -74,6 +74,8 @@ export interface ReportModel {
     templateId: string;
     data: Map<string, ReportObjectModel>;
     reportFiles: ReportFileModel[];
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface ReportFileModel {

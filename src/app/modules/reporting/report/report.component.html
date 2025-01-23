@@ -16,14 +16,20 @@
 
 <div class="main-panel" fxLayout="column">
     <div class="button-header background-color-accent">
-        <button mat-icon-button matTooltip="Save" (click)="save()" *ngIf="reportId === null">
-            <mat-icon>save</mat-icon>
-        </button>
-        <button mat-icon-button matTooltip="Update" (click)="update()" *ngIf="reportId !== null">
-            <mat-icon>save</mat-icon>
-        </button>
+        <div fxLayout="column">
+            <button mat-icon-button matTooltip="Save" (click)="save()" *ngIf="reportId === null">
+                <mat-icon>save</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Update" (click)="update()" *ngIf="reportId !== null">
+                <mat-icon>save</mat-icon>
+            </button>
+        </div>
     </div>
     <div class="layout-margin" fxLayout="column">
+        <div *ngIf="report.createdAt !== undefined" fxLayout="row" fxLayoutAlign="end center" style="margin-bottom: 10px;">
+            <mat-icon>calendar_today</mat-icon>{{report.createdAt| date:"medium"}}
+            <mat-icon style="margin-left: 6px;">update</mat-icon>{{report.updatedAt| date:"medium"}}
+        </div>
         <mat-card>
             <mat-card-content>
                 <div fxLayout="column">
