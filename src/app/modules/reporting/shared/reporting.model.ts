@@ -73,6 +73,8 @@ export interface ReportModel {
     templateId: string;
     data: Map<string, ReportObjectModel>;
     reportFiles: ReportFileModel[];
+    cron?: string;
+    emailAfterCron: boolean;
     createdAt: string;
     updatedAt: string;
 }

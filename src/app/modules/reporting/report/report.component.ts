@@ -44,6 +44,8 @@ export class ReportComponent implements OnInit {
     templateId: string | null = '';
     requestObject: Map<string, any> = new Map<string, any>();
     allDevices: DeviceInstanceModel[] = [];
+    cron: string | undefined;
+    emailAfterCron = false;
     constructor(
         private route: ActivatedRoute,
         public snackBar: MatSnackBar,
@@ -66,6 +68,8 @@ export class ReportComponent implements OnInit {
                     this.report = resp.data;
                     this.templateId = this.report.templateId;
                     this.reportName = this.report.name;
+                    this.cron = this.report.cron;
+                    this.emailAfterCron = this.report.emailAfterCron;
                     this.template.data = { dataJsonString: '', dataStructured: {} as Map<string, ReportObjectModel>, id: '', name: '' };
                     this.template.data.dataStructured = this.report.data;
                     this.reportingService.getTemplate(this.templateId).subscribe((resp2: TemplateResponseModel | null) => {
@@ -89,7 +93,8 @@ export class ReportComponent implements OnInit {
     create() {
         this.reportingService.createReport({
             id: this.reportId, templateId: this.templateId, name: this.reportName,
-            templateName: this.template.name, data: this.template.data?.dataStructured
+            templateName: this.template.name, data: this.template.data?.dataStructured,
+            cron: this.cron, emailAfterCron: this.emailAfterCron,
         } as ReportModel).subscribe(resp => {
             if (resp !== null) {
                 this.snackBar.open('Report created', 'ReportCreate', {
@@ -111,7 +116,8 @@ export class ReportComponent implements OnInit {
     save() {
         this.reportingService.saveReport({
             templateId: this.templateId, name: this.reportName,
-            templateName: this.template.name, data: this.template.data?.dataStructured
+            templateName: this.template.name, data: this.template.data?.dataStructured,
+            cron: this.cron, emailAfterCron: this.emailAfterCron,
         } as ReportModel).subscribe(resp => {
             if (resp !== null) {
                 if (resp.status === 200) {
@@ -126,7 +132,8 @@ export class ReportComponent implements OnInit {
     update() {
         this.reportingService.updateReport({
             id: this.reportId, templateId: this.templateId, name: this.reportName,
-            templateName: this.template.name, data: this.template.data?.dataStructured
+            templateName: this.template.name, data: this.template.data?.dataStructured,
+            cron: this.cron, emailAfterCron: this.emailAfterCron,
         } as ReportModel).subscribe(resp => {
             if (resp !== null) {
                 if (resp.status === 200) {
