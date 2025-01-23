@@ -200,31 +200,40 @@ export class OpenWindowComponent implements OnInit, OnChanges {
     getTimelineData() {
         this.resize();
 
+        const requestRange = new Map<string, any>();
         const timescaleElements: QueriesRequestV2ElementTimescaleModel[] = [];
         const exports = this.widget.properties?.windowExports || [];
         const time: QueriesRequestTimeModel = {};
         const timeRangeLevel = this.widget.properties.windowTimeRange?.level || '';
         const timeRangeType = this.widget.properties.windowTimeRange?.type || '';
+
+        requestRange.set('timeRangeType', timeRangeType);
         if(timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute) {
             const start = this.widget.properties.windowTimeRange?.start;
             if(start != null && start !== '') {
                 const date = new Date(start);
                 time['start'] =  date.toISOString();
+                requestRange.set('start', date);
             }
             const end = this.widget.properties.windowTimeRange?.end;
             if(end != null && end !== '') {
                 const date = new Date(end);
                 time['end'] =  date.toISOString();
+                requestRange.set('end', date);
             }
         } else if(timeRangeType === ChartsExportRangeTimeTypeEnum.Relative) {
             const last = this.widget.properties.windowTimeRange?.time;
             if(last != null) {
                 time['last'] = last + timeRangeLevel;
+                requestRange.set('timeRangeLevel', timeRangeLevel);
+                requestRange.set('timeCount', last);
             }
         } else if(timeRangeType === ChartsExportRangeTimeTypeEnum.RelativeAhead) {
             const ahead = this.widget.properties.windowTimeRange?.time;
             if(ahead != null) {
                 time['ahead'] = ahead + timeRangeLevel;
+                requestRange.set('timeRangeLevel', timeRangeLevel);
+                requestRange.set('timeCount', ahead);
             }
         }
 
@@ -252,7 +261,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
                     this.message = 'No data';
                     return throwError(() => new Error('no data'));
                 }
-                return this.parseToTimelineFormat(resp, time);
+                return this.parseToTimelineFormat(resp, requestRange);
             }),
             map(chartData => {
                 this.timelineChartData = chartData;
@@ -284,17 +293,78 @@ export class OpenWindowComponent implements OnInit, OnChanges {
         }
     }
 
-    fillDataGaps(deviceData: any[][], timeRequest: QueriesRequestTimeModel, resolution: number = 30): any[][] {
+    calcRelativeTimeRange(timeRangeType: string, timeRangeLevel: string, timeCount: number): [Date, Date] {
+        const now = new Date();
+        if (timeRangeLevel === 'months'){
+            if (timeRangeType==='relative') {
+                const start = new Date(new Date(now).setMonth(now.getMonth() - timeCount));
+                return [start, now];
+            }else{
+                const end = new Date(new Date(now).setMonth(now.getMonth() + timeCount));
+                return [now, end];
+            }
+        } else if (timeRangeLevel === 'y') {
+            if (timeRangeType==='relative') {
+                const start = new Date(new Date(now).setFullYear(now.getFullYear() - timeCount));
+                return [start, now];
+            }else{
+                const end = new Date(new Date(now).setFullYear(now.getFullYear() + timeCount));
+                return [now, end];
+            }
+        } else { // for all other cases fixed delta is sufficient
+            let delta = 0;
+            if (timeRangeLevel === 'ms') {
+                delta = timeCount;
+            } else if (timeRangeLevel === 's') {
+                delta = timeCount * 1000;
+            } else if (timeRangeLevel === 'm') {
+                delta = timeCount * 1000 * 60;
+            } else if (timeRangeLevel === 'h') {
+                delta = timeCount * 1000 * 60 * 60;
+            } else if (timeRangeLevel === 'd') {
+                delta = timeCount * 1000 * 60 * 60 * 24;
+            } else if (timeRangeLevel === 'w') {
+                delta = timeCount * 1000 * 60 * 60 * 24 * 7;
+            } else {
+                throw new Error('Open Window Widget: No valid TimeRangeType given');
+            }
+
+            if (timeRangeType==='relative') {
+                const start = new Date(now.getTime() - delta);
+                return [start, now];
+            } else {
+                const end = new Date(now.getTime() + delta);
+                return [now, end];
+            }
+        }
+    }
+
+    getTimeRange(timeRequest: Map<string,any>): [Date, Date] {
+        if (timeRequest.has('timeRangeType')) {
+            const timeRangeType = timeRequest.get('timeRangeType');
+            if (timeRangeType === 'absolute') {
+                if (timeRequest.has('start')  && timeRequest.has('end')) {
+                    return [timeRequest.get('start') as Date, timeRequest.get('end') as Date];
+                }
+            } else if (timeRangeType === 'relative' || timeRangeType === 'relative ahead') {
+                if (timeRequest.has('timeRangeLevel') && timeRequest.has('timeCount')) {
+                    return this.calcRelativeTimeRange(timeRangeType, timeRequest.get('timeRangeLevel'), timeRequest.get('timeCount'));
+                }
+            }
+        }
+        throw new Error('Open Window Widget: No valid TimeRangeType given');
+    }
+
+    fillDataGaps(deviceData: any[][], timeRequest: Map<string,any>, resolution: number = 30): any[][] {
         if (resolution === 0) {
             throw new RangeError('Open Window Widget: resolution to fill data gaps must not be 0.');
         }
         const thresh = this.getGapThreshold(resolution);
-        const endTime = timeRequest['end'];
-        const startTime = timeRequest['start'];
-        let succ: Date = new Date(endTime as string);
+        const [startTime, endTime] = this.getTimeRange(timeRequest);
+        let succ: Date = endTime;
         const updates: any [][] = [];
         for (let i = 0; i < deviceData.length+1; i++) {
-            const current = i < deviceData.length ? new Date(deviceData[i][0]): new Date(startTime as string);
+            const current = i < deviceData.length ? new Date(deviceData[i][0]): startTime;
             const diffTime = Math.abs(succ.getTime() - current.getTime());
             const gapSec = Math.floor(diffTime / (1000));
             if (gapSec > thresh) {
@@ -335,7 +405,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
         }
     }
 
-    parseDeviceDataToTimeline(deviceData: any[][][], timeRequest: QueriesRequestTimeModel) {
+    parseDeviceDataToTimeline(deviceData: any[][][], timeRequest: Map<string, any>) {
         const deviceDataWithoutColumn = deviceData[0];
         let filledData = deviceDataWithoutColumn;
         const medianTimeGap = this.getMedianTimeGap(deviceDataWithoutColumn);
@@ -347,7 +417,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
         return of([filledData]);
     }
 
-    parseToTimelineFormat(response: any, timeRequest: QueriesRequestTimeModel) {
+    parseToTimelineFormat(response: any, timeRequest: Map<string, any>) {
         const obs: Observable<any[][][]>[] = [];
         response.forEach((dataPerExport: any) => {
             obs.push(this.parseDeviceDataToTimeline(dataPerExport['data'], timeRequest));
