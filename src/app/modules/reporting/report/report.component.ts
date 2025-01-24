@@ -28,6 +28,7 @@ import { ReportingService } from '../shared/reporting.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
+import { number } from 'yargs';
 
 @Component({
     selector: 'senergy-reporting-new',
@@ -45,7 +46,10 @@ export class ReportComponent implements OnInit {
     requestObject: Map<string, any> = new Map<string, any>();
     allDevices: DeviceInstanceModel[] = [];
     cron: string | undefined;
-    emailAfterCron = false;
+    emailReceivers?: string[];
+    emailSubject?: string;
+    emailText?: string;
+    emailHTML?: string;
     constructor(
         private route: ActivatedRoute,
         public snackBar: MatSnackBar,
@@ -56,7 +60,7 @@ export class ReportComponent implements OnInit {
     ) {
         this.reportId = this.route.snapshot.paramMap.get('reportId');
         this.templateId = this.route.snapshot.paramMap.get('templateId');
-        this.deviceInstanceService.getDeviceInstances({limit: 9999, offset: 0}).subscribe((devices) => {
+        this.deviceInstanceService.getDeviceInstances({ limit: 9999, offset: 0 }).subscribe((devices) => {
             this.allDevices = devices.result;
         });
     }
@@ -69,7 +73,10 @@ export class ReportComponent implements OnInit {
                     this.templateId = this.report.templateId;
                     this.reportName = this.report.name;
                     this.cron = this.report.cron;
-                    this.emailAfterCron = this.report.emailAfterCron;
+                    this.emailReceivers = this.report.emailReceivers;
+                    this.emailSubject = this.report.emailSubject;
+                    this.emailText = this.report.emailText;
+                    this.emailHTML = this.report.emailHTML;
                     this.template.data = { dataJsonString: '', dataStructured: {} as Map<string, ReportObjectModel>, id: '', name: '' };
                     this.template.data.dataStructured = this.report.data;
                     this.reportingService.getTemplate(this.templateId).subscribe((resp2: TemplateResponseModel | null) => {
@@ -94,7 +101,10 @@ export class ReportComponent implements OnInit {
         this.reportingService.createReport({
             id: this.reportId, templateId: this.templateId, name: this.reportName,
             templateName: this.template.name, data: this.template.data?.dataStructured,
-            cron: this.cron, emailAfterCron: this.emailAfterCron,
+            cron: this.cron, emailReceivers: this.emailReceivers,
+            emailSubject: this.emailSubject,
+            emailText: this.emailText,
+            emailHTML: this.emailHTML,
         } as ReportModel).subscribe(resp => {
             if (resp !== null) {
                 this.snackBar.open('Report created', 'ReportCreate', {
@@ -117,7 +127,10 @@ export class ReportComponent implements OnInit {
         this.reportingService.saveReport({
             templateId: this.templateId, name: this.reportName,
             templateName: this.template.name, data: this.template.data?.dataStructured,
-            cron: this.cron, emailAfterCron: this.emailAfterCron,
+            cron: this.cron, emailReceivers: this.emailReceivers,
+            emailSubject: this.emailSubject,
+            emailText: this.emailText,
+            emailHTML: this.emailHTML,
         } as ReportModel).subscribe(resp => {
             if (resp !== null) {
                 if (resp.status === 200) {
@@ -133,7 +146,10 @@ export class ReportComponent implements OnInit {
         this.reportingService.updateReport({
             id: this.reportId, templateId: this.templateId, name: this.reportName,
             templateName: this.template.name, data: this.template.data?.dataStructured,
-            cron: this.cron, emailAfterCron: this.emailAfterCron,
+            cron: this.cron, emailReceivers: this.emailReceivers,
+            emailSubject: this.emailSubject,
+            emailText: this.emailText,
+            emailHTML: this.emailHTML,
         } as ReportModel).subscribe(resp => {
             if (resp !== null) {
                 if (resp.status === 200) {
@@ -143,5 +159,24 @@ export class ReportComponent implements OnInit {
                 }
             }
         });
+    }
+
+    trackByIndex(index: number, _: any) {
+        return index;
+    }
+
+    addEmailAddress() {
+        if (this.emailReceivers === undefined || this.emailReceivers === null) {
+            this.emailReceivers = [''];
+        } else {
+            this.emailReceivers.push('');
+        }
+    }
+
+    deleteEmailAddress(i: number) {
+        if (this.emailReceivers === undefined || this.emailReceivers === null) {
+            return;
+        }
+        this.emailReceivers.splice(i, 1);
     }
 }

@@ -41,14 +41,14 @@ export interface TemplateDataModel {
 }
 
 export interface ReportObjectModel {
-     name: string;
-     valueType: string;
-     value: any | undefined;
-     fields: Map<string, ReportObjectModel> | undefined;
-     children: Map<string, ReportObjectModel> | undefined;
-     length: number | undefined;
-     query?:  QueriesRequestV2ElementTimescaleModel | undefined;
-     queryOptions?: ReportObjectModelQueryOptions;
+    name: string;
+    valueType: string;
+    value: any | undefined;
+    fields: Map<string, ReportObjectModel> | undefined;
+    children: Map<string, ReportObjectModel> | undefined;
+    length: number | undefined;
+    query?: QueriesRequestV2ElementTimescaleModel | undefined;
+    queryOptions?: ReportObjectModelQueryOptions;
 }
 
 export interface ReportObjectModelQueryOptions {
@@ -74,7 +74,10 @@ export interface ReportModel {
     data: Map<string, ReportObjectModel>;
     reportFiles: ReportFileModel[];
     cron?: string;
-    emailAfterCron: boolean;
+    emailReceivers?: string[];
+    emailSubject?: string;
+    emailText?: string;
+    emailHTML?: string;
     createdAt: string;
     updatedAt: string;
 }

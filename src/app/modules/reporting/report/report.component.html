@@ -46,7 +46,32 @@
                         <input matInput [(ngModel)]="cron">
                         <mat-error senergyError label="Cron Schedule"></mat-error>
                     </mat-form-field>
-                    <mat-checkbox [(ngModel)]="emailAfterCron">Email Report after Cronjob</mat-checkbox>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>E-Mail Subject</mat-label>
+                        <input matInput [(ngModel)]="emailSubject">
+                        <mat-error senergyError label="E-Mail Subject"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>E-Mail Text</mat-label>
+                        <textarea  matInput [(ngModel)]="emailText"></textarea>
+                        <mat-error senergyError label="E-Mail Text"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>E-Mail HTML</mat-label>
+                        <textarea  matInput [(ngModel)]="emailHTML"></textarea>
+                        <mat-error senergyError label="E-Mail HTML"></mat-error>
+                    </mat-form-field>
+                    <div *ngFor="let email of emailReceivers; trackBy: trackByIndex; let i = index">
+                        <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-label>E-Mail Address</mat-label>
+                            <input type="email" matInput [(ngModel)]="emailReceivers![i]">
+                            <mat-error senergyError label="E-Mail Receiver"></mat-error>
+                        </mat-form-field>
+                        <button mat-icon-button style="padding-top: 1.5rem;" (click)="deleteEmailAddress(i)">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                    </div>
+                    <button mat-stroked-button (click)="addEmailAddress()">Add E-Mail Address</button>
                 </div>
             </mat-card-content>
         </mat-card>
