@@ -14,43 +14,43 @@
  * limitations under the License.
  */
 
-import {EventEmitter, Injectable, OnDestroy, Output} from '@angular/core';
+import { EventEmitter, Injectable, OnDestroy, Output } from '@angular/core';
 
-import {SidenavSectionModel} from './sidenav-section.model';
-import {SidenavPageModel} from './sidenav-page.model';
-import {WaitingRoomService} from '../../../../modules/devices/waiting-room/shared/waiting-room.service';
-import {debounceTime} from 'rxjs/operators';
-import {WaitingRoomEventTypeAuthOk} from '../../../../modules/devices/waiting-room/shared/waiting-room.model';
-import {environment} from '../../../../../environments/environment';
-import {AuthorizationService} from 'src/app/core/services/authorization.service';
-import {SwaggerService} from 'src/app/modules/api-doc/shared/swagger/swagger.service';
-import {Subject} from 'rxjs';
-import {FlowRepoService} from 'src/app/modules/data/flow-repo/shared/flow-repo.service';
-import {OperatorRepoService} from 'src/app/modules/data/operator-repo/shared/operator-repo.service';
-import {PipelineRegistryService} from 'src/app/modules/data/pipeline-registry/shared/pipeline-registry.service';
-import {DesignerHelperService} from 'src/app/modules/processes/designer/shared/designer-helper.service';
-import {ProcessRepoService} from 'src/app/modules/processes/process-repo/shared/process-repo.service';
-import {DeploymentsService} from 'src/app/modules/processes/deployments/shared/deployments.service';
-import {MonitorService} from 'src/app/modules/processes/monitor/shared/monitor.service';
-import {SmartServiceDesignsService} from 'src/app/modules/smart-services/designs/shared/designs.service';
-import {ExportService} from 'src/app/modules/exports/shared/export.service';
-import {BrokerExportService} from 'src/app/modules/exports/shared/broker-export.service';
-import {ImportTypesService} from 'src/app/modules/imports/import-types/shared/import-types.service';
-import {ImportInstancesService} from 'src/app/modules/imports/import-instances/shared/import-instances.service';
-import {FunctionsService} from 'src/app/modules/metadata/functions/shared/functions.service';
-import {AspectsService} from 'src/app/modules/metadata/aspects/shared/aspects.service';
-import {ConceptsService} from 'src/app/modules/metadata/concepts/shared/concepts.service';
-import {CharacteristicsService} from 'src/app/modules/metadata/characteristics/shared/characteristics.service';
-import {DeviceTypeService} from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
-import {DeviceClassesService} from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
-import {LocationsService} from 'src/app/modules/devices/locations/shared/locations.service';
-import {DeviceGroupsService} from 'src/app/modules/devices/device-groups/shared/device-groups.service';
-import {DeviceInstancesService} from 'src/app/modules/devices/device-instances/shared/device-instances.service';
-import {NetworksService} from 'src/app/modules/devices/networks/shared/networks.service';
-import {ProcessIoService} from 'src/app/modules/processes/process-io/shared/process-io.service';
-import {DashboardService} from 'src/app/modules/dashboard/shared/dashboard.service';
-import {CostService} from 'src/app/modules/cost/shared/cost.service';
-import {LadonService} from '../../../../modules/admin/permissions/shared/services/ladom.service';
+import { SidenavSectionModel } from './sidenav-section.model';
+import { SidenavPageModel } from './sidenav-page.model';
+import { WaitingRoomService } from '../../../../modules/devices/waiting-room/shared/waiting-room.service';
+import { debounceTime } from 'rxjs/operators';
+import { WaitingRoomEventTypeAuthOk } from '../../../../modules/devices/waiting-room/shared/waiting-room.model';
+import { environment } from '../../../../../environments/environment';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import { SwaggerService } from 'src/app/modules/api-doc/shared/swagger/swagger.service';
+import { Subject } from 'rxjs';
+import { FlowRepoService } from 'src/app/modules/data/flow-repo/shared/flow-repo.service';
+import { OperatorRepoService } from 'src/app/modules/data/operator-repo/shared/operator-repo.service';
+import { PipelineRegistryService } from 'src/app/modules/data/pipeline-registry/shared/pipeline-registry.service';
+import { DesignerHelperService } from 'src/app/modules/processes/designer/shared/designer-helper.service';
+import { ProcessRepoService } from 'src/app/modules/processes/process-repo/shared/process-repo.service';
+import { DeploymentsService } from 'src/app/modules/processes/deployments/shared/deployments.service';
+import { MonitorService } from 'src/app/modules/processes/monitor/shared/monitor.service';
+import { SmartServiceDesignsService } from 'src/app/modules/smart-services/designs/shared/designs.service';
+import { ExportService } from 'src/app/modules/exports/shared/export.service';
+import { BrokerExportService } from 'src/app/modules/exports/shared/broker-export.service';
+import { ImportTypesService } from 'src/app/modules/imports/import-types/shared/import-types.service';
+import { ImportInstancesService } from 'src/app/modules/imports/import-instances/shared/import-instances.service';
+import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
+import { AspectsService } from 'src/app/modules/metadata/aspects/shared/aspects.service';
+import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
+import { CharacteristicsService } from 'src/app/modules/metadata/characteristics/shared/characteristics.service';
+import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
+import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
+import { LocationsService } from 'src/app/modules/devices/locations/shared/locations.service';
+import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
+import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
+import { NetworksService } from 'src/app/modules/devices/networks/shared/networks.service';
+import { ProcessIoService } from 'src/app/modules/processes/process-io/shared/process-io.service';
+import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
+import { CostService } from 'src/app/modules/cost/shared/cost.service';
+import { LadonService } from '../../../../modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
@@ -94,7 +94,7 @@ export class SidenavService implements OnDestroy {
         private dashboardService: DashboardService,
         private costService: CostService,
         private ladonService: LadonService
-    ) {}
+    ) { }
 
     ngOnDestroy() {
         if (this.waitingRoomEventCloser) {
@@ -119,7 +119,7 @@ export class SidenavService implements OnDestroy {
             const section = check[1];
             const thisArg = check[2];
 
-            if(checkFunction.call(thisArg)) {
+            if (checkFunction.call(thisArg)) {
                 sectionsWithAuthorization.push(section);
             }
         });
@@ -139,7 +139,7 @@ export class SidenavService implements OnDestroy {
 
     setupDevSection(): SidenavSectionModel {
         const sections: SidenavPageModel[] = [];
-        if(this.swaggerService.userHasReadAuthorization()) {
+        if (this.swaggerService.userHasReadAuthorization()) {
             sections.push(new SidenavPageModel('API', 'link', 'api', '/dev/api'));
         }
 
@@ -148,7 +148,7 @@ export class SidenavService implements OnDestroy {
 
     setupAdminSection(): SidenavSectionModel {
         let sections: SidenavPageModel[] = [];
-        if(this.authService.userIsAdmin()) {
+        if (this.authService.userIsAdmin()) {
             sections = [
                 new SidenavPageModel('Authorization', 'link', 'security', '/admin/authorization'),
                 new SidenavPageModel('Timescale Rules', 'link', 'rule', '/admin/timescale-rules'),
@@ -167,7 +167,7 @@ export class SidenavService implements OnDestroy {
             [this.processMonitorService.userHasReadAuthorization, new SidenavPageModel('Monitor', 'link', 'search', '/processes/monitor'), this.processMonitorService]
         ];
 
-        if(environment.processIoUrl) {
+        if (environment.processIoUrl) {
             checks.push([this.processIOService.userHasReadAuthorization, new SidenavPageModel('IO', 'link', 'table_chart', '/processes/io'), this.processIOService]);
         }
 
@@ -242,7 +242,7 @@ export class SidenavService implements OnDestroy {
             [this.locationService.userHasReadAuthorization, new SidenavPageModel('Locations', 'link', 'place', '/devices/locations'), this.locationService]
         ]);
 
-        if(this.waitingRoomService.userHasReadAuthorization()) {
+        if (this.waitingRoomService.userHasReadAuthorization()) {
             sections.push(this.setupWaitingRoom());
         }
         return new SidenavSectionModel('Device Management', 'toggle', 'devices', '/devices', sections);
@@ -270,14 +270,14 @@ export class SidenavService implements OnDestroy {
     }
 
     setupReportsSection(): SidenavSectionModel {
-        const authorizations = this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl);
-        if (authorizations.GET) {
-            return new SidenavSectionModel('Reporting', 'toggle', 'summarize', '/reporting', [
-                new SidenavPageModel('Templates', 'link', 'list', '/reporting/templates'),
-                new SidenavPageModel('Reports', 'link', 'list', '/reporting/reports')
-            ]);
+        const pages: SidenavPageModel[] = [];
+        if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/templates').GET) {
+            pages.push(new SidenavPageModel('Templates', 'link', 'list', '/reporting/templates'));
         }
-        return new SidenavSectionModel('Reporting', 'toggle', 'summarize', '/reporting', []);
+        if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/report').GET) {
+            pages.push(new SidenavPageModel('Reports', 'link', 'list', '/reporting/reports'));
+        }
+        return new SidenavSectionModel('Reporting', 'toggle', 'summarize', '/reporting', pages);
     }
 
     loadSections(): SidenavSectionModel[] {
@@ -295,15 +295,15 @@ export class SidenavService implements OnDestroy {
             this.setupReportsSection()
         ];
 
-        if(this.dashboardService.userHasReadDashboardAuthorization()) {
+        if (this.dashboardService.userHasReadDashboardAuthorization()) {
             sections.push(new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', []));
         }
 
         // Just keep Main sections that have at least one subsection
         sections = sections.filter(section => section.pages.length > 0 || section.name === 'Dashboard');
 
-        const sortedSectionTitles = ['Dashboard','Reporting', 'Smart Services', 'Processes', 'Exports', 'Analytics', 'Device Management', 'Imports', 'Cost', 'Metadata', 'Admin', 'Developer'];
-        sections.sort(function(section1, section2) {
+        const sortedSectionTitles = ['Dashboard', 'Reporting', 'Smart Services', 'Processes', 'Exports', 'Analytics', 'Device Management', 'Imports', 'Cost', 'Metadata', 'Admin', 'Developer'];
+        sections.sort(function (section1, section2) {
             return sortedSectionTitles.indexOf(section1.name) - sortedSectionTitles.indexOf(section2.name);
         });
 

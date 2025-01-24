@@ -16,8 +16,8 @@
  *
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { AllowedMethods, AuthorizationRequest, AuthorizationRequestResponse, PermissionApiModel, permissionApiToPermission, PermissionModel, PermissionTestResponse, permissionToPermissionApi } from '../permission.model';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
@@ -70,14 +70,14 @@ export class LadonService {
     public deletePolicies(policies: PermissionModel[]): Observable<unknown> {
         const ids: string[] = [];
         policies.forEach((p) => ids.push(p.id));
-        return this.http.request('delete', this.baseUrl + '/policies', {body: ids});
+        return this.http.request('delete', this.baseUrl + '/policies', { body: ids });
     }
 
     public test(test: { clientID: string; userId: string; roles: string[]; username: string; target_method: string; target_uri: string }):
         Observable<PermissionTestResponse> {
 
         return this.http.post
-            < {GET: boolean; POST: boolean; PUT: boolean; PATCH: boolean; DELETE: boolean; HEAD: boolean} > (this.baseUrl + '/test', test);
+            <{ GET: boolean; POST: boolean; PUT: boolean; PATCH: boolean; DELETE: boolean; HEAD: boolean }>(this.baseUrl + '/test', test);
     }
 
     public userIsAuthorized(requests: AuthorizationRequest[]): Observable<AuthorizationRequestResponse> {
@@ -143,14 +143,17 @@ export class LadonService {
             environment.costApiUrl + '/estimation/import',
             environment.billingApiUrl + '/billing-components',
             environment.timescaleAPIURL + '/usage',
-            environment.reportEngineUrl,
+            environment.reportEngineUrl + '/templates',
+            environment.reportEngineUrl + '/report/create',
+            environment.reportEngineUrl + '/report',
+            environment.reportEngineUrl + '/report/file',
         ];
 
         serviceEndpoints.forEach(endpointURL => {
             const endpoint = new URL(endpointURL).pathname;
 
             methods.forEach(method => {
-                requests.push({endpoint, method});
+                requests.push({ endpoint, method });
             });
         });
 
@@ -167,7 +170,7 @@ export class LadonService {
                         HEAD: true,
                     };
 
-                    methods.forEach(function(method, methodIndex) {
+                    methods.forEach(function (method, methodIndex) {
                         const indexOfEndpointMethodRule = endpointIndex * 5 + methodIndex;
                         allRules[endpointURL][method] = authResponse.allowed[indexOfEndpointMethodRule];
                     });

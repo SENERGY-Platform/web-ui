@@ -22,6 +22,8 @@ import { UtilService } from 'src/app/core/services/util.service';
 import {TemplateListResponseModel, TemplateModel} from '../shared/reporting.model';
 import {ReportingService} from '../shared/reporting.service';
 import {MatTableDataSource} from '@angular/material/table';
+import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'senergy-reporting-templates',
@@ -34,16 +36,20 @@ export class TemplatesComponent implements OnInit {
 
     templates: TemplateModel[] = [] as TemplateModel[];
     templatesDataSource = new MatTableDataSource<TemplateModel>();
-    displayedColumns: string[] = ['id', 'name', 'type', 'edit'];
+    displayedColumns: string[] = ['id', 'name', 'type'];
     ready = false;
 
     constructor(
         public snackBar: MatSnackBar,
         public utilsService: UtilService,
         private reportingService: ReportingService,
+        private ladonService: LadonService,
     ) {}
 
     ngOnInit() {
+        if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/report/create').POST) {
+            this.displayedColumns.push('create');
+        }
         this.reportingService.getTemplates().subscribe((resp: TemplateListResponseModel | null) => {
             if (resp !== null) {
                 this.templates = resp.data || [];

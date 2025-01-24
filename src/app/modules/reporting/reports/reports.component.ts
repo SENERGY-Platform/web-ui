@@ -25,6 +25,8 @@ import {
 } from '../shared/reporting.model';
 import {ReportingService} from '../shared/reporting.service';
 import {MatTableDataSource} from '@angular/material/table';
+import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'senergy-reporting-reports',
@@ -37,16 +39,26 @@ export class ReportsComponent implements OnInit {
 
     reports: ReportModel[] = [] as ReportModel[];
     reportsDataSource = new MatTableDataSource<ReportModel>();
-    displayedColumns: string[] = ['id', 'name','createdAt','updatedAt', 'files', 'edit', 'delete'];
+    displayedColumns: string[] = ['id', 'name','createdAt','updatedAt'];
     ready = false;
 
     constructor(
         public snackBar: MatSnackBar,
         public utilsService: UtilService,
         private reportingService: ReportingService,
+        private ladonService: LadonService,
     ) {}
 
     ngOnInit() {
+        if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/report/file').GET) {
+            this.displayedColumns.push('files');
+        }
+        if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/report').PUT) {
+            this.displayedColumns.push('edit');
+        }
+        if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/report').DELETE) {
+            this.displayedColumns.push('delete');
+        }
         this.reportingService.getReports().subscribe((resp: ReportListResponseModel | null) => {
             if (resp !== null) {
                 this.reports = resp.data || [];

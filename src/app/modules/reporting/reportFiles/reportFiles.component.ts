@@ -28,6 +28,8 @@ import {MatTableDataSource} from '@angular/material/table';
 import {ActivatedRoute} from '@angular/router';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {saveAs} from 'file-saver';
+import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'senergy-reporting-report-files',
@@ -42,7 +44,7 @@ export class ReportFilesComponent implements OnInit {
 
     report: ReportModel = {} as ReportModel;
     reportsDataSource = new MatTableDataSource<ReportFileModel>();
-    displayedColumns: string[] = ['id','type','createdAt', 'download', 'delete'];
+    displayedColumns: string[] = ['id','type','createdAt', 'download'];
     ready = false;
 
     constructor(
@@ -51,11 +53,15 @@ export class ReportFilesComponent implements OnInit {
         private errorHandlerService: ErrorHandlerService,
         public utilsService: UtilService,
         private reportingService: ReportingService,
+        private ladonService: LadonService,
     ) {
         this.reportId = this.route.snapshot.paramMap.get('reportId');
     }
 
     ngOnInit() {
+        if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/report/file').DELETE) {
+            this.displayedColumns.push('delete');
+        }
         if (this.reportId != null) {
             this.reportingService.getReport(this.reportId).subscribe((resp: ReportResponseModel | null) => {
                 if (resp !== null) {
