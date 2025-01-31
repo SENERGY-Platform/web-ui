@@ -28,8 +28,6 @@ import { ReportingService } from '../shared/reporting.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
-import { number } from 'yargs';
-import {Observable} from 'rxjs';
 
 @Component({
     selector: 'senergy-reporting-new',
@@ -100,6 +98,7 @@ export class ReportComponent implements OnInit {
     }
 
     create() {
+        this.ready=false;
         this.reportingService.createReport({
             id: this.reportId, templateId: this.templateId, name: this.reportName,
             templateName: this.template.name, data: this.template.data?.dataStructured,
@@ -112,6 +111,7 @@ export class ReportComponent implements OnInit {
                 this.snackBar.open('Report created', 'ReportCreate', {
                     duration: 2000
                 });
+                this.ready=true;
                 if (this.reportId == null) {
                     this.reportId = resp.id;
                     this.router.navigateByUrl('/reporting/edit/' + this.reportId);
@@ -123,7 +123,7 @@ export class ReportComponent implements OnInit {
     /**
      * Saves the current report to the reporting service.
      *
-     * @return {void} No return value, but opens a snackbar with a success message if the report is saved successfully.
+     * No return value, but opens a snackbar with a success message if the report is saved successfully.
      */
     save() {
         this.reportingService.saveReport({
