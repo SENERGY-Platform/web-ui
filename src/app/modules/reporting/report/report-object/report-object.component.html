@@ -61,7 +61,7 @@
                     </senergy-select-search>
                     <mat-error senergyError label="Service"></mat-error>
                 </mat-form-field>
-                <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
+                <mat-form-field fxFill color="accent" appearance="outline">
                     <mat-label>Path</mat-label>
                     <input matInput [(ngModel)]="data.query!.columns[0].name" placeholder="Choose or write yourself"
                         [matAutocomplete]="auto" />
@@ -71,13 +71,27 @@
                     </mat-autocomplete>
                     <mat-error senergyError label="Path"></mat-error>
                 </mat-form-field>
-                <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
-                    <mat-label>Field Group Type</mat-label>
-                    <mat-select [(ngModel)]="data.query!.columns[0].groupType">
-                        <mat-option *ngFor="let type of fieldGroupTypes" [value]="type">{{type}}</mat-option>
-                    </mat-select>
-                    <mat-error senergyError label="Field Group Type"></mat-error>
-                </mat-form-field>
+                <div role="group" class="form-grouping">
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Field Group Type</mat-label>
+                        <mat-select [(ngModel)]="data.query!.columns[0].groupType">
+                            <mat-option *ngFor="let type of fieldGroupTypes" [value]="type">{{type}}</mat-option>
+                        </mat-select>
+                        <mat-error senergyError label="Field Group Type"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Sorting Index</mat-label>
+                            <input matInput type="number" [(ngModel)]="data.query!.orderColumnIndex">
+                        <mat-error senergyError label="Sorting"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Sorting</mat-label>
+                        <mat-select [(ngModel)]="data.query!.orderDirection">
+                            <mat-option *ngFor="let type of sortTypes" [value]="type">{{type}}</mat-option>
+                        </mat-select>
+                        <mat-error senergyError label="Sorting"></mat-error>
+                    </mat-form-field>
+                </div>
                 <div role="group" class="form-grouping">
                     <mat-form-field fxFlex color="accent" appearance="outline">
                         <mat-label>Grouping Time</mat-label>

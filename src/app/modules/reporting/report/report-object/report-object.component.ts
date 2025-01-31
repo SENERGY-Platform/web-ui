@@ -60,8 +60,8 @@ export class ReportObjectComponent implements OnInit, OnChanges {
     queryService: DeviceTypeServiceModel = {} as DeviceTypeServiceModel;
     queryServicePaths: string[] = [];
     queryDeviceType: DeviceTypeModel = {} as DeviceTypeModel;
-    queryPreview = '';
     fieldGroupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median', 'time-weighted-mean-linear', 'time-weighted-mean-locf'];
+    sortTypes = ['asc', 'desc'];
     groupingTime = {number: '', unit: ''};
     timeUnits = [
         new TimeUnit('ms', 'Milliseconds'),
