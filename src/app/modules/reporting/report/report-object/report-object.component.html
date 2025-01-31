@@ -31,149 +31,151 @@
             {{queryDevice.display_name || queryDevice?.display_name}}/{{queryService.name}}/{{data.query!.columns[0].name}}
         </mat-panel-description>
     </mat-expansion-panel-header>
-    <div fxLayout="column">
-        <div fxLayout="row">
-            <mat-radio-group
-                *ngIf="data.valueType === 'string' || data.valueType === 'float64' || data.valueType === 'array'"
-                [(ngModel)]="inputType" (ngModelChange)="changeInputType()" aria-label="Select an option">
-                <mat-radio-button value="value">Value</mat-radio-button>
-                <mat-radio-button value="query">Query</mat-radio-button>
-            </mat-radio-group>
-            <button *ngIf="inputType === 'query' && data.query !== undefined" mat-icon-button matTooltip="Preview Query"
-                (click)="previewQuery()">
-                <mat-icon>preview</mat-icon>
-            </button>
-        </div>
-        <div *ngIf="inputType === 'query' && data.query !== undefined" fxLayout="column">
-            <mat-form-field fxFlex color="accent" appearance="outline">
-                <mat-label>Device</mat-label>
-                <senergy-select-search [options]="allDevices" [getOptionViewValue]="getDeviceName"
-                    ngDefaultControl (ngModelChange)="queryDeviceChanged($event).subscribe()" [(ngModel)]="queryDevice"
-                    [multiple]="false">
-                </senergy-select-search>
-                <mat-error senergyError label="Device"></mat-error>
-            </mat-form-field>
-            <mat-form-field fxFlex color="accent" appearance="outline">
-                <mat-label>Service</mat-label>
-                <senergy-select-search (ngModelChange)="queryServiceChanged($event)"
-                    [(ngModel)]="queryService" [options]="queryDeviceType.services" useOptionViewProperty="name">
-                </senergy-select-search>
-                <mat-error senergyError label="Service"></mat-error>
-            </mat-form-field>
-            <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
-                <mat-label>Path</mat-label>
-                <input matInput [(ngModel)]="data.query!.columns[0].name" placeholder="Choose or write yourself"
-                    [matAutocomplete]="auto" />
-                <mat-autocomplete #auto="matAutocomplete">
-                    <mat-option *ngFor="let path of queryServicePaths | keyvalue"
-                        [value]="path.value">{{path.value}}</mat-option>
-                </mat-autocomplete>
-                <mat-error senergyError label="Path"></mat-error>
-            </mat-form-field>
-            <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
-                <mat-label>Field Group Type</mat-label>
-                <mat-select [(ngModel)]="data.query!.columns[0].groupType">
-                    <mat-option *ngFor="let type of fieldGroupTypes" [value]="type">{{type}}</mat-option>
-                </mat-select>
-                <mat-error senergyError label="Field Group Type"></mat-error>
-            </mat-form-field>
-            <div role="group" class="form-grouping">
-                <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>Grouping Time</mat-label>
-                    <input matInput [(ngModel)]="groupingTime.number" (ngModelChange)="setGroupingTime()">
-                    <mat-error senergyError label="Grouping Time"></mat-error>
-                </mat-form-field>
-                <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>Grouping Time Unit</mat-label>
-                    <mat-select [(ngModel)]="groupingTime.unit" (ngModelChange)="setGroupingTime()">
-                        <mat-option *ngFor="let units of timeUnits" [value]="units.unit">{{units.desc}}</mat-option>
-                    </mat-select>
-                    <mat-error senergyError label="Grouping Time Unit"></mat-error>
-                </mat-form-field>
+    <ng-template matExpansionPanelContent>
+        <div fxLayout="column">
+            <div fxLayout="row">
+                <mat-radio-group
+                    *ngIf="data.valueType === 'string' || data.valueType === 'float64' || data.valueType === 'array'"
+                    [(ngModel)]="inputType" (ngModelChange)="changeInputType()" aria-label="Select an option">
+                    <mat-radio-button value="value">Value</mat-radio-button>
+                    <mat-radio-button value="query">Query</mat-radio-button>
+                </mat-radio-group>
+                <button *ngIf="inputType === 'query' && data.query !== undefined" mat-icon-button matTooltip="Preview Query"
+                    (click)="previewQuery()">
+                    <mat-icon>preview</mat-icon>
+                </button>
             </div>
-            <div role="group" class="form-grouping">
+            <div *ngIf="inputType === 'query' && data.query !== undefined" fxLayout="column">
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>Time Frame</mat-label>
-                    <input matInput [(ngModel)]="timeframe.number" (ngModelChange)="setTimeframe()">
-                    <mat-error senergyError label="Time Frame"></mat-error>
+                    <mat-label>Device</mat-label>
+                    <senergy-select-search [options]="allDevices" [getOptionViewValue]="getDeviceName"
+                        ngDefaultControl (ngModelChange)="queryDeviceChanged($event).subscribe()" [(ngModel)]="queryDevice"
+                        [multiple]="false">
+                    </senergy-select-search>
+                    <mat-error senergyError label="Device"></mat-error>
                 </mat-form-field>
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>Time Frame Unit</mat-label>
-                    <mat-select [(ngModel)]="timeframe.unit" (ngModelChange)="setTimeframe()">
-                        <mat-option *ngFor="let units of timeUnits" [value]="units.unit">{{units.desc}}</mat-option>
+                    <mat-label>Service</mat-label>
+                    <senergy-select-search (ngModelChange)="queryServiceChanged($event)"
+                        [(ngModel)]="queryService" [options]="queryDeviceType.services" useOptionViewProperty="name">
+                    </senergy-select-search>
+                    <mat-error senergyError label="Service"></mat-error>
+                </mat-form-field>
+                <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
+                    <mat-label>Path</mat-label>
+                    <input matInput [(ngModel)]="data.query!.columns[0].name" placeholder="Choose or write yourself"
+                        [matAutocomplete]="auto" />
+                    <mat-autocomplete #auto="matAutocomplete">
+                        <mat-option *ngFor="let path of queryServicePaths | keyvalue"
+                            [value]="path.value">{{path.value}}</mat-option>
+                    </mat-autocomplete>
+                    <mat-error senergyError label="Path"></mat-error>
+                </mat-form-field>
+                <mat-form-field fxFill color="accent" appearance="outline" *ngIf="data.query.columns !== undefined">
+                    <mat-label>Field Group Type</mat-label>
+                    <mat-select [(ngModel)]="data.query!.columns[0].groupType">
+                        <mat-option *ngFor="let type of fieldGroupTypes" [value]="type">{{type}}</mat-option>
                     </mat-select>
-                    <mat-error senergyError label="Time Frame Unit"></mat-error>
+                    <mat-error senergyError label="Field Group Type"></mat-error>
                 </mat-form-field>
+                <div role="group" class="form-grouping">
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Grouping Time</mat-label>
+                        <input matInput [(ngModel)]="groupingTime.number" (ngModelChange)="setGroupingTime()">
+                        <mat-error senergyError label="Grouping Time"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Grouping Time Unit</mat-label>
+                        <mat-select [(ngModel)]="groupingTime.unit" (ngModelChange)="setGroupingTime()">
+                            <mat-option *ngFor="let units of timeUnits" [value]="units.unit">{{units.desc}}</mat-option>
+                        </mat-select>
+                        <mat-error senergyError label="Grouping Time Unit"></mat-error>
+                    </mat-form-field>
+                </div>
+                <div role="group" class="form-grouping">
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Time Frame</mat-label>
+                        <input matInput [(ngModel)]="timeframe.number" (ngModelChange)="setTimeframe()">
+                        <mat-error senergyError label="Time Frame"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Time Frame Unit</mat-label>
+                        <mat-select [(ngModel)]="timeframe.unit" (ngModelChange)="setTimeframe()">
+                            <mat-option *ngFor="let units of timeUnits" [value]="units.unit">{{units.desc}}</mat-option>
+                        </mat-select>
+                        <mat-error senergyError label="Time Frame Unit"></mat-error>
+                    </mat-form-field>
+                </div>
+                <div role="group" class="form-grouping">
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Start Date</mat-label>
+                        <input matInput [matDatepicker]="picker_start" [(ngModel)]="data.query!.time!.start"
+                               (ngModelChange)="setStartOffset()">
+                        <mat-hint>DD/MM/YYYY</mat-hint>
+                        <mat-datepicker-toggle matIconSuffix [for]="picker_start"></mat-datepicker-toggle>
+                        <mat-datepicker #picker_start></mat-datepicker>
+                        <mat-error senergyError label="Start Date"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field>
+                        <mat-label>Rolling Start Date</mat-label>
+                        <mat-select [(ngModel)]="data.queryOptions!.rollingStartDate"
+                                    (ngModelChange)="setStartOffset()">
+                            <mat-option [value]="''"></mat-option>
+                            <mat-option [value]="'month'">Monat</mat-option>
+                            <mat-option [value]="'year'">Jahr</mat-option>
+                        </mat-select>
+                        <mat-error senergyError label="Rolling Start Date"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>End Date</mat-label>
+                        <input matInput [matDatepicker]="picker_end" [(ngModel)]="data.query!.time!.end"
+                               (ngModelChange)="setEndOffset()">
+                        <mat-hint>DD/MM/YYYY</mat-hint>
+                        <mat-datepicker-toggle matIconSuffix [for]="picker_end"></mat-datepicker-toggle>
+                        <mat-datepicker #picker_end></mat-datepicker>
+                        <mat-error senergyError label="End Date"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field>
+                        <mat-label>Rolling End Date</mat-label>
+                        <mat-select [(ngModel)]="data.queryOptions!.rollingEndDate"
+                                    (ngModelChange)="setEndOffset()">
+                            <mat-option [value]="''"></mat-option>
+                            <mat-option [value]="'month'">Monat</mat-option>
+                            <mat-option [value]="'year'">Jahr</mat-option>
+                        </mat-select>
+                        <mat-error senergyError label="Rolling End Date"></mat-error>
+                    </mat-form-field>
+                </div>
             </div>
-            <div role="group" class="form-grouping">
-                <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>Start Date</mat-label>
-                    <input matInput [matDatepicker]="picker_start" [(ngModel)]="data.query!.time!.start"
-                           (ngModelChange)="setStartOffset()">
-                    <mat-hint>DD/MM/YYYY</mat-hint>
-                    <mat-datepicker-toggle matIconSuffix [for]="picker_start"></mat-datepicker-toggle>
-                    <mat-datepicker #picker_start></mat-datepicker>
-                    <mat-error senergyError label="Start Date"></mat-error>
-                </mat-form-field>
-                <mat-form-field>
-                    <mat-label>Rolling Start Date</mat-label>
-                    <mat-select [(ngModel)]="data.queryOptions!.rollingStartDate"
-                                (ngModelChange)="setStartOffset()">
-                        <mat-option [value]="''"></mat-option>
-                        <mat-option [value]="'month'">Monat</mat-option>
-                        <mat-option [value]="'year'">Jahr</mat-option>
-                    </mat-select>
-                    <mat-error senergyError label="Rolling Start Date"></mat-error>
-                </mat-form-field>
-                <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>End Date</mat-label>
-                    <input matInput [matDatepicker]="picker_end" [(ngModel)]="data.query!.time!.end"
-                           (ngModelChange)="setEndOffset()">
-                    <mat-hint>DD/MM/YYYY</mat-hint>
-                    <mat-datepicker-toggle matIconSuffix [for]="picker_end"></mat-datepicker-toggle>
-                    <mat-datepicker #picker_end></mat-datepicker>
-                    <mat-error senergyError label="End Date"></mat-error>
-                </mat-form-field>
-                <mat-form-field>
-                    <mat-label>Rolling End Date</mat-label>
-                    <mat-select [(ngModel)]="data.queryOptions!.rollingEndDate"
-                                (ngModelChange)="setEndOffset()">
-                        <mat-option [value]="''"></mat-option>
-                        <mat-option [value]="'month'">Monat</mat-option>
-                        <mat-option [value]="'year'">Jahr</mat-option>
-                    </mat-select>
-                    <mat-error senergyError label="Rolling End Date"></mat-error>
-                </mat-form-field>
-            </div>
-        </div>
 
-        <div *ngIf="inputType === 'value'" fxLayout="column">
-            <div *ngIf="data.valueType === 'string'">
-                <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>{{ name }} String</mat-label>
-                    <input matInput [(ngModel)]="data.value">
-                    <mat-error senergyError label="{{ name }} String"></mat-error>
-                </mat-form-field>
-            </div>
-            <div *ngIf="data.valueType === 'float64'">
-                <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>{{ name }} Float64</mat-label>
-                    <input matInput [(ngModel)]="data.value">
-                    <mat-error senergyError label="{{ name }} Float64"></mat-error>
-                </mat-form-field>
-            </div>
-            <div *ngIf="data.valueType === 'object' && data.fields !== undefined">
+            <div *ngIf="inputType === 'value'" fxLayout="column">
+                <div *ngIf="data.valueType === 'string'">
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>{{ name }} String</mat-label>
+                        <input matInput [(ngModel)]="data.value">
+                        <mat-error senergyError label="{{ name }} String"></mat-error>
+                    </mat-form-field>
+                </div>
+                <div *ngIf="data.valueType === 'float64'">
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>{{ name }} Float64</mat-label>
+                        <input matInput [(ngModel)]="data.value">
+                        <mat-error senergyError label="{{ name }} Float64"></mat-error>
+                    </mat-form-field>
+                </div>
+                <div *ngIf="data.valueType === 'object' && data.fields !== undefined">
 
-                <senergy-reporting-object *ngFor="let element of data.fields | keyvalue" [requestObject]="requestObject"
-                    [name]="element.key" [data]="element.value" [allDevices]="allDevices">
-                </senergy-reporting-object>
-            </div>
-            <div *ngIf="data.valueType === 'array' && data.children !== undefined">
-                <senergy-reporting-object *ngFor="let element of data.children | keyvalue"
-                    [requestObject]="requestObject" [name]="element.key" [data]="element.value"
-                    [allDevices]="allDevices">
-                </senergy-reporting-object>
+                    <senergy-reporting-object *ngFor="let element of data.fields | keyvalue" [requestObject]="requestObject"
+                        [name]="element.key" [data]="element.value" [allDevices]="allDevices">
+                    </senergy-reporting-object>
+                </div>
+                <div *ngIf="data.valueType === 'array' && data.children !== undefined">
+                    <senergy-reporting-object *ngFor="let element of data.children | keyvalue"
+                        [requestObject]="requestObject" [name]="element.key" [data]="element.value"
+                        [allDevices]="allDevices">
+                    </senergy-reporting-object>
+                </div>
             </div>
         </div>
-    </div>
+    </ng-template>
 </mat-expansion-panel>

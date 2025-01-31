@@ -29,6 +29,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 import { number } from 'yargs';
+import {Observable} from 'rxjs';
 
 @Component({
     selector: 'senergy-reporting-new',
@@ -83,6 +84,7 @@ export class ReportComponent implements OnInit {
                         if (resp2 !== null) {
                             this.template.name = resp2.data.name;
                         }
+                        this.ready = true;
                     });
                 }
             });
@@ -92,9 +94,9 @@ export class ReportComponent implements OnInit {
                 if (resp !== null) {
                     this.template = resp.data;
                 }
+                this.ready = true;
             });
         }
-        this.ready = true;
     }
 
     create() {
