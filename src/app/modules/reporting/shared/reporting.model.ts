@@ -56,6 +56,8 @@ export interface ReportObjectModelQueryOptions {
     rollingEndDate: string | undefined;
     startOffset: number | undefined;
     endOffset: number | undefined;
+    resultObject: string | undefined;
+    resultKey: number | undefined;
 }
 
 export interface ReportListResponseModel {

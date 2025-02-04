@@ -73,6 +73,7 @@ export class ReportObjectComponent implements OnInit, OnChanges {
         new TimeUnit('months', 'Months'),
         new TimeUnit('y', 'Years'),
     ];
+    resultObjectTypes=['','key','array'];
     timeframe = {number: '', unit: ''};
 
     constructor(

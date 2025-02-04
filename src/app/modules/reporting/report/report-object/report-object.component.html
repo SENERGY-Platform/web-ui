@@ -94,6 +94,20 @@
                 </div>
                 <div role="group" class="form-grouping">
                     <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>ResultObject</mat-label>
+                        <mat-select [(ngModel)]="data.queryOptions!.resultObject">
+                            <mat-option *ngFor="let type of resultObjectTypes" [value]="type">{{type}}</mat-option>
+                        </mat-select>
+                        <mat-error senergyError label="ResultObject"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>ResultKey</mat-label>
+                        <input matInput type="number" min="0" [(ngModel)]="data.queryOptions!.resultKey">
+                        <mat-error senergyError label="ResultKey"></mat-error>
+                    </mat-form-field>
+                </div>
+                <div role="group" class="form-grouping">
+                    <mat-form-field fxFlex color="accent" appearance="outline">
                         <mat-label>Grouping Time</mat-label>
                         <input matInput [(ngModel)]="groupingTime.number" (ngModelChange)="setGroupingTime()">
                         <mat-error senergyError label="Grouping Time"></mat-error>

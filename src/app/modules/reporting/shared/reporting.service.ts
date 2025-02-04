@@ -58,7 +58,7 @@ export class ReportingService {
         return this.http.post<ReportCreateResponseModel>(environment.reportEngineUrl + '/report/create', data)
             .pipe(
                 map((resp: ReportCreateResponseModel) => resp || {}),
-                catchError(this.errorHandlerService.handleErrorWithSnackBar("Error",ReportingService.name, 'createReport: Error', null)),
+                catchError(this.errorHandlerService.handleErrorWithSnackBar('Error',ReportingService.name, 'createReport: Error', null)),
             );
     }
 
