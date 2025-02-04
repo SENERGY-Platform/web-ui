@@ -58,8 +58,8 @@ export class NewExportComponent implements OnInit {
     offset = 0;
     lastPageEvent: PageEvent | undefined;
 
-    public formatControl = new FormControl('');
-    timestamp_formats: string[] = ['%Y-%m-%dT%H:%M:%S.%fZ']
+    formatControl = new FormControl('');
+    timestamp_formats: string[] = ['%Y-%m-%dT%H:%M:%S.%fZ'];
     filtered_formats: Observable<string[]> = new Observable();
 
     exportForm = this.fb.group({
@@ -86,7 +86,7 @@ export class NewExportComponent implements OnInit {
         operator: [{value: null, disabled: true}, Validators.required],
         pipeline: [{value: null, disabled: true}, Validators.required],
         exportDatabaseId: [{value: environment.exportDatabaseIdInternalTimescaleDb}, Validators.required],
-        timestampFormat: '',
+        timestampFormat: ['', Validators.required],
         exportValues: this.fb.array([] as ExportValueModel[]),
     });
 
@@ -544,6 +544,10 @@ export class NewExportComponent implements OnInit {
                     }
                 });
             }
+
+            this.formatControl.valueChanges.subscribe((selection) => {
+                this.exportForm.get('timestampFormat')?.setValue(selection);
+            });
         }
     }
 
@@ -677,11 +681,13 @@ export class NewExportComponent implements OnInit {
                     timePath: 'time',
                     timestampFormat: '%Y-%m-%dT%H:%M:%S.%fZ'
                 }, {onlySelf: true, emitEvent: false});
+                this.formatControl.setValue('%Y-%m-%dT%H:%M:%S.%fZ');
             } else if (this.exportForm.value.selector === 'import') {
                 this.exportForm.patchValue({timePath: 'time', timestampFormat: '%Y-%m-%dT%H:%M:%SZ'}, {
                     onlySelf: true,
                     emitEvent: false
                 });
+                this.formatControl.setValue('%Y-%m-%dT%H:%M:%S.%fZ');
             } else if (this.exportForm.value.selector === 'device') {
                 this.exportForm.patchValue({timePath: this.timeSuggest, timestampFormat: null}, {
                     onlySelf: true,
@@ -800,7 +806,7 @@ export class NewExportComponent implements OnInit {
     }
 
     private _filter(value: string): string[] {
-        const filterValue = value.toLowerCase()
+        const filterValue = value.toLowerCase();
         return this.timestamp_formats.filter(format => format.toLowerCase().includes(filterValue));
     }
 }
