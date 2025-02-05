@@ -60,7 +60,7 @@ export class ReportObjectComponent implements OnInit, OnChanges {
     queryService: DeviceTypeServiceModel = {} as DeviceTypeServiceModel;
     queryServicePaths: string[] = [];
     queryDeviceType: DeviceTypeModel = {} as DeviceTypeModel;
-    fieldGroupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median', 'time-weighted-mean-linear', 'time-weighted-mean-locf'];
+    fieldGroupTypes = [null,'mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median', 'time-weighted-mean-linear', 'time-weighted-mean-locf'];
     sortTypes = ['asc', 'desc'];
     groupingTime = {number: '', unit: ''};
     timeUnits = [
@@ -133,9 +133,9 @@ export class ReportObjectComponent implements OnInit, OnChanges {
                 delete this.data?.fields;
                 delete this.data?.length;
                 this.data.query = {
-                    columns: [{name: 'energy.value', groupType: 'difference-last'}],
-                    time: {last: '12months'} as QueriesRequestTimeModel,
-                    groupTime: '1months',
+                    columns: [{name: '', groupType: undefined}],
+                    time: {last: undefined} as QueriesRequestTimeModel,
+                    groupTime: undefined,
                     deviceId: '',
                     serviceId: ''
                 };
