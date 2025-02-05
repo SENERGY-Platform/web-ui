@@ -174,8 +174,7 @@
                      fxLayout="row" class="layout-value">
                     <div [formGroupName]="key+offset" fxFlex fxLayoutAlign="center center">
                         <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
-                            <mat-label>Name</mat-label>
-                            <mat-label>{{exportForm.getRawValue().targetSelector === targetDb ? 'Name' : 'Topic'}}</mat-label>
+                            <mat-label>{{exportForm.get('targetSelector')?.value === targetDb ? 'Name' : 'Topic'}}</mat-label>
                             <input #input matInput formControlName="Name"/>
                             <mat-error senergyError label="Name"></mat-error>
                         </mat-form-field>
