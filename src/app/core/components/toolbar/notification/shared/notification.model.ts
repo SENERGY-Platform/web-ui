@@ -67,6 +67,7 @@ export const notificationTopicDeveloper: NotificationTopic = 'developer';
 export const notificationTopicConnector: NotificationTopic = 'connector';
 export const notificationTopicMGW: NotificationTopic = 'mgw';
 export const notificationTopicIncident: NotificationTopic = 'incident';
+export const notificationTopicAnalytics: NotificationTopic = 'analytics';
 export const notificationTopicUnknown: NotificationTopic = 'unknown';
 
 export function getAllTopics(): NotificationTopic[] {
@@ -78,6 +79,7 @@ export function getAllTopics(): NotificationTopic[] {
         notificationTopicConnector,
         notificationTopicMGW,
         notificationTopicIncident,
+        notificationTopicAnalytics,
         notificationTopicUnknown,
     ];
 }
