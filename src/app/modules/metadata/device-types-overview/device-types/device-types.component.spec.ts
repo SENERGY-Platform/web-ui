@@ -34,7 +34,7 @@ import {DeviceTypeModel, DeviceTypeProtocolModel, DeviceTypeServiceModel} from '
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {FlexLayoutModule} from '@angular/flex-layout';
+import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import {util} from 'jointjs';
 import uuid = util.uuid;
 import {MatTreeModule} from '@angular/material/tree';

@@ -18,7 +18,7 @@ import {InjectionToken, NgModule, Optional, SkipSelf} from '@angular/core';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {throwIfAlreadyLoaded} from './module-import-guard';
 import {SidenavComponent} from './components/sidenav/sidenav.component';
-import {FlexLayoutModule} from '@angular/flex-layout';
+import {FlexLayoutModule} from '@ngbracket/ngx-layout';
 import {ToolbarComponent} from './components/toolbar/toolbar.component';
 import {RouterModule} from '@angular/router';
 import {SearchbarComponent} from './components/searchbar/searchbar.component';

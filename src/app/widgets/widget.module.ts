@@ -16,7 +16,6 @@
 
 import {LOCALE_ID, NgModule} from '@angular/core';
 import {SwitchComponent} from './switch/switch.component';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {WidgetHeaderComponent} from './components/widget-header/widget-header.component';
 import {SwitchEditDialogComponent} from './switch/dialogs/switch-edit-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -128,6 +127,7 @@ import { EditVentilationWidgetComponent } from './bad-ventilation/dialog/edit/ed
 import { MatTreeModule } from '@angular/material/tree';
 import { AxisConfigComponent } from './charts/export/dialog/axis-config/axis-config.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import {FlexLayoutModule} from "@ngbracket/ngx-layout";
 
 registerLocaleData(localeDe, 'de');
 

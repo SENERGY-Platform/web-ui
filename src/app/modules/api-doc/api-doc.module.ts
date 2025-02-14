@@ -18,7 +18,7 @@
 
 import {CommonModule} from '@angular/common';
 import {Component, NgModule} from '@angular/core';
-import {FlexLayoutModule} from '@angular/flex-layout';
+import {FlexLayoutModule} from '@ngbracket/ngx-layout';
 
 import {FormsModule} from '@angular/forms';
 import {MatCardModule} from '@angular/material/card';

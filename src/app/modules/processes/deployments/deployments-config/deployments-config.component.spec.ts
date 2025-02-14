@@ -36,7 +36,7 @@ import { DeploymentsService } from '../shared/deployments.service';
 import { of } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import {FlexLayoutModule} from "@ngbracket/ngx-layout";
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ProcessesModule } from '../../processes.module';

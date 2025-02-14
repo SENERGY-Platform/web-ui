@@ -43,7 +43,7 @@ export interface DataSourceConfig {
 })
 export class DataSourceSelectorComponent implements OnInit {
 
-    form: UntypedFormGroup = new UntypedFormGroup({});;
+    form: UntypedFormGroup = new UntypedFormGroup({});
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
     deviceGroups: DeviceGroupModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];

@@ -27,7 +27,7 @@ import { of } from 'rxjs';
 import { CoreModule } from '../../../core/core.module';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { WidgetModule } from '../../../widgets/widget.module';
-import { FlexModule } from '@angular/flex-layout';
+import { FlexModule } from '@ngbracket/ngx-layout';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';

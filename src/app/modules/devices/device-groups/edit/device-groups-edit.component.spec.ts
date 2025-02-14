@@ -35,11 +35,11 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { AspectsPermSearchModel } from '../../../metadata/aspects/shared/aspects-perm-search.model';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {FlexLayoutModule} from "@ngbracket/ngx-layout";
 
 describe('DeviceGroupsEditComponent', () => {
     let component: DeviceGroupsEditComponent;

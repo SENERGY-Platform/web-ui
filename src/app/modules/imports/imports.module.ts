@@ -21,7 +21,7 @@ import { ImportInstancesComponent } from './import-instances/import-instances.co
 import { WidgetModule } from '../../widgets/widget.module';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
-import { FlexModule } from '@angular/flex-layout';
+import { FlexModule } from '@ngbracket/ngx-layout';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';

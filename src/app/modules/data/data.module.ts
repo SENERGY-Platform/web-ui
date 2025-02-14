@@ -20,7 +20,7 @@ import {Route, RouterModule} from '@angular/router';
 import {OperatorRepoComponent} from './operator-repo/operator-repo.component';
 import {CommonModule} from '@angular/common';
 import {CoreModule} from '../../core/core.module';
-import {FlexLayoutModule} from '@angular/flex-layout';
+import {FlexLayoutModule} from '@ngbracket/ngx-layout';
 import {OperatorRepoModule} from './operator-repo/operator-repo.module';
 import {ExportModule} from '../exports/export.module';
 import {FlowDesignerComponent} from './flow-designer/flow-designer.component';

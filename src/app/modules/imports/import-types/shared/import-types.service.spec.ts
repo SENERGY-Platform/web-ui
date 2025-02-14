@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 import { TestBed } from '@angular/core/testing';
-
-import { ImportTypesService } from './import-types.service';
-import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { of } from 'rxjs';
 import { ImportTypeModel } from './import-types.model';
 import { environment } from '../../../../../environments/environment';
+import { ImportTypesService } from './import-types.service';
 import { ExportValueModel } from '../../../exports/shared/export.model';
 
 describe('ImportTypesService', () => {
     let service: ImportTypesService;
-
-    const httpClientSpy: Spy<HttpClient> = createSpyFromClass(HttpClient);
-    httpClientSpy.get.and.returnValue(of(null));
-    httpClientSpy.put.and.returnValue(of(null));
-    httpClientSpy.post.and.returnValue(of(null));
-    httpClientSpy.delete.and.returnValue(of(null));
+    let httpClientSpy: Spy<HttpClient>;
 
     const testType: ImportTypeModel = {
         id: 'urn:infai:ses:import-type:1234',
@@ -118,10 +112,19 @@ describe('ImportTypesService', () => {
     };
 
     beforeEach(() => {
+        httpClientSpy = createSpyFromClass(HttpClient);
+        httpClientSpy.get.and.returnValue(of(null));
+        httpClientSpy.put.and.returnValue(of(null));
+        httpClientSpy.post.and.returnValue(of(null));
+        httpClientSpy.delete.and.returnValue(of(null));
+
         TestBed.configureTestingModule({
-    imports: [],
-    providers: [{ provide: HttpClient, useValue: httpClientSpy }, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+            providers: [
+                { provide: HttpClient, useValue: httpClientSpy },
+                provideHttpClientTesting(),
+            ],
+        });
+
         service = TestBed.inject(ImportTypesService);
     });
 
@@ -130,34 +133,49 @@ describe('ImportTypesService', () => {
     });
 
     it('should correctly request lists', () => {
-        service.listImportTypes('search', 10, 1, 'name.asc').subscribe((val) => expect(val).toEqual({result: [], total: 0}));
+        service.listImportTypes('search', 10, 1, 'name.asc').subscribe((val) => {
+            expect(val).toEqual({ result: [], total: 0 });
+        });
+
         expect(httpClientSpy.get.calls.mostRecent().args[0]).toEqual(
-            environment.importRepoUrl + '/import-types?&search=search&limit=10&offset=1&sort=name.asc',
+            environment.importRepoUrl + '/import-types?&search=search&limit=10&offset=1&sort=name.asc'
         );
     });
 
     it('should correctly request a single type', () => {
-        service.getImportType('1234');
+        service.getImportType('1234').subscribe();
+
         expect(httpClientSpy.get.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types/1234');
     });
 
     it('should correctly create a type', () => {
         const exampleType: ImportTypeModel = { id: '', name: 'test' } as ImportTypeModel;
-        service.saveImportType(exampleType);
-        expect(httpClientSpy.post.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types');
-        expect(httpClientSpy.post.calls.mostRecent().args[1]).toEqual(exampleType);
+
+        service.saveImportType(exampleType).subscribe(() => {
+            expect(httpClientSpy.post.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types');
+            expect(httpClientSpy.post.calls.mostRecent().args[1]).toEqual(exampleType);
+        });
+
+        expect(httpClientSpy.post).toHaveBeenCalled();
     });
 
     it('should correctly update a type', () => {
         const exampleType: ImportTypeModel = { id: '1234' } as ImportTypeModel;
-        service.saveImportType(exampleType);
-        expect(httpClientSpy.put.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types/1234');
-        expect(httpClientSpy.put.calls.mostRecent().args[1]).toEqual(exampleType);
+
+        service.saveImportType(exampleType).subscribe(() => {
+            expect(httpClientSpy.put.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types/1234');
+            expect(httpClientSpy.put.calls.mostRecent().args[1]).toEqual(exampleType);
+        });
+
+        expect(httpClientSpy.put).toHaveBeenCalled();
     });
 
     it('should correctly delete a type', () => {
-        service.deleteImportInstance('1234');
-        expect(httpClientSpy.delete.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types/1234');
+        service.deleteImportInstance('1234').subscribe(() => {
+            expect(httpClientSpy.delete.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types/1234');
+        });
+
+        expect(httpClientSpy.delete).toHaveBeenCalled();
     });
 
     it('should correctly parse export values', () => {

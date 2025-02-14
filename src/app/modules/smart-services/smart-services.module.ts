@@ -21,7 +21,7 @@ import {Route, RouterModule} from '@angular/router';
 import { CoreModule } from '../../core/core.module';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { DevicesModule } from '../devices/devices.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatGridListModule } from '@angular/material/grid-list';

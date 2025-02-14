@@ -25,7 +25,7 @@ import { ProcessMonitorComponent } from '../processes/monitor/monitor.component'
 import { ProcessDesignerComponent } from '../processes/designer/designer.component';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import {FlexLayoutModule} from "@ngbracket/ngx-layout";
 import { DevicesModule } from '../devices/devices.module';
 import { EditOutputDialogComponent } from './designer/dialogs/edit-output-dialog/edit-output-dialog.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';

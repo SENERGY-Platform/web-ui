@@ -16,7 +16,7 @@
 
 import { NgModule } from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { CommonModule } from '@angular/common';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 

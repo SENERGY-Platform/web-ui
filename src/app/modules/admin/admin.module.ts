@@ -24,7 +24,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {Route, RouterModule} from '@angular/router';
 import {CoreModule} from '../../core/core.module';
 import {TimescaleRulesComponent} from './timescale-rules/timescale-rules.component';
-import {FlexLayoutModule, FlexModule} from '@angular/flex-layout';
+import {FlexLayoutModule, FlexModule} from '@ngbracket/ngx-layout';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {WidgetModule} from '../../widgets/widget.module';
 import {

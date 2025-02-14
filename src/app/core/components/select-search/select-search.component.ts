@@ -448,7 +448,9 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     writeValue(obj: any): void {
         if (this.select !== undefined) {
+            setTimeout(() => {
             this.select.writeValue(obj);
+            });
             this.queuedWriteValue = undefined;
             if (this.withGroups) {
                 this.updateOptionsGroups(this.searchControl.value || '', true);

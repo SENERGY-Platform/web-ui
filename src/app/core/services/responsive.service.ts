@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { MediaChange, MediaObserver } from '@angular/flex-layout';
+import { MediaChange, MediaObserver } from '@ngbracket/ngx-layout';
 import { Observable } from 'rxjs';
 import {map} from 'rxjs/operators';
 
