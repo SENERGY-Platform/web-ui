@@ -15,7 +15,7 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { of, Subject } from 'rxjs';
@@ -38,6 +38,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { GridsterModule } from 'angular-gridster2';
 import { MatButtonModule } from '@angular/material/button';
 import {provideRouter} from "@angular/router";
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
@@ -63,29 +64,28 @@ describe('DashboardComponent', () => {
             ] as DashboardModel[]);
 
             TestBed.configureTestingModule({
-                imports: [
-                    CoreModule,
-                    HttpClientTestingModule,
-                    MatSnackBarModule,
-                    MatDialogModule,
-                    MatIconModule,
-                    MatExpansionModule,
-                    MatInputModule,
-                    MatMenuModule,
-                    ReactiveFormsModule,
-                    MatTabsModule,
-                    MatDividerModule,
-                    GridsterModule,
-                    MatButtonModule,
-                ],
-                declarations: [DashboardComponent],
-                providers: [
-                    provideRouter([]),
-                    { provide: DashboardService, useValue: dashboardServiceSpy },
-                    { provide: ResponsiveService, useValue: responsiveServiceSpy },
-                    { provide: DeviceStatusService, useValue: deviceStatusServiceSpy },
-                ],
-            }).compileComponents();
+    declarations: [DashboardComponent],
+    imports: [CoreModule,
+        MatSnackBarModule,
+        MatDialogModule,
+        MatIconModule,
+        MatExpansionModule,
+        MatInputModule,
+        MatMenuModule,
+        ReactiveFormsModule,
+        MatTabsModule,
+        MatDividerModule,
+        GridsterModule,
+        MatButtonModule],
+    providers: [
+        provideRouter([]),
+        { provide: DashboardService, useValue: dashboardServiceSpy },
+        { provide: ResponsiveService, useValue: responsiveServiceSpy },
+        { provide: DeviceStatusService, useValue: deviceStatusServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+}).compileComponents();
             fixture = TestBed.createComponent(DashboardComponent);
             component = fixture.componentInstance;
             fixture.detectChanges();

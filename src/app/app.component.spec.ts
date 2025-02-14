@@ -18,7 +18,7 @@ import { TestBed, ComponentFixture} from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { KeycloakService } from 'keycloak-angular';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MockKeycloakService } from './core/services/keycloak.mock';
 import { AuthorizationServiceMock } from './core/services/authorization.service.mock';
@@ -28,6 +28,7 @@ import { SettingsDialogService } from './modules/settings/shared/settings-dialog
 import { NotificationService } from './core/components/toolbar/notification/shared/notification.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 import {provideRouter} from "@angular/router";
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 
 describe('AppComponent', () => {
@@ -49,16 +50,18 @@ describe('AppComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [CoreModule, HttpClientTestingModule, MatSnackBarModule],
-            declarations: [AppComponent],
-            providers: [
-                provideRouter([]),
-                { provide: KeycloakService, useClass: MockKeycloakService },
-                { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-                { provide: LadonService, useValue: ladonServiceSpy},
-                { provide: NotificationService, useValue: notificationServiceSpy}
-            ],
-        }).compileComponents();
+    declarations: [AppComponent],
+    imports: [CoreModule, MatSnackBarModule],
+    providers: [
+        provideRouter([]),
+        { provide: KeycloakService, useClass: MockKeycloakService },
+        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+        { provide: LadonService, useValue: ladonServiceSpy },
+        { provide: NotificationService, useValue: notificationServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+}).compileComponents();
         fixture = TestBed.createComponent(AppComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

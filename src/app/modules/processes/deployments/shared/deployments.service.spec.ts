@@ -17,8 +17,8 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { DeploymentsService } from './deployments.service';
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CamundaVariable } from './deployments-definition.model';
 import { environment } from '../../../../../environments/environment';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -27,9 +27,9 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 describe('DeploymentsService', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientModule, HttpClientTestingModule, MatDialogModule],
-            providers: [DeploymentsService, MatSnackBar],
-        });
+    imports: [MatDialogModule],
+    providers: [DeploymentsService, MatSnackBar, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     });
 
     it('should be created', inject([DeploymentsService], (service: DeploymentsService) => {

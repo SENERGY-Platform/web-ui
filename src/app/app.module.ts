@@ -20,7 +20,7 @@ import { APP_INITIALIZER, LOCALE_ID, NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { AppRoutingModule } from './app-routing.module';
-import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import {KeycloakAngularModule} from 'keycloak-angular';
 import { initializerService } from './core/services/initializer.service';
 import { DevicesModule } from './modules/devices/devices.module';
@@ -48,11 +48,8 @@ import {ReportingModule} from './modules/reporting/reporting.module';
 
 registerLocaleData(localeDe);
 
-@NgModule({
-    declarations: [AppComponent],
-    imports: [
-        BrowserModule,
-        HttpClientModule,
+@NgModule({ declarations: [AppComponent],
+    bootstrap: [AppComponent], imports: [BrowserModule,
         CoreModule,
         AppRoutingModule,
         DashboardModule,
@@ -77,9 +74,7 @@ registerLocaleData(localeDe);
             // or after 30 seconds (whichever comes first).
             registrationStrategy: 'registerWhenStable:30000'
         }),
-        ReportingModule
-    ],
-    providers: [
+        ReportingModule], providers: [
         {
             provide: APP_INITIALIZER,
             useFactory: initializerService,
@@ -95,7 +90,6 @@ registerLocaleData(localeDe);
             useClass: AuthorizationService,
             multi: true,
         },
-    ],
-    bootstrap: [AppComponent],
-})
+        provideHttpClient(withInterceptorsFromDi()),
+    ] })
 export class AppModule {}

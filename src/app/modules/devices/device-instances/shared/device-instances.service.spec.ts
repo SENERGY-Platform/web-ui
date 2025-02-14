@@ -17,17 +17,18 @@
 import { TestBed } from '@angular/core/testing';
 
 import { MatDialogModule } from '@angular/material/dialog';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DeviceInstancesService } from './device-instances.service';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DeviceInstancesService', () => {
     let service: DeviceInstancesService;
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [MatDialogModule, HttpClientTestingModule, MatSnackBarModule],
-            providers: [DeviceInstancesService],
-        });
+    imports: [MatDialogModule, MatSnackBarModule],
+    providers: [DeviceInstancesService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
         service = TestBed.inject(DeviceInstancesService);
     });
 

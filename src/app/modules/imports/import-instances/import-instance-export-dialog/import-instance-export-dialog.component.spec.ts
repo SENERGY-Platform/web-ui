@@ -28,7 +28,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatTableModule } from '@angular/material/table';
@@ -165,42 +165,40 @@ describe('ImportInstanceExportDialogComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [ImportInstanceExportDialogComponent],
-            imports: [
-                MatDialogModule,
-                MatButtonModule,
-                MatIconModule,
-                MatFormFieldModule,
-                MatInputModule,
-                ReactiveFormsModule,
-                MatSnackBarModule,
-                HttpClientModule,
-                MatCheckboxModule,
-                MatTableModule,
-                BrowserAnimationsModule,
-            ],
-            providers: [
-                {
-                    provide: MAT_DIALOG_DATA,
-                    useValue: {
-                        name: 'name',
-                        id: 'instance-id',
-                        kafka_topic: 'kafka-topic',
-                        import_type_id: 'urn:infai:ses:import-type:1234',
-                    } as ImportInstancesModel,
+    declarations: [ImportInstanceExportDialogComponent],
+    imports: [MatDialogModule,
+        MatButtonModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        MatSnackBarModule,
+        MatCheckboxModule,
+        MatTableModule,
+        BrowserAnimationsModule],
+    providers: [
+        {
+            provide: MAT_DIALOG_DATA,
+            useValue: {
+                name: 'name',
+                id: 'instance-id',
+                kafka_topic: 'kafka-topic',
+                import_type_id: 'urn:infai:ses:import-type:1234',
+            } as ImportInstancesModel,
+        },
+        {
+            provide: MatDialogRef,
+            useValue: {
+                close: (rv: any) => {
+                    r = rv;
                 },
-                {
-                    provide: MatDialogRef,
-                    useValue: {
-                        close: (rv: any) => {
-                            r = rv;
-                        },
-                    },
-                },
-                { provide: ImportTypesService, useValue: importTypesServiceSpy },
-                { provide: ExportService, useValue: exportServiceSpy },
-            ],
-        }).compileComponents();
+            },
+        },
+        { provide: ImportTypesService, useValue: importTypesServiceSpy },
+        { provide: ExportService, useValue: exportServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+    ]
+}).compileComponents();
     });
 
     beforeEach(() => {

@@ -16,7 +16,7 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { CoreModule } from '../../../../core/core.module';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import {ActivatedRoute, convertToParamMap, Route} from '@angular/router';
@@ -39,6 +39,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { AspectsPermSearchModel } from '../../../metadata/aspects/shared/aspects-perm-search.model';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DeviceGroupsEditComponent', () => {
     let component: DeviceGroupsEditComponent;
@@ -513,36 +514,35 @@ describe('DeviceGroupsEditComponent', () => {
             });
 
             TestBed.configureTestingModule({
-                imports: [
-                    CoreModule,
-                    RouterTestingModule.withRoutes([deviceGroupsEdit]),
-                    HttpClientTestingModule,
-                    MatSnackBarModule,
-                    MatFormFieldModule,
-                    MatSelectModule,
-                    MatIconModule,
-                    ReactiveFormsModule,
-                    MatInputModule,
-                    MatChipsModule,
-                    MatCardModule,
-                    MatTooltipModule,
-                    CommonModule,
-                    FlexLayoutModule,
-                ],
-                declarations: [DeviceGroupsEditComponent],
-                providers: [
-                    {
-                        provide: ActivatedRoute,
-                        useValue: {
-                            snapshot: {
-                                paramMap: convertToParamMap({ id: 'test-group:id' }),
-                            },
-                        },
-                    },
-                    { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
-                    { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
-                ],
-            }).compileComponents();
+    declarations: [DeviceGroupsEditComponent],
+    imports: [CoreModule,
+        RouterTestingModule.withRoutes([deviceGroupsEdit]),
+        MatSnackBarModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatIconModule,
+        ReactiveFormsModule,
+        MatInputModule,
+        MatChipsModule,
+        MatCardModule,
+        MatTooltipModule,
+        CommonModule,
+        FlexLayoutModule],
+    providers: [
+        {
+            provide: ActivatedRoute,
+            useValue: {
+                snapshot: {
+                    paramMap: convertToParamMap({ id: 'test-group:id' }),
+                },
+            },
+        },
+        { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
+        { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+}).compileComponents();
             fixture = TestBed.createComponent(DeviceGroupsEditComponent);
             component = fixture.componentInstance;
             fixture.detectChanges();

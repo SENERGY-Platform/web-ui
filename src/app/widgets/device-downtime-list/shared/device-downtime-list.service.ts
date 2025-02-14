@@ -21,7 +21,7 @@ import {DeviceDowntimeListEditDialogComponent} from '../dialogs/device-downtime-
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {Observable} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {DeviceDowntimeListModel} from './device-downtime-list.model';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';

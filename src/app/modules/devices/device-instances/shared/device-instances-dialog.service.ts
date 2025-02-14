@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel} from './device-instances.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';

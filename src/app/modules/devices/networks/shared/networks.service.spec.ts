@@ -17,16 +17,17 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { NetworksService } from './networks.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('NetworksService', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule, MatDialogModule, MatSnackBarModule],
-            providers: [NetworksService],
-        });
+    imports: [MatDialogModule, MatSnackBarModule],
+    providers: [NetworksService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     });
 
     it('should be created', inject([NetworksService], (service: NetworksService) => {

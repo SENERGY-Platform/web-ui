@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SwitchComponent } from './switch.component';
 import { MatDialogModule } from '@angular/material/dialog';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { MatCardModule } from '@angular/material/card';
 import { WidgetModule } from '../widget.module';
@@ -31,10 +31,10 @@ describe('SwitchComponent', () => {
     beforeEach(
         waitForAsync(() => {
             TestBed.configureTestingModule({
-                imports: [MatDialogModule, HttpClientModule, WidgetModule, MatCardModule],
-                declarations: [SwitchComponent],
-                providers: [MatDialogModule, MatSnackBar, { provide: DashboardService, useClass: DashboardService }],
-            }).compileComponents();
+    declarations: [SwitchComponent],
+    imports: [MatDialogModule, WidgetModule, MatCardModule],
+    providers: [MatDialogModule, MatSnackBar, { provide: DashboardService, useClass: DashboardService }, provideHttpClient(withInterceptorsFromDi())]
+}).compileComponents();
         }),
     );
 

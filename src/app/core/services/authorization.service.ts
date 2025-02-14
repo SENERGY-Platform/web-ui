@@ -20,7 +20,7 @@ import {from, mergeMap, Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {ErrorHandlerService} from './error-handler.service';
-import {HttpClient, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import {AuthorizationProfileModel} from '../model/authorization/authorization-profile.model';
 import {AuthorizationUserProfileModel} from '../model/authorization/authorization-user-profile.model';
 import {keycloakServiceToken} from '../core.module';

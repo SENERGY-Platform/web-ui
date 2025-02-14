@@ -25,7 +25,7 @@ import {
     NotificationUpdateModel
 } from './notification.model';
 import {environment} from '../../../../../../environments/environment';
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../services/error-handler.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {NotificationDialogComponent} from '../dialog/notification-dialog.component';

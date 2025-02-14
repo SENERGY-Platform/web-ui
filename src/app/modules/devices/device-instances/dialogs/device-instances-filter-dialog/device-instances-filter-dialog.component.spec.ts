@@ -1,4 +1,4 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import { DeviceInstancesService } from '../../shared/device-instances.service';
 
 import { DeviceInstancesFilterDialogComponent } from './device-instances-filter-dialog.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DeviceInstancesFilterDialogComponent', () => {
     let component: DeviceInstancesFilterDialogComponent;
@@ -18,18 +19,19 @@ describe('DeviceInstancesFilterDialogComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [ DeviceInstancesFilterDialogComponent ],
-            imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule],
-            providers: [
-                { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
-                { provide: MatDialogRef, useValue: matDialogRefSpy },
-                {
-                    provide: MAT_DIALOG_DATA,
-                    useValue: {
-                    },
-                },
-            ]
-        })
+    declarations: [DeviceInstancesFilterDialogComponent],
+    imports: [MatSnackBarModule, MatDialogModule],
+    providers: [
+        { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
+        { provide: MatDialogRef, useValue: matDialogRefSpy },
+        {
+            provide: MAT_DIALOG_DATA,
+            useValue: {},
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+})
             .compileComponents();
 
         fixture = TestBed.createComponent(DeviceInstancesFilterDialogComponent);

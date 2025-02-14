@@ -1,9 +1,10 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { LeakageDetectionComponent } from './leakage-detection.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('LeakageDetectionComponent', () => {
   let component: LeakageDetectionComponent;
@@ -11,13 +12,11 @@ describe('LeakageDetectionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LeakageDetectionComponent ],
-      imports: [
-        HttpClientTestingModule,
-        MatDialogModule,
-        MatSnackBarModule
-      ]
-    })
+    declarations: [LeakageDetectionComponent],
+    imports: [MatDialogModule,
+        MatSnackBarModule],
+    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(LeakageDetectionComponent);

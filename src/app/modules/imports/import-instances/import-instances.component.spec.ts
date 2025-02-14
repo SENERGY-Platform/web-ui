@@ -18,7 +18,7 @@ import {ImportInstancesComponent} from './import-instances.component';
 import {CoreModule} from '../../../core/core.module';
 import {Router, RouterModule} from '@angular/router';
 import {ReactiveFormsModule} from '@angular/forms';
-import {HttpClientModule} from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCheckboxModule} from '@angular/material/checkbox';
@@ -95,40 +95,38 @@ describe('ImportInstancesComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [ImportInstancesComponent],
-            imports: [
-                CoreModule,
-                RouterModule.forRoot([], {}),
-                ReactiveFormsModule,
-                HttpClientModule,
-                MatDialogModule,
-                MatSnackBarModule,
-                MatPaginatorModule,
-                MatCheckboxModule,
-                FlexModule,
-                MatTooltipModule,
-                MatButtonModule,
-                MatIconModule,
-                MatFormFieldModule,
-                MatInputModule,
-                MatDividerModule,
-                MatSelectModule,
-                MatDialogModule,
-                MatTreeModule,
-                MatTableModule,
-                WidgetModule,
-                InfiniteScrollModule,
-            ],
-            providers: [
-                {provide: ImportInstancesService, useValue: importInstancesServiceSpy},
-                {provide: DialogsService, useValue: deleteDialogServiceSpy},
-                {provide: Router, useValue: routerSpy},
-                {provide: SearchbarService, useValue: searchbarSpy},
-                {provide: MatDialog, useValue: dialogSpy},
-                {provide: PermissionsService, useValue: permissionsServiceSpy},
-                {provide: AuthorizationService, useValue: authorizationServiceSpy},
-            ],
-        }).compileComponents();
+    declarations: [ImportInstancesComponent],
+    imports: [CoreModule,
+        RouterModule.forRoot([], {}),
+        ReactiveFormsModule,
+        MatDialogModule,
+        MatSnackBarModule,
+        MatPaginatorModule,
+        MatCheckboxModule,
+        FlexModule,
+        MatTooltipModule,
+        MatButtonModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatDividerModule,
+        MatSelectModule,
+        MatDialogModule,
+        MatTreeModule,
+        MatTableModule,
+        WidgetModule,
+        InfiniteScrollModule],
+    providers: [
+        { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
+        { provide: DialogsService, useValue: deleteDialogServiceSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: SearchbarService, useValue: searchbarSpy },
+        { provide: MatDialog, useValue: dialogSpy },
+        { provide: PermissionsService, useValue: permissionsServiceSpy },
+        { provide: AuthorizationService, useValue: authorizationServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+    ]
+}).compileComponents();
     });
 
     beforeEach(() => {

@@ -152,35 +152,35 @@ $md-custom-color-sidenav: (
         )
 );
 
-$my-app-primary: mat.define-palette($md-custom-color);
-$my-app-accent: mat.define-palette($md-custom-color-accent, 500, 900, A100);
-$my-app-warn: mat.define-palette($md-custom-color-warn);
-$my-app-sidenav: mat.define-palette($md-custom-color-sidenav);
+$my-app-primary: mat.m2-define-palette($md-custom-color);
+$my-app-accent: mat.m2-define-palette($md-custom-color-accent, 500, 900, A100);
+$my-app-warn: mat.m2-define-palette($md-custom-color-warn);
+$my-app-sidenav: mat.m2-define-palette($md-custom-color-sidenav);
 
-$my-app-theme: mat.define-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
+$my-app-theme: mat.m2-define-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
 
 @include mat.all-component-themes($my-app-theme);
 
 .background-color-accent {
   color: white;
-  background-color: mat.get-color-from-palette($my-app-accent) !important;
+  background-color: mat.m2-get-color-from-palette($my-app-accent) !important;
 }
 
 .background-color-sidenav {
   color: white;
-  background-color: mat.get-color-from-palette($my-app-sidenav) !important;
+  background-color: mat.m2-get-color-from-palette($my-app-sidenav) !important;
 }
 
 .color-accent {
-  color: mat.get-color-from-palette($my-app-accent) !important;
+  color: mat.m2-get-color-from-palette($my-app-accent) !important;
 }
 
 .color-warn {
-  color: mat.get-color-from-palette($my-app-warn) !important;
+  color: mat.m2-get-color-from-palette($my-app-warn) !important;
 }
 
 .color-sidenav {
-  color: mat.get-color-from-palette($my-app-sidenav) !important;
+  color: mat.m2-get-color-from-palette($my-app-sidenav) !important;
 }
 
 .snack-bar-error {
@@ -196,5 +196,5 @@ $my-app-theme: mat.define-light-theme($my-app-primary, $my-app-accent, $my-app-w
 }
 
 .mdc-list-item--selected .mdc-list-item__primary-text, .mdc-list-item--activated .mdc-list-item__primary-text {
-  color: mat.get-color-from-palette($my-app-accent) !important;
+  color: mat.m2-get-color-from-palette($my-app-accent) !important;
 }

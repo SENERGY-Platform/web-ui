@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {HttpClient, HttpHeaders, HttpRequest} from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
 import {KeycloakOptions} from 'keycloak-angular/lib/core/interfaces/keycloak-options';
 import {lastValueFrom, mergeMap, Observable} from 'rxjs';
 import {KeycloakConfig, KeycloakProfile} from 'keycloak-js';

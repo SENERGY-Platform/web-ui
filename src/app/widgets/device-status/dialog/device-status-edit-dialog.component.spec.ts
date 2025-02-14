@@ -17,7 +17,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DeviceStatusEditDialogComponent } from './device-status-edit-dialog.component';
 import { CoreModule } from '../../../core/core.module';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -51,6 +51,7 @@ import { DeviceInstancesService } from '../../../modules/devices/device-instance
 import { DeviceSelectablesModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
 import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 import {provideRouter} from "@angular/router";
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DeviceStatusEditDialogComponent', () => {
     let component: DeviceStatusEditDialogComponent;
@@ -180,28 +181,27 @@ describe('DeviceStatusEditDialogComponent', () => {
             );
 
             TestBed.configureTestingModule({
-                imports: [
-                    CoreModule,
-                    HttpClientTestingModule,
-                    MatSnackBarModule,
-                    MatDialogModule,
-                    MatIconModule,
-                    MatExpansionModule,
-                    MatInputModule,
-                    ReactiveFormsModule,
-                ],
-                declarations: [DeviceStatusEditDialogComponent],
-                providers: [
-                    provideRouter([]),
-                    { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
-                    { provide: DashboardService, useValue: dashboardServiceSpy },
-                    { provide: DeviceTypeService, useValue: deviceTypeServiceeSpy },
-                    { provide: DeploymentsService, useValue: deploymentsServiceSpy },
-                    { provide: ExportService, useValue: exportServiceSpy },
-                    { provide: MatDialogRef, useValue: matDialogRefSpy },
-                    { provide: MAT_DIALOG_DATA, useValue: { widgetId: 'widgetId-1', dashboardId: 'dashboardId-1' } },
-                ],
-            }).compileComponents();
+    declarations: [DeviceStatusEditDialogComponent],
+    imports: [CoreModule,
+        MatSnackBarModule,
+        MatDialogModule,
+        MatIconModule,
+        MatExpansionModule,
+        MatInputModule,
+        ReactiveFormsModule],
+    providers: [
+        provideRouter([]),
+        { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
+        { provide: DashboardService, useValue: dashboardServiceSpy },
+        { provide: DeviceTypeService, useValue: deviceTypeServiceeSpy },
+        { provide: DeploymentsService, useValue: deploymentsServiceSpy },
+        { provide: ExportService, useValue: exportServiceSpy },
+        { provide: MatDialogRef, useValue: matDialogRefSpy },
+        { provide: MAT_DIALOG_DATA, useValue: { widgetId: 'widgetId-1', dashboardId: 'dashboardId-1' } },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+}).compileComponents();
             fixture = TestBed.createComponent(DeviceStatusEditDialogComponent);
             component = fixture.componentInstance;
             fixture.detectChanges();

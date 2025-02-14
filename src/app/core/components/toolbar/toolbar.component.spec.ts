@@ -20,7 +20,7 @@ import { ToolbarComponent } from './toolbar.component';
 import { AuthorizationService } from '../../services/authorization.service';
 import { AuthorizationServiceMock } from '../../services/authorization.service.mock';
 import { MatDialogModule } from '@angular/material/dialog';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
@@ -31,6 +31,7 @@ import { NotificationService } from './notification/shared/notification.service'
 import { of } from 'rxjs';
 import { SettingsDialogService } from 'src/app/modules/settings/shared/settings-dialog.service';
 import {provideRouter} from "@angular/router";
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ToolbarComponent', () => {
     let component: ToolbarComponent;
@@ -45,23 +46,22 @@ describe('ToolbarComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [
-                HttpClientTestingModule,
-                MatDialogModule,
-                MatSnackBarModule,
-                MatMenuModule,
-                MatDividerModule,
-                MatIconModule,
-                MatToolbarModule,
-            ],
-            declarations: [ToolbarComponent],
-            providers: [
-                provideRouter([]),
-                { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-                { provide: NotificationService, useValue: notificationServiceSpy },
-                { provide: SettingsDialogService, useValue: settingsDialogServiceSpy }
-            ],
-        }).compileComponents();
+    declarations: [ToolbarComponent],
+    imports: [MatDialogModule,
+        MatSnackBarModule,
+        MatMenuModule,
+        MatDividerModule,
+        MatIconModule,
+        MatToolbarModule],
+    providers: [
+        provideRouter([]),
+        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+        { provide: NotificationService, useValue: notificationServiceSpy },
+        { provide: SettingsDialogService, useValue: settingsDialogServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+}).compileComponents();
         fixture = TestBed.createComponent(ToolbarComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

@@ -16,7 +16,7 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FlowRepoComponent } from './flow-repo.component';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { AuthorizationService } from '../../../core/services/authorization.service';
@@ -31,6 +31,7 @@ import { By } from '@angular/platform-browser';
 import { FlowModel } from './shared/flow.model';
 import { of } from 'rxjs';
 import { CostService } from '../../cost/shared/cost.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('FlowRepoComponent', () => {
     let component: FlowRepoComponent;
@@ -64,16 +65,18 @@ describe('FlowRepoComponent', () => {
     beforeEach(
         waitForAsync(() => {
             TestBed.configureTestingModule({
-                imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule],
-                declarations: [FlowRepoComponent],
-                providers: [
-                    { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-                    { provide: FlowRepoService, useValue: flowRepoServiceSpy },
-                    { provide: FlowEngineService, useValue: flowEngineServiceSpy },
-                    { provide: CostService, useValue: costServiceSpy },
-                    DialogsService
-                ],
-            }).compileComponents();
+    declarations: [FlowRepoComponent],
+    imports: [MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule],
+    providers: [
+        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+        { provide: FlowRepoService, useValue: flowRepoServiceSpy },
+        { provide: FlowEngineService, useValue: flowEngineServiceSpy },
+        { provide: CostService, useValue: costServiceSpy },
+        DialogsService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+}).compileComponents();
         }),
     );
 

@@ -25,7 +25,7 @@ import {
     QueriesRequestV2ElementTimescaleModel,
     TimeValuePairModel
 } from './export-data.model';
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {map} from 'rxjs/operators';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';

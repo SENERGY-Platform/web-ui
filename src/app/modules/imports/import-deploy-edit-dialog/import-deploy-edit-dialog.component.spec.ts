@@ -27,7 +27,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { of } from 'rxjs';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -66,41 +66,39 @@ describe('ImportDeployDialogComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [ImportDeployEditDialogComponent],
-            imports: [
-                MatDialogModule,
-                MatTooltipModule,
-                MatButtonModule,
-                MatIconModule,
-                MatFormFieldModule,
-                MatInputModule,
-                ReactiveFormsModule,
-                MatSnackBarModule,
-                HttpClientModule,
-                MatCheckboxModule,
-                BrowserAnimationsModule,
-                MatTableModule,
-            ],
-            providers: [
-                {
-                    provide: MAT_DIALOG_DATA,
-                    useValue: {
-                        name: 'name',
-                        import_type_id: 'test-id',
-                    } as ImportInstancesModel,
+    declarations: [ImportDeployEditDialogComponent],
+    imports: [MatDialogModule,
+        MatTooltipModule,
+        MatButtonModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        MatSnackBarModule,
+        MatCheckboxModule,
+        BrowserAnimationsModule,
+        MatTableModule],
+    providers: [
+        {
+            provide: MAT_DIALOG_DATA,
+            useValue: {
+                name: 'name',
+                import_type_id: 'test-id',
+            } as ImportInstancesModel,
+        },
+        {
+            provide: MatDialogRef,
+            useValue: {
+                close: (rv: any) => {
+                    r = rv;
                 },
-                {
-                    provide: MatDialogRef,
-                    useValue: {
-                        close: (rv: any) => {
-                            r = rv;
-                        },
-                    },
-                },
-                { provide: ImportTypesService, useValue: importTypeServiceSpy },
-                { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
-            ],
-        }).compileComponents();
+            },
+        },
+        { provide: ImportTypesService, useValue: importTypeServiceSpy },
+        { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+    ]
+}).compileComponents();
     });
 
     beforeEach(() => {

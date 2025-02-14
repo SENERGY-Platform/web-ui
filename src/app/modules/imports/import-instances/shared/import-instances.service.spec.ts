@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import { TestBed } from '@angular/core/testing';
-import { HttpClient } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { of } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
@@ -33,9 +33,9 @@ describe('ImportInstancesService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
-            providers: [{ provide: HttpClient, useValue: httpClientSpy }],
-        });
+    imports: [],
+    providers: [{ provide: HttpClient, useValue: httpClientSpy }, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
         service = TestBed.inject(ImportInstancesService);
     });
 

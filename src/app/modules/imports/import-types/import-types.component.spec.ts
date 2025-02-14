@@ -19,7 +19,7 @@ import {ImportTypesComponent} from './import-types.component';
 import {CoreModule} from '../../../core/core.module';
 import {Router, RouterModule} from '@angular/router';
 import {ReactiveFormsModule} from '@angular/forms';
-import {HttpClientModule} from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {FlexModule} from '@angular/flex-layout';
@@ -85,44 +85,42 @@ describe('ImportTypesComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [ImportTypesComponent],
-            imports: [
-                CoreModule,
-                RouterModule.forRoot([], {}),
-                MatDialogModule,
-                MatSnackBarModule,
-                FlexModule,
-                MatTooltipModule,
-                MatButtonModule,
-                MatPaginatorModule,
-                MatIconModule,
-                WidgetModule,
-                HttpClientModule,
-                InfiniteScrollModule,
-                MatTooltipModule,
-                MatButtonModule,
-                MatIconModule,
-                MatFormFieldModule,
-                MatInputModule,
-                MatDividerModule,
-                MatSelectModule,
-                MatDialogModule,
-                MatTreeModule,
-                WidgetModule,
-                ReactiveFormsModule,
-                MatTableModule,
-            ],
-            providers: [
-                {provide: ImportTypesService, useValue: importTypesServiceSpy},
-                {provide: DialogsService, useValue: deleteDialogServiceSpy},
-                {provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy},
-                {provide: SearchbarService, useValue: searchbarSpy},
-                {provide: Router, useValue: routerSpy},
-                {provide: MatDialog, useValue: dialogSpy},
-                {provide: CostService, useValue: costServiceSpy},
-                {provide: PermissionsService, useValue: permissionsServiceSpy},
-            ],
-        }).compileComponents();
+    declarations: [ImportTypesComponent],
+    imports: [CoreModule,
+        RouterModule.forRoot([], {}),
+        MatDialogModule,
+        MatSnackBarModule,
+        FlexModule,
+        MatTooltipModule,
+        MatButtonModule,
+        MatPaginatorModule,
+        MatIconModule,
+        WidgetModule,
+        InfiniteScrollModule,
+        MatTooltipModule,
+        MatButtonModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatDividerModule,
+        MatSelectModule,
+        MatDialogModule,
+        MatTreeModule,
+        WidgetModule,
+        ReactiveFormsModule,
+        MatTableModule],
+    providers: [
+        { provide: ImportTypesService, useValue: importTypesServiceSpy },
+        { provide: DialogsService, useValue: deleteDialogServiceSpy },
+        { provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy },
+        { provide: SearchbarService, useValue: searchbarSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: MatDialog, useValue: dialogSpy },
+        { provide: CostService, useValue: costServiceSpy },
+        { provide: PermissionsService, useValue: permissionsServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+    ]
+}).compileComponents();
     });
 
     beforeEach(() => {

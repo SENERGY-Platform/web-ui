@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ImportTypesCreateEditComponent } from './import-types-create-edit.component';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
@@ -147,51 +147,46 @@ describe('ImportTypesCreateEditComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [ImportTypesCreateEditComponent],
-            imports: [
-                CoreModule,
-                RouterModule.forRoot(
-                    [
-                        {
-                            path: 'imports/types/list',
-                            pathMatch: 'full',
-                            component: ImportTypesComponent,
-                            data: { header: 'Import Types' },
-                        },
-                    ],
-                    {},
-                ),
-                ReactiveFormsModule,
-                HttpClientModule,
-                MatDialogModule,
-                MatSnackBarModule,
-                MatCheckboxModule,
-                FlexModule,
-                MatTooltipModule,
-                MatButtonModule,
-                MatIconModule,
-                MatFormFieldModule,
-                MatInputModule,
-                MatDividerModule,
-                MatSelectModule,
-                MatDialogModule,
-                MatTreeModule,
-                WidgetModule,
-            ],
-            providers: [
-                { provide: DeviceTypeService, useValue: deviceTypeService },
-                { provide: AspectsService, useValue: aspectsServiceSpy },
-                { provide: ImportTypesService, useValue: importTypesServiceSpy },
-                { provide: ConceptsService, useValue: conceptsServiceSpy },
-                {
-                    provide: ActivatedRoute,
-                    useValue: {
-                        url: of(['edit', '1234']),
-                        snapshot: { paramMap },
-                    },
-                },
-            ],
-        }).compileComponents();
+    declarations: [ImportTypesCreateEditComponent],
+    imports: [CoreModule,
+        RouterModule.forRoot([
+            {
+                path: 'imports/types/list',
+                pathMatch: 'full',
+                component: ImportTypesComponent,
+                data: { header: 'Import Types' },
+            },
+        ], {}),
+        ReactiveFormsModule,
+        MatDialogModule,
+        MatSnackBarModule,
+        MatCheckboxModule,
+        FlexModule,
+        MatTooltipModule,
+        MatButtonModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatDividerModule,
+        MatSelectModule,
+        MatDialogModule,
+        MatTreeModule,
+        WidgetModule],
+    providers: [
+        { provide: DeviceTypeService, useValue: deviceTypeService },
+        { provide: AspectsService, useValue: aspectsServiceSpy },
+        { provide: ImportTypesService, useValue: importTypesServiceSpy },
+        { provide: ConceptsService, useValue: conceptsServiceSpy },
+        {
+            provide: ActivatedRoute,
+            useValue: {
+                url: of(['edit', '1234']),
+                snapshot: { paramMap },
+            },
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+    ]
+}).compileComponents();
     });
 
     beforeEach(() => {

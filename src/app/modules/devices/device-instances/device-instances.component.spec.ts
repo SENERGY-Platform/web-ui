@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { DeviceInstancesComponent } from './device-instances.component';
 import { MatDialogModule } from '@angular/material/dialog';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { KeycloakService } from 'keycloak-angular';
 import { MockKeycloakService } from '../../../core/services/keycloak.mock';
@@ -32,6 +32,7 @@ import { DeviceInstancesService } from './shared/device-instances.service';
 import { of } from 'rxjs';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DeviceInstancesComponent', () => {
     let component: DeviceInstancesComponent;
@@ -51,24 +52,23 @@ describe('DeviceInstancesComponent', () => {
     beforeEach(
         waitForAsync(() => {
             TestBed.configureTestingModule({
-                imports: [
-                    MatDialogModule,
-                    HttpClientTestingModule,
-                    MatSnackBarModule,
-                    CoreModule,
-                    MatTabsModule,
-                    InfiniteScrollModule,
-                    DevicesModule,
-                ],
-                declarations: [DeviceInstancesComponent],
-                providers: [
-                    { provide: KeycloakService, useClass: MockKeycloakService },
-                    { provide: Router, useClass: RouterStub },
-                    { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
-                    { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
-                    { provide: ExportDataService, useValue: exportDataServiceSpy },
-                ],
-            }).compileComponents();
+    declarations: [DeviceInstancesComponent],
+    imports: [MatDialogModule,
+        MatSnackBarModule,
+        CoreModule,
+        MatTabsModule,
+        InfiniteScrollModule,
+        DevicesModule],
+    providers: [
+        { provide: KeycloakService, useClass: MockKeycloakService },
+        { provide: Router, useClass: RouterStub },
+        { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
+        { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
+        { provide: ExportDataService, useValue: exportDataServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+}).compileComponents();
         }),
     );
 

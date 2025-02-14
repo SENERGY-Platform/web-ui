@@ -1,9 +1,10 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { PvPredictionComponent } from './pv-prediction.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('PvPredictionComponent', () => {
   let component: PvPredictionComponent;
@@ -11,13 +12,11 @@ describe('PvPredictionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PvPredictionComponent ],
-      imports: [
-        MatDialogModule,
-        HttpClientTestingModule,
-        MatSnackBarModule
-      ],
-    })
+    declarations: [PvPredictionComponent],
+    imports: [MatDialogModule,
+        MatSnackBarModule],
+    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(PvPredictionComponent);

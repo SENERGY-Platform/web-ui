@@ -16,7 +16,7 @@
 
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { CoreModule } from '../../../core/core.module';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -50,6 +50,7 @@ import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/share
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
 import {provideRouter} from "@angular/router";
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DataTableEditDialogComponent', () => {
     let component: DataTableEditDialogComponent;
@@ -200,38 +201,37 @@ describe('DataTableEditDialogComponent', () => {
             deviceGroupServiceSpy.getFunctionListByIds.and.returnValue(of([]));
             deviceGroupServiceSpy.getDeviceClassListByIds.and.returnValue(of([]));
             TestBed.configureTestingModule({
-                imports: [
-                    CoreModule,
-                    HttpClientTestingModule,
-                    MatSnackBarModule,
-                    MatDialogModule,
-                    MatIconModule,
-                    MatExpansionModule,
-                    MatInputModule,
-                    ReactiveFormsModule,
-                    WidgetModule,
-                ],
-                declarations: [DataTableEditDialogComponent],
-                providers: [
-                    provideRouter([]),
-                    { provide: DashboardService, useValue: dashboardServiceSpy },
-                    { provide: DeploymentsService, useValue: deploymentsServiceSpy },
-                    { provide: ExportService, useValue: exportServiceSpy },
-                    { provide: MatDialogRef, useValue: matDialogRefSpy },
-                    { provide: DataTableHelperService, useValue: dataTableHelperServiceSpy },
-                    { provide: ProcessSchedulerService, useValue: processSchedulerServiceSpy },
-                    { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
-                    { provide: ConceptsService, useValue: conceptsServiceSpy },
-                    {
-                        provide: MAT_DIALOG_DATA, useValue: {
-                            widgetId: 'widgetId-1',
-                            dashboardId: 'dashboardId-1',
-                            userHasUpdateNameAuthorization: true,
-                            userHasUpdatePropertiesAuthorization: true
-                        }
-                    },
-                ],
-            }).compileComponents();
+    declarations: [DataTableEditDialogComponent],
+    imports: [CoreModule,
+        MatSnackBarModule,
+        MatDialogModule,
+        MatIconModule,
+        MatExpansionModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        WidgetModule],
+    providers: [
+        provideRouter([]),
+        { provide: DashboardService, useValue: dashboardServiceSpy },
+        { provide: DeploymentsService, useValue: deploymentsServiceSpy },
+        { provide: ExportService, useValue: exportServiceSpy },
+        { provide: MatDialogRef, useValue: matDialogRefSpy },
+        { provide: DataTableHelperService, useValue: dataTableHelperServiceSpy },
+        { provide: ProcessSchedulerService, useValue: processSchedulerServiceSpy },
+        { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
+        { provide: ConceptsService, useValue: conceptsServiceSpy },
+        {
+            provide: MAT_DIALOG_DATA, useValue: {
+                widgetId: 'widgetId-1',
+                dashboardId: 'dashboardId-1',
+                userHasUpdateNameAuthorization: true,
+                userHasUpdatePropertiesAuthorization: true
+            }
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+}).compileComponents();
         }),
     );
 

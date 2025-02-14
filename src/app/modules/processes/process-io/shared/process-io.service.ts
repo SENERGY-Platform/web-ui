@@ -17,7 +17,7 @@
 
 
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {Observable, timer} from 'rxjs';
 import {environment} from '../../../../../environments/environment';

@@ -16,7 +16,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { CoreModule } from '../../../../core/core.module';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -40,6 +40,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ProcessesModule } from '../../processes.module';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 const nullPath = { path: '', characteristicId: '', aspectNode: Object({  }), functionId: '', isVoid: false, value: null, type: '', configurables: [  ] };
 
@@ -75,38 +76,37 @@ describe('ProcessDeploymentsConfigComponent', () => {
 
     function initSpies(): void {
         TestBed.configureTestingModule({
-            imports: [
-                MatDialogModule,
-                HttpClientTestingModule,
-                MatSnackBarModule,
-                CoreModule,
-                MatTabsModule,
-                InfiniteScrollModule,
-                DevicesModule,
-                MatFormFieldModule,
-                ReactiveFormsModule,
-                FlexLayoutModule,
-                MatInputModule,
-                MatSelectModule,
-                ProcessesModule,
-            ],
-            declarations: [ProcessDeploymentsConfigComponent],
-            providers: [
-                { provide: KeycloakService, useClass: MockKeycloakService },
-                { provide: Router, useValue: routerSpy },
-                { provide: DeploymentsService, useValue: deploymentsServiceSpy },
-                {
-                    provide: ActivatedRoute,
-                    useValue: {
-                        snapshot: {
-                            queryParams: {
-                                processId: '4711',
-                            },
-                        },
+    declarations: [ProcessDeploymentsConfigComponent],
+    imports: [MatDialogModule,
+        MatSnackBarModule,
+        CoreModule,
+        MatTabsModule,
+        InfiniteScrollModule,
+        DevicesModule,
+        MatFormFieldModule,
+        ReactiveFormsModule,
+        FlexLayoutModule,
+        MatInputModule,
+        MatSelectModule,
+        ProcessesModule],
+    providers: [
+        { provide: KeycloakService, useClass: MockKeycloakService },
+        { provide: Router, useValue: routerSpy },
+        { provide: DeploymentsService, useValue: deploymentsServiceSpy },
+        {
+            provide: ActivatedRoute,
+            useValue: {
+                snapshot: {
+                    queryParams: {
+                        processId: '4711',
                     },
                 },
-            ],
-        }).compileComponents();
+            },
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+}).compileComponents();
         fixture = TestBed.createComponent(ProcessDeploymentsConfigComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

@@ -1,9 +1,10 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { ConsumptionProfileComponent } from './consumption-profile.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ConsumptionProfileComponent', () => {
   let component: ConsumptionProfileComponent;
@@ -11,13 +12,11 @@ describe('ConsumptionProfileComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ConsumptionProfileComponent ],
-      imports: [
-        HttpClientTestingModule,
-        MatDialogModule,
-        MatSnackBarModule
-      ]
-    })
+    declarations: [ConsumptionProfileComponent],
+    imports: [MatDialogModule,
+        MatSnackBarModule],
+    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(ConsumptionProfileComponent);

@@ -16,8 +16,8 @@
 import { TestBed } from '@angular/core/testing';
 
 import { ImportTypesService } from './import-types.service';
-import { HttpClient } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { of } from 'rxjs';
 import { ImportTypeModel } from './import-types.model';
@@ -119,9 +119,9 @@ describe('ImportTypesService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
-            providers: [{ provide: HttpClient, useValue: httpClientSpy }],
-        });
+    imports: [],
+    providers: [{ provide: HttpClient, useValue: httpClientSpy }, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
         service = TestBed.inject(ImportTypesService);
     });
 

@@ -76,8 +76,7 @@ export class LadonService {
     public test(test: { clientID: string; userId: string; roles: string[]; username: string; target_method: string; target_uri: string }):
         Observable<PermissionTestResponse> {
 
-        return this.http.post
-            <{ GET: boolean; POST: boolean; PUT: boolean; PATCH: boolean; DELETE: boolean; HEAD: boolean }>(this.baseUrl + '/test', test);
+        return this.http.post<{ GET: boolean; POST: boolean; PUT: boolean; PATCH: boolean; DELETE: boolean; HEAD: boolean }>(this.baseUrl + '/test', test);
     }
 
     public userIsAuthorized(requests: AuthorizationRequest[]): Observable<AuthorizationRequestResponse> {

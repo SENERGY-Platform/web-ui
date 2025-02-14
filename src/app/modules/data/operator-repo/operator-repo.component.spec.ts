@@ -16,7 +16,7 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { OperatorRepoComponent } from './operator-repo.component';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { OperatorRepoService } from './shared/operator-repo.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -27,6 +27,7 @@ import { CoreModule } from '../../../core/core.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 class MockOperatorRepoService {}
 
@@ -36,22 +37,21 @@ describe('OperatorRepoComponent', () => {
     beforeEach(
         waitForAsync(() => {
             TestBed.configureTestingModule({
-                imports: [
-                    HttpClientTestingModule,
-                    MatSnackBarModule,
-                    MatDialogModule,
-                    CoreModule,
-                    MatIconModule,
-                    MatSortModule,
-                    MatPaginatorModule,
-                ],
-                declarations: [OperatorRepoComponent],
-                providers: [
-                    { provide: OperatorRepoService, useClass: MockOperatorRepoService },
-                    { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-                    DialogsService,
-                ],
-            });
+    declarations: [OperatorRepoComponent],
+    imports: [MatSnackBarModule,
+        MatDialogModule,
+        CoreModule,
+        MatIconModule,
+        MatSortModule,
+        MatPaginatorModule],
+    providers: [
+        { provide: OperatorRepoService, useClass: MockOperatorRepoService },
+        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+        DialogsService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+});
             fixture = TestBed.createComponent(OperatorRepoComponent);
         }),
     );

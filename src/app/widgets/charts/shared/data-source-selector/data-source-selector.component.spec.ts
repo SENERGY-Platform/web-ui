@@ -1,9 +1,10 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { DataSourceSelectorComponent } from './data-source-selector.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DataSourceSelectorComponent', () => {
   let component: DataSourceSelectorComponent;
@@ -11,13 +12,11 @@ describe('DataSourceSelectorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DataSourceSelectorComponent ],
-      imports: [
-        HttpClientTestingModule,
-        MatSnackBarModule,
-        MatDialogModule
-      ]
-    })
+    declarations: [DataSourceSelectorComponent],
+    imports: [MatSnackBarModule,
+        MatDialogModule],
+    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(DataSourceSelectorComponent);

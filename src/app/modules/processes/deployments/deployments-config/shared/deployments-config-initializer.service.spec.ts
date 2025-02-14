@@ -16,7 +16,7 @@
 
 import { TestBed, inject } from '@angular/core/testing';
 
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DeploymentsConfigInitializerService } from './deployments-config-initializer.service';
 import { FormBuilder, FormControl } from '@angular/forms';
 import { V2DeploymentsPreparedModel } from '../../shared/deployments-prepared-v2.model';
@@ -26,9 +26,9 @@ const nullPath = { path: '', characteristicId: '', aspectNode: Object({  }), fun
 describe('DeploymentsConfigInitializerService', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientModule],
-            providers: [DeploymentsConfigInitializerService, FormBuilder],
-        });
+    imports: [],
+    providers: [DeploymentsConfigInitializerService, FormBuilder, provideHttpClient(withInterceptorsFromDi())]
+});
     });
 
     it('should be created', inject([DeploymentsConfigInitializerService], (service: DeploymentsConfigInitializerService) => {

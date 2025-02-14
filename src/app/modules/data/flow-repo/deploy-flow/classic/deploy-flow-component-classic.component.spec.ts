@@ -15,7 +15,7 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 
@@ -26,6 +26,7 @@ import { AuthorizationService } from '../../../../../core/services/authorization
 import { AuthorizationServiceMock } from '../../../../../core/services/authorization.service.mock';
 import { DialogsService } from '../../../../../core/services/dialogs.service';
 import {ActivatedRoute, provideRouter} from '@angular/router';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DeployFlowClassicComponent', () => {
     let component: DeployFlowClassicComponent;
@@ -34,32 +35,31 @@ describe('DeployFlowClassicComponent', () => {
     beforeEach(
         waitForAsync(() => {
             TestBed.configureTestingModule({
-                imports: [
-                    HttpClientTestingModule,
-                    MatSnackBarModule,
-                    MatDialogModule,
-                    CoreModule,
-                    InfiniteScrollModule,
-                ],
-                declarations: [DeployFlowClassicComponent],
-                providers: [
-                    provideRouter([]),
-                    { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-                    DialogsService,
-                    {
-                        provide: ActivatedRoute,
-                        useValue: {
-                            snapshot: {
-                                paramMap: {
-                                    get(): string {
-                                        return '123';
-                                    },
-                                },
-                            },
+    declarations: [DeployFlowClassicComponent],
+    imports: [MatSnackBarModule,
+        MatDialogModule,
+        CoreModule,
+        InfiniteScrollModule],
+    providers: [
+        provideRouter([]),
+        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+        DialogsService,
+        {
+            provide: ActivatedRoute,
+            useValue: {
+                snapshot: {
+                    paramMap: {
+                        get(): string {
+                            return '123';
                         },
                     },
-                ],
-            }).compileComponents();
+                },
+            },
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+}).compileComponents();
         }),
     );
 

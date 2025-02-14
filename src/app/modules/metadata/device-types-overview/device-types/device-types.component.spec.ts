@@ -16,7 +16,7 @@
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {RouterTestingModule} from '@angular/router/testing';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {DeviceTypesComponent} from './device-types.component';
 import {CoreModule} from '../../../../core/core.module';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
@@ -38,6 +38,7 @@ import {FlexLayoutModule} from '@angular/flex-layout';
 import {util} from 'jointjs';
 import uuid = util.uuid;
 import {MatTreeModule} from '@angular/material/tree';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DeviceTypesComponent', () => {
     let component: DeviceTypesComponent;
@@ -147,37 +148,36 @@ describe('DeviceTypesComponent', () => {
         deviceTypeServiceSpy.updateDeviceType.and.returnValue(of({id: uuid()}));
 
         TestBed.configureTestingModule({
-            imports: [
-                CoreModule,
-                RouterTestingModule.withRoutes([devicetypesEdit]),
-                HttpClientTestingModule,
-                MatSnackBarModule,
-                MatStepperModule,
-                MatFormFieldModule,
-                MatSelectModule,
-                MatIconModule,
-                ReactiveFormsModule,
-                MatInputModule,
-                MatExpansionModule,
-                MatTabsModule,
-                MatTooltipModule,
-                FlexLayoutModule,
-                MatTreeModule,
-            ],
-            declarations: [DeviceTypesComponent],
-            providers: [
-                {
-                    provide: ActivatedRoute,
-                    useValue: {
-                        snapshot: {
-                            paramMap: convertToParamMap({id}),
-                            queryParamMap: convertToParamMap({function: func}),
-                        },
-                    },
+    declarations: [DeviceTypesComponent],
+    imports: [CoreModule,
+        RouterTestingModule.withRoutes([devicetypesEdit]),
+        MatSnackBarModule,
+        MatStepperModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatIconModule,
+        ReactiveFormsModule,
+        MatInputModule,
+        MatExpansionModule,
+        MatTabsModule,
+        MatTooltipModule,
+        FlexLayoutModule,
+        MatTreeModule],
+    providers: [
+        {
+            provide: ActivatedRoute,
+            useValue: {
+                snapshot: {
+                    paramMap: convertToParamMap({ id }),
+                    queryParamMap: convertToParamMap({ function: func }),
                 },
-                {provide: DeviceTypeService, useValue: deviceTypeServiceSpy},
-            ],
-        }).compileComponents();
+            },
+        },
+        { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+}).compileComponents();
         fixture = TestBed.createComponent(DeviceTypesComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
