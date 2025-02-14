@@ -130,21 +130,21 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "senergy-web-ui:build"
+            "buildTarget": "senergy-web-ui:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "senergy-web-ui:build:production"
+              "buildTarget": "senergy-web-ui:build:production"
             },
             "dev": {
-              "browserTarget": "senergy-web-ui:build:dev"
+              "buildTarget": "senergy-web-ui:build:dev"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "senergy-web-ui:build"
+            "buildTarget": "senergy-web-ui:build"
           }
         },
         "test": {

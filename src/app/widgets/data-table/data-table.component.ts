@@ -335,8 +335,8 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                 const warn = elements[elementIndex].warning;
                                 if (warn !== undefined && warn.enabled) {
                                     if (
-                                        (warn.upperBoundary !== undefined && v !== null && v > warn.upperBoundary) ||
-                                        (warn.lowerBoundary !== undefined && v !== null && v < warn.lowerBoundary)
+                                        (warn.upperBoundary !== undefined && v !== null && (v as number) > warn.upperBoundary) ||
+                                        (warn.lowerBoundary !== undefined && v !== null && (v as number) < warn.lowerBoundary)
                                     ) {
                                         item.class = 'color-warn';
                                     }

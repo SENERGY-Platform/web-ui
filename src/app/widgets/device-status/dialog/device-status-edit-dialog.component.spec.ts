@@ -17,7 +17,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DeviceStatusEditDialogComponent } from './device-status-edit-dialog.component';
 import { CoreModule } from '../../../core/core.module';
-import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -51,6 +50,7 @@ import { environment } from '../../../../environments/environment';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { DeviceSelectablesModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
 import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
+import {provideRouter} from "@angular/router";
 
 describe('DeviceStatusEditDialogComponent', () => {
     let component: DeviceStatusEditDialogComponent;
@@ -182,7 +182,6 @@ describe('DeviceStatusEditDialogComponent', () => {
             TestBed.configureTestingModule({
                 imports: [
                     CoreModule,
-                    RouterTestingModule,
                     HttpClientTestingModule,
                     MatSnackBarModule,
                     MatDialogModule,
@@ -193,6 +192,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 ],
                 declarations: [DeviceStatusEditDialogComponent],
                 providers: [
+                    provideRouter([]),
                     { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
                     { provide: DashboardService, useValue: dashboardServiceSpy },
                     { provide: DeviceTypeService, useValue: deviceTypeServiceeSpy },

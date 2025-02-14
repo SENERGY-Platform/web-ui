@@ -71,10 +71,10 @@ export class MultiValueComponent implements OnInit, OnDestroy {
     }
 
     checkWarning(m: MultiValueMeasurement): boolean {
-        if (m.warning_enabled && m.data && m.lowerBoundary && m.data < m.lowerBoundary) {
+        if (m.warning_enabled && m.data && m.lowerBoundary && (m.data as number) < m.lowerBoundary) {
             return true;
         }
-        if (m.warning_enabled && m.data && m.upperBoundary && m.data > m.upperBoundary) {
+        if (m.warning_enabled && m.data && m.upperBoundary && (m.data as number) > m.upperBoundary) {
             return true;
         }
         return false;

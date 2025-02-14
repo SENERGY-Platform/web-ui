@@ -16,7 +16,6 @@
 
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { CoreModule } from '../../../core/core.module';
-import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -50,6 +49,7 @@ import uuid = util.uuid;
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
+import {provideRouter} from "@angular/router";
 
 describe('DataTableEditDialogComponent', () => {
     let component: DataTableEditDialogComponent;
@@ -202,7 +202,6 @@ describe('DataTableEditDialogComponent', () => {
             TestBed.configureTestingModule({
                 imports: [
                     CoreModule,
-                    RouterTestingModule,
                     HttpClientTestingModule,
                     MatSnackBarModule,
                     MatDialogModule,
@@ -214,6 +213,7 @@ describe('DataTableEditDialogComponent', () => {
                 ],
                 declarations: [DataTableEditDialogComponent],
                 providers: [
+                    provideRouter([]),
                     { provide: DashboardService, useValue: dashboardServiceSpy },
                     { provide: DeploymentsService, useValue: deploymentsServiceSpy },
                     { provide: ExportService, useValue: exportServiceSpy },

@@ -15,8 +15,6 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
-import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -39,6 +37,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
 import { GridsterModule } from 'angular-gridster2';
 import { MatButtonModule } from '@angular/material/button';
+import {provideRouter} from "@angular/router";
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
@@ -66,7 +65,6 @@ describe('DashboardComponent', () => {
             TestBed.configureTestingModule({
                 imports: [
                     CoreModule,
-                    RouterTestingModule,
                     HttpClientTestingModule,
                     MatSnackBarModule,
                     MatDialogModule,
@@ -82,6 +80,7 @@ describe('DashboardComponent', () => {
                 ],
                 declarations: [DashboardComponent],
                 providers: [
+                    provideRouter([]),
                     { provide: DashboardService, useValue: dashboardServiceSpy },
                     { provide: ResponsiveService, useValue: responsiveServiceSpy },
                     { provide: DeviceStatusService, useValue: deviceStatusServiceSpy },

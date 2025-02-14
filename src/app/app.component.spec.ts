@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { TestBed, ComponentFixture, waitForAsync } from '@angular/core/testing';
+import { TestBed, ComponentFixture} from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { KeycloakService } from 'keycloak-angular';
-import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MockKeycloakService } from './core/services/keycloak.mock';
@@ -28,6 +27,8 @@ import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { SettingsDialogService } from './modules/settings/shared/settings-dialog.service';
 import { NotificationService } from './core/components/toolbar/notification/shared/notification.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
+import {provideRouter} from "@angular/router";
+
 
 describe('AppComponent', () => {
     let component: AppComponent;
@@ -48,9 +49,10 @@ describe('AppComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule],
+            imports: [CoreModule, HttpClientTestingModule, MatSnackBarModule],
             declarations: [AppComponent],
             providers: [
+                provideRouter([]),
                 { provide: KeycloakService, useClass: MockKeycloakService },
                 { provide: AuthorizationService, useClass: AuthorizationServiceMock },
                 { provide: LadonService, useValue: ladonServiceSpy},

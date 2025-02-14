@@ -270,7 +270,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
             smallerThreshold.forEach(thresholdConfig => {
                 const threshold = thresholdConfig.threshold;
                 const direction = thresholdConfig.direction;
-                const thresholdReached = (direction === '<=' && currentValue <= threshold);
+                const thresholdReached = (direction === '<=' && (currentValue as number) <= threshold);
                 if(thresholdReached) {
                     this.highlightColor = thresholdConfig.color;
                 }
@@ -278,7 +278,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
             biggerThreshold.forEach(thresholdConfig => {
                 const threshold = thresholdConfig.threshold;
                 const direction = thresholdConfig.direction;
-                const thresholdReached = (direction === '>=' && currentValue >= threshold);
+                const thresholdReached = (direction === '>=' && (currentValue as number) >= threshold);
                 if(thresholdReached) {
                     this.highlightColor = thresholdConfig.color;
                 }

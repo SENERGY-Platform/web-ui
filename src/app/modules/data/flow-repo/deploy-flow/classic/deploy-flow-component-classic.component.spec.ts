@@ -25,8 +25,7 @@ import { CoreModule } from '../../../../../core/core.module';
 import { AuthorizationService } from '../../../../../core/services/authorization.service';
 import { AuthorizationServiceMock } from '../../../../../core/services/authorization.service.mock';
 import { DialogsService } from '../../../../../core/services/dialogs.service';
-import { ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import {ActivatedRoute, provideRouter} from '@angular/router';
 
 describe('DeployFlowClassicComponent', () => {
     let component: DeployFlowClassicComponent;
@@ -41,10 +40,10 @@ describe('DeployFlowClassicComponent', () => {
                     MatDialogModule,
                     CoreModule,
                     InfiniteScrollModule,
-                    RouterTestingModule,
                 ],
                 declarations: [DeployFlowClassicComponent],
                 providers: [
+                    provideRouter([]),
                     { provide: AuthorizationService, useClass: AuthorizationServiceMock },
                     DialogsService,
                     {

@@ -17,7 +17,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ToolbarComponent } from './toolbar.component';
-import { RouterTestingModule } from '@angular/router/testing';
 import { AuthorizationService } from '../../services/authorization.service';
 import { AuthorizationServiceMock } from '../../services/authorization.service.mock';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -31,6 +30,7 @@ import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { NotificationService } from './notification/shared/notification.service';
 import { of } from 'rxjs';
 import { SettingsDialogService } from 'src/app/modules/settings/shared/settings-dialog.service';
+import {provideRouter} from "@angular/router";
 
 describe('ToolbarComponent', () => {
     let component: ToolbarComponent;
@@ -47,7 +47,6 @@ describe('ToolbarComponent', () => {
         TestBed.configureTestingModule({
             imports: [
                 HttpClientTestingModule,
-                RouterTestingModule,
                 MatDialogModule,
                 MatSnackBarModule,
                 MatMenuModule,
@@ -57,6 +56,7 @@ describe('ToolbarComponent', () => {
             ],
             declarations: [ToolbarComponent],
             providers: [
+                provideRouter([]),
                 { provide: AuthorizationService, useClass: AuthorizationServiceMock },
                 { provide: NotificationService, useValue: notificationServiceSpy },
                 { provide: SettingsDialogService, useValue: settingsDialogServiceSpy }
