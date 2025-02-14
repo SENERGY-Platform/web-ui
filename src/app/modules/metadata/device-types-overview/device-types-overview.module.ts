@@ -124,9 +124,7 @@ const devicetypesEdit: Route = {
         DeviceTypesContentVariableDialogComponent,
         DeviceTypesContentVariableJsonDialogComponent,
         IsNotProhibitedNameValidatorDirective,
-        UsedInDeviceTypesDialogComponent
-    ],
-    entryComponents: [
+        UsedInDeviceTypesDialogComponent,
         DeviceTypesNewDeviceClassDialogComponent,
         DeviceTypesNewFunctionDialogComponent,
         DeviceTypesNewAspectDialogComponent,
