@@ -12,7 +12,7 @@ RUN npm ci
 COPY . .
 RUN sed 's/production: false/production: true/' src/environments/environment.ts > src/environments/environment.prod.ts
 #RUN npm run config -- --environment=prod
-RUN ng build --configuration production
+RUN npm run ng build senergy-web-ui -c production
 
 ## STAGE 2: Run nginx to serve application ##
 FROM nginx
