@@ -1,5 +1,5 @@
 ## STAGE 1: Build Angular application ##
-FROM node:18-alpine as builder
+FROM node:22-alpine as builder
 WORKDIR /tmp/workspace
 
 # install dependencies
@@ -12,7 +12,7 @@ RUN npm ci
 COPY . .
 RUN sed 's/production: false/production: true/' src/environments/environment.ts > src/environments/environment.prod.ts
 #RUN npm run config -- --environment=prod
-RUN node --max_old_space_size=8192 $(npm bin)/ng build --configuration production
+RUN ng build --configuration production
 
 ## STAGE 2: Run nginx to serve application ##
 FROM nginx
