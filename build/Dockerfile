@@ -1,5 +1,5 @@
 ## STAGE 1: Build Angular application ##
-FROM node:22-alpine as builder
+FROM node:20-alpine as builder
 WORKDIR /tmp/workspace
 
 # install dependencies
