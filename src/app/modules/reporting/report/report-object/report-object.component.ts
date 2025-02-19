@@ -29,6 +29,7 @@ import {ExportDataService} from '../../../../widgets/shared/export-data.service'
 import {MatDialog} from '@angular/material/dialog';
 import {QueryPreviewDialogComponent} from './query-preview/query-preview-dialog.component';
 import {map, Observable, of} from 'rxjs';
+import {ErrorHandlerService} from "../../../../core/services/error-handler.service";
 
 class TimeUnit {
     constructor(unit: string, desc: string) {
@@ -79,6 +80,7 @@ export class ReportObjectComponent implements OnInit, OnChanges {
     constructor(
         private deviceTypeService: DeviceTypeService,
         private exportDataService: ExportDataService,
+        private errorService: ErrorHandlerService,
         private dialog: MatDialog) {
     }
 
@@ -241,6 +243,8 @@ export class ReportObjectComponent implements OnInit, OnChanges {
                         data: {jsonData: response, dataCount: response['Key ' + 0].length},
                     });
                 }
+            }, error => {
+                this.errorService.showErrorInSnackBar('Preview Error: ' + error.error);
             });
         }
     }
