@@ -28,21 +28,33 @@
             </div>
         </div>
         <div class="layout-margin" fxLayout="column">
-            <div *ngIf="report.createdAt !== undefined" fxLayout="row" fxLayoutAlign="end center" style="margin-bottom: 10px;">
-                <mat-icon>calendar_today</mat-icon>{{report.createdAt| date:"medium"}}
-                <mat-icon style="margin-left: 6px;">update</mat-icon>{{report.updatedAt| date:"medium"}}
+            <div *ngIf="report.createdAt !== undefined" fxLayout="row" fxLayoutAlign="end center"
+                 style="margin-bottom: 10px;">
+                <mat-icon>calendar_today</mat-icon>
+                {{ report.createdAt| date:"medium" }}
+                <mat-icon style="margin-left: 6px;">update</mat-icon>
+                {{ report.updatedAt| date:"medium" }}
             </div>
             <mat-card>
                 <mat-card-content>
                     <div fxLayout="column">
                         <div style="margin-bottom: 10px">
-                            Template Name: {{ template.name }} Id: {{templateId}}
+                            Template Name: {{ template.name }} Id: {{ templateId }}
                         </div>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Report Name</mat-label>
                             <input matInput [(ngModel)]="reportName">
                             <mat-error senergyError label="Report Name"></mat-error>
                         </mat-form-field>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            <mat-expansion-panel style="margin-top: 10px;">
+                <mat-expansion-panel-header>
+                    E-Mail Settings
+                </mat-expansion-panel-header>
+                <div>
+                    <div fxLayout="column">
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Cron Schedule</mat-label>
                             <input matInput [(ngModel)]="cron">
@@ -55,12 +67,12 @@
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>E-Mail Text</mat-label>
-                            <textarea  matInput [(ngModel)]="emailText"></textarea>
+                            <textarea matInput [(ngModel)]="emailText"></textarea>
                             <mat-error senergyError label="E-Mail Text"></mat-error>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>E-Mail HTML</mat-label>
-                            <textarea  matInput [(ngModel)]="emailHTML"></textarea>
+                            <textarea matInput [(ngModel)]="emailHTML"></textarea>
                             <mat-error senergyError label="E-Mail HTML"></mat-error>
                         </mat-form-field>
                         <div *ngFor="let email of emailReceivers; trackBy: trackByIndex; let i = index">
@@ -71,19 +83,19 @@
                             </mat-form-field>
                             <button mat-icon-button style="padding-top: 1.5rem;" (click)="deleteEmailAddress(i)">
                                 <mat-icon>delete</mat-icon>
-                              </button>
+                            </button>
                         </div>
                         <button mat-stroked-button (click)="addEmailAddress()">Add E-Mail Address</button>
                     </div>
-                </mat-card-content>
-            </mat-card>
+                </div>
+            </mat-expansion-panel>
 
             <div *ngIf="template.data !== undefined">
                 <senergy-reporting-object *ngFor="let element of template.data.dataStructured | keyvalue"
-                                        [requestObject]="requestObject"
-                                        [name]="element.key"
-                                        [data]="element.value"
-                                        [allDevices]="allDevices">
+                                          [requestObject]="requestObject"
+                                          [name]="element.key"
+                                          [data]="element.value"
+                                          [allDevices]="allDevices">
                 </senergy-reporting-object>
             </div>
             <button mat-fab class="fab" (click)="create()" matTooltip="Create Report">
