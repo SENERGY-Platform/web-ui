@@ -348,6 +348,7 @@ export class ReportObjectComponent implements OnInit, OnChanges {
     removeItem(evt: string){
         if (this.data != undefined && this.data.children != undefined){
             delete this.data.children[evt];
+            this.data.length = Object.keys(this.data.children).length;
         }
     }
 
@@ -355,6 +356,7 @@ export class ReportObjectComponent implements OnInit, OnChanges {
         if (this.data != undefined && this.data.children != undefined){
             const numberArray = Object.keys(this.data.children).map(Number);
             this.data.children[(Math.max(...numberArray)+1).toString()] = JSON.parse(JSON.stringify(this.data.children[evt]));
+            this.data.length = Object.keys(this.data.children).length;
         }
     }
 }
