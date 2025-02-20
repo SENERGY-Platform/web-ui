@@ -45,7 +45,7 @@ export interface ReportObjectModel {
     valueType: string;
     value: any | undefined;
     fields: Map<string, ReportObjectModel> | undefined;
-    children: Map<string, ReportObjectModel> | undefined;
+    children: {[key: string]: ReportObjectModel} | undefined;
     length: number | undefined;
     query?: QueriesRequestV2ElementTimescaleModel | undefined;
     queryOptions?: ReportObjectModelQueryOptions;

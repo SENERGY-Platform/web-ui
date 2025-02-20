@@ -27,11 +27,6 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
     justify-content: space-between;
 }
 
-.mat-content > mat-panel-title, .mat-content > mat-panel-description {
-    flex: 0 0 auto;
-}
-
-
 /* General design for data tables */
 .layout-margin {
     padding: 12px 8px 8px;

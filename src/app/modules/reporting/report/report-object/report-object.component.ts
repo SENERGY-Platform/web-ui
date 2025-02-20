@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {ReportObjectModel, ReportObjectModelQueryOptions} from '../../shared/reporting.model';
 import {QueriesRequestTimeModel} from '../../../../widgets/shared/export-data.model';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
@@ -51,8 +51,11 @@ class TimeUnit {
 export class ReportObjectComponent implements OnInit, OnChanges {
 
     @Input() name = '';
+    @Input() dynamic = false;
     @Input() data: ReportObjectModel | undefined;
     @Input() requestObject: Map<string, any> = new Map<string, any>();
+    @Output() removeItemEmitter: EventEmitter<string> = new EventEmitter();
+    @Output() copyItemEmitter: EventEmitter<string> = new EventEmitter();
     inputType = 'value';
     origData: ReportObjectModel = {} as ReportObjectModel;
     @Input() allDevices: DeviceInstanceModel[] = [];
@@ -331,6 +334,27 @@ export class ReportObjectComponent implements OnInit, OnChanges {
             if (this.data?.queryOptions !== undefined) {
                 this.data.queryOptions.endOffset = date.getTimezoneOffset();
             }
+        }
+    }
+
+    emitRemoveItem(){
+        this.removeItemEmitter.emit(this.name);
+    }
+
+    emitCopyItem(){
+        this.copyItemEmitter.emit(this.name);
+    }
+
+    removeItem(evt: string){
+        if (this.data != undefined && this.data.children != undefined){
+            delete this.data.children[evt];
+        }
+    }
+
+    addItem(evt: string){
+        if (this.data != undefined && this.data.children != undefined){
+            const numberArray = Object.keys(this.data.children).map(Number);
+            this.data.children[(Math.max(...numberArray)+1).toString()] = JSON.parse(JSON.stringify(this.data.children[evt]));
         }
     }
 }

@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<mat-expansion-panel *ngIf="data !== undefined" class="reporting-object">
+<mat-expansion-panel *ngIf="data !== undefined" class="reporting-object example-headers-align">
     <mat-expansion-panel-header>
         <mat-panel-title> {{ name }} ({{data.valueType}}) </mat-panel-title>
         <mat-panel-description *ngIf="data.valueType!=='object' && inputType==='value' && data.value !== undefined">
@@ -30,6 +30,10 @@
             <mat-icon aria-hidden="false" aria-label="Query" fontIcon="build"></mat-icon>
             {{queryDevice.display_name || queryDevice?.display_name}}/{{queryService.name}}/{{data.query!.columns[0].name}}
         </mat-panel-description>
+        <div class="ctrl" *ngIf="dynamic">
+            <mat-icon [ngStyle]="{'color':'grey'}" [matTooltip]="'delete Item'" fontIcon="delete" (click)="emitRemoveItem()"></mat-icon>
+            <mat-icon [ngStyle]="{'color':'grey'}" [matTooltip]="'copy Item'" fontIcon="content_copy" (click)="emitCopyItem()"></mat-icon>
+        </div>
     </mat-expansion-panel-header>
     <ng-template matExpansionPanelContent>
         <div fxLayout="column">
@@ -200,7 +204,7 @@
                 <div *ngIf="data.valueType === 'array' && data.children !== undefined">
                     <senergy-reporting-object *ngFor="let element of data.children | keyvalue"
                         [requestObject]="requestObject" [name]="element.key" [data]="element.value"
-                        [allDevices]="allDevices">
+                        [allDevices]="allDevices" [dynamic]="true" (removeItemEmitter)="removeItem($event)" (copyItemEmitter)="addItem($event)">
                     </senergy-reporting-object>
                 </div>
             </div>
