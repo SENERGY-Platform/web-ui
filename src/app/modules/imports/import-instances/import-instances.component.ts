@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AfterViewInit, Component, OnInit, ViewChild, } from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild,} from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
 import { Sort } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
@@ -40,7 +40,7 @@ import { AuthorizationService } from 'src/app/core/services/authorization.servic
     templateUrl: './import-instances.component.html',
     styleUrls: ['./import-instances.component.css'],
 })
-export class ImportInstancesComponent implements OnInit, AfterViewInit {
+export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestroy {
     displayedColumns = ['select', 'name', 'image', 'created_at', 'updated_at', 'export'];
     dataSource = new MatTableDataSource<ImportInstancesModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -82,6 +82,10 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
             this.userID = userIDResp;
         }
         this.userRoles = this.userService.getUserRoles();
+    }
+
+    ngOnDestroy(){
+        this.searchSub.unsubscribe();
     }
 
     getTotalNumberOfTypes(): Observable<number> {

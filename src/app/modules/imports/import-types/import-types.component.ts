@@ -38,7 +38,7 @@ import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissi
     templateUrl: './import-types.component.html',
     styleUrls: ['./import-types.component.css'],
 })
-export class ImportTypesComponent implements OnInit, AfterViewInit {
+export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
     displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share'];
     pageSize = 20;
     dataSource = new MatTableDataSource<ImportTypeModelWithCostEstimation>();
@@ -70,6 +70,10 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     ngOnInit(): void {
         this.initSearch();
         this.checkAuthorization();
+    }
+
+    ngOnDestroy(){
+        this.searchSub.unsubscribe();
     }
 
     ngAfterViewInit(): void {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { PipelineModel, PipelineStatus } from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
@@ -33,7 +33,7 @@ import { UtilService } from 'src/app/core/services/util.service';
     templateUrl: './pipeline-registry.component.html',
     styleUrls: ['./pipeline-registry.component.css'],
 })
-export class PipelineRegistryComponent implements OnInit, AfterViewInit {
+export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestroy {
     pageSize = 20;
     offset = 0;
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
@@ -71,6 +71,10 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         }
 
         this.initSearch();
+    }
+
+    ngOnDestroy(){
+        this.searchSub.unsubscribe();
     }
 
     initSearch() {

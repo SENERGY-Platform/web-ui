@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {DeviceInstancesService} from './shared/device-instances.service';
 import {
@@ -62,7 +62,7 @@ export enum DeviceInstancesRouterStateTypesEnum {
     templateUrl: './device-instances.component.html',
     styleUrls: ['./device-instances.component.css'],
 })
-export class DeviceInstancesComponent implements OnInit, AfterViewInit {
+export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     constructor(
         private deviceInstancesService: DeviceInstancesService,
@@ -125,6 +125,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load().subscribe();
         });
+    }
+
+    ngOnDestroy() {
+        this.searchSub.unsubscribe();
     }
 
     checkAuthorization() {
