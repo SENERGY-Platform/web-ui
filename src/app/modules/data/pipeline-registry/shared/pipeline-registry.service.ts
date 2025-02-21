@@ -35,7 +35,6 @@ export class PipelineRegistryService {
     }
 
     getPipelines(order: string = 'id:asc', limit: number | undefined = undefined, offset: string | undefined = undefined, userId: string | undefined = undefined): Observable<PipelineModel[]> {
-        console.trace();
         let url = environment.pipelineRegistryUrl + '/pipeline?order=' + order+'&limit='+limit+'&offset='+offset;
         if (limit === undefined){
             url = environment.pipelineRegistryUrl + '/pipeline?order=' + order;
