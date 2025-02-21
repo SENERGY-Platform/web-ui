@@ -51,7 +51,7 @@ export class FlowRepoService {
                     ':' +
                     order +
                     (search ? '&search=' + search : '')+
-                    (shared !== undefined ? '&shared=' + shared.valueOf() : ''),
+                    (shared !== undefined ? '&shared=' + shared?.valueOf() : ''),
             )
             .pipe(
                 map((resp) => resp || []),

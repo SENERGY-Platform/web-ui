@@ -141,17 +141,23 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
                 if (resp.flows.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
-                resp.flows.forEach((flow: FlowModel) => {
-                    if (typeof flow.image === 'string') {
-                        flow.image = this.sanitizer.bypassSecurityTrustHtml(flow.image);
-                    }
-                    this.flows.push(flow);
-                });
-                if (this.costService.userMayGetFlowCostEstimations()) {
-                    this.costService.getFlowCostEstimations(this.flows.map(f => f._id || '')).subscribe(estimations => {
-                        this.flowEstimations.push(...estimations);
-                        this.ready = true;
+                if (resp.flows.length > 0) {
+                    resp.flows.forEach((flow: FlowModel) => {
+                        if (typeof flow.image === 'string') {
+                            flow.image = this.sanitizer.bypassSecurityTrustHtml(flow.image);
+                        }
+                        this.flows.push(flow);
                     });
+                }
+                if (this.costService.userMayGetFlowCostEstimations()) {
+                    if (resp.flows.length > 0) {
+                        this.costService.getFlowCostEstimations(this.flows.map(f => f._id || '')).subscribe(estimations => {
+                            this.flowEstimations.push(...estimations);
+                            this.ready = true;
+                        });
+                    } else {
+                        this.ready = true;
+                    }
                 } else {
                     this.ready = true;
                 }
