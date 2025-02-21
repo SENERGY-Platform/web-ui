@@ -2,8 +2,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
-import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 
 import { PVPredictionEditComponent } from './edit.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';

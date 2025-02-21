@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync} from '@angular/core/testing';
 import { DeviceStatusEditDialogComponent } from './device-status-edit-dialog.component';
 import { CoreModule } from '../../../core/core.module';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -291,10 +290,15 @@ describe('DeviceStatusEditDialogComponent', () => {
 
     it(
         'select aspect, function',
-        waitForAsync(() => {
+        fakeAsync(() => {
             component.addElement({} as DeviceStatusElementModel);
             component.elementsControl.at(0).patchValue({ aspectId: component.aspects[0].id });
             component.elementsControl.at(0).patchValue({ function: component.funcArray[0][0] });
+
+            fixture.detectChanges();
+            tick();     // wait for async operations
+            flush();    // end delayed timers in subprocesses
+
             expect(component.selectablesArray.length).toBe(1);
             expect(component.selectablesArray[0]).toEqual([
                 {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync} from '@angular/core/testing';
 import {RouterTestingModule} from '@angular/router/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {DeviceTypesComponent} from './device-types.component';
@@ -293,9 +293,14 @@ describe('DeviceTypesComponent', () => {
 
     it(
         'check save with copy',
-        waitForAsync(() => {
+        fakeAsync(() => {
             init('device_id_4711', 'copy');
             component.save();
+
+            fixture.detectChanges();
+            tick();     // wait for async operations
+            flush();    // end delayed timers in subprocesses
+
             expect(component.secondFormGroup.getRawValue().services).toEqual([
                 {
                     id: '',
@@ -355,63 +360,70 @@ describe('DeviceTypesComponent', () => {
 
     it(
         'check save with edit',
-        waitForAsync(() => {
-            init('device_id_4711', 'edit');
-            const inputs = component.inputOutputArray(component.services.controls[0], 'inputs');
-            component.deleteContentVariable(inputs[0], [0, 1]);
+        fakeAsync(() => {
+                init('device_id_4711', 'edit');
+                const inputs = component.inputOutputArray(component.services.controls[0], 'inputs');
+                component.deleteContentVariable(inputs[0], [0, 1]);
+                component.save();
 
-            component.save();
-            expect(component.secondFormGroup.getRawValue().services).toEqual([
-                {
-                    id: 'service_id_1',
-                    local_id: 'local_id_1',
-                    service_group_key: null,
-                    name: 'service1',
-                    description: 'serv_desc',
-                    protocol_id: 'protocol_1',
-                    interaction: 'event',
-                    attributes: [
-                        {key: 'senergy/time_path', value: '', origin: 'web-ui'}
-                    ],
-                    inputs: [
-                        {
-                            id: 'input_id_1',
-                            name: 'metadata',
-                            serialization: 'json',
-                            content_variable: {
-                                id: 'content_variable_1',
-                                name: 'power_comsumption',
-                                type: 'https://schema.org/StructuredValue',
-                                sub_content_variables: [
-                                    {
-                                        id: 'sub_content_variable_1',
-                                        name: 'level',
-                                        type: 'https://schema.org/Float',
-                                        characteristic_id: 'char_1',
-                                        value: 0,
-                                    },
-                                ],
+                fixture.detectChanges();
+                tick();     // wait for async operations
+                flush();    // end delayed timers in subprocesses
+
+                console.log('Saving...', component.secondFormGroup);
+                console.log('Services:', component.secondFormGroup?.getRawValue()?.services);
+
+                expect(component.secondFormGroup.getRawValue().services).toEqual([
+                    {
+                        id: 'service_id_1',
+                        local_id: 'local_id_1',
+                        service_group_key: null,
+                        name: 'service1',
+                        description: 'serv_desc',
+                        protocol_id: 'protocol_1',
+                        interaction: 'event',
+                        attributes: [
+                            {key: 'senergy/time_path', value: '', origin: 'web-ui'}
+                        ],
+                        inputs: [
+                            {
+                                id: 'input_id_1',
+                                name: 'metadata',
+                                serialization: 'json',
+                                content_variable: {
+                                    id: 'content_variable_1',
+                                    name: 'power_comsumption',
+                                    type: 'https://schema.org/StructuredValue',
+                                    sub_content_variables: [
+                                        {
+                                            id: 'sub_content_variable_1',
+                                            name: 'level',
+                                            type: 'https://schema.org/Float',
+                                            characteristic_id: 'char_1',
+                                            value: 0,
+                                        },
+                                    ],
+                                },
+                                protocol_segment_id: 'protocol_segment_1',
+                                show: true,
                             },
-                            protocol_segment_id: 'protocol_segment_1',
-                            show: true,
-                        },
-                    ],
-                    outputs: [
-                        {
-                            id: 'output_id_1',
-                            name: 'data',
-                            serialization: 'json',
-                            content_variable: {
-                                id: 'content_variable_out_1',
-                                name: 'brightness',
-                                type: 'https://schema.org/Float',
+                        ],
+                        outputs: [
+                            {
+                                id: 'output_id_1',
+                                name: 'data',
+                                serialization: 'json',
+                                content_variable: {
+                                    id: 'content_variable_out_1',
+                                    name: 'brightness',
+                                    type: 'https://schema.org/Float',
+                                },
+                                protocol_segment_id: 'protocol_segment_2',
+                                show: true,
                             },
-                            protocol_segment_id: 'protocol_segment_2',
-                            show: true,
-                        },
-                    ],
-                },
-            ]);
+                        ],
+                    },
+                ]);
         }),
     );
 });

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed, fakeAsync, flush} from '@angular/core/testing';
 
 import { ImportTypesCreateEditComponent } from './import-types-create-edit.component';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -44,6 +44,7 @@ import { ConceptsService } from '../../metadata/concepts/shared/concepts.service
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 
 describe('ImportTypesCreateEditComponent', () => {
+
     let component: ImportTypesCreateEditComponent;
     let fixture: ComponentFixture<ImportTypesCreateEditComponent>;
     const deviceTypeService: Spy<DeviceTypeService> = createSpyFromClass(DeviceTypeService);
@@ -208,11 +209,15 @@ describe('ImportTypesCreateEditComponent', () => {
         expect(component.getConfigsFormArray().controls.length).toBe(1);
     });
 
-    it('should save correctly', () => {
-        importTypesServiceSpy.saveImportType.calls.reset();
-        component.save();
-        expect(importTypesServiceSpy.saveImportType).toHaveBeenCalled();
-        expect(importTypesServiceSpy.saveImportType.calls.mostRecent().args.length).toBe(1);
-        expect(importTypesServiceSpy.saveImportType.calls.mostRecent().args[0]).toEqual(testType);
-    });
+    it('should save correctly',
+        fakeAsync(() => {
+            importTypesServiceSpy.saveImportType.calls.reset();
+            component.save();
+            fixture.detectChanges();
+            flush();
+            expect(importTypesServiceSpy.saveImportType).toHaveBeenCalled();
+            expect(importTypesServiceSpy.saveImportType.calls.mostRecent().args.length).toBe(1);
+            expect(importTypesServiceSpy.saveImportType.calls.mostRecent().args[0]).toEqual(testType);
+        }),
+    );
 });
