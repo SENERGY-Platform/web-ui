@@ -50,6 +50,7 @@ Thumbs.db
 /src/assets/env.js
 /src/assets/env.json
 /src/assets/icons/*
+!/src/assets/icons/.gitkeep
 set-env.js
 
 /src/assets/env.init.js
