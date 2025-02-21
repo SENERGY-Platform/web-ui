@@ -21,6 +21,7 @@ export interface PipelineStatus {
     running: boolean;
     transitioning: boolean;
     message: string;
+    name: string;
 }
 
 export interface PipelineModel {

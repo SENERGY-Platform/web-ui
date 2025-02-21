@@ -21,7 +21,7 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { PipelineModel } from './pipeline.model';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
@@ -34,8 +34,12 @@ export class PipelineRegistryService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.pipelineRegistryUrl);
     }
 
-    getPipelines(order: string = 'id:asc', userId: string | undefined = undefined): Observable<PipelineModel[]> {
-        let url = environment.pipelineRegistryUrl + '/pipeline?order=' + order;
+    getPipelines(order: string = 'id:asc', limit: number | undefined = undefined, offset: string | undefined = undefined, userId: string | undefined = undefined): Observable<PipelineModel[]> {
+        console.trace();
+        let url = environment.pipelineRegistryUrl + '/pipeline?order=' + order+'&limit='+limit+'&offset='+offset;
+        if (limit === undefined){
+            url = environment.pipelineRegistryUrl + '/pipeline?order=' + order;
+        }
         if (userId !== undefined) {
             url += '&for_user=' + userId;
         }

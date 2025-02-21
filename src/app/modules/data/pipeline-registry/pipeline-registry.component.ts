@@ -19,12 +19,12 @@ import { PipelineModel, PipelineStatus } from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { MatSort, Sort, SortDirection } from '@angular/material/sort';
+import { Sort, SortDirection } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { forkJoin, Observable, pipe, Subscription, concatMap, of, map, catchError} from 'rxjs';
+import { forkJoin, Observable, Subscription, concatMap, of, map, catchError} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
 
@@ -115,22 +115,10 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
                 if(pipelines.length === 0) {
                     return of([]);
                 }
-                const requests: Observable<PipelineStatus | null >[] = [];
-                pipelines.forEach(pipeline => {
-                    const statusRequest = this.flowEngineService.getPipelineStatus(pipeline.id).pipe(
-                        catchError((_) => of(null))
-                    );
-                    requests.push(statusRequest);
-                });
-                return forkJoin(requests).pipe(
-                    map((responses) => {
-                        pipelines.map((pipeline: PipelineModel, i) => {
-                            if(responses[i] == null) {
-                                return pipeline;
-                            }
-
-                            pipeline.status = responses[i]!;
-                            return pipeline;
+                return this.flowEngineService.getPipelinesStatus().pipe(
+                    map((response) => {
+                        pipelines.forEach(pipeline => {
+                            pipeline.status = response.find(status => status.name === pipeline.id);
                         });
                         return pipelines;
                     })

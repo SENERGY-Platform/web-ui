@@ -50,7 +50,17 @@ export class FlowEngineService {
         return this.http.get<PipelineStatus>(environment.flowEngineUrl + '/pipeline/' + pipelineId).pipe(
             map((resp) => resp || []),
             catchError((err) => {
-                this.errorHandlerService.handleError(FlowEngineService.name, 'getPipelineStatus: Error', undefined)
+                this.errorHandlerService.handleError(FlowEngineService.name, 'getPipelineStatus: Error', undefined);
+                return throwError(() => err);
+            }),
+        );
+    }
+
+    getPipelinesStatus(ids: string[] = []): Observable<PipelineStatus[]> {
+        return this.http.post<PipelineStatus[]>(environment.flowEngineUrl + '/pipelines', ids).pipe(
+            map((resp) => resp || []),
+            catchError((err) => {
+                this.errorHandlerService.handleError(FlowEngineService.name, 'getPipelinesStatus: Error', undefined);
                 return throwError(() => err);
             }),
         );
