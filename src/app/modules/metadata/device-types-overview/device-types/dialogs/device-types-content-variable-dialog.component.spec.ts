@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, flush, TestBed, tick} from '@angular/core/testing';
 import {DeviceTypesContentVariableDialogComponent} from './device-types-content-variable-dialog.component';
 import {CoreModule} from '../../../../../core/core.module';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
@@ -60,21 +60,28 @@ describe('DeviceTypesContentVariableDialog', () => {
         fixture.detectChanges();
     }
 
-    beforeEach(waitForAsync(() => {}));
+    beforeEach(fakeAsync(() => {}));
 
     it(
         'should create the app',
-        waitForAsync(() => {
+        fakeAsync(() => {
             const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;
             init(contentVariable, [], [], []);
+
+            fixture.detectChanges();
+            flush();
             expect(component).toBeTruthy();
         }),
     );
 
     it(
         'create primitive Type',
-        waitForAsync(() => {
+        fakeAsync(() => {
             init({} as DeviceTypeContentVariableModel, [], [], []);
+
+            fixture.detectChanges();
+            flush();
+
             expect(component.isPrimitiveType()).toBe(true);
             expect(component.typeOptionsControl.value).toBe('primitive');
             expect(component.firstFormGroup.invalid).toBe(true);
@@ -91,6 +98,9 @@ describe('DeviceTypesContentVariableDialog', () => {
                 unit_reference: 'unit_reference',
                 value: 'value',
             });
+            fixture.detectChanges();
+            flush();
+
             expect(component.firstFormGroup.getRawValue()).toEqual({
                 indices: null,
                 id: null,
@@ -111,7 +121,7 @@ describe('DeviceTypesContentVariableDialog', () => {
 
     it(
         'edit primitive Type',
-        waitForAsync(() => {
+        fakeAsync(() => {
             const contentVariable: DeviceTypeContentVariableModel = {
                 indices: [0, 1, 0],
                 id: 'id1',
@@ -124,6 +134,9 @@ describe('DeviceTypesContentVariableDialog', () => {
                 omit_empty: false,
             } as DeviceTypeContentVariableModel;
             init(contentVariable, [], [], []);
+
+            fixture.detectChanges();
+            flush();
             expect(component.typeOptionsControl.value).toBe('primitive');
             expect(component.typeOptionsControl.disabled).toBe(true);
             expect(component.firstFormGroup.getRawValue()).toEqual({
@@ -146,10 +159,15 @@ describe('DeviceTypesContentVariableDialog', () => {
 
     it(
         'create non-primitive Type',
-        waitForAsync(() => {
+        fakeAsync(() => {
             const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;
             init(contentVariable, [], [], []);
             component.typeOptionsControl.setValue('non-primitive');
+
+            fixture.detectChanges();
+            tick(100);
+            flush();
+
             expect(component.typeOptionsControl.value).toBe('non-primitive');
             expect(component.isPrimitiveType()).toBe(false);
             expect(component.firstFormGroup.invalid).toBe(true);
@@ -159,6 +177,10 @@ describe('DeviceTypesContentVariableDialog', () => {
                 aspect_id: null,
                 function_id: null,
             });
+            fixture.detectChanges();
+            tick(100);
+            flush();
+
             expect(component.firstFormGroup.valid).toBe(true);
             expect(component.firstFormGroup.getRawValue()).toEqual({
                 indices: null,
@@ -180,7 +202,7 @@ describe('DeviceTypesContentVariableDialog', () => {
 
     it(
         'edit non-primitive Type',
-        waitForAsync(() => {
+        fakeAsync(() => {
             const contentVariable: DeviceTypeContentVariableModel = {
                 id: 'id2',
                 name: 'testStruct',
@@ -194,6 +216,10 @@ describe('DeviceTypesContentVariableDialog', () => {
                 ] as DeviceTypeContentVariableModel[],
             } as DeviceTypeContentVariableModel;
             init(contentVariable, [], [], []);
+
+            fixture.detectChanges();
+            flush();
+
             expect(component.typeOptionsControl.value).toBe('non-primitive');
             expect(component.typeOptionsControl.disabled).toBe(true);
             expect(component.firstFormGroup.getRawValue()).toEqual({
