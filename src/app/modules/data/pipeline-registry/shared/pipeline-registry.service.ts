@@ -34,16 +34,27 @@ export class PipelineRegistryService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.pipelineRegistryUrl);
     }
 
-    getPipelines(order: string = 'id:asc', limit: number | undefined = undefined, offset: string | undefined = undefined, userId: string | undefined = undefined): Observable<PipelineModel[]> {
+    getPipelines(order: string = 'id:asc', limit: number | undefined = undefined, offset: number | undefined = undefined, userId: string | undefined = undefined): Observable<PipelineModel[]> {
         return this.getPipelinesNew(order, limit, offset, userId, ).pipe(
             map((pipes) => pipes?.data || []),
         );
     }
 
-    getPipelinesNew(order: string = 'id:asc', limit: number | undefined = undefined, offset: string | undefined = undefined, userId: string | undefined = undefined): Observable<PipelineResponse | null> {
-        let url = environment.pipelineRegistryUrl + '/pipeline?order=' + order+'&limit='+limit+'&offset='+offset;
-        if (limit === undefined){
-            url = environment.pipelineRegistryUrl + '/pipeline?order=' + order;
+    getPipelinesNew(order: string = 'id:asc',
+                    limit: number | undefined = undefined,
+                    offset: number | undefined = undefined,
+                    search: string | undefined = undefined,
+                    userId: string | undefined = undefined):
+        Observable<PipelineResponse | null> {
+        let url = environment.pipelineRegistryUrl + '/pipeline?order=' + order;
+        if (limit !== undefined){
+            url = url += '&limit='+limit;
+        }
+        if (offset !== undefined){
+            url = url += '&offset='+offset;
+        }
+        if (search !== undefined){
+            url = url += '&search='+search;
         }
         if (userId !== undefined) {
             url += '&for_user=' + userId;

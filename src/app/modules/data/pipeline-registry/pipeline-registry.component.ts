@@ -40,10 +40,11 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     ready = false;
     displayedColumns: string[] = ['select', 'status', 'id', 'name', 'createdat', 'updatedat', 'info'];
     selection = new SelectionModel<PipelineModel>(true, []);
-    totalCount = 200;
+    totalCount = 0;
     searchSub: Subscription = new Subscription();
     sortBy = 'createdat';
     sortDirection: SortDirection = 'desc';
+    search: string | undefined = undefined;
 
     userHasDeleteAuthorization = false;
     userHasUpdateAuthorization = false;
@@ -79,11 +80,13 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
 
     initSearch() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            if (searchText != ''){
+                this.search = searchText;
+            } else {
+                this.search = undefined;
+            }
             this.loadPipelines().subscribe({
                 next: (pipelines) => {
-                    if(searchText != ''){
-                        pipelines = pipelines.filter(pipeline => (pipeline.name.search(searchText) != -1));
-                    }
                     this.setPipelines(pipelines);
                 }
             });
@@ -99,6 +102,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     ngAfterViewInit() {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize;
+            this.offset = this.paginator.pageIndex;
             this.loadPipelines().subscribe({
                 next: (pipelines) => {
                     this.setPipelines(pipelines);
@@ -110,17 +114,18 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     loadPipelines(): Observable<PipelineModel[]> {
         this.ready = false;
         const order = this.sortBy + ':' + this.sortDirection;
-        return this.pipelineRegistryService.getPipelines(order).pipe(
+        return this.pipelineRegistryService.getPipelinesNew(order, this.pageSize, this.offset, this.search).pipe(
             concatMap((pipelines) => {
-                if(pipelines.length === 0) {
+                this.totalCount = pipelines!.total;
+                if(pipelines!.data.length === 0) {
                     return of([]);
                 }
                 return this.flowEngineService.getPipelinesStatus().pipe(
                     map((response) => {
-                        pipelines.forEach(pipeline => {
+                        pipelines?.data.forEach(pipeline => {
                             pipeline.status = response.find(status => status.name === pipeline.id);
                         });
-                        return pipelines;
+                        return pipelines!.data;
                     })
                 );
             })
@@ -129,13 +134,10 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
 
     setPipelines(pipelines: PipelineModel[]) {
         this.dataSource.data = pipelines;
-        this.totalCount = pipelines.length;
         this.ready = true;
     }
 
     reload() {
-        this.pageSize = 20;
-        this.offset = 0;
         this.selectionClear();
         this.loadPipelines().subscribe({
             next: (pipelines) => {
