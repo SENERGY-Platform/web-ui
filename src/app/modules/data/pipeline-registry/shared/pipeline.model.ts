@@ -24,6 +24,11 @@ export interface PipelineStatus {
     name: string;
 }
 
+export interface PipelineResponse {
+    data: PipelineModel[],
+    total: number
+}
+
 export interface PipelineModel {
     id: string;
     name: string;

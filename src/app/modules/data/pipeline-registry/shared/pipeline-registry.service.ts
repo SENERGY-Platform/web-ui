@@ -20,7 +20,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { PipelineModel } from './pipeline.model';
+import {PipelineModel, PipelineResponse} from './pipeline.model';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
@@ -35,6 +35,12 @@ export class PipelineRegistryService {
     }
 
     getPipelines(order: string = 'id:asc', limit: number | undefined = undefined, offset: string | undefined = undefined, userId: string | undefined = undefined): Observable<PipelineModel[]> {
+        return this.getPipelinesNew(order, limit, offset, userId, ).pipe(
+            map((pipes) => pipes?.data || []),
+        );
+    }
+
+    getPipelinesNew(order: string = 'id:asc', limit: number | undefined = undefined, offset: string | undefined = undefined, userId: string | undefined = undefined): Observable<PipelineResponse | null> {
         let url = environment.pipelineRegistryUrl + '/pipeline?order=' + order+'&limit='+limit+'&offset='+offset;
         if (limit === undefined){
             url = environment.pipelineRegistryUrl + '/pipeline?order=' + order;
@@ -42,13 +48,12 @@ export class PipelineRegistryService {
         if (userId !== undefined) {
             url += '&for_user=' + userId;
         }
-        return this.http.get<PipelineModel[]>(url).pipe(
-            map((resp) => resp || []),
+        return this.http.get<PipelineResponse>(url).pipe(
             map((resp) => {
-                resp.forEach((pipe) => this.fixMaps(pipe));
+                resp.data.forEach((pipe) => this.fixMaps(pipe));
                 return resp;
             }),
-            catchError(this.errorHandlerService.handleError(PipelineRegistryService.name, 'getPipelines: Error', [])),
+            catchError(this.errorHandlerService.handleError(PipelineRegistryService.name, 'getPipelines: Error', null)),
         );
     }
 
