@@ -24,6 +24,8 @@ import {ReportingService} from '../shared/reporting.service';
 import {MatTableDataSource} from '@angular/material/table';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from 'src/environments/environment';
+import {saveAs} from 'file-saver';
+import {ErrorHandlerService} from "../../../core/services/error-handler.service";
 
 @Component({
     selector: 'senergy-reporting-templates',
@@ -44,10 +46,12 @@ export class TemplatesComponent implements OnInit {
         public utilsService: UtilService,
         private reportingService: ReportingService,
         private ladonService: LadonService,
+        private errorHandlerService: ErrorHandlerService,
     ) {}
 
     ngOnInit() {
         if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/report/create').POST) {
+            this.displayedColumns.push('preview');
             this.displayedColumns.push('create');
         }
         this.reportingService.getTemplates().subscribe((resp: TemplateListResponseModel | null) => {
@@ -56,7 +60,23 @@ export class TemplatesComponent implements OnInit {
                 this.templatesDataSource.data = this.templates;
             }
             this.ready = true;
-        })
+        });
+    }
+
+    async downloadPreview($event: Event, id: string) {
+        $event.stopPropagation();
+        try {
+            if (id != null) {
+                this.reportingService.getTemplatePreviewFile(id).subscribe((resp: Blob | null) => {
+                    if (resp !== null) {
+                        saveAs(resp, 'preview');
+                    }
+                });
+            }
+        } catch (e) {
+            this.errorHandlerService.handleErrorWithSnackBar('Failed to download', 'downloadPreview', 'download', null)(undefined);
+            return;
+        }
     }
 
 }

@@ -107,6 +107,14 @@ export class ReportingService {
             );
     }
 
+    getTemplatePreviewFile(id: string): Observable<Blob | null> {
+        return this.http.get(environment.reportEngineUrl + '/templates/preview/'+id, {responseType: 'blob'})
+            .pipe(
+                map((resp: Blob) => resp || null),
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'getTemplatePreviewFile: Error', null)),
+            );
+    }
+
     deleteReportFile(reportId: string, fileId: string): Observable<HttpResponse<string> | null> {
         return this.http.delete<any>(environment.reportEngineUrl + '/report/file/'+reportId+'/'+fileId)
             .pipe(
