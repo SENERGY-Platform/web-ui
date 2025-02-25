@@ -25,7 +25,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from 'src/environments/environment';
 import {saveAs} from 'file-saver';
-import {ErrorHandlerService} from "../../../core/services/error-handler.service";
+import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 
 @Component({
     selector: 'senergy-reporting-templates',
@@ -64,12 +64,14 @@ export class TemplatesComponent implements OnInit {
     }
 
     async downloadPreview($event: Event, id: string) {
+        this.ready = false;
         $event.stopPropagation();
         try {
             if (id != null) {
                 this.reportingService.getTemplatePreviewFile(id).subscribe((resp: Blob | null) => {
                     if (resp !== null) {
                         saveAs(resp, 'preview');
+                        this.ready = true;
                     }
                 });
             }

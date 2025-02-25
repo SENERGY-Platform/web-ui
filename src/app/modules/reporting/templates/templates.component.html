@@ -16,6 +16,7 @@
 
 
 <div class="layout-margin">
+    <senergy-spinner [show]="!ready"></senergy-spinner>
     <div class="mat-elevation-z1" [hidden]="!ready || (templates.length === 0 && ready)">
         <div class="table-container">
             <table #sort="matSort" mat-table [dataSource]="templatesDataSource" matSort
