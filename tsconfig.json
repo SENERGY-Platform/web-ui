@@ -20,7 +20,6 @@
     "skipLibCheck": true,
     "allowJs": true,
     "target": "ES2022",
-    "downlevelIteration": true,
     "typeRoots": [
       "node_modules/@types"
     ],

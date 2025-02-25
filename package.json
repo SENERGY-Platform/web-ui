@@ -24,7 +24,6 @@
     "@angular/platform-browser": "^18.2.13",
     "@angular/platform-browser-dynamic": "^18.2.13",
     "@angular/router": "^18.2.13",
-    "@angular/service-worker": "^18.2.13",
     "@ngbracket/ngx-layout": "^17.0.1",
     "@types/backbone": "^1.4.1",
     "@types/jquery": "^3.3.31",

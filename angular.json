@@ -11,12 +11,15 @@
       "schematics": {},
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/senergy-web-ui",
+            "outputPath": {
+              "base": "dist/senergy-web-ui"
+            },
             "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "src/polyfills.ts"
+            ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
@@ -78,55 +81,8 @@
             "scripts": [
               "node_modules/@webcomponents/custom-elements/src/native-shim.js"
             ],
-            "allowedCommonJsDependencies": [
-              "keycloak-js",
-              "js-sha256",
-              "rxjs",
-              "x2js",
-              "bpmn-js-properties-panel",
-              "jointjs",
-              "file-saver",
-              "jquery",
-              "backbone",
-              "lodash",
-              "unraw",
-              "minim",
-              "process",
-              "base-js",
-              "apexcharts",
-              "deepmerge",
-              "classnames",
-              "css.escape",
-              "dompurify",
-              "ieee754",
-              "immutable",
-              "js-file-download",
-              "prop-types",
-              "randexp",
-              "base64-js",
-              "hoist-non-react-statics",
-              "@braintree/sanitize-url",
-              "react-copy-to-clipboard",
-              "react-debounce-input",
-              "react-immutable-proptypes",
-              "redux-immutable",
-              "serialize-error",
-              "url-parse",
-              "xml-but-prettier",
-              "zenscroll",
-              "bpmn-js/dist/bpmn-modeler.production.min.js",
-              "moment",
-              "brace",
-              "cronstrue"
-            ],
-            "vendorChunk": true,
-            "extractLicenses": false,
-            "buildOptimizer": false,
-            "sourceMap": true,
-            "optimization": false,
-            "namedChunks": true,
-            "serviceWorker": true,
-            "ngswConfigPath": "ngsw-config.json"
+            "allowedCommonJsDependencies": ["*"],
+            "browser": "src/main.ts"
           },
           "configurations": {
             "production": {
@@ -136,13 +92,7 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true
+              "outputHashing": "all"
             },
             "dev": {
               "fileReplacements": [
@@ -151,10 +101,13 @@
                   "with": "src/environments/environment.dev.ts"
                 }
               ],
-              "serviceWorker": true
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
           },
-          "defaultConfiguration": ""
+          "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
