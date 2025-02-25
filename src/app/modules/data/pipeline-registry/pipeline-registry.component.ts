@@ -102,7 +102,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     ngAfterViewInit() {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageIndex;
+            this.offset = this.paginator.pageIndex*this.paginator.pageSize;
+
             this.loadPipelines().subscribe({
                 next: (pipelines) => {
                     this.setPipelines(pipelines);
