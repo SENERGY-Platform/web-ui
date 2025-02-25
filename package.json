@@ -42,7 +42,7 @@
     "jointjs": "^3.4.4",
     "jquery": "^3.5.1",
     "keycloak-angular": "^16.1.0",
-    "keycloak-js": "^20.0.5",
+    "keycloak-js": "^26.2.0",
     "lodash": "^4.17.19",
     "lodash.assign": "^4.2.0",
     "lodash.pick": "^4.4.0",

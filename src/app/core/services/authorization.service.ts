@@ -25,7 +25,7 @@ import {AuthorizationProfileModel} from '../model/authorization/authorization-pr
 import {AuthorizationUserProfileModel} from '../model/authorization/authorization-user-profile.model';
 import {keycloakServiceToken} from '../core.module';
 import {KeycloakConfidentialService} from './keycloak-confidential.service';
-import {KeycloakOptions} from 'keycloak-angular/lib/core/interfaces/keycloak-options';
+import {KeycloakOptions} from 'keycloak-angular';
 
 @Injectable({
     providedIn: 'root',

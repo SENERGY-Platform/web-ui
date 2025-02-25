@@ -15,12 +15,12 @@
  */
 
 import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
-import {KeycloakOptions} from 'keycloak-angular/lib/core/interfaces/keycloak-options';
 import {lastValueFrom, mergeMap, Observable} from 'rxjs';
 import {KeycloakConfig, KeycloakProfile} from 'keycloak-js';
 import {environment} from '../../../environments/environment';
 import {Injectable, OnDestroy} from '@angular/core';
 import {catchError, map} from 'rxjs/operators';
+import { KeycloakOptions } from 'keycloak-angular';
 
 
 export interface TokenResponse {

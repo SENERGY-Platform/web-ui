@@ -8,7 +8,7 @@
     "sourceMap": true,
     "declaration": false,
     "module": "es2020",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "emitDecoratorMetadata": false,
     "experimentalDecorators": true,
     "noUnusedLocals": false,
