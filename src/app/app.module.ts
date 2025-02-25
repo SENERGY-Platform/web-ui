@@ -35,7 +35,6 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { ClipboardModule } from 'ngx-clipboard';
 import { ImportsModule } from './modules/imports/imports.module';
 import { MetadataModule } from './modules/metadata/metadata.module';
-import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import {SmartServicesModule} from './modules/smart-services/smart-services.module';
 import { AdminModule } from './modules/admin/admin.module';
@@ -68,12 +67,6 @@ registerLocaleData(localeDe);
         SettingsModule,
         ClipboardModule,
         CostModule,
-        ServiceWorkerModule.register('ngsw-worker.js', {
-            enabled: environment.production,
-            // Register the ServiceWorker as soon as the app is stable
-            // or after 30 seconds (whichever comes first).
-            registrationStrategy: 'registerWhenStable:30000'
-        }),
         ReportingModule], providers: [
         {
             provide: APP_INITIALIZER,
