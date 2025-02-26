@@ -19,12 +19,18 @@
         <mat-panel-title>
             {{element.displayName || name}}
         </mat-panel-title>
-        <mat-panel-description *ngIf="element.estimation_month !== undefined">
+        <mat-panel-description *ngIf="element.estimation_month !== undefined && element.month.requests === undefined">
             Total: {{sum(element.month) | currency:'EUR'}}, Estimation: {{sum(element.estimation_month) |
             currency:'EUR'}}
         </mat-panel-description>
-        <mat-panel-description *ngIf="element.estimation_month === undefined">
+        <mat-panel-description *ngIf="element.estimation_month === undefined && element.month.requests === undefined">
             {{sum(element.month) | currency:'EUR'}}
+        </mat-panel-description>
+        <mat-panel-description *ngIf="element.estimation_month !== undefined && element.estimation_month.requests !== undefined">
+            Total: {{element.month.requests}}, Estimation: {{element.estimation_month.requests}}
+        </mat-panel-description>
+        <mat-panel-description *ngIf="element.estimation_month === undefined && element.month.requests !== undefined">
+            {{element.month.requests}}
         </mat-panel-description>
     </mat-expansion-panel-header>
 
