@@ -27,6 +27,7 @@ import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 @Component({
     templateUrl: './process-state-edit-dialog.component.html',
     styleUrls: ['./process-state-edit-dialog.component.css'],
+    selector: 'senergy-process-state-edit-dialog',
 })
 export class ProcessStateEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

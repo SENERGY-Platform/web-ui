@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 
@@ -23,7 +23,7 @@ import { MatDialogRef } from '@angular/material/dialog';
   templateUrl: './device-instances-replace-dialog.component.html',
   styleUrls: ['./device-instances-replace-dialog.component.css']
 })
-export class DeviceInstancesReplaceDialogComponent {
+export class DeviceInstancesReplaceDialogComponent implements OnInit {
 
   modeFormControl = this.fb.control('clone');
 
@@ -34,6 +34,9 @@ export class DeviceInstancesReplaceDialogComponent {
 
   isValid(): boolean {
     return false;
+  }
+  ngOnInit(): void {
+    console.log('hello world '); // TODO
   }
 
   save() {

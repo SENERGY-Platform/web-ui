@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-var iotProps = require('./IotProps');
+import { processIncident, external, io, msgevent, email, notification, influx, info, timeHelper, description, order } from './IotProps';
 
-var ImplementationTypeHelper = require('bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper');
-var is = require('bpmn-js/lib/util/ModelUtil').is;
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
-var inherits = require('inherits');
-var PropertiesActivator = require('bpmn-js-properties-panel/lib/PropertiesActivator');
+import { is } from 'bpmn-js/lib/util/ModelUtil';
+import inherits from 'inherits';
+import PropertiesActivator from 'bpmn-js-properties-panel/lib/PropertiesActivator';
 
-var CamundaProvider = require('bpmn-js-properties-panel/lib/provider/camunda').propertiesProvider[1];
+import propertiesProvider from 'bpmn-js-properties-panel/lib/provider/camunda';
+
+var CamundaProvider = propertiesProvider.propertiesProvider[1];
 
 function SenergyPropertiesProvider(eventBus, canvas, bpmnFactory, elementRegistry, elementTemplates, bpmnjs, replace, selection, modeling, translate) {
     this.getTabs = function(element) {
@@ -76,7 +76,7 @@ function createIncidentTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace
         entries: [],
         enabled: isTask
     };
-    iotProps.processIncident(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    processIncident(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
     return iotGroup;
 }
 
@@ -87,7 +87,7 @@ function createIotExternalTaskGroup(element, bpmnjs, eventBus, bpmnFactory, repl
         entries: [],
         enabled: isTask
     };
-    iotProps.external(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    external(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
     return iotGroup;
 }
 
@@ -98,7 +98,7 @@ function createProcessIoTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replac
         entries: [],
         enabled: isTask
     };
-    iotProps.io(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    io(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
     return iotGroup;
 }
 
@@ -109,7 +109,7 @@ function createIotMsgEventGroup(element, bpmnjs, eventBus, modeling) {
         entries: [],
         enabled: isMsgEvent
     };
-    iotProps.msgevent(iotGroup, element, bpmnjs, eventBus, modeling);
+    msgevent(iotGroup, element, bpmnjs, eventBus, modeling);
     return iotGroup;
 }
 
@@ -120,8 +120,8 @@ function createHelperGroup(element, bpmnjs, eventBus, bpmnFactory, replace, sele
         entries: [],
         enabled: isTask
     };
-    iotProps.email(helperGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
-    iotProps.notification(helperGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    email(helperGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    notification(helperGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
     return helperGroup;
 }
 
@@ -133,7 +133,7 @@ function createInfluxTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, 
         entries: [],
         enabled: isTask
     };
-    iotProps.influx(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    influx(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
     return iotGroup;
 }
 
@@ -145,7 +145,7 @@ function createIotInfoGroup(element, bpmnjs) {
         entries: [],
         enabled: isTask
     };
-    iotProps.info(infoGroup, element, bpmnjs);
+    info(infoGroup, element, bpmnjs);
     return infoGroup;
 }
 
@@ -156,7 +156,7 @@ function createTimeEventHelperGroup(element, bpmnjs, eventBus, modeling){
         entries: [],
         enabled: isTimeEvent
     };
-    iotProps.timeHelper(timeEventGroup, element, bpmnjs, eventBus, modeling);
+    timeHelper(timeEventGroup, element, bpmnjs, eventBus, modeling);
     return timeEventGroup;
 }
 
@@ -167,7 +167,7 @@ function createDescriptionGroup(){
         entries: [],
         enabled: isCollaborationOrProcess
     };
-    iotProps.description(descGroup);
+    description(descGroup);
     return descGroup;
 }
 
@@ -179,7 +179,7 @@ function createOrderGroup(){
         entries: [],
         enabled: isOrderElement
     };
-    iotProps.order(group);
+    order(group);
     return group;
 }
 
@@ -198,4 +198,4 @@ SenergyPropertiesProvider.$inject = [
 
 inherits(SenergyPropertiesProvider, PropertiesActivator);
 
-module.exports = SenergyPropertiesProvider;
+export default SenergyPropertiesProvider;

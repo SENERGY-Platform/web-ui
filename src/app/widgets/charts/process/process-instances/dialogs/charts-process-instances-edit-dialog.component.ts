@@ -26,6 +26,7 @@ import { MatTable } from '@angular/material/table';
 @Component({
     templateUrl: './charts-process-instances-edit-dialog.component.html',
     styleUrls: ['./charts-process-instances-edit-dialog.component.css'],
+    selector: 'senergy-charts-process-instances-edit-dialog'
 })
 export class ChartsProcessInstancesEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

@@ -112,7 +112,7 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "buildTarget": "senergy-web-ui:build"
+            "buildTarget": "senergy-web-ui:build:dev"
           },
           "configurations": {
             "production": {

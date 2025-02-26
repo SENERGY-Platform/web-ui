@@ -26,6 +26,7 @@ import { DeviceGroupModel } from '../shared/device-groups.model';
 @Component({
     templateUrl: './device-groups-select-dialog.component.html',
     styleUrls: ['./device-groups-select-dialog.component.css'],
+    selector: 'senergy-device-groups-select-dialog',
 })
 export class DeviceGroupsSelectDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeviceGroupsSelectDialogComponent>;

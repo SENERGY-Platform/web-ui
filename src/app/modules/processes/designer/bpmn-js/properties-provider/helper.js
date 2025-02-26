@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-var pick = require('lodash.pick');
-var assign = require('lodash.assign');
+import pick from 'lodash.pick';
+import assign from 'lodash.assign';
 
-var is = require('bpmn-js/lib/util/ModelUtil').is,
-    isEventSubProcess = require('bpmn-js/lib/util/DiUtil').isEventSubProcess;
-
-module.exports = {
-    toMessageEvent: toMessageEvent,
-    toExternalServiceTask: toExternalServiceTask,
-    getOutputPaths: getOutputPaths,
-    toServiceTask: toServiceTask
-};
+import { is } from 'bpmn-js/lib/util/ModelUtil';
+import { isEventSubProcess } from 'bpmn-js/lib/util/DiUtil';
 
 var CUSTOM_PROPERTIES = [
     'cancelActivity',
@@ -35,7 +28,7 @@ var CUSTOM_PROPERTIES = [
     'isInterrupting'
 ];
 
-function toMessageEvent(bpmnFactory, replace, selection, element, additionalChanges){
+export function toMessageEvent(bpmnFactory, replace, selection, element, additionalChanges){
     var EventTargets = {
         "bpmn:StartEvent":{
             type: 'bpmn:StartEvent',
@@ -106,7 +99,7 @@ function toMessageEvent(bpmnFactory, replace, selection, element, additionalChan
     }
 }
 
-function toServiceTask(bpmnFactory, replace, selection, element, additionalChanges) {
+export function toServiceTask(bpmnFactory, replace, selection, element, additionalChanges) {
     var target = {
         type: 'bpmn:ServiceTask'
     };
@@ -156,7 +149,7 @@ function toServiceTask(bpmnFactory, replace, selection, element, additionalChang
     }
 }
 
-function toExternalServiceTask(bpmnFactory, replace, selection, element, additionalChanges) {
+export function toExternalServiceTask(bpmnFactory, replace, selection, element, additionalChanges) {
     var target = {
         type: 'bpmn:ServiceTask'
     };
@@ -214,7 +207,7 @@ function isPrimitive(test) {
 
 
 
-function getOutputPaths(structure, currentPath){
+export function getOutputPaths(structure, currentPath){
     if(!currentPath){
         currentPath = ["outputs"];
     }

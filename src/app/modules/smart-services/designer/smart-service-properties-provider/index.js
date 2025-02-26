@@ -1,28 +1,24 @@
 /* eslint-env es2020 */
 
-var ImplementationTypeHelper = require('bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper');
-var is = require('bpmn-js/lib/util/ModelUtil').is;
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
-var inherits = require('inherits');
-var PropertiesActivator = require('bpmn-js-properties-panel/lib/PropertiesActivator');
-var assign = require('lodash.assign');
-var pick = require('lodash.pick');
-var isEventSubProcess = require('bpmn-js/lib/util/DiUtil').isEventSubProcess;
+import { is } from 'bpmn-js/lib/util/ModelUtil';
+import inherits from 'inherits';
+import PropertiesActivator from 'bpmn-js-properties-panel/lib/PropertiesActivator';
+import assign from 'lodash.assign';
+import pick from 'lodash.pick';
+import { isEventSubProcess } from 'bpmn-js/lib/util/DiUtil';
+import * as camundaimport from 'bpmn-js-properties-panel/lib/provider/camunda' ;
 
-var CamundaProvider = require('bpmn-js-properties-panel/lib/provider/camunda').propertiesProvider[1];
+var CamundaProvider = camundaimport.propertiesProvider[1];
 
-var entryFactory = require('bpmn-js-properties-panel/lib/factory/EntryFactory');
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
-var extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper');
-var ImplementationTypeHelper = require('bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper');
-var panelUtils =  require('bpmn-js-properties-panel/lib/Utils');
-const {property} = require("lodash");
+import { textBox } from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
+import { nextId } from 'bpmn-js-properties-panel/lib/Utils';
+/* never used
 const typeString = "https://schema.org/Text";
 const typeInteger = "https://schema.org/Integer";
 const typeFloat = "https://schema.org/Float";
 const typeBoolean = "https://schema.org/Boolean";
 const typeList = "https://schema.org/ItemList";
-const typeStructure = "https://schema.org/StructuredValue";
+const typeStructure = "https://schema.org/StructuredValue"; */
 
 function SmartServicePropertiesProvider(eventBus, canvas, bpmnFactory, elementFactory, autoPlace, elementRegistry, elementTemplates, bpmnjs, replace, selection, modeling, translate) {
     this.getTabs = function(element) {
@@ -70,7 +66,7 @@ function createDescriptionGroup(){
         id: 'description',
         label: 'Smart-Service Description',
         entries: [
-            entryFactory.textBox({
+            textBox({
                 id : 'desc-field',
                 label : 'Description',
                 modelProperty : 'senergy:description'
@@ -640,7 +636,7 @@ function createIntermediateCatchMessageEvent(bpmnFactory, elementFactory, autoPl
     if (!msgRef) {
         msgRef = bpmnFactory.create("bpmn:Message")
         msgRef.name = topic;
-        msgRef.id = panelUtils.nextId("Message_");
+        msgRef.id = nextId("Message_");
         parent.businessObject.$parent.$parent.rootElements.push(msgRef);
     }
 
@@ -668,7 +664,5 @@ SmartServicePropertiesProvider.$inject = [
 
 inherits(SmartServicePropertiesProvider, PropertiesActivator);
 
-module.exports = {
-    __init__: [ 'propertiesProvider' ],
-    propertiesProvider: [ 'type', SmartServicePropertiesProvider ]
-};
+export const __init__ = ['propertiesProvider'];
+export const propertiesProvider = ['type', SmartServicePropertiesProvider];

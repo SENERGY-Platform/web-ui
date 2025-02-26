@@ -16,5 +16,5 @@
 
 module.exports = {
     __init__: [ 'propertiesProvider' ],
-    propertiesProvider: [ 'type', require('./SenergyPropertiesProvider') ]
+    propertiesProvider: [ 'type', require('./SenergyPropertiesProvider').default ]
 };

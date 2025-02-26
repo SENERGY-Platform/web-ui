@@ -27,6 +27,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 @Component({
     templateUrl: './event-list-edit-dialog.component.html',
     styleUrls: ['./event-list-edit-dialog.component.css'],
+    selector: 'senergy-event-list-edit-dialog',
 })
 export class EventListEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

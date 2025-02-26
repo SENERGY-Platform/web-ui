@@ -125,9 +125,9 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
         const editDialogRef = this.dialog.open(AnomalyReconstructionComponent, dialogConfig);
     };
 
-    private findAnomaly(deviceID: string, selectedStartTime: Date, selectedEndTime: Date) {
+    private findAnomaly(deviceID: string, _ /*selectedStartTime*/: Date, __ /*selectedEndTime*/: Date) {
         return this.anomalies?.[deviceID][0];
-        /* Find the corresponding anomaly based on device id and start/end time */
+        /* Find the corresponding anomaly based on device id and start/end time
         (this.anomalies?.[deviceID] || []).forEach(anomaly => {
             const startTime = new Date(anomaly.start_time);
             const endTime = new Date(anomaly.end_time);
@@ -135,6 +135,6 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
                 return anomaly;
             }
             return;
-        });
+        }); */
     }
 }
