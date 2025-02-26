@@ -20,6 +20,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 @Component({
     templateUrl: './cycle-dialog.component.html',
     styleUrls: ['./cycle-dialog.component.css'],
+    selector: 'senergy-cycle-dialog',
 })
 export class CycleDialogComponent implements OnInit {
     initial: string;

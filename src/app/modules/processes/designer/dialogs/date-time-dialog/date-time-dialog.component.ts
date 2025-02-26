@@ -20,6 +20,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 @Component({
     templateUrl: './date-time-dialog.component.html',
     styleUrls: ['./date-time-dialog.component.css'],
+    selector: 'senergy-date-time-dialog',
 })
 export class DateTimeDialogComponent implements OnInit {
     initial: string;

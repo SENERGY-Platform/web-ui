@@ -20,6 +20,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 @Component({
     templateUrl: './device-types-new-aspect-dialog.component.html',
     styleUrls: ['./device-types-new-aspect-dialog.component.css'],
+    selector: 'senergy-device-types-new-aspect-dialog',
 })
 export class DeviceTypesNewAspectDialogComponent {
     constructor(private dialogRef: MatDialogRef<DeviceTypesNewAspectDialogComponent>) {}
