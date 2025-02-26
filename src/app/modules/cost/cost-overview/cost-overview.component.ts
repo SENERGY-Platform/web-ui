@@ -18,7 +18,7 @@ import { Component, OnInit } from '@angular/core';
 import { CostService } from '../shared/cost.service';
 import { CostEntryModel, CostModel } from '../shared/cost.model';
 import { KeyValue } from '@angular/common';
-import { Observable, forkJoin, map, mergeMap, of } from 'rxjs';
+import {Observable, forkJoin, map, mergeMap, of, concatMap} from 'rxjs';
 import { BillingService } from '../shared/billing.service';
 import { FormControl } from '@angular/forms';
 import { MatDatepicker } from '@angular/material/datepicker';
@@ -92,55 +92,57 @@ export class CostOverviewComponent implements OnInit {
     }
 
     loadForUser(userId: string | undefined = undefined): Observable<any> {
+
         if (userId === this.authorizationService.getUserId()) {
             userId = undefined;
         }
-
-        const obs: Observable<any>[] = [];
-        obs.push(this.pipelineService.getPipelines('id:asc',undefined, undefined, userId));
-        obs.push(this.operatorService.getOperators('', 9999, 0, 'name', 'asc', userId));
-        obs.push(this.importInstancesServcies.listImportInstances('', 9999, 0, 'name.asc', false));
-
-        if (this.isAdmin && userId !== undefined) {
-            obs.push(this.exportService.getExportsAdmin(true).pipe(map(exps => exps?.filter(exp => exp.UserId === userId))));
-        } else {
-            obs.push(this.exportService.getExports(true).pipe(map(resp => resp?.instances)));
-        }
-
-        return forkJoin(obs).pipe(mergeMap(obsres => {
-            this.pipelines = obsres[0];
-            this.operators = obsres[1].operators;
-            this.imports = obsres[2];
-            this.exports = obsres[3] || [];
-
-            const obs: Observable<any>[] = [];
-            obs.push(
-                this.costService.getTree(userId).pipe(map((res: Map<string, CostModel>) => {
-                    this.tree = res;
-                })));
-
-            if (this.billingService.userHasReadAuthorization()) {
-                obs.push(
-                    this.billingService.getAvailable(userId).pipe(map((res) => {
-                        this.dates = res;
-                    })));
+        const obs: Observable<any>[] = [of(null)];
+        return this.costService.getTree(userId).pipe(concatMap((res: Map<string, CostModel>) => {
+            this.tree = res;
+            if ((this.tree as any)['analytics'] !== undefined){
+                obs[0] = this.pipelineService.getPipelines('id:asc',undefined, undefined, userId);
+                obs[1] = this.operatorService.getOperators('', 9999, 0, 'name', 'asc', userId);
             }
-            return forkJoin(obs).pipe(
-                mergeMap(_ => {
-                    if (this.tree === undefined) {
+            if ((this.tree as any)['imports'] !== undefined){
+                obs[2] = this.importInstancesServcies.listImportInstances('', 9999, 0, 'name.asc', false);
+            }
+            if ((this.tree as any)['Exports'] !== undefined){
+                if (this.isAdmin && userId !== undefined) {
+                    obs[3] = this.exportService.getExportsAdmin(true).pipe(map(exps => exps?.filter(exp => exp.UserId === userId)));
+                } else {
+                    obs[3] = this.exportService.getExports(true).pipe(map(resp => resp?.instances));
+                }
+            }
+            return forkJoin(obs).pipe(mergeMap(obsres => {
+                this.pipelines = obsres[0];
+                this.operators = obsres[1]?.operators || [];
+                this.imports = obsres[2];
+                this.exports = obsres[3] || [];
+                const obs: Observable<any>[] = [of(null)];
+
+                if (this.billingService.userHasReadAuthorization()) {
+                    obs[0] =
+                        this.billingService.getAvailable(userId).pipe(map((res) => {
+                            this.dates = res;
+                        }));
+                }
+                return forkJoin(obs).pipe(
+                    mergeMap(_ => {
+                        if (this.tree === undefined) {
+                            return of({result: [], total: 0} as DeviceInstancesTotalModel);
+                        }
+                        const t = this.tree as any;
+                        const devices = t['Devices'];
+                        if (devices !== undefined) {
+                            return this.deviceInstancesService.getDeviceInstances({limit: 100000, offset: 0, deviceIds: Object.keys(devices.children)});
+                        }
                         return of({result: [], total: 0} as DeviceInstancesTotalModel);
-                    }
-                    const t = this.tree as any;
-                    const devices = t["Devices"];
-                    if (devices !== undefined) {
-                        return this.deviceInstancesService.getDeviceInstances({limit: 100000, offset: 0, deviceIds: Object.keys(devices.children)});
-                    }
-                    return of({result: [], total: 0} as DeviceInstancesTotalModel);
-                }),
-                map((devices: DeviceInstancesTotalModel) => {
-                    this.devices = devices.result;
-                })
-            );
+                    }),
+                    map((devices: DeviceInstancesTotalModel) => {
+                        this.devices = devices.result;
+                    })
+                );
+            }));
         }));
     }
 

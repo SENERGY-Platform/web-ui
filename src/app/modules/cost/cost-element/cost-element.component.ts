@@ -109,10 +109,11 @@ export class CostElementComponent {
     @Input() name = '';
     expensiveFirst = (a: KeyValue<string, CostModel>, b: KeyValue<string, CostModel>): number => {
         if (a.value.month.requests !== undefined && b.value.month.requests !== undefined) {
-            return b.value.month.requests - a.value.month.requests
+            return b.value.month.requests - a.value.month.requests;
         }
         return this.sum(b.value.month) - this.sum(a.value.month);
-    }
+    };
+
     sum(m: CostEntryModel): number {
         if (m === undefined) {
             return 0;
