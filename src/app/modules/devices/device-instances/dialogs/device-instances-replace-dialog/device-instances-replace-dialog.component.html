@@ -17,11 +17,22 @@
 
 <mat-dialog-content>
     <form [formGroup]="form">
-        <mat-radio-group formControlName="mode">
-            <mat-radio-button [value]="this.modeChoose">Existing Device</mat-radio-button>
-            <mat-radio-button [value]="this.modeClone">Clone Device</mat-radio-button>
-        </mat-radio-group>
-        <mat-divider></mat-divider>
+        <h4>Choose Replacement</h4>
+        <div>
+            <mat-radio-group formControlName="mode">
+                <mat-radio-button [value]="this.modeChoose">Existing Device</mat-radio-button>
+                <mat-radio-button [value]="this.modeClone">Clone Device</mat-radio-button>
+            </mat-radio-group>
+        </div>
+        <h4>Add to Groups</h4>
+        <div>
+            <mat-radio-group formControlName="groupAddition">
+                <mat-radio-button [value]="this.groupAddAll">All</mat-radio-button>
+                <mat-radio-button [value]="this.groupAddGenerated">Generated</mat-radio-button>
+                <mat-radio-button [value]="this.groupAddNone">None</mat-radio-button>
+            </mat-radio-group>
+        </div>
+        <h4></h4>
         <div [hidden]="form.get('mode')?.value !== this.modeClone" formGroupName="clone">
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>New Name</mat-label>
