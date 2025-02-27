@@ -56,8 +56,8 @@ export class FlowEngineService {
         );
     }
 
-    getPipelinesStatus(ids: string[] = []): Observable<PipelineStatus[]> {
-        return this.http.post<PipelineStatus[]>(environment.flowEngineUrl + '/pipelines', ids).pipe(
+    getPipelinesStatus(req: {ids: []} = {ids: []}): Observable<PipelineStatus[]> {
+        return this.http.post<PipelineStatus[]>(environment.flowEngineUrl + '/pipelines', req).pipe(
             map((resp) => resp || []),
             catchError((err) => {
                 this.errorHandlerService.handleError(FlowEngineService.name, 'getPipelinesStatus: Error', undefined);
