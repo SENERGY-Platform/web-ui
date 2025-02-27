@@ -16,15 +16,22 @@
 <h2 mat-dialog-title>Replace Device</h2>
 
 <mat-dialog-content>
-    <form>
-        <mat-radio-group [formControl]="modeFormControl">
-            <mat-radio-button value="choose">Existing Device</mat-radio-button>
-            <mat-radio-button value="clone">Clone Device</mat-radio-button>
-            <mat-radio-button value="create">Create Device</mat-radio-button>
+    <form [formGroup]="form">
+        <mat-radio-group formControlName="mode">
+            <mat-radio-button [value]="this.modeChoose">Existing Device</mat-radio-button>
+            <mat-radio-button [value]="this.modeClone">Clone Device</mat-radio-button>
         </mat-radio-group>
+        <mat-divider></mat-divider>
+        <div [hidden]="form.get('mode')?.value !== this.modeClone" formGroupName="clone">
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>New Name</mat-label>
+                <input matInput formControlName="name" required>
+                <mat-error senergyError label="Name"></mat-error>
+            </mat-form-field>
+        </div>
     </form>
 </mat-dialog-content>
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()" [disabled]="!isValid()">Save</button>
+    <button mat-raised-button color="accent" (click)="save()" [disabled]="!form.valid">Save</button>
 </mat-dialog-actions>

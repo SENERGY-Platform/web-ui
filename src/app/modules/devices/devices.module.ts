@@ -17,7 +17,7 @@
 import { NgModule } from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
 import { DeviceInstancesComponent } from './device-instances/device-instances.component';
@@ -190,5 +190,8 @@ const locationsEdit: Route = {
         DeviceInstancesFilterDialogComponent,
         DeviceInstancesReplaceDialogComponent,
     ],
+    providers: [
+        DatePipe,
+    ]
 })
 export class DevicesModule {}

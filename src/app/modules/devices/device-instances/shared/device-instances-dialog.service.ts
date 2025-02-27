@@ -18,7 +18,7 @@ import {Injectable} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel} from './device-instances.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatDialog, MatDialogConfig, MatDialogRef} from '@angular/material/dialog';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
 import {
     DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel,
@@ -220,13 +220,13 @@ export class DeviceInstancesDialogService {
         });
     }
 
-    openDeviceReplaceDialog(device: DeviceInstanceModel): void {
+    openDeviceReplaceDialog(device: DeviceInstanceModel): MatDialogRef<DeviceInstancesReplaceDialogComponent> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             device,
         };
 
-        this.dialog.open(DeviceInstancesReplaceDialogComponent, dialogConfig);
+        return this.dialog.open(DeviceInstancesReplaceDialogComponent, dialogConfig);
     }
 }

@@ -336,7 +336,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     replaceDevice(device: DeviceInstanceModel): void {
-        this.deviceInstancesDialogService.openDeviceReplaceDialog(device);
+        this.deviceInstancesDialogService.openDeviceReplaceDialog(device).afterClosed().subscribe((needReload: boolean) => {
+            if (needReload) {
+                this.reload();
+            }
+        });
     }
 
     deleteDevice(device: DeviceInstanceModel): void {

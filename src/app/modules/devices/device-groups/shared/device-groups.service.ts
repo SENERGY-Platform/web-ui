@@ -75,6 +75,13 @@ export class DeviceGroupsService {
         );
     }
 
+    getGeneratedDeviceGroupOfDevice(deviceId: string): Observable<DeviceGroupModel | null> {
+        const deviceIdSplit = deviceId.split(':');
+        return this._getDeviceGroups({
+            ids: ['urn:infai:ses:device-group:' + deviceIdSplit[deviceIdSplit.length - 1]],
+        }).pipe(map(dg => (dg && dg.result.length === 1)? dg.result[0] : null));
+    }
+
     private _getDeviceGroups(options: {
         limit?: number;
         offset?: number;
