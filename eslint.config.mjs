@@ -79,6 +79,18 @@ export default [{
         "@typescript-eslint/no-unused-expressions": "off",
         "@typescript-eslint/prefer-for-of": "off",
         "jsdoc/newline-after-description": "off",
+        "@typescript-eslint/no-unused-vars": [
+            "error",
+            {
+              "args": "all",
+              "argsIgnorePattern": "^_",
+              "caughtErrors": "all",
+              "caughtErrorsIgnorePattern": "^_",
+              "destructuredArrayIgnorePattern": "^_",
+              "varsIgnorePattern": "^_",
+              "ignoreRestSiblings": true
+            }
+          ]
     },
 }, ...compat.extends("plugin:@angular-eslint/template/recommended").map(config => ({
     ...config,
