@@ -49,6 +49,11 @@ export interface ReportObjectModel {
     length: number | undefined;
     query?: QueriesRequestV2ElementTimescaleModel | undefined;
     queryOptions?: ReportObjectModelQueryOptions;
+    deviceQuery?: DeviceQueryModel
+}
+
+export interface DeviceQueryModel {
+    last?: string;
 }
 
 export interface ReportObjectModelQueryOptions {

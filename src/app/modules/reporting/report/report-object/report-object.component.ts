@@ -15,7 +15,7 @@
  */
 
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import {ReportObjectModel, ReportObjectModelQueryOptions} from '../../shared/reporting.model';
+import {DeviceQueryModel, ReportObjectModel, ReportObjectModelQueryOptions} from '../../shared/reporting.model';
 import {QueriesRequestTimeModel} from '../../../../widgets/shared/export-data.model';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstanceModel} from '../../../devices/device-instances/shared/device-instances.model';
@@ -79,6 +79,7 @@ export class ReportObjectComponent implements OnInit, OnChanges {
     ];
     resultObjectTypes=['','key','array'];
     timeframe = {number: '', unit: ''};
+    deviceQueryLastValues=[undefined,'2d','7d','30d'];
 
     constructor(
         private deviceTypeService: DeviceTypeService,
@@ -95,6 +96,9 @@ export class ReportObjectComponent implements OnInit, OnChanges {
             if (this.data?.queryOptions === undefined) {
                 this.data.queryOptions = {} as ReportObjectModelQueryOptions;
             }
+        }
+        if (this.data?.deviceQuery !== undefined) {
+            this.inputType = 'devices';
         }
     }
 
@@ -120,50 +124,71 @@ export class ReportObjectComponent implements OnInit, OnChanges {
 
     changeInputType() {
         if (this.data !== undefined) {
-            if (this.inputType === 'query') {
-                if (this.data?.value !== undefined) {
-                    this.origData.value = this.data.value;
-                }
-                if (this.data?.children !== undefined) {
-                    this.origData.children = this.data.children;
-                }
-                if (this.data?.fields !== undefined) {
-                    this.origData.fields = this.data.fields;
-                }
-                if (this.data?.length !== undefined) {
-                    this.origData.length = this.data.length;
-                }
-                delete this.data?.value;
-                delete this.data?.children;
-                delete this.data?.fields;
-                delete this.data?.length;
-                this.data.query = {
-                    columns: [{name: '', groupType: undefined}],
-                    time: {last: undefined} as QueriesRequestTimeModel,
-                    groupTime: undefined,
-                    deviceId: '',
-                    serviceId: ''
-                };
-                this.data.queryOptions = {} as ReportObjectModelQueryOptions;
-                this.getGroupingTime();
-                this.getTimeframe();
-            } else {
-                if (this.origData.value !== undefined) {
-                    this.data.value = this.origData.value;
-                }
-                if (this.origData.children !== undefined) {
-                    this.data.children = this.origData.children;
-                }
-                if (this.origData.fields !== undefined) {
-                    this.data.fields = this.origData.fields;
-                }
-                if (this.origData.length !== undefined) {
-                    this.data.length = this.origData.length;
-                }
-                delete this.data.query;
-                delete this.data.queryOptions;
+            switch (this.inputType){
+                case 'query':
+                    this.resetValueFields();
+                    if (this.data?.deviceQuery !== undefined) {
+                        this.origData.deviceQuery = this.data.deviceQuery;
+                    }
+                    delete this.data?.deviceQuery;
+                    this.data.query = {
+                        columns: [{name: '', groupType: undefined}],
+                        time: {last: undefined} as QueriesRequestTimeModel,
+                        groupTime: undefined,
+                        deviceId: '',
+                        serviceId: ''
+                    };
+                    this.data.queryOptions = {} as ReportObjectModelQueryOptions;
+                    this.getGroupingTime();
+                    this.getTimeframe();
+                    break;
+                case 'devices':
+                    this.resetValueFields();
+                    if (this.data.deviceQuery === undefined){
+                        this.data.deviceQuery = {} as DeviceQueryModel;
+                    }
+                    this.data.deviceQuery.last= undefined;
+                    if (this.origData.deviceQuery !== undefined) {
+                        this.data.deviceQuery = this.origData.deviceQuery;
+                    }
+                    break;
+                case 'value':
+                    if (this.origData.value !== undefined) {
+                        this.data.value = this.origData.value;
+                    }
+                    if (this.origData.children !== undefined) {
+                        this.data.children = this.origData.children;
+                    }
+                    if (this.origData.fields !== undefined) {
+                        this.data.fields = this.origData.fields;
+                    }
+                    if (this.origData.length !== undefined) {
+                        this.data.length = this.origData.length;
+                    }
+                    delete this.data.deviceQuery;
+                    delete this.data.query;
+                    delete this.data.queryOptions;
             }
         }
+    }
+
+    private resetValueFields() {
+        if (this.data?.value !== undefined) {
+            this.origData.value = this.data.value;
+        }
+        if (this.data?.children !== undefined) {
+            this.origData.children = this.data.children;
+        }
+        if (this.data?.fields !== undefined) {
+            this.origData.fields = this.data.fields;
+        }
+        if (this.data?.length !== undefined) {
+            this.origData.length = this.data.length;
+        }
+        delete this.data?.value;
+        delete this.data?.children;
+        delete this.data?.fields;
+        delete this.data?.length;
     }
 
     queryDeviceChanged(device: DeviceInstanceModel): Observable<DeviceTypeModel | null> {

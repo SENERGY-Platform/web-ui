@@ -43,12 +43,14 @@
                     [(ngModel)]="inputType" (ngModelChange)="changeInputType()" aria-label="Select an option">
                     <mat-radio-button value="value">Value</mat-radio-button>
                     <mat-radio-button value="query">Query</mat-radio-button>
+                    <mat-radio-button value="devices">Devices</mat-radio-button>
                 </mat-radio-group>
                 <button *ngIf="inputType === 'query' && data.query !== undefined" mat-icon-button matTooltip="Preview Query"
                     (click)="previewQuery()">
                     <mat-icon>preview</mat-icon>
                 </button>
             </div>
+
             <div *ngIf="inputType === 'query' && data.query !== undefined" fxLayout="column">
                 <mat-form-field fxFlex color="accent" appearance="outline">
                     <mat-label>Device</mat-label>
@@ -148,7 +150,7 @@
                         <mat-datepicker #picker_start></mat-datepicker>
                         <mat-error senergyError label="Start Date"></mat-error>
                     </mat-form-field>
-                    <mat-form-field>
+                    <mat-form-field fxFlex color="accent"  appearance="outline">
                         <mat-label>Rolling Start Date</mat-label>
                         <mat-select [(ngModel)]="data.queryOptions!.rollingStartDate"
                                     (ngModelChange)="setStartOffset()">
@@ -167,7 +169,7 @@
                         <mat-datepicker #picker_end></mat-datepicker>
                         <mat-error senergyError label="End Date"></mat-error>
                     </mat-form-field>
-                    <mat-form-field>
+                    <mat-form-field fxFlex color="accent"  appearance="outline">
                         <mat-label>Rolling End Date</mat-label>
                         <mat-select [(ngModel)]="data.queryOptions!.rollingEndDate"
                                     (ngModelChange)="setEndOffset()">
@@ -207,6 +209,19 @@
                         [allDevices]="allDevices" [dynamic]="true" (removeItemEmitter)="removeItem($event)" (copyItemEmitter)="addItem($event)">
                     </senergy-reporting-object>
                 </div>
+            </div>
+
+            <div *ngIf="inputType === 'devices'" fxLayout="column">
+                <mat-form-field fxFill color="accent" appearance="outline">
+                    <mat-label>Last Days</mat-label>
+                    <input matInput [(ngModel)]="this.data!.deviceQuery!.last" placeholder="Choose or write yourself"
+                           [matAutocomplete]="auto" />
+                    <mat-autocomplete #auto="matAutocomplete">
+                        <mat-option *ngFor="let values of deviceQueryLastValues | keyvalue"
+                                    [value]="values.value">{{values.value}}</mat-option>
+                    </mat-autocomplete>
+                    <mat-error senergyError label="Path"></mat-error>
+                </mat-form-field>
             </div>
         </div>
     </ng-template>
