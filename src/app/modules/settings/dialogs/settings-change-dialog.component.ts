@@ -37,9 +37,15 @@ export class SettingsChangeDialogComponent implements OnInit {
     profile: AuthorizationProfileModel = { email: '', firstName: '', lastName: '', username: '' };
     passwordNew = new FormControl('', [Validators.pattern('.*[?|!|#|%|$].*'), Validators.minLength(8), this.forbiddenNameValidator()]);
     passwordConfirm = new UntypedFormControl('', [this.equalValidator()]);
-    firstFormGroup!: FormGroup;
+    firstFormGroup: FormGroup = this._formBuilder.group({
+        lastName: [''],
+        firstName: [''],
+        email: ['', [Validators.email]]
+    });
     hidePasswordNew = true;
     hidePasswordConfirm = true;
+
+
 
     constructor(
         private authorizationService: AuthorizationService,
@@ -49,14 +55,16 @@ export class SettingsChangeDialogComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.authorizationService.getProfile().then(profile => this.profile = profile);
-        this.passwordNew.valueChanges.subscribe(() => {
-            this.passwordConfirm.updateValueAndValidity();
-        });
-        this.firstFormGroup = this._formBuilder.group({
-            lastName: [this.profile.lastName],
-            firstName: [this.profile.firstName],
-            email: [this.profile.email, [Validators.email]],
+        this.authorizationService.getProfile().then((profile) => {
+            this.profile = profile;
+            this.firstFormGroup.patchValue({
+                lastName: this.profile.lastName,
+                firstName: this.profile.firstName,
+                email: this.profile.email
+            });
+            this.passwordNew.valueChanges.subscribe(() => {
+                this.passwordConfirm.updateValueAndValidity();
+            });
         });
     }
 
