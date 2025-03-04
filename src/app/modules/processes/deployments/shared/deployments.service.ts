@@ -20,7 +20,7 @@ import { environment } from '../../../../../environments/environment';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, mergeMap, retryWhen } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import {DeploymentsModel, ProcessStartParameter} from './deployments.model';
+import { DeploymentsModel, ProcessStartParameter } from './deployments.model';
 import { CamundaVariable, DeploymentsDefinitionModel } from './deployments-definition.model';
 import { DeploymentsMissingDependenciesModel } from './deployments-missing-dependencies.model';
 import { DeploymentsPreparedModel } from './deployments-prepared.model';
@@ -203,6 +203,13 @@ export class DeploymentsService {
         return this.http
             .get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v3/deployments/' + deploymentId)
             .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'v2getDeployments', null)));
+    }
+
+    v3getAllDeployments(): Observable<V2DeploymentsPreparedModel[]> {
+        return this.http.get<V2DeploymentsPreparedModel[] | null>(environment.processDeploymentUrl + '/v3/deployments').pipe(
+            map(r => r || []),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'v3getDeployments', [])),
+        );
     }
 
     //deprecated

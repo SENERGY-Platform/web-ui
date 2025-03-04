@@ -43,8 +43,7 @@
         <div [hidden]="form.get('mode')?.value !== DeviceInstancesReplaceDialogComponent.modeExisting" formGroupName="existing">
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Device Type</mat-label>
-                <senergy-select-search [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting" [options]="deviceTypes" useOptionViewProperty="name"
-                    [getOptionDisabled]="deviceTypeDisabledFn()" useOptionValueProperty="id"
+                <senergy-select-search [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting" [options]="filteredDeviceTypes" useOptionViewProperty="name" useOptionValueProperty="id"
                     formControlName="deviceType"></senergy-select-search>
                 <mat-error senergyError label="Device Type"></mat-error>
             </mat-form-field>

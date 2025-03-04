@@ -95,6 +95,14 @@ export class DeploymentsFogService {
         );
     }
 
+    getAllFogDeployments(): Observable<DeploymentsFogMetadataModel[]> {
+        const url = environment.processSyncUrl + '/metadata/' + this.hubId;
+        return this.http.get<DeploymentsFogMetadataModel[] | null>(url).pipe(
+            map(r => r || []),
+            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getAllFogDeployments', [])),
+        );
+    }
+
     v2postDeployments(deployment: V2DeploymentsPreparedModel): Observable<{ status: number; id: string }> {
         const url = environment.processFogDeploymentUrl + '/deployments/' + encodeURIComponent(this.hubId);
         return this.http.post<V2DeploymentsPreparedModel>(url, deployment, { observe: 'response' }).pipe(
