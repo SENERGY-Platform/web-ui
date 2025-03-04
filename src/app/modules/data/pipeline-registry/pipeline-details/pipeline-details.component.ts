@@ -22,9 +22,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
-import { DeviceInstanceModel, DeviceInstancesBaseModel } from '../../../devices/device-instances/shared/device-instances.model';
-import { util } from 'jointjs';
-import string = util.format.string;
+import { DeviceInstanceModel} from '../../../devices/device-instances/shared/device-instances.model';
 
 @Component({
     selector: 'senergy-pipeline-details',

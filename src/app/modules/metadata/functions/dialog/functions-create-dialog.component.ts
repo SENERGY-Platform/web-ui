@@ -18,10 +18,8 @@ import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {FormBuilder, FormGroup, UntypedFormControl, Validators} from '@angular/forms';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
-import {ConceptsPermSearchModel} from '../../concepts/shared/concepts-perm-search.model';
-import {util} from 'jointjs';
-import uuid = util.uuid;
 import { DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
+import {v4 as uuid} from 'uuid';
 
 @Component({
     templateUrl: './functions-create-dialog.component.html',

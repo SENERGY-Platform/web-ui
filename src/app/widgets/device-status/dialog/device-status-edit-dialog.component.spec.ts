@@ -25,16 +25,12 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DeviceStatusElementModel } from '../shared/device-status-properties.model';
 import {
-    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
+    DeviceTypeAspectNodeModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
     DeviceTypeServiceModel,
 } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
-import {
-    DeploymentsPreparedModel,
-    DeploymentsPreparedSelectableModel,
-} from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -42,14 +38,13 @@ import { MatInputModule } from '@angular/material/input';
 import { By } from '@angular/platform-browser';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { ExportModel, ExportValueCharacteristicModel } from '../../../modules/exports/shared/export.model';
-import { util } from 'jointjs';
-import uuid = util.uuid;
+import {v4 as uuid} from 'uuid';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { environment } from '../../../../environments/environment';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { DeviceSelectablesModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
 import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
-import {provideRouter} from "@angular/router";
+import {provideRouter} from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DeviceStatusEditDialogComponent', () => {

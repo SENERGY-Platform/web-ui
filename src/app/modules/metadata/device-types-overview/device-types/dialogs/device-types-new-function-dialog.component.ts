@@ -18,10 +18,9 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {UntypedFormControl, Validators} from '@angular/forms';
 import { DeviceTypeConceptModel, DeviceTypeFunctionModel, DeviceTypeFunctionType } from '../../shared/device-type.model';
-import { util } from 'jointjs';
-import uuid = util.uuid;
 import { ConceptsService } from '../../../concepts/shared/concepts.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import {v4 as uuid} from 'uuid';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',

@@ -47,9 +47,8 @@ import {ConceptsService} from '../../concepts/shared/concepts.service';
 import {ConceptsCharacteristicsModel} from '../../concepts/shared/concepts-characteristics.model';
 import {environment} from '../../../../../environments/environment';
 import {debounceTime, map, mergeAll} from 'rxjs/operators';
-import {util} from 'jointjs';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import uuid = util.uuid;
+import {v4 as uuid} from 'uuid';
 import {
     DeviceTypesContentVariableJsonDialogComponent
 } from './dialogs/device-types-content-variable-json-dialog.component';

@@ -32,7 +32,6 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatInputModule } from '@angular/material/input';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { ExportModel } from '../../../modules/exports/shared/export.model';
-import { util } from 'jointjs';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { environment } from '../../../../environments/environment';
 import { DataTableEditDialogComponent } from './data-table-edit-dialog.component';
@@ -44,11 +43,11 @@ import { DataTableHelperService } from '../shared/data-table-helper.service';
 import { WidgetModule } from '../../widget.module';
 import { DataTableElementTypesEnum, DataTableOrderEnum, ExportValueTypes } from '../shared/data-table.model';
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
-import uuid = util.uuid;
+import {v4 as uuid} from 'uuid';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
-import {provideRouter} from "@angular/router";
+import {provideRouter} from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DataTableEditDialogComponent', () => {

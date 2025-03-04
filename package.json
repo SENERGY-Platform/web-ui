@@ -39,7 +39,7 @@
     "cronstrue": "^1.96.0",
     "dotenv": "^8.2.0",
     "file-saver": "^2.0.5",
-    "jointjs": "^3.4.4",
+    "jointjs": "^3.7.7",
     "jquery": "^3.5.1",
     "keycloak-angular": "^16.1.0",
     "keycloak-js": "^26.2.0",
@@ -54,6 +54,7 @@
     "rxjs": "^7.8.0",
     "swagger-ui": "^4.18.3",
     "tslib": "^2.0.0",
+    "uuid": "^11.1.0",
     "x2js": "^3.4.1",
     "yargs": "^15.4.1",
     "zone.js": "^0.14.10"
