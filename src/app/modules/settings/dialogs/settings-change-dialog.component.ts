@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {AuthorizationProfileModel} from '../../../core/model/authorization/authorization-profile.model';
 import {
-    AbstractControl,
-    FormControl,
     FormGroup,
     UntypedFormBuilder,
-    UntypedFormControl,
-    ValidatorFn,
     Validators
 } from '@angular/forms';
 import {MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {environment} from '../../../../environments/environment';
+import {DOCUMENT} from '@angular/common';
 
 @Component({
     templateUrl: './settings-change-dialog.component.html',
@@ -35,19 +33,16 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 })
 export class SettingsChangeDialogComponent implements OnInit {
     profile: AuthorizationProfileModel = { email: '', firstName: '', lastName: '', username: '' };
-    passwordNew = new FormControl('', [Validators.pattern('.*[?|!|#|%|$].*'), Validators.minLength(8), this.forbiddenNameValidator()]);
-    passwordConfirm = new UntypedFormControl('', [this.equalValidator()]);
     firstFormGroup: FormGroup = this._formBuilder.group({
         lastName: [''],
         firstName: [''],
         email: ['', [Validators.email]]
     });
-    hidePasswordNew = true;
-    hidePasswordConfirm = true;
-
-
+    public href: string = '';
+    protected readonly environment = environment;
 
     constructor(
+        @Inject(DOCUMENT) private document: Document,
         private authorizationService: AuthorizationService,
         private dialogRef: MatDialogRef<SettingsChangeDialogComponent>,
         private snackBar: MatSnackBar,
@@ -55,15 +50,14 @@ export class SettingsChangeDialogComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
+        const port = this.document.location.port !== ('443' || '80') ? ':'+this.document.location.port : '';
+        this.href = this.document.location.protocol+'//'+this.document.location.hostname+port+this.document.location.pathname;
         this.authorizationService.getProfile().then((profile) => {
             this.profile = profile;
             this.firstFormGroup.patchValue({
                 lastName: this.profile.lastName,
                 firstName: this.profile.firstName,
                 email: this.profile.email
-            });
-            this.passwordNew.valueChanges.subscribe(() => {
-                this.passwordConfirm.updateValueAndValidity();
             });
         });
     }
@@ -75,52 +69,16 @@ export class SettingsChangeDialogComponent implements OnInit {
     save(): void {
         this.authorizationService
             .changeUserProfile({
-                first_name: this.firstFormGroup.value.firstName,
-                last_name: this.firstFormGroup.value.lastName,
+                firstName: this.firstFormGroup.value.firstName,
+                lastName: this.firstFormGroup.value.lastName,
                 email: this.firstFormGroup.value.email,
             })
             .subscribe((resp: null | { error: string }) => {
                 if (resp === null) {
-                    if (this.passwordConfirm.value !== '') {
-                        this.updatePassword();
-                    } else {
-                        this.snackBar.open('Settings saved successfully.', undefined, { duration: 2000 });
-                    }
+                    this.snackBar.open('Settings saved successfully.', undefined, { duration: 2000 });
                 } else {
                     this.snackBar.open('Error while saving the settings!', 'close', { panelClass: 'snack-bar-error' });
                 }
             });
-    }
-
-    forbiddenNameValidator(): ValidatorFn {
-        return (control: AbstractControl): { [key: string]: any } | null => {
-            if (this.profile.username === control.value) {
-                return { forbiddenName: true };
-            } else {
-                return null;
-            }
-        };
-    }
-
-    equalValidator(): ValidatorFn {
-        return (control: AbstractControl): { [key: string]: any } | null => {
-            if (this.passwordNew.value === control.value) {
-                return null;
-            } else {
-                return { notEqual: true };
-            }
-        };
-    }
-
-    private updatePassword() {
-        this.authorizationService.changePasswort(this.passwordConfirm.value).subscribe((resp: null | { error: string }) => {
-            if (resp === null) {
-                this.snackBar.open('Settings saved successfully.', undefined, { duration: 2000 });
-                this.passwordNew.setValue('');
-                this.passwordConfirm.setValue('');
-            } else {
-                this.snackBar.open('Error while saving the settings!', 'close', { panelClass: 'snack-bar-error' });
-            }
-        });
     }
 }

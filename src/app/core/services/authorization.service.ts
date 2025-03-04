@@ -110,15 +110,9 @@ export class AuthorizationService implements HttpInterceptor {
         this.keycloakService.logout();
     }
 
-    changePasswort(password: string): Observable<null | { error: string }> {
-        return this.http
-            .put<null | { error: string }>(environment.usersServiceUrl + '/password', {password})
-            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changePasswort', {error: 'error'})));
-    }
-
     changeUserProfile(userProfile: AuthorizationUserProfileModel): Observable<null | { error: string }> {
         return this.http
-            .put<null>(environment.usersServiceUrl + '/info', userProfile)
+            .post<null>(environment.keycloakUrl + '/auth/realms/master/account/', userProfile)
             .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changeUserProfile', {error: 'error'})));
     }
 

@@ -46,23 +46,10 @@
 			<mat-error senergyError></mat-error>
         </mat-form-field>
     </form>
-    <form class="form">
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>New Password</mat-label>
-            <input matInput [type]="hidePasswordNew ? 'password' : 'text'" [formControl]="passwordNew">
-            <mat-icon matSuffix (click)="hidePasswordNew = !hidePasswordNew">{{hidePasswordNew ? 'visibility_off' : 'visibility'}}</mat-icon>
-			<mat-error senergyError></mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Confirm Password</mat-label>
-            <input matInput [type]="hidePasswordConfirm ? 'password' : 'text'" [formControl]="passwordConfirm">
-            <mat-icon matSuffix (click)="hidePasswordConfirm = !hidePasswordConfirm">{{hidePasswordConfirm ? 'visibility_off' : 'visibility'}}</mat-icon>
-            <mat-error *ngIf="passwordConfirm.getError('notEqual')">Passwords don't match!</mat-error>
-        </mat-form-field>
-    </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
+    <a mat-raised-button color="accent" href="{{environment.keycloakUrl}}/auth/realms/master/protocol/openid-connect/auth?client_id=frontend&redirect_uri={{href}}&kc_action=UPDATE_PASSWORD&response_type=code" >Change Password</a>
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="(passwordNew.value !== '' || passwordConfirm.value !== '') && (passwordNew.invalid || passwordConfirm.invalid || (passwordNew.value !== passwordConfirm.value))" (click)="save()">Save</button>
+    <button mat-raised-button color="accent" (click)="save()">Save</button>
 </mat-dialog-actions>
