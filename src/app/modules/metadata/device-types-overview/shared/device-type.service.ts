@@ -282,7 +282,7 @@ export class DeviceTypeService {
     }
 
     private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel, paths: { path: string; type: string; contentVariable?: DeviceTypeContentVariableModel }[]) {
-        if (field.type === 'https://schema.org/StructuredValue' && field.type !== undefined && field.type !== null) {
+        if ((field.type === 'https://schema.org/StructuredValue' || (field.type === 'https://schema.org/ItemList' && field.sub_content_variables !== undefined && field.sub_content_variables.length > 0 && field.sub_content_variables[0].name !== '*')) && field.type !== undefined && field.type !== null) {
             if (pathString !== '') {
                 pathString += '.' + field.name;
             } else {
