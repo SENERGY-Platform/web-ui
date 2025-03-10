@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Output} from '@angular/core';
 import {dia, shapes, util, V, Vectorizer} from 'jointjs';
 import $ from 'jquery';
-import {DiagramModel} from './shared/diagram.model';
+import {DiagramModel, LinkIOModel} from './shared/diagram.model';
 import uuid = util.uuid;
+import {IOModel} from '../../../modules/data/operator-repo/shared/operator.model';
 
 @Component({
     selector: 'senergy-diagram-editor',
@@ -221,6 +222,12 @@ export class DiagramEditorComponent implements AfterViewInit {
     paperHeight = 600;
     paper!: any;
 
+    private linkAttrs = {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}};
+
+    private defaultLink = new dia.Link({
+        attrs: this.linkAttrs,
+    });
+
     public dragStartPosition: {x: number; y: number }  | null = null;
 
     constructor() {
@@ -229,17 +236,6 @@ export class DiagramEditorComponent implements AfterViewInit {
     ngAfterViewInit() {
         this.setPaperWidth(this.getPaperWidthFromWrap());
         this.reinitializePaper();
-        this.paper.on('blank:pointerdown', (_: any, x: number, y: number) => {
-            this.dragStartPosition = { x: x* this.graphScale.sx, y: y* this.graphScale.sy};
-        });
-        this.paper.on('cell:pointerup blank:pointerup', () => {
-            this.dragStartPosition = null;
-        });
-        this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
-            evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
-            const model = elementView.model;
-            model.remove();
-        });
     }
 
     onResize() {
@@ -249,12 +245,6 @@ export class DiagramEditorComponent implements AfterViewInit {
 
     setPaperWidth(paperWidth: number) {
         this.paperWidth = paperWidth;
-    }
-
-    resizePaper(width: number, height: number) {
-        this.paperWidth = width;
-        this.paperHeight = height;
-        this.paper.setDimensions(this.paperWidth, this.paperHeight);
     }
 
     private getPaperWidthFromWrap(){
@@ -280,9 +270,7 @@ export class DiagramEditorComponent implements AfterViewInit {
         this.paper = new dia.Paper({
             el: $('#' + this.idGenerated),
             model: this.graph,
-            defaultLink: new dia.Link({
-                attrs: {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}},
-            }),
+            defaultLink: this.defaultLink,
             width: this.paperWidth,
             height: this.paperHeight,
             gridSize: 20,
@@ -301,102 +289,72 @@ export class DiagramEditorComponent implements AfterViewInit {
                 return targetMagnet && targetMagnet.getAttribute('port-group') === 'in';
             },
             markAvailable: true,
+
+        });
+        this.paper.on('blank:pointerdown', (_: any, x: number, y: number) => {
+            this.dragStartPosition = { x: x* this.graphScale.sx, y: y* this.graphScale.sy};
+        });
+        this.paper.on('cell:pointerup blank:pointerup', () => {
+            this.dragStartPosition = null;
+        });
+        this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
+            evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
+            const model = elementView.model;
+            model.remove();
         });
     }
 
-    public loadGraph(model: DiagramModel) {
-        this.graph.fromJSON(model);
+    public prepareLink(source: LinkIOModel, target: LinkIOModel){
+        const link = new dia.Link({
+            attrs: this.linkAttrs,
+        });
+        link.source({id: source.id, port: source.port});
+        link.target({id: target.id, port: target.port});
+        return link;
     }
 
-    public getGraph(): DiagramModel {
-        return this.graph.toJSON();
+    public addElementsToGraph(elements: any[]){
+        this.graph.addCells(elements);
+        this.graph.maxZIndex();
     }
 
-    public scaleContentToFit(){
-        this.paper.scaleContentToFit();
-        this.graphScale = V(this.paper.viewport).scale();
-    }
-
-    public zoomOut() {
-        this.graphScale.sx -= 0.1;
-        this.graphScale.sy -= 0.1;
-        this.paperScale(this.graphScale.sx, this.graphScale.sy);
-    }
-
-    public zoomIn() {
-        this.graphScale.sx += 0.1;
-        this.graphScale.sy += 0.1;
-        this.paperScale(this.graphScale.sx, this.graphScale.sy);
-    }
-
-    public resetZoom() {
-        this.graphScale.sx = 1;
-        this.graphScale.sy = 1;
-        this.paperScale(this.graphScale.sx, this.graphScale.sy);
-    }
-
-    public newCloudNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
-        const node = this.newNode(name, image, inputs, outputs, config, operatorId);
+    prepareCloudNode(id: string | undefined = undefined, name: string, image: string, inputs: string[], outputs: string[], config: IOModel[], operatorId: string, position: Position | undefined = undefined){
+        const node = this.newNode(id, name, image, inputs, outputs, config, operatorId, position);
         node.attributes.deploymentType = 'cloud';
         node.attr({
             body: {
                 fill: '#4484ce',
             }
         });
-        this.graph.addCells([node]);
-        this.graph.maxZIndex();
         return node;
     }
 
-    public newLocalNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
-        const node = this.newNode(name, image, inputs, outputs, config, operatorId);
+    prepareLocalNode(id: string | undefined = undefined, name: string, image: string, inputs: string[], outputs: string[], config: IOModel[], operatorId: string, position: Position | undefined = undefined){
+        const node = this.newNode(id, name, image, inputs, outputs, config, operatorId, position);
         node.attributes.deploymentType = 'local';
         node.attr({
             body: {
                 fill: '#ddd',
             }
         });
+        return node;
+    }
+
+    public newCloudNode(name: string, image: string, inputs: string[], outputs: string[], config: IOModel[], operatorId: string, position: Position | undefined = undefined): any {
+        const node = this.prepareCloudNode(undefined, name, image, inputs, outputs, config, operatorId, position);
         this.graph.addCells([node]);
         this.graph.maxZIndex();
         return node;
     }
 
-    calculateNodePosition() {
-        const box = (document.getElementsByClassName('joint-layers')[0] as any).getBBox();
-        const x = box.x + box.width + 100;
-        const y = 200;
-
-        return [x,y];
+    public newLocalNode(name: string, image: string, inputs: string[], outputs: string[], config: any[], operatorId: string, position: Position | undefined = undefined): any {
+        const node = this.prepareLocalNode(undefined, name, image, inputs, outputs, config, operatorId, position);
+        this.graph.addCells([node]);
+        this.graph.maxZIndex();
+        return node;
     }
 
-    calculateNodeSize(inPorts: any[], outPorts: any[]) {
-        const outCircleradius = 20;
-        const heightBasedOnOut = outCircleradius * outPorts.length + 30;
-        const heightBasedOnIn = outCircleradius * inPorts.length + 30;
-        let height = heightBasedOnIn > heightBasedOnOut ? heightBasedOnIn : heightBasedOnOut;
-        height = height > 100 ? height : 100;
-        const size = {height, width: 150};
-        return size;
-    }
-
-    public newNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
-        const inPorts = [];
-        if (inputs !== null) {
-            for (const input of inputs) {
-                if (input.name !== undefined) {
-                    inPorts.push(input.name);
-                }
-            }
-        }
-
-        const outPorts = [];
-        if (outputs !== null) {
-            for (const output of outputs) {
-                if (output.name !== undefined) {
-                    outPorts.push(output.name);
-                }
-            }
-        }
+    public newNode(id: string | undefined = undefined, name: string, image: string, inPorts: string[], outPorts: string[], config: any[], operatorId: string, position: Position | undefined = undefined): any {
 
         const size = this.calculateNodeSize(inPorts, outPorts);
 
@@ -410,8 +368,13 @@ export class DiagramEditorComponent implements AfterViewInit {
             config,
             operatorId,
         });
-        const position = this.calculateNodePosition();
-        node.position(position[0], position[1]);
+        if (id !== undefined ){
+            node.prop('id', id, { rewrite: true });
+        }
+        if (position === undefined){
+            position = this.calculateNodePosition();
+        }
+        node.position(position.x, position.y);
         node.attr({
             label: {
                 visibility: 'visible',
@@ -440,7 +403,49 @@ export class DiagramEditorComponent implements AfterViewInit {
         return node;
     }
 
+    calculateNodePosition(): Position {
+        const box = (document.getElementsByClassName('joint-layers')[0] as any).getBBox();
+        return  {x: box.x + box.width + 100, y: 200} as Position;
+    }
+
+    calculateNodeSize(inPorts: any[], outPorts: any[]) {
+        const outCircleradius = 20;
+        const heightBasedOnOut = outCircleradius * outPorts.length + 30;
+        const heightBasedOnIn = outCircleradius * inPorts.length + 30;
+        let height = heightBasedOnIn > heightBasedOnOut ? heightBasedOnIn : heightBasedOnOut;
+        height = height > 100 ? height : 100;
+        const size = {height, width: 150};
+        return size;
+    }
+
     private paperScale(sx: number, sy: number){
         this.paper.scale(sx,sy);
     }
+
+    public getGraph(): DiagramModel {
+        return this.graph.toJSON();
+    }
+
+    public zoomOut() {
+        this.graphScale.sx -= 0.1;
+        this.graphScale.sy -= 0.1;
+        this.paperScale(this.graphScale.sx, this.graphScale.sy);
+    }
+
+    public zoomIn() {
+        this.graphScale.sx += 0.1;
+        this.graphScale.sy += 0.1;
+        this.paperScale(this.graphScale.sx, this.graphScale.sy);
+    }
+
+    public resetZoom() {
+        this.graphScale.sx = 1;
+        this.graphScale.sy = 1;
+        this.paperScale(this.graphScale.sx, this.graphScale.sy);
+    }
+}
+
+export interface Position {
+    x: number;
+    y: number;
 }

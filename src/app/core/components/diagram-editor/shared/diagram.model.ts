@@ -14,11 +14,29 @@
  * limitations under the License.
  */
 
+import {IOModel} from '../../../../modules/data/operator-repo/shared/operator.model';
+import {Position} from '../diagram-editor.component';
+
 export interface DiagramModel {
     cells: CellModel[];
 }
 
 export interface CellModel {
+    id: string;
+    image: string;
+    operatorId: string;
+    inPorts: string[];
+    outPorts: string[];
+    config: IOModel[];
+    position: Position;
+    name: string;
     type: string;
-    attrs: any;
+    source: LinkIOModel;
+    target: LinkIOModel;
+    deploymentType: string;
+}
+export interface LinkIOModel {
+    id: string;
+    magnet: string;
+    port: string;
 }

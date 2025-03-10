@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
@@ -66,17 +66,17 @@ export class FlowRepoService {
         );
     }
 
-    saveFlow(flow: FlowModel): Observable<unknown> {
+    saveFlow(flow: FlowModel): Observable<HttpResponse<FlowModel> | null> {
         if (flow._id === undefined) {
             return this.http
-                .put<unknown>(environment.flowRepoUrl + '/flow/', flow)
-                .pipe(catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'putFlow: Error', {})));
+                .put<FlowModel>(environment.flowRepoUrl + '/flow/', flow, {observe: 'response'})
+                .pipe(catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'putFlow: Error', null)));
         } else {
             const id = flow._id;
             delete flow._id;
             return this.http
-                .post<unknown>(environment.flowRepoUrl + '/flow/' + id + '/', flow)
-                .pipe(catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'postFlow: Error', {})));
+                .post<FlowModel>(environment.flowRepoUrl + '/flow/' + id + '/', flow, {observe: 'response'})
+                .pipe(catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'postFlow: Error', null)));
         }
     }
 

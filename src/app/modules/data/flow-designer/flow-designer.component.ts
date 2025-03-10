@@ -15,7 +15,7 @@
  */
 
 import {OnInit, Component, AfterViewInit, ViewChild, HostListener} from '@angular/core';
-import { OperatorModel } from '../operator-repo/shared/operator.model';
+import {IOModel, OperatorModel} from '../operator-repo/shared/operator.model';
 import { FlowRepoService } from '../flow-repo/shared/flow-repo.service';
 import { ActivatedRoute } from '@angular/router';
 import { OperatorRepoService } from '../operator-repo/shared/operator-repo.service';
@@ -52,7 +52,6 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         this.operatorRepoService.getOperators('', 9999, 0, 'name', 'asc').subscribe((resp: { operators: OperatorModel[] }) => {
             this.operators = resp.operators;
-            this.ready = true;
         });
     }
 
@@ -69,21 +68,47 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                         if (this.flow.share.write === true || this.flow.userId === this.authService.getUserId()) {
                             this.write = true;
                         }
+                        const elements = [];
                         for (const cell of this.flow.model.cells) {
                             if (cell.type === 'link') {
-                                cell.attrs['.marker-target'] = cell.attrs.markerTarget;
-                                delete cell.attrs.markerTarget;
+                                elements.push(this.diagram.prepareLink(cell.source, cell.target));
+                            } else if (cell.type === 'senergy.NodeElement'){
+                                if (cell.deploymentType === 'local') {
+                                    elements.push(this.diagram.prepareLocalNode(
+                                        cell.id,
+                                        cell.name,
+                                        cell.image,
+                                        cell.inPorts,
+                                        cell.outPorts,
+                                        cell.config,
+                                        cell.operatorId,
+                                        cell.position
+                                    ));
+                                } else {
+                                    elements.push(this.diagram.prepareCloudNode(
+                                        cell.id,
+                                        cell.name,
+                                        cell.image,
+                                        cell.inPorts,
+                                        cell.outPorts,
+                                        cell.config,
+                                        cell.operatorId,
+                                        cell.position
+                                    ));
+                                }
                             }
                         }
-                        this.diagram.loadGraph(this.flow.model);
+                        this.diagram.addElementsToGraph(elements);
                     }
                 });
             } else {
                 this.write = true;
             }
-        }, 0);
+            this.ready = true;
+        }, 500);
         this.listHeight = this.diagram.paperHeight;
     }
+
 
     public addNode(operator: OperatorModel) {
         if (
@@ -99,8 +124,8 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                 this.diagram.newLocalNode(
                     operator.name,
                     operator.image,
-                    operator.inputs,
-                    operator.outputs,
+                    this.getPortNames(operator.inputs),
+                    this.getPortNames(operator.outputs),
                     operator.config_values,
                     operator._id,
                 );
@@ -109,8 +134,8 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                 this.diagram.newCloudNode(
                     operator.name,
                     operator.image,
-                    operator.inputs,
-                    operator.outputs,
+                    this.getPortNames(operator.inputs),
+                    this.getPortNames(operator.outputs),
                     operator.config_values,
                     operator._id,
                 );
@@ -119,22 +144,31 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         }
     }
 
+    private getPortNames(inputs: IOModel[]): string[]{
+        const ports = [];
+        if (inputs !== undefined) {
+            for (const input of inputs) {
+                if (input.name !== undefined) {
+                    ports.push(input.name);
+                }
+            }
+        }
+        return ports;
+    }
+
     public saveModel() {
         const svg = this.diagram.paper.svg.cloneNode(true) as SVGElement;
         this.flow.image = this.createSVGFromModel(svg);
         this.flow.model = this.diagram.getGraph();
-        if (this.flow.model.cells !== undefined) {
-            for (const cell of this.flow.model.cells) {
-                if (cell.type === 'link') {
-                    cell.attrs.markerTarget = cell.attrs['.marker-target'];
-                    delete cell.attrs['.marker-target'];
+        const flow = Object.assign({}, this.flow);
+        this.flowRepoService.saveFlow(flow).subscribe(resp => {
+            if (resp != null) {
+                if (resp.status == 200){
+                    this.snackBar.open('Flow saved', undefined, {
+                        duration: 2000,
+                    });
                 }
             }
-        }
-        const flow = Object.assign({}, this.flow);
-        this.flowRepoService.saveFlow(flow).subscribe();
-        this.snackBar.open('Flow saved', undefined, {
-            duration: 2000,
         });
     }
 

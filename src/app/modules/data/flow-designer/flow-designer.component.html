@@ -14,7 +14,8 @@
   ~ limitations under the License.
   -->
 <div class="main-panel">
-    <div class="layout-margin" fxLayout="column" [fxShow]="ready">
+    <senergy-spinner [show]="!ready"></senergy-spinner>
+    <div [hidden]="!ready" class="layout-margin" fxLayout="column" [fxShow]="ready">
         <div *ngIf="flow.dateCreated !== undefined" fxLayout="row" fxLayoutAlign="end center" style="margin-bottom: 10px;">
             <mat-icon>calendar_today</mat-icon>{{flow.dateCreated| date:"medium"}}
             <mat-icon style="margin-left: 6px;">update</mat-icon>{{flow.dateUpdated| date:"medium"}}
@@ -37,7 +38,7 @@
         </section>
         <div fxLayout="row">
             <div id="senergy-diagram-editor" fxFlex="70">
-                <senergy-diagram-editor ></senergy-diagram-editor>
+                <senergy-diagram-editor></senergy-diagram-editor>
             </div>
             <div id="diagram-operators" fxFlex="30" class="mat-elevation-z1" >
                 <div style="overflow: auto; height: {{listHeight}} px">
@@ -61,5 +62,4 @@
             <mat-icon>save</mat-icon>
         </button>
     </div>
-    <senergy-spinner [elementCount]="0" [show]="!ready"></senergy-spinner>
 </div>
