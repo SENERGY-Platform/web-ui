@@ -68,7 +68,7 @@
                                 <div fxLayout="row" fxLayoutAlign="end center" class="footer-buttons">
                                     <button
                                             *ngIf="item._id !== undefined"
-                                            [disabled]="userHasPipelineCreateAuthorization && !userHasExecutePermission(item._id)"
+                                            [disabled]="!userHasExecutePermission(item._id)"
                                             mat-icon-button routerLink="/data/flow-repo/deploy/{{item._id}}">
                                         <mat-icon color="accent">
                                             start
@@ -76,7 +76,7 @@
                                     </button>
                                     <button
                                             *ngIf="item._id !== undefined"
-                                            [disabled]="userHasUpdateAuthorization && !userHasWritePermission(item._id)"
+                                            [disabled]="!userHasWritePermission(item._id)"
                                             mat-icon-button routerLink="/data/designer/{{item._id}}">
                                         <mat-icon color="accent">
                                             edit
@@ -84,9 +84,12 @@
                                     </button>
                                     <button class="delete-button"
                                             *ngIf="item._id !== undefined"
-                                            [disabled]="userHasDeleteAuthorization && !userHasAdministratePermission(item._id)"
+                                            [disabled]="!userHasAdministratePermission(item._id)"
                                             mat-icon-button (click)="deleteFlow(item)">
-                                        <mat-icon color="warn">
+                                        <mat-icon color="warn" *ngIf="userHasAdministratePermission(item._id)">
+                                            delete
+                                        </mat-icon>
+                                        <mat-icon *ngIf="!userHasAdministratePermission(item._id)">
                                             delete
                                         </mat-icon>
                                     </button>
