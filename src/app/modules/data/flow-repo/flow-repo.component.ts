@@ -22,12 +22,17 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ResponsiveService } from '../../../core/services/responsive.service';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { Subscription } from 'rxjs';
+import {map, Observable, Subscription} from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { FlowEngineService } from './shared/flow-engine.service';
 import { CostEstimationModel } from '../../cost/shared/cost.model';
 import { CostService } from '../../cost/shared/cost.service';
+import {PermissionsDialogService} from "../../permissions/shared/permissions-dialog.service";
+import {PermissionsV2RightsAndIdModel} from "../../permissions/shared/permissions-resource.model";
+import {PermissionsRightsModel} from "../../permissions/shared/permissions-rights.model";
+import {PermissionsService} from "../../permissions/shared/permissions.service";
+import {concatMap} from "rxjs/operators";
 
 const GRIDS = new Map([
     ['xs', 1],
@@ -60,6 +65,8 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
+    permissionsPerFlows: PermissionsV2RightsAndIdModel[] = [];
+
     showShared = localStorage.getItem('data.flows.showShared') === 'true';
 
     userId = {} as string | Error;
@@ -74,6 +81,8 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         private searchbarService: SearchbarService,
         private flowEngineService: FlowEngineService,
         public costService: CostService,
+        private permissionsDialogService: PermissionsDialogService,
+        private permissionsService: PermissionsService,
     ) {}
 
     ngOnInit() {
@@ -123,12 +132,6 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         this.getFlows(true);
     }
 
-    showSharedChanged() {
-        this.showShared= !this.showShared;
-        localStorage.setItem('data.flows.showShared', String(this.showShared));
-        this.getFlows(true);
-    }
-
     getFlows(reset: boolean) {
         if (reset) {
             this.setRepoItemsParams(this.limitInit);
@@ -148,6 +151,8 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
                         }
                         this.flows.push(flow);
                     });
+                    this.loadFlowsPermissions();
+                    console.log(this.permissionsPerFlows);
                 }
                 if (this.costService.userMayGetFlowCostEstimations()) {
                     if (resp.flows.length > 0) {
@@ -162,6 +167,19 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
                     this.ready = true;
                 }
             });
+    }
+
+    loadFlowsPermissions() {
+        this.permissionsService.getComputedResourcePermissionsV2('analytics-flows', this.flows.map(e => e._id || '')).subscribe(
+            perms => (this.permissionsPerFlows = perms)
+        );
+    }
+
+    shareFlow(flow: FlowModel){
+        if (flow._id == null) {
+            return;
+        }
+        this.permissionsDialogService.openPermissionV2Dialog('analytics-flows', flow._id, flow.name || '');
     }
 
     private initGridCols(): void {
@@ -190,5 +208,21 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+    }
+
+    userHasReadPermission(id: string): boolean {
+        return this.permissionsPerFlows.find(e => e.id === id)?.read || false;
+    }
+
+    userHasWritePermission(id: string): boolean {
+        return this.permissionsPerFlows.find(e => e.id === id)?.write || false;
+    }
+
+    userHasExecutePermission(id: string): boolean {
+        return this.permissionsPerFlows.find(e => e.id === id)?.execute || false;
+    }
+
+    userHasAdministratePermission(id: string): boolean {
+        return this.permissionsPerFlows.find(e => e.id === id)?.administrate || false;
     }
 }

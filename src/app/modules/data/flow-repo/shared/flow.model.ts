@@ -20,17 +20,10 @@ import { SafeHtml } from '@angular/platform-browser';
 export interface FlowModel {
     _id?: string;
     name: string;
-    description: string;
+    description: string | undefined;
     model: DiagramModel;
     image: string | SafeHtml;
-    share: FlowShareModel;
     userId: string;
     dateCreated: number;
     dateUpdated: number;
-}
-
-export interface FlowShareModel {
-    list: boolean | undefined;
-    read: boolean | undefined;
-    write: boolean | undefined;
 }

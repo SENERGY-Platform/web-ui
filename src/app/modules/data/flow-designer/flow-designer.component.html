@@ -22,20 +22,14 @@
         </div>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Name</mat-label>
-            <input disabled="{{!write}}" matInput [(ngModel)]="flow.name">
+            <input matInput [(ngModel)]="flow.name">
             <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Description</mat-label>
-            <input disabled="{{!write}}" matInput [(ngModel)]="flow.description">
+            <input matInput [(ngModel)]="flow.description">
             <mat-error senergyError label="Description"></mat-error>
         </mat-form-field>
-        <section class="checkbox-section">
-            Share Flow:
-            <mat-checkbox disabled="{{!write}}" class="checkbox-margin" [(ngModel)]="flow.share.list">List</mat-checkbox>
-            <mat-checkbox disabled="{{!write}}" class="checkbox-margin" [(ngModel)]="flow.share.read">Read</mat-checkbox>
-            <mat-checkbox disabled="{{!write}}" class="checkbox-margin" [(ngModel)]="flow.share.write">Write</mat-checkbox>
-        </section>
         <div fxLayout="row">
             <div id="senergy-diagram-editor" fxFlex="70">
                 <senergy-diagram-editor></senergy-diagram-editor>
@@ -47,7 +41,7 @@
                             <mat-icon matListItemIcon>insert_chart_outlined</mat-icon>
                             <h3 matListItemTitle>{{ item.name }}</h3>
                             <p [matTooltip]="item.description || 'none'" matListItemLine>{{ item.description }}</p>
-                            <button matListItemMeta disabled="{{!write}}" (click)="addNode(item)" matTooltip="Add operator" mat-button color="accent">
+                            <button matListItemMeta (click)="addNode(item)" matTooltip="Add operator" mat-button color="accent">
                                 <mat-icon color="accent">add</mat-icon>
                             </button>
                         </mat-list-item>
@@ -55,10 +49,10 @@
                 </div>
             </div>
         </div>
-        <button *ngIf="write" mat-fab class="fab-fit" (click)="scaleContentToFit()" matTooltip="scalePaperToFit">
+        <button mat-fab class="fab-fit" (click)="scaleContentToFit()" matTooltip="scalePaperToFit">
             <mat-icon>fit_screen</mat-icon>
         </button>
-        <button *ngIf="write" mat-fab class="fab" (click)="saveModel()" matTooltip="Save">
+        <button mat-fab class="fab" (click)="saveModel()" matTooltip="Save">
             <mat-icon>save</mat-icon>
         </button>
     </div>
