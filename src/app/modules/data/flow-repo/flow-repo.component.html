@@ -33,33 +33,22 @@
                         </div>
                         <mat-grid-tile-footer>
                             <div fxLayout="column" fxFill>
-                                <div *ngIf="item.description !== undefined" class="truncate footer-item-header"
-                                     matTooltip="{{item.name + ' - ' + item.description}}">
-                                    <p>{{ item.name }}</p>
-                                    <mat-icon class="share-icon" *ngIf="item.userId === userId">
-                                        public
-                                    </mat-icon>
-                                    <mat-icon class="share-icon" *ngIf="item.userId !== userId">
-                                        share
-                                    </mat-icon>
-                                </div>
-                                <div *ngIf="item.description === undefined" class="truncate footer-item-header"
-                                     matTooltip="{{item.name}}">
-                                    <p>{{ item.name }}</p>
-                                    <mat-icon class="share-icon" *ngIf="item.userId !== userId">
+                                <div class="truncate footer-item-header">
+                                    <p matTooltip="{{item.description === undefined ? '' : item.description}}">{{ item.name }}</p>
+                                    <mat-icon class="share-icon" *ngIf="item.userId !== userId" matTooltip="{{item.userName || item.userId}}">
                                         share
                                     </mat-icon>
                                 </div>
                                 <div class="truncate footer-item-subtitle" fxLayout="column">
                                     <div *ngIf="costService.userMayGetFlowCostEstimations() && flowEstimations.length>0">
-                                        <div *ngIf=" flowEstimations[i].max > 0" matTooltipClass="multiline-tooltip"
+                                        <div *ngIf="flowEstimations[i] !== undefined && flowEstimations[i].max > 0" matTooltipClass="multiline-tooltip"
                                              matTooltip="Median: {{flowEstimations[i].median | currency:'EUR'}}; Mean: {{flowEstimations[i].mean | currency:'EUR'}}">
                                             {{ flowEstimations[i].min | currency:'EUR' }} - {{
                                                 flowEstimations[i].max |
                                                     currency:'EUR'
                                             }}
                                         </div>
-                                        <div *ngIf=" flowEstimations[i].max === 0">
+                                        <div *ngIf="flowEstimations[i] !== undefined && flowEstimations[i].max === 0">
                                             Unknown cost
                                         </div>
                                     </div>

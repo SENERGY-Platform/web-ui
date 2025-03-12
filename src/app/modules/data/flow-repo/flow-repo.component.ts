@@ -22,17 +22,15 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ResponsiveService } from '../../../core/services/responsive.service';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import {map, Observable, Subscription} from 'rxjs';
+import {concat, Observable, Subscription} from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { FlowEngineService } from './shared/flow-engine.service';
 import { CostEstimationModel } from '../../cost/shared/cost.model';
 import { CostService } from '../../cost/shared/cost.service';
-import {PermissionsDialogService} from "../../permissions/shared/permissions-dialog.service";
-import {PermissionsV2RightsAndIdModel} from "../../permissions/shared/permissions-resource.model";
-import {PermissionsRightsModel} from "../../permissions/shared/permissions-rights.model";
-import {PermissionsService} from "../../permissions/shared/permissions.service";
-import {concatMap} from "rxjs/operators";
+import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
+import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
+import {PermissionsService} from '../../permissions/shared/permissions.service';
 
 const GRIDS = new Map([
     ['xs', 1],
@@ -49,7 +47,7 @@ const GRIDS = new Map([
 })
 export class FlowRepoComponent implements OnInit, OnDestroy {
     flows: FlowModel[] = [];
-    flowEstimations: CostEstimationModel[] = [];
+    flowEstimations: CostEstimationModel [] = [];
     ready = false;
     gridCols = 0;
     sortAttributes = [new SortModel('Name', 'name', 'asc')];
@@ -64,6 +62,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
+    private userIdMap = new Map<string, string>();
 
     permissionsPerFlows: PermissionsV2RightsAndIdModel[] = [];
 
@@ -145,14 +144,22 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
                     this.allDataLoaded = true;
                 }
                 if (resp.flows.length > 0) {
+                    const idReqs: Observable<string>[] = [];
                     resp.flows.forEach((flow: FlowModel) => {
                         if (typeof flow.image === 'string') {
                             flow.image = this.sanitizer.bypassSecurityTrustHtml(flow.image);
                         }
+                        if (this.userId !== flow.userId){
+                            idReqs.push(this.getUserNameById(flow.userId));
+                        }
                         this.flows.push(flow);
                     });
+                    concat(...idReqs).subscribe(_ => {
+                        this.userIdMap.forEach((name: string, userId: string) => {
+                            this.flows.filter((flow) => flow.userId === userId).map((flow) => flow.userName = name);
+                        });
+                    });
                     this.loadFlowsPermissions();
-                    console.log(this.permissionsPerFlows);
                 }
                 if (this.costService.userMayGetFlowCostEstimations()) {
                     if (resp.flows.length > 0) {
@@ -208,6 +215,21 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+    }
+
+    getUserNameById(id: string): Observable<string> {
+        return new Observable((obs) => {
+            if (this.userIdMap.get(id) === undefined) {
+                this.permissionsService.getUserById(id).subscribe(resp => {
+                    this.userIdMap.set(id, resp.username);
+                    obs.next(resp.username);
+                    obs.complete();
+                });
+            } else {
+                obs.next(this.userIdMap.get(id));
+                obs.complete();
+            }
+        });
     }
 
     userHasReadPermission(id: string): boolean {
