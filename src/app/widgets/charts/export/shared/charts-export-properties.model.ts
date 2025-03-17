@@ -60,7 +60,11 @@ export interface ChartsExportMeasurementModel {
     exportDatabaseId?: string;
 }
 
-// eslint-disable-next-line no-shadow
+export interface ChartsExportMeasurementDisplayModel extends ChartsExportMeasurementModel {
+    display_name?: string;
+}
+
+
 export enum ChartsExportDeviceGroupMergingStrategy {
     Separate,
     Sum,

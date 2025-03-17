@@ -2,31 +2,45 @@
 
 <form fxLayout="column" [formGroup]="form" *ngIf="ready">
     <div *ngIf="showSource">
-        <h2>Choose a Data Source</h2>
+        <h2>Select the Data Sources</h2>
 		<mat-form-field appearance="outline" color="accent">
-			<mat-label>Data Source Class</mat-label>
-			<mat-select #dataSourceClass formControlName="dataSourceClass">
-				<mat-option *ngFor="let entity of getSortedDataSourceClasses()" [value]="entity">
+			<mat-label>Data Source Classes</mat-label>
+			<mtx-select formControlName="dataSourceClasses" multiple="true" hideSelected="true"
+						closeOnSelect="false" placeholder="Search" fixedPlaceholder="true">
+				<mtx-option *ngFor="let entity of dataSourceClasses" [value]="entity">
 					{{entity}}
-				</mat-option>
-			</mat-select>
+				</mtx-option>
+			</mtx-select>
 			<mat-error senergyError label="Data Source Class"></mat-error>
 		</mat-form-field>
-        <mat-form-field [class.cdk-visually-hidden]="!dataSourceClass.value" appearance="outline" color="accent">
-            <mat-label>{{getLabelFromCurrentDataSource()}}</mat-label>
-            <senergy-select-search [required]="true" [multiple]="true" [compareWith]="compare" formControlName="exports"
-                (selectionChange)="dataSourceChanged($event.value)" [options]="currentDataSourceOptions"
-                [getOptionViewValue]="getDataSourceName">
-            </senergy-select-search>
-			<mat-error senergyError></mat-error>
-        </mat-form-field>
+
+		<ng-container formArrayName="exportsBySource">
+			<ng-container *ngFor="let sourceForm of exportsControlBySource.controls; let i = index">
+				<div [formGroupName]="i">
+					<mat-form-field [class.cdk-visually-hidden]="!sourceIsUsed(sourceForm)"
+									appearance="outline" color="accent">
+						<mat-label>{{getSourceClass(sourceForm)}}</mat-label>
+						<mtx-select formControlName="sourceExports" [multiple]="true" [hideSelected]="false"
+									closeOnSelect="false" virtualScroll="true" placeholder="Type to search"
+									bindLabel="display_name" bindValue="id"
+									[items]="getExportOptions(getSourceClass(sourceForm))"
+									(scroll)="onSelectScroll($event, sourceForm)"
+									(scrollToEnd)="onSelectScrollEnd(sourceForm)"
+									(search)="onSelectSearch($event, sourceForm)"
+									(close)="onSelectClose(sourceForm)">
+						</mtx-select>
+					</mat-form-field>
+				</div>
+			</ng-container>
+			<mat-error class="error" *ngIf="showDataSourceError">Please select at least one data source!</mat-error>
+		</ng-container>
     </div>
    
     <mat-spinner *ngIf="waitingForDataSourceChange" [diameter]="50" [strokeWidth]="5" color="accent"></mat-spinner>
 
     <span *ngIf="!waitingForDataSourceChange">
         <span [hidden]="(form.get('exports')?.value || '').length === 0" *ngIf="enableFieldSelection">
-            <h2>Choose the Exported Fields</h2>
+            <h2>Select the Exported Fields</h2>
             <mat-form-field appearance="outline" color="accent">
                 <mat-label>Fields</mat-label>
                 <senergy-select-search [required]="true" [multiple]="true" formControlName="fields"
@@ -56,7 +70,7 @@
                     <mat-form-field color="accent" class="full-width" appearance="outline">
                         <mat-label>Time</mat-label>
                         <input type="text" matInput placeholder="e.g. 15, 1" formControlName="time">
-                        <mat-error senergyError label="Time"></mat-error>
+                        <mat-error *ngIf="form.get('time')?.invalid"></mat-error>
                     </mat-form-field>
                 </div>
                 <div

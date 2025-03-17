@@ -23,6 +23,10 @@ export interface LocationModel {
     device_group_ids: string[];
 }
 
+export interface LocationDisplayModel extends LocationModel {
+    display_name?: string;
+}
+
 export interface LocationTotalModel {
     result: LocationModel[];
     total: number;

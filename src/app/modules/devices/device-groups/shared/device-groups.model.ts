@@ -27,6 +27,10 @@ export interface DeviceGroupModel {
     criteria_short?: string[];
 }
 
+export interface DeviceGroupDisplayModel extends DeviceGroupModel{
+    display_name?: string;
+}
+
 export interface DeviceGroupCriteriaModel {
     interaction: string;
     function_id: string;
