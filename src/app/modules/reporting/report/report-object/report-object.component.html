@@ -60,13 +60,20 @@
                     </senergy-select-search>
                     <mat-error senergyError label="Device"></mat-error>
                 </mat-form-field>
-                <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-label>Service</mat-label>
-                    <senergy-select-search (ngModelChange)="queryServiceChanged($event)"
-                        [(ngModel)]="queryService" [options]="queryDeviceType.services" useOptionViewProperty="name">
-                    </senergy-select-search>
-                    <mat-error senergyError label="Service"></mat-error>
-                </mat-form-field>
+
+				<mat-form-field fxFlex color="accent" appearance="outline">
+					<mat-label>Service</mat-label>
+					<mtx-select
+							[items]="queryDeviceType.services"
+							bindLabel="name"
+							placeholder="Type to search"
+							[(ngModel)]="queryService"
+							(ngModelChange)="queryServiceChanged($event)"
+							hideSelected="false"
+					></mtx-select>
+					<mat-error senergyError label="Service New"></mat-error>
+				</mat-form-field>
+
                 <mat-form-field fxFill color="accent" appearance="outline">
                     <mat-label>Path</mat-label>
                     <input matInput [(ngModel)]="data.query!.columns[0].name" placeholder="Choose or write yourself"
