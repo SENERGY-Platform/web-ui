@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {AbstractControl, ControlEvent, FormArray, FormBuilder, FormControl, FormGroup, TouchedChangeEvent, UntypedFormGroup, ValidatorFn, Validators} from '@angular/forms';
-import {catchError, concatMap, defaultIfEmpty, forkJoin, map, Observable, of, throwError} from 'rxjs';
+import {catchError, concatMap, defaultIfEmpty, forkJoin, map, Observable, of, Subject, throwError} from 'rxjs';
 import {DeviceGroupCriteriaModel, DeviceGroupDisplayModel} from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import {DeviceInstanceModel} from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import {ExportModel, ExportResponseModel, ExportValueModel} from 'src/app/modules/exports/shared/export.model';
@@ -18,7 +18,7 @@ import {LocationDisplayModel} from 'src/app/modules/devices/locations/shared/loc
 import {LocationsService} from 'src/app/modules/devices/locations/shared/locations.service';
 import {FunctionsService} from 'src/app/modules/metadata/functions/shared/functions.service';
 import _ from 'lodash';
-import {switchMap} from 'rxjs/operators';
+import {debounceTime, switchMap} from 'rxjs/operators';
 
 export interface DataSourceConfig {
     exports?: (ChartsExportMeasurementDisplayModel | DeviceInstanceModel | DeviceGroupDisplayModel | LocationDisplayModel)[];
@@ -47,6 +47,8 @@ export interface DataSourceConfig {
 export class DataSourceSelectorComponent implements OnInit {
     form: UntypedFormGroup = new UntypedFormGroup({});
     dataSourceClasses = ['Devices', 'Device Groups', 'Exports', 'Locations'];
+
+    searchSubject = new Subject<{ term: string, sourceForm: AbstractControl }>();
 
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
     deviceGroups: DeviceGroupDisplayModel[] = [];
@@ -136,6 +138,7 @@ export class DataSourceSelectorComponent implements OnInit {
     ngOnInit(): void {
         this.waitingForDataSourceChange = true;
         this.initForm();
+        this.initOnSelectSearch();
         this.setupDataSources().pipe(
             concatMap(() => this.loadFieldOptions(this.dataSourceConfig?.exports || [])),
             map((fieldOptions) => {
@@ -589,7 +592,7 @@ export class DataSourceSelectorComponent implements OnInit {
         );
     }
 
-    getDevices(request: { limit: number, offset: number, search?: string }) {
+    getDevices(request: { limit: number, offset: number, searchText?: string }) {
         return this.deviceInstancesService.getDeviceInstances(request).pipe(
             map(devices => {
                 const newResults: DeviceInstanceModel[] = devices.result;
@@ -1029,8 +1032,15 @@ export class DataSourceSelectorComponent implements OnInit {
         this.resetDataSourceOptions(sourceForm);
     }
 
+    initOnSelectSearch(){
+        this.searchSubject.pipe(
+            debounceTime(250)
+        ).subscribe(({ term, sourceForm }) => {
+            this.resetDataSourceOptions(sourceForm, term);
+        });
+    }
     onSelectSearch(search: { term: string, items: any[] }, sourceForm: AbstractControl) {
-        this.resetDataSourceOptions(sourceForm, search.term);
+        this.searchSubject.next({ term: search.term, sourceForm });
     }
 
     resetDataSourceOptions(sourceForm: AbstractControl, search: string = '') {
@@ -1080,7 +1090,7 @@ export class DataSourceSelectorComponent implements OnInit {
         if (sourceClass === 'Exports') {
             return this.getExports({limit: limit, offset: offset, search: search});
         } else if (sourceClass === 'Devices') {
-            return this.getDevices({limit: limit, offset: offset, search: search});
+            return this.getDevices({limit: limit, offset: offset, searchText: search});
         } else if (sourceClass === 'Device Groups') {
             return this.getDeviceGroups({limit: limit, offset: offset, search: search});
         } else if (sourceClass === 'Locations') {
