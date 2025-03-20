@@ -39,6 +39,7 @@
                     ({{joinMeasurementsString(widget.properties.acControl?.getTemperatureMeasurements, true)}}
                     <ng-container *ngIf="widget.properties.acControl?.getBatteryLevel !== undefined">
                         {{widget.properties.acControl?.getTemperatureMeasurements !== undefined ? ', ' : ''}}
+                        <mat-icon class="battery-icon" [color]="getBatteryIconColor(widget.properties.acControl?.getBatteryLevel)">{{getBatteryIcon(widget.properties.acControl?.getBatteryLevel)}}</mat-icon>
                         {{joinMeasurementsString([widget.properties.acControl.getBatteryLevel], true, " %")}}
                     </ng-container>
                     )

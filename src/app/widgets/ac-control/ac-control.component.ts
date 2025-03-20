@@ -179,6 +179,39 @@ export class AcControlComponent implements OnInit, OnDestroy {
         }
     }
 
+    getBatteryIcon(element?: AcControlElementModel|undefined): string {
+        if (element === undefined) {
+            return '';
+        }
+        let value = element.value;
+        if (Array.isArray(value)) {
+            value = Math.min(...value);
+        }
+        if (value <= 15) {
+            return 'battery_0_bar';
+        }
+        if (value <= 30) {
+            return 'battery_1_bar';
+        }
+        if (value <= 45) {
+            return 'battery_2_bar';
+        }
+        if (value <= 60) {
+            return 'battery_3_bar';
+        }
+        if (value <= 75) {
+            return 'battery_4_bar';
+        }
+        if (value <= 90) {
+            return 'battery_5_bar';
+        }
+        return 'battery_full';
+    }
+
+    getBatteryIconColor(element?: AcControlElementModel|undefined): string {
+        return this.getBatteryIcon(element) === 'battery_0_bar' ? 'warn' : 'accent';
+    }
+
     togglePower() {
         if (this.widget.properties.acControl?.getOnOff?.value === true) {
             this.runCommand(this.widget.properties.acControl?.setOff, null);
