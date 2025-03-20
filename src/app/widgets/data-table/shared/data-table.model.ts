@@ -16,6 +16,7 @@
 
 import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
+import { TimeValuePairModel } from '../../shared/export-data.model';
 
 export interface DataTableWidgetPropertiesModel {
     dataTable?: DataTablePropertiesModel;
@@ -74,7 +75,7 @@ export interface DataTableElementModel {
             deviceGroupId?: string;
             deviceGroupCriteria?: DeviceGroupCriteriaModel;
             targetCharacteristic?: string;
-            deviceGroupAggregation?: SingleValueAggregations;
+            deviceGroupAggregation?: DataTableAggregations;
         };
     };
 }
@@ -111,4 +112,15 @@ export enum DataTableOrderEnum {
     ValueDesc = 4,
     TimeAsc = 5,
     TimeDesc = 6,
+}
+
+export enum DataTableAggregations {
+    Latest = 'latest',
+    Sum = 'sum',
+    Separate = 'separate',
+}
+
+export interface  DataTableTimeValuePairModel extends TimeValuePairModel {
+    name?: string;
+    index: number;
 }

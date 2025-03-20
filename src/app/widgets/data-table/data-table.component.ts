@@ -17,7 +17,7 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { MatTable } from '@angular/material/table';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DataTableEditDialogComponent } from './dialog/data-table-edit-dialog.component';
@@ -26,17 +26,17 @@ import {
     QueriesRequestElementTimescaleModel,
     QueriesRequestFilterModel,
     QueriesRequestV2ElementTimescaleModel,
-    TimeValuePairModel
 } from '../shared/export-data.model';
 import { DeviceStatusConfigConvertRuleModel } from '../device-status/shared/device-status-properties.model';
 import { ExportDataService } from '../shared/export-data.service';
-import { DataTableOrderEnum, ExportValueTypes } from './shared/data-table.model';
+import { DataTableAggregations, DataTableOrderEnum, DataTableTimeValuePairModel, ExportValueTypes } from './shared/data-table.model';
 import { DecimalPipe } from '@angular/common';
 import { DashboardManipulationEnum } from '../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { Sort, SortDirection } from '@angular/material/sort';
-import { map } from 'rxjs/operators';
+import { concatMap, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { SingleValueAggregations } from '../single-value/shared/single-value.model';
+import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 
 interface DataTableComponentItem {
     name: string;
@@ -65,6 +65,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
     items: DataTableComponentItem[] = [];
     matSortActive = '';
     matSortDirection: SortDirection = '';
+    devices = new Map<string, DeviceInstanceModel>();
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
@@ -74,6 +75,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
         private dialog: MatDialog,
         private exportDataService: ExportDataService,
         private decimalPipe: DecimalPipe,
+        private deviceInstancesServcie: DeviceInstancesService,
     ) {
     }
 
@@ -89,30 +91,30 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         switch (this.widget.properties.dataTable?.order) {
-        case DataTableOrderEnum.AlphabeticallyAsc:
-            this.matSortActive = 'name';
-            this.matSortDirection = 'asc';
-            break;
-        case DataTableOrderEnum.AlphabeticallyDesc:
-            this.matSortActive = 'name';
-            this.matSortDirection = 'desc';
-            break;
-        case DataTableOrderEnum.ValueAsc:
-            this.matSortActive = 'value';
-            this.matSortDirection = 'asc';
-            break;
-        case DataTableOrderEnum.ValueDesc:
-            this.matSortActive = 'value';
-            this.matSortDirection = 'desc';
-            break;
-        case DataTableOrderEnum.TimeDesc:
-            this.matSortActive = 'time';
-            this.matSortDirection = 'desc';
-            break;
-        case DataTableOrderEnum.TimeAsc:
-            this.matSortActive = 'time';
-            this.matSortDirection = 'asc';
-            break;
+            case DataTableOrderEnum.AlphabeticallyAsc:
+                this.matSortActive = 'name';
+                this.matSortDirection = 'asc';
+                break;
+            case DataTableOrderEnum.AlphabeticallyDesc:
+                this.matSortActive = 'name';
+                this.matSortDirection = 'desc';
+                break;
+            case DataTableOrderEnum.ValueAsc:
+                this.matSortActive = 'value';
+                this.matSortDirection = 'asc';
+                break;
+            case DataTableOrderEnum.ValueDesc:
+                this.matSortActive = 'value';
+                this.matSortDirection = 'desc';
+                break;
+            case DataTableOrderEnum.TimeDesc:
+                this.matSortActive = 'time';
+                this.matSortDirection = 'desc';
+                break;
+            case DataTableOrderEnum.TimeAsc:
+                this.matSortActive = 'time';
+                this.matSortDirection = 'asc';
+                break;
         }
         this.update();
         this.checkConfigured();
@@ -141,27 +143,27 @@ export class DataTableComponent implements OnInit, OnDestroy {
             return;
         }
         switch (event.active) {
-        case 'value':
-            if (event.direction === 'asc') {
-                this.widget.properties.dataTable.order = DataTableOrderEnum.ValueAsc;
-            } else {
-                this.widget.properties.dataTable.order = DataTableOrderEnum.ValueDesc;
-            }
-            break;
-        case 'name':
-            if (event.direction === 'asc') {
-                this.widget.properties.dataTable.order = DataTableOrderEnum.AlphabeticallyAsc;
-            } else {
-                this.widget.properties.dataTable.order = DataTableOrderEnum.AlphabeticallyDesc;
-            }
-            break;
-        case 'time':
-            if (event.direction === 'asc') {
-                this.widget.properties.dataTable.order = DataTableOrderEnum.TimeAsc;
-            } else {
-                this.widget.properties.dataTable.order = DataTableOrderEnum.TimeDesc;
-            }
-            break;
+            case 'value':
+                if (event.direction === 'asc') {
+                    this.widget.properties.dataTable.order = DataTableOrderEnum.ValueAsc;
+                } else {
+                    this.widget.properties.dataTable.order = DataTableOrderEnum.ValueDesc;
+                }
+                break;
+            case 'name':
+                if (event.direction === 'asc') {
+                    this.widget.properties.dataTable.order = DataTableOrderEnum.AlphabeticallyAsc;
+                } else {
+                    this.widget.properties.dataTable.order = DataTableOrderEnum.AlphabeticallyDesc;
+                }
+                break;
+            case 'time':
+                if (event.direction === 'asc') {
+                    this.widget.properties.dataTable.order = DataTableOrderEnum.TimeAsc;
+                } else {
+                    this.widget.properties.dataTable.order = DataTableOrderEnum.TimeDesc;
+                }
+                break;
         }
         this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties).subscribe();
         this.orderItems();
@@ -208,6 +210,8 @@ export class DataTableComponent implements OnInit, OnDestroy {
                             requestElement.groupTime = element.groupTime;
                         }
                         requestElement.limit = this.widget.properties.dataTable?.valuesPerElement || 1;
+                        requestElement.orderDirection = 'desc';
+                        requestElement.orderColumnIndex = 0;
 
                         // Check element data location
                         if (element.exportId !== null && element.exportId !== undefined && (element.exportDbId === undefined || element.exportDbId === environment.exportDatabaseIdInternalInfluxDb)) {
@@ -229,19 +233,19 @@ export class DataTableComponent implements OnInit, OnDestroy {
                             timescaleResultMapper.push(elementIndex);
                         }
                     });
-                    const obs: Observable<{ source: string; res: TimeValuePairModel[] }>[] = [];
+                    const obs: Observable<{ source: string; res: DataTableTimeValuePairModel[] }>[] = [];
                     if (influxRequestPayload.length > 0) {
                         obs.push(this.exportDataService
                             .queryInflux(influxRequestPayload)
                             .pipe(
                                 map((values) => {
-                                    const res: TimeValuePairModel[] = [];
+                                    const res: DataTableTimeValuePairModel[] = [];
                                     values.forEach((_, elementIndex) => {
                                         let dataRows = values[elementIndex];
                                         // sometimes an extra value if given by influx
                                         dataRows = dataRows.slice(0, this.widget.properties.dataTable?.valuesPerElement || 1);
                                         dataRows.forEach((dataRow) => {
-                                            res.push({ time: '' + dataRow[0], value: dataRow[1] });
+                                            res.push({ time: '' + dataRow[0], value: dataRow[1], index: elementIndex });
                                         });
                                     });
                                     return { source: 'influx', res };
@@ -252,6 +256,21 @@ export class DataTableComponent implements OnInit, OnDestroy {
                         obs.push(this.exportDataService
                             .queryTimescaleV2(timescaleRequestPayload)
                             .pipe(
+                                concatMap(values => {
+                                    const deviceIds: string[] = [];
+                                    values.forEach(v => {
+                                        if (v.deviceId !== undefined && !this.devices.has(v.deviceId)) {
+                                            deviceIds.push(v.deviceId);
+                                        }
+                                    });
+                                    if (deviceIds.length === 0) {
+                                        return of(values);
+                                    }
+                                    return this.deviceInstancesServcie.getDeviceInstances({limit: 0, offset: 0, deviceIds: deviceIds}).pipe(map(devices => {
+                                        devices.result.forEach(d => this.devices.set(d.id, d));
+                                        return values;
+                                    }));
+                                }),
                                 map((values) => {
                                     const max = values.reduce((p, m) => {
                                         if (m.requestIndex > p.requestIndex) {
@@ -259,31 +278,34 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                         }
                                         return p;
                                     }).requestIndex;
-                                    const res: TimeValuePairModel[][] = [];
+                                    const res: DataTableTimeValuePairModel[][] = [];
                                     while (res.length < max + 1) {
                                         res.push([]);
                                     }
                                     values.forEach((_, elementIndex) => {
                                         const dataRows = values[elementIndex].data;
                                         if (dataRows === null) {
-                                            res[values[elementIndex].requestIndex].push({ time: '', value: null });
+                                            res[values[elementIndex].requestIndex].push({ time: '', value: null, index: values[elementIndex].requestIndex });
                                         } else {
                                             dataRows.forEach((dataRow) => {
-                                                dataRow.forEach(row => res[values[elementIndex].requestIndex].push({ time: '' + row[0], value: row[1] }));
+                                                dataRow.forEach(row => res[values[elementIndex].requestIndex].push({ time: '' + row[0], value: row[1], name: values[elementIndex].deviceId !== undefined ? (this.devices.get(values[elementIndex].deviceId ||'')?.display_name || this.devices.get(values[elementIndex].deviceId||'')?.name) : undefined, index: values[elementIndex].requestIndex }));
                                             });
                                         }
                                     });
-                                    const res2: TimeValuePairModel[] = [];
+                                    const res2: DataTableTimeValuePairModel[] = [];
                                     res.forEach((r, i) => {
                                         r.sort((a, b) => new Date(b.time as string).valueOf() - new Date(a.time as string).valueOf());
-                                        if (this.widget.properties.dataTable?.elements[timescaleResultMapper[i]].elementDetails.deviceGroup?.deviceGroupAggregation === SingleValueAggregations.Sum) {
+                                        if (this.widget.properties.dataTable?.elements[timescaleResultMapper[i]].elementDetails.deviceGroup?.deviceGroupAggregation === DataTableAggregations.Sum) {
                                             r.slice(1).forEach(s => {
                                                 const v = (r[0].value as number) + (s.value as number);
                                                 r[0].value = v;
                                             });
+                                            res2.push(...(r.slice(0, this.widget.properties.dataTable?.valuesPerElement || 1)));
+                                        } else if (this.widget.properties.dataTable?.elements[timescaleResultMapper[i]].elementDetails.deviceGroup?.deviceGroupAggregation === DataTableAggregations.Separate) {
+                                            res2.push(...r);
+                                        } else {
+                                            res2.push(...(r.slice(0, this.widget.properties.dataTable?.valuesPerElement || 1)));
                                         }
-
-                                        res2.push(...(r.slice(0, this.widget.properties.dataTable?.valuesPerElement || 1)));
                                     });
                                     return { source: 'timescale', res: res2 };
                                 }),
@@ -293,15 +315,14 @@ export class DataTableComponent implements OnInit, OnDestroy {
                     forkJoin(obs).subscribe((results) => {
                         this.items = [];
                         results.forEach(result => {
-                            result.res.forEach((pair: TimeValuePairModel, resultIndex: number) => {
-                                resultIndex = Math.floor(resultIndex / (this.widget.properties.dataTable?.valuesPerElement || 1));
+                            result.res.forEach((pair: DataTableTimeValuePairModel) => {
                                 let elementIndex = -1;
                                 switch (result.source) {
-                                case 'influx':
-                                    elementIndex = influxResultMapper[resultIndex];
-                                    break;
-                                case 'timescale':
-                                    elementIndex = timescaleResultMapper[resultIndex];
+                                    case 'influx':
+                                        elementIndex = influxResultMapper[pair.index];
+                                        break;
+                                    case 'timescale':
+                                        elementIndex = timescaleResultMapper[pair.index];
                                 }
                                 let v = pair.value;
                                 if (v === true || v === false) {
@@ -309,7 +330,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                 }
                                 const convert = this.convert(v, elements[elementIndex].valueType);
                                 const item: DataTableComponentItem = {
-                                    name: elements[elementIndex].name,
+                                    name: pair.name || elements[elementIndex].name,
                                     status: v,
                                     value: v,
                                     icon: convert.icon,
@@ -360,27 +381,27 @@ export class DataTableComponent implements OnInit, OnDestroy {
         if (this.widget.properties.dataTable?.order !== DataTableOrderEnum.Default) {
             this.items.sort((a, b) => {
                 switch (this.widget.properties.dataTable?.order) {
-                case DataTableOrderEnum.AlphabeticallyAsc:
-                    return a.name.charCodeAt(0) - b.name.charCodeAt(0);
-                case DataTableOrderEnum.AlphabeticallyDesc:
-                    return b.name.charCodeAt(0) - a.name.charCodeAt(0);
-                case DataTableOrderEnum.ValueAsc:
-                    if (typeof a.value === 'string' || typeof b.value === 'string') {
-                        return ('' + a.value).localeCompare('' + b.value);
-                    }
-                    return DataTableComponent.parseNumber(a, true) - DataTableComponent.parseNumber(b, true);
-                case DataTableOrderEnum.ValueDesc:
-                    if (typeof a.value === 'string' || typeof b.value === 'string') {
-                        return ('' + b.value).localeCompare('' + a.value);
-                    }
-                    return DataTableComponent.parseNumber(b, false) - DataTableComponent.parseNumber(a, false);
-                case DataTableOrderEnum.TimeDesc:
-                    return new Date(b.time || '').valueOf() - new Date(a.time || '').valueOf();
-                case DataTableOrderEnum.TimeAsc:
-                    return new Date(a.time || '').valueOf() - new Date(b.time || '').valueOf();
-                default:
-                    console.error('DataTableComponent:orderItems: unknown order type');
-                    return 0;
+                    case DataTableOrderEnum.AlphabeticallyAsc:
+                        return a.name.charCodeAt(0) - b.name.charCodeAt(0);
+                    case DataTableOrderEnum.AlphabeticallyDesc:
+                        return b.name.charCodeAt(0) - a.name.charCodeAt(0);
+                    case DataTableOrderEnum.ValueAsc:
+                        if (typeof a.value === 'string' || typeof b.value === 'string') {
+                            return ('' + a.value).localeCompare('' + b.value);
+                        }
+                        return DataTableComponent.parseNumber(a, true) - DataTableComponent.parseNumber(b, true);
+                    case DataTableOrderEnum.ValueDesc:
+                        if (typeof a.value === 'string' || typeof b.value === 'string') {
+                            return ('' + b.value).localeCompare('' + a.value);
+                        }
+                        return DataTableComponent.parseNumber(b, false) - DataTableComponent.parseNumber(a, false);
+                    case DataTableOrderEnum.TimeDesc:
+                        return new Date(b.time || '').valueOf() - new Date(a.time || '').valueOf();
+                    case DataTableOrderEnum.TimeAsc:
+                        return new Date(a.time || '').valueOf() - new Date(b.time || '').valueOf();
+                    default:
+                        console.error('DataTableComponent:orderItems: unknown order type');
+                        return 0;
                 }
             });
         }
@@ -394,28 +415,28 @@ export class DataTableComponent implements OnInit, OnDestroy {
         if (convertRules) {
             for (let i = 0; i < convertRules.length; i++) {
                 switch (type) {
-                case ExportValueTypes.STRING: {
-                    if (status === convertRules[i].status) {
-                        return { icon: convertRules[i].icon, color: convertRules[i].color };
-                    }
-                    break;
-                }
-                case ExportValueTypes.BOOLEAN: {
-                    try {
-                        if (status === JSON.parse(convertRules[i].status)) {
+                    case ExportValueTypes.STRING: {
+                        if (status === convertRules[i].status) {
                             return { icon: convertRules[i].icon, color: convertRules[i].color };
                         }
-                    } catch (_) {
-                    } // happens when rule is not parsable, no problem
-                    break;
-                }
-                case ExportValueTypes.FLOAT:
-                case ExportValueTypes.INTEGER: {
-                    if (status === parseInt(convertRules[i].status, 10)) {
-                        return { icon: convertRules[i].icon, color: convertRules[i].color };
+                        break;
                     }
-                    break;
-                }
+                    case ExportValueTypes.BOOLEAN: {
+                        try {
+                            if (status === JSON.parse(convertRules[i].status)) {
+                                return { icon: convertRules[i].icon, color: convertRules[i].color };
+                            }
+                        } catch (_) {
+                        } // happens when rule is not parsable, no problem
+                        break;
+                    }
+                    case ExportValueTypes.FLOAT:
+                    case ExportValueTypes.INTEGER: {
+                        if (status === parseInt(convertRules[i].status, 10)) {
+                            return { icon: convertRules[i].icon, color: convertRules[i].color };
+                        }
+                        break;
+                    }
                 }
             }
         }

@@ -30,6 +30,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { AbstractControl, FormArray, FormControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { DeviceStatusConfigConvertRuleModel } from '../../device-status/shared/device-status-properties.model';
 import {
+    DataTableAggregations,
     DataTableElementModel,
     DataTableElementTypesEnum,
     DataTableOrderEnum,
@@ -130,7 +131,7 @@ export class DataTableEditDialogComponent implements OnInit {
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     concepts: Map<string, ConceptsCharacteristicsModel | null> = new Map();
     deviceGroups: DeviceGroupModel[] = [];
-    aggregations = Object.values(SingleValueAggregations);
+    aggregations = Object.values(DataTableAggregations);
 
 
     constructor(
