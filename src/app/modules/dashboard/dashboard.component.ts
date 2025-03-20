@@ -457,6 +457,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         case DashboardTypesEnum.AirQuality:
             this.airQualityService.cleanGeneratedContent(widget.properties);
             break;
+        case DashboardTypesEnum.AcControl:
         case DashboardTypesEnum.ChartExport:
             this.chartsService.cleanup(widget);
             break;

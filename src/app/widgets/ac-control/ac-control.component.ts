@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {Subscription} from 'rxjs';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {DeviceCommandModel, DeviceCommandService} from '../../core/services/device-command.service';
-import {AcControlElementModel} from './shared/ac-control.model';
-import {AcControlEditDialogComponent} from './dialog/ac-control-edit-dialog.component';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DashboardManipulationEnum} from '../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {environment} from '../../../environments/environment';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { Subscription } from 'rxjs';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { DeviceCommandModel, DeviceCommandService } from '../../core/services/device-command.service';
+import { AcControlElementModel } from './shared/ac-control.model';
+import { AcControlEditDialogComponent } from './dialog/ac-control-edit-dialog.component';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DashboardManipulationEnum } from '../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'senergy-ac-control',
@@ -155,7 +155,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
         });
     }
 
-    joinMeasurementsString(elements?: (AcControlElementModel|undefined)[], unique: boolean = false, unit = ' °C') {
+    joinMeasurementsString(elements?: (AcControlElementModel | undefined)[], unique: boolean = false) {
         let values: number[] = [];
         elements?.filter(e => e !== undefined && e.value !== null)?.forEach(e => {
             if (e === undefined) {
@@ -173,13 +173,13 @@ export class AcControlComponent implements OnInit, OnDestroy {
             values = Array.from(m.keys());
         }
         if (values.length > 2) {
-            return Math.min(...values) + ' - ' + Math.max(...values) + unit;
+            return Math.min(...values) + ' - ' + Math.max(...values);
         } else {
-            return values?.map(n => n + unit).join(', ');
+            return values?.join(', ');
         }
     }
 
-    getBatteryIcon(element?: AcControlElementModel|undefined): string {
+    getBatteryIcon(element?: AcControlElementModel | undefined): string {
         if (element === undefined) {
             return '';
         }
@@ -208,7 +208,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
         return 'battery_full';
     }
 
-    getBatteryIconColor(element?: AcControlElementModel|undefined): string {
+    getBatteryIconColor(element?: AcControlElementModel | undefined): string {
         return this.getBatteryIcon(element) === 'battery_0_bar' ? 'warn' : 'accent';
     }
 
@@ -235,6 +235,25 @@ export class AcControlComponent implements OnInit, OnDestroy {
         this.deviceCommandService.runCommands([this.toCommand(e, value)], true).subscribe(() => this.updateValue(e, value));
     }
 
+    set bufferedSetTemperature(value: number) {
+        localStorage.setItem(this.widget.id + '_bufferTime', '' + new Date().valueOf());
+        localStorage.setItem(this.widget.id + '_bufferValue', '' + value);
+    }
+
+    get bufferedSetTemperature(): number | null {
+        const bufferTime = localStorage.getItem(this.widget.id + '_bufferTime');
+        if (bufferTime === null) {
+            return null;
+        }
+        if (new Date().valueOf() - parseFloat(bufferTime) > 60 * 10 * 1000) { // older than 10min
+            localStorage.removeItem(this.widget.id + '_bufferTime');
+            localStorage.removeItem(this.widget.id + '_bufferValue');
+            return null;
+        }
+        const bufferValue = localStorage.getItem(this.widget.id + '_bufferValue');
+        return bufferValue === null ? null : parseFloat(bufferValue);
+    }
+
     private toCommand(e: AcControlElementModel, value: any): DeviceCommandModel {
         return {
             device_id: this.widget.properties.acControl?.deviceId,
@@ -250,7 +269,10 @@ export class AcControlComponent implements OnInit, OnDestroy {
     setAllTargets(value: any) {
         const commands: DeviceCommandModel[] = [];
         this.widget.properties.acControl?.setTargetTemperature?.forEach(c => commands.push(this.toCommand(c, value)));
-        this.deviceCommandService.runCommands(commands, true).subscribe(() => this.updateValue(this.widget.properties.acControl?.setTargetTemperature?.[0], value));
+        this.deviceCommandService.runCommands(commands, true).subscribe(() => {
+            this.updateValue(this.widget.properties.acControl?.setTargetTemperature?.[0], value);
+            this.bufferedSetTemperature = value;
+        });
     }
 
     private updateValue(e: AcControlElementModel | undefined, value: any) {

@@ -29,18 +29,20 @@
                           matTooltip="Cleaning Required!">warning
                 </mat-icon>
                 <div *ngIf="widget.properties.acControl?.getTargetTemperature !== undefined"
-                     style="font-size: xx-large;">{{joinMeasurementsString(widget.properties.acControl?.getTargetTemperature, true)}}
+                     style="font-size: xx-large;">{{bufferedSetTemperature || joinMeasurementsString(widget.properties.acControl?.getTargetTemperature, true)}} °C
+                     <mat-icon color="accent" *ngIf="bufferedSetTemperature !== null && '' + bufferedSetTemperature !== joinMeasurementsString(widget.properties.acControl?.getTargetTemperature, true)"
+                     matTooltip="syncing">sync</mat-icon>
                 </div>
                 <mat-icon *ngIf="widget.properties.acControl?.getTemperatureMeasurements !== undefined" inline>
                     fiber_manual_record
                 </mat-icon>
                 <div *ngIf="widget.properties.acControl?.getTemperatureMeasurements !== undefined || widget.properties.acControl?.getBatteryLevel !== undefined"
                      style="font-size: large;">
-                    ({{joinMeasurementsString(widget.properties.acControl?.getTemperatureMeasurements, true)}}
+                    ({{joinMeasurementsString(widget.properties.acControl?.getTemperatureMeasurements, true)}} °C
                     <ng-container *ngIf="widget.properties.acControl?.getBatteryLevel !== undefined">
                         {{widget.properties.acControl?.getTemperatureMeasurements !== undefined ? ', ' : ''}}
                         <mat-icon class="battery-icon" [color]="getBatteryIconColor(widget.properties.acControl?.getBatteryLevel)">{{getBatteryIcon(widget.properties.acControl?.getBatteryLevel)}}</mat-icon>
-                        {{joinMeasurementsString([widget.properties.acControl.getBatteryLevel], true, " %")}}
+                        {{joinMeasurementsString([widget.properties.acControl.getBatteryLevel], true)}} %
                     </ng-container>
                     )
                 </div>
@@ -134,7 +136,7 @@
                             [step]="widget.properties.acControl?.tempStep || 1"
                             discrete
                             color="accent"><input matSliderThumb (valueChange)="setAllTargets($event)"
-                                                  [value]="(widget.properties.acControl?.getTargetTemperature || [{value:0}])[0]?.value"/>
+                                                  [value]="(bufferedSetTemperature !== null ? [{value: bufferedSetTemperature}] : widget.properties.acControl?.getTargetTemperature || [{value:0}])[0]?.value"/>
                 </mat-slider>
                 °C
             </div>
