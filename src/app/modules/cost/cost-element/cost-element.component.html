@@ -67,6 +67,6 @@
 
     <mat-accordion multi *ngIf="ready">
         <senergy-cost-element *ngFor="let child of element.children  | keyvalue: expensiveFirst" [parentName]="name" [name]="child.key"
-        [pipelines]="pipelines" [imports]="imports" [operators]="operators" [devices]="devices" [exports]="exports" [element]="child.value" ></senergy-cost-element>
+        [pipelines]="pipelines" [imports]="imports" [operators]="operators" [devices]="devices" [exports]="exports" [brokerExports]="brokerExports" [element]="child.value" ></senergy-cost-element>
     </mat-accordion>
 </mat-expansion-panel>

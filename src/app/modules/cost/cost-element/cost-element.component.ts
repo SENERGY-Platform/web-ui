@@ -39,6 +39,7 @@ export class CostElementComponent {
     @Input() imports: PipelineModel[] = [];
     @Input() devices: DeviceInstanceModel[] = [];
     @Input() exports: ExportModel[] = [];
+    @Input() brokerExports: ExportModel[] = [];
     @Input() parentName: string = '';
     @Input()
     get element() {
@@ -53,6 +54,13 @@ export class CostElementComponent {
                 dis.displayName = exp.Name;
             } else {
                 dis.displayName = 'Export ' + this.name + ' (deleted)';
+            }
+        } else if (this.parentName === "MQTTExports") {
+            const exp = this.brokerExports.find(e => e.ID === this.name);
+            if (exp !== undefined) {
+                dis.displayName = exp.Name;
+            } else {
+                dis.displayName = 'MQTT Export ' + this.name + ' (deleted)';
             }
         }
         if (this._element.children !== undefined && this._element.children !== null) {

@@ -33,6 +33,7 @@ import { DeviceInstancesService } from '../../devices/device-instances/shared/de
 import { DeviceInstanceModel, DeviceInstancesTotalModel } from '../../devices/device-instances/shared/device-instances.model';
 import { ExportService } from '../../exports/shared/export.service';
 import { ExportModel } from '../../exports/shared/export.model';
+import { BrokerExportService } from '../../exports/shared/broker-export.service';
 
 @Component({
     selector: 'senergy-cost-overview',
@@ -55,6 +56,7 @@ export class CostOverviewComponent implements OnInit {
     imports: PipelineModel[] = [];
     devices: DeviceInstanceModel[] = [];
     exports: ExportModel[] = [];
+    brokerExports: ExportModel[] = [];
 
     constructor(
         private costService: CostService,
@@ -65,6 +67,7 @@ export class CostOverviewComponent implements OnInit {
         private importInstancesServcies: ImportInstancesService,
         private deviceInstancesService: DeviceInstancesService,
         private exportService: ExportService,
+        private brokerExportService: BrokerExportService,
     ) {
         this.isAdmin = this.authorizationService.userIsAdmin();
         if (this.isAdmin) {
@@ -101,10 +104,15 @@ export class CostOverviewComponent implements OnInit {
             this.tree = res;
             if ((this.tree as any)['analytics'] !== undefined){
                 obs[0] = this.pipelineService.getPipelines('id:asc',undefined, undefined, userId);
-                obs[1] = this.operatorService.getOperators('', 9999, 0, 'name', 'asc', userId);
+                obs[1] = this.operatorService.getOperators('', 9999, 0, 'name', 'asc', userId).pipe(map(r => r.operators));
+            } else {
+                obs[0] = of([]);
+                obs[1] = of([]);
             }
             if ((this.tree as any)['imports'] !== undefined){
                 obs[2] = this.importInstancesServcies.listImportInstances('', 9999, 0, 'name.asc', false);
+            } else {
+                obs[2] = of([]);
             }
             if ((this.tree as any)['Exports'] !== undefined){
                 if (this.isAdmin && userId !== undefined) {
@@ -112,12 +120,20 @@ export class CostOverviewComponent implements OnInit {
                 } else {
                     obs[3] = this.exportService.getExports(true).pipe(map(resp => resp?.instances));
                 }
+            } else {
+                obs[3] = of([]);
+            }
+            if ((this.tree as any)['MQTTExports'] !== undefined){
+                obs[4] = this.brokerExportService.getExports('', 9999, 0, 'name', 'asc', true).pipe(map(brokerExports => brokerExports?.instances));
+            } else {
+                obs[4] = of([]);
             }
             return forkJoin(obs).pipe(mergeMap(obsres => {
                 this.pipelines = obsres[0];
-                this.operators = obsres[1]?.operators || [];
+                this.operators = obsres[1];
                 this.imports = obsres[2];
-                this.exports = obsres[3] || [];
+                this.exports = obsres[3];
+                this.brokerExports = obsres[4];
                 const obs: Observable<any>[] = [of(null)];
 
                 if (this.billingService.userHasReadAuthorization()) {
