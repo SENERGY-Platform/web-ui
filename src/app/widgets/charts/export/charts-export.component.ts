@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ChartSelectEvent, GoogleChartComponent, } from 'ng2-google-charts';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../core/services/element-size.service';
@@ -26,7 +26,8 @@ import { ErrorModel } from '../../../core/model/error.model';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { ChartsService } from '../shared/charts.service';
 import { ChartsExportDeviceGroupMergingStrategy, ChartsExportVAxesModel } from './shared/charts-export-properties.model';
-import { BubbleDataPoint, ChartConfiguration, ChartData, ChartTypeRegistry, Point } from 'chart.js';
+import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartDataset, ChartTypeRegistry, Point, TooltipModel } from 'chart.js';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-charts-export',
@@ -47,8 +48,21 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     sizeLimit = 10000;
     size = 0;
     zoomedAfterRefesh = 0;
-    chartJsOptions: ChartConfiguration['options'] = {};
-    chartJsData: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | undefined;
+    chartjs: {
+        options: ChartConfiguration['options'];
+        data: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | undefined;
+        tooltipContext: { chart: Chart; tooltip: TooltipModel<any> } | undefined;
+        tooltipDisplay: string;
+        tooltipAllowed: boolean;
+        tooltipDatasets: { datasetIndex: number, label: string, formattedValue: string, drawToLeft: boolean }[],
+    } = {
+            options: {},
+            data: undefined,
+            tooltipContext: undefined,
+            tooltipAllowed: false,
+            tooltipDisplay: 'none',
+            tooltipDatasets: [],
+        };
 
     private resizeTimeout = 0;
     private timeRgx = /(\d+)(ms|s|months|m|h|d|w|y)/;
@@ -66,7 +80,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.resizeTimeout === 0) {
             this.resizeTimeout = window.setTimeout(() => {
                 this.resizeChart();
-                if (this.chartExportData.dataTable != null && this.chartExportData.dataTable.length > 0 && this.chartExportData.dataTable[0].length > 0) {
+                if (this.chartExportData.dataTable != null && this.chartExportData.dataTable.length > 0 && this.chartExportData.dataTable[0].length > 0 && this.chartExport !== undefined) {
                     this.chartExport.draw();
                 }
                 this.resizeTimeout = 0;
@@ -76,7 +90,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Use a setter for the chart which will get called when then ngif from ready evaluates to true
     // This is needed so the element is not undefined when called later to draw
-    private chartExport!: GoogleChartComponent;
+    private chartExport?: GoogleChartComponent;
     @ViewChild('chartExport', { static: false }) set content(content: GoogleChartComponent) {
         if (content) { // initially setter gets called with undefined
             this.chartExport = content;
@@ -88,13 +102,17 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         private chartsExportService: ChartsExportService,
         private elementSizeService: ElementSizeService,
         private dashboardService: DashboardService,
-        private errorHandlerService: ErrorHandlerService
+        private errorHandlerService: ErrorHandlerService,
+        private datePipe: DatePipe,
+        private cd: ChangeDetectorRef,
     ) {
     }
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
-        this.chartsService.releaseResources(this.chartExport);
+        if (this.chartExport !== undefined) {
+            this.chartsService.releaseResources(this.chartExport);
+        }
     }
 
     ngOnInit(): void {
@@ -112,6 +130,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             if (this.widget.properties.chartType === 'Timeline') {
                 this.timelineChartData = this.initialWidgetData;
                 this.resizeApex();
+            } else if (this.widget.properties.chartType === 'ColumnChart') {
+                this.chartjs = this.initialWidgetData;
+                this.resizeChart();
             } else {
                 this.chartExportData = this.initialWidgetData;
                 this.resizeChart();
@@ -163,6 +184,66 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
         this.timelineHeight = element.height;
         this.timelineWidth = element.width;
+
+        this.chartjs.options = {
+            animation: false,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: this.zoom,
+                },
+                tooltip: {
+                    enabled: false,
+                    callbacks: {
+                        afterBody: (tooltipItems) => {
+                            this.chartjs.tooltipDatasets = tooltipItems.map(x => {
+                                return {
+                                    datasetIndex: x.datasetIndex,
+                                    formattedValue: x.formattedValue,
+                                    label: x.dataset.label || '',
+                                    drawToLeft: x.dataIndex > x.dataset.data.length / 2,
+                                };
+                            });
+                            return [];
+                        }
+                    },
+                    external: (context) => {
+                        this.chartjs.tooltipContext = context;
+                        this.chartjs.tooltipDisplay = 'initial';
+                        this.cd.detectChanges();
+                    },
+                },
+            },
+            scales: {
+                'y': {
+                    stacked: this.stacked,
+                    title: {
+                        text: this.widget.properties.vAxisLabel,
+                        display: (this.widget.properties.vAxisLabel || '').length > 0,
+                    },
+                },
+                'y2': {
+                    stacked: this.stacked,
+                    position: 'right',
+                    title: {
+                        text: this.widget.properties.secondVAxisLabel,
+                        display: (this.widget.properties.secondVAxisLabel || '').length > 0,
+                    },
+                    display: 'auto',
+                },
+                'x': {
+                    stacked: this.stacked,
+                    title: {
+                        text: this.widget.properties.hAxisLabel,
+                        display: (this.widget.properties.hAxisLabel || '').length > 0,
+                    },
+                }
+            }
+
+        };
+        const chartjsChart = Chart.getChart('chartjs-' + this.widget.id);
+        chartjsChart?.resize(element.width, element.height);
+        chartjsChart?.draw();
     }
 
 
@@ -247,17 +328,35 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     console.warn('Chart Widget ' + this.widget.name + ' uses ' + this.size + ' points which is above the recommended limit of ' + this.sizeLimit);
                 }
                 if (this.widget.properties.chartType === 'ColumnChart') {
-                    console.warn('TODO prep chartJSData and chartJSOptions here'); // TODO
-                    this.chartJsOptions = {
-                        
-                    };
-                    const labels = [];
-                    this.chartExportData?.dataTable.forEach(data => {
-                        labels.push(data[0]);
+                    if (this.chartExportData?.dataTable.length < 2) {
+                        this.chartjs = { options: {}, data: undefined, tooltipContext: undefined, tooltipDisplay: 'none', tooltipDatasets: [], tooltipAllowed: false };
+                        return;
+                    }
+                    const labels: (string | null)[] = [];
+                    const datasets: ChartDataset[] = new Array(this.chartExportData?.dataTable[0].length - 1).fill({});
+                    const axes = this.modifiedVaxes || this.widget.properties.vAxes;
+                    this.chartExportData?.dataTable[0].slice(1).forEach((label, i) => {
+                        const axis = axes === undefined ? undefined : axes[i];
+                        datasets[i] = { data: [], label: '' + label, yAxisID: axis === undefined ? 'y' : (axis.displayOnSecondVAxis ? 'y2' : 'y') };
+                        if (this.chartExportData.options?.colors !== undefined && this.chartExportData.options.colors.length > i) {
+                            datasets[i].backgroundColor = this.chartExportData.options.colors[i];
+                        } else {
+                            datasets[i].backgroundColor = window.getComputedStyle(document.getElementsByClassName('color-lookup')[0], null).getPropertyValue('color');
+                        }
                     });
-                    this.chartJsData = {
+                    this.chartExportData?.dataTable.slice(1).forEach(row => row.forEach((data, i) => {
+                        if (i === 0) {
+                            labels.push(this.datePipe.transform(data as Date, this.widget.properties.hAxisFormat));
+                        } else {
+                            datasets[i - 1].data.push(data as number);
+                        }
+                    }));
+                    this.chartjs.data = {
+                        datasets,
                         labels,
                     };
+                    this.onResize();
+                    this.cd.detectChanges();
                 }
             });
         } else {
@@ -288,7 +387,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
     onChartReady() {
         const htmlElem = (this.chartExport as any).HTMLel;
-        const wrapper = this.chartExport.wrapper;
+        const wrapper = this.chartExport?.wrapper;
         if (wrapper.getChart() === undefined && htmlElem === undefined) {
             console.error('unable to setup zoom listener');
             return;
@@ -343,17 +442,17 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         const that = this;
-        const setTime = function() {
+        const setTime = function () {
             if ($event.selectedRowValues === null || $event.selectedRowValues === undefined || $event.selectedRowValues.length === 0) {
                 return;
             }
             that.from = $event.selectedRowValues[0];
-            const idx = that.chartExport.data.dataTable?.findIndex((x: any[]) => x.length > 0 && x[0] === $event.selectedRowValues[0]);
-            if (idx > -1 && that.chartExport.data.dataTable !== undefined) {
-                if (that.chartExport.data.dataTable.length > idx + 1 && that.chartExport.data.dataTable[idx + 1].length > 0) {
-                    that.to = that.chartExport.data.dataTable[idx + 1][0];
+            const idx = that.chartExport?.data.dataTable?.findIndex((x: any[]) => x.length > 0 && x[0] === $event.selectedRowValues[0]);
+            if (idx > -1 && that.chartExport?.data.dataTable !== undefined) {
+                if (that.chartExport?.data.dataTable.length > idx + 1 && that.chartExport?.data.dataTable[idx + 1].length > 0) {
+                    that.to = that.chartExport?.data.dataTable[idx + 1][0];
                 } else if (idx > 1) {
-                    const diff = $event.selectedRowValues[0].valueOf() - that.chartExport.data.dataTable[idx - 1][0].valueOf(); // diff in ms
+                    const diff = $event.selectedRowValues[0].valueOf() - that.chartExport?.data.dataTable[idx - 1][0].valueOf(); // diff in ms
                     const dClone = new Date($event.selectedRowValues[0].toISOString());
                     dClone.setMilliseconds(dClone.getMilliseconds() + diff);
                     that.to = dClone;
@@ -498,6 +597,76 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             && this.widget.properties.group?.type !== '' && rgxRes?.length === 3 && Number(rgxRes[1]) === 1 && rgxRes[2] !== 'y' && this.widget.properties.time?.last !== null && this.widget.properties.time?.last !== '';
     }
 
+    drillable(axisIndex: number): boolean {
+        const axes = this.modifiedVaxes || this.widget.properties.vAxes;
+        if (axes === undefined || axes.length < axisIndex) {
+            return false;
+        }
+
+
+        const axis = axes[axisIndex];
+        if (axis.subAxes !== undefined && axis.subAxes.length > 0) {
+            return true;
+        } else if (axis.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum && (axis.deviceGroupId !== undefined || axis.locationId !== undefined)) {
+            return true;
+        }
+        return false;
+    }
+
+    drillDown(axisIndex: number) {
+        const axes = this.modifiedVaxes || this.widget.properties.vAxes;
+        if (axes === undefined || axes.length < axisIndex) {
+            return;
+        }
+        const axis = axes[axisIndex];
+
+        if (axis.subAxes !== undefined && axis.subAxes.length > 0) {
+            const cpy = JSON.parse(JSON.stringify(axis.subAxes)) as ChartsExportVAxesModel[];
+            cpy.forEach(sub => sub.displayOnSecondVAxis = axis.displayOnSecondVAxis);
+            this.modifiedVaxes = cpy;
+            this.stacked = true;
+        } else if (axis.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum && (axis.deviceGroupId !== undefined || axis.locationId !== undefined)) {
+            // we can split this!
+            this.chooseColors = true;
+            const cpy = JSON.parse(JSON.stringify(axis)) as ChartsExportVAxesModel;
+            cpy.deviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy.Separate;
+            this.modifiedVaxes = [cpy];
+            this.stacked = true;
+        } else {
+            return;
+        }
+        this.ready = false;
+        this.chartjs.tooltipDisplay = 'none';
+        this.cd.detectChanges();
+        this.refresh();
+    }
+
+    closeChartjsTooltip() {
+        this.chartjs.tooltipDisplay = 'none';
+        this.cd.detectChanges();
+    }
+
+    forbidChartjsTooltip() {
+        this.chartjs.tooltipAllowed = false;
+        this.closeChartjsTooltip();
+    }
+    allowChartjsTooltip() {
+        this.chartjs.tooltipAllowed = true;
+    }
+
+    get chartjsTooltipStyle(): any {
+        const o: any = {
+            'top.px': (this.chartjs.tooltipContext?.chart.canvas?.offsetTop || 0) + (this.chartjs.tooltipContext?.tooltip.caretY || 0),
+            'display': this.chartjs.tooltipDisplay,
+        };
+        if (this.chartjs.tooltipDatasets.find(x => x.drawToLeft) !== undefined) {
+            o['right.px'] = (this.chartjs.tooltipContext?.chart.width || 0) - ((this.chartjs.tooltipContext?.chart.canvas?.offsetLeft || 0) + (this.chartjs.tooltipContext?.tooltip.caretX || 0));
+        } else {
+            o['left.px'] = (this.chartjs.tooltipContext?.chart.canvas?.offsetLeft || 0) + (this.chartjs.tooltipContext?.tooltip.caretX || 0);
+        }
+        return o;
+    }
+
     private get groupTime(): string | null {
         return localStorage.getItem(this.widget.id + '_groupTime') || this.widget.properties.group?.time || null;
     }
@@ -639,6 +808,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     getChartData = () => {
+        if (this.widget.properties.chartType === 'ColumnChart') {
+            return this.chartjs;
+        }
         if (this.timelineChartData != null) {
             return this.timelineChartData;
         } else {

@@ -19,7 +19,7 @@ import {SwitchComponent} from './switch/switch.component';
 import {WidgetHeaderComponent} from './components/widget-header/widget-header.component';
 import {SwitchEditDialogComponent} from './switch/dialogs/switch-edit-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {CommonModule, DecimalPipe, registerLocaleData} from '@angular/common';
+import {CommonModule, DatePipe, DecimalPipe, registerLocaleData} from '@angular/common';
 import {DevicesStateComponent} from './devices-state/devices-state.component';
 import {DevicesStateEditDialogComponent} from './devices-state/dialog/devices-state-edit-dialog.component';
 import {EventListComponent} from './event-list/event-list.component';
@@ -129,6 +129,7 @@ import { AxisConfigComponent } from './charts/export/dialog/axis-config/axis-con
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import {FlexLayoutModule} from '@ngbracket/ngx-layout';
 import {MtxOption, MtxSelect} from '@ng-matero/extensions/select';
+import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 registerLocaleData(localeDe, 'de');
 
@@ -171,6 +172,7 @@ registerLocaleData(localeDe, 'de');
 		DragDropModule,
 		MtxSelect,
 		MtxOption,
+        BaseChartDirective,
 	],
     declarations: [
         RangeSliderComponent,
@@ -268,6 +270,8 @@ registerLocaleData(localeDe, 'de');
     providers: [
         {provide: LOCALE_ID, useValue: 'de'},
         DecimalPipe,
+        DatePipe,
+        provideCharts(withDefaultRegisterables())
     ],
 })
 export class WidgetModule {

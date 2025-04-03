@@ -51,7 +51,7 @@
     "lodash.pick": "^4.4.0",
     "moment": "^2.24.0",
     "ng-apexcharts": "1.8.0",
-    "ng2-charts": "^4.1.1",
+    "ng2-charts": "^7.0.0",
     "ng2-google-charts": "^7.0.0",
     "ngx-clipboard": "^16.0.0",
     "ngx-infinite-scroll": "^18.0.0",
