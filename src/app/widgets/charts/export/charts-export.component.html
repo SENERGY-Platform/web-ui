@@ -18,26 +18,19 @@
 
 <mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"
-                           [optionCustomIcon]="getCustomIcons(true).icons" [optionCustomTooltip]="getCustomIcons(true).tooltips"
-                           (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(true).disabled"
-                           [warnText]="(chartExportData?.dataTable?.length || 0) > 0 &&
+        [optionCustomIcon]="getCustomIcons(true).icons" [optionCustomTooltip]="getCustomIcons(true).tooltips"
+        (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(true).disabled" [warnText]="(chartExportData?.dataTable?.length || 0) > 0 &&
                             (chartExportData?.dataTable?.length || 0) * ((chartExportData?.dataTable?.[0]?.length || 0)-1) > sizeLimit ?
                             'This widgets displays many data points and impacts performance. Try reducing the displayed' +
                              ' interval or use an aggregation function!' : ''"></senergy-widget-header>
     <mat-card-content>
-        
-        <timeline-chart
-            *ngIf="widget.properties.chartType === 'Timeline' && ready"
-			chartId = 'chartsExport'
-            [data]="timelineChartData"
-            [hAxisLabel]="widget?.properties?.hAxisLabel || ''"
-            [vAxisLabel]="widget?.properties?.vAxisLabel || ''"
-            [enableToolbar]="false"
-            [vAxes]="widget?.properties?.vAxes || []"
-            [width]="timelineWidth"
-            [height]="timelineHeight">
+
+        <timeline-chart *ngIf="widget.properties.chartType === 'Timeline' && ready" chartId='chartsExport'
+            [data]="timelineChartData" [hAxisLabel]="widget?.properties?.hAxisLabel || ''"
+            [vAxisLabel]="widget?.properties?.vAxisLabel || ''" [enableToolbar]="false"
+            [vAxes]="widget?.properties?.vAxes || []" [width]="timelineWidth" [height]="timelineHeight">
         </timeline-chart>
-        
+
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
             <div *ngIf="ready">
@@ -46,22 +39,30 @@
                 </div>
                 <div *ngIf="!errorHasOccured">
                     <div *ngIf="configureWidget === true">Please configure widget!</div>
-                    <div *ngIf="widget.properties.chartType !== 'Timeline'">
-                        <google-chart *ngIf="configureWidget === false && chartExportData.dataTable !== undefined && chartExportData.dataTable[0].length !== 0"
-                        #chartExport [data]="chartExportData"
-                        (chartSelect)="onChartSelect($event)" (chartReadyOneTime)="onChartReady()"></google-chart>
+                    <div
+                        *ngIf="widget.properties.chartType !== 'Timeline' && widget.properties.chartType !== 'ColumnChart'">
+                        <google-chart
+                            *ngIf="configureWidget === false && chartExportData.dataTable !== undefined && chartExportData.dataTable[0].length !== 0"
+                            #chartExport [data]="chartExportData" (chartSelect)="onChartSelect($event)"
+                            (chartReadyOneTime)="onChartReady()"></google-chart>
                         <senergy-no-data
-                        [showIf]="configureWidget === false && (chartExportData.dataTable === undefined || chartExportData.dataTable[0].length === 0)"></senergy-no-data>
+                            [showIf]="configureWidget === false && (chartExportData.dataTable === undefined || chartExportData.dataTable[0].length === 0)"></senergy-no-data>
                     </div>
-                    
+                    <div *ngIf="widget.properties.chartType === 'ColumnChart'">
+                        <canvas *ngIf="chartExportData !== undefined" baseChart [data]="chartJsData"
+                            [options]="chartJsOptions" type="bar"></canvas>
+                        <senergy-no-data [showIf]="configureWidget === false && chartExportData === undefined"></senergy-no-data>
+                    </div>
                 </div>
             </div>
         </div>
     </mat-card-content>
-    <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom"
-                           (editEvent)="edit()" [refreshing]="refreshing"
-                           [optionCustomIcon]="getCustomIcons(false).icons" [optionCustomTooltip]="getCustomIcons(false).tooltips"
-                           (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(false).disabled"
-                           [reloadAfterZoom]="changesTimeframeOnZoom()" [getInitialWidgetData]="getChartData"></senergy-widget-footer>
+    <senergy-widget-footer [widgetHasUpdateableProperties]="true"
+        [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization"
+        [userHasDeleteAuthorization]="userHasDeleteAuthorization"
+        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
+        [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()" [refreshing]="refreshing"
+        [optionCustomIcon]="getCustomIcons(false).icons" [optionCustomTooltip]="getCustomIcons(false).tooltips"
+        (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(false).disabled"
+        [reloadAfterZoom]="changesTimeframeOnZoom()" [getInitialWidgetData]="getChartData"></senergy-widget-footer>
 </mat-card>
-

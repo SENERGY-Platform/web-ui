@@ -26,6 +26,7 @@ import { ErrorModel } from '../../../core/model/error.model';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { ChartsService } from '../shared/charts.service';
 import { ChartsExportDeviceGroupMergingStrategy, ChartsExportVAxesModel } from './shared/charts-export-properties.model';
+import { BubbleDataPoint, ChartConfiguration, ChartData, ChartTypeRegistry, Point } from 'chart.js';
 
 @Component({
     selector: 'senergy-charts-export',
@@ -46,6 +47,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     sizeLimit = 10000;
     size = 0;
     zoomedAfterRefesh = 0;
+    chartJsOptions: ChartConfiguration['options'] = {};
+    chartJsData: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | undefined;
 
     private resizeTimeout = 0;
     private timeRgx = /(\d+)(ms|s|months|m|h|d|w|y)/;
@@ -242,6 +245,19 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.size = (this.chartExportData?.dataTable?.length || 0) * ((this.chartExportData?.dataTable?.[0]?.length || 0) - 1);
                 if (this.size > this.sizeLimit) {
                     console.warn('Chart Widget ' + this.widget.name + ' uses ' + this.size + ' points which is above the recommended limit of ' + this.sizeLimit);
+                }
+                if (this.widget.properties.chartType === 'ColumnChart') {
+                    console.warn('TODO prep chartJSData and chartJSOptions here'); // TODO
+                    this.chartJsOptions = {
+                        
+                    };
+                    const labels = [];
+                    this.chartExportData?.dataTable.forEach(data => {
+                        labels.push(data[0]);
+                    });
+                    this.chartJsData = {
+                        labels,
+                    };
                 }
             });
         } else {
