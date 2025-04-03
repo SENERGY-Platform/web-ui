@@ -346,7 +346,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     });
                     this.chartExportData?.dataTable.slice(1).forEach(row => row.forEach((data, i) => {
                         if (i === 0) {
-                            labels.push(this.datePipe.transform(data as Date, this.widget.properties.hAxisFormat));
+                            labels.push(this.datePipe.transform(data as Date, this.hAxisFormat || this.widget.properties.hAxisFormat));
                         } else {
                             datasets[i - 1].data.push(data as number);
                         }
@@ -630,6 +630,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             this.chooseColors = true;
             const cpy = JSON.parse(JSON.stringify(axis)) as ChartsExportVAxesModel;
             cpy.deviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy.Separate;
+            cpy.valueAlias = '';
+            cpy.valueName = '';
             this.modifiedVaxes = [cpy];
             this.stacked = true;
         } else {
