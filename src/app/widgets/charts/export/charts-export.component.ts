@@ -354,9 +354,13 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                             datasets[i].backgroundColor = window.getComputedStyle(document.getElementsByClassName('color-lookup')[0], null).getPropertyValue('color');
                         }
                     });
+                    let dateFormat = this.hAxisFormat || this.widget.properties.hAxisFormat;
+                    if (dateFormat !== undefined && dateFormat !== null && dateFormat.length === 0) {
+                        dateFormat = undefined;
+                    }
                     this.chartExportData?.dataTable.slice(1).forEach(row => row.forEach((data, i) => {
                         if (i === 0) {
-                            labels.push(this.datePipe.transform(data as Date, this.hAxisFormat || this.widget.properties.hAxisFormat));
+                            labels.push(this.datePipe.transform(data as Date, dateFormat));
                         } else {
                             datasets[i - 1].data.push(data as number);
                         }
