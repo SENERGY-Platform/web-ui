@@ -50,7 +50,7 @@
                     </div>
                     <div *ngIf="widget.properties.chartType === 'ColumnChart'" class="maximized">
                         <canvas baseChart [data]="chartjs.data" [options]="chartjs.options" type="bar"
-                            id="chartjs-{{widget.id}}"></canvas>
+                            id="chartjs-{{widget.id}}" (contextmenu)="resetChartjsZoom($event); false"></canvas>
                         <senergy-no-data
                             [showIf]="configureWidget === false && chartExportData === undefined"></senergy-no-data>
                         <div *ngIf="chartjs.tooltipAllowed && chartjs.tooltipContext !== undefined" id="chartjs-tooltip"

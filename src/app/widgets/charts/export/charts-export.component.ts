@@ -28,6 +28,7 @@ import { ChartsService } from '../shared/charts.service';
 import { ChartsExportDeviceGroupMergingStrategy, ChartsExportVAxesModel } from './shared/charts-export-properties.model';
 import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartDataset, ChartTypeRegistry, Point, TooltipModel } from 'chart.js';
 import { DatePipe } from '@angular/common';
+import zoomPlugin from 'chartjs-plugin-zoom';
 
 @Component({
     selector: 'senergy-charts-export',
@@ -106,6 +107,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         private datePipe: DatePipe,
         private cd: ChangeDetectorRef,
     ) {
+        Chart.register(zoomPlugin);
     }
 
     ngOnDestroy() {
@@ -211,6 +213,14 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         this.chartjs.tooltipContext = context;
                         this.chartjs.tooltipDisplay = 'initial';
                         this.cd.detectChanges();
+                    },
+                },
+                zoom: {
+                    zoom: {
+                        drag: {
+                            enabled: true
+                        },
+                        mode: 'x',
                     },
                 },
             },
@@ -654,6 +664,14 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     allowChartjsTooltip() {
         this.chartjs.tooltipAllowed = true;
+    }
+
+    resetChartjsZoom($event: MouseEvent) {
+        const chart = Chart.getChart('chartjs-' + this.widget.id);
+        if (chart !== undefined) {
+            $event.stopPropagation();
+            chart.resetZoom();
+        }
     }
 
     get chartjsTooltipStyle(): any {
