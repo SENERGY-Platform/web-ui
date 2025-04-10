@@ -523,7 +523,20 @@ export class ChartsExportService {
                     dataPoint.push(null);
                     return;
                 }
-                const matchingRule = resp.conversions.find((rule) => rule.from === value);
+                const matchingRule = resp.conversions.find((rule) => {
+                    if (rule.from === value) {
+                        return true;
+                    }
+                    try {
+                        const fromParsed = JSON.parse(rule.from);
+                        if (fromParsed === value) {
+                            return true;
+                        }
+                    } catch (_) {
+                        //  no-op
+                    }
+                    return false;
+                });
                 if (matchingRule !== undefined) {
                     try {
                         value = JSON.parse(matchingRule.to);
