@@ -31,6 +31,7 @@ import { DatePipe } from '@angular/common';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import annotationPlugin, { AnnotationOptions } from 'chartjs-plugin-annotation';
 import 'chartjs-adapter-moment';
+import moment from 'moment';
 
 enum DetailLevel {
     ms = 6,
@@ -231,6 +232,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         }
                     },
                     external: (context) => {
+                        if (context.tooltip.dataPoints !== undefined && context.tooltip.dataPoints.length > 0) {
+                            context.tooltip.title = [moment((context.tooltip.dataPoints[0].raw as {x:number}).x).format(dateFormat)];
+                        }
                         this.chartjs.tooltipContext = context;
                         this.chartjs.tooltipDisplay = 'initial';
                         this.cd.detectChanges();
@@ -473,7 +477,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                                     content: this.datePipe.transform(new Date(i > 0 ? breakPoints[i - 1] : (this.chartjs.minDateMs || 0)), this.xAxisFormat(detailLevel - 1)),
                                     display: true,
                                     position: {
-                                        x: v < (this.chartjs.maxDateMs || 0) ? 'center' : `${((this.chartjs.maxDateMs ||0) - xMin)/(v-xMin)*50}%`,
+                                        x: v < (this.chartjs.maxDateMs || 0) ? 'center' : `${((this.chartjs.maxDateMs || 0) - xMin) / (v - xMin) * 50}%`,
                                         // displays last label (almost) centered on remaining x axis space
                                         y: 'start'
                                     }
