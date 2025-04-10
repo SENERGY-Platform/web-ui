@@ -29,6 +29,19 @@ import { ChartsExportDeviceGroupMergingStrategy, ChartsExportVAxesModel } from '
 import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartDataset, ChartTypeRegistry, Point, TooltipModel } from 'chart.js';
 import { DatePipe } from '@angular/common';
 import zoomPlugin from 'chartjs-plugin-zoom';
+import annotationPlugin, { AnnotationOptions } from 'chartjs-plugin-annotation';
+import 'chartjs-adapter-moment';
+
+enum DetailLevel {
+    ms = 6,
+    s = 5,
+    m = 4,
+    h = 3,
+    d = 2,
+    months = 1,
+    y = 0,
+    unknown = -1,
+}
 
 @Component({
     selector: 'senergy-charts-export',
@@ -55,7 +68,10 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         tooltipContext: { chart: Chart; tooltip: TooltipModel<any> } | undefined;
         tooltipDisplay: string;
         tooltipAllowed: boolean;
-        tooltipDatasets: { datasetIndex: number, label: string, formattedValue: string, drawToLeft: boolean }[],
+        tooltipDatasets: { datasetIndex: number, label: string, formattedValue: string, drawToLeft: boolean }[];
+        minDateMs?: number;
+        maxDateMs?: number;
+        annotations?: AnnotationOptions[];
     } = {
             options: {},
             data: undefined,
@@ -107,7 +123,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         private datePipe: DatePipe,
         private cd: ChangeDetectorRef,
     ) {
-        Chart.register(zoomPlugin);
+        Chart.register(zoomPlugin, annotationPlugin);
     }
 
     ngOnDestroy() {
@@ -187,6 +203,11 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         this.timelineHeight = element.height;
         this.timelineWidth = element.width;
 
+        let dateFormat = this.hAxisFormat;
+        if (dateFormat === 'EEE' || dateFormat === 'EE' || dateFormat === 'E') {
+            dateFormat = 'ddd';
+            // was using Angular DatePipe before and uses moment-js now.
+        }
         this.chartjs.options = {
             animation: false,
             maintainAspectRatio: false,
@@ -223,6 +244,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         mode: 'x',
                     },
                 },
+                annotation: {
+                    annotations: this.chartjs.annotations,
+                },
             },
             scales: {
                 'y': {
@@ -247,15 +271,32 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         text: this.widget.properties.hAxisLabel,
                         display: (this.widget.properties.hAxisLabel || '').length > 0,
                     },
-                }
+                    type: 'timeseries',
+                    min: this.chartjs.minDateMs,
+                    max: this.chartjs.maxDateMs,
+                    time: {
+                        displayFormats: {
+                            'millisecond': dateFormat,
+                            'second': dateFormat,
+                            'minute': dateFormat,
+                            'hour': dateFormat,
+                            'day': dateFormat,
+                            'week': dateFormat,
+                            'month': dateFormat,
+                            'quarter': dateFormat,
+                            'year': dateFormat,
+                        }
+                    }
+                },
             }
-
         };
-        const chartjsChart = Chart.getChart('chartjs-' + this.widget.id);
-        chartjsChart?.resize(element.width, element.height);
-        chartjsChart?.draw();
+        this.chartjsChart?.resize(element.width, element.height);
+        this.chartjsChart?.draw();
     }
 
+    get chartjsChart(): Chart | undefined {
+        return Chart.getChart('chartjs-' + this.widget.id);
+    }
 
     private resizeApex() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
@@ -318,8 +359,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.errorHasOccured = true;
                     this.errorMessage = 'No data';
                     this.errorHandlerService.logError('Chart Export', 'getChartData', resp);
-                    this.ready = true;
-                    this.refreshing = false;
                     this.zoomedAfterRefesh = 0;
                 } else {
                     this.errorHasOccured = false;
@@ -327,8 +366,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.chartExportData.dataTable.sort((a, b) => (a[0] as Date).valueOf() - (b[0] as Date).valueOf());
 
                     this.setupZoomChartSettings(lastOverride);
-                    this.ready = true;
-                    this.refreshing = false;
                     this.zoomedAfterRefesh = 0;
                     this.resizeChart();
                     this.chartExport?.draw();
@@ -342,7 +379,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         this.chartjs = { options: {}, data: undefined, tooltipContext: undefined, tooltipDisplay: 'none', tooltipDatasets: [], tooltipAllowed: false };
                         return;
                     }
-                    const labels: (string | null)[] = [];
                     const datasets: ChartDataset[] = new Array(this.chartExportData?.dataTable[0].length - 1).fill({});
                     const axes = this.modifiedVaxes || this.widget.properties.vAxes;
                     this.chartExportData?.dataTable[0].slice(1).forEach((label, i) => {
@@ -351,27 +387,115 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         if (this.chartExportData.options?.colors !== undefined && this.chartExportData.options.colors.length > i) {
                             datasets[i].backgroundColor = this.chartExportData.options.colors[i];
                         } else {
-                            datasets[i].backgroundColor = window.getComputedStyle(document.getElementsByClassName('color-lookup')[0], null).getPropertyValue('color');
+                            datasets[i].backgroundColor = window.getComputedStyle(document.getElementsByClassName('color-lookup-accent')[0], null).getPropertyValue('color');
                         }
                     });
-                    let dateFormat = this.hAxisFormat || this.widget.properties.hAxisFormat;
+                    let dateFormat = this.hAxisFormat || undefined;
                     if (dateFormat !== undefined && dateFormat !== null && dateFormat.length === 0) {
                         dateFormat = undefined;
                     }
+                    if (this.chartExportData?.dataTable !== undefined && this.chartExportData.dataTable.length > 1) {
+                        this.chartjs.minDateMs = (this.chartExportData.dataTable[1][0] as Date).valueOf();
+                    }
                     this.chartExportData?.dataTable.slice(1).forEach(row => row.forEach((data, i) => {
                         if (i === 0) {
-                            labels.push(this.datePipe.transform(data as Date, dateFormat));
+                            this.chartjs.maxDateMs = (data as Date).valueOf();
                         } else {
-                            datasets[i - 1].data.push(data as number);
+                            if (data !== null && data !== 0) {
+                                datasets[i - 1].data.push({ y: data as number, x: (row[0] as Date).valueOf() });
+                            }
                         }
                     }));
                     this.chartjs.data = {
                         datasets,
-                        labels,
                     };
+                    this.chartjs.annotations = [];
+                    const breakPoints: number[] = [];
+                    const detailLevel = this.detailLevel(this.groupTime);
+                    const d = new Date(this.chartjs.minDateMs || 0);
+                    switch (detailLevel) {
+                        case DetailLevel.ms:
+                            d.setMilliseconds(0);
+                            while (d.valueOf() < (this.chartjs.maxDateMs || 0)) {
+                                d.setSeconds(d.getSeconds() + 1);
+                                breakPoints.push(d.valueOf());
+                            }
+                            break;
+                        case DetailLevel.s:
+                            d.setSeconds(0, 0);
+                            while (d.valueOf() < (this.chartjs.maxDateMs || 0)) {
+                                d.setMinutes(d.getMinutes() + 1);
+                                breakPoints.push(d.valueOf());
+                            }
+                            break;
+                        case DetailLevel.m:
+                            d.setMinutes(0, 0, 0);
+                            while (d.valueOf() < (this.chartjs.maxDateMs || 0)) {
+                                d.setHours(d.getHours() + 1);
+                                breakPoints.push(d.valueOf());
+                            }
+                            break;
+                        case DetailLevel.h:
+                            d.setHours(0, 0, 0, 0);
+                            while (d.valueOf() < (this.chartjs.maxDateMs || 0)) {
+                                d.setDate(d.getDate() + 1);
+                                breakPoints.push(d.valueOf());
+                            }
+                            break;
+                        case DetailLevel.d:
+                            d.setHours(0, 0, 0, 0);
+                            d.setDate(1);
+                            while (d.valueOf() < (this.chartjs.maxDateMs || 0)) {
+                                d.setMonth(d.getMonth() + 1);
+                                breakPoints.push(d.valueOf());
+                            }
+                            break;
+                        case DetailLevel.months:
+                            d.setHours(0, 0, 0, 0);
+                            d.setDate(1);
+                            d.setMonth(0);
+                            while (d.valueOf() < (this.chartjs.maxDateMs || 0)) {
+                                d.setFullYear(d.getFullYear() + 1);
+                                breakPoints.push(d.valueOf());
+                            }
+                            break;
+                    }
+                    if (breakPoints.length > 1) {
+                        breakPoints.forEach((v, i) => {
+                            const xMin = i > 0 ? breakPoints[i - 1] : this.chartjs.minDateMs || 0;
+                            this.chartjs.annotations?.push({
+                                type: 'box',
+                                xMax: v,
+                                xMin,
+                                backgroundColor: i % 2 == 0 ? 'rgba(0,0,0,0.0)' : 'rgba(0,0,0,0.05)',
+                                borderWidth: 0,
+                                label: {
+                                    content: this.datePipe.transform(new Date(i > 0 ? breakPoints[i - 1] : (this.chartjs.minDateMs || 0)), this.xAxisFormat(detailLevel - 1)),
+                                    display: true,
+                                    position: {
+                                        x: v < (this.chartjs.maxDateMs || 0) ? 'center' : `${((this.chartjs.maxDateMs ||0) - xMin)/(v-xMin)*50}%`,
+                                        // displays last label (almost) centered on remaining x axis space
+                                        y: 'start'
+                                    }
+                                },
+                            });
+                            this.chartjs.annotations?.push(
+                                {
+                                    type: 'line',
+                                    borderColor: 'rgba(0,0,0,0.5)',
+                                    borderWidth: 1,
+                                    scaleID: 'x',
+                                    value: v,
+                                }
+                            );
+                        });
+                    }
+                    this.resizeChart();
                     this.onResize();
                     this.cd.detectChanges();
                 }
+                this.ready = true;
+                this.refreshing = false;
             });
         } else {
             this.ready = true;
@@ -671,7 +795,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     resetChartjsZoom($event: MouseEvent) {
-        const chart = Chart.getChart('chartjs-' + this.widget.id);
+        const chart = this.chartjsChart;
         if (chart !== undefined) {
             $event.stopPropagation();
             chart.resetZoom();
@@ -703,8 +827,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    private get hAxisFormat(): string | null {
-        return localStorage.getItem(this.widget.id + '_hAxisFormat');
+    private get hAxisFormat(): string | undefined {
+        return localStorage.getItem(this.widget.id + '_hAxisFormat') || this.widget.properties.hAxisFormat;
     }
 
     private set hAxisFormat(hAxisFormat: string | null) {
@@ -842,20 +966,41 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     };
 
-    private detailLevel(groupTime: string | null): number {
+    private detailLevel(groupTime: string | null): DetailLevel {
         const rgxRes = this.timeRgx.exec(groupTime || '');
         if (rgxRes === null || rgxRes.length < 3) {
-            return -1;
+            return DetailLevel.unknown;
         }
         switch (rgxRes[2]) {
-            case 'ms': return 6;
-            case 's': return 5;
-            case 'm': return 4;
-            case 'h': return 3;
-            case 'd': return 2;
-            case 'months': return 1;
-            case 'y': return 0;
-            default: return -1;
+            case 'ms': return DetailLevel.ms;
+            case 's': return DetailLevel.s;
+            case 'm': return DetailLevel.m;
+            case 'h': return DetailLevel.h;
+            case 'd': return DetailLevel.d;
+            case 'months': return DetailLevel.months;
+            case 'y': return DetailLevel.y;
+            default: return DetailLevel.unknown;
+        }
+    }
+
+    private xAxisFormat(detailLevel: DetailLevel): string {
+        switch (detailLevel) {
+            case DetailLevel.ms:
+                return 'ss';
+            case DetailLevel.s:
+                return 'ss';
+            case DetailLevel.m:
+                return 'mm';
+            case DetailLevel.h:
+                return 'HH';
+            case DetailLevel.d:
+                return 'EEE';
+            case DetailLevel.months:
+                return 'MMM';
+            case DetailLevel.y:
+                return 'yyyy';
+            default:
+                return '';
         }
     }
 }
