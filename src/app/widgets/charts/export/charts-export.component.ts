@@ -15,7 +15,7 @@
  */
 
 import { AfterViewInit, ChangeDetectorRef, Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ChartSelectEvent, GoogleChartComponent, } from 'ng2-google-charts';
+import { GoogleChartComponent, } from 'ng2-google-charts';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../core/services/element-size.service';
 import { ChartsModel } from '../shared/charts.model';
@@ -64,7 +64,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     errorMessage = '';
     sizeLimit = 10000;
     size = 0;
-    zoomedAfterRefesh = 0;
     chartjs: {
         options: ChartConfiguration['options'];
         data: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | undefined;
@@ -249,123 +248,125 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         this.timelineHeight = element.height;
         this.timelineWidth = element.width;
 
-        let dateFormat = this.hAxisFormat;
-        switch (dateFormat) {
-            case 'EEE':
-            case 'EE':
-            case 'E':
+        if (this.widget.properties.chartType === 'ColumnChart') {
+            let dateFormat = this.hAxisFormat;
+            switch (dateFormat) {
+                case 'EEE':
+                case 'EE':
+                case 'E':
+                    dateFormat = 'ddd';
+                    break;
+                case 'dd.MM.':
+                    dateFormat = 'DD.MM.';
+                    break;
+            }
+            if (dateFormat === 'EEE' || dateFormat === 'EE' || dateFormat === 'E') {
                 dateFormat = 'ddd';
-                break;
-            case 'dd.MM.':
-                dateFormat = 'DD.MM.';
-                break;
-        }
-        if (dateFormat === 'EEE' || dateFormat === 'EE' || dateFormat === 'E') {
-            dateFormat = 'ddd';
-            // was using Angular DatePipe before and uses moment-js now.
-        }
-        this.chartjs.options = {
-            animation: false,
-            maintainAspectRatio: false,
-            events: ['click', 'mousemove'],
-            onHover: (_, elements) => {
-                if (elements !== undefined && elements.length === 1 && this.drillable(elements[0].datasetIndex)) {
-                    this.chartJsCanvas.nativeElement.style.cursor = 'pointer';
-                    this.chartjs.cursorLocked = true;
-                } else {
-                    this.chartJsCanvas.nativeElement.style.cursor = 'default';
-                    this.chartjs.cursorLocked = false;
-                }
-            },
-            onClick: (_, elements) => {
-                if (elements !== undefined && elements.length === 1 && this.drillable(elements[0].datasetIndex)) {
-                    this.drillDown(elements[0].datasetIndex);
-                }
-            },
-            plugins: {
-                legend: {
-                    display: this.zoom,
-                },
-                tooltip: {
-                    enabled: false,
-                    callbacks: {
-                        afterBody: (tooltipItems) => {
-                            this.chartjs.tooltipDatasets = tooltipItems.map(x => {
-                                return {
-                                    datasetIndex: x.datasetIndex,
-                                    formattedValue: x.formattedValue,
-                                    label: x.dataset.label || '',
-                                    drawToLeft: x.dataIndex > x.dataset.data.length / 2,
-                                };
-                            });
-                            return [];
-                        }
-                    },
-                    external: (context) => {
-                        if (context.tooltip.dataPoints !== undefined && context.tooltip.dataPoints.length > 0) {
-                            context.tooltip.title = [moment((context.tooltip.dataPoints[0].raw as { x: number }).x).format(dateFormat)];
-                        }
-                        this.chartjs.tooltipContext = context;
-                        this.chartjs.tooltipDisplay = 'initial';
-                        this.cd.detectChanges();
-                    },
-                },
-                zoom: {
-                    zoom: {
-                        drag: {
-                            enabled: true
-                        },
-                        mode: 'x',
-                    },
-                },
-                annotation: {
-                    annotations: this.chartjs.annotations,
-                },
-            },
-            scales: {
-                'y': {
-                    stacked: this.stacked,
-                    title: {
-                        text: this.widget.properties.vAxisLabel,
-                        display: (this.widget.properties.vAxisLabel || '').length > 0,
-                    },
-                },
-                'y2': {
-                    stacked: this.stacked,
-                    position: 'right',
-                    title: {
-                        text: this.widget.properties.secondVAxisLabel,
-                        display: (this.widget.properties.secondVAxisLabel || '').length > 0,
-                    },
-                    display: 'auto',
-                },
-                'x': {
-                    stacked: this.stacked,
-                    title: {
-                        text: this.widget.properties.hAxisLabel,
-                        display: (this.widget.properties.hAxisLabel || '').length > 0,
-                    },
-                    type: 'timeseries',
-                    min: this.chartjs.minDateMs,
-                    max: this.chartjs.maxDateMs,
-                    time: {
-                        displayFormats: {
-                            'millisecond': dateFormat,
-                            'second': dateFormat,
-                            'minute': dateFormat,
-                            'hour': dateFormat,
-                            'day': dateFormat,
-                            'week': dateFormat,
-                            'month': dateFormat,
-                            'quarter': dateFormat,
-                            'year': dateFormat,
-                        }
+                // was using Angular DatePipe before and uses moment-js now.
+            }
+            this.chartjs.options = {
+                animation: false,
+                maintainAspectRatio: false,
+                events: ['click', 'mousemove'],
+                onHover: (_, elements) => {
+                    if (elements !== undefined && elements.length === 1 && this.drillable(elements[0].datasetIndex)) {
+                        this.chartJsCanvas.nativeElement.style.cursor = 'pointer';
+                        this.chartjs.cursorLocked = true;
+                    } else {
+                        this.chartJsCanvas.nativeElement.style.cursor = 'default';
+                        this.chartjs.cursorLocked = false;
                     }
                 },
-            }
-        };
-        this.chartjsChart?.resize(element.width, element.height);
-        this.chartjsChart?.draw();
+                onClick: (_, elements) => {
+                    if (elements !== undefined && elements.length === 1 && this.drillable(elements[0].datasetIndex)) {
+                        this.drillDown(elements[0].datasetIndex);
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: this.zoom,
+                    },
+                    tooltip: {
+                        enabled: false,
+                        callbacks: {
+                            afterBody: (tooltipItems) => {
+                                this.chartjs.tooltipDatasets = tooltipItems.map(x => {
+                                    return {
+                                        datasetIndex: x.datasetIndex,
+                                        formattedValue: x.formattedValue,
+                                        label: x.dataset.label || '',
+                                        drawToLeft: x.dataIndex > x.dataset.data.length / 2,
+                                    };
+                                });
+                                return [];
+                            }
+                        },
+                        external: (context) => {
+                            if (context.tooltip.dataPoints !== undefined && context.tooltip.dataPoints.length > 0) {
+                                context.tooltip.title = [moment((context.tooltip.dataPoints[0].raw as { x: number }).x).format(dateFormat)];
+                            }
+                            this.chartjs.tooltipContext = context;
+                            this.chartjs.tooltipDisplay = 'initial';
+                            this.cd.detectChanges();
+                        },
+                    },
+                    zoom: {
+                        zoom: {
+                            drag: {
+                                enabled: true
+                            },
+                            mode: 'x',
+                        },
+                    },
+                    annotation: {
+                        annotations: this.chartjs.annotations,
+                    },
+                },
+                scales: {
+                    'y': {
+                        stacked: this.stacked,
+                        title: {
+                            text: this.widget.properties.vAxisLabel,
+                            display: (this.widget.properties.vAxisLabel || '').length > 0,
+                        },
+                    },
+                    'y2': {
+                        stacked: this.stacked,
+                        position: 'right',
+                        title: {
+                            text: this.widget.properties.secondVAxisLabel,
+                            display: (this.widget.properties.secondVAxisLabel || '').length > 0,
+                        },
+                        display: 'auto',
+                    },
+                    'x': {
+                        stacked: this.stacked,
+                        title: {
+                            text: this.widget.properties.hAxisLabel,
+                            display: (this.widget.properties.hAxisLabel || '').length > 0,
+                        },
+                        type: 'timeseries',
+                        min: this.chartjs.minDateMs,
+                        max: this.chartjs.maxDateMs,
+                        time: {
+                            displayFormats: {
+                                'millisecond': dateFormat,
+                                'second': dateFormat,
+                                'minute': dateFormat,
+                                'hour': dateFormat,
+                                'day': dateFormat,
+                                'week': dateFormat,
+                                'month': dateFormat,
+                                'quarter': dateFormat,
+                                'year': dateFormat,
+                            }
+                        }
+                    },
+                }
+            };
+            this.chartjsChart?.resize(element.width, element.height);
+            this.chartjsChart?.draw();
+        }
     }
 
     get chartjsChart(): Chart | undefined {
@@ -433,14 +434,12 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.errorHasOccured = true;
                     this.errorMessage = 'No data';
                     this.errorHandlerService.logError('Chart Export', 'getChartData', resp);
-                    this.zoomedAfterRefesh = 0;
                 } else {
                     this.errorHasOccured = false;
                     this.chartExportData = resp;
                     this.chartExportData.dataTable.sort((a, b) => (a[0] as Date).valueOf() - (b[0] as Date).valueOf());
 
                     this.setupZoomChartSettings(lastOverride);
-                    this.zoomedAfterRefesh = 0;
                     this.resizeChart();
                     this.chartExport?.draw();
                 }
@@ -587,7 +586,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         } else {
             this.ready = true;
             this.refreshing = false;
-            this.zoomedAfterRefesh = 0;
         }
 
     }
@@ -608,152 +606,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.chartExportData.options.zoomStartTime = new Date(end - (range / (this.widget.properties.zoomTimeFactor || 2)));
             }
         }
-    }
-
-    onChartReady() {
-        const htmlElem = (this.chartExport as any).HTMLel;
-        const wrapper = this.chartExport?.wrapper;
-        if (wrapper.getChart() === undefined && htmlElem === undefined) {
-            console.error('unable to setup zoom listener');
-            return;
-        }
-        if (this.widget.properties.group?.type === undefined || this.widget.properties.group?.type === '') {
-            return; //no aggregation --> no detail gained or lost after zoom
-        }
-        const getCoords = (): { min: Date; max: Date } | undefined => {
-            const chart = wrapper.getChart();
-
-            let res;
-            if (chart && chart.getChartLayoutInterface !== undefined) {
-                const chartLayout = chart.getChartLayoutInterface();
-                const chartBounds = chartLayout.getChartAreaBoundingBox();
-                res = {
-                    min: chartLayout.getHAxisValue(chartBounds.left),
-                    max: chartLayout.getHAxisValue(chartBounds.width + chartBounds.left)
-                };
-            }
-            return res;
-        };
-        const observer = new MutationObserver(() => {
-            const zoomCurrent = getCoords();
-            if (zoomCurrent !== undefined) {
-                if (this.chartExportData.dataTable.length === 0) {
-                    return;
-                }
-                if (!this.refreshing && this.zoomedAfterRefesh > 2) {
-                    if (this.zoomInTZimeIfRequired(zoomCurrent)) {
-                        this.ready = false;
-                        this.refresh();
-                    }
-                }
-                if (!this.refreshing) {
-                    this.zoomedAfterRefesh++;
-                }
-            }
-        });
-        observer.observe(htmlElem, {
-            childList: true,
-            subtree: true
-        });
-    }
-
-    onChartSelect($event: ChartSelectEvent) {
-        if ($event.column === null || this.widget.properties.vAxes === undefined) {
-            return;
-        }
-        const axes = this.modifiedVaxes || this.widget.properties.vAxes;
-        if (axes.length < $event.column) {
-            return;
-        }
-
-        const that = this;
-        const setTime = function () {
-            if ($event.selectedRowValues === null || $event.selectedRowValues === undefined || $event.selectedRowValues.length === 0) {
-                return;
-            }
-            that.from = $event.selectedRowValues[0];
-            const idx = that.chartExport?.data.dataTable?.findIndex((x: any[]) => x.length > 0 && x[0] === $event.selectedRowValues[0]);
-            if (idx > -1 && that.chartExport?.data.dataTable !== undefined) {
-                if (that.chartExport?.data.dataTable.length > idx + 1 && that.chartExport?.data.dataTable[idx + 1].length > 0) {
-                    that.to = that.chartExport?.data.dataTable[idx + 1][0];
-                } else if (idx > 1) {
-                    const diff = $event.selectedRowValues[0].valueOf() - that.chartExport?.data.dataTable[idx - 1][0].valueOf(); // diff in ms
-                    const dClone = new Date($event.selectedRowValues[0].toISOString());
-                    dClone.setMilliseconds(dClone.getMilliseconds() + diff);
-                    that.to = dClone;
-                }
-            }
-            const toD = that.to;
-            if (toD !== null) {
-                that.zoomInTZimeIfRequired({ min: $event.selectedRowValues[0], max: toD });
-            }
-        };
-        const axis = axes[$event.column - 1]; // time column
-        if (axis.subAxes !== undefined && axis.subAxes.length > 0) {
-            const cpy = JSON.parse(JSON.stringify(axis.subAxes)) as ChartsExportVAxesModel[];
-            cpy.forEach(sub => sub.displayOnSecondVAxis = axis.displayOnSecondVAxis);
-            this.modifiedVaxes = cpy;
-            this.stacked = true;
-            setTime();
-            this.ready = false;
-            this.refresh();
-        } else if (axis.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum && (axis.deviceGroupId !== undefined || axis.locationId !== undefined)) {
-            // we can split this!
-            this.chooseColors = true;
-            const cpy = JSON.parse(JSON.stringify(axis)) as ChartsExportVAxesModel;
-            cpy.deviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy.Separate;
-            this.modifiedVaxes = [cpy];
-            this.stacked = true;
-            setTime();
-            this.ready = false;
-            this.refresh();
-        } else if (axes.length > 1 && this.widget.properties.chartType === 'ColumnChart') {
-            this.modifiedVaxes = [axis];
-            this.ready = false;
-            this.refresh();
-        }
-    }
-
-    zoomInTZimeIfRequired(zoomCurrent: { min: Date; max: Date }): boolean {
-        const msInS = 1000;
-        const msInM = msInS * 60;
-        const msInH = msInM * 60;
-        const msInD = msInH * 24;
-        const msInY = msInD * 365;
-        const diff = zoomCurrent.max.valueOf() - zoomCurrent.min.valueOf(); // diff in ms
-        let timeUnit = '';
-        let hAxisFormat = '';
-        if (diff < msInS) {
-            timeUnit = 'ms';
-            hAxisFormat = 'ss.SSS';
-        } else if (diff < 2 * msInM) {
-            timeUnit = 's';
-            hAxisFormat = 'ss';
-        } else if (diff < 2 * msInH) {
-            timeUnit = 'm';
-            hAxisFormat = 'mm';
-        } else if (diff < 2 * msInD) {
-            timeUnit = 'h';
-            hAxisFormat = 'HH';
-        } else if (diff < 45 * msInD) {
-            timeUnit = 'd';
-            hAxisFormat = 'dd';
-        } else if (diff < msInY) {
-            timeUnit = 'months';
-            hAxisFormat = 'MMM';
-        } else { // use years
-            timeUnit = 'y';
-            hAxisFormat = 'yyyy';
-        }
-        const groupTime = '1' + timeUnit;
-        if (this.detailLevel(groupTime) > this.detailLevel(this.groupTime)) {
-            this.groupTime = groupTime;
-            this.hAxisFormat = hAxisFormat;
-            this.to = zoomCurrent.max;
-            this.from = zoomCurrent.min;
-            return true;
-        }
-        return false;
     }
 
     zoomOutTime() {
@@ -827,7 +679,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         if (axes === undefined || axes.length < axisIndex) {
             return false;
         }
-
 
         const axis = axes[axisIndex];
         if (axis.subAxes !== undefined && axis.subAxes.length > 0) {
@@ -1023,7 +874,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-
     getCustomIcons(header: boolean): { icons: string[]; disabled: boolean[]; tooltips: string[] } {
         const res = { icons: [] as string[], disabled: [] as boolean[], tooltips: [] as string[] };
 
@@ -1047,7 +897,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
             }
         }
-
         return res;
     }
 
