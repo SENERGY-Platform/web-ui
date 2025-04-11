@@ -26,12 +26,14 @@ import { ErrorModel } from '../../../core/model/error.model';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { ChartsService } from '../shared/charts.service';
 import { ChartsExportDeviceGroupMergingStrategy, ChartsExportVAxesModel } from './shared/charts-export-properties.model';
-import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartDataset, ChartTypeRegistry, Point, TooltipModel } from 'chart.js';
+import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartDataset, ChartTypeRegistry, Point, TooltipModel, Plugin } from 'chart.js';
 import { DatePipe } from '@angular/common';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import annotationPlugin, { AnnotationOptions } from 'chartjs-plugin-annotation';
 import 'chartjs-adapter-moment';
 import moment from 'moment';
+import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
+import { findLabel, getLabelHitBoxes } from './chartjs-axis-click';
 
 enum DetailLevel {
     ms = 6,
@@ -72,7 +74,10 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         tooltipDatasets: { datasetIndex: number, label: string, formattedValue: string, drawToLeft: boolean }[];
         minDateMs?: number;
         maxDateMs?: number;
+        nextDateMs?: number;
         annotations?: AnnotationOptions[];
+        plugins: Plugin<keyof ChartTypeRegistry, AnyObject>[];
+        cursorLocked: boolean;
     } = {
             options: {},
             data: undefined,
@@ -80,6 +85,44 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             tooltipAllowed: false,
             tooltipDisplay: 'none',
             tooltipDatasets: [],
+            plugins: [{
+                id: 'chartClickXLabel',
+                events: ['click'],
+                afterEvent: (chart, event) => {
+                    const evt = event.event;
+                    const [found, labelInfo] = findLabel(getLabelHitBoxes(chart.scales.x), evt);
+                    const currentDetailLevel = this.detailLevel(this.groupTime);
+                    switch (evt.type) {
+                        case 'click':
+                            if (found && currentDetailLevel < DetailLevel.ms) {
+                                const newDetailLevel = currentDetailLevel + 1;
+                                this.groupTime = this.groupTimeFromDetailLevel(newDetailLevel);
+                                this.hAxisFormat = this.xAxisFormat(newDetailLevel);
+                                this.from = new Date(this.chartjsChart?.scales['x'].ticks[labelInfo.index].value as number);
+                                if (this.chartjsChart?.scales['x'].ticks !== undefined && this.chartjsChart?.scales['x'].ticks.length > labelInfo.index + 1) {
+                                    this.to = new Date(this.chartjsChart?.scales['x'].ticks[labelInfo.index + 1].value as number);
+                                } else {
+                                    this.to = new Date(this.chartjs.nextDateMs || 0);
+                                }
+                                this.ready = false;
+                                this.cd.detectChanges();
+                                this.refresh();
+                            }
+                            return;
+                        case 'mousemove':
+                            if (this.chartJsCanvas?.nativeElement === undefined) {
+                                return;
+                            }
+                            if (found) {
+                                this.chartJsCanvas.nativeElement.style.cursor = 'zoom-in';
+                            } else if (this.chartjs.cursorLocked !== true) {
+                                this.chartJsCanvas.nativeElement.style.cursor = 'default';
+                            }
+                            return;
+                    }
+                },
+            }],
+            cursorLocked: false,
         };
 
     private resizeTimeout = 0;
@@ -114,6 +157,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             this.chartExport = content;
         }
     }
+
+    @ViewChild('chartjswidget') chartJsCanvas: any | undefined;
 
     constructor(
         private chartsService: ChartsService,
@@ -205,6 +250,16 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         this.timelineWidth = element.width;
 
         let dateFormat = this.hAxisFormat;
+        switch (dateFormat) {
+            case 'EEE':
+            case 'EE':
+            case 'E':
+                dateFormat = 'ddd';
+                break;
+            case 'dd.MM.':
+                dateFormat = 'DD.MM.';
+                break;
+        }
         if (dateFormat === 'EEE' || dateFormat === 'EE' || dateFormat === 'E') {
             dateFormat = 'ddd';
             // was using Angular DatePipe before and uses moment-js now.
@@ -212,6 +267,21 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         this.chartjs.options = {
             animation: false,
             maintainAspectRatio: false,
+            events: ['click', 'mousemove'],
+            onHover: (_, elements) => {
+                if (elements !== undefined && elements.length === 1 && this.drillable(elements[0].datasetIndex)) {
+                    this.chartJsCanvas.nativeElement.style.cursor = 'pointer';
+                    this.chartjs.cursorLocked = true;
+                } else {
+                    this.chartJsCanvas.nativeElement.style.cursor = 'default';
+                    this.chartjs.cursorLocked = false;
+                }
+            },
+            onClick: (_, elements) => {
+                if (elements !== undefined && elements.length === 1 && this.drillable(elements[0].datasetIndex)) {
+                    this.drillDown(elements[0].datasetIndex);
+                }
+            },
             plugins: {
                 legend: {
                     display: this.zoom,
@@ -233,7 +303,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     },
                     external: (context) => {
                         if (context.tooltip.dataPoints !== undefined && context.tooltip.dataPoints.length > 0) {
-                            context.tooltip.title = [moment((context.tooltip.dataPoints[0].raw as {x:number}).x).format(dateFormat)];
+                            context.tooltip.title = [moment((context.tooltip.dataPoints[0].raw as { x: number }).x).format(dateFormat)];
                         }
                         this.chartjs.tooltipContext = context;
                         this.chartjs.tooltipDisplay = 'initial';
@@ -380,7 +450,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
                 if (this.widget.properties.chartType === 'ColumnChart') {
                     if (this.chartExportData?.dataTable.length < 2) {
-                        this.chartjs = { options: {}, data: undefined, tooltipContext: undefined, tooltipDisplay: 'none', tooltipDatasets: [], tooltipAllowed: false };
+                        this.chartjs.data = undefined;
+                        this.ready = true;
+                        this.refreshing = false;
                         return;
                     }
                     const datasets: ChartDataset[] = new Array(this.chartExportData?.dataTable[0].length - 1).fill({});
@@ -416,7 +488,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.chartjs.annotations = [];
                     const breakPoints: number[] = [];
                     const detailLevel = this.detailLevel(this.groupTime);
-                    const d = new Date(this.chartjs.minDateMs || 0);
+                    let d = new Date(this.chartjs.minDateMs || 0);
                     switch (detailLevel) {
                         case DetailLevel.ms:
                             d.setMilliseconds(0);
@@ -464,6 +536,16 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                             }
                             break;
                     }
+                    if (detailLevel === DetailLevel.y) {
+                        d = new Date(this.chartjs.maxDateMs || 0);
+                        d.setHours(0, 0, 0, 0);
+                        d.setDate(1);
+                        d.setMonth(0);
+                        d.setFullYear(d.getFullYear() + 1);
+                        this.chartjs.nextDateMs = d.valueOf();
+                    } else if (breakPoints.length > 0) {
+                        this.chartjs.nextDateMs = breakPoints[breakPoints.length - 1];
+                    }
                     if (breakPoints.length > 1) {
                         breakPoints.forEach((v, i) => {
                             const xMin = i > 0 ? breakPoints[i - 1] : this.chartjs.minDateMs || 0;
@@ -500,6 +582,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
                 this.ready = true;
                 this.refreshing = false;
+                this.cd.detectChanges();
             });
         } else {
             this.ready = true;
@@ -688,40 +771,40 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 return;
             case 'months':
                 timeUnit = 'y';
-                this.hAxisFormat = 'yyyy';
+                this.hAxisFormat = this.xAxisFormat(DetailLevel.y);
                 this.from = new Date(0);
                 this.to = new Date('2999-01-01T00:00:00Z');
                 break;
             case 'w':
             case 'd':
                 timeUnit = 'months';
-                this.hAxisFormat = 'MMM';
+                this.hAxisFormat = this.xAxisFormat(DetailLevel.months);
                 this.from = new Date(this.from.setMonth(0, 0));
                 this.from = new Date(this.from.setHours(0, 0, 0, 0));
                 this.to = new Date(this.from.setFullYear(this.from.getFullYear() + 1));
                 break;
             case 'h':
                 timeUnit = 'd';
-                this.hAxisFormat = 'dd';
+                this.hAxisFormat = this.xAxisFormat(DetailLevel.d);
                 this.from = new Date(this.from.setDate(0));
                 this.from = new Date(this.from.setHours(0, 0, 0, 0));
                 this.to = new Date(this.from.setMonth(this.from.getMonth() + 1));
                 break;
             case 'm':
                 timeUnit = 'h';
-                this.hAxisFormat = 'HH';
+                this.hAxisFormat = this.xAxisFormat(DetailLevel.h);
                 this.from = new Date(this.from.setHours(0, 0, 0, 0));
                 this.to = new Date(this.from.setDate(this.from.getDate() + 1));
                 break;
             case 's':
                 timeUnit = 'm';
-                this.hAxisFormat = 'mm';
+                this.hAxisFormat = this.xAxisFormat(DetailLevel.m);
                 this.from = new Date(this.from.setMinutes(0, 0, 0));
                 this.to = new Date(this.from.setHours(this.from.getHours() + 1));
                 break;
             case 'ms':
                 timeUnit = 's';
-                this.hAxisFormat = 'ss';
+                this.hAxisFormat = this.xAxisFormat(DetailLevel.ms);
                 this.from = new Date(this.from.setSeconds(0, 0));
                 this.to = new Date(this.from.setMinutes(this.from.getMinutes() + 1));
         }
@@ -761,12 +844,12 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
         }
         const axis = axes[axisIndex];
-
+        let newAxes: ChartsExportVAxesModel[] = [];
         if (axis.subAxes !== undefined && axis.subAxes.length > 0) {
             const cpy = JSON.parse(JSON.stringify(axis.subAxes)) as ChartsExportVAxesModel[];
             cpy.forEach(sub => sub.displayOnSecondVAxis = axis.displayOnSecondVAxis);
-            this.modifiedVaxes = cpy;
-            this.stacked = true;
+            newAxes = cpy;
+
         } else if (axis.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum && (axis.deviceGroupId !== undefined || axis.locationId !== undefined)) {
             // we can split this!
             this.chooseColors = true;
@@ -774,13 +857,30 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             cpy.deviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy.Separate;
             cpy.valueAlias = '';
             cpy.valueName = '';
-            this.modifiedVaxes = [cpy];
-            this.stacked = true;
+            newAxes = [cpy];
         } else {
             return;
         }
+        this.modifiedVaxes = newAxes;
+        this.drillStackPush(axes, this.stacked);
+        this.stacked = true;
         this.ready = false;
         this.chartjs.tooltipDisplay = 'none';
+        this.cd.detectChanges();
+        this.refresh();
+    }
+
+    drillUp() {
+        const newAxes = this.drillStackPop();
+        if (this.drillStackPeek() !== null) {
+            this.modifiedVaxes = newAxes?.axes || null;
+        } else {
+            this.chooseColors = null;
+            this.modifiedVaxes = null;
+        }
+        this.ready = false;
+        this.chartjs.tooltipDisplay = 'none';
+        this.stacked = newAxes?.stacked || null;
         this.cd.detectChanges();
         this.refresh();
     }
@@ -930,14 +1030,19 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.zoomOutEnabled() && ((this.zoom && header) || (!this.zoom && !header))) {
             res.icons.push('zoom_out');
             res.disabled.push(!this.ready);
-            res.tooltips.push('zoom out');
+            res.tooltips.push('Zoom Out');
+        }
+        if (this.drillStackPeek() !== null && !header) {
+            res.icons.push('arrow_upward');
+            res.disabled.push(!this.ready);
+            res.tooltips.push('Drill Up');
         }
         if ((this.zoom && header) || (!this.zoom && !header)) {
             for (let i = 0; i < localStorage.length; i++) {
                 if (localStorage.key(i)?.startsWith(this.widget.id)) {
                     res.icons.push('undo');
                     res.disabled.push(!this.ready);
-                    res.tooltips.push('reset');
+                    res.tooltips.push('Reset');
                     break;
                 }
             }
@@ -955,6 +1060,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.ready = false;
                 this.chartsService.cleanup(this.widget);
                 setTimeout(() => this.refresh(), 1000);
+                return;
+            case 'arrow_upward':
+                this.drillUp();
                 return;
         }
     }
@@ -987,6 +1095,19 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
+    private groupTimeFromDetailLevel(detailLevel: DetailLevel): string {
+        switch (detailLevel) {
+            case DetailLevel.ms: return '1ms';
+            case DetailLevel.s: return '1s';
+            case DetailLevel.m: return '1m';
+            case DetailLevel.h: return '1h';
+            case DetailLevel.d: return '1d';
+            case DetailLevel.months: return '1months';
+            case DetailLevel.y: return '1y';
+            default: return '';
+        }
+    }
+
     private xAxisFormat(detailLevel: DetailLevel): string {
         switch (detailLevel) {
             case DetailLevel.ms:
@@ -998,7 +1119,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             case DetailLevel.h:
                 return 'HH';
             case DetailLevel.d:
-                return 'EEE';
+                return 'dd.MM.';
             case DetailLevel.months:
                 return 'MMM';
             case DetailLevel.y:
@@ -1006,5 +1127,33 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             default:
                 return '';
         }
+    }
+
+    private drillStackPush(axes: ChartsExportVAxesModel[], stacked: boolean): void {
+        const stack = JSON.parse(localStorage.getItem(this.widget.id + '_drillStack') || '[]') as { axes: ChartsExportVAxesModel[], stacked: boolean }[];
+        stack.push({ axes, stacked });
+        localStorage.setItem(this.widget.id + '_drillStack', JSON.stringify(stack));
+    }
+
+    private drillStackPop(): ({ axes: ChartsExportVAxesModel[], stacked: boolean } | null) {
+        const stack = JSON.parse(localStorage.getItem(this.widget.id + '_drillStack') || '[]') as { axes: ChartsExportVAxesModel[], stacked: boolean }[];
+        if (stack.length === 0) {
+            return null;
+        }
+        const res = stack.pop();
+        if (stack.length === 0) {
+            localStorage.removeItem(this.widget.id + '_drillStack');
+        } else {
+            localStorage.setItem(this.widget.id + '_drillStack', JSON.stringify(stack));
+        }
+        return res || null;
+    }
+
+    private drillStackPeek(): ({ axes: ChartsExportVAxesModel[], stacked: boolean } | null) {
+        const stack = JSON.parse(localStorage.getItem(this.widget.id + '_drillStack') || '[]') as { axes: ChartsExportVAxesModel[], stacked: boolean }[];
+        if (stack.length === 0) {
+            return null;
+        }
+        return stack[stack.length - 1];
     }
 }

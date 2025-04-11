@@ -21,29 +21,29 @@
         </button>
     </div>
     <div *ngIf="optionAdd">
-        <button mat-icon-button color="accent" (click)="add()" matTooltip="add element">
+        <button mat-icon-button color="accent" (click)="add()" matTooltip="Add Element">
             <mat-icon>add</mat-icon>
         </button>
     </div>
     <div fxFlex class="drag-handler"></div>
     <div>
-        <button mat-icon-button color="accent" (click)="refresh()" matTooltip="refresh widget" [disabled]="refreshing">
+        <button mat-icon-button color="accent" (click)="refresh()" matTooltip="Refresh" [disabled]="refreshing">
             <mat-icon *ngIf="!refreshing">refresh</mat-icon>
             <mat-icon *ngIf="refreshing">sync</mat-icon>
         </button>
     </div>
     <div *ngIf="optionZoom">
-        <button mat-icon-button color="accent" (click)="zoomWidget()" matTooltip="zoom widget">
+        <button mat-icon-button color="accent" (click)="zoomWidget()" matTooltip="Maximize">
             <mat-icon>zoom_out_map</mat-icon>
         </button>
     </div>
     <div>
-        <button *ngIf="(widgetHasUpdateableProperties && userHasUpdatePropertiesAuthorization) || userHasUpdateNameAuthorization" mat-icon-button color="accent" (click)="edit()" matTooltip="edit widget">
+        <button *ngIf="(widgetHasUpdateableProperties && userHasUpdatePropertiesAuthorization) || userHasUpdateNameAuthorization" mat-icon-button color="accent" (click)="edit()" matTooltip="Edit">
             <mat-icon>edit</mat-icon>
         </button>
     </div>
     <div>
-        <button *ngIf="userHasDeleteAuthorization" mat-icon-button color="accent" (click)="delete()" matTooltip="delete widget">
+        <button *ngIf="userHasDeleteAuthorization" mat-icon-button color="accent" (click)="delete()" matTooltip="Delete">
             <mat-icon>delete</mat-icon>
         </button>
     </div>

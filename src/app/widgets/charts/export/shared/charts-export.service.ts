@@ -516,6 +516,9 @@ export class ChartsExportService {
         }
 
         series2.forEach((item: (string | number | boolean)[]) => {
+            if (item[0] === null) {
+                return;
+            }
             const dataPoint: (Date | number | string | null)[] = [new Date(item[0] as string)];
             indices.forEach((resp) => {
                 let value = item[resp.index] as any;

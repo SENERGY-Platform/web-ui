@@ -48,11 +48,11 @@
                         <senergy-no-data
                             [showIf]="configureWidget === false && (chartExportData.dataTable === undefined || chartExportData.dataTable[0].length === 0)"></senergy-no-data>
                     </div>
-                    <div *ngIf="widget.properties.chartType === 'ColumnChart'" class="maximized">
-                        <canvas baseChart [data]="chartjs.data" [options]="chartjs.options" type="bar"
-                            id="chartjs-{{widget.id}}" (contextmenu)="resetChartjsZoom($event); false"></canvas>
+                    <div *ngIf="widget.properties.chartType === 'ColumnChart'" class="maximized" #chartjswidget>
+                        <canvas *ngIf="chartjs.data !== undefined" baseChart [data]="chartjs.data" [options]="chartjs.options" type="bar"
+                            id="chartjs-{{widget.id}}" (contextmenu)="resetChartjsZoom($event); false" [plugins]="chartjs.plugins"></canvas>
                         <senergy-no-data
-                            [showIf]="configureWidget === false && chartExportData === undefined"></senergy-no-data>
+                            [showIf]="configureWidget === false && chartjs.data === undefined"></senergy-no-data>
                         <div *ngIf="chartjs.tooltipAllowed && chartjs.tooltipContext !== undefined" id="chartjs-tooltip"
                             class="mat-elevation-z4" [ngStyle]="chartjsTooltipStyle">
                             <table>
@@ -74,7 +74,7 @@
                                         <td>
                                             <button mat-icon-button color="accent" class="small-icon-button"
                                                 *ngIf="drillable(this.chartjs.tooltipDatasets[i].datasetIndex)"
-                                                (click)="drillDown(this.chartjs.tooltipDatasets[i].datasetIndex)"><mat-icon>search_insights</mat-icon></button>
+                                                (click)="drillDown(this.chartjs.tooltipDatasets[i].datasetIndex)" matTooltip="Drill Down"><mat-icon>arrow_downward</mat-icon></button>
                                         </td>
                                     </tr>
                                 </tbody>
