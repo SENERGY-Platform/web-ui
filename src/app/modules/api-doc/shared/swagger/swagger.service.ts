@@ -19,10 +19,10 @@
 import { HttpClient } from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { environment } from 'src/environments/environment';
-import {SwaggerModel} from './swagger.model';
+import {DocInfo, SwaggerModel} from './swagger.model';
 
 @Injectable({
     providedIn: 'root',
@@ -32,14 +32,16 @@ export class SwaggerService {
     private invalidAfter: Date = new Date();
 
     public baseUrl: string = environment.swaggerUrl;
-    authorizations: PermissionTestResponse;
+    authorizationsSwagger: PermissionTestResponse;
+    authorizationsAsyncAPI: PermissionTestResponse;
 
     constructor(
         private http: HttpClient,
         private ladonService: LadonService
     ) {
         // Load in constructor to only load permissions once and not for each request as services are singletons in root
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.swaggerUrl);
+        this.authorizationsSwagger = this.ladonService.getUserAuthorizationsForURI(environment.swaggerUrl + '/storage/swagger');
+        this.authorizationsAsyncAPI = this.ladonService.getUserAuthorizationsForURI(environment.swaggerUrl + '/storage/asyncapi');
     }
 
     public getSwagger(): Observable<SwaggerModel[]> {
@@ -49,6 +51,11 @@ export class SwaggerService {
             return of(this.cachedSwagger);
         }
     }
+
+    public getAsync(): Observable<DocInfo[]> {
+        return this.http.get<DocInfo[]>(this.baseUrl + '/storage/asyncapi');
+    }
+
 
     public getSingleSwagger(title: string): Observable<SwaggerModel> {
         if (this.needsReload()) {
@@ -62,9 +69,13 @@ export class SwaggerService {
         return of(this.filterSingleSwagger(title));
     }
 
+    public getSingleAsync(id: string): Observable<any> {
+        return this.http.get<DocInfo[]>(this.baseUrl + '/docs/asyncapi/' + id);
+    }
+
     private loadSwagger(): Observable<SwaggerModel[]> {
         return new Observable<SwaggerModel[]>((obs) => {
-            this.http.get(this.baseUrl).subscribe((res) => {
+            this.http.get(this.baseUrl+'/swagger').subscribe((res) => {
                 this.cachedSwagger = res as SwaggerModel[];
                 const d = new Date();
                 d.setHours(d.getHours() + 1);
@@ -89,6 +100,6 @@ export class SwaggerService {
     }
 
     userHasReadAuthorization(): boolean {
-        return this.authorizations['GET'];
+        return this.authorizationsSwagger['GET'] || this.authorizationsAsyncAPI['GET'];
     }
 }

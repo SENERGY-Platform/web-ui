@@ -16,39 +16,51 @@
   ~
   -->
 
-<div class="layout-margin">
-    <router-outlet></router-outlet>
+<div class="layout-margin card-container">
+    <span class="search-button-container">
+        <senergy-searchbar></senergy-searchbar>
+    </span>
 
-    <!--<mat-card [hidden]="!ready" class="search">
-        <mat-icon class="material-icons">search</mat-icon>
-        <mat-form-field appearance="outline">
-            <mat-label>Search</mat-label>
-            <input (keyup)="search()" [(ngModel)]="query" [placeholder]="searchPlaceholder" matInput type="text">
-            <mat-error senergyError label="Search"></mat-error>
-        </mat-form-field>
-    </mat-card>-->
+    <div [hidden]="!ready" *ngIf="swaggerService.authorizationsSwagger['GET']">
+        <h1>REST API</h1>
+        <div>
+            <div [hidden]="!ready" class="service-container">
+                <mat-card appearance="outlined" *ngFor="let element of swaggerListShown; let i = index"
+                    [routerLink]="['/dev/api', 'openapi', element.info.title]" class="hover-mat-card entry-card api-card">
+                    <mat-card-header>
+                        <mat-card-title>{{ element.info.title }}</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <p>
+                            {{ element.info.description }}
+                        </p>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+    </div>
 
-    <div [hidden]="!ready" class="card-container" fxFlex="auto">
-        <div [hidden]="!ready" class="service-container" fxFlex="auto">
-            <mat-card appearance="outlined" *ngFor="let element of swaggerListShown; let i = index"
-                      [routerLink]="['/dev/api/', element.info.title]"
-                      class="hover-mat-card entry-card api-card">
-                <mat-card-header>
-                    <mat-card-title>{{ element.info.title }}</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                    <p>
-                        {{ element.info.description }}
-                    </p>
-                </mat-card-content>
-            </mat-card>
+    <div [hidden]="!ready" *ngIf="swaggerService.authorizationsAsyncAPI['GET']" style="padding-top: 1rem">
+        <h1>Async API</h1>
+        <div>
+            <div [hidden]="!ready" class="service-container">
+                <mat-card appearance="outlined" *ngFor="let element of asyncListShown; let i = index"
+                    [routerLink]="['/dev/api/', 'asyncapi', element.id]" class="hover-mat-card entry-card api-card">
+                    <mat-card-header>
+                        <mat-card-title>{{ element.title }}</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <p>
+                            {{ element.description }}
+                        </p>
+                    </mat-card-content>
+                </mat-card>
+            </div>
         </div>
     </div>
 
     <senergy-spinner [show]="!ready"></senergy-spinner>
+
+    <router-outlet></router-outlet>
+
 </div>
-
-
-
-
-

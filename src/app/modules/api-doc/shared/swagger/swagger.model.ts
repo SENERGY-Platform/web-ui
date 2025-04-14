@@ -36,3 +36,10 @@ export interface SwaggerModel {
         name: string;
     }[];
 }
+
+export interface DocInfo {
+    description: string;
+    title: string;  
+    version: any;
+    id: string;
+}

@@ -112,7 +112,8 @@ export class LadonService {
             environment.exportService,
             environment.brokerExportServiceUrl,
             environment.pipelineRegistryUrl,
-            environment.swaggerUrl,
+            environment.swaggerUrl + '/storage/swagger',
+            environment.swaggerUrl + '/storage/asyncapi',
             environment.importDeployUrl,
             environment.importRepoUrl,
 

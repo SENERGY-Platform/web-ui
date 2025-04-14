@@ -16,20 +16,20 @@
  *
  */
 
-import {CommonModule} from '@angular/common';
-import {Component, NgModule} from '@angular/core';
-import {FlexLayoutModule} from '@ngbracket/ngx-layout';
+import { CommonModule } from '@angular/common';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 
-import {FormsModule} from '@angular/forms';
-import {MatCardModule} from '@angular/material/card';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatIconModule} from '@angular/material/icon';
-import {MatInputModule} from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import {RouterModule, Routes} from '@angular/router';
-import {CoreModule} from '../../core/core.module';
-import {ApiDocsComponent} from './api-docs/api-docs.component';
-import {SingleServiceDocComponent} from './single-service-doc/single-service-doc.component';
+import { RouterModule, Routes } from '@angular/router';
+import { CoreModule } from '../../core/core.module';
+import { ApiDocsComponent } from './api-docs/api-docs.component';
+import { SingleServiceDocComponent } from './single-service-doc/single-service-doc.component';
 
 
 const routes: Routes = [
@@ -39,7 +39,7 @@ const routes: Routes = [
         component: ApiDocsComponent,
     },
     {
-        path: 'dev/api/:id',
+        path: 'dev/api/:type/:id',
         data: { header: 'API Documentation' },
         component: SingleServiceDocComponent,
     }
@@ -62,6 +62,9 @@ const routes: Routes = [
         SingleServiceDocComponent,
         ApiDocsComponent,
     ],
+    schemas: [
+        CUSTOM_ELEMENTS_SCHEMA,
+    ]
 })
 export class ApiDocModule {
 }

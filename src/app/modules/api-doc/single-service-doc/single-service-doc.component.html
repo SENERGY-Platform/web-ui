@@ -16,7 +16,9 @@
   ~
   -->
 <div class="container">
-    <link rel="stylesheet" href="/swagger-ui.css"/> <!-- export defined in angular.json -->
-    <div [hidden]="!ready" id="swagger"></div>
-    <senergy-spinner [show]="!ready"></senergy-spinner>
+  <link rel="stylesheet" href="/swagger-ui.css" /> <!-- export defined in angular.json -->
+  <div  [hidden]="!ready || type !== 'openapi'" id="swagger">
+  </div>
+  <asyncapi-component *ngIf="type === 'asyncapi'" [hidden]="!ready" [schema]="swagger" cssImportPath="asyncapi.css"></asyncapi-component>
+  <senergy-spinner [show]="!ready"></senergy-spinner>
 </div>

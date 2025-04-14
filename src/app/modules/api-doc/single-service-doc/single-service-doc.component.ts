@@ -16,12 +16,12 @@
  *
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {AuthorizationService} from 'src/app/core/services/authorization.service';
-import {SwaggerService} from '../shared/swagger/swagger.service';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import { SwaggerService } from '../shared/swagger/swagger.service';
 import SwaggerUI from 'swagger-ui';
-
+import '@asyncapi/web-component/lib/asyncapi-web-component';
 
 @Component({
     selector: 'senergy-single-service-doc',
@@ -33,28 +33,39 @@ export class SingleServiceDocComponent implements OnInit {
     public swagger: any;
     public ui: any;
     public ready = false;
+    public type = '';
 
     constructor(private authService: AuthorizationService, private route: ActivatedRoute, private swaggerService: SwaggerService) {
     }
 
     public ngOnInit() {
-
         this.route.params.subscribe((params) => {
-            this.swaggerService.getSingleSwagger(decodeURIComponent(params.id)).subscribe((api) => {
-                this.swagger = api;
-                this.authService.getToken().then((token: any) => {
-                    this.ui = SwaggerUI({
-                        spec: this.swagger,
-                        dom_id: '#swagger',
-                        requestInterceptor(req) {
-                            req.headers['Authorization'] = token;
-                            return req;
-                        }
+            this.type = params.type;
+            if (params.type === 'openapi') {
+                this.swaggerService.getSingleSwagger(decodeURIComponent(params.id)).subscribe((api) => {
+                    if (api === null) {
+                        return;
+                    }
+                    this.swagger = api;
+                    this.authService.getToken().then((token: any) => {
+                        this.ui = SwaggerUI({
+                            spec: this.swagger,
+                            dom_id: '#swagger',
+                            requestInterceptor(req) {
+                                req.headers['Authorization'] = token;
+                                return req;
+                            }
+                        });
+                        this.ready = true;
                     });
+
+                });
+            } else if (params.type === 'asyncapi') {
+                this.swaggerService.getSingleAsync(decodeURIComponent(params.id)).subscribe((api) => {
+                    this.swagger = api;
                     this.ready = true;
                 });
-
-            });
+            }
         });
     }
 }

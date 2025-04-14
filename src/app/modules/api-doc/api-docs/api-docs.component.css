@@ -63,4 +63,5 @@
 
 .card-container {
     overflow-y: auto;
+    max-height: calc(100% - 86px);
 }
