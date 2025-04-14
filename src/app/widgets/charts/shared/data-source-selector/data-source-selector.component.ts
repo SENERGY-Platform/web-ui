@@ -247,8 +247,10 @@ export class DataSourceSelectorComponent implements OnInit {
 
         this.form.valueChanges.subscribe({
             next: () => {
+                if (!this.ready) {
+                    return;
+                }
                 const newDataSourceConfig: DataSourceConfig = this.form.value;
-                // console.log('emiting', newDataSourceConfig);
                 this.updatedDataSourceConfig.emit(newDataSourceConfig);
             }
         });
