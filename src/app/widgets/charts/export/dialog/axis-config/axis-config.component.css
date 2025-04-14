@@ -59,7 +59,10 @@
 }
 
 .drop-zone {
-    height: 4em;
-    border-top: dotted;
+    min-height: 4em;
     text-align: center;
+}
+
+.drop-zone-active {
+    border-top: dotted;
 }

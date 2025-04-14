@@ -113,7 +113,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="column w-100" cdkDropList (cdkDropListDropped)="dropped.emit({$event, target: element})"
+                <div class="column w-100 drop-zone" [ngClass]="{'drop-zone-active': dragging}"  cdkDropList (cdkDropListDropped)="dropped.emit({$event, target: element})"
                     [id]="getId()" [cdkDropListConnectedTo]="connectedNodes(element)">
                     <senergy-axis-config *ngFor="let child of element.subAxes" class="w-100" [element]="child"
                         [treeControl]="treeControl" [groupTypeIsDifference]="groupTypeIsDifference"
