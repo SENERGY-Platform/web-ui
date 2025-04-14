@@ -109,13 +109,18 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                             }
                             return;
                         case 'mousemove':
-                            if (this.chartJsCanvas?.nativeElement === undefined) {
+                            const style = (chart.canvas?.parentNode as any)?.style;
+                            if (style === null) {
                                 return;
                             }
                             if (found) {
-                                this.chartJsCanvas.nativeElement.style.cursor = 'zoom-in';
+                                if (style !== null) {
+                                    style.cursor = 'zoom-in';
+                                }
                             } else if (this.chartjs.cursorLocked !== true) {
-                                this.chartJsCanvas.nativeElement.style.cursor = 'default';
+                                if (style !== null) {
+                                    style.cursor = 'default';
+                                }
                             }
                             return;
                     }
@@ -156,8 +161,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             this.chartExport = content;
         }
     }
-
-    @ViewChild('chartjswidget') chartJsCanvas: any | undefined;
 
     constructor(
         private chartsService: ChartsService,
@@ -268,12 +271,16 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 animation: false,
                 maintainAspectRatio: false,
                 events: ['click', 'mousemove'],
-                onHover: (_, elements) => {
+                onHover: (_, elements, chart) => {
+                    const style = (chart.canvas?.parentNode as any)?.style;
+                    if (style === null) {
+                        return;
+                    }
                     if (elements !== undefined && elements.length === 1 && this.drillable(elements[0].datasetIndex)) {
-                        this.chartJsCanvas.nativeElement.style.cursor = 'pointer';
+                        style.cursor = 'pointer';
                         this.chartjs.cursorLocked = true;
                     } else {
-                        this.chartJsCanvas.nativeElement.style.cursor = 'default';
+                        style.cursor = 'default';
                         this.chartjs.cursorLocked = false;
                     }
                 },
@@ -683,6 +690,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         const axis = axes[axisIndex];
+        if (axis === undefined) {
+            return false;
+        }
         if (axis.subAxes !== undefined && axis.subAxes.length > 0) {
             return true;
         } else if (axis.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum && (axis.deviceGroupId !== undefined || axis.locationId !== undefined)) {
@@ -884,7 +894,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             res.disabled.push(!this.ready);
             res.tooltips.push('Zoom Out');
         }
-        if (this.drillStackPeek() !== null && !header) {
+        if (this.drillStackPeek() !== null && ((this.zoom && header) || (!this.zoom && !header))) {
             res.icons.push('arrow_upward');
             res.disabled.push(!this.ready);
             res.tooltips.push('Drill Up');

@@ -365,7 +365,6 @@ export class ChartsExportService {
                         // i just created it...
                         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                         from(digestMessage(title as string, 'SHA-1')).pipe(map(digest => tableData.colors![i - 1] = '#' + digest.slice(0, 6)))));
-                    //'#' + Math.abs(hashCode(JSON.stringify(title))).toString(16).slice(0, 6)); // semi-random color that is always the same for the same title
                 }
                 return forkJoin(obs).pipe(map(_ => this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors, hAxisFormat)));
             }
@@ -463,7 +462,7 @@ export class ChartsExportService {
 
                                 const deviceId = metadata[index][metadataIndex].deviceId || ''; // just checked above
                                 const device = this.devices.get(deviceId);
-                                if (head.length > 0) {
+                                if (head.length > 0 && head != ' ') {
                                     head += ' - ';
                                 }
                                 head += device?.display_name || device?.name;
