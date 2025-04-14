@@ -429,7 +429,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
             widget.properties.stacked = this.stacked;
 
-            this.chartsExportService.getChartData(widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride, this.chooseColors).subscribe((resp: ChartsModel | ErrorModel) => {
+            const chooseColors = this.chooseColors || (widget.properties.vAxes?.length === 1 && widget.properties.vAxes[0].deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Separate && (widget.properties.vAxes[0].deviceGroupId !== undefined || widget.properties.vAxes[0].locationId !== undefined));
+
+            this.chartsExportService.getChartData(widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride, chooseColors).subscribe((resp: ChartsModel | ErrorModel) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     this.errorHasOccured = true;
                     this.errorMessage = 'No data';
