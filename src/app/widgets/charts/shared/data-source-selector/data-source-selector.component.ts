@@ -248,7 +248,7 @@ export class DataSourceSelectorComponent implements OnInit {
         this.form.valueChanges.subscribe({
             next: () => {
                 const newDataSourceConfig: DataSourceConfig = this.form.value;
-                console.log('emiting', newDataSourceConfig);
+                // console.log('emiting', newDataSourceConfig);
                 this.updatedDataSourceConfig.emit(newDataSourceConfig);
             }
         });
@@ -616,7 +616,7 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
     getDeviceGroups(request: { search?: string, limit: number, offset: number }) {
-        return this.deviceGroupsService.getDeviceGroups(request.search || '', request.limit, request.offset, 'name', 'asc', true).pipe(
+        return this.deviceGroupsService.getDeviceGroups(request.search || '', request.limit, request.offset, 'name', 'asc', false).pipe(
             map(deviceGroupsResult => {
                 const deviceGroups = deviceGroupsResult.result;
                 deviceGroups.forEach(dg => {
