@@ -941,10 +941,10 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
     private getSourceClassFromId(id: string):string {
-        if (id.includes('device')){
-            return 'Devices';
-        } else if (id.includes('device-group')) {
+        if (id.includes('device-group')) {
             return 'Device Groups';
+        } else if (id.includes('device')){
+            return 'Devices';
         } else if (id.includes('location')) {
             return 'Locations';
         } else {
