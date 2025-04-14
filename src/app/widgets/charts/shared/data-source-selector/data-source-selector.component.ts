@@ -753,21 +753,20 @@ export class DataSourceSelectorComponent implements OnInit {
 
     loadFieldOptions(selectedExports: (ChartsExportMeasurementDisplayModel | DeviceInstanceModel | DeviceGroupDisplayModel | LocationDisplayModel)[]) {
         /* Load available fields based on the choosen data source and set as options in the select-search */
-        let observables: Observable<any>[] = [];
+        const observables: Observable<any>[] = [of(null)];
         (selectedExports || []).forEach((selectedElement: ChartsExportMeasurementDisplayModel | DeviceInstanceModel | DeviceGroupDisplayModel | LocationDisplayModel) => {
             if ((selectedElement as ChartsExportMeasurementDisplayModel).values !== undefined) { // is export
-                observables = observables.concat(this.updateExportFields(selectedElement as ChartsExportMeasurementDisplayModel));
+                observables.push(this.updateExportFields(selectedElement as ChartsExportMeasurementDisplayModel));
             } else if ((selectedElement as DeviceGroupDisplayModel)?.criteria !== undefined) { // is device group
-                observables = observables.concat(this.updateGroupFields(selectedElement as DeviceGroupDisplayModel));
+                observables.push(this.updateGroupFields(selectedElement as DeviceGroupDisplayModel));
             } else if (selectedElement.id.startsWith('urn:infai:ses:location:')) {
-                observables = observables.concat(this.updateLocationFields(selectedElement as LocationDisplayModel));
+                observables.push(this.updateLocationFields(selectedElement as LocationDisplayModel));
             } else {
-                observables = observables.concat(this.updateDeviceFields(selectedElement as DeviceInstanceModel));
+                observables.push(this.updateDeviceFields(selectedElement as DeviceInstanceModel));
             }
         });
 
         return forkJoin(observables).pipe(
-            defaultIfEmpty([]), // in case observables is empty
             map((results: any) => {
                 const options: Map<string, ChartsExportVAxesModel[]> = new Map();
                 results.forEach((result: any) => {
