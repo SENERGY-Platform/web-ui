@@ -47,8 +47,8 @@
                           fxLayoutAlign="space-between center" class="selected-device-card">
                     <mat-card-title>
                     <div class="selected-device-info">
-                        <div matTooltip="{{item.name}}" class="selected-device-name">
-                            {{item.name}}
+                        <div class="selected-device-name">
+                            {{item.display_name || item.name || item.id}}
                         </div>
                     </div>
                     </mat-card-title>
