@@ -27,7 +27,7 @@ import {
 } from '../shared/device-groups.model';
 import {Attribute, DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
 import { debounceTime, delay } from 'rxjs/operators';
-import { DeviceTypeAspectModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeAspectModel, DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
 import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/pipeline-registry.service';
@@ -50,7 +50,7 @@ export class DeviceGroupsEditComponent implements OnInit {
 
     deviceCache: Map<string, DeviceInstancesBaseModel> = new Map<string, DeviceInstancesBaseModel>();
     functionsCache: Map<string, DeviceTypeFunctionModel> = new Map<string, DeviceTypeFunctionModel>();
-    aspectCache: Map<string, DeviceTypeAspectModel> = new Map<string, DeviceTypeAspectModel>();
+    aspectCache: Map<string, DeviceTypeAspectNodeModel> = new Map<string, DeviceTypeAspectNodeModel>();
     deviceClassCache: Map<string, DeviceTypeDeviceClassModel> = new Map<string, DeviceTypeDeviceClassModel>();
 
     debounceTimeInMs = 500;

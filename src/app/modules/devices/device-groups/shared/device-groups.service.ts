@@ -21,7 +21,7 @@ import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {DeviceGroupCriteriaModel, DeviceGroupHelperResultModel, DeviceGroupModel} from './device-groups.model';
-import {DeviceTypeAspectModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
@@ -176,9 +176,9 @@ export class DeviceGroupsService {
             );
     }
 
-    getAspectListByIds(ids: string[]): Observable<DeviceTypeAspectModel[]> {
+    getAspectListByIds(ids: string[]): Observable<DeviceTypeAspectNodeModel[]> {
         return this.http
-            .get<DeviceTypeAspectModel[]>(environment.deviceRepoUrl + '/v2/aspects?ids='+ids.join(','))
+            .get<DeviceTypeAspectNodeModel[]>(environment.deviceRepoUrl + '/v2/aspect-nodes?ids='+ids.join(','))
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getAspectListByIds(ids)', [])),
