@@ -54,7 +54,6 @@ export const environment = {
   dashboardServiceUrl: '${process.env.DASHBOARD_SERVICE_URL}',
   usersServiceUrl: '${process.env.USERS_SERVICE_URL}',
   deviceRepoUrl: '${process.env.DEVICE_REPO_URL}',
-  deviceManagerUrl: '${process.env.DEVICE_MANAGER_URL}',
   deviceSelectionUrl: '${process.env.DEVICE_SELECTION_URL}',
   ubaUrl: '${process.env.UBA_URL}',
   dwdOpenUrl: '${process.env.DWD_OPEN_URL}',

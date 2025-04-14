@@ -73,7 +73,7 @@ export class DeviceTypeService {
 
     getDeviceType(id: string): Observable<DeviceTypeModel | null> {
         return this.http
-            .get<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types/' + encodeURIComponent(id))
+            .get<DeviceTypeModel>(environment.deviceRepoUrl + '/device-types/' + encodeURIComponent(id))
             .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null)));
     }
 
@@ -180,19 +180,19 @@ export class DeviceTypeService {
 
     createDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
         return this.http
-            .post<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types', deviceType)
+            .post<DeviceTypeModel>(environment.deviceRepoUrl + '/device-types', deviceType)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createDeviceType', null)));
     }
 
     updateDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
         return this.http
-            .put<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types/' + encodeURIComponent(deviceType.id) , deviceType)
+            .put<DeviceTypeModel>(environment.deviceRepoUrl + '/device-types/' + encodeURIComponent(deviceType.id) , deviceType)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'updateDeviceType', null)));
     }
 
     deleteDeviceType(id: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/device-types/' + id )
+            .delete<boolean>(environment.deviceRepoUrl + '/device-types/' + id )
             .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'deleteDeviceType', false)));
     }
 
@@ -326,7 +326,7 @@ export class DeviceTypeService {
     }
 
     userHasDeviceManagerAuthorization(method: AllowedMethods): boolean {
-        const deviceManagerUrl = environment.deviceManagerUrl + '/device-types';
+        const deviceManagerUrl = environment.deviceRepoUrl + '/device-types';
         return this.ladonService.getUserAuthorizationsForURI(deviceManagerUrl)[method];
     }
 

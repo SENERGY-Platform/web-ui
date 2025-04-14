@@ -55,7 +55,6 @@ export const environment = {
     dashboardServiceUrl: 'http://localhost',
     usersServiceUrl: 'http://localhost',
     deviceRepoUrl: 'http://localhost',
-    deviceManagerUrl: 'https://localhost',
     deviceSelectionUrl: 'http://localhost',
     ubaUrl: 'http://localhost',
     dwdOpenUrl: 'http://localhost',

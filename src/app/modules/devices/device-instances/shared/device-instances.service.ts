@@ -58,9 +58,9 @@ export class DeviceInstancesService {
         private locationService: LocationsService,
         private networkService: NetworksService,
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl);
-        this.authorizationsDisplayName = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl + '/devices/id/display_name');
-        this.authorizationsAttributes = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl + '/devices/id/attributes');
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices');
+        this.authorizationsDisplayName = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices/id/display_name');
+        this.authorizationsAttributes = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices/id/attributes');
     }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
@@ -76,14 +76,14 @@ export class DeviceInstancesService {
     }
 
     getDeviceInstance(id: string): Observable<DeviceInstanceModel | null> {
-        return this.http.get<DeviceInstanceModel>(environment.deviceManagerUrl + '/extended-devices/' + id).pipe(
+        return this.http.get<DeviceInstanceModel>(environment.deviceRepoUrl + '/extended-devices/' + id).pipe(
             map((resp) => resp),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstance', null)),
         );
     }
 
     getDeviceInstanceBaseModel(id: string): Observable<DeviceInstancesBaseModel | null> {
-        return this.http.get<DeviceInstancesBaseModel>(environment.deviceManagerUrl + '/devices/' + id).pipe(
+        return this.http.get<DeviceInstancesBaseModel>(environment.deviceRepoUrl + '/devices/' + id).pipe(
             map((resp) => resp),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstance', null)),
         );
@@ -91,37 +91,37 @@ export class DeviceInstancesService {
 
     updateDeviceInstance(device: DeviceInstanceModel): Observable<DeviceInstanceModel | null> {
         return this.http
-            .put<DeviceInstanceModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(device.id), device)
+            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(device.id), device)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', null)));
     }
 
     updateDeviceInstanceDisplayName(deviceId: string, newDisplayName: string) {
         return this.http
-            .put<DeviceInstanceModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/display_name', '"' + newDisplayName + '"')
+            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(deviceId) + '/display_name', '"' + newDisplayName + '"')
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
     }
 
     updateDeviceInstanceAttributes(deviceId: string, attributes: Attribute[]) {
         return this.http
-            .put<DeviceInstanceModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes', attributes)
+            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes', attributes)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
     }
 
     saveDeviceInstance(device: DeviceInstanceModel): Observable<DeviceInstanceModel | null> {
         return this.http
-            .post<DeviceInstanceModel>(environment.deviceManagerUrl + '/devices', device)
+            .post<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices', device)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'saveDeviceInstance', null)));
     }
 
     deleteDeviceInstance(id: string): Observable<DeviceInstanceModel | null> {
         return this.http
-            .delete<DeviceInstanceModel>(environment.deviceManagerUrl + '/devices/' + encodeURIComponent(id))
+            .delete<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(id))
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstance', null)));
     }
 
     deleteDeviceInstances(ids: string[]): Observable<DeviceInstanceModel | null> {
         return this.http
-            .request<DeviceInstanceModel>('DELETE', environment.deviceManagerUrl + '/devices', {body: ids})
+            .request<DeviceInstanceModel>('DELETE', environment.deviceRepoUrl + '/devices', {body: ids})
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstances', null)));
     }
 
@@ -419,7 +419,7 @@ export class DeviceInstancesService {
     }
 
     shortIdToUUID(shortId: string): Observable<string> {
-        return this.http.get<string>(environment.deviceManagerUrl+'/helper/id?short_id='+encodeURIComponent(shortId)+'&prefix='+encodeURIComponent('urn:infai:ses:device:')).pipe(
+        return this.http.get<string>(environment.deviceRepoUrl+'/helper/id?short_id='+encodeURIComponent(shortId)+'&prefix='+encodeURIComponent('urn:infai:ses:device:')).pipe(
             map((resp) => resp || ''),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'shortIdToUUID', '')),
         );

@@ -35,7 +35,7 @@ export class LocationsService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl);
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/locations');
     }
 
     getLocations(options?: {limit?: number; offset?: number; search?: string; sortBy?: string; sortDirection?: string; ids?: string[]; permission?: string}): Observable<LocationTotalModel> {
@@ -73,12 +73,12 @@ export class LocationsService {
 
     deleteLocation(id: string) {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(id))
+            .delete<boolean>(environment.deviceRepoUrl + '/locations/' + encodeURIComponent(id))
             .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'deleteLocation', false)));
     }
 
     getLocation(id: string): Observable<LocationModel | null> {
-        return this.http.get<LocationModel>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(id)).pipe(
+        return this.http.get<LocationModel>(environment.deviceRepoUrl + '/locations/' + encodeURIComponent(id)).pipe(
             map((resp) => resp),
             catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocation(id)', null)),
         );
@@ -86,13 +86,13 @@ export class LocationsService {
 
     createLocation(location: LocationModel): Observable<LocationModel | null> {
         return this.http
-            .post<LocationModel>(environment.deviceManagerUrl + '/locations', location)
+            .post<LocationModel>(environment.deviceRepoUrl + '/locations', location)
             .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'createLocation', null)));
     }
 
     updateLocation(location: LocationModel): Observable<LocationModel | null> {
         return this.http
-            .put<LocationModel>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(location.id), location)
+            .put<LocationModel>(environment.deviceRepoUrl + '/locations/' + encodeURIComponent(location.id), location)
             .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'updateLocation', null)));
     }
 

@@ -99,7 +99,6 @@ export class LadonService {
             environment.flowParserUrl,
 
             environment.apiAggregatorUrl,
-            environment.deviceRepoUrl,
             environment.iotRepoUrl,
             environment.operatorRepoUrl,
             environment.smartServiceRepoUrl,
@@ -124,11 +123,14 @@ export class LadonService {
             environment.deviceRepoUrl + '/v2/concepts',
             environment.deviceRepoUrl + '/device-types',
             environment.deviceRepoUrl + '/functions',
+            environment.deviceRepoUrl + '/device-types',
+            environment.deviceRepoUrl + '/devices/id/display_name',
+            environment.deviceRepoUrl + '/devices/id/attributes',
+            environment.deviceRepoUrl + '/devices',
+            environment.deviceRepoUrl + '/device-groups',
+            environment.deviceRepoUrl + '/hubs',
+            environment.deviceRepoUrl + '/locations',
 
-            environment.deviceManagerUrl,
-            environment.deviceManagerUrl + '/device-types',
-            environment.deviceManagerUrl + '/devices/id/display_name',
-            environment.deviceManagerUrl + '/devices/id/attributes',
 
             environment.processIoUrl,
             environment.dashboardServiceUrl + '/dashboards',

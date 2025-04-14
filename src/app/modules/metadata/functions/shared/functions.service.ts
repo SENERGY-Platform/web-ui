@@ -78,19 +78,19 @@ export class FunctionsService {
 
     updateFunction(func: DeviceTypeFunctionModel): Observable<DeviceTypeFunctionModel | null> {
         return this.http
-            .put<DeviceTypeFunctionModel>(environment.deviceManagerUrl + '/functions/' + func.id , func)
+            .put<DeviceTypeFunctionModel>(environment.deviceRepoUrl + '/functions/' + func.id , func)
             .pipe(catchError(this.errorHandlerService.handleError(FunctionsService.name, 'updateFunction', null)));
     }
 
     deleteFunction(functionId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/functions/' + functionId )
+            .delete<boolean>(environment.deviceRepoUrl + '/functions/' + functionId )
             .pipe(catchError(this.errorHandlerService.handleError(FunctionsService.name, 'deleteFunction', false)));
     }
 
     createFunction(func: DeviceTypeFunctionModel): Observable<DeviceTypeFunctionModel | null> {
         return this.http
-            .post<DeviceTypeFunctionModel>(environment.deviceManagerUrl + '/functions', func)
+            .post<DeviceTypeFunctionModel>(environment.deviceRepoUrl + '/functions', func)
             .pipe(catchError(this.errorHandlerService.handleError(FunctionsService.name, 'createFunction', null)));
     }
 

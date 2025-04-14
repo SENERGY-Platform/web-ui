@@ -49,7 +49,7 @@ export class NetworksService {
         private dialog: MatDialog,
         public snackBar: MatSnackBar,
     ) {
-        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl);
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/hubs');
     }
 
     listSyncNetworks(): Observable<HubModel[]> {
@@ -61,13 +61,13 @@ export class NetworksService {
 
     changeName(hubId: string, hubName: string): Observable<HubModel | null> {
         return this.http
-            .put<HubModel>(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hubId) + '/name', '"' + hubName + '"')
+            .put<HubModel>(environment.deviceRepoUrl + '/hubs/' + encodeURIComponent(hubId) + '/name', '"' + hubName + '"')
             .pipe(catchError(this.errorHandlerService.handleError(NetworksService.name, 'changeName', null)));
     }
 
     delete(networkId: string): Observable<{ status: number }> {
         return this.http
-            .delete(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(networkId), { responseType: 'text', observe: 'response' })
+            .delete(environment.deviceRepoUrl + '/hubs/' + encodeURIComponent(networkId), { responseType: 'text', observe: 'response' })
             .pipe(
                 map((resp) => ({ status: resp.status })),
                 catchError(this.errorHandlerService.handleError(NetworksService.name, 'delete', { status: 500 })),
@@ -76,7 +76,7 @@ export class NetworksService {
 
     update(hub: HubModel): Observable<HubModel | null> {
         return this.http
-            .put<HubModel>(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hub.id), hub)
+            .put<HubModel>(environment.deviceRepoUrl + '/hubs/' + encodeURIComponent(hub.id), hub)
             .pipe(catchError(this.errorHandlerService.handleError(NetworksService.name, 'update', null)));
     }
 

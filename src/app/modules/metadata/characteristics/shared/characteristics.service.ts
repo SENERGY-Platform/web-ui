@@ -45,7 +45,7 @@ export class CharacteristicsService {
     ): Observable<DeviceTypeCharacteristicsModel | null> {
         return this.http
             .post<DeviceTypeCharacteristicsModel>(
-                environment.deviceManagerUrl + '/characteristics',
+                environment.deviceRepoUrl + '/characteristics',
                 characteristic,
             )
             .pipe(catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'createCharacteristic', null)));
@@ -54,7 +54,7 @@ export class CharacteristicsService {
     updateConcept(characteristics: DeviceTypeCharacteristicsModel): Observable<DeviceTypeCharacteristicsModel | null> {
         return this.http
             .put<DeviceTypeCharacteristicsModel>(
-                environment.deviceManagerUrl + '/characteristics/' + characteristics.id ,
+                environment.deviceRepoUrl + '/characteristics/' + characteristics.id ,
                 characteristics,
             )
             .pipe(catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'updateConcept', null)));
@@ -62,7 +62,7 @@ export class CharacteristicsService {
 
     deleteCharacteristic(characteristicsId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/characteristics/' + characteristicsId )
+            .delete<boolean>(environment.deviceRepoUrl + '/characteristics/' + characteristicsId )
             .pipe(catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'deleteCharacteristic', false)));
     }
 
