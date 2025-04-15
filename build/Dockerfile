@@ -14,12 +14,11 @@ RUN sed 's/production: false/production: true/' src/environments/environment.ts 
 RUN npm run ng build
 
 ## STAGE 2: Run nginx to serve application ##
-FROM nginx
+FROM nginx-alpine
 ARG COMMIT="no commit provided"
 ENV COMMIT=${COMMIT}
 ARG VERSION="no version provided"
 ENV VERSION=${VERSION}
-RUN apt-get update && apt-get install -y curl
 ADD build-env.sh /
 COPY --from=builder /tmp/workspace/dist/senergy-web-ui/browser/ /usr/share/nginx/html/
 RUN chmod -R a+r /usr/share/nginx/html
