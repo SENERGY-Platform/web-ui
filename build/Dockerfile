@@ -14,7 +14,7 @@ RUN sed 's/production: false/production: true/' src/environments/environment.ts 
 RUN npm run ng build
 
 ## STAGE 2: Run nginx to serve application ##
-FROM nginx-alpine
+FROM nginx:alpine
 ARG COMMIT="no commit provided"
 ENV COMMIT=${COMMIT}
 ARG VERSION="no version provided"
