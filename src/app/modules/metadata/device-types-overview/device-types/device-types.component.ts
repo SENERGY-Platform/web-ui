@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
@@ -32,23 +32,23 @@ import {
     DeviceTypeServiceModel,
     functionTypes, senergyConnectorLocalIdConstraint,
 } from '../shared/device-type.model';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators} from '@angular/forms';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DeviceTypeService} from '../shared/device-type.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {forkJoin, Observable, of} from 'rxjs';
-import {DeviceTypeHelperService} from './shared/device-type-helper.service';
-import {NestedTreeControl} from '@angular/cdk/tree';
-import {MatTreeNestedDataSource} from '@angular/material/tree';
-import {DeviceTypesContentVariableDialogComponent} from './dialogs/device-types-content-variable-dialog.component';
-import {MatOption} from '@angular/material/core';
-import {ConceptsService} from '../../concepts/shared/concepts.service';
-import {ConceptsCharacteristicsModel} from '../../concepts/shared/concepts-characteristics.model';
-import {environment} from '../../../../../environments/environment';
-import {debounceTime, map, mergeAll} from 'rxjs/operators';
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {v4 as uuid} from 'uuid';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DeviceTypeService } from '../shared/device-type.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { forkJoin, Observable, of } from 'rxjs';
+import { DeviceTypeHelperService } from './shared/device-type-helper.service';
+import { NestedTreeControl } from '@angular/cdk/tree';
+import { MatTreeNestedDataSource } from '@angular/material/tree';
+import { DeviceTypesContentVariableDialogComponent } from './dialogs/device-types-content-variable-dialog.component';
+import { MatOption } from '@angular/material/core';
+import { ConceptsService } from '../../concepts/shared/concepts.service';
+import { ConceptsCharacteristicsModel } from '../../concepts/shared/concepts-characteristics.model';
+import { environment } from '../../../../../environments/environment';
+import { debounceTime, map, mergeAll } from 'rxjs/operators';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { v4 as uuid } from 'uuid';
 import {
     DeviceTypesContentVariableJsonDialogComponent
 } from './dialogs/device-types-content-variable-json-dialog.component';
@@ -70,8 +70,8 @@ export class DeviceTypesComponent implements OnInit {
     interactionList: string[] = Object.values(DeviceTypeInteractionEnum);
 
     firstFormGroup!: FormGroup;
-    secondFormGroup: FormGroup = new FormGroup({services: new FormArray([])});
-    attrFormGroup: FormGroup = new FormGroup({attributes: new FormArray([])});
+    secondFormGroup: FormGroup = new FormGroup({ services: new FormArray([]) });
+    attrFormGroup: FormGroup = new FormGroup({ attributes: new FormArray([]) });
     serviceGroupsAndUngroupedServices: ({ key: string; title: string; isGroup: boolean; serviceAndIndices: { service: AbstractControl; index: number }[] }[]) = [];
     editable = false;
     deviceTypeFunctionType = functionTypes;
@@ -122,14 +122,12 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     save(): void {
-        this.cleanUpServices();
-
         const newDeviceType: DeviceTypeModel = {
             id: this.firstFormGroup.getRawValue().id, // use getRawValue because control is disabled
             name: this.firstFormGroup.value.name,
             description: this.firstFormGroup.value.description,
             attributes: this.attrFormGroup.getRawValue().attributes,
-            services: this.secondFormGroup.getRawValue().services,
+            services: this.cleanUpServices(),
             service_groups: this.secondFormGroup.getRawValue().serviceGroups,
             device_class_id: this.firstFormGroup.value.device_class_id,
         };
@@ -139,7 +137,7 @@ export class DeviceTypesComponent implements OnInit {
 
     addService(key: string) {
         const formArray = this.secondFormGroup.controls['services'] as FormArray;
-        formArray.push(this.createServiceFormGroup({service_group_key: key} as DeviceTypeServiceModel));
+        formArray.push(this.createServiceFormGroup({ service_group_key: key } as DeviceTypeServiceModel));
         const formGroup = formArray.controls[formArray.length - 1] as FormGroup;
         this.initProtocolIdChangeListener(formGroup);
         this.updateServiceGroups();
@@ -284,11 +282,11 @@ export class DeviceTypesComponent implements OnInit {
 
     cloneServiceGroup(group: { key: string; title: string; isGroup: boolean; serviceAndIndices: { service: AbstractControl; index: number }[] }) {
         const newServiceFormGroup = this.addServiceGroup();
-        newServiceFormGroup.patchValue({name: this.getServiceGroup(group.key).get('name')?.value});
+        newServiceFormGroup.patchValue({ name: this.getServiceGroup(group.key).get('name')?.value });
         const key = newServiceFormGroup.get('key')?.value;
         group.serviceAndIndices.forEach(s => {
             const clonedServiceGroup = this.cloneService(s.index);
-            clonedServiceGroup.patchValue({service_group_key: key});
+            clonedServiceGroup.patchValue({ service_group_key: key });
         });
         this.updateServiceGroups();
     }
@@ -307,7 +305,7 @@ export class DeviceTypesComponent implements OnInit {
 
     expand(serviceFormGroup: AbstractControl, formControlName: string, index: number): void {
         const inOut = this.inputOutput(serviceFormGroup, formControlName, index);
-        inOut.patchValue({show: !inOut.value.show});
+        inOut.patchValue({ show: !inOut.value.show });
     }
 
     trackByIndex(index: any) {
@@ -418,30 +416,32 @@ export class DeviceTypesComponent implements OnInit {
         };
     }
 
-    private cleanUpServices() {
-        const services = this.secondFormGroup.controls['services'] as FormArray;
+    private cleanUpServices(): DeviceTypeServiceModel[] {
+        const services = this.secondFormGroup.controls['services'].value as DeviceTypeServiceModel[];
 
-        for (let i = 0; i < services.length; i++) {
-            const formGroup = services.controls[i] as FormGroup;
-            this.cleanUpInputOutputs(formGroup.controls['inputs'] as FormArray);
-            this.cleanUpInputOutputs(formGroup.controls['outputs'] as FormArray);
-        }
+        services.forEach(service => {
+            service.inputs = this.cleanUpInputOutputs(service.inputs);
+            service.outputs = this.cleanUpInputOutputs(service.outputs);
+        });
+
+        return services;
     }
 
-    private cleanUpInputOutputs(formArray: FormArray) {
+    private cleanUpInputOutputs(content: DeviceTypeContentEditModel[]): DeviceTypeContentModel[] {
         // loop from highest Index! Otherwise it could cause index problems
-        for (let j = formArray.length - 1; j >= 0; j--) {
-            const inOutControl: FormGroup = formArray.controls[j] as FormGroup;
-            const inOutContent: DeviceTypeContentTreeModel = inOutControl.value;
-            if (!this.deviceTypeHelperService.checkIfContentExists(inOutContent.dataSource.data, inOutContent.serialization)) {
-                formArray.removeAt(j);
+        for (let i = content.length - 1; i >= 0; i--) {
+            const c = content[i];
+            if (c.dataSource === undefined || !this.deviceTypeHelperService.checkIfContentExists(c.dataSource.data, c.serialization)) {
+                content.splice(i, 1);
             } else {
-                this.deviceTypeHelperService.removeField(inOutContent.dataSource.data[0], 'indices');
-                inOutControl.addControl('content_variable', new FormControl(inOutContent.dataSource.data[0]));
-                inOutControl.removeControl('dataSource');
-                inOutControl.removeControl('tree');
+                this.deviceTypeHelperService.removeField(c.dataSource.data[0], 'indices');
+                c.content_variable = c.dataSource.data[0];
+                c.dataSource = undefined;
+                c.tree = undefined;
             }
         }
+
+        return content;
     }
 
     private initFormControls() {
@@ -509,14 +509,14 @@ export class DeviceTypesComponent implements OnInit {
         const disabled = !this.editable;
         if (disabled) {
             this.firstFormGroup = this._formBuilder.group({
-                id: [{value: deviceType.id, disabled: true}],
-                name: [{disabled: true, value: deviceType.name}, Validators.required],
-                description: [{disabled: true, value: deviceType.description}],
-                device_class_id: [{disabled: true, value: deviceType.device_class_id}, Validators.required],
+                id: [{ value: deviceType.id, disabled: true }],
+                name: [{ disabled: true, value: deviceType.name }, Validators.required],
+                description: [{ disabled: true, value: deviceType.description }],
+                device_class_id: [{ disabled: true, value: deviceType.device_class_id }, Validators.required],
             });
         } else {
             this.firstFormGroup = this._formBuilder.group({
-                id: [{value: deviceType.id, disabled: true}],
+                id: [{ value: deviceType.id, disabled: true }],
                 name: [deviceType.name, Validators.required],
                 description: [deviceType.description],
                 device_class_id: [deviceType.device_class_id, Validators.required],
@@ -528,13 +528,13 @@ export class DeviceTypesComponent implements OnInit {
         const disabled = !this.editable;
         if (disabled) {
             return this._formBuilder.group({
-                id: [{value: deviceTypeService.id, disabled: true}],
-                local_id: [{disabled: true, value: deviceTypeService.local_id}],
+                id: [{ value: deviceTypeService.id, disabled: true }],
+                local_id: [{ disabled: true, value: deviceTypeService.local_id }],
                 service_group_key: [deviceTypeService.service_group_key],
-                name: [{disabled: true, value: deviceTypeService.name}, Validators.required],
-                description: [{disabled: true, value: deviceTypeService.description}],
-                protocol_id: [{disabled: true, value: deviceTypeService.protocol_id}, Validators.required],
-                interaction: [{disabled: true, value: deviceTypeService.interaction}, Validators.required],
+                name: [{ disabled: true, value: deviceTypeService.name }, Validators.required],
+                description: [{ disabled: true, value: deviceTypeService.description }],
+                protocol_id: [{ disabled: true, value: deviceTypeService.protocol_id }, Validators.required],
+                interaction: [{ disabled: true, value: deviceTypeService.interaction }, Validators.required],
                 inputs: deviceTypeService.inputs
                     ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs)
                     : this._formBuilder.array([]),
@@ -547,7 +547,7 @@ export class DeviceTypesComponent implements OnInit {
             });
         } else {
             const fg = this._formBuilder.group({
-                id: [{value: deviceTypeService.id, disabled: true}],
+                id: [{ value: deviceTypeService.id, disabled: true }],
                 local_id: [deviceTypeService.local_id, this.createLocalIdValidator()],
                 service_group_key: [deviceTypeService.service_group_key],
                 name: [deviceTypeService.name, Validators.required],
@@ -578,10 +578,10 @@ export class DeviceTypesComponent implements OnInit {
     private createLocalIdValidator(): (control: AbstractControl) => ValidationErrors | null {
         return (c: AbstractControl): ValidationErrors | null => {
             const protocolId: string = c.parent?.get('protocol_id')?.value;
-            if(!this.protocols.find(p => p.id === protocolId)?.constraints?.includes(senergyConnectorLocalIdConstraint)){
+            if (!this.protocols.find(p => p.id === protocolId)?.constraints?.includes(senergyConnectorLocalIdConstraint)) {
                 return null;
             }
-            if(c.value?.includes && (c.value.includes('#') || c.value.includes('+') || c.value.includes('/'))) {
+            if (c.value?.includes && (c.value.includes('#') || c.value.includes('+') || c.value.includes('/'))) {
                 return {
                     validateLocalId: {
                         valid: false
@@ -597,9 +597,9 @@ export class DeviceTypesComponent implements OnInit {
         let group: FormGroup;
         if (disabled) {
             group = this._formBuilder.group({
-                key: [{value: deviceTypeServiceGroup?.key || uuid(), disabled: true}],
-                name: [{value: deviceTypeServiceGroup?.name || '', disabled: true}],
-                description: [{value: deviceTypeServiceGroup?.description || '', disabled: true}],
+                key: [{ value: deviceTypeServiceGroup?.key || uuid(), disabled: true }],
+                name: [{ value: deviceTypeServiceGroup?.name || '', disabled: true }],
+                description: [{ value: deviceTypeServiceGroup?.description || '', disabled: true }],
             });
         } else {
             group = this._formBuilder.group({
@@ -616,13 +616,13 @@ export class DeviceTypesComponent implements OnInit {
         const disabled = !this.editable;
         if (disabled) {
             return this._formBuilder.group({
-                key: [{value: attribute.key, disabled: true}],
-                value: [{value: attribute.value, disabled: true}],
-                origin: [{value: attribute.origin, disabled: true}],
+                key: [{ value: attribute.key, disabled: true }],
+                value: [{ value: attribute.value, disabled: true }],
+                origin: [{ value: attribute.origin, disabled: true }],
             });
         } else {
             return this._formBuilder.group({
-                key: [{value: attribute.key, disabled: attribute.key === this.timeAttributeKey}],
+                key: [{ value: attribute.key, disabled: attribute.key === this.timeAttributeKey }],
                 value: [attribute.value],
                 origin: [attribute.origin],
             });
@@ -672,7 +672,7 @@ export class DeviceTypesComponent implements OnInit {
         const g = this._formBuilder.group({
             id: [content.id],
             name: [protocolSegment.name],
-            serialization: disabled ? [{disabled: true, value: content.serialization}] : [content.serialization],
+            serialization: disabled ? [{ disabled: true, value: content.serialization }] : [content.serialization],
             protocol_segment_id: [protocolSegment.id],
             show: [!!content.protocol_segment_id],
             dataSource,
@@ -685,33 +685,37 @@ export class DeviceTypesComponent implements OnInit {
         if (deviceType.id === '' || deviceType.id === undefined) {
             this.deviceTypeService.createDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
                 this.showMessage(deviceTypeSaved);
-                this.reload(deviceTypeSaved);
+                if (deviceTypeSaved) {
+                    this.reload(deviceTypeSaved);
+                }
             });
         } else {
             this.deviceTypeService.updateDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
                 this.showMessage(deviceTypeSaved);
-                this.reload(deviceTypeSaved);
+                if (deviceTypeSaved) {
+                    this.reload(deviceTypeSaved);
+                }
             });
         }
     }
 
     private reload(deviceType: DeviceTypeModel | null) {
         if (deviceType) {
-            this.router.routeReuseStrategy.shouldReuseRoute = function() {
+            this.router.routeReuseStrategy.shouldReuseRoute = function () {
                 return false;
             };
             this.router.onSameUrlNavigation = 'reload';
             this.router.navigate(['metadata/devicetypesoverview/devicetypes/' + deviceType.id], {
-                queryParams: {function: 'edit'},
+                queryParams: { function: 'edit' },
             });
         }
     }
 
     private showMessage(deviceTypeSaved: DeviceTypeModel | null) {
         if (deviceTypeSaved) {
-            this.snackBar.open('Device type saved successfully.', undefined, {duration: 2000});
+            this.snackBar.open('Device type saved successfully.', undefined, { duration: 2000 });
         } else {
-            this.snackBar.open('Error while saving the device type!', 'close', {panelClass: 'snack-bar-error'});
+            this.snackBar.open('Error while saving the device type!', 'close', { panelClass: 'snack-bar-error' });
         }
     }
 
@@ -782,7 +786,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private deleteIds(): void {
-        const emptyId = {id: ''};
+        const emptyId = { id: '' };
         this.firstFormGroup.patchValue(emptyId);
         const services = this.secondFormGroup.controls['services'] as FormArray;
         services.controls.forEach((service) => {
@@ -798,7 +802,7 @@ export class DeviceTypesComponent implements OnInit {
         if (contents) {
             contents.controls.forEach((content) => {
                 const contentFormGroup = content;
-                contentFormGroup.patchValue({id: ''});
+                contentFormGroup.patchValue({ id: '' });
                 const dataSourceControl = contentFormGroup.get('dataSource');
                 if (dataSourceControl) {
                     if (dataSourceControl.value && dataSourceControl.value.data.length === 1) {
@@ -847,7 +851,7 @@ export class DeviceTypesComponent implements OnInit {
 
     addDeviceTypeAttr() {
         const formArray = this.attrFormGroup.controls['attributes'] as FormArray;
-        formArray.push(this.createAttrGroup({origin: 'web-ui'} as Attribute));
+        formArray.push(this.createAttrGroup({ origin: 'web-ui' } as Attribute));
     }
 
     removeServiceAttr(service: AbstractControl, i: number) {
@@ -857,7 +861,7 @@ export class DeviceTypesComponent implements OnInit {
 
     addServiceAttr(service: AbstractControl) {
         const formArray = (service as FormGroup).controls['attributes'] as FormArray;
-        formArray.push(this.createAttrGroup({origin: 'web-ui'} as Attribute));
+        formArray.push(this.createAttrGroup({ origin: 'web-ui' } as Attribute));
     }
 
     private updateServiceGroups() {
@@ -872,13 +876,13 @@ export class DeviceTypesComponent implements OnInit {
                 serviceAndIndices: []
             });
         });
-        m.set('', {key: '', title: 'Ungrouped Services', isGroup: false, serviceAndIndices: []});
+        m.set('', { key: '', title: 'Ungrouped Services', isGroup: false, serviceAndIndices: [] });
         this.services.controls.forEach((service, index) => {
             let key = (service as FormGroup).getRawValue().service_group_key;
             if (key === undefined || key === null || key === '') {
                 key = '';
             }
-            m.get(key)?.serviceAndIndices.push({service, index});
+            m.get(key)?.serviceAndIndices.push({ service, index });
         });
 
         m.forEach(group => this.serviceGroupsAndUngroupedServices.push(group));
@@ -890,7 +894,7 @@ export class DeviceTypesComponent implements OnInit {
 
     moveServiceToGroup($event: CdkDragDrop<any, any>, key: string) {
         const idx = Number($event.item.element.nativeElement.id);
-        this.services.at(idx).patchValue({service_group_key: key});
+        this.services.at(idx).patchValue({ service_group_key: key });
         this.updateServiceGroups();
     }
 
