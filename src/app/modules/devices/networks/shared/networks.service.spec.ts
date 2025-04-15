@@ -21,10 +21,11 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('NetworksService', () => {
     beforeEach(() => {
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     imports: [MatDialogModule, MatSnackBarModule],
     providers: [NetworksService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 });

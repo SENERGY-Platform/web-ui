@@ -20,12 +20,13 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { DeploymentsConfigInitializerService } from './deployments-config-initializer.service';
 import { FormBuilder, FormControl } from '@angular/forms';
 import { V2DeploymentsPreparedModel } from '../../shared/deployments-prepared-v2.model';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 const nullPath = { path: '', characteristicId: '', aspectNode: Object({  }), functionId: '', isVoid: false, value: null, type: '', configurables: [  ] };
 
 describe('DeploymentsConfigInitializerService', () => {
     beforeEach(() => {
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [DeploymentsConfigInitializerService, FormBuilder, provideHttpClient(withInterceptorsFromDi())]
 });

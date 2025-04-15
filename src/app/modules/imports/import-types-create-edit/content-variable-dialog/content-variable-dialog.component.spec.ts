@@ -29,6 +29,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { DeviceTypeCharacteristicsModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ContentVariableDialogComponent', () => {
     let component: ContentVariableDialogComponent;
@@ -53,7 +54,7 @@ describe('ContentVariableDialogComponent', () => {
     let r: any;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
             declarations: [ContentVariableDialogComponent],
             imports: [
                 CoreModule,

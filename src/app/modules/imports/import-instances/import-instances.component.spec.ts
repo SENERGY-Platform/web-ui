@@ -44,6 +44,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ImportInstancesComponent', () => {
     let component: ImportInstancesComponent;
@@ -94,7 +95,7 @@ describe('ImportInstancesComponent', () => {
     authorizationServiceSpy.getUserRoles.and.returnValue(['user']);
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [ImportInstancesComponent],
     imports: [CoreModule,
         RouterModule.forRoot([], {}),

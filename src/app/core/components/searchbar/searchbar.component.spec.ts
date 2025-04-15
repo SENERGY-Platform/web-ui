@@ -20,6 +20,7 @@ import { SearchbarComponent } from './searchbar.component';
 import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('SearchbarComponent', () => {
     let component: SearchbarComponent;
@@ -27,7 +28,7 @@ describe('SearchbarComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({
+            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
                 imports: [BrowserAnimationsModule, MatInputModule, ReactiveFormsModule],
                 declarations: [SearchbarComponent],
             }).compileComponents();

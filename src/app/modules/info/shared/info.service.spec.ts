@@ -2,12 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 
 import { InfoService } from './info.service';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('InfoService', () => {
     let service: InfoService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
             providers: [
                 {provide: MatDialog, useValue: {}}
             ]

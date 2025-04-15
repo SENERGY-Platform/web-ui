@@ -33,6 +33,7 @@ import { of } from 'rxjs';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeviceInstancesComponent', () => {
     let component: DeviceInstancesComponent;
@@ -51,7 +52,7 @@ describe('DeviceInstancesComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({
+            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [DeviceInstancesComponent],
     imports: [MatDialogModule,
         MatSnackBarModule,

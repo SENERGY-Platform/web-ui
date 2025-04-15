@@ -17,11 +17,12 @@
 import { TestBed } from '@angular/core/testing';
 
 import { UtilService } from './util.service';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('UtilService', () => {
     let service: UtilService;
     beforeEach(() => {
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
             providers: [UtilService],
         });
         service = TestBed.inject(UtilService);

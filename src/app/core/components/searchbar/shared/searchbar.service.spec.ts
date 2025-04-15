@@ -17,10 +17,11 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { SearchbarService } from './searchbar.service';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('SearchbarService', () => {
     beforeEach(() => {
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
             providers: [SearchbarService],
         });
     });

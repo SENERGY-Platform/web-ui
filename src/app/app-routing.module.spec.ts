@@ -25,13 +25,14 @@ import {MockKeycloakService} from './core/services/keycloak.mock';
 import {AuthorizationServiceMock} from './core/services/authorization.service.mock';
 import {KeycloakService} from 'keycloak-angular';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('AppRoutingModule', () => {
     let appRoutingModule: AppRoutingModule;
 
     beforeEach(() => {
 
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [AppComponent],
     imports: [CoreModule, MatSnackBarModule],
     providers: [

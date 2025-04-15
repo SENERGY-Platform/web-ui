@@ -9,6 +9,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableModule} from '@angular/material/table';
 
 import {PermissionsDialogImportComponent} from './permissions-dialog-import.component';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('PermissionsDialogImportComponent', () => {
     let component: PermissionsDialogImportComponent;
@@ -17,7 +18,7 @@ describe('PermissionsDialogImportComponent', () => {
     const snackBarMock = jasmine.createSpyObj(['open']);
 
     beforeEach(waitForAsync(() => {
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
             declarations: [PermissionsDialogImportComponent],
             providers: [
                 {provide: MatDialog, useClass: MatDialogHarness},

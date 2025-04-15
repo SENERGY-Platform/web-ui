@@ -23,6 +23,7 @@ import { DashboardService } from '../../modules/dashboard/shared/dashboard.servi
 import { MatCardModule } from '@angular/material/card';
 import { WidgetModule } from '../widget.module';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('SwitchComponent', () => {
     let component: SwitchComponent;
@@ -30,7 +31,7 @@ describe('SwitchComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({
+            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [SwitchComponent],
     imports: [MatDialogModule, WidgetModule, MatCardModule],
     providers: [MatDialogModule, MatSnackBar, { provide: DashboardService, useClass: DashboardService }, provideHttpClient(withInterceptorsFromDi())]

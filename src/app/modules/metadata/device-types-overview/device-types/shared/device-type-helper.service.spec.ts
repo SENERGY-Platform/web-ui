@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { DeviceTypeHelperService } from './device-type-helper.service';
 import { DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel } from '../../shared/device-type.model';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeviceTypeHelperService', () => {
     let service: DeviceTypeHelperService;
@@ -20,7 +21,7 @@ describe('DeviceTypeHelperService', () => {
     }
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],});
         service = TestBed.inject(DeviceTypeHelperService);
     });
 

@@ -5,12 +5,13 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { BadVentilationService } from './bad-ventilation.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('BadVentilationService', () => {
   let service: BadVentilationService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
+    TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     imports: [MatDialogModule,
         MatSnackBarModule],
     providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]

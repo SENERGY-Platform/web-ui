@@ -5,13 +5,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { AnomalyPhasesComponent } from './anomaly-phases.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('AnomalyPhasesComponent', () => {
   let component: AnomalyPhasesComponent;
   let fixture: ComponentFixture<AnomalyPhasesComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [AnomalyPhasesComponent],
     imports: [MatDialogModule,
         MatSnackBarModule],

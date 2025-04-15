@@ -5,13 +5,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { EditVentilationWidgetComponent } from './edit.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('EditVentilationWidgetComponent', () => {
   let component: EditVentilationWidgetComponent;
   let fixture: ComponentFixture<EditVentilationWidgetComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [EditVentilationWidgetComponent],
     imports: [MatDialogModule,
         MatSnackBarModule],

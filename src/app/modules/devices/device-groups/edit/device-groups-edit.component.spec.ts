@@ -40,6 +40,7 @@ import { AspectsPermSearchModel } from '../../../metadata/aspects/shared/aspects
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import {FlexLayoutModule} from "@ngbracket/ngx-layout";
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeviceGroupsEditComponent', () => {
     let component: DeviceGroupsEditComponent;
@@ -512,7 +513,7 @@ describe('DeviceGroupsEditComponent', () => {
                 );
             });
 
-            TestBed.configureTestingModule({
+            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [DeviceGroupsEditComponent],
     imports: [CoreModule,
         RouterTestingModule.withRoutes([deviceGroupsEdit]),

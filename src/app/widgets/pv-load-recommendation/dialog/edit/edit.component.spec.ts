@@ -5,13 +5,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { PVLoadRecommendationEditComponent } from './edit.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('PVLoadRecommendationEditComponent', () => {
     let component: PVLoadRecommendationEditComponent;
     let fixture: ComponentFixture<PVLoadRecommendationEditComponent>;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [PVLoadRecommendationEditComponent],
     imports: [MatDialogModule,
         MatSnackBarModule],

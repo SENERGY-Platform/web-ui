@@ -5,13 +5,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { ConsumptionProfileComponent } from './consumption-profile.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ConsumptionProfileComponent', () => {
   let component: ConsumptionProfileComponent;
   let fixture: ComponentFixture<ConsumptionProfileComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [ConsumptionProfileComponent],
     imports: [MatDialogModule,
         MatSnackBarModule],

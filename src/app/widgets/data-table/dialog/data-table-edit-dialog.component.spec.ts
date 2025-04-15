@@ -49,6 +49,7 @@ import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concep
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
 import {provideRouter} from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DataTableEditDialogComponent', () => {
     let component: DataTableEditDialogComponent;
@@ -198,7 +199,7 @@ describe('DataTableEditDialogComponent', () => {
             deviceGroupServiceSpy.getAspectListByIds.and.returnValue(of([]));
             deviceGroupServiceSpy.getFunctionListByIds.and.returnValue(of([]));
             deviceGroupServiceSpy.getDeviceClassListByIds.and.returnValue(of([]));
-            TestBed.configureTestingModule({
+            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [DataTableEditDialogComponent],
     imports: [CoreModule,
         MatSnackBarModule,

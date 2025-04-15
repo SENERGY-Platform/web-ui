@@ -33,6 +33,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
 import { MatTableModule } from '@angular/material/table';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ImportDeployDialogComponent', () => {
     let component: ImportDeployEditDialogComponent;
@@ -65,7 +66,8 @@ describe('ImportDeployDialogComponent', () => {
     importInstancesServiceSpy.saveImportInstance.and.returnValue(of(true));
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({schemas: [
+            NO_ERRORS_SCHEMA],
     declarations: [ImportDeployEditDialogComponent],
     imports: [MatDialogModule,
         MatTooltipModule,

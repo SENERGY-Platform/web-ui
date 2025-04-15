@@ -44,6 +44,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { CostService } from '../../cost/shared/cost.service';
 import { ImportTypeModel } from './shared/import-types.model';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ImportTypesComponent', () => {
     let component: ImportTypesComponent;
@@ -84,7 +85,7 @@ describe('ImportTypesComponent', () => {
     permissionsServiceSpy.getComputedResourcePermissionsV2.and.callFake((_: string, ressourceIds: string[]) => of(ressourceIds.map(id => ({id, execute: true, read: true, write: true, administrate: true}))));
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [ImportTypesComponent],
     imports: [CoreModule,
         RouterModule.forRoot([], {}),

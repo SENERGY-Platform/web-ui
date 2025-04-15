@@ -32,6 +32,7 @@ import { FlowModel } from './shared/flow.model';
 import { of } from 'rxjs';
 import { CostService } from '../../cost/shared/cost.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('FlowRepoComponent', () => {
     let component: FlowRepoComponent;
@@ -65,7 +66,7 @@ describe('FlowRepoComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({
+            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [FlowRepoComponent],
     imports: [MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule],
     providers: [

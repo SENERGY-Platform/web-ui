@@ -2,13 +2,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { ListRulesComponent } from './list-rules.component';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ListRulesComponent', () => {
   let component: ListRulesComponent;
   let fixture: ComponentFixture<ListRulesComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
       declarations: [ ListRulesComponent ],
       imports: [
         MatDialogModule

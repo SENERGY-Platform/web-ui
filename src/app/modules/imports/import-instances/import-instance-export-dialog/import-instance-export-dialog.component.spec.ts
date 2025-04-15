@@ -35,6 +35,7 @@ import { MatTableModule } from '@angular/material/table';
 import { ImportTypeModel } from '../../import-types/shared/import-types.model';
 import { environment } from '../../../../../environments/environment';
 import { ExportService } from '../../../exports/shared/export.service';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ImportInstanceExportDialogComponent', () => {
     let component: ImportInstanceExportDialogComponent;
@@ -164,7 +165,7 @@ describe('ImportInstanceExportDialogComponent', () => {
     let r: any;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [ImportInstanceExportDialogComponent],
     imports: [MatDialogModule,
         MatButtonModule,

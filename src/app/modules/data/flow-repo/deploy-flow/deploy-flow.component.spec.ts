@@ -28,6 +28,7 @@ import { DialogsService } from '../../../../core/services/dialogs.service';
 import {ActivatedRoute, provideRouter} from '@angular/router';
 import { of } from 'rxjs';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeployFlowComponent', () => {
     let component: DeployFlowComponent;
@@ -35,7 +36,7 @@ describe('DeployFlowComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({
+            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [DeployFlowComponent],
     imports: [MatSnackBarModule,
         MatDialogModule,

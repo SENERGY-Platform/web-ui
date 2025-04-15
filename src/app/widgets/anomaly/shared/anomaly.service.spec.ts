@@ -5,12 +5,13 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { AnomalyService } from './anomaly.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('AnomalyService', () => {
     let service: AnomalyService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     imports: [MatDialogModule,
         MatSnackBarModule],
     providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]

@@ -25,6 +25,7 @@ import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
 import { NetworksService } from '../shared/networks.service';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 const deviceInstancesServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass(DeviceInstancesService);
 const networksServiceSpy: Spy<NetworksService> = createSpyFromClass(NetworksService);
@@ -34,7 +35,7 @@ describe('NetworksDeleteDialogComponent', () => {
     let fixture: ComponentFixture<NetworksDeleteDialogComponent>;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
             declarations: [NetworksDeleteDialogComponent],
             imports: [MatDialogModule, MatTableModule, MatTooltipModule, MatCheckboxModule, MatSnackBarModule],
             providers: [

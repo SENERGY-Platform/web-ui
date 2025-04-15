@@ -32,6 +32,7 @@ import { of } from 'rxjs';
 import { SettingsDialogService } from 'src/app/modules/settings/shared/settings-dialog.service';
 import {provideRouter} from "@angular/router";
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ToolbarComponent', () => {
     let component: ToolbarComponent;
@@ -45,7 +46,7 @@ describe('ToolbarComponent', () => {
     settingsDialogServiceSpy.userHasUpdateAuthorization.and.returnValue(of(true));
 
     beforeEach(() => {
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [ToolbarComponent],
     imports: [MatDialogModule,
         MatSnackBarModule,

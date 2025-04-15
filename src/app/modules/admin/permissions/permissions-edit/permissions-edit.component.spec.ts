@@ -20,6 +20,7 @@ import { AuthorizationService } from 'src/app/core/services/authorization.servic
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { KongService } from '../shared/services/kong.service';
 import { KongServiceMock } from '../shared/services/kong.service.mock';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('PermissionsEditComponent', () => {
     let component: PermissionsEditComponent;
@@ -28,7 +29,7 @@ describe('PermissionsEditComponent', () => {
     const snackBarMock = jasmine.createSpyObj(['open']);
 
     beforeEach(waitForAsync(() => {
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
             declarations: [PermissionsEditComponent],
             providers: [
                 {provide: MatDialogRef, useValue: {}},

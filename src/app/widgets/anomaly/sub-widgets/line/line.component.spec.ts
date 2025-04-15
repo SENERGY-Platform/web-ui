@@ -5,6 +5,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { LineComponent } from './line.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('LineComponent', () => {
   let component: LineComponent;
@@ -12,12 +13,13 @@ describe('LineComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [LineComponent],
-    imports: [MatDialogModule,
+      schemas: [NO_ERRORS_SCHEMA],
+      declarations: [LineComponent],
+      imports: [MatDialogModule,
         MatSnackBarModule],
-    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-})
-    .compileComponents();
+      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+    })
+      .compileComponents();
 
     fixture = TestBed.createComponent(LineComponent);
     component = fixture.componentInstance;
@@ -30,8 +32,8 @@ describe('LineComponent', () => {
 
   it('should calculate waiting times', () => {
     const data = [
-      {'value': 12,'timestamp': ''}
-    ]
-    component.calcWaitingTimes(data);
-  })
+      { 'value': 12, 'timestamp': '' }
+    ];
+    expect(component.calcWaitingTimes(data)).toBeDefined();
+  });
 });

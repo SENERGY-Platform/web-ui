@@ -27,6 +27,7 @@ import { AuthorizationServiceMock } from '../../../../../core/services/authoriza
 import { DialogsService } from '../../../../../core/services/dialogs.service';
 import {ActivatedRoute, provideRouter} from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeployFlowClassicComponent', () => {
     let component: DeployFlowClassicComponent;
@@ -34,7 +35,7 @@ describe('DeployFlowClassicComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({
+            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [DeployFlowClassicComponent],
     imports: [MatSnackBarModule,
         MatDialogModule,

@@ -5,13 +5,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { OpenWindowEditComponent } from './edit.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('OpenWindowEditComponent', () => {
   let component: OpenWindowEditComponent;
   let fixture: ComponentFixture<OpenWindowEditComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [OpenWindowEditComponent],
     imports: [MatDialogModule,
         MatSnackBarModule],

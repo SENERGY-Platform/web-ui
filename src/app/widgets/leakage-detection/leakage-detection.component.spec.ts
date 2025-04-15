@@ -5,13 +5,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { LeakageDetectionComponent } from './leakage-detection.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('LeakageDetectionComponent', () => {
   let component: LeakageDetectionComponent;
   let fixture: ComponentFixture<LeakageDetectionComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [LeakageDetectionComponent],
     imports: [MatDialogModule,
         MatSnackBarModule],

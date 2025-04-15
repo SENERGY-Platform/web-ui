@@ -5,13 +5,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { BadVentilationComponent } from './bad-ventilation.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('BadVentilationComponent', () => {
   let component: BadVentilationComponent;
   let fixture: ComponentFixture<BadVentilationComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [BadVentilationComponent],
     imports: [MatDialogModule,
         MatSnackBarModule],

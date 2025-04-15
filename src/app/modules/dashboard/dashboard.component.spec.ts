@@ -39,6 +39,7 @@ import { GridsterModule } from 'angular-gridster2';
 import { MatButtonModule } from '@angular/material/button';
 import {provideRouter} from "@angular/router";
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
@@ -63,7 +64,7 @@ describe('DashboardComponent', () => {
                 },
             ] as DashboardModel[]);
 
-            TestBed.configureTestingModule({
+            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [DashboardComponent],
     imports: [CoreModule,
         MatSnackBarModule,

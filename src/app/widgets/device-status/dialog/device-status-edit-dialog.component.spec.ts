@@ -46,6 +46,7 @@ import { DeviceSelectablesModel } from '../../../modules/devices/device-instance
 import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 import {provideRouter} from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeviceStatusEditDialogComponent', () => {
     let component: DeviceStatusEditDialogComponent;
@@ -174,7 +175,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 } as DeviceTypeModel),
             );
 
-            TestBed.configureTestingModule({
+            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [DeviceStatusEditDialogComponent],
     imports: [CoreModule,
         MatSnackBarModule,

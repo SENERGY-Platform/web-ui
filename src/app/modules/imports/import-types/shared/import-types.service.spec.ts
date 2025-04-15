@@ -22,6 +22,7 @@ import { ImportTypeModel } from './import-types.model';
 import { environment } from '../../../../../environments/environment';
 import { ImportTypesService } from './import-types.service';
 import { ExportValueModel } from '../../../exports/shared/export.model';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ImportTypesService', () => {
     let service: ImportTypesService;
@@ -118,7 +119,7 @@ describe('ImportTypesService', () => {
         httpClientSpy.post.and.returnValue(of(null));
         httpClientSpy.delete.and.returnValue(of(null));
 
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
             providers: [
                 { provide: HttpClient, useValue: httpClientSpy },
                 provideHttpClientTesting(),

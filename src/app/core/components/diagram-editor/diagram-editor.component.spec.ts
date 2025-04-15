@@ -17,6 +17,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { DiagramEditorComponent } from './diagram-editor.component';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DiagramEditorComponent', () => {
     let component: DiagramEditorComponent;
@@ -24,7 +25,7 @@ describe('DiagramEditorComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({
+            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
                 declarations: [DiagramEditorComponent],
             }).compileComponents();
         }),

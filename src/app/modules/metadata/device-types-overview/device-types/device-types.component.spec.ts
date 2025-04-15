@@ -38,6 +38,7 @@ import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import {v4 as uuid} from 'uuid';
 import {MatTreeModule} from '@angular/material/tree';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeviceTypesComponent', () => {
     let component: DeviceTypesComponent;
@@ -146,7 +147,7 @@ describe('DeviceTypesComponent', () => {
         deviceTypeServiceSpy.createDeviceType.and.returnValue(of({id: uuid()}));
         deviceTypeServiceSpy.updateDeviceType.and.returnValue(of({id: uuid()}));
 
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [DeviceTypesComponent],
     imports: [CoreModule,
         RouterTestingModule.withRoutes([devicetypesEdit]),
@@ -299,8 +300,7 @@ describe('DeviceTypesComponent', () => {
             fixture.detectChanges();
             tick();     // wait for async operations
             flush();    // end delayed timers in subprocesses
-
-            expect(component.secondFormGroup.getRawValue().services).toEqual([
+            expect(deviceTypeServiceSpy.createDeviceType.calls.mostRecent().args[0]['services']).toEqual([
                 {
                     id: '',
                     local_id: 'local_id_1',
@@ -369,10 +369,7 @@ describe('DeviceTypesComponent', () => {
                 tick();     // wait for async operations
                 flush();    // end delayed timers in subprocesses
 
-                console.log('Saving...', component.secondFormGroup);
-                console.log('Services:', component.secondFormGroup?.getRawValue()?.services);
-
-                expect(component.secondFormGroup.getRawValue().services).toEqual([
+                expect(deviceTypeServiceSpy.updateDeviceType.calls.mostRecent().args[0]['services']).toEqual([
                     {
                         id: 'service_id_1',
                         local_id: 'local_id_1',

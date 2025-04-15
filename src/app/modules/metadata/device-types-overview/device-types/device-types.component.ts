@@ -422,7 +422,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private cleanUpServices(): DeviceTypeServiceModel[] {
-        const services = this.secondFormGroup.controls['services'].value as DeviceTypeServiceModel[];
+        const services = this.secondFormGroup.getRawValue()['services'] as DeviceTypeServiceModel[];
 
         services.forEach(service => {
             service.inputs = this.cleanUpInputOutputs(service.inputs);
@@ -441,8 +441,8 @@ export class DeviceTypesComponent implements OnInit {
             } else {
                 this.deviceTypeHelperService.removeField(c.dataSource.data[0], 'indices');
                 c.content_variable = c.dataSource.data[0];
-                c.dataSource = undefined;
-                c.tree = undefined;
+                delete c.dataSource;
+                delete c.tree;
             }
         }
 

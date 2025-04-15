@@ -42,6 +42,7 @@ import { ImportTypeModel } from '../import-types/shared/import-types.model';
 import { ImportTypesComponent } from '../import-types/import-types.component';
 import { ConceptsService } from '../../metadata/concepts/shared/concepts.service';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ImportTypesCreateEditComponent', () => {
 
@@ -147,7 +148,7 @@ describe('ImportTypesCreateEditComponent', () => {
     paramMap.set('id', 'urn:infai:ses:import-type:1234');
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [ImportTypesCreateEditComponent],
     imports: [CoreModule,
         RouterModule.forRoot([

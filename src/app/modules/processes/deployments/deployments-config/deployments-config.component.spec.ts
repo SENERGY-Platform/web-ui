@@ -41,6 +41,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ProcessesModule } from '../../processes.module';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 const nullPath = { path: '', characteristicId: '', aspectNode: Object({  }), functionId: '', isVoid: false, value: null, type: '', configurables: [  ] };
 
@@ -75,7 +76,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
     const deploymentsServiceSpy: Spy<DeploymentsService> = createSpyFromClass<DeploymentsService>(DeploymentsService);
 
     function initSpies(): void {
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [ProcessDeploymentsConfigComponent],
     imports: [MatDialogModule,
         MatSnackBarModule,

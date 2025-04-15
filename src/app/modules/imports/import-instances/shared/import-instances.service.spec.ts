@@ -22,6 +22,7 @@ import { environment } from '../../../../../environments/environment';
 import { ImportInstancesService } from './import-instances.service';
 import { ImportInstancesModel } from './import-instances.model';
 import 'zone.js/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ImportInstancesService', () => {
     let service: ImportInstancesService;
@@ -34,7 +35,7 @@ describe('ImportInstancesService', () => {
         httpClientSpy.post.and.returnValue(of(null));
         httpClientSpy.delete.and.returnValue(of(null));
 
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
             providers: [
                 { provide: HttpClient, useValue: httpClientSpy },
                 provideHttpClientTesting(),

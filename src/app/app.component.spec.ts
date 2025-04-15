@@ -29,6 +29,7 @@ import { NotificationService } from './core/components/toolbar/notification/shar
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 import {provideRouter} from "@angular/router";
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 
 describe('AppComponent', () => {
@@ -49,7 +50,7 @@ describe('AppComponent', () => {
     });
 
     beforeEach(() => {
-        TestBed.configureTestingModule({
+        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [AppComponent],
     imports: [CoreModule, MatSnackBarModule],
     providers: [

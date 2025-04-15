@@ -8,6 +8,7 @@ import { DeviceInstancesService } from '../../shared/device-instances.service';
 
 import { DeviceInstancesFilterDialogComponent } from './device-instances-filter-dialog.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeviceInstancesFilterDialogComponent', () => {
     let component: DeviceInstancesFilterDialogComponent;
@@ -18,7 +19,7 @@ describe('DeviceInstancesFilterDialogComponent', () => {
   createSpyFromClass<MatDialogRef<DeviceInstancesFilterDialogComponent>>(MatDialogRef);
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [DeviceInstancesFilterDialogComponent],
     imports: [MatSnackBarModule, MatDialogModule],
     providers: [
