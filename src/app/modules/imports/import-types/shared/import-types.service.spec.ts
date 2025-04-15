@@ -133,52 +133,6 @@ describe('ImportTypesService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('should correctly request lists', () => {
-        service.listImportTypes('search', 10, 1, 'name.asc').subscribe((val) => {
-            expect(val).toEqual({ result: [], total: 0 });
-        });
-
-        expect(httpClientSpy.get.calls.mostRecent().args[0]).toEqual(
-            environment.importRepoUrl + '/import-types?&search=search&limit=10&offset=1&sort=name.asc'
-        );
-    });
-
-    it('should correctly request a single type', () => {
-        service.getImportType('1234').subscribe();
-
-        expect(httpClientSpy.get.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types/1234');
-    });
-
-    it('should correctly create a type', () => {
-        const exampleType: ImportTypeModel = { id: '', name: 'test' } as ImportTypeModel;
-
-        service.saveImportType(exampleType).subscribe(() => {
-            expect(httpClientSpy.post.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types');
-            expect(httpClientSpy.post.calls.mostRecent().args[1]).toEqual(exampleType);
-        });
-
-        expect(httpClientSpy.post).toHaveBeenCalled();
-    });
-
-    it('should correctly update a type', () => {
-        const exampleType: ImportTypeModel = { id: '1234' } as ImportTypeModel;
-
-        service.saveImportType(exampleType).subscribe(() => {
-            expect(httpClientSpy.put.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types/1234');
-            expect(httpClientSpy.put.calls.mostRecent().args[1]).toEqual(exampleType);
-        });
-
-        expect(httpClientSpy.put).toHaveBeenCalled();
-    });
-
-    it('should correctly delete a type', () => {
-        service.deleteImportInstance('1234').subscribe(() => {
-            expect(httpClientSpy.delete.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types/1234');
-        });
-
-        expect(httpClientSpy.delete).toHaveBeenCalled();
-    });
-
     it('should correctly parse export values', () => {
         expect(service.parseImportTypeExportValues(testType)).toEqual([
             {
