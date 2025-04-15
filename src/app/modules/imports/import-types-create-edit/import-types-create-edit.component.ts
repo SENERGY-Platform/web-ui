@@ -197,9 +197,9 @@ export class ImportTypesCreateEditComponent implements OnInit {
             },
         );
         this.types.forEach((type) => this.typeConceptCharacteristics.set(type.id, new Map()));
-        this.conceptsService.getConceptsWithCharacteristics().subscribe(
+        this.conceptsService.getConceptsWithCharacteristics({limit: 9999}).subscribe(
             (concepts) =>
-                concepts.forEach((concept) => {
+                concepts.result.forEach((concept) => {
                     concept.characteristics.forEach((characteristic) => {
                         this.saveFlattenedCharacteristics(characteristic);
                         const m = this.typeConceptCharacteristics.get(characteristic.type);

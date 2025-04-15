@@ -18,17 +18,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import {
-    ConverterExtension, ConverterExtensionTryRequest,
+    ConverterExtensionTryRequest,
     ConverterExtensionTryResult,
     DeviceTypeConceptModel
 } from '../../device-types-overview/shared/device-type.model';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { ConceptsPermSearchModel } from './concepts-perm-search.model';
 import { ConceptsCharacteristicsModel } from './concepts-characteristics.model';
-import { forkJoin } from 'rxjs';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
@@ -76,30 +74,39 @@ export class ConceptsService {
             .pipe(catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcept', null)));
     }
 
-    getConceptsWithCharacteristics(): Observable<ConceptsCharacteristicsModel[]> {
-        const list: ConceptsCharacteristicsModel[] = [];
-        return new Observable<ConceptsCharacteristicsModel[]>((obs) => {
-            this.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts) => {
-                const observables: Observable<ConceptsCharacteristicsModel | null>[] = [];
-                concepts.result.forEach((permConcept) =>
-                    observables.push(
-                        this.getConceptWithCharacteristics(permConcept.id).pipe(
-                            map((concept) => {
-                                if (concept !== null) {
-                                    list.push(concept);
-                                }
-                                return concept;
-                            }),
-                        ),
-                    ),
-                );
-                forkJoin(observables).subscribe((_) => {
-                    obs.next(list);
-                    obs.complete();
-                });
-            });
-        });
-    }
+    getConceptsWithCharacteristics(options: {
+        query?: string;
+        limit?: number;
+        offset?: number;
+        sort?: string;
+        ids?: string[];
+    }): Observable<{result: ConceptsCharacteristicsModel[]; total: number}> {
+        let params = new HttpParams();
+        if (options.query !== undefined) {
+            params = params.set('search', options.query);
+        }
+        if (options.limit !== undefined) {
+            params = params.set('limit', options.limit);
+        }
+        if (options.offset !== undefined) {
+            params = params.set('offset', options.offset);
+        }
+        if (options.sort !== undefined) {
+            params = params.set('sort', options.sort);
+        }
+        if (options.ids !== undefined) {
+            params = params.set('ids', options.ids.join(','));
+        }
+
+        return this.http
+            .get<ConceptsCharacteristicsModel[]>(environment.deviceRepoUrl + '/v2/concepts-with-characteristics', { observe: 'response', params}).pipe(
+                map(resp => {
+                    const totalStr = resp.headers.get('X-Total-Count') || '0';
+                    return {result: resp.body || [], total: parseInt(totalStr, 10)};
+                }),
+                catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConceptsWithCharacteristics()', {result: [], total: 0})),
+            );
+    }        
 
     deleteConcept(conceptId: string): Observable<boolean> {
         return this.http

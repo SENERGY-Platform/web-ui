@@ -769,9 +769,9 @@ export class DeviceTypesComponent implements OnInit {
         );
 
         observables.push(
-            this.conceptsService.getConceptsWithCharacteristics().pipe(
+            this.conceptsService.getConceptsWithCharacteristics({limit: 9999}).pipe(
                 map((concepts) => {
-                    this.concepts = concepts;
+                    this.concepts = concepts.result;
                 }),
             ),
         );
