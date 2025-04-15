@@ -15,6 +15,7 @@ RUN npm run ng build
 
 ## STAGE 2: Run nginx to serve application ##
 FROM nginx:alpine
+RUN apk add envsubst
 ARG COMMIT="no commit provided"
 ENV COMMIT=${COMMIT}
 ARG VERSION="no version provided"
