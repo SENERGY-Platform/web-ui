@@ -393,7 +393,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     initDeviceGroups() {
-        return this.deviceGroupsService.getDeviceGroups('', 10000, 0, 'name', 'asc').pipe(mergeMap(deviceGroups => {
+        return this.deviceGroupsService.getDeviceGroups('', 10000, 0, 'name', 'asc', true).pipe(mergeMap(deviceGroups => {
             this.deviceGroups = deviceGroups.result;
             const ascpectIds: Map<string, null> = new Map();
             const functionIds: Map<string, null> = new Map();
@@ -404,19 +404,8 @@ export class SingleValueEditDialogComponent implements OnInit {
                     ascpectIds.set(c.aspect_id, null);
                     functionIds.set(c.function_id, null);
                     deviceClassids.set(c.device_class_id, null);
+                    c.interaction = '';
                 });
-                obs.push(this.deviceGroupsService.getDeviceGroup(dg.id, true).pipe(map(newDg => {
-                    const criteria: DeviceGroupCriteriaModel[] = [];
-                    newDg?.criteria?.forEach(c => {
-                        if (criteria.findIndex(c2 => c.aspect_id === c2.aspect_id && c.function_id === c2.function_id && c.device_class_id === c2.device_class_id) === -1) {
-                            // filters interaction, irrelevant for widget
-                            c.interaction = '';
-                            criteria.push(c);
-                        }
-                    });
-                    dg.criteria = criteria;
-                })));
-
             });
             obs.push(this.deviceGroupsService.getAspectListByIds(Array.from(ascpectIds.keys())).pipe(map(aspects => this.aspects = aspects)));
             obs.push(this.deviceGroupsService.getFunctionListByIds(Array.from(functionIds.keys())).pipe(map(functions => this.functions = functions)));
