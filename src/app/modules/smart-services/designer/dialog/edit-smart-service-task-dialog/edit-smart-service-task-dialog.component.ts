@@ -236,7 +236,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     ngAfterViewInit(): void {
-        const that = this;
+        const setAceJsonCompleter = this.setAceJsonCompleter;
+        const setAceJsCompleter = this.setAceJsCompleter;
         const langTools = braceAcequire('ace/ext/language_tools');
         if(langTools){
             langTools.setCompleters([langTools.snippetCompleter, langTools.keyWordCompleter, {
