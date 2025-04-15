@@ -52,3 +52,5 @@ jobs:
             ghcr.io/senergy-platform/web-ui:${{ steps.tag_version.outputs.new_tag }}
             smartenergyplatform/web-ui:latest
             ghcr.io/senergy-platform/web-ui:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
