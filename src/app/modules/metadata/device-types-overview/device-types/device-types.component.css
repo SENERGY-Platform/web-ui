@@ -16,6 +16,12 @@
 
 .device-type-container {
     height: calc(100% - 64px);
+    overflow: auto;
+}
+
+.root-card {
+    margin: 1rem;
+    padding: 1rem;
 }
 
 .device-type-container ::ng-deep .mat-step-header .mat-step-icon-selected {
@@ -88,3 +94,11 @@ table {
     margin-bottom: 20px;
 }
 
+mat-card-footer {
+    padding-top: 1rem;
+    margin-right: 0.5rem;
+}
+
+mat-card-actions button {
+    margin-left: 1rem;
+}
