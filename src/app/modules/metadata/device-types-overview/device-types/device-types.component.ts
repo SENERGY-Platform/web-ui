@@ -85,6 +85,7 @@ export class DeviceTypesComponent implements OnInit {
     concepts: ConceptsCharacteristicsModel[] = [];
     equivalentProtocolSegments: string[][] = [[]];
     ready = false;
+    userHasEditAuthorization = this.deviceTypeService.userHasUpdateAuthorization();
 
     timeAttributeKey = 'senergy/time_path';
 
@@ -416,6 +417,10 @@ export class DeviceTypesComponent implements OnInit {
         };
     }
 
+    editDeviceType() {
+        this.reload({id: this.id} as DeviceTypeModel); // no more info needed
+    }
+
     private cleanUpServices(): DeviceTypeServiceModel[] {
         const services = this.secondFormGroup.controls['services'].value as DeviceTypeServiceModel[];
 
@@ -685,16 +690,12 @@ export class DeviceTypesComponent implements OnInit {
         if (deviceType.id === '' || deviceType.id === undefined) {
             this.deviceTypeService.createDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
                 this.showMessage(deviceTypeSaved);
-                if (deviceTypeSaved) {
-                    this.reload(deviceTypeSaved);
-                }
+                this.reload(deviceTypeSaved);
             });
         } else {
             this.deviceTypeService.updateDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
                 this.showMessage(deviceTypeSaved);
-                if (deviceTypeSaved) {
-                    this.reload(deviceTypeSaved);
-                }
+                this.reload(deviceTypeSaved);
             });
         }
     }

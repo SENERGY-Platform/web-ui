@@ -396,4 +396,7 @@
             </mat-card-actions>
         </mat-card-footer>
     </mat-card>
+    <button *ngIf="!editable && userHasEditAuthorization" mat-fab class="fab" (click)="editDeviceType()" matTooltip="Edit device type">
+        <mat-icon>edit</mat-icon>
+    </button>
 </div>
