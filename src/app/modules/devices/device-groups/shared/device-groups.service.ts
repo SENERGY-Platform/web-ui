@@ -169,7 +169,7 @@ export class DeviceGroupsService {
 
     getFunctionListByIds(ids: string[]): Observable<DeviceTypeFunctionModel[]> {
         return this.http
-            .get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/functions?ids='+ids.join(','))
+            .post<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/query/functions', {ids})
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getFunctionListByIds(ids)', [])),

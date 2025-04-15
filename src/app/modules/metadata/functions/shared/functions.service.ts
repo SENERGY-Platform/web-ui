@@ -52,13 +52,13 @@ export class FunctionsService {
         if (sortBy === '' || sortBy === null || sortBy === undefined) {
             sortBy = 'name';
         }
-        const params = ['limit=' + limit, 'offset=' + offset, 'sort=' + sortBy + '.' + sortDirection];
+        const params: any = {limit, offset, sort: sortBy + '.' + sortDirection};
         if (query) {
-            params.push('search=' + encodeURIComponent(query));
+            params['search'] = encodeURIComponent(query);
         }
 
         return this.http
-            .get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/functions?' + params.join('&'), { observe: 'response' }).pipe(
+            .post<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/query/functions', params, { observe: 'response' }).pipe(
                 map(resp => {
                     const totalStr = resp.headers.get('X-Total-Count') || '0';
                     return {
