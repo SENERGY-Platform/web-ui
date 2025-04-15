@@ -384,18 +384,14 @@
             </mat-accordion>
         </mat-card-content>
         <mat-card-footer *ngIf="editable">
-            <ng-template matStepLabel>Save</ng-template>
             <div *ngIf="firstFormGroup.invalid || secondFormGroup.invalid">Can't save, please fix errors.</div>
             <div *ngIf="firstFormGroup.invalid">Error in section "Information".</div>
             <div *ngIf="secondFormGroup.invalid">Error in section "Service". You need at least one service.</div>
-            <mat-card-actions align="end">
-                <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-                <button mat-raised-button color="accent" [disabled]="firstFormGroup.invalid || secondFormGroup.invalid"
-                    (click)="save()">Save
-                </button>
-            </mat-card-actions>
         </mat-card-footer>
     </mat-card>
+    <button *ngIf="editable" mat-fab class="fab" (click)="save()" matTooltip="Edit device type">
+        <mat-icon>save</mat-icon>
+    </button>
     <button *ngIf="!editable && userHasEditAuthorization" mat-fab class="fab" (click)="editDeviceType()" matTooltip="Edit device type">
         <mat-icon>edit</mat-icon>
     </button>

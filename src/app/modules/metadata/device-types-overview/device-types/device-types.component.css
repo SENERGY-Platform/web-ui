@@ -99,10 +99,6 @@ mat-card-footer {
     margin-right: 0.5rem;
 }
 
-mat-card-actions button {
-    margin-left: 1rem;
-}
-
 .fab {
     position: fixed;
     bottom: 15px;
