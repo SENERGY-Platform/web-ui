@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
@@ -22,7 +22,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
     styleUrls: ['./cycle-dialog.component.css'],
     selector: 'senergy-cycle-dialog',
 })
-export class CycleDialogComponent implements OnInit {
+export class CycleDialogComponent {
     initial: string;
     result = { cron: '', text: '' };
 
@@ -36,8 +36,6 @@ export class CycleDialogComponent implements OnInit {
     update(updateEvent: { cron: string; text: string }) {
         this.result = updateEvent;
     }
-
-    ngOnInit() {}
 
     close(): void {
         this.dialogRef.close();

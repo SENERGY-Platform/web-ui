@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
-    AbstractControl,
-    FormArray,
-    FormControl,
+    AbstractControl, FormControl,
     FormGroup, UntypedFormArray,
     UntypedFormBuilder, UntypedFormGroup,
     ValidationErrors,
     ValidatorFn
 } from '@angular/forms';
-import {duration} from 'moment';
+import { duration } from 'moment';
 import {
     ConditionalEventModel,
     DeploymentsSelectionConfigurableModel,

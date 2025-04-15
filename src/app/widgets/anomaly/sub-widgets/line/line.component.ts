@@ -1,23 +1,18 @@
-import { coerceNumberProperty } from '@angular/cdk/coercion';
-import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ChartType } from 'ng-apexcharts';
-import { GoogleChartComponent } from 'ng2-google-charts';
-import { GoogleChartsDataTable } from 'ng2-google-charts/lib/google-charts-datatable';
-import { catchError, forkJoin, map, Observable, of, throwError } from 'rxjs';
-import { ElementSizeService } from 'src/app/core/services/element-size.service';
+import { forkJoin, map, Observable, of } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ApexChartOptions } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
-import { ChartsModel } from 'src/app/widgets/charts/shared/charts.model';
 import { AnomaliesPerDevice, AnomalyResultModel, DeviceValue } from '../../shared/anomaly.model';
 import { AnomalyService } from '../../shared/anomaly.service';
-import {  ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 
-const AnomalyPointSize = 7;
-const AnomalyPointColor = '#FF0000';
-const NormalPointSize = 1;
-const NormalPointColor = '#008FFB';
-const DebugPointSize = 0;
-const NormalWaitingPointSize = 5;
+const anomalyPointSize = 7;
+const anomalyPointColor = '#FF0000';
+const normalPointSize = 1;
+const normalPointColor = '#008FFB';
+const debugPointSize = 0;
+const normalWaitingPointSize = 5;
 
 @Component({
     selector: 'anomaly-line',
@@ -323,8 +318,8 @@ export class LineComponent implements OnInit, OnChanges {
                     });
                 });
 
-                const colors = [NormalPointColor];
-                const sizes = [NormalPointSize];
+                const colors = [normalPointColor];
+                const sizes = [normalPointSize];
 
                 chartData.series?.push({data: points, name: 'Original', type:'line'});
                 const anomalies = this.getChartAnomalies(deviceId);
@@ -333,22 +328,22 @@ export class LineComponent implements OnInit, OnChanges {
                 if(chartData.annotations.points != null) {
                     // Anomaly Points can be drawn as annotations -> Unfortunately ApexCahrt has no tooltip on annotations
                     // Can be drawn as scatter plot -> but marker size is not configurable when combi chart line+scatter is done
-                    //chartData.annotations.points = anomalyPoints;
+                    // chartData.annotations.points = anomalyPoints;
                     chartData.series?.push({data: outlierPoints, name: 'Outlier', type:'scatter'});
-                    colors.push(AnomalyPointColor);
-                    sizes.push(AnomalyPointSize);
+                    colors.push(anomalyPointColor);
+                    sizes.push(anomalyPointSize);
                 }
 
                 if(this.showDebug) {
                     const reconstrucedPoints = anomalies[1];
                     chartData.series?.push({data: reconstrucedPoints, name: 'Prediction', type:'line'});
                     colors.push('#228B22');
-                    sizes.push(DebugPointSize);
+                    sizes.push(debugPointSize);
 
                     const reconstructionInputPoints = anomalies[2];
                     chartData.series?.push({data: reconstructionInputPoints, name: 'Processed', type:'line'});
                     colors.push('#AFE1AF');
-                    sizes.push(DebugPointSize);
+                    sizes.push(debugPointSize);
                 }
 
                 const anomalyIntervals = anomalies[3];
@@ -363,7 +358,7 @@ export class LineComponent implements OnInit, OnChanges {
                 if(chartData.yaxis.title != null) {
                     chartData.yaxis.title.text = 'Device Output';
                 }
-                const self = this;
+                const extremeOutliers = this.extremeOutliers;
 
                 chartData.tooltip.custom = function({series, seriesIndex, dataPointIndex}) {
                     // console.log(w)
@@ -374,7 +369,7 @@ export class LineComponent implements OnInit, OnChanges {
                         tooltipMsg = '<b>Device Output:</b> ' + value;
                         break;
                     case 1:
-                        const anomaly = self.extremeOutliers[dataPointIndex];
+                        const anomaly = extremeOutliers[dataPointIndex];
                         tooltipMsg = '<b>Extreme Outlier:</b> ' + anomaly.value + ' [' + anomaly.lower_bound + '-' + anomaly.upper_bound + ']';
                         break;
                     case 2:
@@ -611,13 +606,13 @@ export class LineComponent implements OnInit, OnChanges {
                 });
 
                 chartData.series?.push({data: points, name: 'Waiting Time'});
-                const colors = [NormalPointColor];
-                const sizes = [NormalWaitingPointSize];
+                const colors = [normalPointColor];
+                const sizes = [normalWaitingPointSize];
 
                 const outlierPoints = this.parseFrequencyAnomalies(deviceId);
                 chartData.series?.push({data: outlierPoints, name: 'Outlier', type:'scatter'});
-                colors.push(AnomalyPointColor);
-                sizes.push(AnomalyPointSize);
+                colors.push(anomalyPointColor);
+                sizes.push(anomalyPointSize);
 
                 chartData.markers.colors = colors;
                 chartData.colors = colors;

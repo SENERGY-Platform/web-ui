@@ -313,8 +313,8 @@ export class ExportService {
                     exports.instances?.forEach((exportModel: ExportModel) => {
                         if (
                             exportModel.ID !== undefined &&
-                  exportModel.Name !== undefined //&&
-                  //EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
+                  exportModel.Name !== undefined // &&
+                  // EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
                         ) {
                             filteredExports.push(exportModel);
                         }

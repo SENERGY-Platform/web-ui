@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {Observable} from 'rxjs';
-import {MatDialog} from '@angular/material/dialog';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Router} from '@angular/router';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {AspectsService} from './shared/aspects.service';
-import {DeviceTypeAspectModel} from '../device-types-overview/shared/device-type.model';
-import {NestedTreeControl} from '@angular/cdk/tree';
-import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
-import {AuthorizationService} from '../../../core/services/authorization.service';
-import {DeviceTypeService} from '../device-types-overview/shared/device-type.service';
-import {FunctionsPermSearchModel} from "../functions/shared/functions-perm-search.model";
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Observable } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { AspectsService } from './shared/aspects.service';
+import { DeviceTypeAspectModel } from '../device-types-overview/shared/device-type.model';
+import { NestedTreeControl } from '@angular/cdk/tree';
+import { MatTree, MatTreeNestedDataSource } from '@angular/material/tree';
+import { AuthorizationService } from '../../../core/services/authorization.service';
+import { DeviceTypeService } from '../device-types-overview/shared/device-type.service';
 import {
     UsedInDeviceTypeQuery,
     UsedInDeviceTypeResponseElement
-} from "../device-types-overview/shared/used-in-device-type.model";
+} from '../device-types-overview/shared/used-in-device-type.model';
 
 @Component({
     selector: 'senergy-aspects',
@@ -53,7 +52,7 @@ export class AspectsComponent implements OnInit {
 
     dragging = false;
 
-    usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>()
+    usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>();
 
     constructor(
         private dialog: MatDialog,
@@ -75,7 +74,7 @@ export class AspectsComponent implements OnInit {
     }
 
     checkAuthorization() {
-        this.userHasUsedInAuthorization = this.deviceTypesService.userHasUsedInAuthorization()
+        this.userHasUsedInAuthorization = this.deviceTypesService.userHasUsedInAuthorization();
     }
 
     newAspect(): void {
@@ -273,17 +272,17 @@ export class AspectsComponent implements OnInit {
         if (!this.userHasUsedInAuthorization) {
             return;
         }
-        let query: UsedInDeviceTypeQuery = {
-            resource: "aspects",
+        const query: UsedInDeviceTypeQuery = {
+            resource: 'aspects',
             ids: this.getAspectIds(aspects)
-        }
+        };
         console.log(query);
         this.deviceTypesService.getUsedInDeviceType(query).subscribe(result => {
-            console.log(result)
+            console.log(result);
             result?.forEach((value, key) => {
                 this.usedIn.set(key, value);
-            })
-        })
+            });
+        });
     }
 
     public showUsedInDialog(usedIn: UsedInDeviceTypeResponseElement | undefined) {
@@ -293,11 +292,11 @@ export class AspectsComponent implements OnInit {
     }
 
     private getAspectIds(aspects: DeviceTypeAspectModel[] | null | undefined) {
-        var result: string[] = [];
+        let result: string[] = [];
         aspects?.forEach(value => {
             result.push(value.id);
             result = result.concat(this.getAspectIds(value.sub_aspects));
-        })
+        });
         return result;
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     SmartServiceTaskInputDescription,
@@ -26,7 +26,7 @@ import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../pr
     templateUrl: './edit-smart-service-json-extraction-dialog.component.html',
     styleUrls: ['./edit-smart-service-json-extraction-dialog.component.css'],
 })
-export class EditSmartServiceJsonExtractionDialogComponent implements OnInit {
+export class EditSmartServiceJsonExtractionDialogComponent {
     exports: JsonExtract[] = [];
     prefix = 'JSON.parse(';
     seperator = ')';
@@ -169,8 +169,6 @@ export class EditSmartServiceJsonExtractionDialogComponent implements OnInit {
         this.opened = tempOpended;
         this.exports?.push({JsonSource: '', FieldPath: '', OutputName: ''});
     }
-
-    ngOnInit() {}
 
     isInvalid(){
         return false;

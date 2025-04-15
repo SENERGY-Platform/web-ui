@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {DurationIso, DurationResult} from '../../shared/designer.model';
-import {duration, Duration} from 'moment';
+import { DurationResult } from '../../shared/designer.model';
+import { duration, Duration } from 'moment';
 
 @Component({
     templateUrl: './duration-dialog.component.html',
     styleUrls: ['./duration-dialog.component.css'],
 })
-export class DurationDialogComponent implements OnInit {
+export class DurationDialogComponent {
     initial: string;
     result?: DurationResult;
     valid = false;
@@ -41,14 +41,12 @@ export class DurationDialogComponent implements OnInit {
         this.valid = this.isValid(duration(JSON.parse(JSON.stringify(updateEvent.iso))));
     }
 
-    ngOnInit() {}
-
     close(): void {
         this.dialogRef.close();
     }
 
-    isValid(duration: Duration): boolean {
-        return duration.asSeconds() >= 5;
+    isValid(dur: Duration): boolean {
+        return dur.asSeconds() >= 5;
     }
 
     ok(): void {

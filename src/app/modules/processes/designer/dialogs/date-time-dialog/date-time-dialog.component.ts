@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
@@ -22,7 +22,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
     styleUrls: ['./date-time-dialog.component.css'],
     selector: 'senergy-date-time-dialog',
 })
-export class DateTimeDialogComponent implements OnInit {
+export class DateTimeDialogComponent {
     initial: string;
     result = { iso: '', text: '' };
 
@@ -36,8 +36,6 @@ export class DateTimeDialogComponent implements OnInit {
     update(updateEvent: { iso: string; text: string }) {
         this.result = updateEvent;
     }
-
-    ngOnInit() {}
 
     close(): void {
         this.dialogRef.close();

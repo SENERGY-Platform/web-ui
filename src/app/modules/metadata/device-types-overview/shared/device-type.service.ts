@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
@@ -31,12 +31,12 @@ import {
 } from './device-type.model';
 import { BpmnSkeletonModel } from './device-type-selection.model';
 import { flatMap } from 'rxjs/operators';
-import {flatten} from 'lodash';
+import { flatten } from 'lodash';
 import { AllowedMethods } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import {UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement} from './used-in-device-type.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {UsedInDeviceTypesDialogComponent} from '../dialogs/used-in-device-types-dialog.component';
+import { UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement } from './used-in-device-type.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { UsedInDeviceTypesDialogComponent } from '../dialogs/used-in-device-types-dialog.component';
 
 @Injectable({
     providedIn: 'root',

@@ -35,7 +35,7 @@ import { first, map } from 'rxjs/operators';
 import { forkJoin, Observable, of } from 'rxjs';
 import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
 import { PathOptionsService } from '../shared/path-options.service';
-import {AbstractControl, FormArray, FormBuilder, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
+import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
 import { ConceptsService } from '../../../metadata/concepts/shared/concepts.service';
 import { OperatorInputTopic, PipelineModel, PipelineOperatorModel } from '../../pipeline-registry/shared/pipeline.model';
@@ -906,7 +906,7 @@ export class DeployFlowComponent implements OnInit {
                 joinedValueFilters.forEach((filter) =>
                     nodeModel.inputs?.push({
                         filterType: filter.devicesOrImports[0].startsWith(DeployFlowComponent.IMPORT_PREFIX) ? 'ImportId' : 'deviceId',
-                        filterIds: filter.devicesOrImports.map(value => value.split('$')[0]).join(','), //trim id modifiers and join with ','
+                        filterIds: filter.devicesOrImports.map(value => value.split('$')[0]).join(','), // trim id modifiers and join with ','
                         topicName: filter.topic,
                         values: filter.values,
                     }),
@@ -1114,11 +1114,9 @@ export class DeployFlowComponent implements OnInit {
         }
         const parser = new DOMParser();
         const svg = parser.parseFromString(pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
-        // @ts-ignore
-        const viewbox = svg.getAttribute('viewbox').split(' ');
+        const viewbox = svg.getAttribute('viewbox')!.split(' ');
         svg.setAttribute('height', viewbox[3]);
-        const elements = svg.getElementsByClassName('joint-cell');
-        // @ts-ignore
+        const elements = svg.getElementsByClassName('joint-cell') as any;
         for (const element of elements) {
             if (element.attributes['model-id'].value === pipelineGroup.get('operatorId')?.value) {
                 for (const node of element.childNodes) {

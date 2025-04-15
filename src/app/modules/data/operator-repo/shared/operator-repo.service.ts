@@ -22,7 +22,7 @@ import { catchError, map } from 'rxjs/operators';
 import { OperatorModel } from './operator.model';
 import { Observable } from 'rxjs';
 import { ExportService } from '../../../exports/shared/export.service';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({

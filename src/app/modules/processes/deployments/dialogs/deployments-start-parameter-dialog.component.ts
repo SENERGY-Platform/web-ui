@@ -16,7 +16,6 @@
 
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { DeploymentsService } from '../shared/deployments.service';
 import { CamundaVariable } from '../shared/deployments-definition.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -66,7 +65,7 @@ export class DeploymentsStartParameterDialogComponent {
             (err: HttpErrorResponse) => {
                 try {
                     this.err = JSON.parse(err.error.substring(5)).message;
-                } catch (e) {
+                } catch (_) {
                     this.err = err.error;
                 }
                 this.starting = false;

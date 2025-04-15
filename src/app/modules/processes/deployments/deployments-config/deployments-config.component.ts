@@ -14,34 +14,31 @@
  * limitations under the License.
  */
 
-import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
-import {DeploymentsService} from '../shared/deployments.service';
-import {UtilService} from '../../../../core/services/util.service';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {CdkTextareaAutosize} from '@angular/cdk/text-field';
-import {DeploymentsConfigInitializerService} from './shared/deployments-config-initializer.service';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ProcessRepoService } from '../../process-repo/shared/process-repo.service';
+import { DeploymentsService } from '../shared/deployments.service';
+import { UtilService } from '../../../../core/services/util.service';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { DeploymentsConfigInitializerService } from './shared/deployments-config-initializer.service';
 import {
     DeploymentsSelectionPathOptionModel,
     V2DeploymentsPreparedConfigurableModel,
-    V2DeploymentsPreparedElementModel,
-    V2DeploymentsPreparedFilterCriteriaModel,
-    V2DeploymentsPreparedModel, V2DeploymentsPreparedSelectionModel,
-    V2DeploymentsPreparedSelectionOptionModel, V2DeploymentsPreparedStartParameterModel,
+    V2DeploymentsPreparedElementModel, V2DeploymentsPreparedModel, V2DeploymentsPreparedSelectionModel,
+    V2DeploymentsPreparedSelectionOptionModel, V2DeploymentsPreparedStartParameterModel
 } from '../shared/deployments-prepared-v2.model';
-import {FlowRepoService} from '../../../data/flow-repo/shared/flow-repo.service';
-import {FlowModel} from '../../../data/flow-repo/shared/flow.model';
-import {Observable} from 'rxjs';
-import {DeploymentsFogFactory} from '../shared/deployments-fog.service';
-import {HubModel} from '../../../devices/networks/shared/networks.model';
-import {NetworksService} from '../../../devices/networks/shared/networks.service';
-import {OperatorRepoService} from '../../../data/operator-repo/shared/operator-repo.service';
-import {OperatorModel} from '../../../data/operator-repo/shared/operator.model';
-import {CharacteristicsService} from '../../../metadata/characteristics/shared/characteristics.service';
-import {DeviceTypeAspectNodeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
-import {MatSelectChange} from '@angular/material/select';
+import { FlowRepoService } from '../../../data/flow-repo/shared/flow-repo.service';
+import { FlowModel } from '../../../data/flow-repo/shared/flow.model';
+import { Observable } from 'rxjs';
+import { DeploymentsFogFactory } from '../shared/deployments-fog.service';
+import { HubModel } from '../../../devices/networks/shared/networks.model';
+import { NetworksService } from '../../../devices/networks/shared/networks.service';
+import { OperatorRepoService } from '../../../data/operator-repo/shared/operator-repo.service';
+import { OperatorModel } from '../../../data/operator-repo/shared/operator.model';
+import { CharacteristicsService } from '../../../metadata/characteristics/shared/characteristics.service';
+import { DeviceTypeAspectNodeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     selector: 'senergy-process-deployments-config',
@@ -307,7 +304,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     setSelectedServiceId(elementIndex: number, selectionOptionIndex: number, elementType: string): string | null {
         const selection = this.deploymentFormGroup.get(['elements', elementIndex, elementType, 'selection']) as FormGroup;
-        const selectedPathOption = selection.get('selected_path') as FormGroup;
         const services = (
             this.deploymentFormGroup.get([
                 'elements',

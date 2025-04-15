@@ -16,9 +16,9 @@
  *
  */
 
-import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {PermissionApiModel, PermissionModel} from '../permission.model';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { PermissionModel } from '../permission.model';
 
 @Injectable({
     providedIn: 'root',

@@ -1,11 +1,6 @@
-import { Component, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { GoogleChartComponent } from 'ng2-google-charts';
-import { map, of } from 'rxjs';
-import { ElementSizeService } from 'src/app/core/services/element-size.service';
+import { Component, Input, OnInit } from '@angular/core';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
-import { ChartsModel } from 'src/app/widgets/charts/shared/charts.model';
 import { AnomalyResultModel } from '../../shared/anomaly.model';
-import { AnomalyService } from '../../shared/anomaly.service';
 
 @Component({
     selector: 'last-anomaly',

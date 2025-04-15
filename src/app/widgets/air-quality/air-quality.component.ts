@@ -20,7 +20,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AirQualityService } from './shared/air-quality.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { forkJoin, Observable, of, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { UBAService } from './shared/uba.service';
 import { DWDPollenService } from './shared/dwd-pollen.service';
 import { map } from 'rxjs/operators';

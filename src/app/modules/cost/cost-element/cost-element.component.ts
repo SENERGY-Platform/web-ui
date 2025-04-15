@@ -17,7 +17,6 @@
 import { KeyValue } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { CostEntryModel, CostModel, } from '../shared/cost.model';
-import { Observable } from 'rxjs';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
 import { OperatorModel } from '../../data/operator-repo/shared/operator.model';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
@@ -48,14 +47,14 @@ export class CostElementComponent {
 
     set element(dis) {
         this._element = dis;
-        if (this.parentName === "Exports") {
+        if (this.parentName === 'Exports') {
             const exp = this.exports.find(e => e.ID === this.name);
             if (exp !== undefined) {
                 dis.displayName = exp.Name;
             } else {
                 dis.displayName = 'Export ' + this.name + ' (deleted)';
             }
-        } else if (this.parentName === "MQTTExports") {
+        } else if (this.parentName === 'MQTTExports') {
             const exp = this.brokerExports.find(e => e.ID === this.name);
             if (exp !== undefined) {
                 dis.displayName = exp.Name;
@@ -67,9 +66,8 @@ export class CostElementComponent {
             const keys = Object.keys(this._element.children);
             if (keys.length > 0) {
                 const obj = this.element.children as any;
-                const obs: Observable<any>[] = [];
                 keys.forEach((name) => {
-                    if (this.name === "analytics") {
+                    if (this.name === 'analytics') {
                         const pipeline = this.pipelines.find(p => name === p.id);
                         if (pipeline !== undefined) {
                             obj[name].displayName = pipeline.name;
@@ -86,7 +84,7 @@ export class CostElementComponent {
                                 }
                             });
                         });
-                    } else if (name.startsWith('import-') && name !== "import-deploy" && name !== "import-repo") {
+                    } else if (name.startsWith('import-') && name !== 'import-deploy' && name !== 'import-repo') {
                         const id = name.replace('import-', '');
                         const ip = this.imports.find(p => id === p.id.replace('urn:infai:ses:import:', ''));
                         if (ip !== undefined) {

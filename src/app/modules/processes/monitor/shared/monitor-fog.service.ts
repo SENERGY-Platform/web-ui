@@ -19,7 +19,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map, share } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { MonitorProcessModel } from './monitor-process.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MonitorDetailsDialogComponent } from '../dialogs/monitor-details-dialog.component';

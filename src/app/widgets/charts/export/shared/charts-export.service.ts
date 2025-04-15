@@ -85,7 +85,7 @@ export class ChartsExportService {
         });
     }
 
-    getData(properties: WidgetPropertiesModels, from?: string, to?: string, groupInterval?: string, lastOverride?: string): Observable<{ data: any[][][][] | null | ErrorModel; metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][] }> {
+    getData(properties: WidgetPropertiesModels, fromTime?: string, toTime?: string, groupInterval?: string, lastOverride?: string): Observable<{ data: any[][][][] | null | ErrorModel; metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][] }> {
         const widgetProperties = properties as ChartsExportPropertiesModel;
         const time: QueriesRequestTimeModel = {};
         const limit = properties.chartType === 'PieChart' && properties.calculateIntervals !== true ? 1 : undefined;
@@ -98,9 +98,9 @@ export class ChartsExportService {
             };
         }
 
-        if (from !== undefined && to !== undefined && groupInterval !== undefined) {
-            time.start = new Date(from).toISOString();
-            time.end = new Date(to).toISOString();
+        if (fromTime !== undefined && toTime !== undefined && groupInterval !== undefined) {
+            time.start = new Date(fromTime).toISOString();
+            time.end = new Date(toTime).toISOString();
             if (group !== undefined) {
                 group.time = groupInterval;
             }
@@ -255,7 +255,7 @@ export class ChartsExportService {
                                 break;
                             case ChartsExportDeviceGroupMergingStrategy.Separate:
                             default:
-                                //preserve individual rows
+                                // preserve individual rows
                                 threeD.forEach(rows => {
                                     if (rows.length === 0) {
                                         return;
@@ -363,7 +363,7 @@ export class ChartsExportService {
                     tableData.colors = Array(tableData.table.data[0].length - 1);
                     obs.push(...tableData.table.data[0].slice(1).map((title, i) =>
                         // i just created it...
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                         
                         from(digestMessage(title as string, 'SHA-1')).pipe(map(digest => tableData.colors![i - 1] = '#' + digest.slice(0, 6)))));
                 }
                 return forkJoin(obs).pipe(map(_ => this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors, hAxisFormat)));
@@ -393,7 +393,7 @@ export class ChartsExportService {
         data.forEach(req => {
             req.forEach((series, seriesIndex) => {
                 let previousColumnsWithoutData = 0;
-                for (let i = 1; i < seriesIndex; i++) { //skip time column
+                for (let i = 1; i < seriesIndex; i++) { // skip time column
                     if (!columnHasData[i]) {
                         previousColumnsWithoutData++;
                     }
@@ -673,9 +673,9 @@ export class ChartsExportService {
         if (chartModel.options?.vAxes !== undefined && secondAxisSeries.length > 0) {
             chartModel.options.vAxes['1'] = { title: widget.properties.secondVAxisLabel };
             chartModel.options.series = {};
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             firstAxesSeries.forEach((i) => (chartModel.options!.series[i] = { targetAxisIndex: 0 }));
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             secondAxisSeries.forEach((i) => (chartModel.options!.series[i] = { targetAxisIndex: 1 }));
         }
         return chartModel;

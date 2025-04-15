@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     DeviceTypeAspectModel,
-    DeviceTypeCharacteristicsModel, DeviceTypeConceptModel,
-    DeviceTypeContentVariableModel,
+    DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel,
     DeviceTypeFunctionModel
 } from '../../shared/device-type.model';
 import {
     AbstractControl,
     FormBuilder,
     FormControl,
-    FormGroup,
-    ValidationErrors,
-    ValidatorFn,
-    Validators
+    FormGroup, ValidatorFn
 } from '@angular/forms';
-import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
-import {DeviceTypeHelperService} from '../shared/device-type-helper.service';
-import {convertPunctuation, typeValueValidator} from '../../../../imports/validators/type-value-validator';
+import { ConceptsCharacteristicsModel } from '../../../concepts/shared/concepts-characteristics.model';
+import { DeviceTypeHelperService } from '../shared/device-type-helper.service';
+import { convertPunctuation, typeValueValidator } from '../../../../imports/validators/type-value-validator';
 
 interface DeviceTypeCharacteristicsClassModel extends DeviceTypeCharacteristicsModel {
     class: string;
@@ -258,7 +254,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 is_void: [{disabled: true, value: this.contentVariable.is_void}],
                 omit_empty: [!!this.contentVariable.omit_empty],
             });
-            this.firstFormGroup.get('omit_empty')?.disable(); //[{disabled: true, value: !!this.contentVariable.omit_empty}], doesn't work
+            this.firstFormGroup.get('omit_empty')?.disable(); // [{disabled: true, value: !!this.contentVariable.omit_empty}], doesn't work
         } else {
             this.firstFormGroup = this._formBuilder.group(
                 {
@@ -330,25 +326,25 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     }
 
     aspectDisabled(aspect: DeviceTypeAspectModel): boolean {
-        return !(aspect.sub_aspects === null || aspect.sub_aspects === undefined || aspect.sub_aspects.length == 0)
+        return !(aspect.sub_aspects === null || aspect.sub_aspects === undefined || aspect.sub_aspects.length == 0);
     }
 
     copyAspect(aspect: DeviceTypeAspectModel): DeviceTypeAspectModel {
-        let result: DeviceTypeAspectModel = {
+        const result: DeviceTypeAspectModel = {
             id: aspect.id,
             name: aspect.name,
             sub_aspects: [],
-        }
-        aspect.sub_aspects?.forEach((a:DeviceTypeAspectModel) => result.sub_aspects?.push(this.copyAspect(a)))
-        return result
+        };
+        aspect.sub_aspects?.forEach((a:DeviceTypeAspectModel) => result.sub_aspects?.push(this.copyAspect(a)));
+        return result;
     }
 
-    private getAllAspectsOnTree(a: DeviceTypeAspectModel, prefix: string=""): DeviceTypeAspectModel[] {
+    private getAllAspectsOnTree(a: DeviceTypeAspectModel, prefix: string=''): DeviceTypeAspectModel[] {
         const res: DeviceTypeAspectModel[] = [];
-        let element = this.copyAspect(a)
+        const element = this.copyAspect(a);
         element.name = prefix+element.name;
         res.push(element);
-        element.sub_aspects?.forEach(sub => res.push(...this.getAllAspectsOnTree(sub, element.name+".")));
+        element.sub_aspects?.forEach(sub => res.push(...this.getAllAspectsOnTree(sub, element.name+'.')));
         return res;
     }
 

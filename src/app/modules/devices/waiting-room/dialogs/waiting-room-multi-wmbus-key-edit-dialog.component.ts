@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { WaitingDeviceModel } from '../shared/waiting-room.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
@@ -24,7 +24,7 @@ import { FormBuilder } from '@angular/forms';
     templateUrl: './waiting-room-multi-wmbus-key-edit-dialog.component.html',
     styleUrls: ['./waiting-room-multi-wmbus-key-edit-dialog.component.css'],
 })
-export class WaitingRoomMultiWmbusKeyEditDialogComponent implements OnInit {
+export class WaitingRoomMultiWmbusKeyEditDialogComponent {
     static wmbusKeyAttributeKey = 'wmbus/key';
     public wmbusKeyAttributeKey = WaitingRoomMultiWmbusKeyEditDialogComponent.wmbusKeyAttributeKey;
 
@@ -42,8 +42,6 @@ export class WaitingRoomMultiWmbusKeyEditDialogComponent implements OnInit {
             this.devices = [];
         }
     }
-
-    ngOnInit() {}
 
     close(): void {
         this.dialogRef.close();

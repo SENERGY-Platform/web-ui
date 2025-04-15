@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
@@ -24,7 +24,7 @@ import { DeviceTypeDeviceClassModel } from '../../device-types-overview/shared/d
     templateUrl: './device-classes-edit-dialog.component.html',
     styleUrls: ['./device-classes-edit-dialog.component.css'],
 })
-export class DeviceClassesEditDialogComponent implements OnInit {
+export class DeviceClassesEditDialogComponent {
     deviceClassFormGroup!: FormGroup;
 
     constructor(
@@ -35,8 +35,6 @@ export class DeviceClassesEditDialogComponent implements OnInit {
     ) {
         this.initDeviceClassFormGroup(data.deviceClass);
     }
-
-    ngOnInit(): void {}
 
     close(): void {
         this.dialogRef.close();

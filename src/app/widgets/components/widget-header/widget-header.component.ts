@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -24,7 +24,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
     templateUrl: './widget-header.component.html',
     styleUrls: ['./widget-header.component.css'],
 })
-export class WidgetHeaderComponent implements OnInit {
+export class WidgetHeaderComponent {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() warnText = '';
@@ -35,8 +35,6 @@ export class WidgetHeaderComponent implements OnInit {
     @Output() customEvent = new EventEmitter<{index: number; icon: string}>();
 
     constructor(private dashboardService: DashboardService) {}
-
-    ngOnInit() {}
 
     refresh() {
         this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, this.widget.id, this.widget);

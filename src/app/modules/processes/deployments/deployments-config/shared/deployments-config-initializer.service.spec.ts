@@ -24,7 +24,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 const nullPath = { path: '', characteristicId: '', aspectNode: Object({  }), functionId: '', isVoid: false, value: null, type: '', configurables: [  ] };
 
-describe('DeploymentsConfigInitializerService', () => {
+describe('DeploymentsConfigInitializerService', () => { // TODO
     beforeEach(() => {
         TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     imports: [],

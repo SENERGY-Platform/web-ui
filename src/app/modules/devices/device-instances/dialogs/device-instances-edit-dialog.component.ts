@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {Attribute, DeviceInstanceModel} from '../shared/device-instances.model';
-import {AbstractControl, ValidationErrors} from '@angular/forms';
-import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
-import {senergyConnectorLocalIdConstraint} from '../../../metadata/device-types-overview/shared/device-type.model';
+import { Attribute, DeviceInstanceModel } from '../shared/device-instances.model';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
+import { senergyConnectorLocalIdConstraint } from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',
     styleUrls: ['./device-instances-edit-dialog.component.css'],
 })
-export class DeviceInstancesEditDialogComponent implements OnInit {
+export class DeviceInstancesEditDialogComponent {
     device: DeviceInstanceModel;
     displayname = '';
     nicknameAttributeKey = 'shared/nickname';
@@ -83,8 +83,6 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
         }
 
     }
-
-    ngOnInit() {}
 
     close(): void {
         this.dialogRef.close();

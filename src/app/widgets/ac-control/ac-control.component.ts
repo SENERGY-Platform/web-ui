@@ -89,39 +89,39 @@ export class AcControlComponent implements OnInit, OnDestroy {
         this.refreshing = true;
         const m: Map<DeviceCommandModel, AcControlElementModel> = new Map();
         if (this.widget.properties.acControl?.getCleaningRequired !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             m.set(this.toCommand(this.widget.properties.acControl!.getCleaningRequired!, null), this.widget.properties.acControl!.getCleaningRequired!);
         }
         if (this.widget.properties.acControl?.getOnOff !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             m.set(this.toCommand(this.widget.properties.acControl!.getOnOff!, null), this.widget.properties.acControl!.getOnOff!);
         }
         if (this.widget.properties.acControl?.getMode !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             m.set(this.toCommand(this.widget.properties.acControl!.getMode!, null), this.widget.properties.acControl!.getMode!);
         }
         if (this.widget.properties.acControl?.getLocked !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             m.set(this.toCommand(this.widget.properties.acControl!.getLocked!, null), this.widget.properties.acControl!.getLocked!);
         }
         if (this.widget.properties.acControl?.getTargetTemperature !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             this.widget.properties.acControl?.getTargetTemperature!.forEach(e => m.set(this.toCommand(e, null), e));
         }
         if (this.widget.properties.acControl?.getTemperatureMeasurements !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             this.widget.properties.acControl?.getTemperatureMeasurements!.forEach(e => m.set(this.toCommand(e, null), e));
         }
         if (this.widget.properties.acControl?.getFanSpeedLevel !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             m.set(this.toCommand(this.widget.properties.acControl!.getFanSpeedLevel!, null), this.widget.properties.acControl!.getFanSpeedLevel!);
         }
         if (this.widget.properties.acControl?.getFanSpeedLevelAutomatic !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             m.set(this.toCommand(this.widget.properties.acControl!.getFanSpeedLevelAutomatic!, null), this.widget.properties.acControl!.getFanSpeedLevelAutomatic!);
         }
         if (this.widget.properties.acControl?.getBatteryLevel !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             m.set(this.toCommand(this.widget.properties.acControl!.getBatteryLevel!, null), this.widget.properties.acControl!.getBatteryLevel!);
         }
 

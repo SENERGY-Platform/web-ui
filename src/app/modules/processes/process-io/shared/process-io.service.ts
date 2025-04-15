@@ -16,14 +16,14 @@
 
 
 
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {Observable, timer} from 'rxjs';
-import {environment} from '../../../../../environments/environment';
-import {catchError, map, mergeMap, retryWhen} from 'rxjs/operators';
-import {ProcessIoVariable, VariablesCount} from './process-io.model';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { Observable } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
+import { catchError, map } from 'rxjs/operators';
+import { ProcessIoVariable, VariablesCount } from './process-io.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({

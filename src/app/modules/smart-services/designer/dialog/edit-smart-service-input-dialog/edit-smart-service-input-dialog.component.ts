@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     SmartServiceInputsDescription,
     SmartServiceInput, SmartServiceInputProperty
 } from '../../shared/designer.model';
-import {BpmnElement} from '../../../../processes/designer/shared/designer.model';
-import {FunctionsPermSearchModel} from '../../../../metadata/functions/shared/functions-perm-search.model';
-import {FunctionsService} from '../../../../metadata/functions/shared/functions.service';
-import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
-import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
-import {DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel, DeviceTypeDeviceClassModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
-import {CharacteristicsService} from '../../../../metadata/characteristics/shared/characteristics.service';
-import {AbstractControl, ValidationErrors} from '@angular/forms';
+import { BpmnElement } from '../../../../processes/designer/shared/designer.model';
+import { FunctionsPermSearchModel } from '../../../../metadata/functions/shared/functions-perm-search.model';
+import { FunctionsService } from '../../../../metadata/functions/shared/functions.service';
+import { DeviceClassesService } from '../../../../metadata/device-classes/shared/device-classes.service';
+import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
+import { DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel, DeviceTypeDeviceClassModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
+import { CharacteristicsService } from '../../../../metadata/characteristics/shared/characteristics.service';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
 
 @Component({
     templateUrl: './edit-smart-service-input-dialog.component.html',
     styleUrls: ['./edit-smart-service-input-dialog.component.css'],
 })
-export class EditSmartServiceInputDialogComponent implements OnInit {
+export class EditSmartServiceInputDialogComponent {
     abstract: AbstractSmartServiceInput[] = [];
 
     functions: (FunctionsPermSearchModel | {id?: string; name: string})[] = [];
@@ -73,8 +73,6 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
         });
         this.setAbstractByDescription(dialogParams.info);
     }
-
-    ngOnInit() {}
 
     isValidCamundaVariableNameValidator(c: AbstractControl): ValidationErrors | null {
         const variableName: string = c.value;
@@ -400,23 +398,23 @@ function isValidCamundaVariableName(variableName: string): boolean {
     if(!variableName) {
         return false;
     }
-    //may not start with number
+    // may not start with number
     if(variableName.match(/^\d/)){
         return false;
     }
-    //may not contain whitespaces
+    // may not contain whitespaces
     if(variableName.match(/\s/g)){
         return false;
     }
-    //my not contain operators like +, -, *, /, =, >, ?, .
+    // my not contain operators like +, -, *, /, =, >, ?, .
     if(['+', '-', '*', '\\', '/', '=', '>', '<', '?', '.', '&', '|', ',', '%', '!'].some(e => variableName.includes(e))){
         return false;
     }
-    //my not be literals like null, true, false
+    // my not be literals like null, true, false
     if(['null', 'true', 'false'].some(e => variableName === e)){
         return false;
     }
-    //my not contain keywords like function, if, then, else, for, between, instance, of, not
+    // my not contain keywords like function, if, then, else, for, between, instance, of, not
     if(['function', 'if', 'then', 'else', 'for', 'between', 'instance', 'of', 'not'].some(e => variableName === e)){
         return false;
     }

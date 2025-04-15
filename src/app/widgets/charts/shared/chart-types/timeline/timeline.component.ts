@@ -1,21 +1,11 @@
 import {
-    AfterViewInit,
     ChangeDetectorRef,
-    Component,
-    ComponentFactoryResolver,
-    ComponentRef,
-    ElementRef,
+    Component, ElementRef,
     Input,
     OnChanges,
-    OnInit,
-    Renderer2,
-    SimpleChanges,
-    ViewChild,
-    ViewContainerRef
+    OnInit, SimpleChanges
 } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
-import { AnomalyReconstructionComponent } from 'src/app/widgets/anomaly/reconstruction/reconstruction.component';
 import { ApexChartOptions, ChartsExportVAxesModel } from '../../../export/shared/charts-export-properties.model';
 import ApexCharts from 'apexcharts';
 
@@ -224,7 +214,7 @@ export class TimelineComponent implements OnInit, OnChanges{
         const chartElement = this.elementRef.nativeElement.querySelector(`#${this.chartId}`);
         if (chartElement) {
             this.chartInstance = new ApexCharts(chartElement, this.apexChartOptions);
-            const promise = this.chartInstance.render();
+            this.chartInstance.render();
         }
     }
 
@@ -332,7 +322,7 @@ export class TimelineComponent implements OnInit, OnChanges{
     getAliasOfMatchingRule(vAxis: ChartsExportVAxesModel, firstValue: any, lastValue: any) {
         let alias;
         (vAxis?.conversions || []).forEach(conversion => {
-            //console.log(conversion.to + "-" + lastValue + "-" + conversion.from + "-" + firstValue)
+            // console.log(conversion.to + "-" + lastValue + "-" + conversion.from + "-" + firstValue)
             // convert everything to string, as there are problems with booleans in the conversion that are sometimes strings or bool
             if(String(conversion.to) === String(lastValue) && String(conversion.from) === String(firstValue)) {
                 alias = conversion.alias || String(conversion.to);

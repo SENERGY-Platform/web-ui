@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { ImportTypeContentVariableModel, ImportTypeModel } from './import-types.model';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { Observable, catchError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { delay } from 'rxjs/operators';
 import { ExportValueModel } from '../../../exports/shared/export.model';

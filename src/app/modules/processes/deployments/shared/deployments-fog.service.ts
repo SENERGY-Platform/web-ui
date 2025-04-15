@@ -23,10 +23,9 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { DeploymentsModel } from './deployments.model';
 import { CamundaVariable } from './deployments-definition.model';
 import { V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel } from './deployments-prepared-v2.model';
-import { MatDialog } from '@angular/material/dialog';
 import { DeploymentsFogMetadataModel, DeploymentsFogModel } from './deployments-fog.model';
 import { NetworksService } from '../../../devices/networks/shared/networks.service';
-import {ExtendedHubModel, HubModel} from '../../../devices/networks/shared/networks.model';
+import { ExtendedHubModel } from '../../../devices/networks/shared/networks.model';
 
 @Injectable({
     providedIn: 'root',

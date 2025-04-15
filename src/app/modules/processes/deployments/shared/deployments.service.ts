@@ -21,17 +21,15 @@ import { Observable, timer } from 'rxjs';
 import { catchError, map, mergeMap, retryWhen } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { DeploymentsModel, ProcessStartParameter } from './deployments.model';
-import { CamundaVariable, DeploymentsDefinitionModel } from './deployments-definition.model';
+import { CamundaVariable } from './deployments-definition.model';
 import { DeploymentsMissingDependenciesModel } from './deployments-missing-dependencies.model';
-import { DeploymentsPreparedModel } from './deployments-prepared.model';
 import {
     DeploymentsSelectionPathOptionModel,
     V2DeploymentsPreparedConfigurableModel,
     V2DeploymentsPreparedModel
 } from './deployments-prepared-v2.model';
-import { MatDialog } from '@angular/material/dialog';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
@@ -212,7 +210,7 @@ export class DeploymentsService {
         );
     }
 
-    //deprecated
+    // deprecated
     getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null> {
         return this.http
             .get<V2DeploymentsPreparedConfigurableModel[]>(

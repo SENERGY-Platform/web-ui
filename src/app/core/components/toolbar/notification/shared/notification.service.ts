@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {EventEmitter, Injectable, OnDestroy, Output} from '@angular/core';
-import {Observable} from 'rxjs';
+import { EventEmitter, Injectable, OnDestroy, Output } from '@angular/core';
+import { Observable } from 'rxjs';
 import {
     NotificationBrokerListModel,
     NotificationBrokerModel,
@@ -24,14 +24,14 @@ import {
     NotificationSettingsModel,
     NotificationUpdateModel
 } from './notification.model';
-import {environment} from '../../../../../../environments/environment';
+import { environment } from '../../../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import {ErrorHandlerService} from '../../../../services/error-handler.service';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {NotificationDialogComponent} from '../dialog/notification-dialog.component';
-import {AuthorizationService} from '../../../../services/authorization.service';
-import {webSocket, WebSocketSubject} from 'rxjs/webSocket';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { ErrorHandlerService } from '../../../../services/error-handler.service';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { NotificationDialogComponent } from '../dialog/notification-dialog.component';
+import { AuthorizationService } from '../../../../services/authorization.service';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
@@ -155,7 +155,7 @@ export class NotificationService implements OnDestroy {
                     const idx = this.notifications.findIndex((no) => no._id === n._id);
                     if (idx === -1) {
                         this.notifications.splice(0, 0, n);
-                        //this.notifications.push(n);
+                        // this.notifications.push(n);
                     } else {
                         this.notifications[idx] = n;
                     }

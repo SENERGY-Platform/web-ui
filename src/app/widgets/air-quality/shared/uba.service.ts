@@ -52,7 +52,6 @@ export class UBAService {
                     const sssname = response.indices.indexOf('station setting short name');
                     const stname = response.indices.indexOf('station type name');
                     Object.keys(response.data).forEach((key) => {
-                        // @ts-ignore
                         const sub = response.data ? response.data[key] as string[] : [];
 
                         const station: UBAStation = {
@@ -119,7 +118,6 @@ export class UBAService {
                     const arr: UBAComponent[] = [];
                     if (response.components !== undefined) {
                         Object.keys(response.components).forEach((key) => {
-                            // @ts-ignore
                             const sub = response.components ? response.components[key] as string[] : [];
                             const component: UBAComponent = {
                                 id: Number(sub[0]),
@@ -160,8 +158,7 @@ export class UBAService {
                     catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as UBADataResponse)),
                 )
                 .subscribe((response) => {
-                    // @ts-ignore
-                    const stationData = response.data[stationId];
+                    const stationData = (response.data as any)[stationId];
                     const arr: UBAData[] = [];
                     if (stationData !== undefined) {
                         const keys = Object.keys(stationData);

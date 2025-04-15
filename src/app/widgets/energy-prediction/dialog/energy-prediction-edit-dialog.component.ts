@@ -16,7 +16,7 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {AbstractControl, FormBuilder, FormControl, UntypedFormBuilder, ValidatorFn, Validators} from '@angular/forms';
+import { AbstractControl, FormControl, UntypedFormBuilder, ValidatorFn, Validators } from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -44,7 +44,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
 
     form = this.formBuilder.group({
         name: ['', Validators.required],
-        export: ['', [Validators.required, chartsExportMeasurementModelValidator()]],  //, EnergyPredictionEditDialogComponent.estimationExportValidator()]],
+        export: ['', [Validators.required, chartsExportMeasurementModelValidator()]],  // , EnergyPredictionEditDialogComponent.estimationExportValidator()]],
         math: [''],
         unit: ['kWh'],
         predictionType: ['', Validators.required],

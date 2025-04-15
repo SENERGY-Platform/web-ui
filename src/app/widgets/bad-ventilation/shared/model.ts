@@ -1,5 +1,5 @@
-import { DeviceInstanceModel } from "src/app/modules/devices/device-instances/shared/device-instances.model";
-import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from "../../charts/export/shared/charts-export-properties.model";
+import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../../charts/export/shared/charts-export-properties.model';
 
 export interface DeviceValue {
     timestamp: string;

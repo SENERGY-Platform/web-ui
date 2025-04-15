@@ -1,6 +1,6 @@
-import { DeviceInstanceModel } from "src/app/modules/devices/device-instances/shared/device-instances.model";
-import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from "../../charts/export/shared/charts-export-properties.model";
-import { DeviceGroupModel } from "src/app/modules/devices/device-groups/shared/device-groups.model";
+import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../../charts/export/shared/charts-export-properties.model';
+import { DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 
 export interface AnomaliesPerDevice {
     [device_id: string]: AnomalyResultModel[];

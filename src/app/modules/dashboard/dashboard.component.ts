@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ResponsiveService} from '../../core/services/responsive.service';
-import {DashboardService} from './shared/dashboard.service';
-import {DashboardModel} from './shared/dashboard.model';
-import {WidgetModel, WidgetUpdatePosition} from './shared/dashboard-widget.model';
-import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
-import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
-import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
-import {DisplayGrid, GridsterConfig, GridsterItem, GridType} from 'angular-gridster2';
-import {catchError, forkJoin, map, Observable, of, Subscription} from 'rxjs';
-import {DashboardTypesEnum} from './shared/dashboard-types.enum';
-import {DeviceStatusService} from '../../widgets/device-status/shared/device-status.service';
-import {moveItemInArray} from '@angular/cdk/drag-drop';
-import {DialogsService} from '../../core/services/dialogs.service';
-import {ProcessSchedulerService} from '../../widgets/process-scheduler/shared/process-scheduler.service';
-import {DataTableService} from '../../widgets/data-table/shared/data-table.service';
-import {AirQualityService} from '../../widgets/air-quality/shared/air-quality.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {MatTabGroup} from '@angular/material/tabs';
-import {ChartsService} from '../../widgets/charts/shared/charts.service';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ResponsiveService } from '../../core/services/responsive.service';
+import { DashboardService } from './shared/dashboard.service';
+import { DashboardModel } from './shared/dashboard.model';
+import { WidgetModel, WidgetUpdatePosition } from './shared/dashboard-widget.model';
+import { DashboardWidgetManipulationModel } from './shared/dashboard-widget-manipulation.model';
+import { DashboardManipulationEnum } from './shared/dashboard-manipulation.enum';
+import { DashboardManipulationModel } from './shared/dashboard-manipulation.model';
+import { DisplayGrid, GridsterConfig, GridsterItem, GridType } from 'angular-gridster2';
+import { catchError, forkJoin, Observable, of, Subscription } from 'rxjs';
+import { DashboardTypesEnum } from './shared/dashboard-types.enum';
+import { DeviceStatusService } from '../../widgets/device-status/shared/device-status.service';
+import { moveItemInArray } from '@angular/cdk/drag-drop';
+import { DialogsService } from '../../core/services/dialogs.service';
+import { ProcessSchedulerService } from '../../widgets/process-scheduler/shared/process-scheduler.service';
+import { DataTableService } from '../../widgets/data-table/shared/data-table.service';
+import { AirQualityService } from '../../widgets/air-quality/shared/air-quality.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatTabGroup } from '@angular/material/tabs';
+import { ChartsService } from '../../widgets/charts/shared/charts.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 
 const grids = new Map([
@@ -260,7 +260,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.options = {
             gridType: GridType.VerticalFixed,
             fixedRowHeight: 350,
-            //outerMarginBottom: 100,
+            // outerMarginBottom: 100,
             displayGrid: DisplayGrid.None,
             minCols: this.gridCols,
             maxCols: this.gridCols,

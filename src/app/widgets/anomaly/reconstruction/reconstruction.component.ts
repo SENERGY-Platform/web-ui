@@ -14,17 +14,17 @@ export class AnomalyReconstructionComponent implements OnInit {
     ready = false;
     values = [
       [
-        "2024-04-29T12:01:54.288249Z",
+        '2024-04-29T12:01:54.288249Z',
         1,
         2
       ],
       [
-        "2024-04-29T13:01:54.288249Z",
+        '2024-04-29T13:01:54.288249Z',
         2,
         2
       ],
       [
-        "2024-04-29T14:01:54.288249Z",
+        '2024-04-29T14:01:54.288249Z',
         2,
         3
       ],
@@ -56,7 +56,7 @@ export class AnomalyReconstructionComponent implements OnInit {
     }
 
     setupChartData() {
-        let dataTable: any = [["time", "expected", "true"]];
+        let dataTable: any = [['time', 'expected', 'true']];
         const valueList: any = [];
         this.values.forEach(value => {
             valueList.push([new Date(value[0]), value[1], value[2]]);

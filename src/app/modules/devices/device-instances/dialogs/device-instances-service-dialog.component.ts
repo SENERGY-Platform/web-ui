@@ -155,7 +155,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         let url = '';
         try {
             url = await this.getDownloadUrl(i);
-        } catch (e) {
+        } catch (_) {
             this.errorHandlerService.handleErrorWithSnackBar('Failed to prepare download', 'DeviceInstancesServiceDialogComponent', 'download', null)(undefined);
             return;
         }

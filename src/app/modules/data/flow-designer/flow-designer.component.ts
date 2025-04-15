@@ -244,8 +244,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
 
     private removeSVGNodesByClassNames(svg: SVGElement, tags: string[], classes: string[]) {
         tags.forEach((tag) => {
-            const elements = svg.getElementsByTagName(tag);
-            // @ts-ignore
+            const elements = svg.getElementsByTagName(tag) as any;
             for (const element of elements) {
                 classes.forEach((cl: string) => {
                     if (element.classList.contains(cl)) {
@@ -258,8 +257,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
 
     private removeSVGAttributesByTagNames(svg: SVGElement, tags: string[]) {
         tags.forEach((tag) => {
-            const elements = svg.getElementsByTagName(tag) as HTMLCollectionOf<any>;
-            // @ts-ignore
+            const elements = svg.getElementsByTagName(tag) as HTMLCollectionOf<any> as any;
             for (const element of elements) {
                 element.removeAttribute('magnet');
                 element.removeAttribute('cursor');

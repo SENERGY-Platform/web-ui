@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, EventEmitter, Output} from '@angular/core';
-import {dia, shapes, util, V, Vectorizer} from 'jointjs';
+import { AfterViewInit, Component } from '@angular/core';
+import { dia, shapes, util, Vectorizer } from 'jointjs';
 import $ from 'jquery';
-import {DiagramModel, LinkIOModel} from './shared/diagram.model';
+import { DiagramModel, LinkIOModel } from './shared/diagram.model';
+import { IOModel } from '../../../modules/data/operator-repo/shared/operator.model';
 import uuid = util.uuid;
-import {IOModel} from '../../../modules/data/operator-repo/shared/operator.model';
 
 @Component({
     selector: 'senergy-diagram-editor',
@@ -186,6 +186,7 @@ export class DiagramEditorComponent implements AfterViewInit {
             ],
 
             initialize() {
+                // eslint-disable-next-line prefer-rest-params
                 shapes.basic.Generic.prototype.initialize.apply(this, arguments as any);
                 this.updatePortItems();
             },

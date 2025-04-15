@@ -199,8 +199,7 @@ export class NewExportComponent implements OnInit {
                                                     if (resp !== null) {
                                                         this.deviceType = resp;
                                                         this.deviceType.services.forEach((service) => {
-                                                            // @ts-ignore
-                                                            if (service.id === exp.Topic.replace(/_/g, ':')) {
+                                                            if (service.id === exp.Topic!.replace(/_/g, ':')) {
                                                                 this.exportForm.patchValue({service});
                                                                 service.outputs.forEach((out: DeviceTypeContentModel) => {
                                                                     const pathString = 'value';
@@ -476,8 +475,7 @@ export class NewExportComponent implements OnInit {
                         const svg = parser
                             .parseFromString(this.exportForm.value.pipeline.image, 'image/svg+xml')
                             .getElementsByTagName('svg')[0];
-                        // @ts-ignore
-                        const viewbox = svg.getAttribute('viewbox').split(' ');
+                        const viewbox = svg.getAttribute('viewbox')!.split(' ');
                         svg.setAttribute('height', viewbox[3]);
                         this.image = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
                         if (pipe.operators.length === 1) {
@@ -584,11 +582,9 @@ export class NewExportComponent implements OnInit {
         if (typeof this.exportForm.value.pipeline.image === 'string') {
             const parser = new DOMParser();
             const svg = parser.parseFromString(this.exportForm.value.pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
-            // @ts-ignore
-            const viewbox = svg.getAttribute('viewbox').split(' ');
+            const viewbox = svg.getAttribute('viewbox')!.split(' ');
             svg.setAttribute('height', viewbox[3]);
-            const elements = svg.getElementsByClassName('joint-cell');
-            // @ts-ignore
+            const elements = svg.getElementsByClassName('joint-cell') as any;
             for (const element of elements) {
                 if (element.attributes['model-id'].value === id) {
                     for (const node of element.childNodes) {

@@ -134,15 +134,15 @@ export class CostOverviewComponent implements OnInit {
                 this.imports = obsres[2];
                 this.exports = obsres[3];
                 this.brokerExports = obsres[4];
-                const obs: Observable<any>[] = [of(null)];
+                const obs2: Observable<any>[] = [of(null)];
 
                 if (this.billingService.userHasReadAuthorization()) {
-                    obs[0] =
-                        this.billingService.getAvailable(userId).pipe(map((res) => {
-                            this.dates = res;
+                    obs2[0] =
+                        this.billingService.getAvailable(userId).pipe(map((res2) => {
+                            this.dates = res2;
                         }));
                 }
-                return forkJoin(obs).pipe(
+                return forkJoin(obs2).pipe(
                     mergeMap(_ => {
                         if (this.tree === undefined) {
                             return of({result: [], total: 0} as DeviceInstancesTotalModel);
@@ -162,7 +162,7 @@ export class CostOverviewComponent implements OnInit {
         }));
     }
 
-    originalOrder = (_: KeyValue<string, any>, __: KeyValue<string, any>): number => 0;
+    originalOrder = (_: KeyValue<string, any>, _2: KeyValue<string, any>): number => 0;
 
     sum(m: CostEntryModel): number {
         return (m.cpu || 0) + (m.ram || 0) + (m.storage || 0);

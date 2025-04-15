@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AbstractControl, FormArray, FormControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { AbstractControl, FormControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { DataTableElementTypesEnum } from '../shared/data-table.model';
 
 export function boundaryValidator(): ValidatorFn {

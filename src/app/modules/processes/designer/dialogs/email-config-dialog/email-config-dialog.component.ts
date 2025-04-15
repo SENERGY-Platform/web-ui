@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
-import {ParentErrorStateMatcher} from '../../../../../core/classes/parent-error-state-matcher';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-error-state-matcher';
 
 @Component({
     templateUrl: './email-config-dialog.component.html',
     styleUrls: ['./email-config-dialog.component.css'],
 })
-export class EmailConfigDialogComponent implements OnInit {
+export class EmailConfigDialogComponent {
     toFormGroup: FormGroup;
     subjectFormGroup: FormGroup;
     contentFormGroup: FormGroup;
@@ -62,9 +62,6 @@ export class EmailConfigDialogComponent implements OnInit {
             this.getValidator(),
         );
         this.contentFormGroup.setValue(EmailConfigDialogComponent.interpretStringAsPlaceholder(this.dialogParams.content));
-    }
-
-    ngOnInit() {
     }
 
     close(): void {

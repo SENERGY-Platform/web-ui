@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {ProcessIoVariable} from '../shared/process-io.model';
+import { ProcessIoVariable } from '../shared/process-io.model';
 
 @Component({
     templateUrl: './process-io-variable-edit-dialog.component.html',
@@ -59,7 +59,7 @@ export class ProcessIoVariableEditDialogComponent {
         }
         try {
             JSON.parse(this.valueJson);
-        } catch (e) {
+        } catch (_) {
             return false;
         }
         return this.variable.key !== '';

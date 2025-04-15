@@ -27,7 +27,7 @@ import {FormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import {animate, state, style, transition, trigger,} from '@angular/animations';
 
-const DateDiff = {
+const dateDiff = {
     inSeconds(d1: Date, d2: Date) {
         const t2 = d2.getTime();
         const t1 = d1.getTime();
@@ -303,19 +303,19 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         let timeSinceLastValue: number;
         switch(this.widget.properties.timestampConfig?.warningTimeLevel) {
         case('s'):
-            timeSinceLastValue = DateDiff.inSeconds(date, new Date());
+            timeSinceLastValue = dateDiff.inSeconds(date, new Date());
             break;
         case('min'):
-            timeSinceLastValue = DateDiff.inMinutes(date, new Date());
+            timeSinceLastValue = dateDiff.inMinutes(date, new Date());
             break;
         case('h'):
-            timeSinceLastValue = DateDiff.inHours(date, new Date());
+            timeSinceLastValue = dateDiff.inHours(date, new Date());
             break;
         case('d'):
-            timeSinceLastValue = DateDiff.inDays(date, new Date());
+            timeSinceLastValue = dateDiff.inDays(date, new Date());
             break;
         case('m'):
-            timeSinceLastValue = DateDiff.inMonths(date, new Date());
+            timeSinceLastValue = dateDiff.inMonths(date, new Date());
             break;
         default:
             return;
@@ -326,19 +326,19 @@ export class SingleValueComponent implements OnInit, OnDestroy {
 
         switch(this.widget.properties.timestampConfig?.problemTimeLevel) {
         case('s'):
-            timeSinceLastValue = DateDiff.inSeconds(date, new Date());
+            timeSinceLastValue = dateDiff.inSeconds(date, new Date());
             break;
         case('min'):
-            timeSinceLastValue = DateDiff.inMinutes(date, new Date());
+            timeSinceLastValue = dateDiff.inMinutes(date, new Date());
             break;
         case('h'):
-            timeSinceLastValue = DateDiff.inHours(date, new Date());
+            timeSinceLastValue = dateDiff.inHours(date, new Date());
             break;
         case('d'):
-            timeSinceLastValue = DateDiff.inDays(date, new Date());
+            timeSinceLastValue = dateDiff.inDays(date, new Date());
             break;
         case('m'):
-            timeSinceLastValue = DateDiff.inMonths(date, new Date());
+            timeSinceLastValue = dateDiff.inMonths(date, new Date());
             break;
         default:
             return;

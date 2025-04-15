@@ -30,7 +30,7 @@ import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { NotificationService } from './notification/shared/notification.service';
 import { of } from 'rxjs';
 import { SettingsDialogService } from 'src/app/modules/settings/shared/settings-dialog.service';
-import {provideRouter} from "@angular/router";
+import {provideRouter} from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 

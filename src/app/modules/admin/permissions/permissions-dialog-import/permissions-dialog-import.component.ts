@@ -16,13 +16,11 @@
  *
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {FormControl, UntypedFormControl, Validators} from '@angular/forms';
-import {MatDialogRef} from '@angular/material/dialog';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {PermissionImportModel} from './permissions-dialog-import.model';
-import {MatPaginator} from '@angular/material/paginator';
-import {Subscription} from 'rxjs';
+import { Component, ViewChild } from '@angular/core';
+import { UntypedFormControl, Validators } from '@angular/forms';
+import { MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { PermissionImportModel } from './permissions-dialog-import.model';
 import { PermissionModel } from '../shared/permission.model';
 
 @Component({
@@ -32,8 +30,7 @@ import { PermissionModel } from '../shared/permission.model';
 })
 export class PermissionsDialogImportComponent {
 
-    // @ts-ignore
-    @ViewChild('fileInput') public fileInput: HTMLInputElement;
+    @ViewChild('fileInput') public fileInput!: HTMLInputElement;
     public overwrite = new UntypedFormControl(undefined, Validators.required);
     public policies: PermissionModel[] = [];
     public fileValid = false;
@@ -78,7 +75,7 @@ export class PermissionsDialogImportComponent {
                 this.selections.fill(false);
                 this.masterToggle(true);
                 this.fileValid = true;
-            } catch (e) {
+            } catch (_) {
                 this.snackBar.open('Could not import permissions: Invalid JSON', undefined, {
                     duration: 3 * 1000,
                 });
@@ -87,18 +84,16 @@ export class PermissionsDialogImportComponent {
             this.fileChecked = true;
         };
         try {
-            // @ts-ignore
-            reader.readAsText(this.fileInput.nativeElement.files[0]);
-        } catch (e) {
+            reader.readAsText((this.fileInput as any).nativeElement.files[0]);
+        } catch (_) {
             console.error('fileInput undefined: Could not read file');
         }
     }
 
     public hasValidFileSelected() {
         try {
-            // @ts-ignore
-            return this.fileInput.nativeElement.files.length !== 0 && this.fileValid;
-        } catch (e) {
+            return (this.fileInput as any).nativeElement.files.length !== 0 && this.fileValid;
+        } catch (_) {
             return false;
         }
     }

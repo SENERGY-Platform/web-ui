@@ -163,7 +163,7 @@ export class KeycloakConfidentialService implements OnDestroy {
                 window.alert('Failed to get user info, username correct?');
                 location.reload();
                 throw err;
-            }), mergeMap((userInfo, __) => {
+            }), mergeMap((userInfo, _) => {
                 this.userInfo = userInfo;
                 if (userInfo.id === undefined) {
                     window.alert('Failed to login!');
@@ -187,7 +187,7 @@ export class KeycloakConfidentialService implements OnDestroy {
         return p.resolve();
     }
 
-    isUserInRole(role: string, __?: string): boolean {
+    isUserInRole(role: string, _?: string): boolean {
         const decodedToken = this.decodeToken();
         if (decodedToken === undefined) {
             return false;

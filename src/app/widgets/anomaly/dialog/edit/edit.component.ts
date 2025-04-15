@@ -109,7 +109,7 @@ export class EditComponent implements OnInit {
             map((widget: WidgetModel) => {
                 this.widget = widget;
 
-                //const filterDevices: DeviceInstanceModel[] = this.devices.filter(device => this.widget.properties.anomalyDetection?.filterDeviceIds.includes(device.id))
+                // const filterDevices: DeviceInstanceModel[] = this.devices.filter(device => this.widget.properties.anomalyDetection?.filterDeviceIds.includes(device.id))
 
                 const exportElement = this.exports.find((availableExport) => this.widget.properties.anomalyDetection?.export === availableExport.id);
 
@@ -184,7 +184,7 @@ export class EditComponent implements OnInit {
             map((exports: ExportResponseModel | null) => {
                 if (exports !== null) {
                     exports.instances?.forEach((exportModel: ExportModel) => {
-                        //EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
+                        // EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
                         if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
                             this.exports.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID });
                         }

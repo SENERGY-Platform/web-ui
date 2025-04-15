@@ -82,7 +82,7 @@ export interface AirQualityImportExportModel {
     exportDatabaseId?: string;
 }
 
-// eslint-disable-next-line no-shadow
+ 
 export enum AirQualityExternalProvider {
     UBA,
     Yr,

@@ -120,7 +120,7 @@ export class PermissionDialogComponent implements OnInit {
 
                     });
                     setTimeout(() => this.userTable?.render(), 0);
-                })
+                });
             });
         }
     }
@@ -139,7 +139,7 @@ export class PermissionDialogComponent implements OnInit {
 
     get adddableUsers(): PermissionsUserModel[] {
         const keys = Object.keys(this.permissions.user_permissions);
-        const u = this.users.filter(u => keys.findIndex(k => k === u.id) === -1);
+        const u = this.users.filter(u2 => keys.findIndex(k => k === u2.id) === -1);
         if (u.length === 0) {
             this.userFormControl.disable();
         } else {
@@ -150,7 +150,7 @@ export class PermissionDialogComponent implements OnInit {
 
     get adddableGroups(): string[] {
         const keys = Object.keys(this.permissions.group_permissions);
-        const u = this.groups.filter(u => keys.findIndex(k => k === u) === -1);
+        const u = this.groups.filter(u2 => keys.findIndex(k => k === u2) === -1);
         if (u.length === 0) {
             this.groupFormControl.disable();
         } else {
@@ -161,7 +161,7 @@ export class PermissionDialogComponent implements OnInit {
 
     get adddableRoles(): string[] {
         const keys = Object.keys(this.permissions.role_permissions);
-        const u = this.roles.filter(u => keys.findIndex(k => k === u) === -1);
+        const u = this.roles.filter(u2 => keys.findIndex(k => k === u2) === -1);
         if (u.length === 0) {
             this.roleFormControl.disable();
         } else {

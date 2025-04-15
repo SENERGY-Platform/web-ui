@@ -427,7 +427,7 @@ export class DataTableEditDialogComponent implements OnInit {
                 return;
             }
             const update = function(that: DataTableEditDialogComponent) {
-                if (that.functions.length === 0) { //delay until functions populated
+                if (that.functions.length === 0) { // delay until functions populated
                     setTimeout(() => update(that), 100);
                     return;
                 }
@@ -440,7 +440,7 @@ export class DataTableEditDialogComponent implements OnInit {
         });
         newGroup.get('unit')?.valueChanges.subscribe(unit => {
             const functionId = newGroup.get('elementDetails')?.get('deviceGroup')?.get('deviceGroupCriteria')?.value?.function_id;
-            const f = this.functions.find(f => f.id === functionId);
+            const f = this.functions.find(f2 => f2.id === functionId);
             if (f === undefined) {
                 return;
             }
@@ -1259,7 +1259,7 @@ export class DataTableEditDialogComponent implements OnInit {
 
     getConcept(element: AbstractControl): ConceptsCharacteristicsModel | undefined {
         const functionId = element.get('elementDetails')?.get('deviceGroup')?.get('deviceGroupCriteria')?.value?.function_id;
-        const f = this.functions.find(f => f.id === functionId);
+        const f = this.functions.find(f2 => f2.id === functionId);
         if (f === undefined) {
             return undefined;
         }

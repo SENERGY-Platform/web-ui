@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     SmartServiceTaskInputDescription,
     SmartServiceTaskDescription,
     ServingRequest,
-    SmartServiceInputsDescription
 } from '../../shared/designer.model';
-import {ProcessRepoService} from '../../../../processes/process-repo/shared/process-repo.service';
-import {DeploymentsService} from '../../../../processes/deployments/shared/deployments.service';
-import {ProcessModel} from '../../../../processes/process-repo/shared/process.model';
+import { ProcessRepoService } from '../../../../processes/process-repo/shared/process-repo.service';
+import { DeploymentsService } from '../../../../processes/deployments/shared/deployments.service';
+import { ProcessModel } from '../../../../processes/process-repo/shared/process.model';
 import {
-    V2DeploymentsPreparedFilterCriteriaModel,
     V2DeploymentsPreparedModel
 } from '../../../../processes/deployments/shared/deployments-prepared-v2.model';
-import {FlowRepoService} from '../../../../data/flow-repo/shared/flow-repo.service';
-import {FlowModel} from '../../../../data/flow-repo/shared/flow.model';
-import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
-import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
+import { FlowRepoService } from '../../../../data/flow-repo/shared/flow-repo.service';
+import { FlowModel } from '../../../../data/flow-repo/shared/flow.model';
+import { ParserService } from '../../../../data/flow-repo/shared/parser.service';
+import { ParseModel } from '../../../../data/flow-repo/shared/parse.model';
 import {
     BpmnElement,
     BpmnParameter,
@@ -40,30 +38,30 @@ import {
     BpmnBusinessObject,
     BpmnElementRef
 } from '../../../../processes/designer/shared/designer.model';
-import {ImportInstanceConfigModel, ImportInstancesModel} from '../../../../imports/import-instances/shared/import-instances.model';
+import { ImportInstanceConfigModel, ImportInstancesModel } from '../../../../imports/import-instances/shared/import-instances.model';
 import {
     ImportTypeContentVariableModel,
     ImportTypeModel,
 } from '../../../../imports/import-types/shared/import-types.model';
-import {ImportTypesService} from '../../../../imports/import-types/shared/import-types.service';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {ExportService} from '../../../../exports/shared/export.service';
-import {ExportDatabaseModel} from '../../../../exports/shared/export.model';
+import { ImportTypesService } from '../../../../imports/import-types/shared/import-types.service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ExportService } from '../../../../exports/shared/export.service';
+import { ExportDatabaseModel } from '../../../../exports/shared/export.model';
 import {
     AbstractSmartServiceInput, abstractSmartServiceInputToSmartServiceInputsDescription,
     smartServiceInputsDescriptionToAbstractSmartServiceInput
 } from '../edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
-import {FunctionsPermSearchModel} from '../../../../metadata/functions/shared/functions-perm-search.model';
-import {DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
-import {FunctionsService} from '../../../../metadata/functions/shared/functions.service';
-import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
-import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
-import {edit as barceEdit, acequire as braceAcequire} from 'brace';
+import { FunctionsPermSearchModel } from '../../../../metadata/functions/shared/functions-perm-search.model';
+import { DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
+import { FunctionsService } from '../../../../metadata/functions/shared/functions.service';
+import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
+import { DeviceClassesService } from '../../../../metadata/device-classes/shared/device-classes.service';
+import { edit as barceEdit, acequire as braceAcequire } from 'brace';
 import 'brace/mode/javascript';
 import 'brace/mode/json';
 import 'brace/ext/language_tools';
-import {completer} from './ace-code-completer';
-//import * as langTools from 'brace/ext/language_tools';
+import { completer } from './ace-code-completer';
+// import * as langTools from 'brace/ext/language_tools';
 
 interface Criteria {
     interaction?: string;
@@ -75,16 +73,16 @@ interface Criteria {
 interface GenericWatcherRequest {
     method: string;
     endpoint: string;
-    body?: string; //base64 encoded byte array
+    body?: string; // base64 encoded byte array
     add_auth_token: boolean;
-    header?: {[index: string]: string[]};
+    header?: { [index: string]: string[] };
 }
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
     styleUrls: ['./edit-smart-service-task-dialog.component.css'],
 })
-export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewInit {
+export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
     init: SmartServiceTaskDescription;
     result: SmartServiceTaskDescription;
     tabs: string[] = ['process_deployment', 'process_deployment_start', 'analytics', 'export', 'import', 'info', 'device_repository', 'watcher'];
@@ -99,21 +97,21 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     flowSvg: string | SafeHtml = '';
     currentFlowInputId = '';
 
-    availableProcessVariables: Map<string,BpmnParameterWithLabel[]> = new Map();
+    availableProcessVariables: Map<string, BpmnParameterWithLabel[]> = new Map();
 
     exportRequest: ServingRequest;
     importRequest: ImportInstancesModel;
-    importRequestConfigValueType: Map<string,string> = new Map();
+    importRequestConfigValueType: Map<string, string> = new Map();
     importTypes: ImportTypeModel[] = [];
     knownImportTypes: Map<string, ImportTypeModel> = new Map();
-    importOverwrites: {config_name: string; json_value: string}[] = [];
-    availableAnalyticsIotSelections: {name: string; value: string}[];
-    availableProcessIotSelections: {name: string; value: string}[];
+    importOverwrites: { config_name: string; json_value: string }[] = [];
+    availableAnalyticsIotSelections: { name: string; value: string }[];
+    availableProcessIotSelections: { name: string; value: string }[];
 
     infoModuleType = 'widget';
     infoKey = '';
 
-    processStart: ProcessStartModel = {deployment_id: '', inputs: []};
+    processStart: ProcessStartModel = { deployment_id: '', inputs: [] };
 
     exportDatabaseList: ExportDatabaseModel[] = [];
 
@@ -142,7 +140,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         maintenance_producer: string;
         interval: string;
         hash_type: string;
-        maintenance_procedure_inputs: {key: string; value: string}[];
+        maintenance_procedure_inputs: { key: string; value: string }[];
         devices_by_criteria: {
             criteria: Criteria[];
         };
@@ -161,7 +159,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                 endpoint: 'http://example.com',
                 body: '',
                 add_auth_token: false,
-                header: {'Accept-Charset':['utf-8']}
+                header: { 'Accept-Charset': ['utf-8'] }
             }
         };
 
@@ -183,10 +181,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         private functionsService: FunctionsService,
         private deviceTypesService: DeviceTypeService,
         private deviceClassService: DeviceClassesService,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription; element: BpmnElement},
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription; element: BpmnElement },
     ) {
         this.smartServiceBpmnElement = dialogParams.element;
-        if(!dialogParams.info.topic) {
+        if (!dialogParams.info.topic) {
             dialogParams.info.topic = this.tabs[0];
         }
         this.result = dialogParams.info;
@@ -200,7 +198,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         this.exportRequest = this.parseExport(this.result.inputs.find(value => value.name === 'export.request')?.value || '{"generated": true}');
         this.importRequest = this.parseImport(this.result.inputs.find(value => value.name === 'import.request')?.value || '{}');
         this.importTypeService.listImportTypes('', 9999, 0, 'name.asc').subscribe(value => this.importTypes = value.result);
-        if(this.importRequest.import_type_id) {
+        if (this.importRequest.import_type_id) {
             this.loadImportType(false);
         }
 
@@ -236,22 +234,21 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     ngAfterViewInit(): void {
-        const setAceJsonCompleter = this.setAceJsonCompleter;
-        const setAceJsCompleter = this.setAceJsCompleter;
+        const that = this;
         const langTools = braceAcequire('ace/ext/language_tools');
-        if(langTools){
+        if (langTools) {
             langTools.setCompleters([langTools.snippetCompleter, langTools.keyWordCompleter, {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 getCompletions(_: any, session: any, pos: any, ___: any, callback: any) {
-                    switch (session.$modeId){
-                    case 'ace/mode/json':
-                        that.setAceJsonCompleter(callback);
-                        return;
-                    case 'ace/mode/javascript':
-                        that.setAceJsCompleter(session, pos, callback);
-                        return;
-                    default:
-                        console.error('unknown ace editor mode:', session.$modeId);
+                    switch (session.$modeId) {
+                        case 'ace/mode/json':
+                            that.setAceJsonCompleter(callback);
+                            return;
+                        case 'ace/mode/javascript':
+                            that.setAceJsCompleter(session, pos, callback);
+                            return;
+                        default:
+                            console.error('unknown ace editor mode:', session.$modeId);
                     }
 
 
@@ -265,7 +262,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         this.setAceJsEditor(this.postScriptEditor, 'postscript');
     }
 
-    private setAceJsonCompleter(callback: any){
+    private setAceJsonCompleter(callback: any) {
         let completers = ([] as BpmnParameterWithLabel[])
             .concat(this.availableProcessVariables.get('iot_form_fields') || [])
             .concat(this.availableProcessVariables.get('value_form_fields') || [])
@@ -275,8 +272,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             .concat(this.availableProcessVariables.get('import') || [])
             .concat(this.availableProcessVariables.get('uncategorized') || [])
             .map(value => ({
-                caption: 'process-variable: '+value.name,
-                value: '${'+value.name+'}',
+                caption: 'process-variable: ' + value.name,
+                value: '${' + value.name + '}',
                 meta: 'static'
             }));
         completers = completers.concat(
@@ -284,35 +281,36 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                 .concat(this.availableProcessVariables.get('iot_form_fields') || [])
                 .concat(this.availableProcessVariables.get('value_form_fields') || [])
                 .map(value => ({
-                    caption: 'placeholder: '+value.name,
-                    value: '{{.'+value.name+'}}',
+                    caption: 'placeholder: ' + value.name,
+                    value: '{{.' + value.name + '}}',
                     meta: 'static'
                 }))
         );
         callback(null, completers);
     }
 
-    private setAceJsCompleter(session: any, pos: any, callback: any){
+    private setAceJsCompleter(session: any, pos: any, callback: any) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const that = this;
-        completer.getCompletions(null, session, pos, null, function(_: any, completers: { caption: string; value: string; meta: string }[]) {
+        completer.getCompletions(null, session, pos, null, function (_: any, completers: { caption: string; value: string; meta: string }[]) {
             if (!completers) {
                 completers = [];
             }
 
             completers.push({
                 caption: 'filter criteria struct',
-                value: 'var criteria = '+JSON.stringify({
+                value: 'var criteria = ' + JSON.stringify({
                     aspect_id: '',
                     device_class_id: '',
                     function_id: '',
                     interaction: ''
-                } as Criteria)+'/*remove unused fields*/',
+                } as Criteria) + '/*remove unused fields*/',
                 meta: 'static'
             });
 
             that.functions.forEach(value => {
                 completers.push({
-                    caption: 'function: '+value.name,
+                    caption: 'function: ' + value.name,
                     value: `"${value.id}"/*${value.name}*/`,
                     meta: 'static'
                 });
@@ -320,7 +318,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
             that.deviceClasses.forEach(value => {
                 completers.push({
-                    caption: 'device-class: '+value.name,
+                    caption: 'device-class: ' + value.name,
                     value: `"${value.id}"/*${value.name}*/`,
                     meta: 'static'
                 });
@@ -329,7 +327,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             that.nestedAspects.forEach(list => {
                 list.forEach(value => {
                     completers.push({
-                        caption: 'aspect: '+value.name,
+                        caption: 'aspect: ' + value.name,
                         value: `"${value.id}"/*${value.name}*/`,
                         meta: 'static'
                     });
@@ -339,7 +337,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             const interactions: string[] = ['event', 'request', 'event+request'];
             interactions.forEach(value => {
                 completers.push({
-                    caption: 'interaction: '+value,
+                    caption: 'interaction: ' + value,
                     value: `"${value}"`,
                     meta: 'static'
                 });
@@ -351,8 +349,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
 
-    private setAceJsEditor(element: ElementRef<HTMLElement>, inputNamePrefix: string){
-        if(element) {
+    private setAceJsEditor(element: ElementRef<HTMLElement>, inputNamePrefix: string) {
+        if (element) {
             const editor = barceEdit(element.nativeElement);
             editor.getSession().setMode('ace/mode/javascript');
             editor.setOptions({
@@ -363,12 +361,12 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             });
             editor.setValue(this.getChunkedDataFromInputs(inputNamePrefix, this.result.inputs, ''));
         } else {
-            console.error(inputNamePrefix+' scriptEditor not loaded');
+            console.error(inputNamePrefix + ' scriptEditor not loaded');
         }
     }
 
-    private setInfoModuleDataAceEditor(element: ElementRef<HTMLElement>){
-        if(element) {
+    private setInfoModuleDataAceEditor(element: ElementRef<HTMLElement>) {
+        if (element) {
             const editor = barceEdit(element.nativeElement);
             editor.getSession().setMode('ace/mode/json');
             editor.setOptions({
@@ -377,18 +375,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                 minLines: 20,
                 maxLines: Infinity
             });
-            editor.setValue(this.getModuleDataFromInputs( this.result.inputs));
+            editor.setValue(this.getModuleDataFromInputs(this.result.inputs));
         } else {
             console.error('info module data editor not loaded');
         }
     }
 
-
-    ngOnInit() {}
-
     ensureResultFields() {
         const processDeploymentTopic = this.tabs[0];
-        if(!this.processModels && this.result.topic === processDeploymentTopic) {
+        if (!this.processModels && this.result.topic === processDeploymentTopic) {
             this.processRepo.getProcessModels('', 9999, 0, 'date', 'asc').subscribe(value => this.processModels = value.result);
         }
         this.ensureFlowList();
@@ -415,12 +410,12 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             inputs: []
         };
         inputs?.forEach(value => {
-            if(value.name === 'process_deployment_start.process_deployment_id') {
+            if (value.name === 'process_deployment_start.process_deployment_id') {
                 result.deployment_id = value.value;
             }
-            if(value.name.startsWith('process_deployment_start.input.')){
+            if (value.name.startsWith('process_deployment_start.input.')) {
                 const key = value.name.replace('process_deployment_start.input.', '');
-                result.inputs.push({key, value: value.value});
+                result.inputs.push({ key, value: value.value });
             }
         });
         return result;
@@ -434,7 +429,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         }];
         processStart.inputs.forEach(value => {
             result.push({
-                name: 'process_deployment_start.input.'+value.key,
+                name: 'process_deployment_start.input.' + value.key,
                 value: value.value,
                 type: 'text'
             });
@@ -446,17 +441,17 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         this.processStart.inputs.splice(index, 1);
     }
 
-    addProcessStartInput(){
-        this.processStart.inputs.push({key: '', value: ''});
+    addProcessStartInput() {
+        this.processStart.inputs.push({ key: '', value: '' });
     }
 
     generateProcessStartInputs(deploymentIdVariableName: string) {
         const modelId = this.availableProcessVariables.get('process_deployment_to_model')?.find(e => e.name === deploymentIdVariableName)?.value;
-        if(modelId){
+        if (modelId) {
             this.processDeployment.getStartParameter(modelId).subscribe(value => {
                 this.processStart.inputs = [];
                 value.forEach(param => {
-                    this.processStart.inputs.push({key: param.id, value: param.default});
+                    this.processStart.inputs.push({ key: param.id, value: param.default });
                 });
             });
         }
@@ -466,89 +461,89 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
      *      Processes
      ******************************/
 
-    getAvailableProcessIotSelections(): {name: string; value: string}[]  {
-        const result:  {name: string; value: string}[] = [];
+    getAvailableProcessIotSelections(): { name: string; value: string }[] {
+        const result: { name: string; value: string }[] = [];
         this.availableProcessVariables.get('iot_form_fields')?.forEach(field => {
-            result.push({name: field.label || field.name, value: '${'+field.name+'}'});
+            result.push({ name: field.label || field.name, value: '${' + field.name + '}' });
         });
         this.availableProcessVariables.get('import_selection')?.forEach(field => {
-            result.push({name: field.label || field.name, value: field.name});
+            result.push({ name: field.label || field.name, value: field.name });
         });
         return result;
     }
 
     ensureProcessTaskParameter(id: string) {
         this.result.inputs.forEach(e => this.knownInputValues.set(e.name, e));
-        if(!this.selectedProcessModelPreparation || this.selectedProcessModelPreparation.id !== id) {
+        if (!this.selectedProcessModelPreparation || this.selectedProcessModelPreparation.id !== id) {
             this.processDeployment.getPreparedDeployments(id).subscribe(value => {
-                if(value) {
+                if (value) {
                     this.selectedProcessModelPreparation = value;
                     this.result.inputs = [
-                        this.knownInputValues.get('process_deployment.process_model_id') || {name:'process_deployment.process_model_id', value: id, type: 'text'},
-                        {name:'process_deployment.name', value: this.selectedProcessModelPreparation.name, type: 'text'},
-                        this.knownInputValues.get('process_deployment.module_data') || {name:'process_deployment.module_data', value: '{}', type: 'text'},
-                        this.knownInputValues.get(this.processFogFieldName) || {name:this.processFogFieldName, value: 'false', type: 'text'},
-                        this.knownInputValues.get(this.processRestartFieldName) || {name:this.processRestartFieldName, value: 'false', type: 'text'},
-                        this.knownInputValues.get(this.processNotifyFieldName) || {name:this.processNotifyFieldName, value: 'true', type: 'text'}
+                        this.knownInputValues.get('process_deployment.process_model_id') || { name: 'process_deployment.process_model_id', value: id, type: 'text' },
+                        { name: 'process_deployment.name', value: this.selectedProcessModelPreparation.name, type: 'text' },
+                        this.knownInputValues.get('process_deployment.module_data') || { name: 'process_deployment.module_data', value: '{}', type: 'text' },
+                        this.knownInputValues.get(this.processFogFieldName) || { name: this.processFogFieldName, value: 'false', type: 'text' },
+                        this.knownInputValues.get(this.processRestartFieldName) || { name: this.processRestartFieldName, value: 'false', type: 'text' },
+                        this.knownInputValues.get(this.processNotifyFieldName) || { name: this.processNotifyFieldName, value: 'true', type: 'text' }
                     ];
                     const keep: string[] = [this.processRestartFieldName, this.processNotifyFieldName, this.processFogFieldName];
                     this.selectedProcessModelPreparation.start_parameter?.forEach(param => {
-                        const selectionKey = 'process_deployment.start_parameter.default.'+param.id;
+                        const selectionKey = 'process_deployment.start_parameter.default.' + param.id;
                         keep.push(selectionKey);
-                        this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: param.default, type: 'text'});
+                        this.result.inputs.push(this.knownInputValues.get(selectionKey) || { name: selectionKey, value: param.default, type: 'text' });
                     });
                     const elementIds: string[] = [];
                     this.selectedProcessModelPreparation.elements?.forEach(element => {
                         elementIds.push(element.bpmn_id);
-                        if(element.task){
-                            const selectionKey = 'process_deployment.'+element.bpmn_id+'.selection';
-                            this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: '{}', type: 'text'});
-                            // eslint-disable-next-line guard-for-in
+                        if (element.task) {
+                            const selectionKey = 'process_deployment.' + element.bpmn_id + '.selection';
+                            this.result.inputs.push(this.knownInputValues.get(selectionKey) || { name: selectionKey, value: '{}', type: 'text' });
+
                             for (const key in element.task.parameter) {
                                 const value2 = element.task.parameter[key];
-                                if(this.taskParameterShouldBeEditable(value2)){
-                                    const paramKey = 'process_deployment.'+element.bpmn_id+'.parameter.'+key;
-                                    this.result.inputs.push(this.knownInputValues.get(paramKey) || {name:paramKey, value: value2, type: 'text'});
+                                if (this.taskParameterShouldBeEditable(value2)) {
+                                    const paramKey = 'process_deployment.' + element.bpmn_id + '.parameter.' + key;
+                                    this.result.inputs.push(this.knownInputValues.get(paramKey) || { name: paramKey, value: value2, type: 'text' });
                                 }
                             }
                         }
-                        if(element.message_event){
+                        if (element.message_event) {
                             this.ensureFlowList();
-                            const selectionKey = 'process_deployment.'+element.bpmn_id+'.selection';
-                            this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: '{}', type: 'text'});
-                            const eventFlowKey = 'process_deployment.'+element.bpmn_id+'.event.flow_id';
-                            this.result.inputs.push(this.knownInputValues.get(eventFlowKey) || {name:eventFlowKey, value: '', type: 'text'});
-                            const eventValueKey = 'process_deployment.'+element.bpmn_id+'.event.value';
-                            this.result.inputs.push(this.knownInputValues.get(eventValueKey) || {name:eventValueKey, value: '', type: 'text'});
-                            const eventMarshallerKey = 'process_deployment.'+element.bpmn_id+'.event.use_marshaller';
+                            const selectionKey = 'process_deployment.' + element.bpmn_id + '.selection';
+                            this.result.inputs.push(this.knownInputValues.get(selectionKey) || { name: selectionKey, value: '{}', type: 'text' });
+                            const eventFlowKey = 'process_deployment.' + element.bpmn_id + '.event.flow_id';
+                            this.result.inputs.push(this.knownInputValues.get(eventFlowKey) || { name: eventFlowKey, value: '', type: 'text' });
+                            const eventValueKey = 'process_deployment.' + element.bpmn_id + '.event.value';
+                            this.result.inputs.push(this.knownInputValues.get(eventValueKey) || { name: eventValueKey, value: '', type: 'text' });
+                            const eventMarshallerKey = 'process_deployment.' + element.bpmn_id + '.event.use_marshaller';
                             let useMarshaller = 'false';
                             if (element.message_event.use_marshaller) {
                                 useMarshaller = 'true';
                             }
-                            this.result.inputs.push(this.knownInputValues.get(eventMarshallerKey) || {name:eventMarshallerKey, value: useMarshaller, type: 'text'});
+                            this.result.inputs.push(this.knownInputValues.get(eventMarshallerKey) || { name: eventMarshallerKey, value: useMarshaller, type: 'text' });
                         }
-                        if(element.conditional_event){
-                            const selectionKey = 'process_deployment.'+element.bpmn_id+'.selection';
-                            this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: '{}', type: 'text'});
+                        if (element.conditional_event) {
+                            const selectionKey = 'process_deployment.' + element.bpmn_id + '.selection';
+                            this.result.inputs.push(this.knownInputValues.get(selectionKey) || { name: selectionKey, value: '{}', type: 'text' });
                             if (element.conditional_event.variables) {
-                                // eslint-disable-next-line guard-for-in
+
                                 for (const key in element.conditional_event.variables) {
                                     const value2 = element.conditional_event.variables[key];
-                                    const paramKey = 'process_deployment.'+element.bpmn_id+'.variables.'+key;
-                                    this.result.inputs.push(this.knownInputValues.get(paramKey) || {name:paramKey, value: value2, type: 'text'});
+                                    const paramKey = 'process_deployment.' + element.bpmn_id + '.variables.' + key;
+                                    this.result.inputs.push(this.knownInputValues.get(paramKey) || { name: paramKey, value: value2, type: 'text' });
                                 }
                             }
                         }
-                        if(element.time_event){
-                            const eventTimeKey = 'process_deployment.'+element.bpmn_id+'.time';
-                            this.result.inputs.push(this.knownInputValues.get(eventTimeKey) || {name:eventTimeKey, value: element.time_event.time, type: 'text'});
+                        if (element.time_event) {
+                            const eventTimeKey = 'process_deployment.' + element.bpmn_id + '.time';
+                            this.result.inputs.push(this.knownInputValues.get(eventTimeKey) || { name: eventTimeKey, value: element.time_event.time, type: 'text' });
                         }
                     });
 
-                    //remove values of other/previous process-model selections
+                    // remove values of other/previous process-model selections
                     this.result.inputs = this.result.inputs.filter(input => {
-                        if (!keep.includes(input.name) && input.name.startsWith('process_deployment.') && input.name.split('.').length >= 3 ) { //keep values of other workers/topics and general process_deployment values
-                            return elementIds.some(knownId => input.name.startsWith('process_deployment.'+knownId));
+                        if (!keep.includes(input.name) && input.name.startsWith('process_deployment.') && input.name.split('.').length >= 3) { // keep values of other workers/topics and general process_deployment values
+                            return elementIds.some(knownId => input.name.startsWith('process_deployment.' + knownId));
                         }
                         return true;
                     });
@@ -557,34 +552,34 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         }
     }
 
-    ensureFlowList(){
-        if(!this.flows) {
+    ensureFlowList() {
+        if (!this.flows) {
             this.flowService.getFlows('', 9999, 0, 'name', 'asc').subscribe(flows => {
                 this.flows = flows.flows;
                 const currentFlowId = this.analyticsFlowId;
-                if(currentFlowId){
+                if (currentFlowId) {
                     this.ensureAnalyticsFlowParameter(currentFlowId);
                 }
             });
         }
     }
 
-    get processTaskIds(): string[]{
+    get processTaskIds(): string[] {
         const resultSet = new Map<string, string>();
         this.result.inputs.forEach(input => {
-            if (input.name.startsWith('process_deployment.') && !input.name.startsWith('process_deployment.on_incident.') && !input.name.startsWith('process_deployment.start_parameter.default.') ) {
+            if (input.name.startsWith('process_deployment.') && !input.name.startsWith('process_deployment.on_incident.') && !input.name.startsWith('process_deployment.start_parameter.default.')) {
                 const parts = input.name.split('.');
-                if (parts.length > 2 ) {
+                if (parts.length > 2) {
                     resultSet.set(parts[1], parts[1]);
                 }
             }
         });
-        return Array.from( resultSet.keys() );
+        return Array.from(resultSet.keys());
     }
 
-    getProcessTaskParameter(taskId: string): string[]{
+    getProcessTaskParameter(taskId: string): string[] {
         const result: string[] = [];
-        const prefix = 'process_deployment.'+taskId+'.parameter.';
+        const prefix = 'process_deployment.' + taskId + '.parameter.';
         this.result.inputs.forEach(input => {
             if (input.name.startsWith(prefix)) {
                 result.push(input.name.slice(prefix.length));
@@ -593,9 +588,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         return result;
     }
 
-    getProcessConditionalEventVariables(taskId: string): string[]{
+    getProcessConditionalEventVariables(taskId: string): string[] {
         const result: string[] = [];
-        const prefix = 'process_deployment.'+taskId+'.variables.';
+        const prefix = 'process_deployment.' + taskId + '.variables.';
         this.result.inputs.forEach(input => {
             if (input.name.startsWith(prefix)) {
                 result.push(input.name.slice(prefix.length));
@@ -607,7 +602,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     processProcessModelIdFieldName = 'process_deployment.process_model_id';
     processProcessNameFieldName = 'process_deployment.name';
     get processProcessName(): string {
-        this.getFieldValue(this.processProcessModelIdFieldName, 'text', ''); //ensure existence of process model id input
+        this.getFieldValue(this.processProcessModelIdFieldName, 'text', ''); // ensure existence of process model id input
         return this.getFieldValue(this.processProcessNameFieldName, 'text', '');
     }
 
@@ -643,26 +638,26 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     processStartParamPrefix = 'process_deployment.start_parameter.default.';
-    isProcessStartParam(input: SmartServiceTaskInputDescription): boolean  {
+    isProcessStartParam(input: SmartServiceTaskInputDescription): boolean {
         return input.name.startsWith(this.processStartParamPrefix);
     }
 
     getProcessStartParameterName(input: SmartServiceTaskInputDescription): string {
-        if (input.name.startsWith(this.processStartParamPrefix)){
+        if (input.name.startsWith(this.processStartParamPrefix)) {
             return input.name.slice(this.processStartParamPrefix.length);
         }
         return '';
     }
 
-    processTaskMatches(input: SmartServiceTaskInputDescription, taskId: string, suffix: string): boolean  {
-        return input.name === 'process_deployment.'+taskId+'.'+suffix;
+    processTaskMatches(input: SmartServiceTaskInputDescription, taskId: string, suffix: string): boolean {
+        return input.name === 'process_deployment.' + taskId + '.' + suffix;
     }
 
     getProcessTaskName(taskId: string): string {
         return this.selectedProcessModelPreparation?.elements?.find(e => e.bpmn_id === taskId)?.name || taskId;
     }
 
-    generateInputForProcessElement(input: SmartServiceTaskInputDescription,taskId: string){
+    generateInputForProcessElement(input: SmartServiceTaskInputDescription, taskId: string) {
         const element = this.selectedProcessModelPreparation?.elements.find(element2 => element2.bpmn_id === taskId);
         const criteria = element?.task?.selection.filter_criteria ||
             element?.message_event?.selection.filter_criteria ||
@@ -671,9 +666,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             const current = this.availableProcessVariables.get('iot_form_fields') || [];
             const interaction = element?.task ? 'request' : 'event';
             const newField: AbstractSmartServiceInput = {
-                id: this.smartServiceBpmnElement.id+'_'+taskId+'_selection',
+                id: this.smartServiceBpmnElement.id + '_' + taskId + '_selection',
                 type: 'string',
-                label: 'generated for '+ element?.name,
+                label: 'generated for ' + element?.name,
                 order: 0,
                 multiple: false,
                 auto_select_all: false,
@@ -687,12 +682,12 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                 }],
             };
 
-            if(!this.smartServiceInputs.find(v => v.id === newField.id) && !current.find(v => v.name === newField.id)){
+            if (!this.smartServiceInputs.find(v => v.id === newField.id) && !current.find(v => v.name === newField.id)) {
                 this.smartServiceInputs.push(newField);
-                current.push({name: newField.id, value: '', label: newField.label});
+                current.push({ name: newField.id, value: '', label: newField.label });
                 this.availableProcessVariables.set('iot_form_fields', current);
                 this.availableProcessIotSelections = this.getAvailableProcessIotSelections();
-                input.value = this.availableProcessIotSelections[this.availableProcessIotSelections.length-1].value;
+                input.value = this.availableProcessIotSelections[this.availableProcessIotSelections.length - 1].value;
             }
 
         }
@@ -709,11 +704,11 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
      ******************************/
 
     analyticsKeyFieldName = 'analytics.key';
-    get analyticsKeyId(): string{
+    get analyticsKeyId(): string {
         return this.getFieldValue(this.analyticsKeyFieldName, 'text', '');
     }
 
-    set analyticsKeyId(value: string){
+    set analyticsKeyId(value: string) {
         this.setFieldValue(this.analyticsKeyFieldName, 'text', value);
     }
 
@@ -765,11 +760,11 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         if (Number.isNaN(temp)) {
             return 30;
         }
-        if(Number.isInteger(temp)) {
+        if (Number.isInteger(temp)) {
             return temp;
         }
         console.error('WARNING: unexpected state in analyticsWindowTime()');
-        // eslint-disable-next-line no-console
+
         console.trace();
         return 30;
     }
@@ -788,7 +783,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     getAnalyticsFlowImage(svgIn: string | SafeHtml, inputId: string): SafeHtml {
-        if(!svgIn) {
+        if (!svgIn) {
             return '';
         }
         if (typeof svgIn !== 'string') {
@@ -797,8 +792,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         const parser = new DOMParser();
         const svg = parser.parseFromString(svgIn, 'image/svg+xml').getElementsByTagName('svg')[0];
 
-        const elements = svg.getElementsByClassName('joint-cell');
-        // @ts-ignore
+        const elements = svg.getElementsByClassName('joint-cell') as any;
         for (const element of elements) {
             if (element.attributes['model-id'].value === inputId) {
                 for (const node of element.childNodes) {
@@ -811,8 +805,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         return this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
     }
 
-    analyticsSvgSelectOperatorGetEventNodeId(node: any): string{
-        if(!node){
+    analyticsSvgSelectOperatorGetEventNodeId(node: any): string {
+        if (!node) {
             return '';
         }
         if (
@@ -828,7 +822,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
     analyticsSvgSelectOperator($event: MouseEvent) {
         const id = this.analyticsSvgSelectOperatorGetEventNodeId($event.target);
-        if(id){
+        if (id) {
             this.currentFlowInputId = id;
         }
     }
@@ -841,74 +835,74 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             this.currentParsedFlows = inputs;
             this.result.inputs.forEach(e => this.knownInputValues.set(e.name, e));
             this.result.inputs = [
-                this.knownInputValues.get(this.analyticsFlowIdFieldName) || {name:this.analyticsFlowIdFieldName, value: flowId, type: 'text'},
-                this.knownInputValues.get(this.analyticsPipelineNameFieldName) || {name:this.analyticsPipelineNameFieldName, value: '', type: 'text'},
-                this.knownInputValues.get(this.analyticsPipelineDescFieldName) || {name:this.analyticsPipelineDescFieldName, value: '', type: 'text'},
-                this.knownInputValues.get(this.analyticsWindowTimeFieldName) || {name:this.analyticsWindowTimeFieldName, value: '30', type: 'text'},
-                this.knownInputValues.get(this.analyticsMergeStrategyFieldName) || {name:this.analyticsMergeStrategyFieldName, value: 'inner', type: 'text'},
-                this.knownInputValues.get(this.analyticsConsumeAllMessagesFieldName) || {name:this.analyticsConsumeAllMessagesFieldName, value: 'false', type: 'text'},
+                this.knownInputValues.get(this.analyticsFlowIdFieldName) || { name: this.analyticsFlowIdFieldName, value: flowId, type: 'text' },
+                this.knownInputValues.get(this.analyticsPipelineNameFieldName) || { name: this.analyticsPipelineNameFieldName, value: '', type: 'text' },
+                this.knownInputValues.get(this.analyticsPipelineDescFieldName) || { name: this.analyticsPipelineDescFieldName, value: '', type: 'text' },
+                this.knownInputValues.get(this.analyticsWindowTimeFieldName) || { name: this.analyticsWindowTimeFieldName, value: '30', type: 'text' },
+                this.knownInputValues.get(this.analyticsMergeStrategyFieldName) || { name: this.analyticsMergeStrategyFieldName, value: 'inner', type: 'text' },
+                this.knownInputValues.get(this.analyticsConsumeAllMessagesFieldName) || { name: this.analyticsConsumeAllMessagesFieldName, value: 'false', type: 'text' },
             ];
             inputs.forEach(input => {
-                const persistDataKey = 'analytics.persistData.'+input.id;
-                this.result.inputs.push(this.knownInputValues.get(persistDataKey) || {name:persistDataKey, value: 'false', type: 'text'});
+                const persistDataKey = 'analytics.persistData.' + input.id;
+                this.result.inputs.push(this.knownInputValues.get(persistDataKey) || { name: persistDataKey, value: 'false', type: 'text' });
                 input.inPorts?.forEach(port => {
-                    const selectionKey = 'analytics.selection.'+input.id+'.'+port;
-                    this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: '{}', type: 'text'});
-                    const criteriaKey = 'analytics.criteria.'+input.id+'.'+port;
-                    this.result.inputs.push(this.knownInputValues.get(criteriaKey) || {name:criteriaKey, value: '[]', type: 'text'});
-                    const serviceCriteriaKey = 'analytics.service_criteria.'+input.id+'.'+port;
-                    this.result.inputs.push(this.knownInputValues.get(serviceCriteriaKey) || {name:serviceCriteriaKey, value: '[]', type: 'text'});
+                    const selectionKey = 'analytics.selection.' + input.id + '.' + port;
+                    this.result.inputs.push(this.knownInputValues.get(selectionKey) || { name: selectionKey, value: '{}', type: 'text' });
+                    const criteriaKey = 'analytics.criteria.' + input.id + '.' + port;
+                    this.result.inputs.push(this.knownInputValues.get(criteriaKey) || { name: criteriaKey, value: '[]', type: 'text' });
+                    const serviceCriteriaKey = 'analytics.service_criteria.' + input.id + '.' + port;
+                    this.result.inputs.push(this.knownInputValues.get(serviceCriteriaKey) || { name: serviceCriteriaKey, value: '[]', type: 'text' });
                 });
                 input.config?.forEach(config => {
-                    const configKey = 'analytics.conf.'+input.id+'.'+config.name;
-                    this.result.inputs.push(this.knownInputValues.get(configKey) || {name:configKey, value: '', type: 'text'});
+                    const configKey = 'analytics.conf.' + input.id + '.' + config.name;
+                    this.result.inputs.push(this.knownInputValues.get(configKey) || { name: configKey, value: '', type: 'text' });
                 });
             });
         };
-        if(this.parsedFlows.has(flowId)){
+        if (this.parsedFlows.has(flowId)) {
             const parsed = this.parsedFlows.get(flowId);
-            if(parsed){
+            if (parsed) {
                 f(parsed);
             }
         } else {
-            this.flowParser.getInputs(flowId).subscribe(value =>{
+            this.flowParser.getInputs(flowId).subscribe(value => {
                 this.parsedFlows.set(flowId, value);
                 f(value);
             });
         }
     }
 
-    analyticsGetImportIotEntityTemplate(variable: BpmnParameterWithLabel){
-        return '{"import_selection": {"id":"${'+variable.name+'}", "path": ""}}';
+    analyticsGetImportIotEntityTemplate(variable: BpmnParameterWithLabel) {
+        return '{"import_selection": {"id":"${' + variable.name + '}", "path": ""}}';
     }
 
     analyticsInputMatchesIotSelection(input: SmartServiceTaskInputDescription, flowInputId: string, port: string): boolean {
-        return input.name === 'analytics.selection.'+flowInputId+'.'+port;
+        return input.name === 'analytics.selection.' + flowInputId + '.' + port;
     }
 
     analyticsInputMatchesIotCriteria(input: SmartServiceTaskInputDescription, flowInputId: string, port: string): boolean {
-        return input.name === 'analytics.criteria.'+flowInputId+'.'+port;
+        return input.name === 'analytics.criteria.' + flowInputId + '.' + port;
     }
 
     analyticsInputMatchesIotServiceCriteria(input: SmartServiceTaskInputDescription, flowInputId: string, port: string): boolean {
-        return input.name === 'analytics.service_criteria.'+flowInputId+'.'+port;
+        return input.name === 'analytics.service_criteria.' + flowInputId + '.' + port;
     }
 
     analyticsInputMatchesIotConfig(input: SmartServiceTaskInputDescription, flowInputId: string, configName: string): boolean {
-        return input.name === 'analytics.conf.'+flowInputId+'.'+configName;
+        return input.name === 'analytics.conf.' + flowInputId + '.' + configName;
     }
 
     analyticsInputMatchesPersistDataField(input: SmartServiceTaskInputDescription, flowInputId: string): boolean {
-        return input.name === 'analytics.persistData.'+flowInputId;
+        return input.name === 'analytics.persistData.' + flowInputId;
     }
 
-    getAvailableAnalyticsIotSelections(): {name: string; value: string}[] {
-        const result:  {name: string; value: string}[] = [];
+    getAvailableAnalyticsIotSelections(): { name: string; value: string }[] {
+        const result: { name: string; value: string }[] = [];
         this.availableProcessVariables.get('iot_form_fields')?.forEach(field => {
-            result.push({name: field.label || field.name, value: '${'+field.name+'}'});
+            result.push({ name: field.label || field.name, value: '${' + field.name + '}' });
         });
         this.availableProcessVariables.get('import_selection')?.forEach(field => {
-            result.push({name: field.label || field.name, value: field.name});
+            result.push({ name: field.label || field.name, value: field.name });
         });
         return result;
     }
@@ -917,26 +911,26 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
      *      Export
      ******************************/
 
-    ensureExportDatabaseList(){
-        if(this.result.topic === 'export' && this.exportDatabaseList.length === 0) {
+    ensureExportDatabaseList() {
+        if (this.result.topic === 'export' && this.exportDatabaseList.length === 0) {
             this.exportService.getExportDatabases().subscribe(value => {
                 this.exportDatabaseList = value;
             });
         }
     }
 
-    removeExportValue(index: number){
+    removeExportValue(index: number) {
         this.exportRequest?.Values?.splice(index, 1);
     }
 
-    addExportValue(){
-        if(!this.exportRequest){
+    addExportValue() {
+        if (!this.exportRequest) {
             this.exportRequest = this.parseExport('{}');
         }
-        if(!this.exportRequest.Values){
+        if (!this.exportRequest.Values) {
             this.exportRequest.Values = [];
         }
-        this.exportRequest?.Values.push({Name: '', Path: '', Type: 'string', Tag: false});
+        this.exportRequest?.Values.push({ Name: '', Path: '', Type: 'string', Tag: false });
     }
 
     parseExport(str: string): ServingRequest {
@@ -944,7 +938,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     stringifyExport(exp: ServingRequest | undefined | null) {
-        if(!exp) {
+        if (!exp) {
             exp = this.parseExport('{}');
         }
         return JSON.stringify(exp);
@@ -959,63 +953,63 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     stringifyImport(value: ImportInstancesModel | undefined | null) {
-        if(!value) {
+        if (!value) {
             value = this.parseImport('{}');
         }
         return JSON.stringify(value);
     }
 
-    setImportRequestConfigValueTypes(importType: ImportTypeModel){
+    setImportRequestConfigValueTypes(importType: ImportTypeModel) {
         importType.configs.forEach(value => {
             this.importRequestConfigValueType.set(value.name, value.type);
         });
     }
 
-    handleUnknownImportConfigAsJsonString(){
+    handleUnknownImportConfigAsJsonString() {
         this.importRequest.configs = this.importRequest.configs?.map(value => {
             if (this.isUnknownImportConfig(value)) {
-                return {name: value.name, value: JSON.stringify(value.value)} as ImportInstanceConfigModel;
+                return { name: value.name, value: JSON.stringify(value.value) } as ImportInstanceConfigModel;
             } else {
-                return {name: value.name, value: value.value} as ImportInstanceConfigModel;
+                return { name: value.name, value: value.value } as ImportInstanceConfigModel;
             }
         });
     }
 
-    handleUnknownImportConfigAsJsonObject(){
+    handleUnknownImportConfigAsJsonObject() {
         this.importRequest.configs = this.importRequest.configs?.map(value => {
             if (this.isUnknownImportConfig(value) && (typeof value.value === 'string')) {
                 let newValue = value.value;
-                try{
+                try {
                     newValue = JSON.parse(newValue);
-                } catch (e) {}
-                return {name: value.name, value: newValue} as ImportInstanceConfigModel;
+                } catch (_) { }
+                return { name: value.name, value: newValue } as ImportInstanceConfigModel;
             } else {
-                return {name: value.name, value: value.value} as ImportInstanceConfigModel;
+                return { name: value.name, value: value.value } as ImportInstanceConfigModel;
             }
         });
     }
 
-    generateImportFields(importType: ImportTypeModel){
+    generateImportFields(importType: ImportTypeModel) {
         this.importRequest.image = importType.image;
         this.importRequest.restart = importType.default_restart;
-        this.importRequest.configs = importType.configs.map(value => ({name: value.name, value: value.default_value} as ImportInstanceConfigModel));
+        this.importRequest.configs = importType.configs.map(value => ({ name: value.name, value: value.default_value } as ImportInstanceConfigModel));
     }
 
-    loadImportType(updateConfigs: boolean){
-        if(this.importRequest.import_type_id) {
+    loadImportType(updateConfigs: boolean) {
+        if (this.importRequest.import_type_id) {
             const importType: ImportTypeModel | undefined = this.knownImportTypes.get(this.importRequest.import_type_id);
-            if(importType){
+            if (importType) {
                 this.setImportRequestConfigValueTypes(importType);
-                if(updateConfigs) {
+                if (updateConfigs) {
                     this.generateImportFields(importType);
                 }
                 this.handleUnknownImportConfigAsJsonString();
                 this.loadImportConfigOverwrites(importType, !updateConfigs);
-            }else{
+            } else {
                 this.importTypeService.getImportType(this.importRequest.import_type_id).subscribe(value => {
                     this.knownImportTypes.set(this.importRequest.import_type_id, value);
                     this.setImportRequestConfigValueTypes(value);
-                    if(updateConfigs){
+                    if (updateConfigs) {
                         this.generateImportFields(value);
                     }
                     this.handleUnknownImportConfigAsJsonString();
@@ -1028,16 +1022,16 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     private loadImportConfigOverwrites(importType: ImportTypeModel, isInit: boolean) {
         this.importOverwrites = [];
         const known: Map<string, string> = new Map();
-        if(isInit) {
+        if (isInit) {
             this.result.inputs.filter(value => value.name.startsWith('import.config.json_overwrite.')).forEach(value => {
                 known.set(value.name.replace('import.config.json_overwrite.', ''), value.value);
             });
         }
-        this.importOverwrites = importType.configs.map(value => ({config_name: value.name, json_value: known.get(value.name) || ''}));
+        this.importOverwrites = importType.configs.map(value => ({ config_name: value.name, json_value: known.get(value.name) || '' }));
 
     }
 
-    set importTypeId(id: string){
+    set importTypeId(id: string) {
         this.importRequest.import_type_id = id;
         this.loadImportType(true);
     }
@@ -1055,7 +1049,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         return type === this.STRING || type === 'text';
     }
 
-    isTextImportConfig(config: ImportInstanceConfigModel): boolean{
+    isTextImportConfig(config: ImportInstanceConfigModel): boolean {
         const type = this.importRequestConfigValueType.get(config.name);
         return this.isTextImportConfigType(type);
     }
@@ -1064,7 +1058,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         return type === this.INTEGER || type === this.FLOAT || type === 'number';
     }
 
-    isNumberImportConfig(config: ImportInstanceConfigModel): boolean{
+    isNumberImportConfig(config: ImportInstanceConfigModel): boolean {
         const type = this.importRequestConfigValueType.get(config.name);
         return this.isNumberImportConfigType(type);
     }
@@ -1074,7 +1068,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
 
-    isBooleanImportConfig(config: ImportInstanceConfigModel): boolean{
+    isBooleanImportConfig(config: ImportInstanceConfigModel): boolean {
         const type = this.importRequestConfigValueType.get(config.name);
         return this.isBooleanImportConfigType(type);
     }
@@ -1086,7 +1080,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             this.isBooleanImportConfigType(type));
     }
 
-    isUnknownImportConfig(config: ImportInstanceConfigModel): boolean{
+    isUnknownImportConfig(config: ImportInstanceConfigModel): boolean {
         const type = this.importRequestConfigValueType.get(config.name);
         return this.isUnknownImportConfigType(type);
     }
@@ -1104,7 +1098,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         if (result) {
             return result.value;
         } else {
-            this.result.inputs.push({name, value: defaultValue, type});
+            this.result.inputs.push({ name, value: defaultValue, type });
             return defaultValue;
         }
     }
@@ -1112,27 +1106,27 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     setFieldValue(name: string, type: string, value: string) {
         let found = false;
         this.result.inputs = this.result.inputs.map(element => {
-            if(element.name === name) {
+            if (element.name === name) {
                 found = true;
                 element.value = value;
             }
             return element;
         });
-        if(!found) {
-            this.result.inputs.push({name, value, type});
+        if (!found) {
+            this.result.inputs.push({ name, value, type });
         }
     }
 
-    getIncomingOutputs(element: BpmnElement, done: BpmnElement[] = []): Map<string,BpmnParameterWithLabel[]> {
-        const result: Map<string,BpmnParameter[]> = new Map<string, BpmnParameterWithLabel[]>();
+    getIncomingOutputs(element: BpmnElement, done: BpmnElement[] = []): Map<string, BpmnParameterWithLabel[]> {
+        const result: Map<string, BpmnParameter[]> = new Map<string, BpmnParameterWithLabel[]>();
         if (done.indexOf(element) !== -1) {
             return result;
         }
 
         const add = (key: string, value: BpmnParameterWithLabel[], element2?: any) => {
-            if(element2 && element2.name) {
+            if (element2 && element2.name) {
                 value = value.map(e => {
-                    if(!e.label) {
+                    if (!e.label) {
                         e.label = element2.name + ': ' + e.name;
                     }
                     return e;
@@ -1144,7 +1138,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         };
 
         done.push(element);
-        if(element.incoming) {
+        if (element.incoming) {
             for (let index = 0; index < element.incoming.length; index++) {
                 const incoming = element.incoming[index].source;
                 if (
@@ -1153,10 +1147,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                     incoming.businessObject.extensionElements.values[0] &&
                     incoming.businessObject.extensionElements.values[0].outputParameters
                 ) {
-                    if(incoming.businessObject.topic) {
+                    if (incoming.businessObject.topic) {
                         const topic = incoming.businessObject.topic;
                         add(topic, incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject);
-                        if(topic === 'analytics' && incoming.businessObject.extensionElements.values[0].outputParameters?.length && incoming.businessObject.extensionElements.values[0].outputParameters?.length > 0) {
+                        if (topic === 'analytics' && incoming.businessObject.extensionElements.values[0].outputParameters?.length && incoming.businessObject.extensionElements.values[0].outputParameters?.length > 0) {
                             const flowId = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name === 'analytics.flow_id')?.value;
                             add('flow_selection_raw', [{
                                 name: incoming.businessObject.extensionElements.values[0].outputParameters[0].name,
@@ -1164,10 +1158,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                                 value: flowId || ''
                             }]);
                         }
-                        if(topic === 'import' && incoming.businessObject.extensionElements.values[0].outputParameters?.length && incoming.businessObject.extensionElements.values[0].outputParameters?.length > 0) {
-                            try{
+                        if (topic === 'import' && incoming.businessObject.extensionElements.values[0].outputParameters?.length && incoming.businessObject.extensionElements.values[0].outputParameters?.length > 0) {
+                            try {
                                 const importRequestStr = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name === 'import.request')?.value;
-                                if(importRequestStr) {
+                                if (importRequestStr) {
                                     const importRequest = JSON.parse(importRequestStr);
                                     if (importRequest.import_type_id) {
                                         const importType = importRequest.import_type_id;
@@ -1178,17 +1172,17 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                                         }]);
                                     }
                                 }
-                            }catch (e) {
+                            } catch (e) {
                                 console.error(e);
                             }
                         }
-                        if(topic === 'process_deployment'
+                        if (topic === 'process_deployment'
                             && incoming.businessObject.extensionElements.values[0].inputParameters?.length
                             && incoming.businessObject.extensionElements.values[0].outputParameters?.length
                         ) {
                             const processModelId = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name === 'process_deployment.process_model_id')?.value;
                             const processDeploymentIdVariable = incoming.businessObject.extensionElements.values[0].outputParameters?.find(value => value.name.endsWith('_process_deployment_id'))?.name;
-                            if (processModelId && processDeploymentIdVariable && processModelId.match(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/)){
+                            if (processModelId && processDeploymentIdVariable && processModelId.match(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/)) {
                                 add('process_deployment_to_model', [{
                                     name: processDeploymentIdVariable,
                                     label: '',
@@ -1196,14 +1190,14 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                                 }]);
                             }
                         }
-                        if(topic === 'device_repository'
+                        if (topic === 'device_repository'
                             && incoming.businessObject.extensionElements.values[0].inputParameters?.length
                             && incoming.businessObject.extensionElements.values[0].outputParameters?.length
                         ) {
                             const deviceGroupSelectionVariable = incoming.businessObject.extensionElements.values[0].outputParameters?.find(value => value.name.endsWith('_device_group_selection'))?.name;
                             if (deviceGroupSelectionVariable) {
-                                add('iot_form_fields', [{name: deviceGroupSelectionVariable, label: '', value: ''}]);
-                                add('group_iot_form_fields', [{name: deviceGroupSelectionVariable, label: '', value: ''}]);
+                                add('iot_form_fields', [{ name: deviceGroupSelectionVariable, label: '', value: '' }]);
+                                add('group_iot_form_fields', [{ name: deviceGroupSelectionVariable, label: '', value: '' }]);
                             }
                         }
                     } else {
@@ -1218,15 +1212,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                 ) {
                     const formFields = incoming.businessObject.extensionElements.values[0].fields;
                     formFields?.forEach(field => {
-                        add('form_fields', [{name: field.id, label: field.label, value: ''}]);
-                        const iotProperty = field.properties?.values?.find(property => property.id === 'iot') ;
-                        if(iotProperty){
-                            add('iot_form_fields', [{name: field.id, label: field.label, value: ''}]);
+                        add('form_fields', [{ name: field.id, label: field.label, value: '' }]);
+                        const iotProperty = field.properties?.values?.find(property => property.id === 'iot');
+                        if (iotProperty) {
+                            add('iot_form_fields', [{ name: field.id, label: field.label, value: '' }]);
                             iotProperty.value.split(',').forEach(iotKind => {
-                                add(iotKind.trim()+'_iot_form_fields', [{name: field.id, label: field.label, value: ''}]);
+                                add(iotKind.trim() + '_iot_form_fields', [{ name: field.id, label: field.label, value: '' }]);
                             });
-                        }else {
-                            add('value_form_fields', [{name: field.id, label: field.label, value: ''}]);
+                        } else {
+                            add('value_form_fields', [{ name: field.id, label: field.label, value: '' }]);
                         }
                     });
                 }
@@ -1236,7 +1230,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                 ) {
                     const defaultStartEvent = this.getDefaultStartEvent(incoming.businessObject?.$parent?.flowElements);
                     if (defaultStartEvent) {
-                        const sub2 = this.getIncomingOutputs({id: '', incoming: [{source: { businessObject: defaultStartEvent}} as BpmnElementRef]} as BpmnElement, done);
+                        const sub2 = this.getIncomingOutputs({ id: '', incoming: [{ source: { businessObject: defaultStartEvent } } as BpmnElementRef] } as BpmnElement, done);
                         sub2.forEach((value, topic) => {
                             add(topic, value);
                         });
@@ -1252,21 +1246,21 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         return result;
     }
 
-    private getDefaultStartEvent(elements:  BpmnBusinessObject[] | undefined):  BpmnBusinessObject | undefined{
+    private getDefaultStartEvent(elements: BpmnBusinessObject[] | undefined): BpmnBusinessObject | undefined {
         return elements?.find(e => e.$type === 'bpmn:StartEvent' && !e?.eventDefinitions);
     }
 
     private addPipelineWithOperatorIdOptionsToAvailableVariables() {
-        if(!this.availableProcessVariables.get('flow_selection')) {
+        if (!this.availableProcessVariables.get('flow_selection')) {
             this.availableProcessVariables.set('flow_selection', []);
         }
         const flowSelectionRaw = this.availableProcessVariables.get('flow_selection_raw')?.filter(value => value.value);
         flowSelectionRaw?.forEach(flowSelection => {
             this.flowParser.getInputs(flowSelection.value).subscribe(fields => {
                 fields?.forEach(value => {
-                    const pipelineFlowSelection = '${'+flowSelection.name+'}:'+value.id;
-                    const topic = 'analytics-'+value.name;
-                    this.availableProcessVariables.get('flow_selection')?.push({name: pipelineFlowSelection, label: flowSelection.label + ': ' + value.name, value: topic});
+                    const pipelineFlowSelection = '${' + flowSelection.name + '}:' + value.id;
+                    const topic = 'analytics-' + value.name;
+                    this.availableProcessVariables.get('flow_selection')?.push({ name: pipelineFlowSelection, label: flowSelection.label + ': ' + value.name, value: topic });
                 });
 
             });
@@ -1274,15 +1268,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     private addImportIotEntityWithPathToAvailableVariables() {
-        if(!this.availableProcessVariables.get('import_selection')) {
+        if (!this.availableProcessVariables.get('import_selection')) {
             this.availableProcessVariables.set('import_selection', []);
         }
         const importSelectionRaw = this.availableProcessVariables.get('import_selection_raw')?.filter(value => value.value);
         importSelectionRaw?.forEach(importSelection => {
             this.importTypeService.getImportType(importSelection.value).subscribe(importType => {
                 this.getImportTypeOutputPathsFormSubElements(importType.output.sub_content_variables).forEach(path => {
-                    const selection =  '{"import_selection": {"id":"${'+importSelection.name+'}", "path": "'+path.path+'", "characteristic_id": "'+path.characteristic+'"}}';
-                    this.availableProcessVariables.get('import_selection')?.push({name: selection, label: importSelection.label + ': ' + path.path, value: ''});
+                    const selection = '{"import_selection": {"id":"${' + importSelection.name + '}", "path": "' + path.path + '", "characteristic_id": "' + path.characteristic + '"}}';
+                    this.availableProcessVariables.get('import_selection')?.push({ name: selection, label: importSelection.label + ': ' + path.path, value: '' });
                 });
                 this.availableAnalyticsIotSelections = this.getAvailableAnalyticsIotSelections();
                 this.availableProcessIotSelections = this.getAvailableProcessIotSelections();
@@ -1290,14 +1284,14 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         });
     }
 
-    private getImportTypeOutputPathsFormSubElements(importOutputs: ImportTypeContentVariableModel[] | null, current?: string[]): {path: string; characteristic: string}[] {
-        if(!current) {
+    private getImportTypeOutputPathsFormSubElements(importOutputs: ImportTypeContentVariableModel[] | null, current?: string[]): { path: string; characteristic: string }[] {
+        if (!current) {
             current = [];
         }
-        if(!importOutputs|| importOutputs.length === 0) {
-            return [{path: current.join('.'), characteristic: ''}];
+        if (!importOutputs || importOutputs.length === 0) {
+            return [{ path: current.join('.'), characteristic: '' }];
         } else {
-            let result: {path: string; characteristic: string}[] = [];
+            let result: { path: string; characteristic: string }[] = [];
             importOutputs.forEach(sub => {
                 result = result.concat(this.getImportTypeOutputPaths(sub, JSON.parse(JSON.stringify(current))));
             });
@@ -1305,22 +1299,22 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         }
     }
 
-    private getImportTypeOutputPaths(importOutputs: ImportTypeContentVariableModel, current?: string[]): {path: string; characteristic: string}[] {
-        if(!current) {
+    private getImportTypeOutputPaths(importOutputs: ImportTypeContentVariableModel, current?: string[]): { path: string; characteristic: string }[] {
+        if (!current) {
             current = [];
         }
         current.push(importOutputs.name);
-        if(!importOutputs.sub_content_variables || importOutputs.sub_content_variables.length === 0) {
-            return [{path: current.join('.'), characteristic: importOutputs.characteristic_id||''}];
+        if (!importOutputs.sub_content_variables || importOutputs.sub_content_variables.length === 0) {
+            return [{ path: current.join('.'), characteristic: importOutputs.characteristic_id || '' }];
         } else {
             return this.getImportTypeOutputPathsFormSubElements(importOutputs.sub_content_variables, current);
         }
     }
 
     appendParam(value: string, param: BpmnParameterWithLabel, element: HTMLInputElement): string {
-        const placeholder = '${'+param.name+'}';
+        const placeholder = '${' + param.name + '}';
         let position = 0;
-        if(!value) {
+        if (!value) {
             return placeholder;
         }
         if (element.selectionStart) {
@@ -1338,41 +1332,41 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
     private initDeviceRepositoryWorkerInfo(inputs: SmartServiceTaskInputDescription[]) {
         inputs.forEach(input => {
-            if(input.name === this.deviceRepositoryNameFieldKey) {
+            if (input.name === this.deviceRepositoryNameFieldKey) {
                 this.deviceRepositoryWorkerInfo.name = input.value;
             }
-            if(input.name === this.deviceRepositoryCreateDeviceGroupFieldKey) {
+            if (input.name === this.deviceRepositoryCreateDeviceGroupFieldKey) {
                 this.deviceRepositoryWorkerInfo.create_device_group.ids = input.value;
                 this.deviceRepositoryWorkerInfo.operation = 'create_device_group';
             }
-            if(input.name === this.deviceRepositoryKeyFieldKey) {
+            if (input.name === this.deviceRepositoryKeyFieldKey) {
                 this.deviceRepositoryWorkerInfo.key = input.value;
             }
         });
-        if(!this.deviceRepositoryWorkerInfo.operation) {
+        if (!this.deviceRepositoryWorkerInfo.operation) {
             this.deviceRepositoryWorkerInfo.operation = 'create_device_group';
         }
     }
 
     private deviceRepositoryWorkerInfoToInputs(): SmartServiceTaskInputDescription[] {
         const result: SmartServiceTaskInputDescription[] = [];
-        switch (this.deviceRepositoryWorkerInfo.operation){
-        case 'create_device_group': {
-            result.push({name: this.deviceRepositoryCreateDeviceGroupFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.create_device_group.ids});
-            result.push({name: this.deviceRepositoryNameFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.name});
-            result.push({name: this.deviceRepositoryWaitFieldKey, type: 'text', value: 'true'});
-            if (this.deviceRepositoryWorkerInfo.key) {
-                result.push({name: this.deviceRepositoryKeyFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.key});
+        switch (this.deviceRepositoryWorkerInfo.operation) {
+            case 'create_device_group': {
+                result.push({ name: this.deviceRepositoryCreateDeviceGroupFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.create_device_group.ids });
+                result.push({ name: this.deviceRepositoryNameFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.name });
+                result.push({ name: this.deviceRepositoryWaitFieldKey, type: 'text', value: 'true' });
+                if (this.deviceRepositoryWorkerInfo.key) {
+                    result.push({ name: this.deviceRepositoryKeyFieldKey, type: 'text', value: this.deviceRepositoryWorkerInfo.key });
+                }
+                break;
             }
-            break;
-        }
         }
         return result;
     }
 
 
-    functions: (FunctionsPermSearchModel | {id?: string; name: string})[] = [];
-    deviceClasses: (DeviceTypeDeviceClassModel | {id?: string; name: string})[] = [];
+    functions: (FunctionsPermSearchModel | { id?: string; name: string })[] = [];
+    deviceClasses: (DeviceTypeDeviceClassModel | { id?: string; name: string })[] = [];
     nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
 
     removeCriteria(list: Criteria[], index: number): Criteria[] {
@@ -1381,43 +1375,43 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     addCriteria(list: Criteria[]): Criteria[] {
-        list.push({interaction: 'request', aspect_id: '', device_class_id: '', function_id: ''});
+        list.push({ interaction: 'request', aspect_id: '', device_class_id: '', function_id: '' });
         return list;
     }
 
-    criteriaToLabel(criteria: {interaction?: string; function_id?: string; device_class_id?: string; aspect_id?: string}): string {
+    criteriaToLabel(criteria: { interaction?: string; function_id?: string; device_class_id?: string; aspect_id?: string }): string {
         let functionName = '';
-        if(criteria.function_id) {
+        if (criteria.function_id) {
             functionName = this.functions.find(v => v.id === criteria.function_id)?.name || criteria.function_id;
         }
         let deviceClassName = '';
-        if(criteria.device_class_id) {
+        if (criteria.device_class_id) {
             deviceClassName = this.deviceClasses.find(v => v.id === criteria.device_class_id)?.name || criteria.device_class_id;
         }
         let aspectName = '';
-        if(criteria.aspect_id) {
+        if (criteria.aspect_id) {
             this.nestedAspects.forEach((value, _) => {
                 const temp = value.find(v => v.id === criteria.aspect_id)?.name;
-                if(temp) {
+                if (temp) {
                     aspectName = temp;
                 }
             });
-            if(!aspectName) {
+            if (!aspectName) {
                 aspectName = criteria.aspect_id;
             }
         }
 
         const parts: string[] = [];
-        if(criteria.interaction) {
+        if (criteria.interaction) {
             parts.push(criteria.interaction);
         }
-        if(aspectName) {
+        if (aspectName) {
             parts.push(aspectName);
         }
-        if(deviceClassName) {
+        if (deviceClassName) {
             parts.push(deviceClassName);
         }
-        if(functionName) {
+        if (functionName) {
             parts.push(functionName);
         }
         return parts.join(' | ');
@@ -1432,20 +1426,20 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
     private initWatcherInfo(inputs: SmartServiceTaskInputDescription[]) {
         inputs.forEach(input => {
-            if(input.name === this.watcherMaintenanceProducerFieldKey) {
+            if (input.name === this.watcherMaintenanceProducerFieldKey) {
                 this.watcherWorkerInfo.maintenance_producer = input.value;
             }
-            if(input.name === this.watcherWatchIntervalFieldKey) {
+            if (input.name === this.watcherWatchIntervalFieldKey) {
                 this.watcherWorkerInfo.interval = input.value;
             }
-            if(input.name === this.watcherHashTypeFieldKey) {
+            if (input.name === this.watcherHashTypeFieldKey) {
                 this.watcherWorkerInfo.hash_type = input.value;
             }
-            if(input.name === this.watcherDevicesByCriteriaFieldKey) {
+            if (input.name === this.watcherDevicesByCriteriaFieldKey) {
                 this.watcherWorkerInfo.devices_by_criteria.criteria = JSON.parse(input.value);
                 this.watcherWorkerInfo.operation = 'devices_by_criteria';
             }
-            if(input.name.startsWith(this.watcherMaintenanceProducerInputsPrefix)){
+            if (input.name.startsWith(this.watcherMaintenanceProducerInputsPrefix)) {
                 if (!this.watcherWorkerInfo.maintenance_procedure_inputs) {
                     this.watcherWorkerInfo.maintenance_procedure_inputs = [];
                 }
@@ -1454,60 +1448,60 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                     value: input.value
                 });
             }
-            if(input.name === this.watcherRequestFieldKey) {
+            if (input.name === this.watcherRequestFieldKey) {
                 this.watcherWorkerInfo.request = JSON.parse(input.value);
-                if(!this.watcherWorkerInfo.request.body) {
+                if (!this.watcherWorkerInfo.request.body) {
                     this.watcherWorkerInfo.request.body = '';
                 }
                 this.watcherWorkerInfo.operation = 'watch_request';
             }
         });
-        if(!this.watcherWorkerInfo.operation) {
+        if (!this.watcherWorkerInfo.operation) {
             this.deviceRepositoryWorkerInfo.operation = 'devices_by_criteria';
         }
     }
 
     private watcherWorkerInfoToInputs(): SmartServiceTaskInputDescription[] {
         const result: SmartServiceTaskInputDescription[] = [];
-        result.push({name: this.watcherMaintenanceProducerFieldKey, type: 'text', value: this.watcherWorkerInfo.maintenance_producer});
-        result.push({name: this.watcherWatchIntervalFieldKey, type: 'text', value: this.watcherWorkerInfo.interval});
-        result.push({name: this.watcherHashTypeFieldKey, type: 'text', value: this.watcherWorkerInfo.hash_type});
-        if(this.watcherWorkerInfo.maintenance_procedure_inputs) {
-            this.watcherWorkerInfo.maintenance_procedure_inputs.forEach((v)=> {
-                result.push({name: this.watcherMaintenanceProducerInputsPrefix+v.key, type: 'text', value: v.value});
+        result.push({ name: this.watcherMaintenanceProducerFieldKey, type: 'text', value: this.watcherWorkerInfo.maintenance_producer });
+        result.push({ name: this.watcherWatchIntervalFieldKey, type: 'text', value: this.watcherWorkerInfo.interval });
+        result.push({ name: this.watcherHashTypeFieldKey, type: 'text', value: this.watcherWorkerInfo.hash_type });
+        if (this.watcherWorkerInfo.maintenance_procedure_inputs) {
+            this.watcherWorkerInfo.maintenance_procedure_inputs.forEach((v) => {
+                result.push({ name: this.watcherMaintenanceProducerInputsPrefix + v.key, type: 'text', value: v.value });
             });
         }
-        switch (this.watcherWorkerInfo.operation){
-        case 'devices_by_criteria': {
-            result.push({name: this.watcherDevicesByCriteriaFieldKey, type: 'text', value: JSON.stringify(this.watcherWorkerInfo.devices_by_criteria.criteria)});
-            break;
-        }
-        case 'watch_request': {
-            const req = this.watcherWorkerInfo.request;
-            if(req.body === '') {
-                req.body = undefined;
+        switch (this.watcherWorkerInfo.operation) {
+            case 'devices_by_criteria': {
+                result.push({ name: this.watcherDevicesByCriteriaFieldKey, type: 'text', value: JSON.stringify(this.watcherWorkerInfo.devices_by_criteria.criteria) });
+                break;
             }
-            result.push({name: this.watcherRequestFieldKey, type: 'text', value: JSON.stringify(req)});
-            break;
-        }
+            case 'watch_request': {
+                const req = this.watcherWorkerInfo.request;
+                if (req.body === '') {
+                    req.body = undefined;
+                }
+                result.push({ name: this.watcherRequestFieldKey, type: 'text', value: JSON.stringify(req) });
+                break;
+            }
         }
         return result;
     }
 
     watcherWorkerInfoRequestHeaderValue = '';
-    get watcherWorkerInfoRequestHeader(): string{
-        if(!this.watcherWorkerInfoRequestHeaderValue) {
+    get watcherWorkerInfoRequestHeader(): string {
+        if (!this.watcherWorkerInfoRequestHeaderValue) {
             this.watcherWorkerInfoRequestHeaderValue = JSON.stringify(this.watcherWorkerInfo.request.header);
         }
         return this.watcherWorkerInfoRequestHeaderValue;
     }
 
-    set watcherWorkerInfoRequestHeader(str: string){
+    set watcherWorkerInfoRequestHeader(str: string) {
         let temp = this.watcherWorkerInfo.request.header;
         try {
             temp = JSON.parse(str);
             this.watcherWorkerInfo.request.header = temp;
-        } catch (e) {}
+        } catch (_) { }
     }
 
     private getModuleDataFromInputs(inputs: SmartServiceTaskInputDescription[]): string {
@@ -1531,10 +1525,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         const size = chunks.length.toString().length + 1;
         chunks.forEach((value2: string, i: number) => {
             let name = inputNamePrefix;
-            if(i > 0){
+            if (i > 0) {
                 name = name + '_' + this.padNumber(i, size);
             }
-            result.push({name, type: 'text', value: value2});
+            result.push({ name, type: 'text', value: value2 });
         });
         return result;
     }
@@ -1544,7 +1538,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     padNumber(num: number, size: number): string {
-        let s = num+'';
+        let s = num + '';
         while (s.length < size) {
             s = '0' + s;
         }
@@ -1552,53 +1546,53 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     isInvalid(): boolean {
-        switch (this.result.topic){
-        case 'export':
-            if(!this.exportRequest.Name) {
-                return true;
-            }
-            if(!this.exportRequest.EntityName) {
-                return true;
-            }
-            if(!this.exportRequest.FilterType) {
-                return true;
-            }
-            if(!this.exportRequest.Filter) {
-                return true;
-            }
-            if(!this.exportRequest.Topic) {
-                return true;
-            }
-            if(!this.exportRequest.ExportDatabaseID) {
-                return true;
-            }
-            if(!this.exportRequest.TimePath) {
-                return true;
-            }
-            if(!this.exportRequest.ServiceName) {
-                return true;
-            }
-            if(!this.exportRequest.Offset) {
-                return true;
-            }
-            if(this.exportRequest.Values?.find(value => !value.Name || !value.Path)) {
-                return true;
-            }
-            return false;
-        case 'import':
-            let invalidJsonConfig = false;
-            this.importRequest?.configs?.forEach(value => {
-                if (this.isUnknownImportConfig(value) && (typeof value.value === 'string')) {
-                    try{
-                        JSON.parse(value.value);
-                    } catch (e) {
-                        invalidJsonConfig = true;
-                    }
+        switch (this.result.topic) {
+            case 'export':
+                if (!this.exportRequest.Name) {
+                    return true;
                 }
-            });
-            return invalidJsonConfig;
-        default:
-            return false;
+                if (!this.exportRequest.EntityName) {
+                    return true;
+                }
+                if (!this.exportRequest.FilterType) {
+                    return true;
+                }
+                if (!this.exportRequest.Filter) {
+                    return true;
+                }
+                if (!this.exportRequest.Topic) {
+                    return true;
+                }
+                if (!this.exportRequest.ExportDatabaseID) {
+                    return true;
+                }
+                if (!this.exportRequest.TimePath) {
+                    return true;
+                }
+                if (!this.exportRequest.ServiceName) {
+                    return true;
+                }
+                if (!this.exportRequest.Offset) {
+                    return true;
+                }
+                if (this.exportRequest.Values?.find(value => !value.Name || !value.Path)) {
+                    return true;
+                }
+                return false;
+            case 'import':
+                let invalidJsonConfig = false;
+                this.importRequest?.configs?.forEach(value => {
+                    if (this.isUnknownImportConfig(value) && (typeof value.value === 'string')) {
+                        try {
+                            JSON.parse(value.value);
+                        } catch (_) {
+                            invalidJsonConfig = true;
+                        }
+                    }
+                });
+                return invalidJsonConfig;
+            default:
+                return false;
         }
     }
 
@@ -1607,31 +1601,31 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     ok(): void {
-        const result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; //prevent changes to the result after filtering
-        let temp = result.inputs.filter(e => e.name.startsWith(result.topic+'.') &&
-                                            !e.name.startsWith('info.') &&
-                                            !e.name.startsWith('process_deployment_start.') &&
-                                            !e.name.startsWith('import.') &&
-                                            !e.name.startsWith('export.') &&
-                                            !e.name.startsWith('watcher.') &&
-                                            !e.name.startsWith('device_repository.')); //filter unused inputs (remove existing info, process_deployment_start, import and export inputs)
+        const result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; // prevent changes to the result after filtering
+        let temp = result.inputs.filter(e => e.name.startsWith(result.topic + '.') &&
+            !e.name.startsWith('info.') &&
+            !e.name.startsWith('process_deployment_start.') &&
+            !e.name.startsWith('import.') &&
+            !e.name.startsWith('export.') &&
+            !e.name.startsWith('watcher.') &&
+            !e.name.startsWith('device_repository.')); // filter unused inputs (remove existing info, process_deployment_start, import and export inputs)
 
-        temp.push({name: 'export.request', type: 'text', value: this.stringifyExport(this.exportRequest)});
+        temp.push({ name: 'export.request', type: 'text', value: this.stringifyExport(this.exportRequest) });
 
         this.handleUnknownImportConfigAsJsonObject();
-        temp.push({name: 'import.request', type: 'text', value: this.stringifyImport(this.importRequest)});
+        temp.push({ name: 'import.request', type: 'text', value: this.stringifyImport(this.importRequest) });
         this.importOverwrites.forEach(value => {
-            if(value.json_value) {
-                temp.push({name: 'import.config.json_overwrite.'+value.config_name, type: 'text', value: value.json_value});
+            if (value.json_value) {
+                temp.push({ name: 'import.config.json_overwrite.' + value.config_name, type: 'text', value: value.json_value });
             }
         });
 
-        temp.push({name: 'info.module_type', type: 'text', value: this.infoModuleType});
+        temp.push({ name: 'info.module_type', type: 'text', value: this.infoModuleType });
         const infoModuleData = barceEdit(this.infoModuleDataEditor.nativeElement).getValue();
-        if(infoModuleData){
+        if (infoModuleData) {
             temp = temp.concat(this.getChunkedInputs('info.module_data', infoModuleData));
         }
-        temp.push({name: 'info.key', type: 'text', value: this.infoKey});
+        temp.push({ name: 'info.key', type: 'text', value: this.infoKey });
 
         temp = temp.concat(this.processStartModelToInputs(this.processStart));
 
@@ -1639,15 +1633,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
         temp = temp.concat(this.watcherWorkerInfoToInputs());
 
-        temp = temp.filter(e => e.name.startsWith(result.topic+'.')); //filter unused inputs
+        temp = temp.filter(e => e.name.startsWith(result.topic + '.')); // filter unused inputs
 
         const preScript = barceEdit(this.preScriptEditor.nativeElement).getValue();
-        if(preScript){
+        if (preScript) {
             temp = temp.concat(this.getChunkedInputs('prescript', preScript));
         }
 
         const postScript = barceEdit(this.postScriptEditor.nativeElement).getValue();
-        if(postScript){
+        if (postScript) {
             temp = temp.concat(this.getChunkedInputs('postscript', postScript));
         }
 
@@ -1662,7 +1656,7 @@ interface ProcessStartModel {
     inputs: ProcessStartInputModel[];
 }
 
-interface ProcessStartInputModel{
+interface ProcessStartInputModel {
     key: string;
     value: string;
 }

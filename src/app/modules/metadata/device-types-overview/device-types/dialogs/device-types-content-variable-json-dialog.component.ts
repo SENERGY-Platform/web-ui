@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import {Component, Directive, Inject, Input} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     DeviceTypeContentVariableModel,
 } from '../../shared/device-type.model';
-import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator} from '@angular/forms';
-import {jsonValidator} from '../../../../../core/validators/json.validator';
 
 
 
@@ -94,7 +92,7 @@ export class DeviceTypesContentVariableJsonDialogComponent {
         }
         try{
             JSON.parse(this.jsonStr);
-        } catch (e) {
+        } catch (_) {
             return false;
         }
         return true;

@@ -21,7 +21,7 @@ import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { forkJoin, Observable } from 'rxjs';
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 
 @Component({
     templateUrl: './process-scheduler-schedule-edit-dialog.component.html',

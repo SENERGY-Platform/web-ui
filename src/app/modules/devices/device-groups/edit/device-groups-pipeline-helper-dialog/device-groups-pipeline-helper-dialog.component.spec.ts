@@ -21,7 +21,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import {provideRouter} from "@angular/router";
+import {provideRouter} from '@angular/router';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeviceGroupsPipelineHelperDialogComponent', () => {

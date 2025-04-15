@@ -28,7 +28,6 @@ import { Subject } from 'rxjs';
 import { FlowRepoService } from 'src/app/modules/data/flow-repo/shared/flow-repo.service';
 import { OperatorRepoService } from 'src/app/modules/data/operator-repo/shared/operator-repo.service';
 import { PipelineRegistryService } from 'src/app/modules/data/pipeline-registry/shared/pipeline-registry.service';
-import { DesignerHelperService } from 'src/app/modules/processes/designer/shared/designer-helper.service';
 import { ProcessRepoService } from 'src/app/modules/processes/process-repo/shared/process-repo.service';
 import { DeploymentsService } from 'src/app/modules/processes/deployments/shared/deployments.service';
 import { MonitorService } from 'src/app/modules/processes/monitor/shared/monitor.service';

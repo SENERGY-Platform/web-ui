@@ -38,7 +38,7 @@ export interface MultiValueMeasurement {
     warning_enabled?: boolean;
 }
 
-// eslint-disable-next-line no-shadow
+ 
 export enum MultiValueOrderEnum {
     Default,
     AlphabeticallyAsc,

@@ -1,8 +1,6 @@
-import {Component, HostListener, Input, OnChanges, OnInit, SimpleChanges, ViewChild} from '@angular/core';
+import { Component, HostListener, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import moment from 'moment';
-import { DurationInputArg1, unitOfTime } from 'moment';
-import { Subscription, map, Observable, catchError, concatMap, of, forkJoin, throwError } from 'rxjs';
+import { Subscription, map, Observable, concatMap, of, forkJoin, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
@@ -12,7 +10,7 @@ import { QueriesRequestTimeModel, QueriesRequestV2ElementTimescaleModel, TimeVal
 import { ExportDataService } from '../../shared/export-data.service';
 import { ChartsExportRangeTimeTypeEnum } from '../export/shared/charts-export-range-time-type.enum';
 import { OpenWindowEditComponent } from './dialog/edit/edit.component';
-import {TimelineComponent} from '../shared/chart-types/timeline/timeline.component';
+import { TimelineComponent } from '../shared/chart-types/timeline/timeline.component';
 
 interface InitCheck {
   message: string;
@@ -373,7 +371,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
                 const newEndDp = [newEndDate.toISOString(), null];
                 updates.push([i, newEndDp]);
 
-                const startTimeDiff = i===deviceData.length ? 0: (resolution * 1000); //start point can be taken as it is
+                const startTimeDiff = i===deviceData.length ? 0: (resolution * 1000); // start point can be taken as it is
                 const newStartDate = new Date(current.getTime() + startTimeDiff);
                 const newStartDp = [newStartDate.toISOString(), null];
                 updates.push([i, newStartDp]);
@@ -390,7 +388,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
 
     getGapThreshold(res: number): number {
         const resolutionToGapThreshold = {
-            '1min' : (5*60), //in seconds
+            '1min' : (5*60), // in seconds
             '5min' : (15*60),
             '15min' : (30*60),
         };

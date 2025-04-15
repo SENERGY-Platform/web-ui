@@ -119,7 +119,7 @@ export class BadVentilationComponent implements OnInit {
                 this.refreshing = false;
             },
             error: (err) => {
-                console.log(err)
+                console.log(err);
                 this.error = true;
                 this.ready = true;
                 this.refreshing = false;
@@ -161,7 +161,7 @@ export class BadVentilationComponent implements OnInit {
         return this.ventilationService.getVentilationOutput(exportID, timeRange).pipe(
             map(result => {
                 this.ventilationResults = result;
-                //this.ventilationResults = this.createMockResult();
+                // this.ventilationResults = this.createMockResult();
             })
         );
     }

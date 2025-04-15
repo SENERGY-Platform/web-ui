@@ -16,18 +16,18 @@
  * /
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import {MatCardModule} from '@angular/material/card';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {MatDialogHarness} from "@angular/material/dialog/testing";
+import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialog } from '@angular/material/dialog';
+import { MatDialogHarness } from '@angular/material/dialog/testing';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import {MatIconModule} from '@angular/material/icon';
-import {MatInputModule} from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import {MatTableModule} from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { AuthorizationServiceMock } from 'src/app/core/services/authorization.service.mock';
@@ -35,7 +35,7 @@ import { KongService } from '../shared/services/kong.service';
 import { KongServiceMock } from '../shared/services/kong.service.mock';
 import { LadonService } from '../shared/services/ladom.service';
 import { LadomServiceMock } from '../shared/services/ladom.service.mock';
-import {PermissionsListComponent} from './permissions-list.component';
+import { PermissionsListComponent } from './permissions-list.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 xdescribe('PermissionsListComponent', () => {

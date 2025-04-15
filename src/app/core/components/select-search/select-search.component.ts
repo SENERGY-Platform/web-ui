@@ -28,17 +28,17 @@ import {
     Self,
     ViewChild,
 } from '@angular/core';
-import {MatSelect, MatSelectChange} from '@angular/material/select';
-import {MatFormFieldControl} from '@angular/material/form-field';
-import {Observable, Subject} from 'rxjs';
-import {ControlValueAccessor, FormControl, NgControl, UntypedFormControl} from '@angular/forms';
-import {coerceBooleanProperty} from '@angular/cdk/coercion';
-import {ErrorStateMatcher} from '@angular/material/core';
-import {MatOption} from '@angular/material/core';
-import {MatInput} from '@angular/material/input';
+import { MatSelect, MatSelectChange } from '@angular/material/select';
+import { MatFormFieldControl } from '@angular/material/form-field';
+import { Observable, Subject } from 'rxjs';
+import { ControlValueAccessor, NgControl, UntypedFormControl } from '@angular/forms';
+import { coerceBooleanProperty } from '@angular/cdk/coercion';
+import { ErrorStateMatcher } from '@angular/material/core';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { KeyValue } from '@angular/common';
 import ScrollEvent = JQuery.ScrollEvent;
 import MouseUpEvent = JQuery.MouseUpEvent;
-import {KeyValue} from '@angular/common';
 
 export function useProperty(property: string): (option: any) => any {
     const properties = property.split('.');
@@ -209,7 +209,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @Input() noneView = '';
 
     readonly controlType: string = 'select-autocomplete';
-    //readonly errorState: boolean = this.select?.errorState || false;
+    // readonly errorState: boolean = this.select?.errorState || false;
     readonly focused: boolean = this.select?.focused;
 
     readonly stateChanges = new Subject<void>();

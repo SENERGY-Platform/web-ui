@@ -25,9 +25,7 @@ import { DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel } from './
 import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
 import { DeviceStatusDialogService } from './shared/device-status-dialog.service';
 import {
-    LastValuesRequestElementInfluxModel,
-    LastValuesRequestElementTimescaleModel,
-    TimeValuePairModel
+    LastValuesRequestElementInfluxModel, TimeValuePairModel
 } from '../shared/export-data.model';
 import { ExportDataService } from '../shared/export-data.service';
 import { DeviceStatusItemModel } from './shared/device-status-item.model';

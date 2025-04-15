@@ -135,9 +135,9 @@ export class SingleValueService {
                 requestPayload[0].orderDirection = 'desc';
 
                 requestPayload.push(JSON.parse(JSON.stringify(requestPayload[0])));
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                 
                 requestPayload[1].time!.start = date.toISOString();
-                // eslint-disable-next-line
+                 
                 requestPayload[1].time!.end = '2099-01-01T00:00:00Z';
                 requestPayload[1].orderDirection = 'asc';
                 requestPayload[1].orderColumnIndex = 0;
@@ -167,9 +167,9 @@ export class SingleValueService {
                 (requestPayload[0] as QueriesRequestV2ElementTimescaleModel).serviceId = widget.properties.service?.id;
                 (requestPayload[0] as QueriesRequestV2ElementTimescaleModel).deviceGroupId = widget.properties.deviceGroupId;
                 queryMultiple();
-                o = this.exportDataService.queryTimescaleV2(requestPayload).pipe(map(o => {
+                o = this.exportDataService.queryTimescaleV2(requestPayload).pipe(map(o2 => {
                     const data: any[][][] = [];
-                    o.forEach(o => o.data.forEach(o => data.push(o)));
+                    o2.forEach(o3 => o3.data.forEach(o4 => data.push(o4)));
                     return data;
                 }));
             }

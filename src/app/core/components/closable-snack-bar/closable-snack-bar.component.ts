@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Component, Inject, Input} from '@angular/core';
-import {MAT_SNACK_BAR_DATA, MatSnackBarRef} from '@angular/material/snack-bar';
+import { Component, Inject } from '@angular/core';
+import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 
 @Component({
     selector: 'senergy-closable-snack-bar',

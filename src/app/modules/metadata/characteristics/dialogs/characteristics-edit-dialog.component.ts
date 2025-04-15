@@ -16,11 +16,9 @@
 
 import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FormControl, Validators } from '@angular/forms';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
 import { CharacteristicsPermSearchModel } from '../shared/characteristics-perm-search.model';
 import { CharacteristicsService } from '../shared/characteristics.service';
-import { ConceptsPermSearchModel } from '../../concepts/shared/concepts-perm-search.model';
 import { DeviceTypeCharacteristicsModel } from '../../device-types-overview/shared/device-type.model';
 import { CharacteristicElementComponent } from './characteristic-element/characteristic-element.component';
 

@@ -15,7 +15,6 @@
  */
 
 import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
-import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
 import { TimeValuePairModel } from '../../shared/export-data.model';
 
 export interface DataTableWidgetPropertiesModel {
@@ -80,7 +79,7 @@ export interface DataTableElementModel {
     };
 }
 
-// eslint-disable-next-line no-shadow
+ 
 export enum DataTableElementTypesEnum {
     DEVICE,
     PIPELINE,
@@ -94,7 +93,7 @@ export interface DataTableElementWarningModel {
     upperBoundary?: number;
 }
 
-// eslint-disable-next-line no-shadow
+ 
 export enum ExportValueTypes {
     INTEGER = 'int',
     FLOAT = 'float',
@@ -103,7 +102,7 @@ export enum ExportValueTypes {
     STRING_JSON = 'string_json',
 }
 
-// eslint-disable-next-line no-shadow
+ 
 export enum DataTableOrderEnum {
     Default = 0,
     AlphabeticallyAsc = 1,

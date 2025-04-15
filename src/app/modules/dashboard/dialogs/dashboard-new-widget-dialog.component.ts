@@ -200,8 +200,8 @@ export class DashboardNewWidgetDialogComponent implements OnInit{
     }
 
     private sortByViewValue(a: any, b: any) {
-        let nameA = a.viewValue.toUpperCase(); // ignore upper and lowercase
-        let nameB = b.viewValue.toUpperCase(); // ignore upper and lowercase
+        const nameA = a.viewValue.toUpperCase(); // ignore upper and lowercase
+        const nameB = b.viewValue.toUpperCase(); // ignore upper and lowercase
         if (nameA < nameB) {
             return -1;
         }
@@ -214,6 +214,6 @@ export class DashboardNewWidgetDialogComponent implements OnInit{
     }
 
     ngOnInit(): void {
-        this.types = this.types.sort(this.sortByViewValue)
+        this.types = this.types.sort(this.sortByViewValue);
     }
 }

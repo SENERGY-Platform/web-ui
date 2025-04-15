@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { AppRoutingModule } from './app-routing.module';
-import {TestBed} from '@angular/core/testing';
-import {CoreModule, keycloakServiceToken} from './core/core.module';
-import { provideRouter } from '@angular/router';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {AppComponent} from './app.component';
-import {MockKeycloakService} from './core/services/keycloak.mock';
-import {AuthorizationServiceMock} from './core/services/authorization.service.mock';
-import {KeycloakService} from 'keycloak-angular';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { provideRouter } from '@angular/router';
+import { KeycloakService } from 'keycloak-angular';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { CoreModule } from './core/core.module';
+import { AuthorizationServiceMock } from './core/services/authorization.service.mock';
+import { MockKeycloakService } from './core/services/keycloak.mock';
 
 describe('AppRoutingModule', () => {
     let appRoutingModule: AppRoutingModule;

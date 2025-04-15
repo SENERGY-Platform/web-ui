@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel} from './device-instances.model';
-import {MatDialog, MatDialogConfig, MatDialogRef} from '@angular/material/dialog';
-import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
+import { Injectable } from '@angular/core';
+import { DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel } from './device-instances.model';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { DeviceInstancesServiceDialogComponent } from '../dialogs/device-instances-service-dialog.component';
 import {
     DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel
 } from '../../../metadata/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
-import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-edit-dialog.component';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {DeviceInstancesService} from './device-instances.service';
-import {DeviceInstancesSelectDialogComponent} from '../dialogs/device-instances-select-dialog.component';
-import {concat, forkJoin, Observable, of} from 'rxjs';
-import {LastValuesRequestElementTimescaleModel} from '../../../../widgets/shared/export-data.model';
-import {ExportDataService} from '../../../../widgets/shared/export-data.service';
-import {map, concatMap} from 'rxjs/operators';
+import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
+import { DeviceInstancesEditDialogComponent } from '../dialogs/device-instances-edit-dialog.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DeviceInstancesService } from './device-instances.service';
+import { DeviceInstancesSelectDialogComponent } from '../dialogs/device-instances-select-dialog.component';
+import { forkJoin, Observable } from 'rxjs';
+import { LastValuesRequestElementTimescaleModel } from '../../../../widgets/shared/export-data.model';
+import { map, concatMap } from 'rxjs/operators';
 import { DeviceInstancesReplaceDialogComponent } from '../dialogs/device-instances-replace-dialog/device-instances-replace-dialog.component';
 
 @Injectable({
@@ -42,12 +39,9 @@ import { DeviceInstancesReplaceDialogComponent } from '../dialogs/device-instanc
 export class DeviceInstancesDialogService {
     constructor(
         private dialog: MatDialog,
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
         private deviceTypeService: DeviceTypeService,
         private snackBar: MatSnackBar,
         private deviceInstancesService: DeviceInstancesService,
-        private exportDataService: ExportDataService,
     ) {
     }
 

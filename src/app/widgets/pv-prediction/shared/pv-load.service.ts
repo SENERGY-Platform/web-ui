@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { concatMap, map, Observable, throwError, of } from 'rxjs';
+import { concatMap, Observable, throwError, of } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -8,7 +8,6 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 import { environment } from 'src/environments/environment';
 import { ChartsExportRangeTimeTypeEnum } from '../../charts/export/shared/charts-export-range-time-type.enum';
 import { ChartsExportService } from '../../charts/export/shared/charts-export.service';
-import { ExportDataService } from '../../shared/export-data.service';
 import { PVPredictionEditComponent } from '../dialog/edit/edit.component';
 import { PVPrediction, PVPredictionResult } from './prediction.model';
 
@@ -21,7 +20,6 @@ export class PvPredictionService {
         private dialog: MatDialog,
         private dashboardService: DashboardService,
         private errorHandlerService: ErrorHandlerService,
-        private exportDataService: ExportDataService,
         private chartsExportService: ChartsExportService
     ) {}
 

@@ -31,7 +31,7 @@ import { DashboardManipulationModel } from './dashboard-manipulation.model';
 import { DashboardManipulationEnum } from './dashboard-manipulation.enum';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DashboardEditDialogComponent } from '../dialogs/dashboard-edit-dialog.component';
-import { AllowedMethods, PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 
 @Injectable({

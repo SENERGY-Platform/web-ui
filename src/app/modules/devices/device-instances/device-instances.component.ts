@@ -48,7 +48,7 @@ export interface DeviceInstancesRouterState {
     value: any;
 }
 
-// eslint-disable-next-line no-shadow
+ 
 export enum DeviceInstancesRouterStateTypesEnum {
     NETWORK,
     DEVICE_TYPE,
@@ -233,16 +233,16 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                     connectionState:  this.routerConnectionState
                 })
                 .pipe(
-                    //if no result is found: try to interpret the search as shortDeviceId, convert it to a deviceId and load it
+                    // if no result is found: try to interpret the search as shortDeviceId, convert it to a deviceId and load it
                     concatMap((deviceInstanceWithTotal: DeviceInstancesTotalModel): Observable<DeviceInstancesTotalModel> => {
                         if (deviceInstanceWithTotal.result.length > 0) {
                             return of(deviceInstanceWithTotal);
                         }
-                        //we may also search for normal ids
+                        // we may also search for normal ids
                         if (this.searchText.trim().startsWith('urn:infai:ses:device:')){
                             return this.deviceInstancesService.getDeviceInstances({deviceIds: [this.searchText.trim()], limit: 1, offset: 0});
                         }
-                        //short ids are expected to be 22 chars long
+                        // short ids are expected to be 22 chars long
                         if (this.searchText.trim().length !== 22) {
                             return of(deviceInstanceWithTotal);
                         }
@@ -255,7 +255,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                             })
                         );
                     }),
-                    //handle results
+                    // handle results
                     map((deviceInstancesWithTotal: DeviceInstancesTotalModel) => {
                         this.loadUserNames(deviceInstancesWithTotal.result);
                         this.setDevicesAndTotal(deviceInstancesWithTotal);

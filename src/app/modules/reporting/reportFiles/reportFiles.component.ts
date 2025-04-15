@@ -83,7 +83,7 @@ export class ReportFilesComponent implements OnInit {
                     }
                 });
             }
-        } catch (e) {
+        } catch (_) {
             this.errorHandlerService.handleErrorWithSnackBar('Failed to download', 'ReportingFileDownload', 'download', null)(undefined);
             return;
         }

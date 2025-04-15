@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FormControl, FormGroup, ValidatorFn } from '@angular/forms';
-import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-error-state-matcher';
-import {ProcessIoDesignerInfo, ProcessIoDesignerInfoGet, ProcessIoDesignerInfoSet} from '../../../process-io/shared/process-io.model';
+import { ProcessIoDesignerInfo, ProcessIoDesignerInfoGet, ProcessIoDesignerInfoSet } from '../../../process-io/shared/process-io.model';
 
 @Component({
     templateUrl: './process-io-designer-dialog.component.html',
     styleUrls: ['./process-io-designer-dialog.component.css'],
 })
-export class ProcessIoDesignerDialogComponent implements OnInit {
+export class ProcessIoDesignerDialogComponent {
     info: ProcessIoDesignerInfoWithBinding;
 
     constructor(
@@ -33,8 +31,6 @@ export class ProcessIoDesignerDialogComponent implements OnInit {
     ) {
         this.info = addBinding(dialogParams.info);
     }
-
-    ngOnInit() {}
 
     close(): void {
         this.dialogRef.close();

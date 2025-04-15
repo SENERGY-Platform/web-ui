@@ -16,7 +16,7 @@
 
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {FormControl, UntypedFormControl, Validators} from '@angular/forms';
+import { UntypedFormControl, Validators } from '@angular/forms';
 import { DashboardModel } from '../shared/dashboard.model';
 
 @Component({

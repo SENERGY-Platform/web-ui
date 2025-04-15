@@ -28,7 +28,7 @@ export interface CostModel  {
 	displayName?: string;
 }
 
-const CostTypeAnalytics = 'analytics';
+export const costTypeAnalytics = 'analytics';
 
 
 export interface CostEstimationModel {

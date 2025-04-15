@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
-import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {FormBuilder, FormControl, UntypedFormBuilder, UntypedFormControl, Validators} from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import {
     DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
-    DeviceTypeCharacteristicsModel,
-    DeviceTypeDeviceClassModel,
-    DeviceTypeFunctionModel,
-    DeviceTypeFunctionType,
-    functionTypes,
+    DeviceTypeCharacteristicsModel, DeviceTypeFunctionModel
 } from '../../../../metadata/device-types-overview/shared/device-type.model';
-import {
-    DeviceTypeSelectionRefModel,
-    DeviceTypeSelectionResultModel,
-} from '../../../../metadata/device-types-overview/shared/device-type-selection.model';
 import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
 import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
 import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
 import { FilterCriteriaDialogResultModel } from '../../shared/designer-dialog.model';
-import { Observable } from 'rxjs';
 
 @Component({
     templateUrl: './filter-criteria-dialog.component.html',

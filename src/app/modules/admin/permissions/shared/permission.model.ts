@@ -40,7 +40,7 @@ export function permissionApiToPermission(model: PermissionApiModel): Permission
     try {
         resource = model.resources[0].split('(')[1].split(')')[0]
             .replace(/:/g, '/').replace('endpoints', '');
-    } catch (e) {
+    } catch (_) {
         resource = model.resources[0];
     }
     return {

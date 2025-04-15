@@ -20,10 +20,9 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
 import { SettingsChangeDialogComponent } from '../dialogs/settings-change-dialog.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AllowedMethods, PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
-import { Observable } from 'rxjs';
+import { PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
-import {environment} from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
     providedIn: 'root',

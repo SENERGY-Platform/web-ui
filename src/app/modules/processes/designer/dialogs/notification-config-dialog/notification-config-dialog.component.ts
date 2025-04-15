@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormControl, FormGroup, ValidatorFn } from '@angular/forms';
 import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-error-state-matcher';
@@ -23,7 +23,7 @@ import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-erro
     templateUrl: './notification-config-dialog.component.html',
     styleUrls: ['./notification-config-dialog.component.css'],
 })
-export class NotificationConfigDialogComponent implements OnInit {
+export class NotificationConfigDialogComponent {
     subjectFormGroup: FormGroup;
     contentFormGroup: FormGroup;
     parentErrorStateMatcher = new ParentErrorStateMatcher();
@@ -52,8 +52,6 @@ export class NotificationConfigDialogComponent implements OnInit {
         );
         this.contentFormGroup.setValue(this.interpretStringAsPlaceholder(this.dialogParams.content));
     }
-
-    ngOnInit() {}
 
     close(): void {
         this.dialogRef.close();

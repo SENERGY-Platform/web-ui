@@ -19,7 +19,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import { MatTable } from '@angular/material/table';
-import {FormControl, UntypedFormControl} from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';
 

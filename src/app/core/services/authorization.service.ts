@@ -98,7 +98,7 @@ export class AuthorizationService implements HttpInterceptor {
     }
 
     getUsersGroups(): string[] {
-        return (this.keycloakService.getKeycloakInstance().tokenParsed || {groups: []})["groups"];
+        return (this.keycloakService.getKeycloakInstance().tokenParsed || {groups: []})['groups'];
     }
 
     getToken(): Promise<string> {

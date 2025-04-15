@@ -7,12 +7,10 @@ import {
 } from '@angular/material/dialog';
 import {
     Observable,
-    of ,
+    of,
     map,
     throwError,
-    concatMap,
-    EMPTY,
-    catchError
+    concatMap, catchError
 } from 'rxjs';
 import {
     ErrorHandlerService
@@ -332,7 +330,7 @@ export class AnomalyService {
         */
         const anomalyPhases: any[][][] = [];
         let deviceIndex = 0;
-        for (const [deviceID, anomaliesPerDevice] of Object.entries(anomalies)) {
+        for (const [_, anomaliesPerDevice] of Object.entries(anomalies)) {
             const intervals = this.createIntervalsPerDevice(anomaliesPerDevice, earliestStartTime);
             anomalyPhases[deviceIndex] = intervals;
             deviceIndex += 1;

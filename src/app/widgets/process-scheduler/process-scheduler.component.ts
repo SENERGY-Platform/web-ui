@@ -22,13 +22,11 @@ import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
 import { ProcessSchedulerWidgetModel } from './shared/process-scheduler-widget.model';
-import { DeploymentsPreparedModel } from '../../modules/processes/deployments/shared/deployments-prepared.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ProcessSchedulerScheduleDialogComponent } from './dialogs/process-scheduler-schedule-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { CronConverterService } from './shared/cron-converter.service';
-import { V2DeploymentsPreparedModel } from '../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 
 @Component({
     selector: 'senergy-process-scheduler',

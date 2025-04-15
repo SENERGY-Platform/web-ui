@@ -75,7 +75,7 @@ export class TemplatesComponent implements OnInit {
                     }
                 });
             }
-        } catch (e) {
+        } catch (_) {
             this.errorHandlerService.handleErrorWithSnackBar('Failed to download', 'downloadPreview', 'download', null)(undefined);
             return;
         }

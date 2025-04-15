@@ -18,9 +18,9 @@ import { Component, OnInit } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 
 import { HttpClient } from '@angular/common/http';
-import {ActivatedRoute, Router} from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {SmartServiceDesignsService} from '../designs/shared/designs.service';
+import { SmartServiceDesignsService } from '../designs/shared/designs.service';
 import {
     camundaBpmnModdle,
     CamundaPropertiesProvider,
@@ -28,26 +28,24 @@ import {
     InjectionNames,
     Modeler,
     PropertiesPanelModule,
-    PaletteProvider, SenergyPropertiesProvider
+    PaletteProvider
 } from '../../processes/designer/bpmn-js/bpmn-js';
-import {SmartServiceDesignModel} from '../designs/shared/design.model';
-import {DialogsService} from '../../../core/services/dialogs.service';
+import { SmartServiceDesignModel } from '../designs/shared/design.model';
+import { DialogsService } from '../../../core/services/dialogs.service';
 import * as ServicePropertiesProvider from './smart-service-properties-provider';
 import {
-    SmartServiceInputsDescription,
-    SmartServiceTaskInputDescription,
-    SmartServiceTaskDescription,
+    SmartServiceInputsDescription, SmartServiceTaskDescription,
     SmartServiceTaskInputOutputDescription
 } from './shared/designer.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {EditSmartServiceTaskDialogComponent} from './dialog/edit-smart-service-task-dialog/edit-smart-service-task-dialog.component';
-import {BpmnElement} from '../../processes/designer/shared/designer.model';
-import {EditSmartServiceInputDialogComponent} from './dialog/edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { EditSmartServiceTaskDialogComponent } from './dialog/edit-smart-service-task-dialog/edit-smart-service-task-dialog.component';
+import { BpmnElement } from '../../processes/designer/shared/designer.model';
+import { EditSmartServiceInputDialogComponent } from './dialog/edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
 import {
     EditSmartServiceJsonExtractionDialogComponent
 } from './dialog/edit-smart-service-json-extraction-dialog/edit-smart-service-json-extraction-dialog.component';
-import {SmartServiceReleasesService} from '../releases/shared/release.service';
-import {SmartServiceExtendedReleaseModel} from '../releases/shared/release.model';
+import { SmartServiceReleasesService } from '../releases/shared/release.service';
+import { SmartServiceExtendedReleaseModel } from '../releases/shared/release.model';
 
 @Component({
     selector: 'senergy-smart-service-designer',
@@ -76,7 +74,7 @@ export class SmartServiceDesignerComponent implements OnInit {
 
     ngOnInit() {
         setTimeout(() => {
-            const that = this;
+            const dialog = this.dialog;
             this.id = this.route.snapshot.paramMap.get('id') || '';
             this.releaseId =this.route.snapshot.paramMap.get('releaseId') || '';
 
@@ -115,7 +113,7 @@ export class SmartServiceDesignerComponent implements OnInit {
                     const dialogConfig = new MatDialogConfig();
                     dialogConfig.disableClose = false;
                     dialogConfig.data = { info: initInfo, element };
-                    const editDialogRef = that.dialog.open(EditSmartServiceTaskDialogComponent, dialogConfig);
+                    const editDialogRef = dialog.open(EditSmartServiceTaskDialogComponent, dialogConfig);
                     editDialogRef.afterClosed().subscribe((value: SmartServiceTaskDescription) => {
                         if (value) {
                             callback(value);
@@ -127,7 +125,7 @@ export class SmartServiceDesignerComponent implements OnInit {
                     const dialogConfig = new MatDialogConfig();
                     dialogConfig.disableClose = false;
                     dialogConfig.data = { info: initInfo, element };
-                    const editDialogRef = that.dialog.open(EditSmartServiceJsonExtractionDialogComponent, dialogConfig);
+                    const editDialogRef = dialog.open(EditSmartServiceJsonExtractionDialogComponent, dialogConfig);
                     editDialogRef.afterClosed().subscribe((value: SmartServiceTaskInputOutputDescription) => {
                         if (value) {
                             callback(value);
@@ -139,7 +137,7 @@ export class SmartServiceDesignerComponent implements OnInit {
                     const dialogConfig = new MatDialogConfig();
                     dialogConfig.disableClose = false;
                     dialogConfig.data = { info, element };
-                    const editDialogRef = that.dialog.open(EditSmartServiceInputDialogComponent, dialogConfig);
+                    const editDialogRef = dialog.open(EditSmartServiceInputDialogComponent, dialogConfig);
                     editDialogRef.afterClosed().subscribe((value: SmartServiceInputsDescription) => {
                         if (value) {
                             callback(value);

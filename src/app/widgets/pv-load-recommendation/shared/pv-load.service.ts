@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { concatMap, map, Observable, throwError, of } from 'rxjs';
+import { concatMap, Observable, throwError, of } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
-import { LastValuesRequestElementInfluxModel, LastValuesRequestElementTimescaleModel, TimeValuePairModel } from '../../shared/export-data.model';
+import { LastValuesRequestElementInfluxModel, LastValuesRequestElementTimescaleModel } from '../../shared/export-data.model';
 import { ExportDataService } from '../../shared/export-data.service';
 import { PVLoadRecommendationEditComponent } from '../dialog/edit/edit.component';
 import { PVLoadRecommendationResult } from './recommendation.model';

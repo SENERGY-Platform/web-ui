@@ -21,7 +21,7 @@ import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { AppRoutingModule } from './app-routing.module';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import {KeycloakAngularModule} from 'keycloak-angular';
+import { KeycloakAngularModule } from 'keycloak-angular';
 import { initializerService } from './core/services/initializer.service';
 import { DevicesModule } from './modules/devices/devices.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
@@ -35,15 +35,14 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { ClipboardModule } from 'ngx-clipboard';
 import { ImportsModule } from './modules/imports/imports.module';
 import { MetadataModule } from './modules/metadata/metadata.module';
-import { environment } from '../environments/environment';
-import {SmartServicesModule} from './modules/smart-services/smart-services.module';
+import { SmartServicesModule } from './modules/smart-services/smart-services.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { ApiDocModule } from './modules/api-doc/api-doc.module';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import {AuthorizationService} from './core/services/authorization.service';
+import { AuthorizationService } from './core/services/authorization.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 import { CostModule } from './modules/cost/cost.module';
-import {ReportingModule} from './modules/reporting/reporting.module';
+import { ReportingModule } from './modules/reporting/reporting.module';
 
 registerLocaleData(localeDe);
 

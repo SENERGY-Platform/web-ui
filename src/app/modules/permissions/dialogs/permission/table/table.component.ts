@@ -116,7 +116,7 @@ export class TableComponent implements AfterContentInit {
 
   setR(element: AnnotatedPermissionsV2ResourceModel, $event: MatCheckboxChange) {
     this.permissions[element.id].read = $event.checked;
-    const e = this.flattened.data.find(e => e.id === element.id);
+    const e = this.flattened.data.find(e2 => e2.id === element.id);
     if (e !== undefined) {
       e.read = $event.checked;
     }
@@ -124,7 +124,7 @@ export class TableComponent implements AfterContentInit {
 
   setW(element: AnnotatedPermissionsV2ResourceModel, $event: MatCheckboxChange) {
     this.permissions[element.id].write = $event.checked;
-    const e = this.flattened.data.find(e => e.id === element.id);
+    const e = this.flattened.data.find(e2 => e2.id === element.id);
     if (e !== undefined) {
       e.write = $event.checked;
     }
@@ -132,7 +132,7 @@ export class TableComponent implements AfterContentInit {
 
   setX(element: AnnotatedPermissionsV2ResourceModel, $event: MatCheckboxChange) {
     this.permissions[element.id].execute = $event.checked;
-    const e = this.flattened.data.find(e => e.id === element.id);
+    const e = this.flattened.data.find(e2 => e2.id === element.id);
     if (e !== undefined) {
       e.execute = $event.checked;
     }
@@ -140,7 +140,7 @@ export class TableComponent implements AfterContentInit {
 
   setA(element: AnnotatedPermissionsV2ResourceModel, $event: MatCheckboxChange) {
     this.permissions[element.id].administrate = $event.checked;
-    const e = this.flattened.data.find(e => e.id === element.id);
+    const e = this.flattened.data.find(e2 => e2.id === element.id);
     if (e !== undefined) {
       e.administrate = $event.checked;
     }

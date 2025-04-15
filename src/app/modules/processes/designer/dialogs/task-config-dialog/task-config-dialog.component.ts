@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import {
     MAT_DIALOG_DATA,
     MatDialogRef
 } from '@angular/material/dialog';
-import {FormControl, UntypedFormBuilder, UntypedFormControl, Validators} from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import {
     DeviceTypeAspectModel,
     DeviceTypeAspectNodeModel,
@@ -33,10 +33,10 @@ import {
     DeviceTypeSelectionRefModel,
     DeviceTypeSelectionResultModel,
 } from '../../../../metadata/device-types-overview/shared/device-type-selection.model';
-import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
-import {ConceptsService} from '../../../../metadata/concepts/shared/concepts.service';
-import {ConceptsCharacteristicsModel} from '../../../../metadata/concepts/shared/concepts-characteristics.model';
-import {rangeValidator} from '../../../../../core/validators/range.validator';
+import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
+import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
+import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
+import { rangeValidator } from '../../../../../core/validators/range.validator';
 
 @Component({
     templateUrl: './task-config-dialog.component.html',

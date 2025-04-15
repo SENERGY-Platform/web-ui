@@ -19,7 +19,7 @@ import {Directive, Input} from '@angular/core';
 import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator} from '@angular/forms';
 
 @Directive({
-    // eslint-disable-next-line @angular-eslint/directive-selector
+     
     selector: '[isNotProhibitedName]',
     providers: [{provide: NG_VALIDATORS, useExisting: IsNotProhibitedNameValidatorDirective, multi: true}]
 })

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line no-shadow
+ 
 export enum DashboardTypesEnum {
     Switch = 'switch',
     RangeSlider = 'range_slider',

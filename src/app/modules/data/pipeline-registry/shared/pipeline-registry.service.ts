@@ -102,9 +102,8 @@ export class PipelineRegistryService {
             pipe.operators.forEach((op) => {
                 if (op.config !== undefined) {
                     const m = new Map<string, string>();
-                    // @ts-ignore this is ok, api gives object not map
                     for (const key of Object.keys(op.config)) {
-                        // @ts-ignore this is ok, api gives object not map
+                        // @ts-expect-error this is ok, api gives object not map
                         m.set(key, op.config[key]);
                     }
                     op.config = m;

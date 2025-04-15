@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild,} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, } from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
 import { Sort } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
@@ -24,13 +24,13 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
 import { Router } from '@angular/router';
-import { forkJoin, Observable, Subscription, map, mergeAll, concatMap } from 'rxjs';
+import { forkJoin, Observable, Subscription, map, concatMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UtilService } from 'src/app/core/services/util.service';
 import { MatPaginator } from '@angular/material/paginator';
-import { PermissionsV2ResourceModel, PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
+import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';

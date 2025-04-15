@@ -119,8 +119,8 @@ export class PVLoadRecommendationEditComponent implements OnInit {
                     exports.instances?.forEach((exportModel: ExportModel) => {
                         if (
                             exportModel.ID !== undefined &&
-                  exportModel.Name !== undefined //&&
-                  //EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
+                  exportModel.Name !== undefined // &&
+                  // EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
                         ) {
                             this.exports.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID });
                         }

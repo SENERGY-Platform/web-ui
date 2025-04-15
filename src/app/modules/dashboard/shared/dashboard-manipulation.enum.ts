@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line no-shadow
+ 
 export enum DashboardManipulationEnum {
     Update = 'update',
     Delete = 'delete',

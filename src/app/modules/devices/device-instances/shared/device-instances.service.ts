@@ -64,7 +64,7 @@ export class DeviceInstancesService {
     }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
-        return this.getDeviceInstances({limit: 9999, offset: 0}).pipe(map(d => d.result.map(dd => dd.device_type_id).filter((v,i,a) => a.indexOf(v) === i))); //unique
+        return this.getDeviceInstances({limit: 9999, offset: 0}).pipe(map(d => d.result.map(dd => dd.device_type_id).filter((v,i,a) => a.indexOf(v) === i))); // unique
     }
 
     getDeviceListByIds(ids: string[]): Observable<DeviceInstanceModel[]> {

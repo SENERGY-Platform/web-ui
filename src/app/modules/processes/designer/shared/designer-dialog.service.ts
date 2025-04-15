@@ -31,11 +31,10 @@ import {
 } from '../../../metadata/device-types-overview/shared/device-type-selection.model';
 import { TaskConfigDialogComponent } from '../dialogs/task-config-dialog/task-config-dialog.component';
 import { NotificationConfigDialogComponent } from '../dialogs/notification-config-dialog/notification-config-dialog.component';
-import {ConditionalEventEditModel, FilterCriteriaDialogResultModel} from './designer-dialog.model';
-import { FilterCriteriaDialogComponent } from '../dialogs/filter-criteria-dialog/filter-criteria-dialog.component';
-import {ProcessIoDesignerInfo} from '../../process-io/shared/process-io.model';
-import {ProcessIoDesignerDialogComponent} from '../dialogs/process-io-designer-dialog/process-io-designer-dialog.component';
-import {ConditionalEventDialogComponent} from '../dialogs/conditional-event-dialog/conditional-event-dialog.component';
+import { ConditionalEventEditModel } from './designer-dialog.model';
+import { ProcessIoDesignerInfo } from '../../process-io/shared/process-io.model';
+import { ProcessIoDesignerDialogComponent } from '../dialogs/process-io-designer-dialog/process-io-designer-dialog.component';
+import { ConditionalEventDialogComponent } from '../dialogs/conditional-event-dialog/conditional-event-dialog.component';
 import { IncidentDialogComponent } from '../dialogs/incident-dialog/incident-dialog.component';
 import { ProcessIncidentsConfig } from '../../incidents/shared/process-incidents.model';
 

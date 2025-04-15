@@ -102,7 +102,7 @@ export class DeviceTypesComponent implements OnInit {
     ) {
         try {
             this.equivalentProtocolSegments = JSON.parse(environment.equivalentProtocolSegments);
-        } catch (e) {
+        } catch (_) {
             console.error('Could not parse environment.equivalentProtocolSegments', environment.equivalentProtocolSegments);
         }
         this.getRouterParams();

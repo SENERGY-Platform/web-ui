@@ -16,7 +16,7 @@
 
 import {Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output} from '@angular/core';
 import {UntypedFormControl, Validators} from '@angular/forms';
-import {rangeValidator} from "../../../../../core/validators/range.validator";
+import {rangeValidator} from '../../../../../core/validators/range.validator';
 
 @Component({
     selector: 'senergy-date-time-event-config',

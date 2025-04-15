@@ -36,7 +36,6 @@ import { DeploymentsStartParameterDialogComponent } from './dialogs/deployments-
 import { DeploymentsFogFactory } from './shared/deployments-fog.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
-import { DeploymentsFogModel } from './shared/deployments-fog.model';
 
 const grids = new Map([
     ['xs', 1],

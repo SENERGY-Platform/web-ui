@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { WidgetFooterService } from './shared/widget-footer.service';
-import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Component({
     selector: 'senergy-widget-footer',
     templateUrl: './widget-footer.component.html',
     styleUrls: ['./widget-footer.component.css'],
 })
-export class WidgetFooterComponent implements OnInit {
+export class WidgetFooterComponent {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() optionZoom = false;
@@ -54,8 +52,6 @@ export class WidgetFooterComponent implements OnInit {
     ) {
 
     }
-
-    ngOnInit() {}
 
     edit() {
         this.editEvent.emit(true);

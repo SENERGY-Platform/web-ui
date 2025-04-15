@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {environment} from '../../../environments/environment';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import {
     LastValuesRequestElementInfluxModel,
     LastValuesRequestElementTimescaleModel,
@@ -26,10 +26,9 @@ import {
     TimeValuePairModel
 } from './export-data.model';
 import { HttpClient } from '@angular/common/http';
-import {map} from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import { ExportResponseModel } from 'src/app/modules/exports/shared/export.model';
 
 @Injectable({
     providedIn: 'root',

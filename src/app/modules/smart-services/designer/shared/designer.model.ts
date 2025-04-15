@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-//{name: "test-task", topic: "test-topic", inputs:[{name: "test-input", type: "text", value: "42"}, {name: "test-script", type: "script", value: '[13]'}]};
-import {AbstractSmartServiceInput} from '../dialog/edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
+// {name: "test-task", topic: "test-topic", inputs:[{name: "test-input", type: "text", value: "42"}, {name: "test-script", type: "script", value: '[13]'}]};
 
 export interface SmartServiceTaskDescription {
     name: string;
@@ -27,7 +26,7 @@ export interface SmartServiceTaskDescription {
 
 export interface SmartServiceTaskInputDescription {
     name: string;
-    type: string; //"text" || "script"
+    type: string; // "text" || "script"
     value: string;
 }
 

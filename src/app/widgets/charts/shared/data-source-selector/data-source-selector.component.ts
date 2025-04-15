@@ -1132,7 +1132,7 @@ export class DataSourceSelectorComponent implements OnInit {
                                 return null;
                             }));
                         } else {
-                            return of({device: device, type:  this.deviceTypes.get((device as DeviceInstanceModel).device_type_id)})
+                            return of({device: device, type:  this.deviceTypes.get((device as DeviceInstanceModel).device_type_id)});
                         }
                     } else {
                         return of(null);

@@ -64,7 +64,7 @@ export class ChartsService {
     }
 
     cleanup(widget: WidgetModel) {
-        for (let i = localStorage.length; i >= 0; i--) { //reverse order, since deleting messes with index
+        for (let i = localStorage.length; i >= 0; i--) { // reverse order, since deleting messes with index
             const key = localStorage.key(i);
             if (key?.startsWith(widget.id)) {
                 localStorage.removeItem(key);

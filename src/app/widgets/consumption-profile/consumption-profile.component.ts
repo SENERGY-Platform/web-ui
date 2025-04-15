@@ -1,11 +1,8 @@
-import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { GoogleChartComponent } from 'ng2-google-charts';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { map } from 'rxjs';
-import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ApexChartOptions } from '../charts/export/shared/charts-export-properties.model';
-import { ChartsModel } from '../charts/shared/charts.model';
-import { ConsumptionProfileProperties, ConsumptionProfilePropertiesModel, ConsumptionProfileResponse } from './shared/consumption-profile.model';
+import { ConsumptionProfileProperties, ConsumptionProfileResponse } from './shared/consumption-profile.model';
 import { ConsumptionProfileService } from './shared/consumption-profile.service';
 
 @Component({

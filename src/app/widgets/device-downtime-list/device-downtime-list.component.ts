@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewChecked, Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DeviceDowntimeListService } from './shared/device-downtime-list.service';
 import { DeviceDowntimeListModel } from './shared/device-downtime-list.model';

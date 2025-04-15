@@ -68,8 +68,8 @@ export class GeonamesService {
                         '&q=' +
                         q +
                         '&maxRows=100' +
-                        //'&featureCode=PPL' +
-                        //'&&featureClass=P' +
+                        // '&featureCode=PPL' +
+                        // '&&featureClass=P' +
                         '&isNameRequired=true' +
                         '&countryBias=DE' +
                         '&style=medium',

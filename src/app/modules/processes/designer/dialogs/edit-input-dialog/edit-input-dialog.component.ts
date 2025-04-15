@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BpmnElement, BpmnParameter } from '../../shared/designer.model';
 import { DesignerHelperService } from '../../shared/designer-helper.service';
@@ -23,7 +23,7 @@ import { DesignerHelperService } from '../../shared/designer-helper.service';
     templateUrl: './edit-input-dialog.component.html',
     styleUrls: ['./edit-input-dialog.component.css'],
 })
-export class EditInputDialogComponent implements OnInit {
+export class EditInputDialogComponent {
     inputs: BpmnParameter[];
     outputs: BpmnParameter[];
 
@@ -40,8 +40,6 @@ export class EditInputDialogComponent implements OnInit {
             this.inputs = [];
         }
     }
-
-    ngOnInit() {}
 
     close(): void {
         this.dialogRef.close();

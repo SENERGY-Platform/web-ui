@@ -20,8 +20,8 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import {SmartServiceReleaseCreateModel, SmartServiceReleaseModel, SmartServiceExtendedReleaseModel} from './release.model';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { SmartServiceReleaseCreateModel, SmartServiceReleaseModel, SmartServiceExtendedReleaseModel } from './release.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({

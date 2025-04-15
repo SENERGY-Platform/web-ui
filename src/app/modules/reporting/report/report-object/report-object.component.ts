@@ -29,7 +29,7 @@ import {ExportDataService} from '../../../../widgets/shared/export-data.service'
 import {MatDialog} from '@angular/material/dialog';
 import {QueryPreviewDialogComponent} from './query-preview/query-preview-dialog.component';
 import {map, Observable, of} from 'rxjs';
-import {ErrorHandlerService} from "../../../../core/services/error-handler.service";
+import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 
 class TimeUnit {
     constructor(unit: string, desc: string) {
@@ -256,10 +256,10 @@ export class ReportObjectComponent implements OnInit, OnChanges {
             this.exportDataService.queryTimescaleV2([query]).subscribe((resp) => {
                 if (resp !== undefined) {
                     const response: any = {};
-                    // eslint-disable-next-line guard-for-in
+                     
                     for (const key in resp[0].data[0]) {
                         const value = resp[0].data[0][key];
-                        // eslint-disable-next-line guard-for-in
+                         
                         for (const keyInner in value) {
                             if (key === '0') {
                                 response['Key ' + keyInner] = [];

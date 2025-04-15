@@ -91,7 +91,8 @@ export default [{
               "varsIgnorePattern": "^_",
               "ignoreRestSiblings": true
             }
-          ]
+          ],
+          "@typescript-eslint/no-this-alias": "off",
     },
 }, ...compat.extends("plugin:@angular-eslint/template/recommended").map(config => ({
     ...config,

@@ -263,13 +263,13 @@ export class AcControlEditDialogComponent implements OnInit {
         const functionId = functionIds.find(f => f === field.function_id);
         if (functionId !== undefined) {
             const f = {serviceId, aspectId: field.aspect_id || ''};
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+             
             if (results.has(field.function_id!)) {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                 
                 results.get(field.function_id!)?.push(f);
             } else {
                 if (field.function_id != null) {
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                     
                     results.set(field.function_id!, [f]);
                 }
             }

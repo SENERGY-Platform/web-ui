@@ -98,7 +98,7 @@ export interface FilterSelection {
     network?: string;
 }
 
-// eslint-disable-next-line no-shadow
+ 
 export enum DeviceInstancesRouterStateTabEnum {
     ALL,
     ONLINE,

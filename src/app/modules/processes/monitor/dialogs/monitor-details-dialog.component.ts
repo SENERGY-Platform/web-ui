@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.model';
 
@@ -22,7 +22,7 @@ import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.
     templateUrl: './monitor-details-dialog.component.html',
     styleUrls: ['./monitor-details-dialog.component.css'],
 })
-export class MonitorDetailsDialogComponent implements OnInit {
+export class MonitorDetailsDialogComponent {
     incidents: ProcessIncidentsModel[] = [];
 
     constructor(
@@ -31,8 +31,6 @@ export class MonitorDetailsDialogComponent implements OnInit {
     ) {
         this.incidents = data.incident;
     }
-
-    ngOnInit() {}
 
     ok(): void {
         this.dialogRef.close();

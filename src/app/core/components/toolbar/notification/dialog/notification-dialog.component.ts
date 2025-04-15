@@ -19,7 +19,7 @@ import {
     MAT_DIALOG_DATA,
     MatDialogRef
 } from '@angular/material/dialog';
-import { getAllTopics, NotificationBrokerModel, NotificationModel, NotificationSettingsModel } from '../shared/notification.model';
+import { getAllTopics, NotificationBrokerModel, NotificationModel } from '../shared/notification.model';
 import { NotificationService } from '../shared/notification.service';
 import { PageEvent } from '@angular/material/paginator';
 import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
@@ -29,7 +29,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { environment } from '../../../../../../environments/environment';
 import { AuthorizationService } from '../../../../services/authorization.service';
 
-// eslint-disable-next-line no-shadow
+ 
 export enum Modes {
     NOTIFICATIONS = 1,
     SETTINGS,

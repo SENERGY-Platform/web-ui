@@ -214,7 +214,7 @@ export class LocationsEditComponent implements OnInit {
                 .subscribe((locationSaved: LocationModel | null) => {
                     this.isSaving = false;
                     this.showMessage(locationSaved);
-                    //this.reload(locationSaved);
+                    // this.reload(locationSaved);
                     this.goToLocationsOverviewPage();
                 });
         } else {
@@ -224,7 +224,7 @@ export class LocationsEditComponent implements OnInit {
                 .subscribe((locationSaved: LocationModel | null) => {
                     this.isSaving = false;
                     this.showMessage(locationSaved);
-                    //this.reload(locationSaved);
+                    // this.reload(locationSaved);
                     this.goToLocationsOverviewPage();
                 });
         }

@@ -22,7 +22,7 @@ import { catchError, map } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
 import { PipelineRequestModel } from '../deploy-flow/shared/pipeline-request.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { PipelineStatus } from '../../pipeline-registry/shared/pipeline.model';
 
 @Injectable({

@@ -66,9 +66,7 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
         if (event.value !== null) {
             if (this.widget.properties.rangeSliderValue !== null) {
                 this.widget.properties.rangeSliderValue = event.value;
-                // @ts-ignore
-                this.widget.properties.selectedParameterModel.value = event.value;
-                // @ts-ignore
+                this.widget.properties.selectedParameterModel!.value = event.value;
                 this.deploymentService
                     .startDeploymentWithParameter(
                         this.widget.properties.deployment?.id || '',

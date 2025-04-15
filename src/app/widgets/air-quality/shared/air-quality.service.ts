@@ -269,20 +269,16 @@ export class AirQualityService {
             const valid = values.length >= (valueIndex - 1) && values[valueIndex].length > 0 && values[valueIndex][0].length > 0 && values[valueIndex][0][0] !== undefined && values[valueIndex][0][0] !== null;
             if (inside) {
                 if (valid) {
-                    // @ts-ignore
-                    widget.properties[property][measurementIndex].data.value = Math.round(Number(values[valueIndex][0][1]) * 100) / 100;
+                    (widget.properties as any)[property][measurementIndex].data.value = Math.round(Number(values[valueIndex][0][1]) * 100) / 100;
                 } else {
-                    // @ts-ignore
-                    widget.properties[property][measurementIndex].data.value = undefined;
+                    (widget.properties as any)[measurementIndex].data.value = undefined;
                 }
             } else {
                 if (valid) {
-                    // @ts-ignore
-                    widget.properties[property][measurementIndex].outsideData.value =
+                    (widget.properties as any)[measurementIndex].outsideData.value =
                         Math.round(Number(values[valueIndex][0][1]) * 100) / 100;
                 } else {
-                    // @ts-ignore
-                    widget.properties[property][measurementIndex].outsideData.value = undefined;
+                    (widget.properties as any)[measurementIndex].outsideData.value = undefined;
                 }
             }
         });

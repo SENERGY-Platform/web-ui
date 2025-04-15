@@ -31,7 +31,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
-import { MonitorFogFactory, MonitorFogService } from './shared/monitor-fog.service';
+import { MonitorFogFactory } from './shared/monitor-fog.service';
 import { UtilService } from 'src/app/core/services/util.service';
 
 @Component({

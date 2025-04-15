@@ -83,8 +83,7 @@ export class PipelineDetailsComponent implements OnInit {
                     if (typeof this.pipe.image === 'string') {
                         const parser = new DOMParser();
                         const svg = parser.parseFromString(this.pipe.image, 'image/svg+xml').getElementsByTagName('svg')[0];
-                        // @ts-ignore
-                        const viewbox = svg.getAttribute('viewbox').split(' ');
+                        const viewbox = svg.getAttribute('viewbox')!.split(' ');
                         svg.setAttribute('height', viewbox[3]);
                         this.pipe.image = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
                     }

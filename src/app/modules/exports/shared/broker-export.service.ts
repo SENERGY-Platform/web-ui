@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {environment} from '../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
-import {Observable} from 'rxjs';
-import {ExportModel, ExportResponseModel} from './export.model';
-import { AllowedMethods, PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { environment } from '../../../../environments/environment';
+import { catchError, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { ExportModel, ExportResponseModel } from './export.model';
+import { PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 
 @Injectable({

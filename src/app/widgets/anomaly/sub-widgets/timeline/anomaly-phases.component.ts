@@ -1,6 +1,5 @@
-import { Component, HostListener, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
 import { AnomaliesPerDevice } from '../../shared/anomaly.model';
 import { AnomalyReconstructionComponent } from '../../reconstruction/reconstruction.component';
@@ -122,10 +121,10 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
         dialogConfig.data = {
             anomaly: this.findAnomaly(deviceID, startTime, endTime)
         };
-        const editDialogRef = this.dialog.open(AnomalyReconstructionComponent, dialogConfig);
+        this.dialog.open(AnomalyReconstructionComponent, dialogConfig);
     };
 
-    private findAnomaly(deviceID: string, _ /*selectedStartTime*/: Date, __ /*selectedEndTime*/: Date) {
+    private findAnomaly(deviceID: string, _ /* selectedStartTime*/: Date, _2 /* selectedEndTime*/: Date) {
         return this.anomalies?.[deviceID][0];
         /* Find the corresponding anomaly based on device id and start/end time
         (this.anomalies?.[deviceID] || []).forEach(anomaly => {

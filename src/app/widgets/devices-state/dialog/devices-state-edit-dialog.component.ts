@@ -22,7 +22,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MatTable } from '@angular/material/table';
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 
 @Component({
     templateUrl: './devices-state-edit-dialog.component.html',

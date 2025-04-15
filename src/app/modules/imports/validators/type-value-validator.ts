@@ -48,7 +48,7 @@ export function typeValueValidator(typeControlName: string, valueControlName: st
                     if (typeof JSON.parse(defaultValue.value) !== 'boolean') {
                         defaultNotOk = true;
                     }
-                } catch (e) {
+                } catch (_) {
                     defaultNotOk = true;
                 }
                 break;
@@ -58,7 +58,7 @@ export function typeValueValidator(typeControlName: string, valueControlName: st
                     if (typeof JSON.parse(floatVal || '') !== 'number') {
                         defaultNotOk = true;
                     }
-                } catch (e) {
+                } catch (_) {
                     defaultNotOk = true;
                 }
                 break;
@@ -72,7 +72,7 @@ export function typeValueValidator(typeControlName: string, valueControlName: st
                     if (typeof val !== 'number' || val % 1 !== 0) {
                         defaultNotOk = true;
                     }
-                } catch (e) {
+                } catch (_) {
                     defaultNotOk = true;
                 }
                 break;
@@ -82,7 +82,7 @@ export function typeValueValidator(typeControlName: string, valueControlName: st
                     if (typeof structVal !== 'object' || Array.isArray(structVal)) {
                         defaultNotOk = true;
                     }
-                } catch (e) {
+                } catch (_) {
                     defaultNotOk = true;
                 }
                 break;
@@ -91,7 +91,7 @@ export function typeValueValidator(typeControlName: string, valueControlName: st
                     if (!Array.isArray(JSON.parse(defaultValue.value))) {
                         defaultNotOk = true;
                     }
-                } catch (e) {
+                } catch (_) {
                     defaultNotOk = true;
                 }
                 break;

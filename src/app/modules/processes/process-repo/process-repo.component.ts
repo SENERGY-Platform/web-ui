@@ -295,10 +295,10 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.animationDone = true;
                 switch (this.activeIndex) {
                 case 0:
-                    //all
+                    // all
                     break;
                 case 1:
-                    //own
+                    // own
                     repoItems.result = repoItems.result.filter(r => r.owner === this.userID);
                     break;
                 case 2:
@@ -365,11 +365,11 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         let conditions: ProcessRepoConditionsModel | null = {};
         switch (this.activeIndex) {
         case 0:
-            //all
+            // all
             conditions = null;
             break;
         case 1:
-            //own
+            // own
             conditions.and = [
                 { condition: this.setCondition('creator', '==', 'jwt.user') },
                 { condition: this.setCondition('features.parent_id', '==', 'null') },

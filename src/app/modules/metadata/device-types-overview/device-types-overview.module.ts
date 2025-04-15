@@ -62,7 +62,7 @@ import {
     DeviceTypesContentVariableJsonDialogComponent,
 } from './device-types/dialogs/device-types-content-variable-json-dialog.component';
 import {IsNotProhibitedNameValidatorDirective} from './device-types/shared/is-not-prohibited-name.directive';
-import {UsedInDeviceTypesDialogComponent} from "./dialogs/used-in-device-types-dialog.component";
+import {UsedInDeviceTypesDialogComponent} from './dialogs/used-in-device-types-dialog.component';
 
 const devicetypes: Route = {
     path: 'metadata/devicetypesoverview/devicetypes',

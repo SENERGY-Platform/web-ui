@@ -19,10 +19,10 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     UsedInDeviceTypeResponseDeviceTypeRef,
     UsedInDeviceTypeResponseElement
-} from "../shared/used-in-device-type.model";
-import {MatTableDataSource} from "@angular/material/table";
-import {AuthorizationService} from "../../../../core/services/authorization.service";
-import {Router} from "@angular/router";
+} from '../shared/used-in-device-type.model';
+import {MatTableDataSource} from '@angular/material/table';
+import {AuthorizationService} from '../../../../core/services/authorization.service';
+import {Router} from '@angular/router';
 
 @Component({
     templateUrl: './used-in-device-types-dialog.component.html',
@@ -30,7 +30,7 @@ import {Router} from "@angular/router";
 })
 export class UsedInDeviceTypesDialogComponent implements OnInit {
     dataSource = new MatTableDataSource<UsedInDeviceTypeResponseDeviceTypeRef>();
-    displayedColumns = ["name"];
+    displayedColumns = ['name'];
     userHasUpdateAuthorization = false;
 
     constructor(
@@ -43,11 +43,11 @@ export class UsedInDeviceTypesDialogComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.userHasUpdateAuthorization = this.authService.userIsAdmin()
+        this.userHasUpdateAuthorization = this.authService.userIsAdmin();
         if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push("edit");
+            this.displayedColumns.push('edit');
         } else {
-            this.displayedColumns.push("view");
+            this.displayedColumns.push('view');
         }
     }
 

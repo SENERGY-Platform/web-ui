@@ -1,12 +1,9 @@
-import { AfterViewChecked, AfterViewInit, Component, HostListener, Input, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, HostListener, Input } from '@angular/core';
 import { concatMap, of, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
-import { ChartsExportVAxesModel } from '../../charts/export/shared/charts-export-properties.model';
 import { ChartsExportService } from '../../charts/export/shared/charts-export.service';
-import { SingleValueService } from '../../single-value/shared/single-value.service';
-import { AnomalyService } from '../shared/anomaly.service';
 
 @Component({
     selector: 'fake-senergy-anomaly-detection',
@@ -14,7 +11,7 @@ import { AnomalyService } from '../shared/anomaly.service';
     styleUrls: ['./fake.component.css']
 })
 export class FakeAnomalyComponent implements AfterViewChecked {
-    type = 'curve_anomaly'; //time, schema, curve_anomaly
+    type = 'curve_anomaly'; // time, schema, curve_anomaly
     style = '';
 
     timestamp = new Date();
@@ -108,7 +105,7 @@ export class FakeAnomalyComponent implements AfterViewChecked {
 
     ngAfterViewChecked(): void {
         if(!this.initialized) {
-            //this.lastAnomaly();
+            // this.lastAnomaly();
             this.loadTimelineData(this.properties).subscribe({
                 next: (chartData) => {
                     this.timelineChartData = chartData;

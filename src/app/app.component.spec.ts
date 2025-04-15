@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { TestBed, ComponentFixture} from '@angular/core/testing';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { KeycloakService } from 'keycloak-angular';
@@ -22,12 +22,11 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MockKeycloakService } from './core/services/keycloak.mock';
 import { AuthorizationServiceMock } from './core/services/authorization.service.mock';
-import {AuthorizationService} from './core/services/authorization.service';
+import { AuthorizationService } from './core/services/authorization.service';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
-import { SettingsDialogService } from './modules/settings/shared/settings-dialog.service';
 import { NotificationService } from './core/components/toolbar/notification/shared/notification.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
-import {provideRouter} from "@angular/router";
+import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 

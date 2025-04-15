@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Directive, Input} from '@angular/core';
-import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn} from '@angular/forms';
-import {jsonValidator} from './json.validator';
+import { Directive } from '@angular/core';
+import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
+import { jsonValidator } from './json.validator';
 
 @Directive({
-    // eslint-disable-next-line @angular-eslint/directive-selector
+     
     selector: '[isValidJson]',
     providers: [{provide: NG_VALIDATORS, useExisting: IsJsonValidatorDirective, multi: true}]
 })

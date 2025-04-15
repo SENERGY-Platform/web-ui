@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Subscription} from 'rxjs';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {ProcessModel} from '../../processes/process-repo/shared/process.model';
-import {SmartServiceDesignsService} from './shared/designs.service';
-import {SmartServiceDesignModel} from './shared/design.model';
-import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {DesignerProcessModel} from '../../processes/designer/shared/designer.model';
-import {saveAs} from 'file-saver';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {UtilService} from '../../../core/services/util.service';
-import {SmartServiceReleasesService} from '../releases/shared/release.service';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { ProcessModel } from '../../processes/process-repo/shared/process.model';
+import { SmartServiceDesignsService } from './shared/designs.service';
+import { SmartServiceDesignModel } from './shared/design.model';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { saveAs } from 'file-saver';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { UtilService } from '../../../core/services/util.service';
+import { SmartServiceReleasesService } from '../releases/shared/release.service';
 
 const grids = new Map([
     ['xs', 1],

@@ -22,17 +22,16 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import {
-    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
+    DeviceTypeAspectNodeModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
-    DeviceTypeServiceModel,
+    DeviceTypeServiceModel
 } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import { DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel } from '../shared/device-status-properties.model';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {
-    DeploymentsPreparedModel,
-    DeploymentsPreparedSelectableModel,
+    DeploymentsPreparedSelectableModel
 } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 import { ExportModel, ExportValueCharacteristicModel } from '../../../modules/exports/shared/export.model';
 import { forkJoin, Observable, of } from 'rxjs';

@@ -23,7 +23,7 @@ export function jsonValidator(blankIsValid = false): ValidatorFn {
         }
         try {
             JSON.parse(control.value);
-        } catch (e) {
+        } catch (_) {
             return { jsonValidator: { value: control.value } };
         }
         return null;

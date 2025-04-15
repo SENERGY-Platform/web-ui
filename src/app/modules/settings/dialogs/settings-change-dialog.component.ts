@@ -50,7 +50,7 @@ export class SettingsChangeDialogComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        const port = this.document.location.port !== ('443' || '80') ? ':'+this.document.location.port : '';
+        const port = this.document.location.port !== '443' && this.document.location.port !== '80' ? ':'+this.document.location.port : '';
         this.href = this.document.location.protocol+'//'+this.document.location.hostname+port+this.document.location.pathname;
         this.authorizationService.getProfile().then((profile) => {
             this.profile = profile;

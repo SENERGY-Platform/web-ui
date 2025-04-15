@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { WidgetModel } from '../modules/dashboard/shared/dashboard-widget.model';
 
 @Component({
@@ -22,7 +22,7 @@ import { WidgetModel } from '../modules/dashboard/shared/dashboard-widget.model'
     templateUrl: './widget.component.html',
     styleUrls: ['./widget.component.css'],
 })
-export class WidgetComponent implements OnInit {
+export class WidgetComponent {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -33,5 +33,4 @@ export class WidgetComponent implements OnInit {
 
     constructor() {}
 
-    ngOnInit() {}
 }

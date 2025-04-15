@@ -165,7 +165,7 @@ export interface DeviceTypeProtocolSegmentModel {
     name: string;
 }
 
-// eslint-disable-next-line no-shadow
+ 
 export enum DeviceTypeInteractionEnum {
     Event = 'event',
     Request = 'request',

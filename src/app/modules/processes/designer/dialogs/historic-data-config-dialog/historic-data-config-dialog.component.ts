@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { HistoricDataConfig } from '../../shared/designer.model';
 import { ExportModel } from '../../../../exports/shared/export.model';
@@ -24,7 +24,7 @@ import { ExportService } from '../../../../exports/shared/export.service';
     templateUrl: './historic-data-config-dialog.component.html',
     styleUrls: ['./historic-data-config-dialog.component.css'],
 })
-export class HistoricDataConfigDialogComponent implements OnInit {
+export class HistoricDataConfigDialogComponent {
     config: HistoricDataConfig;
     availableMeasurements: ExportModel[] = [];
     readonly times = [
@@ -80,8 +80,6 @@ export class HistoricDataConfigDialogComponent implements OnInit {
             }
         });
     }
-
-    ngOnInit() {}
 
     close(): void {
         this.dialogRef.close();

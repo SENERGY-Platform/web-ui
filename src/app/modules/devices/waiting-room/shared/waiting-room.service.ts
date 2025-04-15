@@ -17,12 +17,9 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, Subscription } from 'rxjs';
-import { LocationModel } from '../../locations/shared/locations.model';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { ExportResponseModel } from '../../../exports/shared/export.model';
 import {
     WaitingDeviceListModel,
     WaitingDeviceModel,
@@ -37,8 +34,7 @@ import {
 } from './waiting-room.model';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { NotificationModel } from '../../../../core/components/toolbar/notification/shared/notification.model';
-import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({

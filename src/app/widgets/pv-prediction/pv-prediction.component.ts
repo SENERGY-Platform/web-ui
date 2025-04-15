@@ -81,7 +81,7 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
                 this.refreshing = false;
             },
             error: (err) => {
-                console.error(err)
+                console.error(err);
                 this.error = err;
                 this.ready = true;
                 this.refreshing = false;
@@ -90,7 +90,7 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
     }
 
     setupChartData(data: PVPredictionResult) {
-        const dataTable: any = [["time", "energy"]];
+        const dataTable: any = [['time', 'energy']];
         data.predictions.forEach(row => {
             dataTable.push([new Date(row.timestamp), row.value]);
         });

@@ -180,7 +180,7 @@ export class NetworksService {
         }
         return this.http.get<ExtendedHubModel[]>(environment.deviceRepoUrl + '/extended-hubs', { observe: 'response', params: params }).pipe(
             map((resp) => {
-                let totalStr = resp.headers.get('X-Total-Count') || '0';
+                const totalStr = resp.headers.get('X-Total-Count') || '0';
                 return {
                     result: resp.body,
                     total: parseInt(totalStr)

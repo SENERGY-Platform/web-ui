@@ -1,20 +1,14 @@
 import {
-    AfterContentChecked,
-    AfterContentInit,
-    AfterViewChecked,
-    AfterViewInit,
-    ChangeDetectorRef,
-    Component,
+    AfterContentChecked, Component,
     Input,
     OnDestroy,
     OnInit
 } from '@angular/core';
 import moment from 'moment';
-import { Subscription, concatMap, Observable, map, of, throwError } from 'rxjs';
+import { Subscription, concatMap, map, of, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
-import { DeviceInstancesBaseModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { AnomaliesPerDevice, AnomalyResultModel } from './shared/anomaly.model';
 import { AnomalyService } from './shared/anomaly.service';
 
@@ -206,7 +200,7 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
         return this.anomalyService.getAnomalyHistory(exportID, lastTimeRange).pipe(
             map((anomalies) => {
                 this.anomalies = anomalies;
-                //this.anomalies = this.createMockAnomalies(); Use this to simulate some anomalies in the UI`
+                // this.anomalies = this.createMockAnomalies(); Use this to simulate some anomalies in the UI`
                 this.getAllDevices(this.anomalies);
             })
         );

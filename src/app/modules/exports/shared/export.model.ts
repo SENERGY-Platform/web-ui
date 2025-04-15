@@ -78,7 +78,7 @@ export interface ExportDatabaseModel {
     Public: boolean;
 }
 
-// eslint-disable-next-line no-shadow
+ 
 export enum DatabaseType {
     influxdb = 'influxdb',
     timescaledb = 'timescaledb',

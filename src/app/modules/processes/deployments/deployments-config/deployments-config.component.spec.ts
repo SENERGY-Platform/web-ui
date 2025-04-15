@@ -27,16 +27,12 @@ import { MockKeycloakService } from '../../../../core/services/keycloak.mock';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProcessDeploymentsConfigComponent } from './deployments-config.component';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
-import {
-    DeploymentsSelectionConfigurableModel, DeploymentsSelectionPathOptionModel,
-    V2DeploymentsPreparedConfigurableModel,
-    V2DeploymentsPreparedModel
-} from '../shared/deployments-prepared-v2.model';
+import { V2DeploymentsPreparedModel } from '../shared/deployments-prepared-v2.model';
 import { DeploymentsService } from '../shared/deployments.service';
 import { of } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule } from '@angular/forms';
-import {FlexLayoutModule} from "@ngbracket/ngx-layout";
+import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ProcessesModule } from '../../processes.module';
@@ -44,29 +40,6 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 const nullPath = { path: '', characteristicId: '', aspectNode: Object({  }), functionId: '', isVoid: false, value: null, type: '', configurables: [  ] };
-
-function pathOptionsWithConfig(serviceId: string, config: DeploymentsSelectionConfigurableModel[] ): Map<string, DeploymentsSelectionPathOptionModel[]> {
-    const result = new Map<string, DeploymentsSelectionPathOptionModel[]>();
-    result.set(serviceId, [{
-        path: 'foo.bar',
-        type: 'https://schema.org/Text',
-        value: 'foo',
-        isVoid: false,
-        aspectNode: {
-            id: '',
-            name: '',
-            ancestor_ids: [],
-            child_ids: [],
-            descendent_ids: [],
-            parent_id: '',
-            root_id: ''
-        },
-        characteristicId: 'cid',
-        functionId: 'fid',
-        configurables: config
-    }]);
-    return result;
-}
 
 describe('ProcessDeploymentsConfigComponent', () => {
     let component: ProcessDeploymentsConfigComponent;
@@ -407,25 +380,6 @@ describe('ProcessDeploymentsConfigComponent', () => {
     });
 
     it('test lane process and auto selection of device and services', () => {
-        const configurable: DeploymentsSelectionConfigurableModel[] = [
-            {
-                characteristic_id: 'urn:infai:ses:characteristic:541665645sd-asdsad',
-                path: 'test.path',
-                type: 'https://schema.org/Text',
-                value: 'foo',
-                function_id: '',
-                aspect_node: {
-                    id: '',
-                    name: '',
-                    ancestor_ids: [],
-                    child_ids: [],
-                    descendent_ids: [],
-                    parent_id: '',
-                    root_id: ''
-                }
-            },
-        ];
-
         const laneProcess = {
             version: 3,
             description: 'description',
