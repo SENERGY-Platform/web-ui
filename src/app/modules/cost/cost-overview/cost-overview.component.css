@@ -40,3 +40,11 @@
    justify-content: end;
    margin-right: 20px;
 }
+
+.total-cost {
+   margin-bottom: 12px;
+   display: flex;
+   justify-content: end;
+   margin-right: 20px;
+   margin-top: 20px;
+}

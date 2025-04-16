@@ -59,6 +59,10 @@
       <senergy-cost-element *ngFor="let cat of tree | keyvalue: originalOrder" [pipelines]="pipelines" [imports]="imports" [operators]="operators" [devices]="devices" [name]="cat.key" [exports]="exports" [brokerExports]="brokerExports" [element]="cat.value"/>
     </mat-accordion>
 
+    <h4 *ngIf="tree !== undefined && tree.size != 0" class="total-cost">
+      Total Cost: {{totalCost  | currency:'EUR'}}
+    </h4>
+
     <div *ngIf="tree === undefined || tree.size === 0">
       No cost data
     </div>

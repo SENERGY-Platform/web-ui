@@ -202,4 +202,14 @@ export class CostOverviewComponent implements OnInit {
         return userid;
     }
 
+    get totalCost(): number {
+        if (this.tree === undefined) {
+            return 0;
+        }
+        let total = 0;
+        // @ts-expect-error just checked for undefined above
+        Object.keys(this.tree).forEach(k => total += this.sum(this.tree[k].month)); // tree is object not map
+        return total;
+    }
+
 }
