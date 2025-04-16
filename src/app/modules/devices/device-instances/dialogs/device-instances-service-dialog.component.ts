@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     DeviceTypeModel,
     DeviceTypeServiceModel
@@ -25,13 +25,15 @@ import {
     QueriesRequestColumnModel,
     TimeValuePairModel
 } from '../../../../widgets/shared/export-data.model';
-import {ExportDataService} from '../../../../widgets/shared/export-data.service';
-import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {environment} from '../../../../../environments/environment';
-import {AuthorizationService} from '../../../../core/services/authorization.service';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
+import { ExportDataService } from '../../../../widgets/shared/export-data.service';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { environment } from '../../../../../environments/environment';
+import { AuthorizationService } from '../../../../core/services/authorization.service';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
+import { ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
+import { MatExpansionPanel } from '@angular/material/expansion';
 
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',
@@ -48,8 +50,8 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
     deviceType: DeviceTypeModel;
     serviceOutputCounts: number[] = [];
     timeControl: FormGroup = this.fb.group({
-        from: [{value: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)), disabled: true}],
-        to: [{value: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)), disabled: true}],
+        from: [{ value: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)), disabled: true }],
+        to: [{ value: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)), disabled: true }],
     });
     device: DeviceInstanceModel;
     descriptions: string[][];
@@ -61,6 +63,24 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
 
     errorOccured = false;
     errorMessage = '';
+
+    connectionHistory: any[][][] = [];
+    userCanLoadConnectionHistory = false;
+
+    timelineAxes: ChartsExportVAxesModel[] = [
+        // @ts-expect-error other values are not required
+        {
+            exportName: ' ',
+            valueAlias: 'Period',
+            conversions: [
+                { from: true, to: true, alias: 'Online', color: '#097969' },
+                { from: false, to: false, alias: 'Offline', color: '#C41E3A' }
+            ],
+
+        }
+    ];
+
+    @ViewChild('connectionHistoryPanel') connectionHistoryPanel: MatExpansionPanel | undefined;
 
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesServiceDialogComponent>,
@@ -84,6 +104,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         this.serviceOutputCounts = data.serviceOutputCounts;
         this.device = data.device;
         this.descriptions = data.descriptions;
+        this.userCanLoadConnectionHistory = this.deviceInstancesService.userHasReadAuthorizationConnectionLog();
     }
 
     ngOnInit() {
@@ -120,6 +141,22 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         this.exportDataService.getTimescaleDataAvailability(this.device.id).subscribe(availability => {
             this.availability = availability;
         });
+        if (this.userCanLoadConnectionHistory) {
+            this.deviceInstancesService.getDeviceHistoryV2({ id: this.device.id, range: '168h' }).subscribe(history => {
+                this.connectionHistory = [[[]]];
+                if (history?.prev_state) {
+                    this.connectionHistory[0][0].push([history.prev_state.time, history.prev_state.connected]);
+                }
+                if (history?.states) {
+                    this.connectionHistory[0][0].push(...(history.states.map(s => [s.time, s.connected])));
+                }
+                if (this.connectionHistory[0][0].length > 0) {
+                    // continue last state to current
+                    this.connectionHistory[0][0].push([new Date().toISOString(), this.connectionHistory[0][0][this.connectionHistory[0][0].length - 1][1]]);
+                }
+                this.connectionHistory[0][0].reverse();
+            });
+        }
     }
 
     close(): void {
@@ -130,7 +167,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         const fromIso = this.timeControl.get('from')?.value.toISOString();
         const toIso = new Date((this.timeControl.get('to')?.value as Date).valueOf() + 86400000).toISOString();
         const columns: QueriesRequestColumnModel[] = [];
-        this.lastValueArray[i].forEach(c => columns.push({name: c.request.columnName, groupType: this.availabilityControl.value?.groupType}));
+        this.lastValueArray[i].forEach(c => columns.push({ name: c.request.columnName, groupType: this.availabilityControl.value?.groupType }));
 
         const token = await this.authorizationService.getToken();
         const f = await fetch(environment.timescaleAPIURL + '/prepare-download?query=' + JSON.stringify({
@@ -142,7 +179,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
                 end: toIso,
             },
             groupTime: this.availabilityControl.value?.groupTime,
-        }), {headers: {Authorization: token}});
+        }), { headers: { Authorization: token } });
         if (!f.ok) {
             throw f.statusText;
         }
@@ -219,5 +256,12 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
 
     getShortId(id: string): string {
         return this.deviceInstancesService.convertToShortId(id);
+    }
+
+    get connectionHistoryPanelWidth(): number {
+        if (this.connectionHistoryPanel === undefined) {
+            return 400;
+        }
+        return this.connectionHistoryPanel._body.nativeElement.offsetWidth;
     }
 }

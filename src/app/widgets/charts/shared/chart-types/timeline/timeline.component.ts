@@ -14,7 +14,7 @@ import ApexCharts from 'apexcharts';
     templateUrl: './timeline.component.html',
     styleUrls: ['./timeline.component.css']
 })
-export class TimelineComponent implements OnInit, OnChanges{
+export class TimelineComponent implements OnInit, OnChanges {
     /*
     Data is expected to be in shape
     [NUMBER_TIMELINE_ROWS, NUMBER_COLUMNS, NUMBER_TIMESTAMPS, 2]
@@ -29,7 +29,7 @@ export class TimelineComponent implements OnInit, OnChanges{
     @Input() vAxes: ChartsExportVAxesModel[] = [];
     @Input() height = 0;
     @Input() width = 0;
-    @Input() OnClickFnc = (_: any, _2: any, _3: any) => {};
+    @Input() OnClickFnc = (_: any, _2: any, _3: any) => { };
     render = false;
     private chartInstance: ApexCharts | null = null;
     private series: any[] = [];
@@ -41,7 +41,7 @@ export class TimelineComponent implements OnInit, OnChanges{
         chart: {
             redrawOnParentResize: true,
             redrawOnWindowResize: true,
-            width: 0.95*this.width,
+            width: 0.95 * this.width,
             height: '100%',
             animations: {
                 enabled: false
@@ -50,7 +50,11 @@ export class TimelineComponent implements OnInit, OnChanges{
             toolbar: {
                 show: false
             },
-            events: {}
+            events: {},
+            zoom: {
+                // @ts-expect-error allowMouseWheelZoom is unknown to ng2-apexcharts but works as expected
+                allowMouseWheelZoom: false,
+            }
         },
         plotOptions: {
             bar: {
@@ -77,7 +81,7 @@ export class TimelineComponent implements OnInit, OnChanges{
         legend: {
             position: 'top',
             show: true,
-            horizontalAlign: this.isSafari? 'center' : 'right',
+            horizontalAlign: this.isSafari ? 'center' : 'right',
             offsetY: 15,
             showForSingleSeries: true,
         },
@@ -91,14 +95,16 @@ export class TimelineComponent implements OnInit, OnChanges{
     constructor(
         private errorHandlerService: ErrorHandlerService,
         private cdr: ChangeDetectorRef,
-        private elementRef: ElementRef
-    ) {}
+    ) { }
 
     ngOnInit() {
         // id must clearly identify apx-chart in case multiple widgets of the same type are used
         this.chartId = this.chartId + `_chart_${Math.random().toString(35).substring(2, 7)}`;
+        if (this.apexChartOptions.chart !== undefined) {
+            this.apexChartOptions.chart.id = this.chartId;
+        }
         this.renderTimelineChart();
-        if(this.apexChartOptions.chart != null && this.apexChartOptions.chart.events != null) {
+        if (this.apexChartOptions.chart != null && this.apexChartOptions.chart.events != null) {
             this.apexChartOptions.chart.events['dataPointSelection'] = this.OnClickFnc;
         }
     }
@@ -119,7 +125,7 @@ export class TimelineComponent implements OnInit, OnChanges{
         }
     }
 
-    rebuildChart(reloadData=true) {
+    rebuildChart(reloadData = true) {
         this.destroyChart();
         this.renderTimelineChart(reloadData);
         this.cdr.detectChanges(); // Ensure Angular detects and applies the changes
@@ -157,10 +163,10 @@ export class TimelineComponent implements OnInit, OnChanges{
         }
 
         if (xMax.length > 0 && xMin.length > 0) {
-            const maxPoint = xMax.reduce(function(a, b) {
+            const maxPoint = xMax.reduce(function (a, b) {
                 return a > b ? a : b;
             });
-            const minPoint = xMin.reduce(function(a, b) {
+            const minPoint = xMin.reduce(function (a, b) {
                 return a < b ? a : b;
             });
             return [minPoint.getTime(), maxPoint.getTime()];
@@ -169,7 +175,7 @@ export class TimelineComponent implements OnInit, OnChanges{
         }
     }
 
-    private renderTimelineChart(reloadData=true) {
+    private renderTimelineChart(reloadData = true) {
         if (reloadData || this.series.length === 0) {
             const chartData = this.prepareTimelineChartData();
             this.series = chartData.data;
@@ -178,8 +184,8 @@ export class TimelineComponent implements OnInit, OnChanges{
             this.apexChartOptions.colors = chartData.colors;
 
             const xRange = this.getXRange();
-            const chartOpt:  Partial<ApexChartOptions> = {
-                xaxis:{
+            const chartOpt: Partial<ApexChartOptions> = {
+                xaxis: {
                     type: 'datetime',
                     labels: {
                         datetimeUTC: false,
@@ -193,27 +199,26 @@ export class TimelineComponent implements OnInit, OnChanges{
             };
             this.apexChartOptions.xaxis = chartOpt.xaxis;
         }
-        if(this.enableToolbar && this.apexChartOptions.chart?.toolbar !== undefined) {
+        if (this.enableToolbar && this.apexChartOptions.chart?.toolbar !== undefined) {
             this.apexChartOptions.chart.toolbar.show = true;
         }
-        if(this.apexChartOptions.xaxis?.title !== undefined) {
+        if (this.apexChartOptions.xaxis?.title !== undefined) {
             this.apexChartOptions.xaxis.title.text = this.hAxisLabel;
         }
-        if(this.apexChartOptions.yaxis?.title !== undefined) {
+        if (this.apexChartOptions.yaxis?.title !== undefined) {
             this.apexChartOptions.yaxis.title.text = this.vAxisLabel;
         }
         // Ensure valid chart dimensions
         if (this.height && this.width) {
-            this.apexChartOptions.chart!.height = `${0.9*this.height}px`;
-            this.apexChartOptions.chart!.width = `${0.9*this.width}px`;
+            this.apexChartOptions.chart!.height = `${0.9 * this.height}px`;
+            this.apexChartOptions.chart!.width = `${0.9 * this.width}px`;
         } else {
             console.error('Chart dimensions are not properly set.');
         }
 
         this.render = true;
-        const chartElement = this.elementRef.nativeElement.querySelector(`#${this.chartId}`);
-        if (chartElement) {
-            this.chartInstance = new ApexCharts(chartElement, this.apexChartOptions);
+        this.chartInstance = ApexCharts.getChartByID(this.chartId) || null;
+        if (this.chartInstance !== null) {
             this.chartInstance.render();
         }
     }
@@ -221,16 +226,16 @@ export class TimelineComponent implements OnInit, OnChanges{
     prepareTimelineChartData() {
         if (this.data == null) {
             // no data
-            return {data: [], colors: []};
+            return { data: [], colors: [] };
         }
 
         if (this.errorHandlerService.checkIfErrorExists(this.data)) {
-            throw(new Error((this.data as any).error));
+            throw (new Error((this.data as any).error));
         }
 
         const chartData = this.setupTimelineChart();
         this.data.forEach((dataForOneEntity: any, i: any) => {
-            if(dataForOneEntity.length > 0) { // only when requested entitity has any data
+            if (dataForOneEntity.length > 0) { // only when requested entitity has any data
                 this.processDataForOneEntity(dataForOneEntity, chartData, this.vAxes[i]);
             }
         });
@@ -247,15 +252,15 @@ export class TimelineComponent implements OnInit, OnChanges{
             let aliasFound = false;
             this.vAxes.forEach((vAxis: any) => {
                 vAxis.conversions.forEach((conversion: any) => {
-                    if(aliasFound) {
+                    if (aliasFound) {
                         return;
                     }
-                    if(conversion.alias === serie.name || conversion.alias === serie.to) {
+                    if (conversion.alias === serie.name || conversion.alias === serie.to) {
                         colors.push(conversion.color);
                         aliasFound = true;
                     }
                 });
-                if(aliasFound) {
+                if (aliasFound) {
                     return;
                 }
             });
@@ -265,9 +270,9 @@ export class TimelineComponent implements OnInit, OnChanges{
 
     convertTimelineChartData(chartData: any) {
         const convertedChartData = [];
-        for(const [key, value] of Object.entries(chartData)) {
+        for (const [key, value] of Object.entries(chartData)) {
             const data = (value as any)['data'];
-            if(data.length === 0){
+            if (data.length === 0) {
                 continue;
             }
             convertedChartData.push({
@@ -304,13 +309,13 @@ export class TimelineComponent implements OnInit, OnChanges{
             let changeDetected = false;
             let nextRow;
             // last value should be the last value even when no change
-            if(i === data.length-1) {
+            if (i === data.length - 1) {
                 changeDetected = true;
             } else {
-                nextRow = data[i+1];
+                nextRow = data[i + 1];
                 changeDetected = row[1] !== nextRow[1];
             }
-            if(changeDetected) {
+            if (changeDetected) {
                 mergedData.push(endRow);
                 mergedData.push(row);
                 endRow = nextRow;
@@ -324,7 +329,7 @@ export class TimelineComponent implements OnInit, OnChanges{
         (vAxis?.conversions || []).forEach(conversion => {
             // console.log(conversion.to + "-" + lastValue + "-" + conversion.from + "-" + firstValue)
             // convert everything to string, as there are problems with booleans in the conversion that are sometimes strings or bool
-            if(String(conversion.to) === String(lastValue) && String(conversion.from) === String(firstValue)) {
+            if (String(conversion.to) === String(lastValue) && String(conversion.from) === String(firstValue)) {
                 alias = conversion.alias || String(conversion.to);
                 return;
             }
@@ -335,22 +340,22 @@ export class TimelineComponent implements OnInit, OnChanges{
     processDataForOneEntity(data: any, chartData: any, vAxis: ChartsExportVAxesModel) {
         const mergedData = this.mergeTimelineData(data);
         mergedData.forEach((row: any, i: any) => {
-            if(i === mergedData.length-1) {
+            if (i === mergedData.length - 1) {
                 return;
             }
-            const nextRow = mergedData[i+1];
+            const nextRow = mergedData[i + 1];
             const firstValue = nextRow[1];
             const lastValue = row[1];
             const ruleAlias = this.getAliasOfMatchingRule(vAxis, firstValue, lastValue);
-            if(ruleAlias != null) {
+            if (ruleAlias != null) {
                 const startDate = new Date(nextRow[0]);
                 let endDate;
-                if(i === 0) {
+                if (i === 0) {
                     endDate = new Date(row[0]);
                 } else {
                     // here I use the previous row to get the start date, this assumes that the operator output is valid until the next input
                     // If the border shall be more exact (ending with the last timestamp with that value, use row[0])
-                    const prevRow = mergedData[i-1];
+                    const prevRow = mergedData[i - 1];
                     endDate = new Date(prevRow[0]);
                 }
 
@@ -363,5 +368,14 @@ export class TimelineComponent implements OnInit, OnChanges{
                 });
             }
         });
+    }
+
+    resetZoom() {
+        if (!this.chartInstance) {
+            this.chartInstance = ApexCharts.getChartByID(this.chartId) || null;
+        }
+        if (this.chartInstance && this.apexChartOptions.xaxis?.min && this.apexChartOptions.xaxis?.max) {
+            this.chartInstance.zoomX(this.apexChartOptions.xaxis.min, this.apexChartOptions.xaxis.max);
+        }
     }
 }

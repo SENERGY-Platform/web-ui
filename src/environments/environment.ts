@@ -118,7 +118,8 @@ export const environment = {
     costApiUrl: 'http://localhost',
     billingApiUrl: 'http://localhost',
     reportEngineUrl: 'http://localhost',
-    permissionV2Url: 'http://localhost'
+    permissionV2Url: 'http://localhost',
+    connectionLogUrl: 'http://localhost',
 };
 
 /*

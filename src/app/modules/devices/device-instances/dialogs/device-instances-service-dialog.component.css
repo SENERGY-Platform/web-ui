@@ -23,7 +23,7 @@
 }
 
 ::ng-deep .example-custom-date-class {
-    background:rgba(0,0,0,.38)!important;
+    background: rgba(0, 0, 0, .38) !important;
 }
 
 #id-container {
@@ -33,4 +33,8 @@
 
 #id-container mat-form-field {
     width: 16%;
+}
+
+#connectionHistoryPanel {
+    margin-bottom: 1rem;
 }

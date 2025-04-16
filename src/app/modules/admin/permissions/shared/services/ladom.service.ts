@@ -149,6 +149,7 @@ export class LadonService {
             environment.reportEngineUrl + '/report/create',
             environment.reportEngineUrl + '/report',
             environment.reportEngineUrl + '/report/file',
+            environment.connectionLogUrl,
         ];
 
         serviceEndpoints.forEach(endpointURL => {

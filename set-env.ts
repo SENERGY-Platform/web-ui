@@ -86,6 +86,7 @@ export const environment = {
   processSyncUrl: '${process.env.PROCESS_SYNC_URL}',
   equivalentProtocolSegments: '${process.env.EQUIVALENT_PROTOCOL_SEGMENTS}'
   costApiUrl: '${process.env.COST_API_URL}'
+  connectionLogUrl: '${process.env.CONNECTION_LOG_URL}'
 };
 `;
 

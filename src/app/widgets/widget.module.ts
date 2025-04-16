@@ -265,7 +265,8 @@ registerLocaleData(localeDe, 'de');
         RankingListComponent,
         WidgetSpinnerComponent,
         WidgetComponent,
-        WidgetFooterComponent
+        WidgetFooterComponent,
+        TimelineComponent,
     ],
     providers: [
         {provide: LOCALE_ID, useValue: 'de'},

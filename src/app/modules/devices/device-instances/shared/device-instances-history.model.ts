@@ -16,7 +16,9 @@
 
 import { Attribute } from './device-instances.model';
 
-
+/**
+ * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link ResourceHistoricalConnectionStatesModelV2} instead.
+ */
 export interface DeviceInstancesHistoryModel {
     creator: string;
     date: number;
@@ -28,12 +30,31 @@ export interface DeviceInstancesHistoryModel {
     attributes?: Attribute[];
 }
 
+/**
+ * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link ResourceHistoricalConnectionStatesModelV2} instead.
+ */
 interface LogHistoryValues {
     0: number /** time          */;
     1: boolean /** connected     */;
     2: string /** connectorName */;
 }
 
-export interface DeviceInstancesHistoryModelWithId extends DeviceInstancesHistoryModel{
+/**
+ * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link ResourceHistoricalConnectionStatesModelV2} instead.
+ */
+export interface DeviceInstancesHistoryModelWithId extends DeviceInstancesHistoryModel {
     id: string;
+}
+
+
+export interface ResourceHistoricalConnectionStatesModelV2 {
+    id: string;
+    next_state: ConnectionStateModelV2 | null,
+    prev_state: ConnectionStateModelV2 | null;
+    states: ConnectionStateModelV2[] | null;
+}
+
+export interface ConnectionStateModelV2 {
+    connected: boolean;
+    time: string;
 }

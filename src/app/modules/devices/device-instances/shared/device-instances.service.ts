@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {environment} from '../../../../../environments/environment';
-import {catchError, map, reduce, share, concatMap} from 'rxjs/operators';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { environment } from '../../../../../environments/environment';
+import { catchError, map, reduce, share, concatMap } from 'rxjs/operators';
 import {
     Attribute,
     DeviceFilterCriteriaModel,
@@ -30,9 +30,9 @@ import {
     DeviceSelectablesFullModel,
     DeviceSelectablesModel,
 } from './device-instances.model';
-import {forkJoin, Observable, of} from 'rxjs';
-import {DeviceInstancesHistoryModel, DeviceInstancesHistoryModelWithId} from './device-instances-history.model';
-import {UtilService} from '../../../../core/services/util.service';
+import { forkJoin, Observable, of } from 'rxjs';
+import { DeviceInstancesHistoryModel, ResourceHistoricalConnectionStatesModelV2, DeviceInstancesHistoryModelWithId } from './device-instances-history.model';
+import { UtilService } from '../../../../core/services/util.service';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LocationsService } from '../../locations/shared/locations.service';
@@ -49,6 +49,7 @@ export class DeviceInstancesService {
     authorizations: PermissionTestResponse;
     authorizationsDisplayName: PermissionTestResponse;
     authorizationsAttributes: PermissionTestResponse;
+    authorizationsConnectionLog: PermissionTestResponse;
 
     constructor(
         private http: HttpClient,
@@ -61,10 +62,11 @@ export class DeviceInstancesService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices');
         this.authorizationsDisplayName = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices/id/display_name');
         this.authorizationsAttributes = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices/id/attributes');
+        this.authorizationsConnectionLog = this.ladonService.getUserAuthorizationsForURI(environment.connectionLogUrl);
     }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
-        return this.getDeviceInstances({limit: 9999, offset: 0}).pipe(map(d => d.result.map(dd => dd.device_type_id).filter((v,i,a) => a.indexOf(v) === i))); // unique
+        return this.getDeviceInstances({ limit: 9999, offset: 0 }).pipe(map(d => d.result.map(dd => dd.device_type_id).filter((v, i, a) => a.indexOf(v) === i))); // unique
     }
 
     getDeviceListByIds(ids: string[]): Observable<DeviceInstanceModel[]> {
@@ -121,27 +123,27 @@ export class DeviceInstancesService {
 
     deleteDeviceInstances(ids: string[]): Observable<DeviceInstanceModel | null> {
         return this.http
-            .request<DeviceInstanceModel>('DELETE', environment.deviceRepoUrl + '/devices', {body: ids})
+            .request<DeviceInstanceModel>('DELETE', environment.deviceRepoUrl + '/devices', { body: ids })
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstances', null)));
     }
 
     getDeviceIds(hubId?: string, locationId?: string): Observable<string[]> {
         let deviceIDs: string[] = [];
         const obs = [];
-        if(hubId != null) {
+        if (hubId != null) {
             obs.push(this.networkService.getExtendedHub(hubId));
         }
 
-        if(locationId != null) {
+        if (locationId != null) {
             obs.push(this.locationService.getLocation(locationId));
         }
 
-        if(obs.length > 0) {
+        if (obs.length > 0) {
             return forkJoin(obs).pipe(
                 map((results) => {
                     results.forEach((result, i) => {
-                        if(!!result) {
-                            if(i === 0) {
+                        if (!!result) {
+                            if (i === 0) {
                                 deviceIDs = result.device_ids || [];
                             } else {
                                 deviceIDs = deviceIDs.filter((deviceID) => result.device_ids?.includes(deviceID));
@@ -213,11 +215,11 @@ export class DeviceInstancesService {
         locationId?: string;
         fulldt?: boolean;
     }): Observable<DeviceInstancesTotalModel | DeviceInstancesWithDeviceTypeTotalModel> {
-        if(options.hubId || options.locationId) {
+        if (options.hubId || options.locationId) {
             return this.getDeviceIds(options.hubId, options.locationId).pipe(
                 concatMap((deviceIds) => {
-                    if(deviceIds.length === 0) {
-                        return of({result: [], total: 0});
+                    if (deviceIds.length === 0) {
+                        return of({ result: [], total: 0 });
                     }
                     options.hubId = undefined;
                     options.locationId = undefined;
@@ -227,45 +229,45 @@ export class DeviceInstancesService {
             );
         }
         let params = new HttpParams();
-        if(options.limit > 0) {
+        if (options.limit > 0) {
             params = params.set('limit', options.limit.toString());
         }
-        if(options.offset > 0) {
+        if (options.offset > 0) {
             params = params.set('offset', options.offset.toString());
         }
         let sort = options.sortBy || 'name';
-        if(sort === 'annotations.connected') {
+        if (sort === 'annotations.connected') {
             sort = 'connection_state';
         }
-        if(options.sortDesc){
-            sort = sort+'.desc';
+        if (options.sortDesc) {
+            sort = sort + '.desc';
         }
-        if(sort !== '') {
+        if (sort !== '') {
             params = params.set('sort', sort);
         }
         if (options.searchText && options.searchText !== '') {
             params = params.set('search', options.searchText);
         }
-        if(options.deviceTypeIds!==null && options.deviceTypeIds!==undefined && options.deviceTypeIds.join && options.deviceTypeIds.length > 0){
+        if (options.deviceTypeIds !== null && options.deviceTypeIds !== undefined && options.deviceTypeIds.join && options.deviceTypeIds.length > 0) {
             params = params.set('device-type-ids', options.deviceTypeIds.join(','));
         }
-        if(options.deviceIds!==null && options.deviceIds!==undefined && options.deviceIds.join){
+        if (options.deviceIds !== null && options.deviceIds !== undefined && options.deviceIds.join) {
             params = params.set('ids', options.deviceIds.join(','));
         }
-        if(options.connectionState!==null && options.connectionState!==undefined) {
-            switch (options.connectionState){
-            case DeviceInstancesRouterStateTabEnum.ONLINE: {
-                params = params.set('connection-state', 'online');
-                break;
-            }
-            case DeviceInstancesRouterStateTabEnum.OFFLINE: {
-                params = params.set('connection-state', 'offline');
-                break;
-            }
-            case DeviceInstancesRouterStateTabEnum.UNKNOWN: {
-                params = params.set('connection-state', '');
-                break;
-            }
+        if (options.connectionState !== null && options.connectionState !== undefined) {
+            switch (options.connectionState) {
+                case DeviceInstancesRouterStateTabEnum.ONLINE: {
+                    params = params.set('connection-state', 'online');
+                    break;
+                }
+                case DeviceInstancesRouterStateTabEnum.OFFLINE: {
+                    params = params.set('connection-state', 'offline');
+                    break;
+                }
+                case DeviceInstancesRouterStateTabEnum.UNKNOWN: {
+                    params = params.set('connection-state', '');
+                    break;
+                }
             }
         }
         if (options.fulldt === true) {
@@ -279,7 +281,7 @@ export class DeviceInstancesService {
                     total: parseInt(totalStr, 10)
                 } as DeviceInstancesTotalModel;
             }),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, '_getDeviceInstances', {result: [], total: 0})),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, '_getDeviceInstances', { result: [], total: 0 })),
         );
     }
 
@@ -355,6 +357,9 @@ export class DeviceInstancesService {
         );
     }
 
+    /**
+     * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link getDeviceHistoryV2} instead.
+     */
     getDeviceHistory(limit: number, offset: number, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
         return this.http
             .get<DeviceInstancesHistoryModelWithId[]>(environment.apiAggregatorUrl + '/devices?offset=' + offset + '&limit=' + limit + '&log=' + logDuration)
@@ -365,6 +370,9 @@ export class DeviceInstancesService {
             );
     }
 
+    /**
+     * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link getDeviceHistoryV2} instead.
+     */
     getDeviceHistoryAll(batchsize: number, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
         return new Observable<DeviceInstancesHistoryModelWithId[]>(subscriber => {
             const limit = batchsize;
@@ -389,6 +397,9 @@ export class DeviceInstancesService {
         });
     }
 
+    /**
+     * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link getDeviceHistoryV2} instead.
+     */
     getDeviceHistory7d(): Observable<DeviceInstancesHistoryModel[] | null> {
         if (this.getDeviceHistoryObservable7d === null) {
             this.getDeviceHistoryObservable7d = this.getDeviceHistoryAll(1000, '7d').pipe(reduce((acc, value) => acc.concat(value)));
@@ -396,11 +407,29 @@ export class DeviceInstancesService {
         return this.getDeviceHistoryObservable7d;
     }
 
+    /**
+     * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link getDeviceHistoryV2} instead.
+     */
     getDeviceHistory1h(): Observable<DeviceInstancesHistoryModel[] | null> {
         if (this.getDeviceHistoryObservable1h === null) {
             this.getDeviceHistoryObservable1h = this.getDeviceHistoryAll(1000, '1h').pipe(reduce((acc, value) => acc.concat(value)));
         }
         return this.getDeviceHistoryObservable1h;
+    }
+
+    getDeviceHistoryV2(options: { id: string, range?: string, since?: string; until?: string; }): Observable<ResourceHistoricalConnectionStatesModelV2 | null> {
+        let params = new HttpParams();
+        if (options.range !== undefined) {
+            params = params.set('range', options.range);
+        }
+        if (options.since !== undefined) {
+            params = params.set('since', options.since);
+        }
+        if (options.until !== undefined) {
+            params = params.set('until', options.until);
+        }
+        return this.http.get<ResourceHistoricalConnectionStatesModelV2>(environment.connectionLogUrl + '/historical/devices/' + options.id, { params }).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistoryV2', null)));
     }
 
     convertToShortId(id: string | undefined): string {
@@ -419,7 +448,7 @@ export class DeviceInstancesService {
     }
 
     shortIdToUUID(shortId: string): Observable<string> {
-        return this.http.get<string>(environment.deviceRepoUrl+'/helper/id?short_id='+encodeURIComponent(shortId)+'&prefix='+encodeURIComponent('urn:infai:ses:device:')).pipe(
+        return this.http.get<string>(environment.deviceRepoUrl + '/helper/id?short_id=' + encodeURIComponent(shortId) + '&prefix=' + encodeURIComponent('urn:infai:ses:device:')).pipe(
             map((resp) => resp || ''),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'shortIdToUUID', '')),
         );
@@ -449,4 +478,7 @@ export class DeviceInstancesService {
         return this.authorizationsAttributes['PUT'];
     }
 
+    userHasReadAuthorizationConnectionLog() {
+        return this.authorizationsConnectionLog['GET'];
+    }
 }

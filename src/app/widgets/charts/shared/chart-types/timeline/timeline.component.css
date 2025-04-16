@@ -1,6 +1,7 @@
 
 .chart{
     display: flex;
+    justify-content: center;
     height: 99%;
     width: 99%;
 }

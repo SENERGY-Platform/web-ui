@@ -53,7 +53,17 @@
     </div>
 
     <mat-accordion>
-        <mat-expansion-panel *ngFor="let service of services; let i = index" [expanded]="services.length === 1">
+        <mat-expansion-panel id="connectionHistoryPanel" #connectionHistoryPanel *ngIf="userCanLoadConnectionHistory">
+            <mat-expansion-panel-header>
+                <mat-panel-title fxFlex>Connection History</mat-panel-title>
+            </mat-expansion-panel-header>
+            <ng-template matExpansionPanelContent>
+                <timeline-chart chartId='deviceHistory' class="timeline" *ngIf="connectionHistory !== null" [data]="connectionHistory"
+                [enableToolbar]="false" [vAxes]="timelineAxes" [width]="connectionHistoryPanelWidth" [height]="200"></timeline-chart>
+            </ng-template>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel *ngFor="let service of services; let i = index">
             <mat-expansion-panel-header>
                 <mat-panel-title fxFlex>{{service.name}}</mat-panel-title>
                 <mat-panel-description>

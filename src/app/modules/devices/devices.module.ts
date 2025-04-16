@@ -15,7 +15,7 @@
  */
 
 import { NgModule } from '@angular/core';
-import {Route, RouterModule} from '@angular/router';
+import { Route, RouterModule } from '@angular/router';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { CommonModule, DatePipe } from '@angular/common';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
@@ -64,10 +64,11 @@ import { NetworksDeleteDialogComponent } from './networks/dialogs/networks-delet
 import { WaitingRoomComponent } from './waiting-room/waiting-room.component';
 import { WaitingRoomDeviceEditDialogComponent } from './waiting-room/dialogs/waiting-room-device-edit-dialog.component';
 import { WaitingRoomMultiWmbusKeyEditDialogComponent } from './waiting-room/dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
-import {MatDatepickerModule} from '@angular/material/datepicker';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { DeviceInstancesFilterDialogComponent } from './device-instances/dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 import { DeviceInstancesReplaceDialogComponent } from './device-instances/dialogs/device-instances-replace-dialog/device-instances-replace-dialog.component';
+import { WidgetModule } from 'src/app/widgets/widget.module';
 
 const networks: Route = { path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: { header: 'Networks' } };
 const deviceInstances: Route = {
@@ -168,6 +169,7 @@ const locationsEdit: Route = {
         MatTreeModule,
         MatDatepickerModule,
         MatSnackBarModule,
+        WidgetModule,
     ],
     declarations: [
         NetworksComponent,
