@@ -176,9 +176,13 @@ export class DeviceGroupsService {
             );
     }
 
-    getAspectListByIds(ids: string[]): Observable<DeviceTypeAspectNodeModel[]> {
+    getAspectListByIds(ids?: string[]): Observable<DeviceTypeAspectNodeModel[]> {
+        let params = new HttpParams();
+        if (ids !== undefined) {
+            params = params.set('ids', ids.join(','));
+        }
         return this.http
-            .get<DeviceTypeAspectNodeModel[]>(environment.deviceRepoUrl + '/v2/aspect-nodes?ids='+ids.join(','))
+            .get<DeviceTypeAspectNodeModel[]>( environment.deviceRepoUrl + '/v2/aspect-nodes', {params})
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getAspectListByIds(ids)', [])),

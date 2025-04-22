@@ -1,0 +1,96 @@
+<!--
+  ~ Copyright 2025 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h2 mat-dialog-title>Edit Floorplan</h2>
+<mat-dialog-content>
+  <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+  <div [hidden]="!ready">
+    <mat-form-field appearance="outline" style="display: flex;" color="accent" *ngIf="userHasUpdateNameAuthorization">
+      <mat-label>Widget Name</mat-label>
+      <input type="text" matInput [formControl]="name" required>
+      <mat-error senergyError label="Widget Name"></mat-error>
+    </mat-form-field>
+
+    <div *ngIf="userHasUpdatePropertiesAuthorization" class="file-upload-wrapper" (drop)="onFileDrop($event)"
+      (dragover)="onDragOver($event)">
+      <input type="file" accept="image/*" (change)="onFileChange($event)" hidden #fileInput />
+      <div *ngIf="form.value.image === null || form.value.image === undefined" class="upload-wrapper">
+        <button mat-icon-button (click)="fileInput.click()"><mat-icon>upload</mat-icon></button>
+        <p>Upload Image</p>
+      </div>
+      <div *ngIf="form.value.image !== null && form.value.image !== undefined" class="delete-wrapper">
+        <button mat-icon-button color="warn" (click)="removeImage()"><mat-icon>delete</mat-icon></button>
+      </div>
+      <div [hidden]="form.value.image === null && form.value.image === undefined" class="image-wrapper" #imageWrapper>
+          <canvas #canvas [ngClass]="{'placing': placing !== undefined}" (click)="placeSelected($event)"> </canvas>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf=" userHasUpdatePropertiesAuthorization" [formGroup]="form">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let tab of form.controls.placements.controls; let i = index" [formGroup]="tab">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span [ngClass]="{'color-warn': tab.invalid}"> {{getDeviceGroup(tab.value.deviceGroupId)?.name}}:
+              {{describeCriteria(tab.value.criteria)}} </span>
+          </mat-panel-title>
+          <mat-panel-description>
+            {{i}}
+            <button mat-icon-button color="accent" (click)="placePlacement(i); false">
+              <mat-icon>point_scan</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="removePlacement(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-panel-description>
+
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+          <mat-form-field appearance="outline" color="accent" style="display: flex;">
+            <mat-label>Device Group</mat-label>
+            <mtx-select required formControlName="deviceGroupId" [hideSelected]="false" closeOnSelect
+              virtualScroll="true" placeholder="Type to search" bindLabel="name" bindValue="id" [items]="deviceGroups"
+              (scroll)="onSelectScroll($event)" (search)="onSelectSearch($event)">
+            </mtx-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" color="accent" style="display: flex;">
+            <mat-label>Criteria</mat-label>
+            <mtx-select required formControlName="criteria" [hideSelected]="false" closeOnSelect virtualScroll="true"
+              placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria">
+              <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
+                [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
+            </mtx-select>
+          </mat-form-field>
+        </ng-template>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <button (click)="addNewPlacement()" mat-icon-button matTooltip="Add element">
+      <mat-icon>add</mat-icon>
+    </button>
+
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid || name.invalid" cdkFocusInitial>
+    Save
+  </button>
+</mat-dialog-actions>

@@ -111,6 +111,9 @@
   <div *ngSwitchCase="'bad_ventilation'" fxFill>
     <senergy-bad-ventilation [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-bad-ventilation>
   </div>
+  <div *ngSwitchCase="'floorplan'" fxFill>
+    <senergy-floorplan [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-floorplan>
+  </div>
   <div *ngSwitchDefault>
     <div>default</div>
   </div>

@@ -43,4 +43,5 @@ export enum DashboardTypesEnum {
     LeakageDetection = 'leakage_detection',
     ConsumptionProfile = 'consumption_profile',
     BadVentilation = 'bad_ventilation',
+    Floorplan = 'floorplan',
 }
