@@ -93,7 +93,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
 
   edit() {
     const dialogConfig = new MatDialogConfig();
-    dialogConfig.minWidth = '450px';
+    dialogConfig.minWidth = '75vw';
     dialogConfig.disableClose = false;
     dialogConfig.data = {
       widgetId: this.widget.id,

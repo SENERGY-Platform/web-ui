@@ -32,7 +32,7 @@ export interface FloorplanWidgetCapabilityModel {
     }
 }
 
-export const dotSize = 15;
+export const dotSize = 17;
 
 export function image(properties: FloorplanWidgetPropertiesModel): HTMLImageElement {
     const img = new Image();

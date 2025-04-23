@@ -45,11 +45,9 @@
       <mat-expansion-panel *ngFor="let tab of form.controls.placements.controls; let i = index" [formGroup]="tab">
         <mat-expansion-panel-header>
           <mat-panel-title>
-            <span [ngClass]="{'color-warn': tab.invalid}"> {{getDeviceGroup(tab.value.deviceGroupId)?.name}}:
-              {{describeCriteria(tab.value.criteria)}} </span>
+            <span [ngClass]="{'color-warn': tab.invalid}"> {{i}} </span>
           </mat-panel-title>
           <mat-panel-description>
-            {{i}}
             <button mat-icon-button color="accent" (click)="placePlacement(i); false">
               <mat-icon>point_scan</mat-icon>
             </button>

@@ -271,7 +271,7 @@ export class FloorplanEditDialogComponent implements OnInit {
     if (this.deviceGroups.length === this.deviceGroupsTotal && this.deviceGroupLoadingSubscription?.closed !== false) {
       return;
     }
-    this.deviceGroupLoadingSubscription = this.deviceGroupsService.getDeviceGroups(search.term, 100, this.deviceGroups.length, 'name', 'asc', true).subscribe(dg => {
+    this.deviceGroupLoadingSubscription = this.deviceGroupsService.getDeviceGroups(search.term, 100, 0, 'name', 'asc', true).subscribe(dg => {
       // dg.result can contain device groups, which are already loaded
       this.deviceGroups = [...this.deviceGroups, ...dg.result.filter(d => this.deviceGroups.find(d2 => d.id === d2.id) === undefined)];
     });
