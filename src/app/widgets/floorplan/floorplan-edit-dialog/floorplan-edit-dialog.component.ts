@@ -15,7 +15,7 @@
  */
 
 
-import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable, Subscription, concatMap, forkJoin, map, of } from 'rxjs';
@@ -125,15 +125,23 @@ export class FloorplanEditDialogComponent implements OnInit {
     forkJoin(obs).subscribe(_ => {
       this.ready = true;
       setTimeout(() => { // needs to draw ready=true first
-        if (this.canvas !== undefined) {
-          this.drawShift = draw(this.canvas.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel, this.form.value.placements?.map((_2, i) => {
-            return { text: '' + i };
-          }));
-        }
-      }, 100);
+        this.draw();
+      }, 300);
     });
   }
 
+  @HostListener('window:resize')
+  onResize() {
+    this.draw();
+  }
+
+  draw() {
+    if (this.canvas !== undefined) {
+      this.drawShift = draw(this.canvas.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel, this.form.value.placements?.map((_2, i) => {
+        return { text: '' + i };
+      }));
+    }
+  }
   close(): void {
     this.dialogRef.close();
   }
@@ -175,9 +183,7 @@ export class FloorplanEditDialogComponent implements OnInit {
     const reader = new FileReader();
     reader.onload = () => {
       this.form.patchValue({ image: reader.result as string });
-      if (this.canvas !== undefined) {
-        this.drawShift = draw(this.canvas.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel);
-      }
+      this.draw();
     };
     try {
       reader.readAsDataURL(file);
@@ -207,11 +213,7 @@ export class FloorplanEditDialogComponent implements OnInit {
   // Method to remove the uploaded image
   removeImage(): void {
     this.form.patchValue({ image: undefined });
-    if (this.canvas !== undefined) {
-      this.drawShift = draw(this.canvas.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel, this.form.value.placements?.map((_2, i) => {
-        return { text: '' + i };
-      }));
-    }
+    this.draw();
   }
 
   addNewPlacement(): void {
@@ -232,11 +234,7 @@ export class FloorplanEditDialogComponent implements OnInit {
   removePlacement(i: number) {
     this.placing = undefined;
     this.form.controls.placements.controls.splice(i, 1);
-    if (this.canvas !== undefined) {
-      this.drawShift = draw(this.canvas.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel, this.form.value.placements?.map((_2, j) => {
-        return { text: '' + j };
-      }));
-    }
+    this.draw();
   }
 
   placePlacement(i: number) {
@@ -255,11 +253,7 @@ export class FloorplanEditDialogComponent implements OnInit {
       }
     });
     this.placing = undefined;
-    if (this.canvas !== undefined) {
-      this.drawShift = draw(this.canvas.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel, this.form.value.placements?.map((_2, i) => {
-        return { text: '' + i };
-      }));
-    }
+    this.draw();
   }
 
   onSelectScroll(scroll: { end: number }) {

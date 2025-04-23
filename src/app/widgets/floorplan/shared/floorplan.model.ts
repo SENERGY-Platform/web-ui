@@ -32,7 +32,7 @@ export interface FloorplanWidgetCapabilityModel {
     }
 }
 
-export const dotSize = 25;
+export const dotSize = 15;
 
 export function image(properties: FloorplanWidgetPropertiesModel): HTMLImageElement {
     const img = new Image();
@@ -62,11 +62,12 @@ export function draw(canvas: HTMLCanvasElement, properties: FloorplanWidgetPrope
     properties.floorplan?.placements.forEach((p, i) => {
         ctx.beginPath();
         const x = (p.position.x || 0) * img.width * ratio + centerShiftX;
-        const y = (p.position.y || 0) * img.width * ratio + centerShiftY;
-        ctx.arc(x, y, dotSize * ratio, 0, 2 * Math.PI);
+        const y = (p.position.y || 0) * img.height * ratio + centerShiftY;
+        ctx.arc(x, y, dotSize, 0, 2 * Math.PI);
         ctx.fillStyle = (options || [])[i]?.color || 'darkgrey';
         ctx.fill();
         if ((options || [])[i]?.text !== undefined) {
+            ctx.font = '14px Arial';
             ctx.fillStyle = 'black';
             ctx.textBaseline = 'middle';
             ctx.textAlign = 'center';

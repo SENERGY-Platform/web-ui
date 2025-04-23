@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-edit-dialog.component';
@@ -63,6 +63,17 @@ export class FloorplanComponent implements OnInit, OnDestroy {
     this.destroy?.unsubscribe();
   }
 
+  @HostListener('window:resize')
+  onResize() {
+    this.draw();
+  }
+
+  draw() {
+    draw(this.canvas.nativeElement, this.widget.properties, this.values.map(r => {
+      return { text: '' + r.message };
+    }));
+  }
+
   private refresh(): Observable<unknown> {
     this.refreshing = true;
     const commands: DeviceCommandModel[] = [];
@@ -75,9 +86,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
     }));
     return this.deviceCommandService.runCommands(commands, true).pipe(map(res => {
       this.values = res;
-      draw(this.canvas.nativeElement, this.widget.properties, res.map(r => {
-        return { text: '' + r.message };
-      }));
+      this.draw();
       this.refreshing = false;
     }));
   }
