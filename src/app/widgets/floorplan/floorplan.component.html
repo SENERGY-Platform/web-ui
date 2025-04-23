@@ -20,10 +20,32 @@
     <div *ngIf="ready && widget.properties.floorplan === undefined" class="content">
       <div>Please configure widget!</div>
     </div>
-    <senergy-widget-spinner [show]="widget.properties.floorplan !== undefined && !ready"></senergy-widget-spinner>
-    <div [hidden]="!ready || !widget.properties.floorplan !== undefined" class="content">
+    <senergy-widget-spinner [show]="widget.properties.floorplan === undefined || !ready || draws < 2"></senergy-widget-spinner>
+    <div [hidden]="!ready || !widget.properties.floorplan === undefined" class="content">
       <div class="image-wrapper" #imageWrapper>
-        <canvas #canvas> </canvas>
+        <canvas #canvas baseChart [data]="chartjs.data" [options]="chartjs.options" type="scatter"
+          id="chartjs-{{widget.id}}" 
+          [plugins]="chartjs.plugins" [ngClass]="{'hidden': draws < 2}"></canvas> <!-- TODO zoom reset on right click (contextmenu)="resetChartjsZoom($event); false" -->
+        <div *ngIf="chartjs.tooltipContext !== undefined" id="chartjs-tooltip"
+          class="mat-elevation-z4" [ngStyle]="chartjsTooltipStyle">
+          <table>
+            <thead>
+              <tr *ngFor="let title of chartjs.tooltipContext.tooltip.title">
+                <td>{{title}}</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let line of chartjs.tooltipContext.tooltip.body, let i = index" style="display: flex;">
+                <td>
+                  <span class="tooltip-colorbox"
+                    [ngStyle]="{'background': chartjs.tooltipContext.tooltip.labelColors[i].backgroundColor}"></span>
+                </td>
+                <td>{{this.chartjs.tooltipDatasets[i].label}}</td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </mat-card-content>

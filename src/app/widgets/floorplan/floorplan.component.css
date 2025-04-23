@@ -55,3 +55,34 @@
     position: relative;
     line-height: 0;
   }
+
+  #chartjs-tooltip {
+    text-align: left;
+    background: white;
+    position: absolute;
+    padding: 3px;
+    border-radius: 3px;
+    font-size: small;
+    line-height: 1rem;
+    z-index: 999;
+}
+
+.tooltip-colorbox {
+    margin-right: 0.25rem;
+    height: 10px;
+    width: 10px;
+    display: inline-block;
+}
+
+#chartjs-tooltip > table > thead {
+    font-weight: bold;
+}
+
+td {
+    padding: 0;
+   /* width: min-content;*/
+}
+
+.hidden {
+    opacity: 0;
+}

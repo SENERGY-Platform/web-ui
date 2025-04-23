@@ -107,8 +107,10 @@ export class FloorplanEditDialogComponent implements OnInit {
                 return null;
               }));
           }
+          this.form.updateValueAndValidity();
         }
         this.name.setValue(w.name);
+        this.name.updateValueAndValidity();
         return r;
       })));
     obs.push(this.deviceGroupsService.getDeviceGroups('', 30, 0, 'name', 'asc', true).pipe(
@@ -218,12 +220,14 @@ export class FloorplanEditDialogComponent implements OnInit {
 
   addNewPlacement(): void {
     this.form.controls.placements.push(this.newPlacement());
+    this.form.updateValueAndValidity();
   }
 
   newPlacement(): FormGroup {
     return this.fb.group({
       criteria: new FormControl<DeviceGroupCriteriaModel | null>(null),
       deviceGroupId: new FormControl<string>(''),
+      alias: new FormControl<string>(''),
       position: new FormGroup({
         x: new FormControl<number>(0),
         y: new FormControl<number>(0),
@@ -234,6 +238,7 @@ export class FloorplanEditDialogComponent implements OnInit {
   removePlacement(i: number) {
     this.placing = undefined;
     this.form.controls.placements.controls.splice(i, 1);
+    this.form.updateValueAndValidity();
     this.draw();
   }
 

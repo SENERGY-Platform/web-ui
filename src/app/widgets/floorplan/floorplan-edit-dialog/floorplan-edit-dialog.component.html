@@ -35,7 +35,7 @@
         <button mat-icon-button color="warn" (click)="removeImage()"><mat-icon>delete</mat-icon></button>
       </div>
       <div [hidden]="form.value.image === null && form.value.image === undefined" class="image-wrapper" #imageWrapper>
-          <canvas #canvas [ngClass]="{'placing': placing !== undefined}" (click)="placeSelected($event)"> </canvas>
+        <canvas #canvas [ngClass]="{'placing': placing !== undefined}" (click)="placeSelected($event)"> </canvas>
       </div>
     </div>
   </div>
@@ -45,19 +45,26 @@
       <mat-expansion-panel *ngFor="let tab of form.controls.placements.controls; let i = index" [formGroup]="tab">
         <mat-expansion-panel-header>
           <mat-panel-title>
-            <span [ngClass]="{'color-warn': tab.invalid}"> {{i}} </span>
+            <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.value.alias}} </span>
           </mat-panel-title>
           <mat-panel-description>
-            <button mat-icon-button color="accent" (click)="placePlacement(i); false">
+            {{i}}
+            <button mat-icon-button color="accent" (click)="placePlacement(i); false" matTooltip="Place on Map">
               <mat-icon>point_scan</mat-icon>
             </button>
             <button mat-icon-button color="warn" (click)="removePlacement(i)">
               <mat-icon>delete</mat-icon>
             </button>
           </mat-panel-description>
-
         </mat-expansion-panel-header>
+
         <ng-template matExpansionPanelContent>
+          <mat-form-field appearance="outline" color="accent" style="display: flex;">
+            <mat-label>Alias</mat-label>
+            <input type="text" matInput formControlName="alias" required>
+            <mat-error senergyError label="Alias"></mat-error>
+          </mat-form-field>
+
           <mat-form-field appearance="outline" color="accent" style="display: flex;">
             <mat-label>Device Group</mat-label>
             <mtx-select required formControlName="deviceGroupId" [hideSelected]="false" closeOnSelect

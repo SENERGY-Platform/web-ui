@@ -25,6 +25,7 @@ export interface FloorplanWidgetPropertiesModel {
 
 export interface FloorplanWidgetCapabilityModel {
     criteria: DeviceGroupCriteriaModel;
+    alias: string;
     deviceGroupId: string | null;
     position: {
         x: number | null;
@@ -32,7 +33,7 @@ export interface FloorplanWidgetCapabilityModel {
     }
 }
 
-export const dotSize = 17;
+export const dotSize = 10;
 
 export function image(properties: FloorplanWidgetPropertiesModel): HTMLImageElement {
     const img = new Image();
