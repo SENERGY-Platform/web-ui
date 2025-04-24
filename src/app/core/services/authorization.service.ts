@@ -107,6 +107,7 @@ export class AuthorizationService implements HttpInterceptor {
 
     logout() {
         localStorage.clear();
+        sessionStorage.clear();
         this.keycloakService.logout();
     }
 

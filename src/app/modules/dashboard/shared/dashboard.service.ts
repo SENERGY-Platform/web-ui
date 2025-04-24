@@ -17,12 +17,12 @@
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardNewDialogComponent } from '../dialogs/dashboard-new-dialog.component';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { DashboardModel } from './dashboard.model';
-import { Observable, Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { DashboardResponseMessageModel } from './dashboard-response-message.model';
 import { WidgetModel, WidgetUpdatePosition } from './dashboard-widget.model';
 import { DashboardNewWidgetDialogComponent } from '../dialogs/dashboard-new-widget-dialog.component';
@@ -70,9 +70,25 @@ export class DashboardService {
     /** REST Services */
 
     getDashboards(): Observable<DashboardModel[]> {
-        return this.http.get<DashboardModel[]>(environment.dashboardServiceUrl + '/dashboards').pipe(
-            map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', [])),
+        const key = DashboardService.name + '/getDashboards';
+        const stored = sessionStorage.getItem(key);
+        let cached: { dashboards: DashboardModel[]; lastModified: string } | undefined;
+        if (stored !== null) {
+            cached = JSON.parse(stored);
+        }
+        return this.http.get<DashboardModel[]>(environment.dashboardServiceUrl + '/dashboards', { headers: { 'If-Modified-Since': cached?.lastModified || new Date(0).toUTCString() }, observe: 'response' }).pipe(
+            map((resp) => {
+                try {
+                    sessionStorage.setItem(key, JSON.stringify({ dashboards: resp.body || [], lastModified: resp.headers.get('Last-Modified') }));
+                } catch (_) { }
+                return resp.body || [];
+            }),
+            catchError((e: HttpErrorResponse) => {
+                if (e.status === 304) {
+                    return of(cached?.dashboards || []);
+                }
+                return this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', [])(e);
+            }),
         );
     }
 
@@ -96,9 +112,27 @@ export class DashboardService {
     }
 
     getWidget(dashboardId: string, widgetId: string): Observable<WidgetModel> {
+        const key = DashboardService.name + '/getWidget/' + dashboardId + '/' + widgetId;
+        const stored = sessionStorage.getItem(key);
+        let cached: { widget: WidgetModel; lastModified: string } | undefined;
+        if (stored !== null) {
+            cached = JSON.parse(stored);
+        }
         return this.http
-            .get<WidgetModel>(environment.dashboardServiceUrl + '/widgets/' + dashboardId + '/' + widgetId)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'getWidget', {} as WidgetModel)));
+            .get<WidgetModel>(environment.dashboardServiceUrl + '/widgets/' + dashboardId + '/' + widgetId, { headers: { 'If-Modified-Since': cached?.lastModified || new Date(0).toUTCString() }, observe: 'response' })
+            .pipe(
+                map(resp => {
+                    try {
+                        sessionStorage.setItem(key, JSON.stringify({ widget: resp.body || [], lastModified: resp.headers.get('Last-Modified') }));
+                    } catch (_) { }
+                    return resp.body || {} as WidgetModel;
+                }),
+                catchError((e: HttpErrorResponse) => {
+                    if (e.status === 304) {
+                        return of(cached?.widget || {} as WidgetModel);
+                    }
+                    return this.errorHandlerService.handleError(DashboardService.name, 'getWidget', {} as WidgetModel)(e);
+                }));
     }
 
     createWidget(dashboardId: string, widget: WidgetModel): Observable<WidgetModel> {
@@ -115,18 +149,18 @@ export class DashboardService {
 
     updateWidgetProperty(dashboardId: string, widgetId: string, pathToProperty: string[], newValue: any): Observable<DashboardResponseMessageModel> {
         let url = environment.dashboardServiceUrl + '/widgets/properties';
-        if(pathToProperty.length > 0) {
+        if (pathToProperty.length > 0) {
             const pathToPropertyString = pathToProperty.join('.');
             url += pathToPropertyString;
         }
         return this.http
-            .patch<DashboardResponseMessageModel>(url + '/' + dashboardId  + '/' + widgetId, newValue)
+            .patch<DashboardResponseMessageModel>(url + '/' + dashboardId + '/' + widgetId, newValue)
             .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetProperty', { message: 'error update' })));
     }
 
     updateWidgetName(dashboardId: string, widgetId: string, name: any): Observable<DashboardResponseMessageModel> {
         return this.http
-            .patch<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/name/' + dashboardId  + '/' + widgetId, name)
+            .patch<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/name/' + dashboardId + '/' + widgetId, name)
             .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetName', { message: 'error update' })));
     }
 
@@ -213,7 +247,7 @@ export class DashboardService {
     }
 
     zoomWidget(manipulation: DashboardManipulationEnum, widgetId: string, widget: WidgetModel | null, reloadAfterZoom: boolean, initialWidgetData: any) {
-        this.widgetSubject.next({ manipulation, widgetId, widget, reloadAfterZoom, initialWidgetData});
+        this.widgetSubject.next({ manipulation, widgetId, widget, reloadAfterZoom, initialWidgetData });
     }
 
     reloadAllWidgets() {

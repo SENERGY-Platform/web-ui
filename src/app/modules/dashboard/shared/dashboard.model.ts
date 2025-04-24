@@ -23,4 +23,5 @@ export interface DashboardModel {
     refresh_time: number;
     widgets: WidgetModel[];
     index: number;
+    updatedAt?: string;
 }
