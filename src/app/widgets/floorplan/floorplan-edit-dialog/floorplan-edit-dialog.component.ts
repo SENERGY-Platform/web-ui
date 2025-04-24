@@ -15,7 +15,7 @@
  */
 
 
-import { ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable, Subscription, concatMap, forkJoin, map, of } from 'rxjs';
@@ -27,7 +27,6 @@ import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/share
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeAspectNodeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
-import { AspectsService } from 'src/app/modules/metadata/aspects/shared/aspects.service';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
 import { dotSize, draw, FloorplanWidgetPropertiesModel, image } from '../shared/floorplan.model';
 
@@ -71,9 +70,7 @@ export class FloorplanEditDialogComponent implements OnInit {
     private fb: NonNullableFormBuilder,
     private deviceGroupsService: DeviceGroupsService,
     private functionService: FunctionsService,
-    private aspectsService: AspectsService,
     private deviceClassService: DeviceClassesService,
-    private cd: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) data: {
       dashboardId: string;
       widgetId: string;

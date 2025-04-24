@@ -20,13 +20,15 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
 import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-edit-dialog.component';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
-import { map, Observable, Subscription, of } from 'rxjs';
+import { map, Observable, Subscription, of, forkJoin, concatMap } from 'rxjs';
 import { dotSize, image } from './shared/floorplan.model';
 import { DeviceCommandModel, DeviceCommandResponseModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
 import { Point } from '@angular/cdk/drag-drop';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
 import { ChartConfiguration, ChartData, ChartTypeRegistry, BubbleDataPoint, Chart, TooltipModel, Plugin, ChartDataset } from 'chart.js';
 import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
+import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
+import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 
 @Component({
   selector: 'senergy-floorplan',
@@ -51,6 +53,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
   img: HTMLImageElement | undefined;
   draws = 0;
+  functionIdToUnit = new Map<string, string>();
 
   chartjs: {
     options: ChartConfiguration['options'];
@@ -176,11 +179,32 @@ export class FloorplanComponent implements OnInit, OnDestroy {
     private dashboardService: DashboardService,
     private deviceCommandService: DeviceCommandService,
     private cd: ChangeDetectorRef,
+    private deviceGroupsService: DeviceGroupsService,
+    private conceptsService: ConceptsService,
   ) { }
 
   ngOnInit(): void {
     this.img = image(this.widget.properties);
-    this.refresh().subscribe(_ => this.ready = true);
+    const obs: Observable<unknown>[] = [];
+    obs.push(this.refresh());
+    const functionIds = this.widget.properties.floorplan?.placements.map(p => p.criteria.function_id);
+    if (functionIds !== undefined && functionIds?.length > 0) {
+      obs.push(this.deviceGroupsService.getFunctionListByIds(functionIds).pipe(
+        concatMap(functions => this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) }).pipe(map(concepts => ({ concepts, functions })))),
+        map((res) => res.functions.forEach(f => {
+          const concept = res.concepts.result.find(c => f.concept_id === c.id);
+          if (concept === undefined) {
+            return;
+          }
+          const displayUnit = concept.characteristics.find(c => c.id === concept.base_characteristic_id)?.display_unit;
+          if (displayUnit === undefined) {
+            return;
+          }
+          this.functionIdToUnit.set(f.id, displayUnit);
+        }),
+      )));
+    }
+    forkJoin(obs).subscribe(_ => this.ready = true);
     this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
       if (event === 'reloadAll' || event === this.widget.id) {
         this.refresh().subscribe();
@@ -205,7 +229,6 @@ export class FloorplanComponent implements OnInit, OnDestroy {
       }
       const x = (this.widget.properties.floorplan.placements[i].position.x || 0) * this.img.naturalWidth * this.drawShift.ratio + this.drawShift.centerShiftX;
       const y = (this.widget.properties.floorplan.placements[i].position.y || 0) * this.img.naturalHeight * this.drawShift.ratio + this.drawShift.centerShiftY;
-      // TODO unit based on function & concept & baseCharacteristic
       let color = 'grey';
       if (!isNaN(r.message) && this.widget.properties.floorplan.placements[i].colorHigh !== null && this.widget.properties.floorplan.placements[i].colorLow !== null && this.widget.properties.floorplan.placements[i].valueLow !== null && this.widget.properties.floorplan.placements[i].valueHigh !== null && this.widget.properties.floorplan.placements[i].colorHigh !== undefined && this.widget.properties.floorplan.placements[i].colorLow !== undefined && this.widget.properties.floorplan.placements[i].valueLow !== undefined && this.widget.properties.floorplan.placements[i].valueHigh !== undefined) {
         // @ts-expect-error just ensured above...
@@ -236,7 +259,11 @@ export class FloorplanComponent implements OnInit, OnDestroy {
           color = `rgb(${Math.round(red)},${Math.round(green)},${Math.round(blue)}`;
         }
       }
-      datasets[i] = { data: [{ 'x': x, 'y': y }], label: '' + r.message, backgroundColor: color,  };
+      let label = '' + r.message;
+      if (this.functionIdToUnit.has(this.widget.properties.floorplan.placements[i].criteria.function_id)) {
+        label += ' ' + this.functionIdToUnit.get(this.widget.properties.floorplan.placements[i].criteria.function_id);
+      }
+      datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color, };
     });
     this.chartjs.data = { datasets };
     const chart = this.chartjsChart;
