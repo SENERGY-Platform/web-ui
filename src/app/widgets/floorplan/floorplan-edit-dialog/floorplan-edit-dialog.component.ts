@@ -180,6 +180,10 @@ export class FloorplanEditDialogComponent implements OnInit {
       this.errorHandlerService.showErrorInSnackBar('Please select an image');
       return;
     }
+    if (file.size > 256 * 1024) {
+      this.errorHandlerService.showErrorInSnackBar('Please select a smaller image (max. 256KB)');
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       this.form.patchValue({ image: reader.result as string });
