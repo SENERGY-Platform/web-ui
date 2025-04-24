@@ -16,7 +16,7 @@
 
 
 import { ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
-import { FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable, Subscription, concatMap, forkJoin, map, of } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
@@ -232,6 +232,10 @@ export class FloorplanEditDialogComponent implements OnInit {
         x: new FormControl<number>(0),
         y: new FormControl<number>(0),
       }),
+      valueLow: new FormControl<number | null>(null),
+      valueHigh: new FormControl<number | null>(null),
+      colorLow: new FormControl<string | null>(null),
+      colorHigh: new FormControl<string | null>(null),
     });
   }
 
@@ -298,5 +302,10 @@ export class FloorplanEditDialogComponent implements OnInit {
       a.device_class_id === b.device_class_id &&
       a.aspect_id === b.aspect_id &&
       a.interaction === b.interaction;
+  }
+
+  colorSelected($event: string, control: AbstractControl<any, any>) {
+    control.setValue($event);
+    control.updateValueAndValidity();
   }
 }

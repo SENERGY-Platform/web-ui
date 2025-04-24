@@ -30,7 +30,11 @@ export interface FloorplanWidgetCapabilityModel {
     position: {
         x: number | null;
         y: number | null;
-    }
+    },
+    valueLow: number | null;
+    valueHigh: number | null;
+    colorLow: string | null;
+    colorHigh: string | null;
 }
 
 export const dotSize = 10;

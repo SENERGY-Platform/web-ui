@@ -81,6 +81,34 @@
                 [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
             </mtx-select>
           </mat-form-field>
+
+          <div class="colorbar"
+            [style]="'background-image: linear-gradient(to right, ' + (tab.value.colorLow || 'black') + ', ' + (tab.value.colorHigh || 'black') + ');'">
+          </div>
+
+          <div class="color-row">
+            <div class="color-column">
+              <input class="value-form" [(colorPicker)]="tab.controls.colorLow.value" cpAlphaChannel="disabled"
+                [style.background]="tab.controls.colorLow.value"
+                (colorPickerChange)="colorSelected($event, tab.controls.colorLow)" />
+              <mat-form-field appearance="outline" color="accent" class="value-form">
+                <mat-label>Low Value</mat-label>
+                <input type="number" matInput formControlName="valueLow">
+                <mat-error senergyError label="Low Value"></mat-error>
+              </mat-form-field>
+            </div>
+            <div class="color-column">
+              <input class="value-form" [(colorPicker)]="tab.controls.colorHigh.value" cpAlphaChannel="disabled"
+                [style.background]="tab.controls.colorHigh.value"
+                (colorPickerChange)="colorSelected($event, tab.controls.colorHigh)" />
+              <mat-form-field appearance="outline" color="accent" class="value-form">
+                <mat-label>High Value</mat-label>
+                <input type="number" matInput formControlName="valueHigh">
+                <mat-error senergyError label="Low Value"></mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
         </ng-template>
       </mat-expansion-panel>
     </mat-accordion>

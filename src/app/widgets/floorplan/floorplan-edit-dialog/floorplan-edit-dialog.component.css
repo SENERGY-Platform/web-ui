@@ -14,52 +14,73 @@
  * limitations under the License.
  */
 
- .file-upload-wrapper {
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   flex-direction: column;
-   border: 2px dashed #ccc;
-   padding: 1rem;
-   margin-bottom: 1rem;
-   border-radius: 10px;
- }
-  .upload-wrapper {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
- }
- 
- .image-preview {
-   max-width: 100%;
-   height: auto;
- }
+.file-upload-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  border: 2px dashed #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+}
 
- .delete-wrapper {
-   width: 100%;
-   display: flex;
-   justify-content: end;
- }
+.upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
- .mat-expansion-panel-header-description {
-   display: flex;
-   justify-content: end;
- }
+.image-preview {
+  max-width: 100%;
+  height: auto;
+}
 
- .placing {
-   cursor: crosshair;
- }
+.delete-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+}
 
- .image-wrapper {
-   height: 300px;
-   width: 100%;
- }
+.mat-expansion-panel-header-description {
+  display: flex;
+  justify-content: end;
+}
 
- .dot {
-   background-color: #bbb;
-   border-radius: 50%;
-   display: inline-block;
-   position: absolute;
-   text-align: center;
-   line-height: 1.5;
- }
+.placing {
+  cursor: crosshair;
+}
+
+.image-wrapper {
+  height: 300px;
+  width: 100%;
+}
+
+.dot {
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  position: absolute;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.colorbar {
+  display: flex;
+  height: 1em;
+  margin-bottom: 1em;
+}
+
+.color-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.color-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.value-form {
+  display: flex;
+}

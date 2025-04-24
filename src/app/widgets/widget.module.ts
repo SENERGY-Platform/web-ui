@@ -132,6 +132,7 @@ import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
 import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { FloorplanComponent } from './floorplan/floorplan.component';
 import { FloorplanEditDialogComponent } from './floorplan/floorplan-edit-dialog/floorplan-edit-dialog.component';
+import { ColorPickerComponent, ColorPickerDirective } from 'ngx-color-picker';
 
 registerLocaleData(localeDe, 'de');
 
@@ -175,6 +176,8 @@ registerLocaleData(localeDe, 'de');
         MtxSelect,
         MtxOption,
         BaseChartDirective,
+        ColorPickerComponent,
+        ColorPickerDirective, 
     ],
     declarations: [
         RangeSliderComponent,

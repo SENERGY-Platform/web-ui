@@ -126,7 +126,12 @@ export class FloorplanComponent implements OnInit, OnDestroy {
             },
             min: 0,
           },
-        }
+        },
+        elements: {
+          point: {
+            radius: 5,
+          },
+        },
       },
       data: undefined,
       tooltipContext: undefined,
@@ -135,7 +140,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
         id: 'customCanvasBackgroundImage',
         beforeDraw: (chart: Chart) => {
 
-         if (this.img === undefined) {
+          if (this.img === undefined) {
             return false;
           }
 
@@ -163,7 +168,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
           }
           return true;
         }
-      }]
+      }],
     };
 
   constructor(
@@ -186,7 +191,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
     this.destroy?.unsubscribe();
   }
 
-  
+
   draw() {
     if (this.chartjs.options?.plugins !== undefined) {
       this.chartjs.options.plugins.annotation = {
@@ -201,8 +206,37 @@ export class FloorplanComponent implements OnInit, OnDestroy {
       const x = (this.widget.properties.floorplan.placements[i].position.x || 0) * this.img.naturalWidth * this.drawShift.ratio + this.drawShift.centerShiftX;
       const y = (this.widget.properties.floorplan.placements[i].position.y || 0) * this.img.naturalHeight * this.drawShift.ratio + this.drawShift.centerShiftY;
       // TODO unit based on function & concept & baseCharacteristic
-      // TODO color based on value
-      datasets[i] = { data: [{ 'x': x, 'y': y }], label: '' + r.message, backgroundColor: 'grey' };
+      let color = 'grey';
+      if (!isNaN(r.message) && this.widget.properties.floorplan.placements[i].colorHigh !== null && this.widget.properties.floorplan.placements[i].colorLow !== null && this.widget.properties.floorplan.placements[i].valueLow !== null && this.widget.properties.floorplan.placements[i].valueHigh !== null && this.widget.properties.floorplan.placements[i].colorHigh !== undefined && this.widget.properties.floorplan.placements[i].colorLow !== undefined && this.widget.properties.floorplan.placements[i].valueLow !== undefined && this.widget.properties.floorplan.placements[i].valueHigh !== undefined) {
+        // @ts-expect-error just ensured above...
+        if (r.message < this.widget.properties.floorplan.placements[i].valueLow) {
+          // @ts-expect-error just ensured above...
+          color = this.widget.properties.floorplan.placements[i].colorLow;
+          // @ts-expect-error just ensured above...
+        } else if (r.message > this.widget.properties.floorplan.placements[i].valueHigh) {
+          // @ts-expect-error just ensured above...
+          color = this.widget.properties.floorplan.placements[i].colorHigh;
+        } else {
+          // @ts-expect-error just ensured above...
+          const ratio = (r.message - this.widget.properties.floorplan.placements[i].valueLow) / (this.widget.properties.floorplan.placements[i].valueHigh - this.widget.properties.floorplan.placements[i].valueLow);
+
+          const w = ratio * 2 - 1;
+          const w2 = (w / 1 + 1) / 2;
+          const w1 = 1 - w2;
+
+          // @ts-expect-error just ensured above...
+          const red = parseInt(this.widget.properties.floorplan.placements[i].colorLow.substring(1, 3), 16) * w1 + parseInt(this.widget.properties.floorplan.placements[i].colorHigh.substring(1, 3), 16) * w2;
+
+          // @ts-expect-error just ensured above...
+          const green = parseInt(this.widget.properties.floorplan.placements[i].colorLow.substring(3, 5), 16) * w1 + parseInt(this.widget.properties.floorplan.placements[i].colorHigh.substring(3, 5), 16) * w2;
+
+          // @ts-expect-error just ensured above...
+          const blue = parseInt(this.widget.properties.floorplan.placements[i].colorLow.substring(5, 7), 16) * w1 + parseInt(this.widget.properties.floorplan.placements[i].colorHigh.substring(5, 7), 16) * w2;
+
+          color = `rgb(${Math.round(red)},${Math.round(green)},${Math.round(blue)}`;
+        }
+      }
+      datasets[i] = { data: [{ 'x': x, 'y': y }], label: '' + r.message, backgroundColor: color,  };
     });
     this.chartjs.data = { datasets };
     const chart = this.chartjsChart;
