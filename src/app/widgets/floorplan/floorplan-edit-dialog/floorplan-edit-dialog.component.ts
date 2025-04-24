@@ -52,6 +52,7 @@ export class FloorplanEditDialogComponent implements OnInit {
   placing: number | undefined;
   dotSize = dotSize;
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
+  step: number|undefined;
 
   form = new FormGroup({
     image: new FormControl<string | null>(null),
@@ -237,6 +238,14 @@ export class FloorplanEditDialogComponent implements OnInit {
       colorLow: new FormControl<string | null>(null),
       colorHigh: new FormControl<string | null>(null),
     });
+  }
+
+  copyPlacement(i: number) {
+    this.placing = undefined;
+    this.addNewPlacement();
+    this.form.controls.placements.at(this.form.controls.placements.length - 1).setValue(this.form.controls.placements.at(i).value);
+    this.step = this.form.controls.placements.length - 1;
+    this.form.updateValueAndValidity();
   }
 
   removePlacement(i: number) {
