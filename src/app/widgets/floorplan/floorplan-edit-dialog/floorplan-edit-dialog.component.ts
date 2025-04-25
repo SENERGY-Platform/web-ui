@@ -51,7 +51,7 @@ export class FloorplanEditDialogComponent implements OnInit {
   placing: number | undefined;
   dotSize = dotSize;
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
-  step: number|undefined;
+  step: number | undefined;
 
   form = new FormGroup({
     image: new FormControl<string | null>(null),
@@ -123,9 +123,12 @@ export class FloorplanEditDialogComponent implements OnInit {
 
     forkJoin(obs).subscribe(_ => {
       this.ready = true;
-      setTimeout(() => { // needs to draw ready=true first
-        this.draw();
-      }, 300);
+      this.form.controls.image.valueChanges.subscribe(() => this.draw());
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => { // needs to draw ready=true first
+          this.draw();
+        }, i * 100);
+      }
     });
   }
 
@@ -135,10 +138,12 @@ export class FloorplanEditDialogComponent implements OnInit {
   }
 
   draw() {
-    if (this.canvas !== undefined && this.canvas.first !== undefined) {
-      this.drawShift = draw(this.canvas.first.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel, this.form.value.placements?.map((_2, i) => {
+    if (this.canvas !== undefined) {
+      this.drawShift = draw(this.canvas.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel, this.form.value.placements?.map((_2, i) => {
         return { text: '' + i };
       }));
+    } else {
+      setTimeout(() => this.draw(), 100);
     }
   }
   close(): void {
@@ -187,6 +192,11 @@ export class FloorplanEditDialogComponent implements OnInit {
     reader.onload = () => {
       this.form.patchValue({ image: reader.result as string });
       this.draw();
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => { // needs to draw ready=true first
+          this.draw();
+        }, i * 100);
+      }
     };
     try {
       reader.readAsDataURL(file);
@@ -216,7 +226,6 @@ export class FloorplanEditDialogComponent implements OnInit {
   // Method to remove the uploaded image
   removeImage(): void {
     this.form.patchValue({ image: undefined });
-    this.draw();
   }
 
   addNewPlacement(): void {

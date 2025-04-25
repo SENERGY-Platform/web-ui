@@ -53,6 +53,11 @@ export function draw(canvas: HTMLCanvasElement, properties: FloorplanWidgetPrope
     if (ctx === null) {
         return { centerShiftY: NaN, centerShiftX: NaN, ratio: NaN };
     }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (properties.floorplan?.image === undefined) {
+        return { centerShiftY: NaN, centerShiftX: NaN, ratio: NaN };
+    }
+
     const img = image(properties);
     const hRatio = canvas.width / img.naturalWidth;
     const vRatio = canvas.height / img.naturalHeight;
