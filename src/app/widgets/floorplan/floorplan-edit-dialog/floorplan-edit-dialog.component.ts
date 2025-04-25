@@ -15,8 +15,8 @@
  */
 
 
-import { Component, ElementRef, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
-import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
+import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable, Subscription, concatMap, forkJoin, map, of } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
@@ -28,7 +28,7 @@ import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devi
 import { DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeAspectNodeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
-import { dotSize, draw, FloorplanWidgetPropertiesModel, image } from '../shared/floorplan.model';
+import { dotSize, draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, image } from '../shared/floorplan.model';
 
 @Component({
   selector: 'senergy-floorplan-edit-dialog',
@@ -57,7 +57,7 @@ export class FloorplanEditDialogComponent implements OnInit {
     image: new FormControl<string | null>(null),
     placements: new FormArray([].map(this.newPlacement)),
   });
-  name = new FormControl<string>('');
+  name = new FormControl<string>('', Validators.required);
 
   @ViewChild('fileInput', { static: true }) public fileInput!: ElementRef;
   @ViewChild('canvas', { static: false }) canvas: ElementRef<HTMLCanvasElement> | undefined;
@@ -71,6 +71,7 @@ export class FloorplanEditDialogComponent implements OnInit {
     private deviceGroupsService: DeviceGroupsService,
     private functionService: FunctionsService,
     private deviceClassService: DeviceClassesService,
+    private cd: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) data: {
       dashboardId: string;
       widgetId: string;
@@ -105,10 +106,8 @@ export class FloorplanEditDialogComponent implements OnInit {
                 return null;
               }));
           }
-          this.form.updateValueAndValidity();
         }
         this.name.setValue(w.name);
-        this.name.updateValueAndValidity();
         return r;
       })));
     obs.push(this.deviceGroupsService.getDeviceGroups('', 30, 0, 'name', 'asc', true).pipe(
@@ -222,11 +221,11 @@ export class FloorplanEditDialogComponent implements OnInit {
 
   addNewPlacement(): void {
     this.form.controls.placements.push(this.newPlacement());
-    this.form.updateValueAndValidity();
+    this.form.controls.placements.updateValueAndValidity();
   }
 
-  newPlacement(): FormGroup {
-    return this.fb.group({
+  newPlacement(value?: FloorplanWidgetCapabilityModel): FormGroup {
+    const fg = this.fb.group({
       criteria: new FormControl<DeviceGroupCriteriaModel | null>(null),
       deviceGroupId: new FormControl<string>(''),
       alias: new FormControl<string>(''),
@@ -236,23 +235,27 @@ export class FloorplanEditDialogComponent implements OnInit {
       }),
       valueLow: new FormControl<number | null>(null),
       valueHigh: new FormControl<number | null>(null),
-      colorLow: new FormControl<string | null>(null),
-      colorHigh: new FormControl<string | null>(null),
+      colorLow: new FormControl<string>('#808080'),
+      colorHigh: new FormControl<string>('#808080'),
     });
+    if (value !== undefined) {
+      fg.patchValue(value);
+    }
+    return fg;
   }
 
   copyPlacement(i: number) {
     this.placing = undefined;
-    this.addNewPlacement();
-    this.form.controls.placements.at(this.form.controls.placements.length - 1).setValue(this.form.controls.placements.at(i).value);
+    this.form.controls.placements.push(this.newPlacement(this.form.controls.placements.at(i).value));
+    this.form.controls.placements.updateValueAndValidity();
     this.step = this.form.controls.placements.length - 1;
-    this.form.updateValueAndValidity();
+    this.cd.detectChanges();
   }
 
   removePlacement(i: number) {
     this.placing = undefined;
     this.form.controls.placements.controls.splice(i, 1);
-    this.form.updateValueAndValidity();
+    this.form.controls.placements.updateValueAndValidity();
     this.draw();
   }
 
@@ -316,6 +319,5 @@ export class FloorplanEditDialogComponent implements OnInit {
 
   colorSelected($event: string, control: AbstractControl<any, any>) {
     control.setValue($event);
-    control.updateValueAndValidity();
   }
 }

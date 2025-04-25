@@ -126,7 +126,7 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid || name.invalid" cdkFocusInitial>
+  <button mat-raised-button color="accent" (click)="save()" [disabled]="!form.valid || !name.valid" cdkFocusInitial>
     Save
   </button>
 </mat-dialog-actions>
