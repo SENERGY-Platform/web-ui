@@ -202,7 +202,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
           }
           this.functionIdToUnit.set(f.id, displayUnit);
         }),
-      )));
+        )));
     }
     forkJoin(obs).subscribe(_ => this.ready = true);
     this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
@@ -277,8 +277,11 @@ export class FloorplanComponent implements OnInit, OnDestroy {
 
   @HostListener('window:resize')
   onResize() {
-    // TODO dots move out of position until refresh after resize
-    this.draw();
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        this.draw();
+      }, i * 100);
+    }
   }
 
   private refresh(): Observable<unknown> {
