@@ -135,8 +135,8 @@ export class FloorplanEditDialogComponent implements OnInit {
   }
 
   draw() {
-    if (this.canvas !== undefined) {
-      this.drawShift = draw(this.canvas.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel, this.form.value.placements?.map((_2, i) => {
+    if (this.canvas !== undefined && this.canvas.first !== undefined) {
+      this.drawShift = draw(this.canvas.first.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel, this.form.value.placements?.map((_2, i) => {
         return { text: '' + i };
       }));
     }
