@@ -45,7 +45,7 @@
                                     <td>
                                         <mat-form-field appearance="outline" class="full-width" color="accent">
                                             <mat-label>Device Class</mat-label>
-                                            <senergy-select-search formControlName="device_class_id" [required]="true"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="device_class_id" [required]="true"
                                                 [options]="deviceTypeDeviceClasses" useOptionViewProperty="name"
                                                 useOptionValueProperty="id">
                                             </senergy-select-search>
@@ -199,7 +199,7 @@
                                                                     <input matInput placeholder="Value"
                                                                         formControlName="value"
                                                                         *ngIf="attr.get('key')?.value !== timeAttributeKey">
-                                                                    <senergy-select-search
+                                                                    <!-- TODO replace with mtx-select --> <senergy-select-search
                                                                         [options]="getTimePathOptions(serviceAndIndex.index)"
                                                                         *ngIf="attr.get('key')?.value === timeAttributeKey"
                                                                         placeholder="Path" formControlName="value"
@@ -239,7 +239,7 @@
                                                                         <mat-form-field appearance="outline"
                                                                             class="full-width" color="accent">
                                                                             <mat-label>Serialization</mat-label>
-                                                                            <senergy-select-search
+                                                                            <!-- TODO replace with mtx-select --> <senergy-select-search
                                                                                 [options]="serializations"
                                                                                 formControlName="serialization"
                                                                                 [required]="inOut.dataSource && inOut.dataSource.data.length > 0"

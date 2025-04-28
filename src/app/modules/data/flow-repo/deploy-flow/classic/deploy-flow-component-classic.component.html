@@ -61,30 +61,29 @@
                         <div fxLayout="row" fxFlex="">
                             <mat-form-field fxFlex color="accent" appearance="outline">
                                 <mat-label>Device</mat-label>
-                                <senergy-select-search [options]="devices[operatorKey][deviceKey]"
-                                    useOptionViewProperty="name"
+                                <mtx-select [items]="devices[operatorKey][deviceKey]"
+                                    bindLabel="display_name"
                                     (ngModelChange)="deviceChanged($event, input.id, port, operatorKey, deviceKey)"
                                     ngDefaultControl
-                                    [(ngModel)]="selectedValues.get(input.id).get(port).device"
-                                                       [multiple]="true">
-                                </senergy-select-search>
+                                    [(ngModel)]="selectedValues.get(input.id).get(port).device" multiple>
+                                </mtx-select>
                                 <mat-error senergyError label="Device"></mat-error>
                             </mat-form-field>
                         </div>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Service</mat-label>
-                            <senergy-select-search (ngModelChange)="serviceChanged($event, input.id, port)"
-                                        [(ngModel)]="selectedValues.get(input.id).get(port).service" [options]="deviceTypes[input.id][port].services"
-                            useOptionViewProperty="name">
-                            </senergy-select-search>
+                            <mtx-select (ngModelChange)="serviceChanged($event, input.id, port)"
+                                        [(ngModel)]="selectedValues.get(input.id).get(port).service" [items]="deviceTypes[input.id][port].services"
+                            bindLabel="name">
+                            </mtx-select>
                             <mat-error senergyError label="Service"></mat-error>
                         </mat-form-field>
 
                         <mat-form-field fxFill color="accent" appearance="outline">
                             <mat-label>Path</mat-label>
-                            <senergy-select-search [(ngModel)]="selectedValues.get(input.id).get(port).path"
-                            [options]="paths[input.id][port]">
-                            </senergy-select-search>
+                            <mtx-select [(ngModel)]="selectedValues.get(input.id).get(port).path"
+                            [items]="paths[input.id][port]">
+                            </mtx-select>
                             <mat-error senergyError label="Path"></mat-error>
                         </mat-form-field>
                     </div>

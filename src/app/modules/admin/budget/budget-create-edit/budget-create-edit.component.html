@@ -39,14 +39,14 @@
         <div>
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Users</mat-label>
-                <senergy-select-search [options]="users" formControlName="user_id" useOptionViewProperty="username" useOptionValueProperty="id" noneView="NONE"></senergy-select-search>
+                <mtx-select formControlName="user_id" bindLabel="username" bindValue="id" [items]="users"></mtx-select>
             </mat-form-field>
         </div>
 
         <div>
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Role</mat-label>
-                <senergy-select-search [options]="roles" formControlName="role" noneView="NONE"></senergy-select-search>
+                <mtx-select [items]="roles" formControlName="role"></mtx-select>
             </mat-form-field>
         </div>
     </form>

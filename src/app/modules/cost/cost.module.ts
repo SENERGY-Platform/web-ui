@@ -28,6 +28,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MtxSelect } from '@ng-matero/extensions/select';
 
 
 
@@ -48,6 +49,7 @@ import { MatSelectModule } from '@angular/material/select';
         ReactiveFormsModule,
         MatInputModule,
         MatSelectModule,
+        MtxSelect,
     ]
 })
 export class CostModule { }

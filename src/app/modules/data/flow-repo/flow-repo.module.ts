@@ -36,6 +36,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { DeployFlowClassicComponent } from './deploy-flow/classic/deploy-flow-component-classic.component';
+import { MtxSelect } from '@ng-matero/extensions/select';
 
 const deploy: Route = { path: 'data/flow-repo/deploy/:id', pathMatch: 'full', component: DeployFlowComponent, data: { header: 'Analytics' } };
 const deployClassic: Route = {
@@ -66,6 +67,7 @@ const deployClassic: Route = {
         MatSelectModule,
         MatCardModule,
         ReactiveFormsModule,
+        MtxSelect,
     ],
     declarations: [DeployFlowComponent, DeployFlowClassicComponent],
 })

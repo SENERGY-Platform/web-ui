@@ -43,13 +43,13 @@
         <div [hidden]="form.get('mode')?.value !== DeviceInstancesReplaceDialogComponent.modeExisting" formGroupName="existing">
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Device Type</mat-label>
-                <senergy-select-search [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting" [options]="filteredDeviceTypes" useOptionViewProperty="name" useOptionValueProperty="id"
+                <!-- TODO replace with mtx-select --> <senergy-select-search [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting" [options]="filteredDeviceTypes" useOptionViewProperty="name" useOptionValueProperty="id"
                     formControlName="deviceType"></senergy-select-search>
                 <mat-error senergyError label="Device Type"></mat-error>
             </mat-form-field>
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Device</mat-label>
-                <senergy-select-search [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting"
+                <!-- TODO replace with mtx-select --> <senergy-select-search [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting"
                     [options]="deviceInstancesByType.get(form.get('existing.deviceType')?.value || '') || []"
                     [getOptionViewValue]="getDeviceName" formControlName="device"></senergy-select-search> <!-- TODO  [disabled]="form.get('existing.deviceType')?.invalid || true"-->
                 <mat-error senergyError label="Device"></mat-error>

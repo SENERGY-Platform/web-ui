@@ -106,7 +106,7 @@
                                 <div fxLayout="column">
                                     <mat-form-field fxFlex color="accent" appearance="outline">
                                         <mat-label>Data Format</mat-label>
-                                        <senergy-select-search [options]="filterAvailability(i)"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search [options]="filterAvailability(i)"
                                             [getOptionViewValue]="formatAvailability"
                                             [getOptionValue]="valueAvailability" [formControl]="availabilityControl"
                                             [compareWith]="compareAvailabilityValue" placeholder="Device">

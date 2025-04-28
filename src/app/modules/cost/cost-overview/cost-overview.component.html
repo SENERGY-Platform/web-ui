@@ -22,9 +22,7 @@
 
       <mat-form-field *ngIf="isAdmin" color="accent" appearance="outline">
         <mat-label>User</mat-label>
-        <senergy-select-search placeholder="Pipeline" [options]="users" [formControl]="selectedUser"
-          useOptionValueProperty="id" useOptionViewProperty="username">
-        </senergy-select-search>
+        <mtx-select placeholder="Pipeline" [formControl]="selectedUser" bindLabel="username" bindValue="id" [items]="users"></mtx-select>
         <mat-error senergyError label="User"></mat-error>
       </mat-form-field>
       <div class="spacer-w20" *ngIf="isAdmin"></div>

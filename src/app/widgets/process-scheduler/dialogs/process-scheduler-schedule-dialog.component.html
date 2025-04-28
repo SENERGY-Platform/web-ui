@@ -44,7 +44,7 @@
 
         <mat-form-field class="full-width deployment" appearance="outline" color="accent">
             <mat-label>Deployment</mat-label>
-            <senergy-select-search formControlName="processId" [required]="true" [compareWith]="compare"
+            <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="processId" [required]="true" [compareWith]="compare"
                     [options]="deployments" useOptionViewProperty="name" useOptionValueProperty="id">
             </senergy-select-search>
             <mat-error senergyError label="Deployment"></mat-error>

@@ -62,7 +62,7 @@
         <div>
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Users</mat-label>
-                <senergy-select-search [options]="users" [multiple]="true" formControlName="users" useOptionViewProperty="username" useOptionValueProperty="id"></senergy-select-search>
+                <mtx-select formControlName="users" multiple closeOnSelect="false" bindLabel="username" bindValue="id" [items]="users"></mtx-select>
                 <mat-error senergyError label="Users"></mat-error>
             </mat-form-field>
         </div>
@@ -70,7 +70,7 @@
         <div>
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Roles</mat-label>
-                <senergy-select-search [options]="roles" [multiple]="true" formControlName="roles"></senergy-select-search>
+                <mtx-select [items]="roles" multiple formControlName="roles" closeOnSelect="false"></mtx-select>
                 <mat-error senergyError label="Roles"></mat-error>
             </mat-form-field>
         </div>
@@ -78,7 +78,8 @@
         <div>
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Command Template</mat-label>
-                <textarea matInput formControlName="command_template" required cdkTextareaAutosize cdkAutosizeMinRows="5"></textarea>
+                <textarea matInput formControlName="command_template" required cdkTextareaAutosize
+                    cdkAutosizeMinRows="5"></textarea>
                 <mat-error senergyError label="Command Template"></mat-error>
             </mat-form-field>
         </div>
@@ -86,7 +87,8 @@
         <div>
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Delete Template</mat-label>
-                <textarea matInput formControlName="delete_template" cdkTextareaAutosize cdkAutosizeMinRows="1"></textarea>
+                <textarea matInput formControlName="delete_template" cdkTextareaAutosize
+                    cdkAutosizeMinRows="1"></textarea>
                 <mat-error senergyError label="Delete Template"></mat-error>
             </mat-form-field>
         </div>
@@ -94,7 +96,8 @@
         <div *ngIf="rule?.errors !== null && rule?.errors !== undefined && (rule?.errors?.length || 0) > 0">
             <mat-form-field color="accent" appearance="outline" fxFill disabled="">
                 <mat-label>Errors</mat-label>
-                <textarea matInput [value]="(rule?.errors || []).join('\n')" cdkTextareaAutosize cdkAutosizeMinRows="1" disabled></textarea>
+                <textarea matInput [value]="(rule?.errors || []).join('\n')" cdkTextareaAutosize cdkAutosizeMinRows="1"
+                    disabled></textarea>
             </mat-form-field>
         </div>
     </form>

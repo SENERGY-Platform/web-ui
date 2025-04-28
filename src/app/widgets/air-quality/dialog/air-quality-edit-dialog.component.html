@@ -144,7 +144,7 @@
                                     <td>
                                         <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Export</mat-label>
-                                            <senergy-select-search [(ngModel)]="option.export" (ngModelChange)="insideExportChanged(option)"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="option.export" (ngModelChange)="insideExportChanged(option)"
                                                         [compareWith]="compareExports" [options]="exports" useOptionViewProperty="Name" noneView="--None--"
                                                         [disabled]="option.insideDeviceId != null">
                                             </senergy-select-search>
@@ -154,7 +154,7 @@
                                     <td>
                                         <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Value</mat-label>
-                                            <senergy-select-search [(ngModel)]="option.data.column"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="option.data.column"
                                                         [compareWith]="compareExportValueModels" [options]="option.export?.Values || []"
                                                         useOptionViewProperty="Name" [disabled]="option.insideDeviceId != null">
                                             </senergy-select-search>
@@ -173,7 +173,7 @@
                                     <td>
                                         <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Device</mat-label>
-                                            <senergy-select-search [(ngModel)]="option.insideDeviceId" (ngModelChange)="insideDeviceChanged(option)"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="option.insideDeviceId" (ngModelChange)="insideDeviceChanged(option)"
                                                                    [options]="devices" useOptionViewProperty="name" useOptionValueProperty="id" [disabled]="option.export != null" noneView="--None--">
                                             </senergy-select-search>
                                             <mat-error senergyError label="Device"></mat-error>
@@ -182,7 +182,7 @@
                                     <td>
                                         <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Service</mat-label>
-                                            <senergy-select-search [(ngModel)]="option.insideServiceId"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="option.insideServiceId"
                                                                    [options]="(getServices(option.insideDeviceId) | async) || []" useOptionValueProperty="id"
                                                                    [disabled]="option.export != null" useOptionViewProperty="name">
                                             </senergy-select-search>
@@ -192,7 +192,7 @@
                                     <td>
                                         <mat-form-field color="accent" appearance="outline" fxFlexFill>
                                             <mat-label>Value</mat-label>
-                                            <senergy-select-search [(ngModel)]="option.insideDeviceValuePath"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="option.insideDeviceValuePath"
                                                                    [options]="getServiceValues(option.insideDeviceId, option.insideServiceId)"
                                                                    [disabled]="option.export != null">
                                             </senergy-select-search>
@@ -217,7 +217,7 @@
                                         <td>
                                             <mat-form-field color="accent" appearance="outline">
                                                 <mat-label>Export</mat-label>
-                                                <senergy-select-search
+                                                <!-- TODO replace with mtx-select --> <senergy-select-search
                                                             [(ngModel)]="option.outsideExport"
                                                             [compareWith]="compareExports"
                                                             [options]="exports" useOptionViewProperty="Name" (ngModelChange)="outsideExportChanged(option)"
@@ -229,7 +229,7 @@
                                         <td>
                                             <mat-form-field color="accent" appearance="outline">
                                                 <mat-label>Value</mat-label>
-                                                <senergy-select-search
+                                                <!-- TODO replace with mtx-select --> <senergy-select-search
                                                             [(ngModel)]="option.outsideData.column"
                                                             [compareWith]="compareExportValueModels"
                                                             [options]="option.outsideExport?.Values || []"
@@ -251,7 +251,7 @@
                                         <td>
                                             <mat-form-field color="accent" appearance="outline">
                                                 <mat-label>Device</mat-label>
-                                                <senergy-select-search [(ngModel)]="option.outsideDeviceId" (ngModelChange)="outsideDeviceChanged(option)"
+                                                <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="option.outsideDeviceId" (ngModelChange)="outsideDeviceChanged(option)"
                                                                        [options]="devices" useOptionViewProperty="name" useOptionValueProperty="id" [disabled]="option.outsideExport !== null" noneView="--None--">
                                                 </senergy-select-search>
                                                 <mat-error senergyError label="Device"></mat-error>
@@ -260,7 +260,7 @@
                                         <td>
                                             <mat-form-field color="accent" appearance="outline">
                                                 <mat-label>Service</mat-label>
-                                                <senergy-select-search [(ngModel)]="option.outsideServiceId"
+                                                <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="option.outsideServiceId"
                                                                        [options]="(getServices(option.outsideDeviceId) | async) || []" useOptionValueProperty="id"
                                                                        [disabled]="option.outsideExport != null" useOptionViewProperty="name">
                                                 </senergy-select-search>
@@ -270,7 +270,7 @@
                                         <td>
                                             <mat-form-field color="accent" appearance="outline">
                                                 <mat-label>Value</mat-label>
-                                                <senergy-select-search [(ngModel)]="option.outsideDeviceValuePath"
+                                                <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="option.outsideDeviceValuePath"
                                                                        [disabled]="option.outsideExport != null" [options]="getServiceValues(option.outsideDeviceId, option.outsideServiceId)">
                                                 </senergy-select-search>
                                                 <mat-error senergyError label="Value"></mat-error>

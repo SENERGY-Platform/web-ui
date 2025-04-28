@@ -212,6 +212,7 @@ export class DeployFlowClassicComponent {
                 this.traverseDataStructure(pathString, out.content_variable, false);
             });
         }
+        this.paths[inputId][port] = [];
         this.paths[inputId][port] = this.vals;
     }
 

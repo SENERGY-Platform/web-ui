@@ -161,7 +161,7 @@
                                 <td formGroupName="device">
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Aspect</mat-label>
-                                        <senergy-select-search formControlName="aspectId" [required]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="aspectId" [required]="true"
                                             placeholder="Choose Aspect"
                                             [options]="dataTableHelperService.getAspectsWithMeasuringFunction()"
                                             useOptionViewProperty="name"
@@ -173,7 +173,7 @@
                                 <td formGroupName="device">
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Function</mat-label>
-                                        <senergy-select-search formControlName="functionId" [required]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="functionId" [required]="true"
                                             placeholder="Choose Function" [compareWith]="compareStrings"
                                             [options]="getFunctions(tab)" useOptionValueProperty="id"
                                             useOptionViewProperty="name">
@@ -184,7 +184,7 @@
                                 <td formGroupName="device">
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Device</mat-label>
-                                        <senergy-select-search [compareWith]="compareStrings"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search [compareWith]="compareStrings"
                                                            formControlName="deviceId" placeholder="Choose Device"
                                                            [required]="true" [options]="getSelectables(tab)"
                                                            useOptionViewProperty="device.display_name"
@@ -198,7 +198,7 @@
                                 <td formGroupName="elementDetails">
                                     <mat-form-field appearance="outline" color="accent" formGroupName="device">
                                         <mat-label>Service</mat-label>
-                                        <senergy-select-search formControlName="serviceId" [required]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="serviceId" [required]="true"
                                             placeholder="Choose Service" [compareWith]="compareStrings"
                                             [options]="getServices(tab)" useOptionValueProperty="id"
                                             useOptionViewProperty="name">
@@ -209,7 +209,7 @@
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Value</mat-label>
-                                        <senergy-select-search formControlName="exportValuePath" [required]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="exportValuePath" [required]="true"
                                             placeholder="Choose Value" [compareWith]="compareStrings"
                                             [options]="getServiceValues(tab)"
                                                            useOptionViewProperty="Name"
@@ -223,7 +223,7 @@
                                 <td formGroupName="elementDetails">
                                     <mat-form-field appearance="outline" color="accent" formGroupName="pipeline">
                                         <mat-label>Pipeline</mat-label>
-                                        <senergy-select-search formControlName="pipelineId" [required]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="pipelineId" [required]="true"
                                             placeholder="Choose Pipeline" [compareWith]="compareStrings"
                                             [options]="dataTableHelperService.getPipelines()"
                                             useOptionValueProperty="id" useOptionViewProperty="name">
@@ -234,7 +234,7 @@
                                 <td formGroupName="elementDetails">
                                     <mat-form-field appearance="outline" color="accent" formGroupName="pipeline">
                                         <mat-label>Operator</mat-label>
-                                        <senergy-select-search formControlName="operatorId" [required]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="operatorId" [required]="true"
                                             placeholder="Choose Operator" [compareWith]="compareStrings"
                                             [options]="getOperators(tab)" useOptionValueProperty="id"
                                             [getOptionViewValue]="getOperatorViewValue">
@@ -245,7 +245,7 @@
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Value</mat-label>
-                                        <senergy-select-search formControlName="exportValuePath" [required]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="exportValuePath" [required]="true"
                                             placeholder="Choose Value" [compareWith]="compareStrings"
                                             [options]="getOperatorValues(tab)"
                                                            useOptionValueProperty="Path"
@@ -259,7 +259,7 @@
                                 <td formGroupName="elementDetails">
                                     <mat-form-field appearance="outline" color="accent" formGroupName="import">
                                         <mat-label>Type</mat-label>
-                                        <senergy-select-search formControlName="typeId" [required]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="typeId" [required]="true"
                                             placeholder="Choose Type"
                                             [options]="dataTableHelperService.getImportTypes()"
                                             useOptionValueProperty="id" useOptionViewProperty="name">
@@ -270,7 +270,7 @@
                                 <td formGroupName="elementDetails">
                                     <mat-form-field appearance="outline" color="accent" formGroupName="import">
                                         <mat-label>Instance</mat-label>
-                                        <senergy-select-search formControlName="instanceId" [required]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="instanceId" [required]="true"
                                             placeholder="Choose Instance"
                                             [options]="dataTableHelperService.getImportInstancesOfType(tab.get('elementDetails.import.typeId')?.value)"
                                             useOptionValueProperty="id"
@@ -282,7 +282,7 @@
                                 <td>
                                     <mat-form-field appearance="outline"  color="accent">
                                         <mat-label>Value</mat-label>
-                                        <senergy-select-search formControlName="exportValuePath" [required]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="exportValuePath" [required]="true"
                                             placeholder="Choose Value"
                                             [options]="dataTableHelperService.getImportTypeValues(tab.get('elementDetails.import.typeId')?.value)"
                                             useOptionValueProperty="Path" useOptionViewProperty="Name">
@@ -295,7 +295,7 @@
                                 <td formGroupName="deviceGroup">
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Device Group</mat-label>
-                                        <senergy-select-search placeholder="Choose Device Group"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Device Group"
 												[options]="deviceGroups" formControlName="deviceGroupId"
                                             useOptionViewProperty="name" useOptionValueProperty="id">
                                         </senergy-select-search>
@@ -306,7 +306,7 @@
                                 <td formGroupName="deviceGroup">
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Criteria</mat-label>
-                                        <senergy-select-search [options]="getCriteria(tab)" placeholder="Choose Criteria"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search [options]="getCriteria(tab)" placeholder="Choose Criteria"
                                             formControlName="deviceGroupCriteria"
                                             [getOptionViewValue]="describeCriteria()" [compareWith]="compareCriteria">
                                         </senergy-select-search>
@@ -318,7 +318,7 @@
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Unit</mat-label>
-                                        <senergy-select-search [options]="getConcept(tab)?.characteristics || []"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search [options]="getConcept(tab)?.characteristics || []"
                                             formControlName="unit" [getOptionValue]="getDisplayUnit"
                                             [getOptionViewValue]="getDisplayUnit">
                                         </senergy-select-search>
@@ -328,7 +328,7 @@
                                 <td formGroupName="elementDetails">
                                     <mat-form-field appearance="outline" color="accent" formGroupName="deviceGroup">
                                         <mat-label>Aggregation</mat-label>
-                                        <senergy-select-search [options]="aggregations"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search [options]="aggregations"
                                             formControlName="deviceGroupAggregation">
                                         </senergy-select-search>
                                         <mat-error senergyError label="Aggregation"></mat-error>
@@ -339,7 +339,7 @@
                                 <td *ngIf="!isDevice(tab) && !isDeviceGroup(tab)">
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Export</mat-label>
-                                        <senergy-select-search formControlName="exportId" [required]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="exportId" [required]="true"
                                             placeholder="Choose Export" [options]="getExports(tab)"
                                             useOptionViewProperty="Name" useOptionValueProperty="ID">
                                         </senergy-select-search>
@@ -350,7 +350,7 @@
                                 <td *ngIf="!isDevice(tab) && tab.get('exportId')?.value !== undefined && getTags(tab).size > 0">
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Tags</mat-label>
-                                        <senergy-select-search placeholder="Choose Tags" [multiple]="true"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Tags" [multiple]="true"
                                             [options]="getTags(tab)"
                                                            formControlName="exportTagSelection"
                                             [getOptionDisabled]="getTagOptionDisabledFunction(tab)"
@@ -380,7 +380,7 @@
                                 <td>
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Group Type</mat-label>
-                                        <senergy-select-search [options]="groupTypes"
+                                        <!-- TODO replace with mtx-select --> <senergy-select-search [options]="groupTypes"
                                             [noneView]="'none'" formControlName="groupType">
                                         </senergy-select-search>
 										<mat-error senergyError label="Group Type"></mat-error>

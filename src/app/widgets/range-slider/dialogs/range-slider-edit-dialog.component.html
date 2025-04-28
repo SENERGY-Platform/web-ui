@@ -31,14 +31,14 @@
 			<div>
 				<mat-form-field appearance="outline" color="accent" class="user-input">
 					<mat-label>Deployment</mat-label>
-					<senergy-select-search placeholder="Choose Deployment" formControlName="deployment" [compareWith]="compareDeployments"
+					<!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Deployment" formControlName="deployment" [compareWith]="compareDeployments"
 						[options]="deployments" useOptionViewProperty="name">
 					</senergy-select-search>
 					<mat-error senergyError label="Deployment"></mat-error>
 				</mat-form-field>
 				<mat-form-field appearance="outline" color="accent" class="user-input">
 					<mat-label>Parameter</mat-label>
-					<senergy-select-search placeholder="Choose Parameter" formControlName="parameter" [options]="parameters">
+					<!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Parameter" formControlName="parameter" [options]="parameters">
 					</senergy-select-search>
 					<mat-error senergyError label="Parameter"></mat-error>
 				</mat-form-field>

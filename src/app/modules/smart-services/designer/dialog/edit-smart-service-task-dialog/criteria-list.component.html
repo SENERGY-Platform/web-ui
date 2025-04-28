@@ -22,7 +22,7 @@
                 <div>
                     <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                         <mat-label>Function</mat-label>
-                        <senergy-select-search
+                        <!-- TODO replace with mtx-select --> <senergy-select-search
                                                [(ngModel)]="criteria.function_id"
                                                [options]="functions"
                                                (selectionChange)="emitUpdate()"
@@ -36,7 +36,7 @@
                 <div>
                     <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                         <mat-label>Aspect</mat-label>
-                        <senergy-select-search
+                        <!-- TODO replace with mtx-select --> <senergy-select-search
                                                [(ngModel)]="criteria.aspect_id"
                                                [options]="nestedAspects"
                                                (selectionChange)="emitUpdate()"
@@ -50,7 +50,7 @@
                 <div>
                     <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                         <mat-label>Device Class</mat-label>
-                        <senergy-select-search
+                        <!-- TODO replace with mtx-select --> <senergy-select-search
                                                [(ngModel)]="criteria.device_class_id"
                                                [options]="deviceClasses"
                                                (selectionChange)="emitUpdate()"

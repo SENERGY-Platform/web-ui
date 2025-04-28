@@ -35,7 +35,7 @@
           <div>
             <mat-form-field appearance="outline" class="form-field full-width" color="accent">
               <mat-label>Variable</mat-label>
-              <senergy-select-search placeholder="Variable with json string" [(ngModel)]="exportInfo.JsonSource"
+              <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Variable with json string" [(ngModel)]="exportInfo.JsonSource"
                                      [options]="availableProcessVariables.get('all') || []"
                                      useOptionViewProperty="name"
                                      useOptionValueProperty="name">

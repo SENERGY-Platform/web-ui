@@ -25,7 +25,7 @@
     "@angular/platform-browser-dynamic": "^18.2.13",
     "@angular/router": "^18.2.13",
     "@asyncapi/web-component": "^2.6.3",
-    "@ng-matero/extensions": "^18.4.1",
+    "@ng-matero/extensions": "^18.5.0",
     "@ngbracket/ngx-layout": "^17.0.1",
     "@types/backbone": "^1.4.1",
     "@types/jquery": "^3.3.31",

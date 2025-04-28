@@ -30,7 +30,7 @@
           <div *ngIf="input.name === 'process_deployment.process_model_id'">
             <mat-form-field appearance="outline"  color="accent" class="full-width">
               <mat-label>Process Model</mat-label>
-              <senergy-select-search [(ngModel)]="input.value"
+              <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="input.value"
                                      [options]="processModels || []"
                                      (selectionChange)="ensureProcessTaskParameter($event.value)"
                                      useOptionViewProperty="name"
@@ -111,7 +111,7 @@
                   <div *ngIf="processTaskMatches(input, taskId, 'selection')">
                     <mat-form-field  appearance="outline" color="accent" class="full-width-minus-button">
                       <mat-label>IoT-Selection</mat-label>
-                      <senergy-select-search placeholder="IoT-Selection"
+                      <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="IoT-Selection"
                                              [(ngModel)]="input.value"
                                              [options]="availableProcessIotSelections"
                                              useOptionViewProperty="name"
@@ -138,7 +138,7 @@
                   <div *ngIf="processTaskMatches(input, taskId, 'event.flow_id')">
                     <mat-form-field appearance="outline"  color="accent" class="full-width">
                       <mat-label>Event Flow</mat-label>
-                      <senergy-select-search [(ngModel)]="input.value"
+                      <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="input.value"
                                              [options]="flows || []"
                                              useOptionViewProperty="name"
                                              useOptionValueProperty="_id">
@@ -285,7 +285,7 @@
           <div>
             <mat-form-field appearance="outline" class="form-field full-width" color="accent">
               <mat-label>Flow</mat-label>
-              <senergy-select-search [(ngModel)]="analyticsFlowId"
+              <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="analyticsFlowId"
                                      [options]="flows || []"
                                      useOptionViewProperty="name"
                                      useOptionValueProperty="_id">
@@ -361,7 +361,7 @@
                         <div *ngIf="analyticsInputMatchesIotSelection(input, flowInput.id, port)">
                           <mat-form-field appearance="outline"  color="accent" class="full-width">
                             <mat-label>IoT-Selection</mat-label>
-                            <senergy-select-search placeholder="IoT-Selection"
+                            <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="IoT-Selection"
                                                    [(ngModel)]="input.value"
                                                    [options]="availableAnalyticsIotSelections"
                                                    useOptionViewProperty="name"
@@ -523,7 +523,7 @@
         <div>
           <mat-form-field appearance="outline"  color="accent" class="full-width">
             <mat-label>Export Database ID</mat-label>
-            <senergy-select-search
+            <!-- TODO replace with mtx-select --> <senergy-select-search
                                    [(ngModel)]="exportRequest.ExportDatabaseID"
                                    [options]="exportDatabaseList || []"
                                    useOptionViewProperty="Name"
@@ -883,7 +883,7 @@
                   <div>
                     <mat-form-field appearance="outline"  class="form-field full-width" color="accent">
                       <mat-label>Function</mat-label>
-                      <senergy-select-search [(ngModel)]="criteria.function_id"
+                      <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="criteria.function_id"
                                              [options]="functions"
                                              noneView="NONE"
                                              useOptionViewProperty="name"
@@ -895,7 +895,7 @@
                   <div>
                     <mat-form-field appearance="outline"  class="form-field full-width" color="accent">
                       <mat-label>Aspect</mat-label>
-                      <senergy-select-search
+                      <!-- TODO replace with mtx-select --> <senergy-select-search
                                              [(ngModel)]="criteria.aspect_id"
                                              [options]="nestedAspects"
                                              noneView="NONE"
@@ -908,7 +908,7 @@
                   <div>
                     <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                       <mat-label>Device Class</mat-label>
-                      <senergy-select-search
+                      <!-- TODO replace with mtx-select --> <senergy-select-search
                                              [(ngModel)]="criteria.device_class_id"
                                              [options]="deviceClasses"
                                              noneView="NONE"
