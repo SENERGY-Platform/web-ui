@@ -132,7 +132,8 @@ export class FloorplanComponent implements OnInit, OnDestroy {
         },
         elements: {
           point: {
-            radius: 5,
+            radius: this.widget.properties?.floorplan?.dotSize || 5,
+            hoverRadius: this.widget.properties?.floorplan?.dotSize || 5,
           },
         },
       },
@@ -221,6 +222,10 @@ export class FloorplanComponent implements OnInit, OnDestroy {
       this.chartjs.options.plugins.annotation = {
         annotations: this.chartjs.annotations,
       };
+    }
+    if (this.chartjs.options?.elements?.point !== undefined) {
+      this.chartjs.options.elements.point.radius = this.widget.properties?.floorplan?.dotSize || 5;
+      this.chartjs.options.elements.point.hoverRadius = this.widget.properties?.floorplan?.dotSize || 5;
     }
     const datasets: ChartDataset[] = new Array(this.values.length - 1).fill({});
     this.values.forEach((r, i) => {

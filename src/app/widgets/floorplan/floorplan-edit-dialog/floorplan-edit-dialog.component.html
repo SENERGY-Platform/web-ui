@@ -24,6 +24,13 @@
       <mat-error senergyError label="Widget Name"></mat-error>
     </mat-form-field>
 
+    <mat-form-field *ngIf="userHasUpdatePropertiesAuthorization" appearance="outline" color="accent"
+      style="display: flex;" [formGroup]="form">
+      <mat-label>Point Size</mat-label>
+      <input type="number" formControlName="dotSize" matInput>
+      <mat-error senergyError label="Point Size"></mat-error>
+    </mat-form-field>
+
     <div *ngIf="userHasUpdatePropertiesAuthorization" class="file-upload-wrapper" (drop)="onFileDrop($event)"
       (dragover)="onDragOver($event)">
       <input type="file" accept="image/*" (change)="onFileChange($event)" hidden #fileInput />
@@ -34,7 +41,8 @@
       <div *ngIf="form.value.image !== null && form.value.image !== undefined" class="delete-wrapper">
         <button mat-icon-button color="warn" (click)="removeImage()"><mat-icon>delete</mat-icon></button>
       </div>
-      <div *ngIf="form.value.image !== null && form.value.image !== undefined" [hidden]="form.value.image === null && form.value.image === undefined" class="image-wrapper" #imageWrapper>
+      <div *ngIf="form.value.image !== null && form.value.image !== undefined"
+        [hidden]="form.value.image === null && form.value.image === undefined" class="image-wrapper" #imageWrapper>
         <canvas #canvas [ngClass]="{'placing': placing !== undefined}" (click)="placeSelected($event)"> </canvas>
       </div>
     </div>
@@ -42,7 +50,8 @@
 
   <div *ngIf="userHasUpdatePropertiesAuthorization" [formGroup]="form">
     <mat-accordion>
-      <mat-expansion-panel *ngFor="let tab of form.controls.placements.controls; let i = index" [formGroup]="tab" [expanded]="step === i">
+      <mat-expansion-panel *ngFor="let tab of form.controls.placements.controls; let i = index" [formGroup]="tab"
+        [expanded]="step === i">
         <mat-expansion-panel-header>
           <mat-panel-title>
             <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.value.alias}} </span>

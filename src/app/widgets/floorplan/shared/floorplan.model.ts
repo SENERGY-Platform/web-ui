@@ -20,6 +20,7 @@ export interface FloorplanWidgetPropertiesModel {
     floorplan?: {
         image: string | null;
         placements: FloorplanWidgetCapabilityModel[];
+        dotSize: number;
     }
 }
 

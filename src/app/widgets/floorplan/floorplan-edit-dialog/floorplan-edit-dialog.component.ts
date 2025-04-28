@@ -56,6 +56,7 @@ export class FloorplanEditDialogComponent implements OnInit {
   form = new FormGroup({
     image: new FormControl<string | null>(null),
     placements: new FormArray([].map(this.newPlacement)),
+    dotSize: new FormControl<number>(5, {validators: [Validators.required, Validators.min(1)]}),
   });
   name = new FormControl<string>('', Validators.required);
 
