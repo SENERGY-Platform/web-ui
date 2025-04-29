@@ -26,29 +26,52 @@
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>ID</mat-label>
             <input matInput disabled value="{{device.id}}">
+            <button *ngIf="userIsDeveloper" mat-icon-button matPrefix (click)="copyToClipboard(0, device.id)" [matTooltip]="clipboardTooltip"
+            [ngClass]="clipboardTooltipTimeout[0] !== undefined ? 'clipboard-success': 'clipboard'">
+                <mat-icon>{{clipboardTooltipTimeout[0] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
+            </button>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Short ID</mat-label>
             <input matInput placeholder="ShortID" disabled value="{{getShortId(device.id)}}">
+            <button *ngIf="userIsDeveloper" mat-icon-button matPrefix (click)="copyToClipboard(1, getShortId(device.id))" [matTooltip]="clipboardTooltip"
+            [ngClass]="clipboardTooltipTimeout[1] !== undefined ? 'clipboard-success': 'clipboard'">
+                <mat-icon>{{clipboardTooltipTimeout[1] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
+            </button>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Device Type ID</mat-label>
             <input matInput disabled value="{{device.device_type_id}}">
+            <button *ngIf="userIsDeveloper" mat-icon-button matPrefix (click)="copyToClipboard(2, device.device_type_id)" [matTooltip]="clipboardTooltip"
+            [ngClass]="clipboardTooltipTimeout[2] !== undefined ? 'clipboard-success': 'clipboard'">
+                <mat-icon>{{clipboardTooltipTimeout[2] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
+            </button>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Device Type Name</mat-label>
             <input matInput disabled value="{{device.device_type_name}}">
+            <button *ngIf="userIsDeveloper" mat-icon-button matPrefix (click)="copyToClipboard(3, device.device_type_name)" [matTooltip]="clipboardTooltip"
+            [ngClass]="clipboardTooltipTimeout[3] !== undefined ? 'clipboard-success': 'clipboard'">
+                <mat-icon>{{clipboardTooltipTimeout[3] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
+            </button>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Origin Name</mat-label>
-            <input matInput [(ngModel)]="device.name" disabled
-                [ngModelOptions]="{standalone: true}">
+            <input matInput [(ngModel)]="device.name" disabled [ngModelOptions]="{standalone: true}">
             <mat-error senergyError label="Origin Name"></mat-error>
+            <button *ngIf="userIsDeveloper" mat-icon-button matPrefix (click)="copyToClipboard(4, device.name)" [matTooltip]="clipboardTooltip"
+            [ngClass]="clipboardTooltipTimeout[4] !== undefined ? 'clipboard-success': 'clipboard'">
+                <mat-icon>{{clipboardTooltipTimeout[4] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
+            </button>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Local ID</mat-label>
             <input matInput [(ngModel)]="device.local_id" disabled>
             <mat-error senergyError label="Local ID"></mat-error>
+            <button *ngIf="userIsDeveloper" mat-icon-button matPrefix (click)="copyToClipboard(5, device.local_id)" [matTooltip]="clipboardTooltip"
+            [ngClass]="clipboardTooltipTimeout[5] !== undefined ? 'clipboard-success': 'clipboard'">
+                <mat-icon>{{clipboardTooltipTimeout[5] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
+            </button>
         </mat-form-field>
     </div>
 
@@ -58,8 +81,9 @@
                 <mat-panel-title fxFlex>Connection History</mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-                <timeline-chart chartId='deviceHistory' class="timeline" *ngIf="connectionHistory !== null" [data]="connectionHistory"
-                [enableToolbar]="false" [vAxes]="timelineAxes" [width]="connectionHistoryPanelWidth" [height]="200"></timeline-chart>
+                <timeline-chart chartId='deviceHistory' class="timeline" *ngIf="connectionHistory !== null"
+                    [data]="connectionHistory" [enableToolbar]="false" [vAxes]="timelineAxes"
+                    [width]="connectionHistoryPanelWidth" [height]="200"></timeline-chart>
             </ng-template>
         </mat-expansion-panel>
 
@@ -69,11 +93,21 @@
                 <mat-panel-description>
                     {{service.description}}
                     <span
-                        *ngIf="lastValueArray[i] !== undefined && lastValueArray[i].length > 0">{{lastValueArray[i][0].response.time |  date:'dd.MM.yyyy - HH:mm:ss'}}</span>
+                        *ngIf="lastValueArray[i] !== undefined && lastValueArray[i].length > 0">{{lastValueArray[i][0].response.time
+                        | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
                 </mat-panel-description>
             </mat-expansion-panel-header>
 
             <ng-template matExpansionPanelContent>
+                <mat-form-field *ngIf="userIsDeveloper" appearance="outline" style="display: flex;" color="accent">
+                    <mat-label>Service ID</mat-label>
+                    <input matInput [(ngModel)]="service.id" disabled>
+                    <mat-error senergyError label="Local ID"></mat-error>
+                    <button mat-icon-button matPrefix (click)="copyToClipboard(6+i, service.id)" [matTooltip]="clipboardTooltip"
+                    [ngClass]="clipboardTooltipTimeout[6+i] !== undefined ? 'clipboard-success': 'clipboard'">
+                        <mat-icon>{{clipboardTooltipTimeout[6+i] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
+                    </button>
+                </mat-form-field>
                 <div *ngIf="errorOccured === false && lastValueArray[i] !== undefined">
                     <table mat-table *ngIf="lastValueArray[i].length > 0" [dataSource]="lastValueArray[i]">
                         <ng-container matColumnDef="field">

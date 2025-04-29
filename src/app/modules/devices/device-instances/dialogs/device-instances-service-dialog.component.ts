@@ -66,6 +66,9 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
 
     connectionHistory: any[][][] = [];
     userCanLoadConnectionHistory = false;
+    clipboardTooltip = 'Copy to Clipboard';
+    clipboardTooltipTimeout: unknown[] = [];
+    userIsDeveloper = false;
 
     timelineAxes: ChartsExportVAxesModel[] = [
         // @ts-expect-error other values are not required
@@ -105,6 +108,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         this.device = data.device;
         this.descriptions = data.descriptions;
         this.userCanLoadConnectionHistory = this.deviceInstancesService.userHasReadAuthorizationConnectionLog();
+        this.userIsDeveloper = this.authorizationService.userIsDeveloper();
     }
 
     ngOnInit() {
@@ -263,5 +267,10 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
             return 400;
         }
         return this.connectionHistoryPanel._body.nativeElement.offsetWidth;
+    }
+
+    copyToClipboard(id: number, text: string) {
+        navigator.clipboard.writeText(text);
+        this.clipboardTooltipTimeout[id] = setTimeout(() => this.clipboardTooltipTimeout[id] = undefined, 2000);
     }
 }

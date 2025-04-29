@@ -38,3 +38,11 @@
 #connectionHistoryPanel {
     margin-bottom: 1rem;
 }
+
+.clipboard-success {
+    color: #28a745 !important;
+}
+
+.clipboard {
+    color: rgba(0, 0, 0, .38)
+}
