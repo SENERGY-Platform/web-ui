@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 @use '@angular/material' as mat;
+@use '@ng-matero/extensions' as mtx;
 
 @include mat.all-component-typographies();
 @include mat.core();
@@ -160,6 +161,7 @@ $my-app-sidenav: mat.m2-define-palette($md-custom-color-sidenav);
 $my-app-theme: mat.m2-define-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
 
 @include mat.all-component-themes($my-app-theme);
+@include mtx.all-component-themes($my-app-theme);
 
 .background-color-accent {
   color: white;
