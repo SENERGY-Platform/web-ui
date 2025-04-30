@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ParserService } from '../shared/parser.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ParseModel } from '../shared/parse.model';
@@ -84,7 +84,6 @@ export class DeployFlowComponent implements OnInit {
         private operatorRepoService: OperatorRepoService,
         private importInstancesService: ImportInstancesService,
         private flowEngineService: FlowEngineService,
-        private cd: ChangeDetectorRef,
     ) { }
 
     static DEVICE_KEY = 'Devices';
@@ -285,7 +284,6 @@ export class DeployFlowComponent implements OnInit {
                 inputGroup.patchValue({
                     functionId: null,
                 });
-                this.cd.detectChanges(); // TODO
             });
             inputGroup.get('functionId')?.valueChanges.subscribe((functionId) => {
                 this.prepareSelectables(inputGroup).subscribe();
@@ -296,7 +294,6 @@ export class DeployFlowComponent implements OnInit {
                         inputGroup.patchValue({
                             characteristics: chars.map(c => c.id),
                         });
-                        this.cd.detectChanges(); // TODO
                     });
                 }
                
@@ -306,7 +303,6 @@ export class DeployFlowComponent implements OnInit {
                 inputGroup.patchValue({
                     selectableId: null,
                 });
-                this.cd.detectChanges(); // TODO
             });
             inputGroup.get('selectableId')?.valueChanges.subscribe((selectableId) => {
                 inputGroup.patchValue({
@@ -330,15 +326,9 @@ export class DeployFlowComponent implements OnInit {
                     deviceTypeGroup
                         .get('selection')
                         ?.valueChanges.subscribe((value) => this.servicePathSelected(inputGroup, deviceTypeGroup.get('id')?.value, value));
-                    const serviceOptions = this.getServiceOptions(inputGroup, deviceTypeGroup.get('id')?.value);
-                    let options = 0;
-                    serviceOptions.forEach((option) => (options += option.length));
-                    if (options < 2) {
-                        serviceOptions.forEach((option) => {
-                            if (option.length === 1) {
-                                deviceTypeGroup.patchValue({ selection: [option[0]] });
-                            }
-                        });
+                    const options = this.getServiceOptions(inputGroup, deviceTypeGroup.get('id')?.value);
+                    if (options.length === 1) {
+                        deviceTypeGroup.patchValue({ selection: options });
                         deviceTypeGroup.disable();
                     } else {
                         deviceTypeGroup.enable();
@@ -991,7 +981,7 @@ export class DeployFlowComponent implements OnInit {
         this.router.navigateByUrl('data/flow-repo/deploy-classic/' + this.flowId);
     }
 
-    getServiceOptions(input: FormGroup, id: string): Map<string, { path: string; service_id: string }[]> {
+    getServiceOptions(input: FormGroup, id: string): {group?: string; path: string; service_id: string }[] {
         const functionId = input.get('functionId')?.value;
         const aspectId = input.get('aspectId')?.value;
         const characteristicsKey = DeployFlowComponent.stringArrayKey(input.get('characteristics')?.value);
@@ -1000,7 +990,14 @@ export class DeployFlowComponent implements OnInit {
             key = this.importInstances.find((i) => i.id === id)?.kafka_topic || '';
         }
         const preparedOptions = this.serviceOptions.get(aspectId)?.get(functionId)?.get(characteristicsKey)?.get(key);
-        return preparedOptions || new Map();
+        const result: {group?: string; path: string; service_id: string }[] = [];;
+        preparedOptions?.forEach((v, k) => {
+            v.forEach(e => {
+                (e as {group?: string; path: string; service_id: string }).group = k;
+                result.push(e);
+            });
+        });
+        return result;
     }
 
     getDeviceTypes(input: AbstractControl): (DeviceTypeModel | ImportInstancesModel)[] {

@@ -57,6 +57,10 @@ mat-grid-list {
     overflow-y: auto;
 }
 
+.root {
+    position: relative;
+}
+
 .fab {
     position: fixed;
     bottom: 15px;

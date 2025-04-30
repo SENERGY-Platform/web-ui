@@ -19,37 +19,40 @@
 <h2 mat-dialog-title>Timescale Rule</h2>
 
 <mat-dialog-content>
-    <form [formGroup]="form" fxLayout="column">
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Budget</mat-label>
-                <input matInput formControlName="budget_identifier" required>
-                <mat-error senergyError label="Budget"></mat-error>
-            </mat-form-field>
-        </div>
+    <div class="root">
+        <form [formGroup]="form" fxLayout="column">
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Budget</mat-label>
+                    <input matInput formControlName="budget_identifier" required>
+                    <mat-error senergyError label="Budget"></mat-error>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Value</mat-label>
-                <input matInput formControlName="value" type="number" required>
-                <mat-error senergyError label="Value"></mat-error>
-            </mat-form-field>
-        </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Value</mat-label>
+                    <input matInput formControlName="value" type="number" required>
+                    <mat-error senergyError label="Value"></mat-error>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Users</mat-label>
-                <mtx-select formControlName="user_id" bindLabel="username" bindValue="id" [items]="users"></mtx-select>
-            </mat-form-field>
-        </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Users</mat-label>
+                    <mtx-select formControlName="user_id" bindLabel="username"
+                        bindValue="id" [items]="users" appendTo=".root"></mtx-select>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Role</mat-label>
-                <mtx-select [items]="roles" formControlName="role"></mtx-select>
-            </mat-form-field>
-        </div>
-    </form>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Role</mat-label>
+                    <mtx-select [items]="roles" formControlName="role" appendTo=".root"></mtx-select>
+                </mat-form-field>
+            </div>
+        </form>
+    </div>
 </mat-dialog-content>
 
 
