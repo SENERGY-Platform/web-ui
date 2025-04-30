@@ -7,7 +7,7 @@
 			<mat-label>Data Source Classes</mat-label>
 			<mtx-select formControlName="dataSourceClasses" multiple="true" hideSelected="true"
 						closeOnSelect="false" placeholder="Search" fixedPlaceholder="true">
-				<mtx-option *ngFor="let entity of dataSourceClasses" [value]="entity">
+				<!-- TODO use items property --><mtx-option *ngFor="let entity of dataSourceClasses" [value]="entity">
 					{{entity}}
 				</mtx-option>
 			</mtx-select>
@@ -43,7 +43,7 @@
             <h2>Select the Exported Fields</h2>
             <mat-form-field appearance="outline" color="accent">
                 <mat-label>Fields</mat-label>
-                <senergy-select-search [required]="true" [multiple]="true" formControlName="fields"
+                <!-- TODO replace with mtx-select --> <senergy-select-search [required]="true" [multiple]="true" formControlName="fields"
                     [options]="fieldOptionsTMP" useOptionViewProperty="valueName" [compareWith]="compareFields">
                 </senergy-select-search>
 				<mat-error senergyError [label]="'Fields'"></mat-error>

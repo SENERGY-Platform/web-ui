@@ -17,3 +17,7 @@
 .mat-mdc-dialog-content {
     padding-top: 8px;
 }
+
+.root {
+    position: relative;
+}

@@ -78,7 +78,7 @@
                     <div [hidden]="getTags(element).size === 0">
                         <mat-form-field color="accent" appearance="outline">
                             <mat-label>Tags</mat-label>
-                            <senergy-select-search placeholder="Choose Tags" [multiple]="true"
+                            <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Tags" [multiple]="true"
                                 [disabled]="getTags(element).size === 0" [options]="getTags(element)"
                                 [getOptionDisabled]="getTagOptionDisabledFunction(element)"
                                 [getOptionValue]="getTagValue" [(ngModel)]="element.tagSelection"

@@ -54,6 +54,9 @@ export function useProperty(property: string): (option: any) => any {
     };
 }
 
+/**
+* @deprecated use mtx-select instead!
+*/
 @Component({
     selector: 'senergy-select-search',
     templateUrl: './select-search.component.html',

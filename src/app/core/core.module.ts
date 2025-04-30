@@ -63,6 +63,7 @@ import {FitTextComponent} from './components/fit-text/fit-text.component';
 import {KeycloakService} from 'keycloak-angular';
 import {KeycloakConfidentialService} from './services/keycloak-confidential.service';
 import {MatErrorMessagesDirective} from './directives/matError.directive';
+import { MtxSelect } from '@ng-matero/extensions/select';
 
 export const keycloakServiceToken = new InjectionToken<KeycloakService>('KeycloakService');
 
@@ -93,6 +94,7 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         MatCheckboxModule,
         MatTableModule,
         MatButtonToggleModule,
+        MtxSelect,
     ],
     declarations: [
         SidenavComponent,

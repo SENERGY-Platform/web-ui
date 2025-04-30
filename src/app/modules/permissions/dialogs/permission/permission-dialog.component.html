@@ -31,7 +31,7 @@
     <form class="user-input">
         <mat-form-field color="accent" appearance="outline" class="selector">
             <mat-label>User</mat-label>
-            <senergy-select-search [options]="adddableUsers" [formControl]="userFormControl"
+            <!-- TODO replace with mtx-select --> <senergy-select-search [options]="adddableUsers" [formControl]="userFormControl"
               useOptionValueProperty="id" useOptionViewProperty="username">
             </senergy-select-search> 
             <mat-error senergyError label="User"></mat-error>
@@ -44,7 +44,7 @@
     <form class="user-input">
         <mat-form-field color="accent" appearance="outline" class="selector">
             <mat-label>Group</mat-label>
-            <senergy-select-search [options]="adddableGroups" [formControl]="groupFormControl">
+            <!-- TODO replace with mtx-select --> <senergy-select-search [options]="adddableGroups" [formControl]="groupFormControl">
             </senergy-select-search> 
             <mat-error senergyError label="Group"></mat-error>
         </mat-form-field>
@@ -56,7 +56,7 @@
     <form *ngIf="isAdmin" class="user-input">
         <mat-form-field color="accent" appearance="outline" class="selector">
             <mat-label>Role</mat-label>
-            <senergy-select-search [options]="adddableRoles" [formControl]="roleFormControl">
+            <!-- TODO replace with mtx-select --> <senergy-select-search [options]="adddableRoles" [formControl]="roleFormControl">
             </senergy-select-search> 
             <mat-error senergyError label="Role"></mat-error>
         </mat-form-field>

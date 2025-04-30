@@ -27,7 +27,7 @@
     <form class="form">
         <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Controlling'">
             <mat-label>Device Class</mat-label>
-            <senergy-select-search [compareWith]="compare"
+            <!-- TODO replace with mtx-select --> <senergy-select-search [compareWith]="compare"
                                    [formControl]="deviceClassFormControl" [required]="true"
                                    [options]="deviceClasses" useOptionViewProperty="name">
             </senergy-select-search>
@@ -36,7 +36,7 @@
 
         <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Measuring'">
             <mat-label>Aspect</mat-label>
-            <senergy-select-search [compareWith]="compare"
+            <!-- TODO replace with mtx-select --> <senergy-select-search [compareWith]="compare"
                                    [formControl]="aspectFormControl" [required]="true"
                                    [options]="aspects" useOptionViewProperty="name">
             </senergy-select-search>
@@ -45,7 +45,7 @@
 
         <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value !== ''">
             <mat-label>Function</mat-label>
-            <senergy-select-search [compareWith]="compare"
+            <!-- TODO replace with mtx-select --> <senergy-select-search [compareWith]="compare"
                                    [formControl]="functionFormControl" [required]="true"
                                    [options]="functions" useOptionViewProperty="name">
             </senergy-select-search>

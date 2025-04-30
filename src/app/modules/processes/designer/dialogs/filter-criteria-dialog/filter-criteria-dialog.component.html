@@ -22,7 +22,7 @@
     <form class="form">
         <mat-form-field appearance="outline" class="form-field" color="accent">
             <mat-label>Aspect</mat-label>
-            <senergy-select-search [formControl]="aspectFormControl" [required]="true"
+            <!-- TODO replace with mtx-select --> <senergy-select-search [formControl]="aspectFormControl" [required]="true"
                         [options]="this.aspects" useOptionViewProperty="name" useOptionValueProperty="id">
             </senergy-select-search>
             <mat-error senergyError label="Aspect"></mat-error>
@@ -30,7 +30,7 @@
 
         <mat-form-field appearance="outline" class="form-field" color="accent">
             <mat-label>Function</mat-label>
-            <senergy-select-search [compareWith]="compare" [formControl]="functionFormControl" [required]="true"
+            <!-- TODO replace with mtx-select --> <senergy-select-search [compareWith]="compare" [formControl]="functionFormControl" [required]="true"
                         [options]="functions" useOptionViewProperty="name">
             </senergy-select-search>
             <mat-error senergyError label="Function"></mat-error>

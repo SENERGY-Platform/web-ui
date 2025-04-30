@@ -21,17 +21,16 @@ import { ParseModel } from '../shared/parse.model';
 import { DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel, DeviceSelectablesFullModel } from '../../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import {
-    DeviceTypeAspectNodeModel,
-    DeviceTypeCharacteristicsModel,
+    DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
-    DeviceTypeServiceModel,
+    DeviceTypeServiceModel
 } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { FlowEngineService } from '../shared/flow-engine.service';
 import { NodeConfig, NodeModel, NodeValue, PipelineInputSelectionModel, PipelineRequestModel } from './shared/pipeline-request.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { first, map } from 'rxjs/operators';
+import { concatMap, first, map } from 'rxjs/operators';
 import { forkJoin, Observable, of } from 'rxjs';
 import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
 import { PathOptionsService } from '../shared/path-options.service';
@@ -45,16 +44,22 @@ import { OperatorModel } from '../../operator-repo/shared/operator.model';
 import { OperatorRepoService } from '../../operator-repo/shared/operator-repo.service';
 import { ImportInstancesService } from '../../../imports/import-instances/shared/import-instances.service';
 import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
+import { GroupValueFn } from '@ng-matero/extensions/select';
 
 interface CustomSelectable {
     id: string;
     name: string;
+    groupName?: string;
 }
 
 interface DeviceServicePath {
     devicesOrImports: string[];
     values: NodeValue[];
     topic: string;
+}
+
+interface DeviceTypeAspectModelWithRootName extends DeviceTypeAspectModel {
+    root_name?: string;
 }
 
 @Component({
@@ -79,7 +84,7 @@ export class DeployFlowComponent implements OnInit {
         private operatorRepoService: OperatorRepoService,
         private importInstancesService: ImportInstancesService,
         private flowEngineService: FlowEngineService,
-    ) {}
+    ) { }
 
     static DEVICE_KEY = 'Devices';
     static GROUP_KEY = 'Device Groups';
@@ -93,7 +98,8 @@ export class DeployFlowComponent implements OnInit {
     editMode = false;
     allDevices: DeviceInstanceWithDeviceTypeModel[] = [];
     pipelines: PipelineModel[] = [];
-    aspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+    aspects: DeviceTypeAspectModelWithRootName[] = [];
+    rootAspects = new Map<string, string>();
     aspectFunctions = new Map<string, DeviceTypeFunctionModel[]>();
     selectables = new Map<string, DeviceSelectablesFullModel[]>();
     selectablesCharacteristics = new Map<string, Map<string, CustomSelectable[]>>();
@@ -109,7 +115,7 @@ export class DeployFlowComponent implements OnInit {
         description: '',
         nodes: this.fb.array([]),
         windowTime: 30,
-        enable_metrics: [{value: true, disabled: true}],
+        enable_metrics: [{ value: true, disabled: true }],
         consume_all_msgs: false,
         mergeStrategy: '',
     });
@@ -127,31 +133,43 @@ export class DeployFlowComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.deviceTypeService.getAspectNodesWithMeasuringFunction().subscribe((aspects) => {
-            const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
-            aspects.forEach(a => {
-                if (!tmp.has(a.root_id)) {
-                    tmp.set(a.root_id, []);
+        const obs: Observable<unknown>[] = [];
+        obs.push(this.deviceTypeService.getAspects().pipe(map(aspects => {
+            const tmp: DeviceTypeAspectModelWithRootName[] = [];
+            aspects.forEach(root => {
+                const rootWithName = root as DeviceTypeAspectModelWithRootName;
+                if (rootWithName.sub_aspects !== undefined && rootWithName.sub_aspects !== null && rootWithName.sub_aspects.length > 0) {
+                    const addSubs = (a: DeviceTypeAspectModel) => {
+                        a.sub_aspects?.forEach(sub => {
+                            const subn = sub as DeviceTypeAspectModelWithRootName;
+                            subn.root_name = rootWithName.name;
+                            tmp.push(sub);
+                            addSubs(sub);
+                            this.rootAspects.set(sub.id, rootWithName.id);
+                        });
+                    };
+                    addSubs(rootWithName);
+                } else {
+                    tmp.push(rootWithName);
                 }
-                tmp.get(a.root_id)?.push(a);
             });
-            tmp.forEach((v, k) => this.aspects.set(aspects.find(a => a.id === k)?.name || '', v));
-        });
-        this.pipelineRegistryService.getPipelines().subscribe((pipelines) => (this.pipelines = pipelines));
-        this.importInstancesService
+            this.aspects = tmp;
+        })));
+        obs.push(this.pipelineRegistryService.getPipelines().pipe(map(pipelines => (this.pipelines = pipelines))));
+        obs.push(this.importInstancesService
             .listImportInstances('', undefined, undefined, 'name.asc')
-            .subscribe((instances) => (this.importInstances = instances));
-        this.route.url.subscribe((url) => {
+            .pipe(map(instances => (this.importInstances = instances))));
+        obs.push(this.route.url.pipe(first(), concatMap(url => {
             this.ready = false;
             this.resetForm();
             let id = this.route.snapshot.paramMap.get('id');
             if (id === null) {
                 console.error('id not set!');
-                return;
+                return of(null);
             }
             if (url[url.length - 2]?.path === 'edit') {
                 this.editMode = true;
-                this.pipelineRegistryService.getPipeline(id || '').subscribe((pipeline: PipelineModel | null) => {
+                return this.pipelineRegistryService.getPipeline(id || '').pipe(map((pipeline: PipelineModel | null) => {
                     if (pipeline === null || pipeline.id.length === 0) {
                         // does not 404
                         this.snackBar.open('Unknown pipeline', undefined, {
@@ -170,38 +188,42 @@ export class DeployFlowComponent implements OnInit {
                         consume_all_msgs: pipeline.consumeAllMessages || false,
                         mergeStrategy: pipeline.mergeStrategy || 'inner',
                     });
-
-                    this.parserService.getInputs(id).subscribe((parseModels: ParseModel[]) => {
-                        this.deviceInstanceService
-                            .getDeviceInstancesWithDeviceType({limit: 9999, offset: 0})
-                            .subscribe(deviceTotal => {
+                    return { pipeline, id };
+                }), concatMap(res => {
+                    if (res === undefined) {
+                        return of(null);
+                    }
+                    return this.parserService.getInputs(res.id).pipe(concatMap((parseModels: ParseModel[]) => {
+                        return this.deviceInstanceService
+                            .getDeviceInstancesWithDeviceType({ limit: 9999, offset: 0 })
+                            .pipe(concatMap(deviceTotal => {
                                 this.allDevices = deviceTotal.result;
                                 const observables: Observable<any>[] = [];
                                 parseModels.forEach((input) => {
-                                    const operator = pipeline.operators.find((o) => o.id === input.id);
+                                    const operator = res.pipeline.operators.find((o) => o.id === input.id);
                                     observables.push(
                                         this.addNode(input, operator?.inputSelections || [], operator?.config, operator?.inputTopics, operator?.persistData),
                                     );
                                 });
-                                forkJoin(observables).subscribe((_) => (this.ready = true));
-                            });
-                    });
-                });
+                                return forkJoin(observables);
+                            }));
+                    }));
+                }));
             } else {
                 this.flowId = id || '';
-                this.parserService.getInputs(this.flowId).subscribe((resp: ParseModel[]) => {
-                    this.deviceInstanceService
-                        .getDeviceInstancesWithDeviceType({limit: 9999, offset: 0})
-                        .subscribe(deviceTotal => {
+                return this.parserService.getInputs(this.flowId).pipe(concatMap((resp: ParseModel[]) => {
+                    return this.deviceInstanceService
+                        .getDeviceInstancesWithDeviceType({ limit: 9999, offset: 0 })
+                        .pipe(map(deviceTotal => {
                             this.allDevices = deviceTotal.result;
                             resp.forEach((input) => {
                                 this.addNode(input, []);
                             });
-                        });
-                    this.ready = true;
-                });
+                        }));
+                }));
             }
-        });
+        })));
+        forkJoin(obs).subscribe(_ => this.ready = true);
     }
 
     private resetForm() {
@@ -210,7 +232,7 @@ export class DeployFlowComponent implements OnInit {
             description: '',
             nodes: this.fb.array([]),
             windowTime: 30,
-            enable_metrics: [{value: true, disabled: true}],
+            enable_metrics: [{ value: true, disabled: true }],
             consume_all_msgs: false,
             mergeStrategy: 'inner',
         });
@@ -244,10 +266,10 @@ export class DeployFlowComponent implements OnInit {
         });
         newNode.inPorts?.forEach((input) => {
             const inputGroup = this.fb.group({
-                aspectId: '',
-                functionId: '',
+                aspectId: null,
+                functionId: null,
                 characteristics: [],
-                selectableId: '',
+                selectableId: null,
                 filter: new Map<string, { serviceId: string; path: string }>(), // deviceId to serviceId and path
                 devices: [],
                 deviceTypes: this.fb.array([]),
@@ -255,9 +277,12 @@ export class DeployFlowComponent implements OnInit {
                 pipelines: this.fb.array([]),
             });
             inputGroup.get('aspectId')?.valueChanges.subscribe((aspectId) => {
+                if (aspectId === null) {
+                    return;
+                }
                 this.loadAspectFunctions(aspectId).subscribe();
                 inputGroup.patchValue({
-                    functionId: '',
+                    functionId: null,
                 });
             });
             inputGroup.get('functionId')?.valueChanges.subscribe((functionId) => {
@@ -265,16 +290,18 @@ export class DeployFlowComponent implements OnInit {
                 const aspectId = inputGroup.get('aspectId')?.value;
                 const func = this.aspectFunctions.get(aspectId)?.find((f) => f.id === functionId);
                 if (func !== undefined) {
-                    this.loadFunctionCharacteristics(func).subscribe();
+                    this.loadFunctionCharacteristics(func).subscribe(chars => {
+                        inputGroup.patchValue({
+                            characteristics: chars.map(c => c.id),
+                        });
+                    });
                 }
-                inputGroup.patchValue({
-                    characteristics: [],
-                });
+               
             });
             inputGroup.get('characteristics')?.valueChanges.subscribe((_) => {
                 this.prepareSelectables(inputGroup).subscribe();
                 inputGroup.patchValue({
-                    selectableId: '',
+                    selectableId: null,
                 });
             });
             inputGroup.get('selectableId')?.valueChanges.subscribe((selectableId) => {
@@ -299,15 +326,9 @@ export class DeployFlowComponent implements OnInit {
                     deviceTypeGroup
                         .get('selection')
                         ?.valueChanges.subscribe((value) => this.servicePathSelected(inputGroup, deviceTypeGroup.get('id')?.value, value));
-                    const serviceOptions = this.getServiceOptions(inputGroup, deviceTypeGroup.get('id')?.value);
-                    let options = 0;
-                    serviceOptions.forEach((option) => (options += option.length));
-                    if (options < 2) {
-                        serviceOptions.forEach((option) => {
-                            if (option.length === 1) {
-                                deviceTypeGroup.patchValue({ selection: [option[0]] });
-                            }
-                        });
+                    const options = this.getServiceOptions(inputGroup, deviceTypeGroup.get('id')?.value);
+                    if (options.length === 1) {
+                        deviceTypeGroup.patchValue({ selection: options });
                         deviceTypeGroup.disable();
                     } else {
                         deviceTypeGroup.enable();
@@ -624,9 +645,17 @@ export class DeployFlowComponent implements OnInit {
         );
     }
 
-    getSelectables(aspectId: string, functionId: string, characteristicIds: string[]): Map<string, CustomSelectable[]> {
+    getSelectables(aspectId: string, functionId: string, characteristicIds: string[]): CustomSelectable[] {
         const characteristicKey = DeployFlowComponent.stringArrayKey(characteristicIds);
-        return this.selectablesCharacteristics.get(aspectId + functionId + characteristicKey) || new Map();
+        const values = this.selectablesCharacteristics.get(aspectId + functionId + characteristicKey);
+        const res: CustomSelectable[] = [];
+        values?.forEach((v, k) => {
+            v.forEach(v2 => {
+                v2.groupName = k;
+                res.push(v2);
+            });
+        });
+        return res;
     }
 
     loadDeviceGroup(id: string): Observable<string[]> {
@@ -952,7 +981,7 @@ export class DeployFlowComponent implements OnInit {
         this.router.navigateByUrl('data/flow-repo/deploy-classic/' + this.flowId);
     }
 
-    getServiceOptions(input: FormGroup, id: string): Map<string, { path: string; service_id: string }[]> {
+    getServiceOptions(input: FormGroup, id: string): {group?: string; path: string; service_id: string }[] {
         const functionId = input.get('functionId')?.value;
         const aspectId = input.get('aspectId')?.value;
         const characteristicsKey = DeployFlowComponent.stringArrayKey(input.get('characteristics')?.value);
@@ -961,7 +990,14 @@ export class DeployFlowComponent implements OnInit {
             key = this.importInstances.find((i) => i.id === id)?.kafka_topic || '';
         }
         const preparedOptions = this.serviceOptions.get(aspectId)?.get(functionId)?.get(characteristicsKey)?.get(key);
-        return preparedOptions || new Map();
+        const result: {group?: string; path: string; service_id: string }[] = [];;
+        preparedOptions?.forEach((v, k) => {
+            v.forEach(e => {
+                (e as {group?: string; path: string; service_id: string }).group = k;
+                result.push(e);
+            });
+        });
+        return result;
     }
 
     getDeviceTypes(input: AbstractControl): (DeviceTypeModel | ImportInstancesModel)[] {
@@ -1160,5 +1196,17 @@ export class DeployFlowComponent implements OnInit {
                 }
             }
         }
+    }
+
+    getRootAspect(): GroupValueFn {
+        const that = this;
+        return (_, children): any => {
+            children = children as DeviceTypeAspectModel[];
+            const id = that.rootAspects.get(children[0].id);
+            if (id !== undefined) {
+                return { id };
+            }
+            return null;
+        };
     }
 }

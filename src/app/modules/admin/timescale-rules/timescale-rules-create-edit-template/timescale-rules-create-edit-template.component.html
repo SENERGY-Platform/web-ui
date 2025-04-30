@@ -18,116 +18,115 @@
 <h2 mat-dialog-title>Timescale Rule</h2>
 
 <mat-dialog-content>
+    <div class="root">
+        <form [formGroup]="form" fxLayout="column">
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>ID</mat-label>
+                    <input matInput formControlName="id">
+                    <mat-error senergyError label="ID"></mat-error>
+                </mat-form-field>
+            </div>
 
-
-    <form [formGroup]="form" fxLayout="column">
-        <div>
             <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>ID</mat-label>
-                <input matInput formControlName="id">
-                <mat-error senergyError label="ID"></mat-error>
+                <mat-label>Template</mat-label>
+               <mtx-select formControlName="template" required bindLabel="name"
+                    bindValue="name" [items]="templates" appendTo=".root"></mtx-select>
+                <mat-error senergyError label="Template"></mat-error>
             </mat-form-field>
-        </div>
 
-        <mat-form-field color="accent" appearance="outline" fxFill>
-            <mat-label>Template</mat-label>
-            <senergy-select-search [options]="templates" formControlName="template" useOptionViewProperty="name"
-                                   useOptionValueProperty="name" [required]="true"></senergy-select-search>
-            <mat-error senergyError label="Template"></mat-error>
-        </mat-form-field>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Description</mat-label>
+                    <input matInput formControlName="description" required>
+                    <mat-error senergyError label="Description"></mat-error>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Description</mat-label>
-                <input matInput formControlName="description" required>
-                <mat-error senergyError label="Description"></mat-error>
-            </mat-form-field>
-        </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Target</mat-label>
+                    <mat-select formControlName="target" required>
+                        <mat-option [value]="'device'">
+                            Devices
+                        </mat-option>
+                        <mat-option [value]="'export'">
+                            Exports
+                        </mat-option>
+                    </mat-select>
+                    <mat-error senergyError label="Target"></mat-error>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Target</mat-label>
-                <mat-select formControlName="target" required>
-                    <mat-option [value]="'device'">
-                        Devices
-                    </mat-option>
-                    <mat-option [value]="'export'">
-                        Exports
-                    </mat-option>
-                </mat-select>
-                <mat-error senergyError label="Target"></mat-error>
-            </mat-form-field>
-        </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Users</mat-label>
+                    <mtx-select formControlName="users" multiple closeOnSelect="false"
+                        bindLabel="username" bindValue="id" [items]="users" appendTo=".root"></mtx-select>
+                    <mat-error senergyError label="Users"></mat-error>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Users</mat-label>
-                <senergy-select-search [options]="users" [multiple]="true" formControlName="users"
-                                       useOptionViewProperty="username"
-                                       useOptionValueProperty="id"></senergy-select-search>
-                <mat-error senergyError label="Users"></mat-error>
-            </mat-form-field>
-        </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Roles</mat-label>
+                    <mtx-select [items]="roles" multiple formControlName="roles"
+                        closeOnSelect="false" appendTo=".root"></mtx-select>
+                    <mat-error senergyError label="Roles"></mat-error>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Roles</mat-label>
-                <senergy-select-search [options]="roles" [multiple]="true"
-                                       formControlName="roles"></senergy-select-search>
-                <mat-error senergyError label="Roles"></mat-error>
-            </mat-form-field>
-        </div>
+            <div *ngIf="rule?.errors !== null && rule?.errors !== undefined && (rule?.errors?.length || 0) > 0">
+                <mat-form-field color="accent" appearance="outline" fxFill disabled="">
+                    <mat-label>Errors</mat-label>
+                    <textarea matInput [value]="(rule?.errors || []).join('\n')" cdkTextareaAutosize
+                        cdkAutosizeMinRows="1" disabled></textarea>
+                </mat-form-field>
+            </div>
 
-        <div *ngIf="rule?.errors !== null && rule?.errors !== undefined && (rule?.errors?.length || 0) > 0">
-            <mat-form-field color="accent" appearance="outline" fxFill disabled="">
-                <mat-label>Errors</mat-label>
-                <textarea matInput [value]="(rule?.errors || []).join('\n')" cdkTextareaAutosize cdkAutosizeMinRows="1"
-                          disabled></textarea>
-            </mat-form-field>
-        </div>
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                    <mat-panel-title fxFlex>Details</mat-panel-title>
+                </mat-expansion-panel-header>
+                <ng-template matExpansionPanelContent>
 
-        <mat-expansion-panel>
-            <mat-expansion-panel-header>
-                <mat-panel-title fxFlex>Details</mat-panel-title>
-            </mat-expansion-panel-header>
-            <ng-template matExpansionPanelContent>
+                    <div>
+                        <mat-form-field color="accent" appearance="outline" fxFill>
+                            <mat-label>Group</mat-label>
+                            <input matInput formControlName="group" required>
+                            <mat-error senergyError label="Group"></mat-error>
+                        </mat-form-field>
+                    </div>
 
-                <div>
-                    <mat-form-field color="accent" appearance="outline" fxFill>
-                        <mat-label>Group</mat-label>
-                        <input matInput formControlName="group" required>
-                        <mat-error senergyError label="Group"></mat-error>
-                    </mat-form-field>
-                </div>
+                    <div>
+                        <mat-form-field color="accent" appearance="outline" fxFill>
+                            <mat-label>Priority</mat-label>
+                            <input matInput formControlName="priority" required type="number">
+                            <mat-error senergyError label="Priority"></mat-error>
+                        </mat-form-field>
+                    </div>
 
-                <div>
-                    <mat-form-field color="accent" appearance="outline" fxFill>
-                        <mat-label>Priority</mat-label>
-                        <input matInput formControlName="priority" required type="number">
-                        <mat-error senergyError label="Priority"></mat-error>
-                    </mat-form-field>
-                </div>
+                    <div>
+                        <mat-form-field color="accent" appearance="outline" fxFill>
+                            <mat-label>Command Template</mat-label>
+                            <textarea matInput formControlName="command_template" required cdkTextareaAutosize
+                                cdkAutosizeMinRows="5"></textarea>
+                            <mat-error senergyError label="Command Template"></mat-error>
+                        </mat-form-field>
+                    </div>
 
-                <div>
-                    <mat-form-field color="accent" appearance="outline" fxFill>
-                        <mat-label>Command Template</mat-label>
-                        <textarea matInput formControlName="command_template" required cdkTextareaAutosize
-                                  cdkAutosizeMinRows="5"></textarea>
-                        <mat-error senergyError label="Command Template"></mat-error>
-                    </mat-form-field>
-                </div>
-
-                <div>
-                    <mat-form-field color="accent" appearance="outline" fxFill>
-                        <mat-label>Delete Template</mat-label>
-                        <textarea matInput formControlName="delete_template" cdkTextareaAutosize
-                                  cdkAutosizeMinRows="1"></textarea>
-                        <mat-error senergyError label="Delete Template"></mat-error>
-                    </mat-form-field>
-                </div>
-            </ng-template>
-        </mat-expansion-panel>
-    </form>
+                    <div>
+                        <mat-form-field color="accent" appearance="outline" fxFill>
+                            <mat-label>Delete Template</mat-label>
+                            <textarea matInput formControlName="delete_template" cdkTextareaAutosize
+                                cdkAutosizeMinRows="1"></textarea>
+                            <mat-error senergyError label="Delete Template"></mat-error>
+                        </mat-form-field>
+                    </div>
+                </ng-template>
+            </mat-expansion-panel>
+        </form>
+    </div>
 </mat-dialog-content>
 
 

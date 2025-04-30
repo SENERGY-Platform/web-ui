@@ -68,3 +68,7 @@ table {
     display: flex;
     justify-content: space-between;
 }
+
+.content-root {
+    position: relative;
+}

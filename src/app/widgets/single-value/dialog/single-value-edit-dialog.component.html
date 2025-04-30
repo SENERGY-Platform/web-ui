@@ -39,7 +39,7 @@
                         <div>
                             <mat-form-field appearance="outline" color="accent">
                                 <mat-label>Device</mat-label>
-                                <senergy-select-search placeholder="Choose Device" [options]="devices" formControlName="device"
+                                <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Device" [options]="devices" formControlName="device"
                                     useOptionViewProperty="display_name" [compareWith]="compareIds">
                                 </senergy-select-search>
                                 <mat-error senergyError label="Device"></mat-error>
@@ -49,7 +49,7 @@
                         <div *ngIf="dataSourceFieldsReady">
                             <mat-form-field appearance="outline" color="accent">
                                 <mat-label>Service</mat-label>
-                                <senergy-select-search placeholder="Choose Service" [options]="services" formControlName="service"
+                                <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Service" [options]="services" formControlName="service"
                                     useOptionViewProperty="name" [compareWith]="compareIds">
                                 </senergy-select-search>
                                 <mat-error senergyError label="Service"></mat-error>
@@ -67,7 +67,7 @@
                         <div>
                             <mat-form-field appearance="outline" color="accent">
                                 <mat-label>Export</mat-label>
-                                <senergy-select-search placeholder="Choose Export" [options]="exports" formControlName="measurement"
+                                <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Export" [options]="exports" formControlName="measurement"
                                     useOptionViewProperty="name" [compareWith]="compareIds">
                                 </senergy-select-search>
                                 <mat-error senergyError label="Export"></mat-error>
@@ -85,7 +85,7 @@
                         <div>
                             <mat-form-field appearance="outline" color="accent">
                                 <mat-label>Device Group</mat-label>
-                                <senergy-select-search placeholder="Choose Device Group" [options]="deviceGroups" formControlName="deviceGroupId"
+                                <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Device Group" [options]="deviceGroups" formControlName="deviceGroupId"
                                     useOptionViewProperty="name" useOptionValueProperty="id">
                                 </senergy-select-search>
                                 <mat-error senergyError label="Device Group"></mat-error>
@@ -95,7 +95,7 @@
                         <div *ngIf="dataSourceFieldsReady">
                             <mat-form-field appearance="outline" color="accent">
                                 <mat-label>Criteria</mat-label>
-                                <senergy-select-search placeholder="Choose Criteria" [options]="getCriteria()" formControlName="deviceGroupCriteria"
+                                <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Criteria" [options]="getCriteria()" formControlName="deviceGroupCriteria"
                                     [getOptionViewValue]="describeCriteria()" [compareWith]="compareCriteria">
                                 </senergy-select-search>
                                 <mat-error senergyError label="Criteria"></mat-error>
@@ -114,7 +114,7 @@
                     <div *ngIf="form.get('sourceType')?.value === 'export' && exports.length > 0">
                         <mat-form-field appearance="outline" color="accent">
                             <mat-label>Value</mat-label>
-                            <senergy-select-search placeholder="Choose Value" [options]="vAxisValues"
+                            <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Value" [options]="vAxisValues"
                                 [compareWith]="compareValues" useOptionViewProperty="Name" formControlName="vAxis">
                             </senergy-select-search>
                             <mat-error senergyError label="Value"></mat-error>
@@ -123,7 +123,7 @@
                     <div *ngIf="form.get('sourceType')?.value === 'device'  && devices.length > 0">
                         <mat-form-field appearance="outline" color="accent">
                             <mat-label>Value</mat-label>
-                            <senergy-select-search placeholder="Choose Value" useOptionViewProperty="Name" [options]="paths"
+                            <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Value" useOptionViewProperty="Name" [options]="paths"
                                 formControlName="vAxis" [compareWith]="compareNames">
                             </senergy-select-search>
                             <mat-error senergyError label="Value"></mat-error>
@@ -139,7 +139,7 @@
                         <mat-form-field appearance="outline" color="accent"
                             *ngIf="form.get('sourceType')?.value === 'deviceGroup' && deviceGroups.length > 0">
                             <mat-label>Unit</mat-label>
-                            <senergy-select-search  placeholder="Choose Unit" [options]="concept?.characteristics || []"
+                            <!-- TODO replace with mtx-select --> <senergy-select-search  placeholder="Choose Unit" [options]="concept?.characteristics || []"
                                 formControlName="vAxisLabel" [getOptionValue]="getDisplay"
                                 [getOptionViewValue]="getDisplay">
                             </senergy-select-search>
@@ -149,7 +149,7 @@
                     <div>
                         <mat-form-field appearance="outline" color="accent" *ngIf="form.get('sourceType')?.value === 'deviceGroup'">
                             <mat-label>Aggregation</mat-label>
-                            <senergy-select-search  placeholder="Choose Aggregation" [options]="aggregations" formControlName="deviceGroupAggregation">
+                            <!-- TODO replace with mtx-select --> <senergy-select-search  placeholder="Choose Aggregation" [options]="aggregations" formControlName="deviceGroupAggregation">
                             </senergy-select-search>
                             <mat-error senergyError label="Aggregation"></mat-error>
                         </mat-form-field>

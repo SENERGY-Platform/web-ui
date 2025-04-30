@@ -87,7 +87,7 @@
                 <mat-form-field fxFlex color="accent" appearance="outline"
                                 *ngIf="exportForm.getRawValue().selector ==='device'">
                     <mat-label>Device</mat-label>
-                    <senergy-select-search formControlName="device"
+                    <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="device"
                                            [options]="devices" useOptionViewProperty="display_name" [required]="true">
                     </senergy-select-search>
 					<mat-error senergyError label="Device"></mat-error>
@@ -96,7 +96,7 @@
                 <mat-form-field fxFlex color="accent" appearance="outline"
                                 *ngIf="exportForm.getRawValue().selector ==='pipe'">
                     <mat-label>Pipeline</mat-label>
-                    <senergy-select-search formControlName="pipeline"
+                    <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="pipeline"
                                            [options]="pipelines" useOptionViewProperty="name" [required]="true">
                     </senergy-select-search>
 					<mat-error senergyError label="Pipeline"></mat-error>
@@ -105,7 +105,7 @@
                 <mat-form-field fxFlex color="accent" appearance="outline"
                                 *ngIf="exportForm.getRawValue().selector ==='import'">
                     <mat-label>Import</mat-label>
-                    <senergy-select-search formControlName="import"
+                    <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="import"
                                            [options]="imports" useOptionViewProperty="name" [required]="true">
                     </senergy-select-search>
 					<mat-error senergyError label="Import"></mat-error>
@@ -114,7 +114,7 @@
                 <mat-form-field fxFlex color="accent" appearance="outline"
                                 *ngIf="exportForm.getRawValue().selector === 'device'">
                     <mat-label>Service</mat-label>
-                    <senergy-select-search formControlName="service"
+                    <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="service"
                                            [options]="deviceType.services"
                                            useOptionViewProperty="name" [required]="true">
                     </senergy-select-search>
@@ -150,7 +150,7 @@
                 <mat-form-field fxFill color="accent" appearance="outline"
                                 *ngIf="exportForm.getRawValue().targetSelector === targetDb">
                     <mat-label>Time Path</mat-label>
-                    <senergy-select-search formControlName="timePath" [options]="getPathsKeyOptions()">
+                    <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="timePath" [options]="getPathsKeyOptions()">
                     </senergy-select-search>
 					<mat-error senergyError label="Time Path"></mat-error>
                 </mat-form-field>
@@ -180,7 +180,7 @@
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
                             <mat-label>Path</mat-label>
-                            <senergy-select-search formControlName="Path" (ngModelChange)="pathChanged(key+offset)"
+                            <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="Path" (ngModelChange)="pathChanged(key+offset)"
                                                    [options]="getPathsKeyOptions()">
                             </senergy-select-search>
                             <mat-error senergyError label="Path"></mat-error>

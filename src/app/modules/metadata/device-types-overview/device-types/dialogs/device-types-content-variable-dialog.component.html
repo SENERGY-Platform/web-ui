@@ -38,21 +38,21 @@
 
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Aspect</mat-label>
-            <senergy-select-search [options]="aspectOptions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
+            <!-- TODO replace with mtx-select --> <senergy-select-search [options]="aspectOptions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
                                    formControlName="aspect_id" [getOptionDisabled]="aspectDisabled"></senergy-select-search>
             <mat-error senergyError label="Aspect"></mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Function</mat-label>
-            <senergy-select-search [options]="functions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
+            <!-- TODO replace with mtx-select --> <senergy-select-search [options]="functions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
                                    formControlName="function_id" useOptionClassProperty="class"></senergy-select-search>
             <mat-error senergyError label="Function"></mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isVoidType()">
             <mat-label>Characteristic</mat-label>
-            <senergy-select-search formControlName="characteristic_id" noneView="-- None --"
+            <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="characteristic_id" noneView="-- None --"
                                    [options]="characteristics" useOptionViewProperty="name" useOptionValueProperty="id"
                                    useOptionClassProperty="class">
             </senergy-select-search>

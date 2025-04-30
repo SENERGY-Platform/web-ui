@@ -27,7 +27,7 @@
         <div *ngIf="userHasUpdatePropertiesAuthorization" fxLayout="column">
             <mat-form-field color="accent" appearance="outline">
                 <mat-label>Device/group</mat-label>
-                <senergy-select-search [options]="selectables"
+                <!-- TODO replace with mtx-select --> <senergy-select-search [options]="selectables"
                                        [getOptionViewValue]="getSelectableName"
                                        ngDefaultControl formControlName="selectable"
                                        [getOptionValue]="getSelectableId"

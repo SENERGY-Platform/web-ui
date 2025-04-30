@@ -18,7 +18,7 @@
         <div *ngIf="ready">
             <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="hubList && hubList.length">
                 <mat-label>Deployment Destination</mat-label>
-                <senergy-select-search [formControl]="selectedHubForm"
+                <!-- TODO replace with mtx-select --> <senergy-select-search [formControl]="selectedHubForm"
                                        [autoSelectSingleElement]="true"
                                        [options]="hubList"
                                        useOptionViewProperty="name">
@@ -86,7 +86,7 @@
                             <div formGroupName="selection">
                                 <mat-form-field appearance="outline" class="full-width" color="accent">
                                     <mat-label>{{element.name}}</mat-label>
-                                    <senergy-select-search [required]="true" formControlName="selection_options_index"
+                                    <!-- TODO replace with mtx-select --> <senergy-select-search [required]="true" formControlName="selection_options_index"
                                                            [scrollWindowSize]="10000"
                                                            [options]="optionGroups.get(elementIndex) || []"
                                                            [getOptionValue]="getConditionalEventIndex(element)"
@@ -98,7 +98,7 @@
 
                                 <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="element.conditional_event.selection.show === true">
                                     <mat-label>Service</mat-label>
-                                    <senergy-select-search [required]="true" formControlName="selected_service_id"
+                                    <!-- TODO replace with mtx-select --> <senergy-select-search [required]="true" formControlName="selected_service_id"
                                                            [options]="element.conditional_event.selection.selection_options[element.conditional_event.selection.selection_options_index || 0].services || []"
                                                            useOptionValueProperty="id"
                                                            useOptionViewProperty="name">
@@ -109,7 +109,7 @@
                                 <mat-form-field appearance="outline" class="full-width" color="accent"
                                                 [fxShow]="getPathOptions(elementIndex, 'conditional_event').length > 1">
 									<mat-label>Path</mat-label>
-									<senergy-select-search [required]="true"
+									<!-- TODO replace with mtx-select --> <senergy-select-search [required]="true"
                                                            (selectionChange)="setSelectedPathOptionByElementIndex('conditional_event', elementIndex, $event.value)"
                                                            [autoSelectSingleElement]="true"
                                                            [options]="getPathOptions(elementIndex, 'conditional_event')"
@@ -134,7 +134,7 @@
 
                                         <mat-form-field appearance="outline" class="full-width" color="accent">
                                             <mat-label>{{element.name}}</mat-label>
-                                            <senergy-select-search [required]="true" formControlName="selection_options_index"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search [required]="true" formControlName="selection_options_index"
                                                                    [scrollWindowSize]="10000"
                                                                    [options]="optionGroups.get(elementIndex) || []"
                                                                    [getOptionValue]="getTaskIndex(element)"
@@ -146,7 +146,7 @@
 
                                         <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="element.task.selection.show === true">
                                             <mat-label>Service</mat-label>
-                                            <senergy-select-search [required]="true"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search [required]="true"
                                                                    formControlName="selected_service_id"
                                                                    [options]="element.task.selection.selection_options[element.task.selection.selection_options_index || 0].services || []"
                                                                    useOptionValueProperty="id"
@@ -158,7 +158,7 @@
                                         <mat-form-field appearance="outline" class="full-width" color="accent"
                                                         [fxShow]="getPathOptions(elementIndex, 'task').length > 1">
 											<mat-label>Path</mat-label>
-                                            <senergy-select-search [required]="true"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search [required]="true"
                                                                    (selectionChange)="setSelectedPathOptionByElementIndex('task', elementIndex, $event.value)"
                                                                    [autoSelectSingleElement]="true"
                                                                    [options]="getPathOptions(elementIndex, 'task')"
@@ -203,7 +203,7 @@
                                     <td formGroupName="selection">
                                         <mat-form-field appearance="outline" class="full-width" color="accent">
                                             <mat-label>{{element.name}}</mat-label>
-                                            <senergy-select-search placeholder="{{element.name}}" [required]="true"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="{{element.name}}" [required]="true"
                                                                    [scrollWindowSize]="10000"
                                                                    formControlName="selection_options_index"
                                                                    [options]="optionGroups.get(elementIndex) || []"
@@ -217,7 +217,7 @@
                                         <mat-form-field appearance="outline" class="full-width" color="accent"
                                                         *ngIf="element.message_event.selection.show === true">
 											<mat-label>Service</mat-label>
-                                            <senergy-select-search [required]="true"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search [required]="true"
                                                                    formControlName="selected_service_id"
                                                                    [autoSelectSingleElement]="true"
                                                                    [options]="getServiceOptions(elementIndex)"
@@ -230,7 +230,7 @@
                                         <mat-form-field appearance="outline" class="full-width" color="accent"
                                                         [fxShow]="getPathOptions(elementIndex, 'message_event').length > 1">
 											<mat-label>Path</mat-label>
-                                            <senergy-select-search [required]="true"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search [required]="true"
                                                                    (selectionChange)="setSelectedPathOptionByElementIndex('message_event', elementIndex, $event.value)"
                                                                    [autoSelectSingleElement]="true"
                                                                    [options]="getPathOptions(elementIndex, 'message_event')"
@@ -241,7 +241,7 @@
                                     <td>
                                         <mat-form-field appearance="outline" class="full-width" color="accent">
                                             <mat-label>Handler</mat-label>
-                                            <senergy-select-search [required]="true"
+                                            <!-- TODO replace with mtx-select --> <senergy-select-search [required]="true"
                                                                    formControlName="flow_id"
                                                                    [options]="handlerList"
                                                                    useOptionValueProperty="_id"
