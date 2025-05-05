@@ -18,3 +18,7 @@
     min-height: 270px;
     padding-top: 8px;
 }
+
+.root {
+    position: relative;
+}

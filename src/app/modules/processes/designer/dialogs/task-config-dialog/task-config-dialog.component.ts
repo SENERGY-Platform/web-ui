@@ -37,6 +37,11 @@ import { DeviceTypeService } from '../../../../metadata/device-types-overview/sh
 import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
 import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
 import { rangeValidator } from '../../../../../core/validators/range.validator';
+import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
+
+interface DeviceTypeAspectNodeModelWithRootName extends DeviceTypeAspectNodeModel {
+    root_name?: string;
+}
 
 @Component({
     templateUrl: './task-config-dialog.component.html',
@@ -54,7 +59,7 @@ export class TaskConfigDialogComponent implements OnInit {
 
 
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
-    aspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+    aspects: DeviceTypeAspectNodeModelWithRootName[] = [];
     functions: DeviceTypeFunctionModel[] = [];
     characteristic: DeviceTypeCharacteristicsModel = {} as DeviceTypeCharacteristicsModel;
     limit = 20;
@@ -104,6 +109,33 @@ export class TaskConfigDialogComponent implements OnInit {
         return a && b && a.id === b.id && a.name === b.name;
     }
 
+    getRootAspect(): GroupValueFn {
+        return (_, children): any => {
+            children = children as DeviceTypeAspectNodeModelWithRootName[];
+            const id = children[0].root_id;
+            if (id !== undefined) {
+                return { id };
+            }
+            return null;
+        };
+    }
+
+    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectNodeModelWithRootName | string, b: DeviceTypeAspectNodeModelWithRootName | string) => {
+        const aIsStr = typeof a === 'string' || a instanceof String;
+        const bIsStr = typeof b === 'string' || b instanceof String;
+
+        if (aIsStr && bIsStr) {
+            return a === b;
+        }
+        if (!aIsStr && !bIsStr) {
+            return a.id === b.id;
+        }
+        if (aIsStr) {
+            return a === (b as DeviceTypeAspectNodeModelWithRootName).id;
+        }
+        return a.id === b;
+    };
+
     private initOptions(): void {
         this.optionsFormControl.valueChanges.subscribe((options) => {
             this.deviceClassFormControl.setValue('');
@@ -147,16 +179,13 @@ export class TaskConfigDialogComponent implements OnInit {
 
     private getAspects(): void {
         this.deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
-            const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
-            const asp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            const tmp: DeviceTypeAspectNodeModelWithRootName[] = [];
             aspects.forEach(a => {
-                if (!tmp.has(a.root_id)) {
-                    tmp.set(a.root_id, []);
-                }
-                tmp.get(a.root_id)?.push(a);
+                const t = a as DeviceTypeAspectNodeModelWithRootName;
+                t.root_name = aspects.find(x => x.id === t.root_id)?.name;
+                tmp.push(t);
             });
-            tmp.forEach((v, k) => asp.set(aspects.find(a => a.id === k)?.name || '', v));
-            this.aspects = asp;
+            this.aspects = tmp;
         });
     }
 
@@ -208,12 +237,12 @@ export class TaskConfigDialogComponent implements OnInit {
                         if (index >= 0) {
                             this.characteristic = concept.characteristics[index];
                         } else {
-                            console.error('base characteristic '+concept.base_characteristic_id+' is not characteristic of the concept');
+                            console.error('base characteristic ' + concept.base_characteristic_id + ' is not characteristic of the concept');
                         }
                     } else {
                         if (!concept) {
                             console.error('unknown concept');
-                        }else if (!concept.base_characteristic_id) {
+                        } else if (!concept.base_characteristic_id) {
                             console.error('missing concept base characteristic');
                         }
                     }

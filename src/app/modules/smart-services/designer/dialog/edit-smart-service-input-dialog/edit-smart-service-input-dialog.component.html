@@ -16,6 +16,7 @@
 
 <h2 mat-dialog-title>Smart-Service Inputs</h2>
 <mat-dialog-content class="edit-smart-service-input-dialog">
+    <div class="root">
         <mat-accordion *ngIf="abstract && abstract.length > 0">
             <mat-expansion-panel *ngFor="let input of abstract; let inputIndex = index">
                 <mat-expansion-panel-header>
@@ -25,14 +26,15 @@
                 </mat-expansion-panel-header>
                 <div>
                     <div>
-                        <mat-form-field appearance="outline" class="full-width" color="accent" >
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
                             <mat-label>ID</mat-label>
-                            <input matInput [(ngModel)]="input.id" [generic_validator]="isValidCamundaVariableNameValidator">
+                            <input matInput [(ngModel)]="input.id"
+                                [generic_validator]="isValidCamundaVariableNameValidator">
                             <mat-error senergyError label="ID"></mat-error>
                         </mat-form-field>
                     </div>
                     <div>
-                        <mat-form-field appearance="outline" class="full-width" color="accent" >
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
                             <mat-label>Label</mat-label>
                             <input matInput [(ngModel)]="input.label">
                             <mat-error senergyError label="Label"></mat-error>
@@ -40,7 +42,7 @@
                     </div>
 
                     <div>
-                        <mat-form-field appearance="outline" class="full-width" color="accent" >
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
                             <mat-label>Description</mat-label>
                             <input matInput [(ngModel)]="input.description">
                             <mat-error senergyError label="Description"></mat-error>
@@ -48,7 +50,7 @@
                     </div>
 
                     <div>
-                        <mat-form-field appearance="outline" class="full-width" color="accent" >
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
                             <mat-label>Order</mat-label>
                             <input matInput [(ngModel)]="input.order" type="number">
                             <mat-error senergyError label="Order"></mat-error>
@@ -56,18 +58,16 @@
                     </div>
 
                     <div>
-                        <mat-checkbox [(ngModel)]="input.multiple"
-                                      [disabled]="input.auto_select_all"
-                                      matTooltip="may only be deactivated if 'Auto Select All' is deactivated"
-                                      [matTooltipDisabled]="!input.auto_select_all">
+                        <mat-checkbox [(ngModel)]="input.multiple" [disabled]="input.auto_select_all"
+                            matTooltip="may only be deactivated if 'Auto Select All' is deactivated"
+                            [matTooltipDisabled]="!input.auto_select_all">
                             Multiple
                         </mat-checkbox>
                     </div>
 
                     <div>
-                        <mat-checkbox [(ngModel)]="input.auto_select_all"
-                                      [disabled]="!input.multiple"
-                                      matTooltip="the smart service will use all possible options as value without asking the user; may only be activated if 'Multiple' is activated">
+                        <mat-checkbox [(ngModel)]="input.auto_select_all" [disabled]="!input.multiple"
+                            matTooltip="the smart service will use all possible options as value without asking the user; may only be activated if 'Multiple' is activated">
                             Auto Select All
                         </mat-checkbox>
                     </div>
@@ -80,19 +80,21 @@
 
 
                     <div>
-                        <mat-checkbox [checked]="isIotInputProvider(input)" (change)="useIotSelectors($event.checked, input)">
+                        <mat-checkbox [checked]="isIotInputProvider(input)"
+                            (change)="useIotSelectors($event.checked, input)">
                             IoT
                         </mat-checkbox>
                     </div>
 
                     <ng-container *ngIf="input.iot_selectors">
                         <div>
-                            <mat-checkbox [(ngModel)]="input.entity_only" matTooltip="check if you want the options to only contain the entity itself, without services or paths. tasks that receive this option often need more criteria information.">
+                            <mat-checkbox [(ngModel)]="input.entity_only"
+                                matTooltip="check if you want the options to only contain the entity itself, without services or paths. tasks that receive this option often need more criteria information.">
                                 EntityOnly
                             </mat-checkbox>
                         </div>
                         <div>
-                            <mat-form-field appearance="outline" class="full-width" color="accent" >
+                            <mat-form-field appearance="outline" class="full-width" color="accent">
                                 <mat-label>IoT-Selectors</mat-label>
                                 <mat-select [(ngModel)]="input.iot_selectors" multiple>
                                     <mat-option value="device">Device</mat-option>
@@ -127,44 +129,42 @@
                                     </div>
                                     <div>
                                         <div>
-                                            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                                            <mat-form-field appearance="outline" class="form-field full-width"
+                                                color="accent">
                                                 <mat-label>Function</mat-label>
-                                                <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="criteria.function_id"
-                                                                       [options]="functions"
-                                                                       noneView="NONE"
-                                                                       useOptionViewProperty="name"
-                                                                       useOptionValueProperty="id">
-                                                </senergy-select-search>
+                                                <mtx-select [(ngModel)]="criteria.function_id" [items]="functions"
+                                                    bindLabel="name" bindValue="id" appendTo=".root">
+                                                </mtx-select>
                                                 <mat-error senergyError label="Function"></mat-error>
                                             </mat-form-field>
                                         </div>
                                         <div>
-                                            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                                            <mat-form-field appearance="outline" class="form-field full-width"
+                                                color="accent">
                                                 <mat-label>Aspect</mat-label>
-                                                <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="criteria.aspect_id"
-                                                                       [options]="nestedAspects"
-                                                                       noneView="NONE"
-                                                                       useOptionViewProperty="name"
-                                                                       useOptionValueProperty="id">
-                                                </senergy-select-search>
+                                                <mtx-select  [(ngModel)]="criteria.aspect_id" [items]="aspects" bindLabel="name" bindValue="id"
+                                                appendTo=".root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
+                                                [compareWith]="compareAspectsWith">
+                                            </mtx-select>
+
+
                                                 <mat-error senergyError label="Aspect"></mat-error>
                                             </mat-form-field>
                                         </div>
                                         <div>
-                                            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                                            <mat-form-field appearance="outline" class="form-field full-width"
+                                                color="accent">
                                                 <mat-label>Device-Class</mat-label>
-                                                <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="criteria.device_class_id"
-                                                                       [options]="deviceClasses"
-                                                                       noneView="NONE"
-                                                                       useOptionViewProperty="name"
-                                                                       useOptionValueProperty="id">
-                                                </senergy-select-search>
+                                                <mtx-select [(ngModel)]="criteria.device_class_id"
+                                                    [items]="deviceClasses" bindLabel="name" bindValue="id" appendTo=".root">
+                                                </mtx-select>
                                                 <mat-error senergyError label="Device-Class"></mat-error>
                                             </mat-form-field>
                                         </div>
                                     </div>
                                     <div>
-                                        <button mat-raised-button color="accent" (click)="removeCriteria(input, i)">Remove Criteria</button>
+                                        <button mat-raised-button color="accent"
+                                            (click)="removeCriteria(input, i)">Remove Criteria</button>
                                     </div>
                                 </div>
                             </mat-expansion-panel>
@@ -211,12 +211,10 @@
                         <div>
                             <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                                 <mat-label>Characteristic</mat-label>
-                                <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="input.characteristic_id"
-                                                       [options]="characteristics"
-                                                       noneView="NONE"
-                                                       useOptionViewProperty="name"
-                                                       useOptionValueProperty="id">
-                                </senergy-select-search>
+                                <mtx-select
+                                    [(ngModel)]="input.characteristic_id" [items]="characteristics"
+                                    bindLabel="name" bindValue="id" appendTo=".root">
+                                </mtx-select>
                                 <mat-error senergyError label="Characteristic"></mat-error>
                             </mat-form-field>
                         </div>
@@ -240,7 +238,8 @@
                                     <input matInput [(ngModel)]="option.value" type="number">
                                     <mat-error senergyError label="Value"></mat-error>
                                 </mat-form-field>
-                                <mat-radio-group aria-label="Value" [(ngModel)]="option.value" *ngIf="input.type === 'boolean'">
+                                <mat-radio-group aria-label="Value" [(ngModel)]="option.value"
+                                    *ngIf="input.type === 'boolean'">
                                     <mat-radio-button [value]="true">True</mat-radio-button>
                                     <mat-radio-button [value]="false">False</mat-radio-button>
                                 </mat-radio-group>
@@ -260,13 +259,13 @@
                 </div>
             </mat-expansion-panel>
         </mat-accordion>
-    <div>
-        <button mat-raised-button color="accent" (click)="addInput()">Add Input</button>
+        <div>
+            <button mat-raised-button color="accent" (click)="addInput()">Add Input</button>
+        </div>
     </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="ok()" [disabled]="!isValid()">Save</button>
+    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+    <button mat-raised-button color="accent" (click)="ok()" [disabled]="!isValid()">Save</button>
 </mat-dialog-actions>
-

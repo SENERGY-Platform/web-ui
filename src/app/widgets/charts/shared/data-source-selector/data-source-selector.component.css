@@ -20,3 +20,7 @@ mat-form-field {
     padding-left: 0.5rem;
     font-size: 13px;
 }
+
+.root {
+    position: relative;
+}

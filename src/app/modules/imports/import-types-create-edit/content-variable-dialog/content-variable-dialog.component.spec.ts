@@ -30,6 +30,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { DeviceTypeCharacteristicsModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { MtxSelect } from '@ng-matero/extensions/select';
 
 describe('ContentVariableDialogComponent', () => {
     let component: ContentVariableDialogComponent;
@@ -69,6 +70,7 @@ describe('ContentVariableDialogComponent', () => {
                 MatInputModule,
                 MatSelectModule,
                 MatDialogModule,
+                MtxSelect,
             ],
             providers: [
                 { provide: MAT_DIALOG_DATA, useValue: dialogData },

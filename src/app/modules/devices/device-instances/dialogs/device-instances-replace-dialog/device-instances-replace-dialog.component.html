@@ -16,46 +16,59 @@
 <h2 mat-dialog-title>Replace Device</h2>
 
 <mat-dialog-content>
-    <form [formGroup]="form">
-        <h4>Choose Replacement</h4>
-        <div>
-            <mat-radio-group formControlName="mode">
-                <mat-radio-button [value]="DeviceInstancesReplaceDialogComponent.modeExisting">Existing Device</mat-radio-button>
-                <mat-radio-button [value]="DeviceInstancesReplaceDialogComponent.modeClone">Clone Device</mat-radio-button>
-            </mat-radio-group>
-        </div>
-        <h4>Add to Groups</h4>
-        <div>
-            <mat-radio-group formControlName="groupAddition">
-                <mat-radio-button [value]="this.groupAddAll">All</mat-radio-button>
-                <mat-radio-button [value]="this.groupAddGenerated">Generated</mat-radio-button>
-                <mat-radio-button [value]="this.groupAddNone">None</mat-radio-button>
-            </mat-radio-group>
-        </div>
-        <h4></h4>
-        <div [hidden]="form.get('mode')?.value !== DeviceInstancesReplaceDialogComponent.modeClone" formGroupName="clone">
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>New Name</mat-label>
-                <input matInput formControlName="name" [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeClone">
-                <mat-error senergyError label="Name"></mat-error>
-            </mat-form-field>
-        </div>
-        <div [hidden]="form.get('mode')?.value !== DeviceInstancesReplaceDialogComponent.modeExisting" formGroupName="existing">
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Device Type</mat-label>
-                <!-- TODO replace with mtx-select --> <senergy-select-search [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting" [options]="filteredDeviceTypes" useOptionViewProperty="name" useOptionValueProperty="id"
-                    formControlName="deviceType"></senergy-select-search>
-                <mat-error senergyError label="Device Type"></mat-error>
-            </mat-form-field>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Device</mat-label>
-                <!-- TODO replace with mtx-select --> <senergy-select-search [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting"
-                    [options]="deviceInstancesByType.get(form.get('existing.deviceType')?.value || '') || []"
-                    [getOptionViewValue]="getDeviceName" formControlName="device"></senergy-select-search> <!-- TODO  [disabled]="form.get('existing.deviceType')?.invalid || true"-->
-                <mat-error senergyError label="Device"></mat-error>
-            </mat-form-field>
-        </div>
-    </form>
+    <div class="root">
+        <form [formGroup]="form">
+            <h4>Choose Replacement</h4>
+            <div>
+                <mat-radio-group formControlName="mode">
+                    <mat-radio-button [value]="DeviceInstancesReplaceDialogComponent.modeExisting">Existing
+                        Device</mat-radio-button>
+                    <mat-radio-button [value]="DeviceInstancesReplaceDialogComponent.modeClone">Clone
+                        Device</mat-radio-button>
+                </mat-radio-group>
+            </div>
+            <h4>Add to Groups</h4>
+            <div>
+                <mat-radio-group formControlName="groupAddition">
+                    <mat-radio-button [value]="this.groupAddAll">All</mat-radio-button>
+                    <mat-radio-button [value]="this.groupAddGenerated">Generated</mat-radio-button>
+                    <mat-radio-button [value]="this.groupAddNone">None</mat-radio-button>
+                </mat-radio-group>
+            </div>
+            <h4></h4>
+            <div [hidden]="form.get('mode')?.value !== DeviceInstancesReplaceDialogComponent.modeClone"
+                formGroupName="clone">
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>New Name</mat-label>
+                    <input matInput formControlName="name"
+                        [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeClone">
+                    <mat-error senergyError label="Name"></mat-error>
+                </mat-form-field>
+            </div>
+            <div [hidden]="form.get('mode')?.value !== DeviceInstancesReplaceDialogComponent.modeExisting"
+                formGroupName="existing">
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Device Type</mat-label>
+                    <mtx-select
+                        [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting"
+                        [items]="filteredDeviceTypes" bindLabel="name" bindValue="id" appendTo=".root"
+                        formControlName="deviceType"></mtx-select>
+                    <mat-error senergyError label="Device Type"></mat-error>
+                </mat-form-field>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Device</mat-label>
+                    <mtx-select
+                        [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting"
+                        formControlName="device" appendTo=".root">
+                        <mtx-option
+                            *ngFor="let option of deviceInstancesByType.get(form.get('existing.deviceType')?.value || '') || []"
+                            [value]="option">{{getDeviceName(option)}}</mtx-option>
+                    </mtx-select>
+                    <mat-error senergyError label="Device"></mat-error>
+                </mat-form-field>
+            </div>
+        </form>
+    </div>
 </mat-dialog-content>
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>

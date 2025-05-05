@@ -49,7 +49,6 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatListModule} from '@angular/material/list';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatSelectModule} from '@angular/material/select';
-import {SelectSearchComponent} from './components/select-search/select-search.component';
 import {ConfirmDialogComponent} from './dialogs/confirm-dialog.component';
 import {ClosableSnackBarComponent} from './components/closable-snack-bar/closable-snack-bar.component';
 import {MatPaginatorModule} from '@angular/material/paginator';
@@ -113,7 +112,6 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         InputDialogComponent,
         WidgetNoDataComponent,
         NotificationDialogComponent,
-        SelectSearchComponent,
         ClosableSnackBarComponent,
         IsJsonValidatorDirective,
         GenericValidator,
@@ -133,7 +131,6 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
         WidgetNoDataComponent,
-        SelectSearchComponent,
         ClosableSnackBarComponent,
         IsJsonValidatorDirective,
         GenericValidator,

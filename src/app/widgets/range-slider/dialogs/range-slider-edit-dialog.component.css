@@ -34,3 +34,7 @@
     margin-right: 16px;
     width: 20%;
 }
+
+.root {
+    position: relative;
+}

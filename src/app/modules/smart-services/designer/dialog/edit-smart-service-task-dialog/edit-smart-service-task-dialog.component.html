@@ -16,988 +16,1018 @@
 
 <h2 mat-dialog-title>Smart-Service Task</h2>
 <mat-dialog-content class="edit-smart-service-task-dialog">
-  <mat-tab-group  backgroundColor="accent" color="primary" dynamicHeight="true" [(selectedIndex)]="activeIndex">
-    <mat-tab label="Process">
-      <div class="smart-service-task-tab">
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Task Name</mat-label>
-            <input matInput [(ngModel)]="result.name">
-            <mat-error senergyError label="Task Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <ng-container *ngFor="let input of result.inputs">
-          <div *ngIf="input.name === 'process_deployment.process_model_id'">
-            <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <mat-label>Process Model</mat-label>
-              <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="input.value"
-                                     [options]="processModels || []"
-                                     (selectionChange)="ensureProcessTaskParameter($event.value)"
-                                     useOptionViewProperty="name"
-                                     useOptionValueProperty="_id">
-              </senergy-select-search>
-              <mat-error senergyError label="Process Model"></mat-error>
-            </mat-form-field>
-          </div>
-        </ng-container>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Deployment Name</mat-label>
-            <input matInput [(ngModel)]="processProcessName" required>
-            <mat-error senergyError label="Deployment Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-checkbox
-                  class="checkbox-margin"
-                  [(ngModel)]="processFog"
-                  appStringCheckboxValue
-                  trueValue="true"
-                  falseValue="false">
-            Prefer Fog Deployment
-          </mat-checkbox>
-        </div>
-        <div>
-          <mat-checkbox
-                  class="checkbox-margin"
-                  [(ngModel)]="processRestart"
-                  appStringCheckboxValue
-                  trueValue="true"
-                  falseValue="false">
-            Restart on Incident
-          </mat-checkbox>
-        </div>
-        <div>
-          <mat-checkbox
-                  class="checkbox-margin"
-                  [(ngModel)]="processNotify"
-                  appStringCheckboxValue
-                  trueValue="true"
-                  falseValue="false">
-            Notify on Incident
-          </mat-checkbox>
-        </div>
-        <mat-card appearance="outlined">
-          <mat-accordion>
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  Start Parameter Defaults
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              <ng-container *ngFor="let input of result.inputs">
-                <div *ngIf="isProcessStartParam(input)">
-                  <mat-form-field appearance="outline" class="full-width" color="accent">
-                    <mat-label>{{getProcessStartParameterName(input)}}</mat-label>
-                    <input type="text"  matInput placeholder="{{getProcessStartParameterName(input)}}" [(ngModel)]="input.value">
-                    <mat-error senergyError></mat-error>
-                  </mat-form-field>
-                </div>
-              </ng-container>
-            </mat-expansion-panel>
-          </mat-accordion>
-        </mat-card>
-        <div>
-          <mat-card appearance="outlined">
-            <mat-accordion>
-            <mat-expansion-panel *ngFor="let taskId of processTaskIds">
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  {{getProcessTaskName(taskId)}} | {{taskId}}
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              <div>
-                <ng-container *ngFor="let input of result.inputs">
-                  <div *ngIf="processTaskMatches(input, taskId, 'selection')">
-                    <mat-form-field  appearance="outline" color="accent" class="full-width-minus-button">
-                      <mat-label>IoT-Selection</mat-label>
-                      <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="IoT-Selection"
-                                             [(ngModel)]="input.value"
-                                             [options]="availableProcessIotSelections"
-                                             useOptionViewProperty="name"
-                                             useOptionValueProperty="value">
-                      </senergy-select-search>
-                      <mat-error senergyError label="IoT-Selection"></mat-error>
-                    </mat-form-field>
-                    <button mat-icon-button (click)="generateInputForProcessElement(input, taskId)" matTooltip="generate and use input from task criteria">
-                      <mat-icon>playlist_add</mat-icon>
-                    </button>
-                    <mat-form-field appearance="outline"  color="accent" class="full-width">
-                      <mat-label>IoT-Selection Value</mat-label>
-                      <input matInput [(ngModel)]="input.value" required>
-                      <mat-error senergyError label="Iot-Selection Value"></mat-error>
-                    </mat-form-field>
-                  </div>
-                  <div *ngIf="processTaskMatches(input, taskId, 'time')">
-                    <mat-form-field appearance="outline"  color="accent" class="full-width">
-                      <mat-label>Time Event</mat-label>
-                      <input matInput [(ngModel)]="input.value" required>
-                      <mat-error senergyError label="Time Event"></mat-error>
-                    </mat-form-field>
-                  </div>
-                  <div *ngIf="processTaskMatches(input, taskId, 'event.flow_id')">
-                    <mat-form-field appearance="outline"  color="accent" class="full-width">
-                      <mat-label>Event Flow</mat-label>
-                      <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="input.value"
-                                             [options]="flows || []"
-                                             useOptionViewProperty="name"
-                                             useOptionValueProperty="_id">
-                      </senergy-select-search>
-                      <mat-error senergyError label="Event Flow"></mat-error>
-                    </mat-form-field>
-                  </div>
-                  <div *ngIf="processTaskMatches(input, taskId, 'event.value')">
-                    <mat-form-field appearance="outline"  color="accent" class="full-width">
-                      <mat-label>Event Value</mat-label>
-                      <input matInput [(ngModel)]="input.value">
-                      <mat-error senergyError label="Event Value"></mat-error>
-                    </mat-form-field>
-                  </div>
-                  <div *ngIf="processTaskMatches(input, taskId, 'event.use_marshaller')">
-                    <mat-checkbox
-                            class="checkbox-margin"
-                            *ngIf="processTaskMatches(input, taskId, 'event.use_marshaller')"
-                            [(ngModel)]="input.value"
-                            appStringCheckboxValue
-                            trueValue="true"
-                            falseValue="false">
-                      Use Marshaller
-                    </mat-checkbox>
-                  </div>
-
-                  <ng-container *ngFor="let parameter of getProcessTaskParameter(taskId)">
-                    <div *ngIf="processTaskMatches(input, taskId, 'parameter.'+parameter)">
-                      <mat-form-field appearance="outline"  color="accent" class="full-width">
-                        <mat-label>{{parameter}}</mat-label>
-                        <input matInput [(ngModel)]="input.value">
-                        <mat-error senergyError label="{{parameter}}"></mat-error>
-                      </mat-form-field>
-                    </div>
-                  </ng-container>
-
-                  <ng-container *ngFor="let variable of getProcessConditionalEventVariables(taskId)">
-                    <div *ngIf="processTaskMatches(input, taskId, 'variables.'+variable)">
-                      <mat-form-field appearance="outline"  color="accent" class="full-width">
-                        <mat-label>{{variable}}</mat-label>
-                        <input matInput placeholder="{{variable}}" [(ngModel)]="input.value">
-                        <mat-error senergyError label="{{variable}}"></mat-error>
-                      </mat-form-field>
-                    </div>
-                  </ng-container>
-
-                </ng-container>
-              </div>
-            </mat-expansion-panel>
-          </mat-accordion>
-          </mat-card>
-        </div>
-      </div>
-    </mat-tab>
-    <mat-tab label="Process-Start">
-      <div class="smart-service-task-tab">
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Task Name</mat-label>
-            <input matInput [(ngModel)]="result.name">
-            <mat-error senergyError label="Task Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Deployment-ID</mat-label>
-            <input matInput [(ngModel)]="processStart.deployment_id">
-            <button mat-icon-button matSuffix [matMenuTriggerFor]="menuDeploymentId">
-              <mat-icon>data_object</mat-icon>
-            </button>
-            <mat-menu #menuDeploymentId="matMenu">
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="processStart.deployment_id = '${'+param.name+'}'; generateProcessStartInputs(param.name)" [matTooltip]="param.name">
-                {{param.label || param.name}}
-              </button>
-            </mat-menu>
-            <mat-error senergyError label="Deployment-ID"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <div *ngFor="let input of processStart.inputs; let i = index" class="process-start-input">
-            <mat-form-field appearance="outline" color="accent" class="process-start-input-field">
-                <mat-label>Input Name</mat-label>
-                <input matInput [(ngModel)]="input.key">
-                <mat-error senergyError label="Input Name"></mat-error>
-            </mat-form-field>
-            <mat-form-field appearance="outline" color="accent" class="process-start-input-field">
-              <mat-label>Input Value</mat-label>
-              <input matInput [(ngModel)]="input.value" #processStartInput>
-              <button mat-icon-button matSuffix [matMenuTriggerFor]="menuInputValue">
-                <mat-icon>data_object</mat-icon>
-              </button>
-              <mat-menu #menuInputValue="matMenu">
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
-                  Value: {{param.label || param.name}}
-                </button>
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
-                  {{param.label || param.name}}
-                </button>
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
-                  {{param.label || param.name}}
-                </button>
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('analytics')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
-                  {{param.label || param.name}}
-                </button>
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('export')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
-                  {{param.label || param.name}}
-                </button>
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
-                  {{param.label || param.name}}
-                </button>
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
-                  IoT: {{param.label || param.name}}
-                </button>
-              </mat-menu>
-              <mat-error senergyError label="Input Value"></mat-error>
-            </mat-form-field>
-            <button mat-icon-button class="process-start-input-delete" (click)="removeProcessStartInput(i)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-          <button mat-icon-button (click)="addProcessStartInput()">
-            <mat-icon matTooltip="add process input">add</mat-icon>
-          </button>
-        </div>
-      </div>
-    </mat-tab>
-    <mat-tab label="Analytics">
-      <div class="smart-service-task-tab">
+  <div class="root">
+    <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true" [(selectedIndex)]="activeIndex">
+      <mat-tab label="Process">
         <div class="smart-service-task-tab">
           <div>
-            <mat-form-field appearance="outline"  color="accent" class="full-width">
+            <mat-form-field appearance="outline" color="accent" class="full-width">
               <mat-label>Task Name</mat-label>
               <input matInput [(ngModel)]="result.name">
               <mat-error senergyError label="Task Name"></mat-error>
             </mat-form-field>
           </div>
+          <ng-container *ngFor="let input of result.inputs">
+            <div *ngIf="input.name === 'process_deployment.process_model_id'">
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Process Model</mat-label>
+                <mtx-select [(ngModel)]="input.value" [items]="processModels || []"
+                  (change)="ensureProcessTaskParameter($event)" bindLabel="name" bindValue="_id" appendTo=".root">
+                </mtx-select>
+                <mat-error senergyError label="Process Model"></mat-error>
+              </mat-form-field>
+            </div>
+          </ng-container>
           <div>
-            <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <mat-label>Key</mat-label>
-              <input matInput [(ngModel)]="analyticsKeyId" type="text" matTooltip="optional key used to reference the module for updates">
-              <mat-error senergyError label="Key"></mat-error>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Deployment Name</mat-label>
+              <input matInput [(ngModel)]="processProcessName" required>
+              <mat-error senergyError label="Deployment Name"></mat-error>
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-              <mat-label>Flow</mat-label>
-              <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="analyticsFlowId"
-                                     [options]="flows || []"
-                                     useOptionViewProperty="name"
-                                     useOptionValueProperty="_id">
-              </senergy-select-search>
-              <mat-error senergyError label="Flow"></mat-error>
-            </mat-form-field>
-          </div>
-          <div>
-            <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <mat-label>Pipeline Name</mat-label>
-              <input matInput [(ngModel)]="analyticsPipelineName" required>
-              <mat-error senergyError label="Pipeline Name"></mat-error>
-            </mat-form-field>
-          </div>
-          <div>
-            <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <mat-label>Pipeline Description</mat-label>
-              <input matInput [(ngModel)]="analyticsPipelineDesc">
-              <mat-error senergyError label="Pipeline Description"></mat-error>
-            </mat-form-field>
-          </div>
-          <div>
-            <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <mat-label>Pipeline Window Time</mat-label>
-              <input matInput [(ngModel)]="analyticsWindowTime" required>
-              <mat-error senergyError label="Pipeline Window Time"></mat-error>
-            </mat-form-field>
-          </div>
-          <div>
-            <mat-checkbox
-                    class="consume-all-messages-checkbox"
-                    [(ngModel)]="analyticsConsumeAllMessages"
-                    appStringCheckboxValue
-                    trueValue="true"
-                    falseValue="false">
-              Consume All Messages
+            <mat-checkbox class="checkbox-margin" [(ngModel)]="processFog" appStringCheckboxValue trueValue="true"
+              falseValue="false">
+              Prefer Fog Deployment
             </mat-checkbox>
           </div>
           <div>
-            <mat-form-field appearance="outline" class="full-width" color="accent">
-              <mat-label>Pipeline Merge Strategy</mat-label>
-              <mat-select [(ngModel)]="analyticsMergeStrategy">
-                <mat-option value="inner">inner</mat-option>
-                <mat-option value="outer">outer</mat-option>
-              </mat-select>
-              <mat-error senergyError label="Pipeline Merge Strategy"></mat-error>
-            </mat-form-field>
+            <mat-checkbox class="checkbox-margin" [(ngModel)]="processRestart" appStringCheckboxValue trueValue="true"
+              falseValue="false">
+              Restart on Incident
+            </mat-checkbox>
           </div>
-
-          <div *ngIf="flowSvg"
-               class="image-svg-wrapper"
-               [innerHtml]="getAnalyticsFlowImage(flowSvg, currentFlowInputId)"
-                (click)="analyticsSvgSelectOperator($event)">
+          <div>
+            <mat-checkbox class="checkbox-margin" [(ngModel)]="processNotify" appStringCheckboxValue trueValue="true"
+              falseValue="false">
+              Notify on Incident
+            </mat-checkbox>
           </div>
-
+          <mat-card appearance="outlined">
+            <mat-accordion>
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Start Parameter Defaults
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <ng-container *ngFor="let input of result.inputs">
+                  <div *ngIf="isProcessStartParam(input)">
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
+                      <mat-label>{{getProcessStartParameterName(input)}}</mat-label>
+                      <input type="text" matInput placeholder="{{getProcessStartParameterName(input)}}"
+                        [(ngModel)]="input.value">
+                      <mat-error senergyError></mat-error>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </mat-card>
           <div>
             <mat-card appearance="outlined">
               <mat-accordion>
-                <mat-expansion-panel
-                        *ngFor="let flowInput of currentParsedFlows"
-                        [expanded]="currentFlowInputId === flowInput.id"
-                        (opened)="currentFlowInputId = flowInput.id">
+                <mat-expansion-panel *ngFor="let taskId of processTaskIds">
                   <mat-expansion-panel-header>
                     <mat-panel-title>
-                      {{flowInput.name}}
+                      {{getProcessTaskName(taskId)}} | {{taskId}}
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <div>
-                    <div *ngFor="let port of flowInput.inPorts">
-                      <mat-divider [inset]="true"></mat-divider>
-                      <h4 class="mat-h4">{{port}}</h4>
-                      <ng-container *ngFor="let input of result.inputs">
-                        <div *ngIf="analyticsInputMatchesIotSelection(input, flowInput.id, port)">
-                          <mat-form-field appearance="outline"  color="accent" class="full-width">
-                            <mat-label>IoT-Selection</mat-label>
-                            <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="IoT-Selection"
-                                                   [(ngModel)]="input.value"
-                                                   [options]="availableAnalyticsIotSelections"
-                                                   useOptionViewProperty="name"
-                                                   useOptionValueProperty="value">
-                            </senergy-select-search>
-                            <mat-error senergyError label="IoT-Selection"></mat-error>
-                          </mat-form-field>
-                          <mat-form-field appearance="outline"  color="accent" class="full-width">
-                            <mat-label>IoT-Selection Value</mat-label>
-                            <input matInput [(ngModel)]="input.value" required>
-                            <mat-error senergyError label="IoT-Selection Value"></mat-error>
-                          </mat-form-field>
-                        </div>
-                        <div *ngIf="analyticsInputMatchesIotCriteria(input, flowInput.id, port)">
-                          <mat-divider [inset]="true"></mat-divider>
-                          <h4 class="mat-h4">Criteria</h4>
-                          <senergy-criteria-list (changed)="input.value = $event" [criteria_json]="input.value"></senergy-criteria-list>
-                        </div>
-                        <div *ngIf="analyticsInputMatchesIotServiceCriteria(input, flowInput.id, port)">
-                          <mat-divider [inset]="true"></mat-divider>
-                          <h4 class="mat-h4">Service-Criteria</h4>
-                          <senergy-criteria-list (changed)="input.value = $event" [criteria_json]="input.value"></senergy-criteria-list>
-                        </div>
-                      </ng-container>
-                    </div>
-                    <mat-divider [inset]="true"></mat-divider>
-                    <h4 class="mat-h4">Configurations</h4>
-                    <div>
-                      <ng-container *ngFor="let input of result.inputs">
-                        <mat-checkbox
-                                class="checkbox-margin"
-                                *ngIf="analyticsInputMatchesPersistDataField(input, flowInput.id)"
-                                [(ngModel)]="input.value"
-                                appStringCheckboxValue
-                                trueValue="true"
-                                falseValue="false">
-                          Persist Data
+                    <ng-container *ngFor="let input of result.inputs">
+                      <div *ngIf="processTaskMatches(input, taskId, 'selection')">
+                        <mat-form-field appearance="outline" color="accent" class="full-width-minus-button">
+                          <mat-label>IoT-Selection</mat-label>
+                          <mtx-select placeholder="IoT-Selection" [(ngModel)]="input.value"
+                            [items]="availableProcessIotSelections" bindLabel="name" bindValue="value" appendTo=".root">
+                          </mtx-select>
+                          <mat-error senergyError label="IoT-Selection"></mat-error>
+                        </mat-form-field>
+                        <button mat-icon-button (click)="generateInputForProcessElement(input, taskId)"
+                          matTooltip="generate and use input from task criteria">
+                          <mat-icon>playlist_add</mat-icon>
+                        </button>
+                        <mat-form-field appearance="outline" color="accent" class="full-width">
+                          <mat-label>IoT-Selection Value</mat-label>
+                          <input matInput [(ngModel)]="input.value" required>
+                          <mat-error senergyError label="Iot-Selection Value"></mat-error>
+                        </mat-form-field>
+                      </div>
+                      <div *ngIf="processTaskMatches(input, taskId, 'time')">
+                        <mat-form-field appearance="outline" color="accent" class="full-width">
+                          <mat-label>Time Event</mat-label>
+                          <input matInput [(ngModel)]="input.value" required>
+                          <mat-error senergyError label="Time Event"></mat-error>
+                        </mat-form-field>
+                      </div>
+                      <div *ngIf="processTaskMatches(input, taskId, 'event.flow_id')">
+                        <mat-form-field appearance="outline" color="accent" class="full-width">
+                          <mat-label>Event Flow</mat-label>
+                          <mtx-select [(ngModel)]="input.value" [items]="flows || []" bindLabel="name" bindValue="_id"
+                            appendTo=".root">
+                          </mtx-select>
+                          <mat-error senergyError label="Event Flow"></mat-error>
+                        </mat-form-field>
+                      </div>
+                      <div *ngIf="processTaskMatches(input, taskId, 'event.value')">
+                        <mat-form-field appearance="outline" color="accent" class="full-width">
+                          <mat-label>Event Value</mat-label>
+                          <input matInput [(ngModel)]="input.value">
+                          <mat-error senergyError label="Event Value"></mat-error>
+                        </mat-form-field>
+                      </div>
+                      <div *ngIf="processTaskMatches(input, taskId, 'event.use_marshaller')">
+                        <mat-checkbox class="checkbox-margin"
+                          *ngIf="processTaskMatches(input, taskId, 'event.use_marshaller')" [(ngModel)]="input.value"
+                          appStringCheckboxValue trueValue="true" falseValue="false">
+                          Use Marshaller
                         </mat-checkbox>
-                      </ng-container>
-                    </div>
-                    <div *ngFor="let config of flowInput.config">
-                      <ng-container *ngFor="let input of result.inputs">
-                        <div *ngIf="analyticsInputMatchesIotConfig(input, flowInput.id, config.name)">
-                          <mat-form-field appearance="outline"  color="accent" class="full-width">
-                            <mat-label>{{config.name}}</mat-label>
-                            <input matInput placeholder="{{config.name}}" [(ngModel)]="input.value" #configInput>
-                            <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
-                              <mat-icon>data_object</mat-icon>
-                            </button>
-                            <mat-menu #menu="matMenu">
-                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
-                                Value: {{param.label || param.name}}
-                              </button>
-                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
-                                {{param.label || param.name}}
-                              </button>
-                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
-                                {{param.label || param.name}}
-                              </button>
-                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('analytics')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
-                                {{param.label || param.name}}
-                              </button>
-                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('export')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
-                                {{param.label || param.name}}
-                              </button>
-                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
-                                {{param.label || param.name}}
-                              </button>
-                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
-                                IoT: {{param.label || param.name}}
-                              </button>
-                            </mat-menu>
-                            <mat-error senergyError label="{{config.name}}"></mat-error>
+                      </div>
+
+                      <ng-container *ngFor="let parameter of getProcessTaskParameter(taskId)">
+                        <div *ngIf="processTaskMatches(input, taskId, 'parameter.'+parameter)">
+                          <mat-form-field appearance="outline" color="accent" class="full-width">
+                            <mat-label>{{parameter}}</mat-label>
+                            <input matInput [(ngModel)]="input.value">
+                            <mat-error senergyError label="{{parameter}}"></mat-error>
                           </mat-form-field>
                         </div>
                       </ng-container>
-                    </div>
+
+                      <ng-container *ngFor="let variable of getProcessConditionalEventVariables(taskId)">
+                        <div *ngIf="processTaskMatches(input, taskId, 'variables.'+variable)">
+                          <mat-form-field appearance="outline" color="accent" class="full-width">
+                            <mat-label>{{variable}}</mat-label>
+                            <input matInput placeholder="{{variable}}" [(ngModel)]="input.value">
+                            <mat-error senergyError label="{{variable}}"></mat-error>
+                          </mat-form-field>
+                        </div>
+                      </ng-container>
+
+                    </ng-container>
                   </div>
                 </mat-expansion-panel>
               </mat-accordion>
             </mat-card>
           </div>
         </div>
-      </div>
-    </mat-tab>
-    <mat-tab label="Export">
-      <div class="smart-service-task-tab">
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Task Name</mat-label>
-            <input matInput [(ngModel)]="result.name">
-            <mat-error senergyError label="Task Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Name</mat-label>
-            <input matInput [(ngModel)]="exportRequest.Name" type="text" required>
-            <mat-error senergyError label="Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Description</mat-label>
-            <input matInput [(ngModel)]="exportRequest.Description" type="text">
-            <mat-error senergyError label="Description"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Filter Type</mat-label>
-            <mat-select [(ngModel)]="exportRequest.FilterType" required>
-              <mat-option value="deviceId">deviceId</mat-option>
-              <mat-option value="operatorId">operatorId</mat-option>
-              <mat-option value="import_id">import_id</mat-option>
-            </mat-select>
-            <mat-error senergyError label="Filter Type"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Filter</mat-label>
-            <input matInput [(ngModel)]="exportRequest.Filter" type="text" #filterInput required>
-            <button mat-icon-button matSuffix [matMenuTriggerFor]="menuFilter">
-              <mat-icon>data_object</mat-icon>
-            </button>
-            <mat-menu #menuFilter="matMenu">
-              <ng-container *ngIf="exportRequest.FilterType === 'operatorId'">
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('flow_selection')" (click)="exportRequest.Filter = param.name; exportRequest.Topic = param.value" [matTooltip]="param.name">
-                  {{param.label || param.name}}
-                </button>
-              </ng-container>
-              <ng-container *ngIf="exportRequest.FilterType === 'import_id'">
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')" (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
-                  {{param.label || param.name}}
-                </button>
-              </ng-container>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')" (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
-                {{param.label || param.name}}
-              </button>
-            </mat-menu>
-            <mat-error senergyError label="Filter"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Entity Name</mat-label>
-            <input matInput [(ngModel)]="exportRequest.EntityName" type="text" required>
-            <mat-error senergyError label="Entity Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Topic</mat-label>
-            <input matInput [(ngModel)]="exportRequest.Topic" type="text" required>
-            <mat-error senergyError label="Topic"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Export Database ID</mat-label>
-            <!-- TODO replace with mtx-select --> <senergy-select-search
-                                   [(ngModel)]="exportRequest.ExportDatabaseID"
-                                   [options]="exportDatabaseList || []"
-                                   useOptionViewProperty="Name"
-                                   useOptionValueProperty="ID">
-            </senergy-select-search>
-            <mat-error senergyError label="Export Database ID"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Time Path</mat-label>
-            <input matInput [(ngModel)]="exportRequest.TimePath" type="text" required>
-            <mat-error senergyError label="Time Path"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Timestamp Format</mat-label>
-            <input matInput [(ngModel)]="exportRequest.TimestampFormat" type="text">
-            <mat-error senergyError label="Timestamp Format"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Time Precision</mat-label>
-            <input matInput [(ngModel)]="exportRequest.TimePrecision" type="text">
-            <mat-error senergyError label="Time Precision"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Service Name</mat-label>
-            <input matInput [(ngModel)]="exportRequest.ServiceName" type="text" required>
-            <mat-error senergyError label="Service Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Offset</mat-label>
-            <mat-select [(ngModel)]="exportRequest.Offset" required>
-              <mat-option value="largest">largest</mat-option>
-              <mat-option value="smallest">smallest</mat-option>
-            </mat-select>
-            <mat-error senergyError label="Offset"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-checkbox class="checkbox-margin" [(ngModel)]="exportRequest.generated">Generated</mat-checkbox>
-        </div>
-        <mat-accordion>
-          <mat-expansion-panel *ngFor="let value of exportRequest.Values; let i = index">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                {{value.Name}}
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <div>
-              <div>
-                <mat-form-field appearance="outline"  color="accent" class="full-width">
-                  <mat-label>Name</mat-label>
-                  <input matInput [(ngModel)]="value.Name" type="text" required>
-                  <mat-error senergyError label="Name"></mat-error>
-                </mat-form-field>
-              </div>
-              <div>
-                <mat-form-field appearance="outline"  color="accent" class="full-width">
-                  <mat-label>Path</mat-label>
-                  <input matInput [(ngModel)]="value.Path" type="text" required>
-                  <mat-error senergyError label="Path"></mat-error>
-                </mat-form-field>
-              </div>
-              <div>
-                <mat-form-field appearance="outline"  color="accent" class="full-width">
-                  <mat-label>Type</mat-label>
-                  <mat-select [(ngModel)]="value.Type" required>
-                    <mat-option value="string">string</mat-option>
-                    <mat-option value="float">float</mat-option>
-                    <mat-option value="bool">bool</mat-option>
-                    <mat-option value="string_json">string_json</mat-option>
-                  </mat-select>
-                  <mat-error senergyError label="Type"></mat-error>
-                </mat-form-field>
-              </div>
-              <div>
-                <mat-checkbox class="checkbox-margin" [(ngModel)]="value.Tag">Tag</mat-checkbox>
-              </div>
-              <div>
-                <button mat-raised-button color="accent" (click)="removeExportValue(i)">Remove Value</button>
-              </div>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-        <div>
-          <button mat-raised-button color="accent" (click)="addExportValue()">Add Value</button>
-        </div>
-      </div>
-    </mat-tab>
-    <mat-tab label="Import">
-      <div class="smart-service-task-tab">
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Task Name</mat-label>
-            <input matInput [(ngModel)]="result.name">
-            <mat-error senergyError label="Task Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Name</mat-label>
-            <input matInput [(ngModel)]="importRequest.name" type="text">
-            <mat-error senergyError label="Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Import-Type</mat-label>
-            <mat-select [(ngModel)]="importTypeId">
-              <mat-option *ngFor="let importType of importTypes" [value]="importType.id">
-                {{importType.name}}
-              </mat-option>
-            </mat-select>
-            <mat-error senergyError label="Import Type"></mat-error>
-          </mat-form-field>
-        </div>
-      </div>
-      <div>
-        <mat-checkbox class="checkbox-margin" [(ngModel)]="importRequest.restart">Generated</mat-checkbox>
-      </div>
-      <div>
-        <mat-checkbox class="checkbox-margin" [(ngModel)]="importRequest.generated">Restart</mat-checkbox>
-      </div>
-      <div *ngFor="let config of importRequest.configs" class="input-with-overwrite">
-        <mat-form-field appearance="outline"  color="accent" class="input-with-overwrite-value" *ngIf="isTextImportConfig(config)">
-          <mat-label>{{config.name}}</mat-label>
-          <input matInput [(ngModel)]="config.value" type="text">
-          <mat-error senergyError label="{{config.name}}"></mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline"  color="accent" class="input-with-overwrite-value" *ngIf="isNumberImportConfig(config)">
-          <mat-label>{{config.name}}</mat-label>
-          <input matInput [(ngModel)]="config.value" type="number">
-          <mat-error senergyError label="{{config.name}}"></mat-error>
-        </mat-form-field>
-        <mat-checkbox class="checkbox-margin" *ngIf="isBooleanImportConfig(config)" [(ngModel)]="importRequest.restart">{{config.name}}</mat-checkbox>
-        <mat-form-field  appearance="outline" color="accent" class="input-with-overwrite-value" *ngIf="isUnknownImportConfig(config)">
-          <mat-label>{{config.name}}</mat-label>
-          <input matInput [(ngModel)]="config.value" type="text" isValidJson>
-          <mat-error senergyError label="{{config.name}}"></mat-error>
-        </mat-form-field>
-        <ng-container *ngFor="let overwrite of importOverwrites">
-          <mat-form-field appearance="outline" *ngIf="overwrite.config_name === config.name" color="accent" class="input-with-overwrite-overwrite">
-            <mat-label>{{config.name}}</mat-label>
-            <input matInput placeholder="{{config.name}} overwrite with placeholder evaluated as json" [(ngModel)]="overwrite.json_value" type="text" #overwriterJsonInput>
-            <button mat-icon-button matSuffix [matMenuTriggerFor]="menuImportOverwrites">
-              <mat-icon>data_object</mat-icon>
-            </button>
-            <mat-menu #menuImportOverwrites="matMenu">
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')" (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)" [matTooltip]="param.name">
-                IoT: {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')" (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)" [matTooltip]="param.name">
-                Value: {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)" [matTooltip]="param.name">
-                {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('analytics')" (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)" [matTooltip]="param.name">
-                {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('export')" (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)" [matTooltip]="param.name">
-                {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')" (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)" [matTooltip]="param.name">
-                {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')" (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)" [matTooltip]="param.name">
-                {{param.label || param.name}}
-              </button>
-            </mat-menu>
-            <mat-error senergyError label="{{config.name}}"></mat-error>
-          </mat-form-field>
-        </ng-container>
-      </div>
-    </mat-tab>
-    <mat-tab label="Info">
-      <div class="smart-service-task-tab">
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Task Name</mat-label>
-            <input matInput [(ngModel)]="result.name" type="text">
-            <mat-error senergyError label="Task Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Key</mat-label>
-            <input matInput [(ngModel)]="infoKey" type="text" matTooltip="optional key used to reference the module for updates">
-            <mat-error senergyError label="Key"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>ModuleType</mat-label>
-            <input matInput [(ngModel)]="infoModuleType" type="text">
-            <mat-error senergyError label="Module Type"></mat-error>
-          </mat-form-field>
-        </div>
-        <div class="module-data-editor">
-          <h4>Module-Data</h4>
-          <div #infoModuleDataEditor id="infoModuleDataEditor" class="ace-editor"></div>
-        </div>
-      </div>
-    </mat-tab>
-    <mat-tab label="Device-Repository">
-      <div class="smart-service-task-tab">
-        <div>
-          <mat-form-field  appearance="outline" color="accent" class="full-width">
-            <mat-label>Task Name</mat-label>
-            <input matInput [(ngModel)]="result.name" type="text">
-            <mat-error senergyError label="Task Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Key</mat-label>
-            <input matInput [(ngModel)]="deviceRepositoryWorkerInfo.key" type="text" matTooltip="optional key used to reference the module for updates">
-            <mat-error senergyError label="Key"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Operation</mat-label>
-            <mat-select [(ngModel)]="deviceRepositoryWorkerInfo.operation">
-              <mat-option value="create_device_group">Create Device-Group</mat-option>
-            </mat-select>
-            <mat-error senergyError label="Operation"></mat-error>
-          </mat-form-field>
-        </div>
-        <ng-container *ngIf="deviceRepositoryWorkerInfo.operation === 'create_device_group'">
+      </mat-tab>
+      <mat-tab label="Process-Start">
+        <div class="smart-service-task-tab">
           <div>
-            <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <mat-label>Device-Group Name</mat-label>
-              <input matInput [(ngModel)]="deviceRepositoryWorkerInfo.name" type="text">
-              <mat-error senergyError label="Device-Group Name"></mat-error>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Task Name</mat-label>
+              <input matInput [(ngModel)]="result.name">
+              <mat-error senergyError label="Task Name"></mat-error>
             </mat-form-field>
           </div>
-          <div >
-            <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <mat-label>List of Devices</mat-label>
-              <input matInput [(ngModel)]="deviceRepositoryWorkerInfo.create_device_group.ids" #configInput>
-              <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Deployment-ID</mat-label>
+              <input matInput [(ngModel)]="processStart.deployment_id">
+              <button mat-icon-button matSuffix [matMenuTriggerFor]="menuDeploymentId">
                 <mat-icon>data_object</mat-icon>
               </button>
-              <mat-menu #menu="matMenu">
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')" (click)="deviceRepositoryWorkerInfo.create_device_group.ids = '${'+param.name+'}'" [matTooltip]="param.name">
-                  IoT: {{param.label || param.name}}
+              <mat-menu #menuDeploymentId="matMenu">
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')"
+                  (click)="processStart.deployment_id = '${'+param.name+'}'; generateProcessStartInputs(param.name)"
+                  [matTooltip]="param.name">
+                  {{param.label || param.name}}
                 </button>
               </mat-menu>
-              <mat-error senergyError label="List of Devices"></mat-error>
+              <mat-error senergyError label="Deployment-ID"></mat-error>
             </mat-form-field>
           </div>
-        </ng-container>
-      </div>
-    </mat-tab>
-    <mat-tab label="Watcher">
-      <div class="smart-service-task-tab">
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Task Name</mat-label>
-            <input matInput [(ngModel)]="result.name" type="text">
-            <mat-error senergyError label="Task Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Interval</mat-label>
-            <input matInput [(ngModel)]="watcherWorkerInfo.interval" type="text">
-            <mat-error senergyError label="Interval"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Hash Type</mat-label>
-            <mat-select [(ngModel)]="watcherWorkerInfo.hash_type">
-              <mat-option value="deviceids">deviceids</mat-option>
-              <mat-option value="md5">md5</mat-option>
-            </mat-select>
-            <mat-error senergyError label="Hash Type"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Maintenance-Procedure Event-Msg-Name</mat-label>
-            <input matInput [(ngModel)]="watcherWorkerInfo.maintenance_producer" type="text">
-            <mat-error senergyError label="Maintenance-Procedure Event-Msg-Name"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <div class="divider">
-            Maintenance-Inputs
-            <mat-divider></mat-divider>
-          </div>
-          <div *ngFor="let inp of watcherWorkerInfo.maintenance_procedure_inputs; let i = index" class="maintenanceInput">
-            <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
-              <mat-label>Key</mat-label>
-              <input matInput [(ngModel)]="inp.key" [ngModelOptions]="{standalone: true}">
-              <mat-error senergyError label="Key"></mat-error>
-            </mat-form-field>
-            <span style="width: 2em"></span>
-            <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
-              <mat-label>Value</mat-label>
-              <input matInput [(ngModel)]="inp.value" [ngModelOptions]="{standalone: true}" matTooltip="preferred as json value">
-              <mat-error senergyError label="Value"></mat-error>
-            </mat-form-field>
-            <button mat-icon-button color="warn" (click)="watcherWorkerInfo.maintenance_procedure_inputs.splice(i, 1)">
-              <mat-icon>delete</mat-icon>
+          <div>
+            <div *ngFor="let input of processStart.inputs; let i = index" class="process-start-input">
+              <mat-form-field appearance="outline" color="accent" class="process-start-input-field">
+                <mat-label>Input Name</mat-label>
+                <input matInput [(ngModel)]="input.key">
+                <mat-error senergyError label="Input Name"></mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" color="accent" class="process-start-input-field">
+                <mat-label>Input Value</mat-label>
+                <input matInput [(ngModel)]="input.value" #processStartInput>
+                <button mat-icon-button matSuffix [matMenuTriggerFor]="menuInputValue">
+                  <mat-icon>data_object</mat-icon>
+                </button>
+                <mat-menu #menuInputValue="matMenu">
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')"
+                    (click)="input.value = appendParam(input.value, param, processStartInput)"
+                    [matTooltip]="param.name">
+                    Value: {{param.label || param.name}}
+                  </button>
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')"
+                    (click)="input.value = appendParam(input.value, param, processStartInput)"
+                    [matTooltip]="param.name">
+                    {{param.label || param.name}}
+                  </button>
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')"
+                    (click)="input.value = appendParam(input.value, param, processStartInput)"
+                    [matTooltip]="param.name">
+                    {{param.label || param.name}}
+                  </button>
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('analytics')"
+                    (click)="input.value = appendParam(input.value, param, processStartInput)"
+                    [matTooltip]="param.name">
+                    {{param.label || param.name}}
+                  </button>
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('export')"
+                    (click)="input.value = appendParam(input.value, param, processStartInput)"
+                    [matTooltip]="param.name">
+                    {{param.label || param.name}}
+                  </button>
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')"
+                    (click)="input.value = appendParam(input.value, param, processStartInput)"
+                    [matTooltip]="param.name">
+                    {{param.label || param.name}}
+                  </button>
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')"
+                    (click)="input.value = appendParam(input.value, param, processStartInput)"
+                    [matTooltip]="param.name">
+                    IoT: {{param.label || param.name}}
+                  </button>
+                </mat-menu>
+                <mat-error senergyError label="Input Value"></mat-error>
+              </mat-form-field>
+              <button mat-icon-button class="process-start-input-delete" (click)="removeProcessStartInput(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <button mat-icon-button (click)="addProcessStartInput()">
+              <mat-icon matTooltip="add process input">add</mat-icon>
             </button>
           </div>
-          <button mat-stroked-button color="accent" (click)="watcherWorkerInfo.maintenance_procedure_inputs.push({key: '', value: ''})">Add Input</button>
-          <div class="divider">
-            <mat-divider></mat-divider>
+        </div>
+      </mat-tab>
+      <mat-tab label="Analytics">
+        <div class="smart-service-task-tab">
+          <div class="smart-service-task-tab">
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Task Name</mat-label>
+                <input matInput [(ngModel)]="result.name">
+                <mat-error senergyError label="Task Name"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Key</mat-label>
+                <input matInput [(ngModel)]="analyticsKeyId" type="text"
+                  matTooltip="optional key used to reference the module for updates">
+                <mat-error senergyError label="Key"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                <mat-label>Flow</mat-label>
+                <mtx-select [(ngModel)]="analyticsFlowId" [items]="flows || []" bindLabel="name" bindValue="_id"
+                  appendTo=".root">
+                </mtx-select>
+                <mat-error senergyError label="Flow"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Pipeline Name</mat-label>
+                <input matInput [(ngModel)]="analyticsPipelineName" required>
+                <mat-error senergyError label="Pipeline Name"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Pipeline Description</mat-label>
+                <input matInput [(ngModel)]="analyticsPipelineDesc">
+                <mat-error senergyError label="Pipeline Description"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Pipeline Window Time</mat-label>
+                <input matInput [(ngModel)]="analyticsWindowTime" required>
+                <mat-error senergyError label="Pipeline Window Time"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-checkbox class="consume-all-messages-checkbox" [(ngModel)]="analyticsConsumeAllMessages"
+                appStringCheckboxValue trueValue="true" falseValue="false">
+                Consume All Messages
+              </mat-checkbox>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="full-width" color="accent">
+                <mat-label>Pipeline Merge Strategy</mat-label>
+                <mat-select [(ngModel)]="analyticsMergeStrategy">
+                  <mat-option value="inner">inner</mat-option>
+                  <mat-option value="outer">outer</mat-option>
+                </mat-select>
+                <mat-error senergyError label="Pipeline Merge Strategy"></mat-error>
+              </mat-form-field>
+            </div>
+
+            <div *ngIf="flowSvg" class="image-svg-wrapper"
+              [innerHtml]="getAnalyticsFlowImage(flowSvg, currentFlowInputId)"
+              (click)="analyticsSvgSelectOperator($event)">
+            </div>
+
+            <div>
+              <mat-card appearance="outlined">
+                <mat-accordion>
+                  <mat-expansion-panel *ngFor="let flowInput of currentParsedFlows"
+                    [expanded]="currentFlowInputId === flowInput.id" (opened)="currentFlowInputId = flowInput.id">
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>
+                        {{flowInput.name}}
+                      </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <div>
+                      <div *ngFor="let port of flowInput.inPorts">
+                        <mat-divider [inset]="true"></mat-divider>
+                        <h4 class="mat-h4">{{port}}</h4>
+                        <ng-container *ngFor="let input of result.inputs">
+                          <div *ngIf="analyticsInputMatchesIotSelection(input, flowInput.id, port)">
+                            <mat-form-field appearance="outline" color="accent" class="full-width">
+                              <mat-label>IoT-Selection</mat-label>
+                              <mtx-select placeholder="IoT-Selection" [(ngModel)]="input.value"
+                                [items]="availableAnalyticsIotSelections" bindLabel="name" bindValue="value"
+                                appendTo=".root">
+                              </mtx-select>
+                              <mat-error senergyError label="IoT-Selection"></mat-error>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" color="accent" class="full-width">
+                              <mat-label>IoT-Selection Value</mat-label>
+                              <input matInput [(ngModel)]="input.value" required>
+                              <mat-error senergyError label="IoT-Selection Value"></mat-error>
+                            </mat-form-field>
+                          </div>
+                          <div *ngIf="analyticsInputMatchesIotCriteria(input, flowInput.id, port)">
+                            <mat-divider [inset]="true"></mat-divider>
+                            <h4 class="mat-h4">Criteria</h4>
+                            <senergy-criteria-list (changed)="input.value = $event"
+                              [criteria_json]="input.value"></senergy-criteria-list>
+                          </div>
+                          <div *ngIf="analyticsInputMatchesIotServiceCriteria(input, flowInput.id, port)">
+                            <mat-divider [inset]="true"></mat-divider>
+                            <h4 class="mat-h4">Service-Criteria</h4>
+                            <senergy-criteria-list (changed)="input.value = $event"
+                              [criteria_json]="input.value"></senergy-criteria-list>
+                          </div>
+                        </ng-container>
+                      </div>
+                      <mat-divider [inset]="true"></mat-divider>
+                      <h4 class="mat-h4">Configurations</h4>
+                      <div>
+                        <ng-container *ngFor="let input of result.inputs">
+                          <mat-checkbox class="checkbox-margin"
+                            *ngIf="analyticsInputMatchesPersistDataField(input, flowInput.id)" [(ngModel)]="input.value"
+                            appStringCheckboxValue trueValue="true" falseValue="false">
+                            Persist Data
+                          </mat-checkbox>
+                        </ng-container>
+                      </div>
+                      <div *ngFor="let config of flowInput.config">
+                        <ng-container *ngFor="let input of result.inputs">
+                          <div *ngIf="analyticsInputMatchesIotConfig(input, flowInput.id, config.name)">
+                            <mat-form-field appearance="outline" color="accent" class="full-width">
+                              <mat-label>{{config.name}}</mat-label>
+                              <input matInput placeholder="{{config.name}}" [(ngModel)]="input.value" #configInput>
+                              <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
+                                <mat-icon>data_object</mat-icon>
+                              </button>
+                              <mat-menu #menu="matMenu">
+                                <button mat-menu-item
+                                  *ngFor="let param of availableProcessVariables.get('value_form_fields')"
+                                  (click)="input.value = appendParam(input.value, param, configInput)"
+                                  [matTooltip]="param.name">
+                                  Value: {{param.label || param.name}}
+                                </button>
+                                <button mat-menu-item
+                                  *ngFor="let param of availableProcessVariables.get('uncategorized')"
+                                  (click)="input.value = appendParam(input.value, param, configInput)"
+                                  [matTooltip]="param.name">
+                                  {{param.label || param.name}}
+                                </button>
+                                <button mat-menu-item
+                                  *ngFor="let param of availableProcessVariables.get('process_deployment')"
+                                  (click)="input.value = appendParam(input.value, param, configInput)"
+                                  [matTooltip]="param.name">
+                                  {{param.label || param.name}}
+                                </button>
+                                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('analytics')"
+                                  (click)="input.value = appendParam(input.value, param, configInput)"
+                                  [matTooltip]="param.name">
+                                  {{param.label || param.name}}
+                                </button>
+                                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('export')"
+                                  (click)="input.value = appendParam(input.value, param, configInput)"
+                                  [matTooltip]="param.name">
+                                  {{param.label || param.name}}
+                                </button>
+                                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')"
+                                  (click)="input.value = appendParam(input.value, param, configInput)"
+                                  [matTooltip]="param.name">
+                                  {{param.label || param.name}}
+                                </button>
+                                <button mat-menu-item
+                                  *ngFor="let param of availableProcessVariables.get('iot_form_fields')"
+                                  (click)="input.value = appendParam(input.value, param, configInput)"
+                                  [matTooltip]="param.name">
+                                  IoT: {{param.label || param.name}}
+                                </button>
+                              </mat-menu>
+                              <mat-error senergyError label="{{config.name}}"></mat-error>
+                            </mat-form-field>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </div>
+                  </mat-expansion-panel>
+                </mat-accordion>
+              </mat-card>
+            </div>
           </div>
         </div>
-        <div>
-          <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Watch Operation</mat-label>
-            <mat-select [(ngModel)]="watcherWorkerInfo.operation">
-              <mat-option value="devices_by_criteria">Watch Devices by Criteria</mat-option>
-              <mat-option value="watch_request">Watch Generic Request</mat-option>
-            </mat-select>
-            <mat-error senergyError label="Watch Operation"></mat-error>
-          </mat-form-field>
-        </div>
-        <ng-container *ngIf="watcherWorkerInfo.operation === 'devices_by_criteria'">
-          <mat-divider [inset]="true"></mat-divider>
-          <h4 class="mat-h4">Criteria</h4>
+      </mat-tab>
+      <mat-tab label="Export">
+        <div class="smart-service-task-tab">
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Task Name</mat-label>
+              <input matInput [(ngModel)]="result.name">
+              <mat-error senergyError label="Task Name"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Name</mat-label>
+              <input matInput [(ngModel)]="exportRequest.Name" type="text" required>
+              <mat-error senergyError label="Name"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Description</mat-label>
+              <input matInput [(ngModel)]="exportRequest.Description" type="text">
+              <mat-error senergyError label="Description"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Filter Type</mat-label>
+              <mat-select [(ngModel)]="exportRequest.FilterType" required>
+                <mat-option value="deviceId">deviceId</mat-option>
+                <mat-option value="operatorId">operatorId</mat-option>
+                <mat-option value="import_id">import_id</mat-option>
+              </mat-select>
+              <mat-error senergyError label="Filter Type"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Filter</mat-label>
+              <input matInput [(ngModel)]="exportRequest.Filter" type="text" #filterInput required>
+              <button mat-icon-button matSuffix [matMenuTriggerFor]="menuFilter">
+                <mat-icon>data_object</mat-icon>
+              </button>
+              <mat-menu #menuFilter="matMenu">
+                <ng-container *ngIf="exportRequest.FilterType === 'operatorId'">
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('flow_selection')"
+                    (click)="exportRequest.Filter = param.name; exportRequest.Topic = param.value"
+                    [matTooltip]="param.name">
+                    {{param.label || param.name}}
+                  </button>
+                </ng-container>
+                <ng-container *ngIf="exportRequest.FilterType === 'import_id'">
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')"
+                    (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
+                    {{param.label || param.name}}
+                  </button>
+                </ng-container>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')"
+                  (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+              </mat-menu>
+              <mat-error senergyError label="Filter"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Entity Name</mat-label>
+              <input matInput [(ngModel)]="exportRequest.EntityName" type="text" required>
+              <mat-error senergyError label="Entity Name"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Topic</mat-label>
+              <input matInput [(ngModel)]="exportRequest.Topic" type="text" required>
+              <mat-error senergyError label="Topic"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Export Database ID</mat-label>
+              <mtx-select [(ngModel)]="exportRequest.ExportDatabaseID" [items]="exportDatabaseList || []"
+                bindLabel="Name" bindValue="ID" appendTo=".root">
+              </mtx-select>
+              <mat-error senergyError label="Export Database ID"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Time Path</mat-label>
+              <input matInput [(ngModel)]="exportRequest.TimePath" type="text" required>
+              <mat-error senergyError label="Time Path"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Timestamp Format</mat-label>
+              <input matInput [(ngModel)]="exportRequest.TimestampFormat" type="text">
+              <mat-error senergyError label="Timestamp Format"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Time Precision</mat-label>
+              <input matInput [(ngModel)]="exportRequest.TimePrecision" type="text">
+              <mat-error senergyError label="Time Precision"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Service Name</mat-label>
+              <input matInput [(ngModel)]="exportRequest.ServiceName" type="text" required>
+              <mat-error senergyError label="Service Name"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Offset</mat-label>
+              <mat-select [(ngModel)]="exportRequest.Offset" required>
+                <mat-option value="largest">largest</mat-option>
+                <mat-option value="smallest">smallest</mat-option>
+              </mat-select>
+              <mat-error senergyError label="Offset"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-checkbox class="checkbox-margin" [(ngModel)]="exportRequest.generated">Generated</mat-checkbox>
+          </div>
           <mat-accordion>
-            <mat-expansion-panel *ngFor="let criteria of watcherWorkerInfo.devices_by_criteria.criteria; let i = index">
+            <mat-expansion-panel *ngFor="let value of exportRequest.Values; let i = index">
               <mat-expansion-panel-header>
                 <mat-panel-title>
-                  {{criteriaToLabel(criteria)}}
+                  {{value.Name}}
                 </mat-panel-title>
               </mat-expansion-panel-header>
               <div>
                 <div>
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Interaction</mat-label>
-                    <mat-select [(ngModel)]="criteria.interaction">
-                      <mat-option [value]="undefined">NONE</mat-option>
-                      <mat-option value="event">event</mat-option>
-                      <mat-option value="request">request</mat-option>
-                      <mat-option value="event+request">event+request</mat-option>
-                    </mat-select>
-                    <mat-error senergyError label="Interaction"></mat-error>
+                  <mat-form-field appearance="outline" color="accent" class="full-width">
+                    <mat-label>Name</mat-label>
+                    <input matInput [(ngModel)]="value.Name" type="text" required>
+                    <mat-error senergyError label="Name"></mat-error>
                   </mat-form-field>
                 </div>
                 <div>
-                  <div>
-                    <mat-form-field appearance="outline"  class="form-field full-width" color="accent">
-                      <mat-label>Function</mat-label>
-                      <!-- TODO replace with mtx-select --> <senergy-select-search [(ngModel)]="criteria.function_id"
-                                             [options]="functions"
-                                             noneView="NONE"
-                                             useOptionViewProperty="name"
-                                             useOptionValueProperty="id">
-                      </senergy-select-search>
-                      <mat-error senergyError label="Function"></mat-error>
-                    </mat-form-field>
-                  </div>
-                  <div>
-                    <mat-form-field appearance="outline"  class="form-field full-width" color="accent">
-                      <mat-label>Aspect</mat-label>
-                      <!-- TODO replace with mtx-select --> <senergy-select-search
-                                             [(ngModel)]="criteria.aspect_id"
-                                             [options]="nestedAspects"
-                                             noneView="NONE"
-                                             useOptionViewProperty="name"
-                                             useOptionValueProperty="id">
-                      </senergy-select-search>
-                      <mat-error senergyError label="Aspect"></mat-error>
-                    </mat-form-field>
-                  </div>
-                  <div>
-                    <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                      <mat-label>Device Class</mat-label>
-                      <!-- TODO replace with mtx-select --> <senergy-select-search
-                                             [(ngModel)]="criteria.device_class_id"
-                                             [options]="deviceClasses"
-                                             noneView="NONE"
-                                             useOptionViewProperty="name"
-                                             useOptionValueProperty="id">
-                      </senergy-select-search>
-                      <mat-error senergyError label="Device Class"></mat-error>
-                    </mat-form-field>
-                  </div>
+                  <mat-form-field appearance="outline" color="accent" class="full-width">
+                    <mat-label>Path</mat-label>
+                    <input matInput [(ngModel)]="value.Path" type="text" required>
+                    <mat-error senergyError label="Path"></mat-error>
+                  </mat-form-field>
                 </div>
                 <div>
-                  <button mat-raised-button color="accent" (click)="watcherWorkerInfo.devices_by_criteria.criteria = removeCriteria(watcherWorkerInfo.devices_by_criteria.criteria, i)">Remove Criteria</button>
+                  <mat-form-field appearance="outline" color="accent" class="full-width">
+                    <mat-label>Type</mat-label>
+                    <mat-select [(ngModel)]="value.Type" required>
+                      <mat-option value="string">string</mat-option>
+                      <mat-option value="float">float</mat-option>
+                      <mat-option value="bool">bool</mat-option>
+                      <mat-option value="string_json">string_json</mat-option>
+                    </mat-select>
+                    <mat-error senergyError label="Type"></mat-error>
+                  </mat-form-field>
+                </div>
+                <div>
+                  <mat-checkbox class="checkbox-margin" [(ngModel)]="value.Tag">Tag</mat-checkbox>
+                </div>
+                <div>
+                  <button mat-raised-button color="accent" (click)="removeExportValue(i)">Remove Value</button>
                 </div>
               </div>
             </mat-expansion-panel>
           </mat-accordion>
           <div>
-            <button mat-raised-button color="accent" (click)="watcherWorkerInfo.devices_by_criteria.criteria = addCriteria(watcherWorkerInfo.devices_by_criteria.criteria)">Add Criteria</button>
+            <button mat-raised-button color="accent" (click)="addExportValue()">Add Value</button>
           </div>
-        </ng-container>
-        <ng-container *ngIf="watcherWorkerInfo.operation === 'watch_request'">
+        </div>
+      </mat-tab>
+      <mat-tab label="Import">
+        <div class="smart-service-task-tab">
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Task Name</mat-label>
+              <input matInput [(ngModel)]="result.name">
+              <mat-error senergyError label="Task Name"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Name</mat-label>
+              <input matInput [(ngModel)]="importRequest.name" type="text">
+              <mat-error senergyError label="Name"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Import-Type</mat-label>
+              <mat-select [(ngModel)]="importTypeId">
+                <mat-option *ngFor="let importType of importTypes" [value]="importType.id">
+                  {{importType.name}}
+                </mat-option>
+              </mat-select>
+              <mat-error senergyError label="Import Type"></mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div>
+          <mat-checkbox class="checkbox-margin" [(ngModel)]="importRequest.restart">Generated</mat-checkbox>
+        </div>
+        <div>
+          <mat-checkbox class="checkbox-margin" [(ngModel)]="importRequest.generated">Restart</mat-checkbox>
+        </div>
+        <div *ngFor="let config of importRequest.configs" class="input-with-overwrite">
+          <mat-form-field appearance="outline" color="accent" class="input-with-overwrite-value"
+            *ngIf="isTextImportConfig(config)">
+            <mat-label>{{config.name}}</mat-label>
+            <input matInput [(ngModel)]="config.value" type="text">
+            <mat-error senergyError label="{{config.name}}"></mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" color="accent" class="input-with-overwrite-value"
+            *ngIf="isNumberImportConfig(config)">
+            <mat-label>{{config.name}}</mat-label>
+            <input matInput [(ngModel)]="config.value" type="number">
+            <mat-error senergyError label="{{config.name}}"></mat-error>
+          </mat-form-field>
+          <mat-checkbox class="checkbox-margin" *ngIf="isBooleanImportConfig(config)"
+            [(ngModel)]="importRequest.restart">{{config.name}}</mat-checkbox>
+          <mat-form-field appearance="outline" color="accent" class="input-with-overwrite-value"
+            *ngIf="isUnknownImportConfig(config)">
+            <mat-label>{{config.name}}</mat-label>
+            <input matInput [(ngModel)]="config.value" type="text" isValidJson>
+            <mat-error senergyError label="{{config.name}}"></mat-error>
+          </mat-form-field>
+          <ng-container *ngFor="let overwrite of importOverwrites">
+            <mat-form-field appearance="outline" *ngIf="overwrite.config_name === config.name" color="accent"
+              class="input-with-overwrite-overwrite">
+              <mat-label>{{config.name}}</mat-label>
+              <input matInput placeholder="{{config.name}} overwrite with placeholder evaluated as json"
+                [(ngModel)]="overwrite.json_value" type="text" #overwriterJsonInput>
+              <button mat-icon-button matSuffix [matMenuTriggerFor]="menuImportOverwrites">
+                <mat-icon>data_object</mat-icon>
+              </button>
+              <mat-menu #menuImportOverwrites="matMenu">
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')"
+                  (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)"
+                  [matTooltip]="param.name">
+                  IoT: {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')"
+                  (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)"
+                  [matTooltip]="param.name">
+                  Value: {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')"
+                  (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)"
+                  [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('analytics')"
+                  (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)"
+                  [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('export')"
+                  (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)"
+                  [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')"
+                  (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)"
+                  [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')"
+                  (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)"
+                  [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+              </mat-menu>
+              <mat-error senergyError label="{{config.name}}"></mat-error>
+            </mat-form-field>
+          </ng-container>
+        </div>
+      </mat-tab>
+      <mat-tab label="Info">
+        <div class="smart-service-task-tab">
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Task Name</mat-label>
+              <input matInput [(ngModel)]="result.name" type="text">
+              <mat-error senergyError label="Task Name"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Key</mat-label>
+              <input matInput [(ngModel)]="infoKey" type="text"
+                matTooltip="optional key used to reference the module for updates">
+              <mat-error senergyError label="Key"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>ModuleType</mat-label>
+              <input matInput [(ngModel)]="infoModuleType" type="text">
+              <mat-error senergyError label="Module Type"></mat-error>
+            </mat-form-field>
+          </div>
+          <div class="module-data-editor">
+            <h4>Module-Data</h4>
+            <div #infoModuleDataEditor id="infoModuleDataEditor" class="ace-editor"></div>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab label="Device-Repository">
+        <div class="smart-service-task-tab">
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Task Name</mat-label>
+              <input matInput [(ngModel)]="result.name" type="text">
+              <mat-error senergyError label="Task Name"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Key</mat-label>
+              <input matInput [(ngModel)]="deviceRepositoryWorkerInfo.key" type="text"
+                matTooltip="optional key used to reference the module for updates">
+              <mat-error senergyError label="Key"></mat-error>
+            </mat-form-field>
+          </div>
           <div>
             <mat-form-field appearance="outline" class="full-width" color="accent">
-              <mat-label>Method</mat-label>
-              <mat-select [(ngModel)]="watcherWorkerInfo.request.method">
-                <mat-option value="GET">GET</mat-option>
-                <mat-option value="HEAD">HEAD</mat-option>
-                <mat-option value="POST">POST</mat-option>
-                <mat-option value="PUT">PUT</mat-option>
-                <mat-option value="DELETE">DELETE</mat-option>
-                <mat-option value="PATCH">PATCH</mat-option>
+              <mat-label>Operation</mat-label>
+              <mat-select [(ngModel)]="deviceRepositoryWorkerInfo.operation">
+                <mat-option value="create_device_group">Create Device-Group</mat-option>
               </mat-select>
-              <mat-error senergyError label="Method"></mat-error>
+              <mat-error senergyError label="Operation"></mat-error>
+            </mat-form-field>
+          </div>
+          <ng-container *ngIf="deviceRepositoryWorkerInfo.operation === 'create_device_group'">
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Device-Group Name</mat-label>
+                <input matInput [(ngModel)]="deviceRepositoryWorkerInfo.name" type="text">
+                <mat-error senergyError label="Device-Group Name"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>List of Devices</mat-label>
+                <input matInput [(ngModel)]="deviceRepositoryWorkerInfo.create_device_group.ids" #configInput>
+                <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
+                  <mat-icon>data_object</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')"
+                    (click)="deviceRepositoryWorkerInfo.create_device_group.ids = '${'+param.name+'}'"
+                    [matTooltip]="param.name">
+                    IoT: {{param.label || param.name}}
+                  </button>
+                </mat-menu>
+                <mat-error senergyError label="List of Devices"></mat-error>
+              </mat-form-field>
+            </div>
+          </ng-container>
+        </div>
+      </mat-tab>
+      <mat-tab label="Watcher">
+        <div class="smart-service-task-tab">
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Task Name</mat-label>
+              <input matInput [(ngModel)]="result.name" type="text">
+              <mat-error senergyError label="Task Name"></mat-error>
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <mat-label>Endpoint</mat-label>
-              <input matInput [(ngModel)]="watcherWorkerInfo.request.endpoint" type="text">
-              <mat-error senergyError label="Endpoint"></mat-error>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Interval</mat-label>
+              <input matInput [(ngModel)]="watcherWorkerInfo.interval" type="text">
+              <mat-error senergyError label="Interval"></mat-error>
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <mat-label>Body</mat-label>
-              <input matInput [(ngModel)]="watcherWorkerInfo.request.body" type="text" matTooltip="as base64 encoded byte array">
-              <mat-error senergyError label="Body"></mat-error>
+            <mat-form-field appearance="outline" class="full-width" color="accent">
+              <mat-label>Hash Type</mat-label>
+              <mat-select [(ngModel)]="watcherWorkerInfo.hash_type">
+                <mat-option value="deviceids">deviceids</mat-option>
+                <mat-option value="md5">md5</mat-option>
+              </mat-select>
+              <mat-error senergyError label="Hash Type"></mat-error>
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field appearance="outline"  color="accent" class="full-width">
-              <mat-label>Headers</mat-label>
-              <input matInput [(ngModel)]="watcherWorkerInfoRequestHeader" type="text" isValidJson>
-              <mat-error senergyError label="Headers"></mat-error>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Maintenance-Procedure Event-Msg-Name</mat-label>
+              <input matInput [(ngModel)]="watcherWorkerInfo.maintenance_producer" type="text">
+              <mat-error senergyError label="Maintenance-Procedure Event-Msg-Name"></mat-error>
             </mat-form-field>
           </div>
           <div>
-            <mat-checkbox class="checkbox-margin" [(ngModel)]="watcherWorkerInfo.request.add_auth_token" matTooltip="adds the users platform auth token to the request">
-              Add Auth-Token
-            </mat-checkbox>
+            <div class="divider">
+              Maintenance-Inputs
+              <mat-divider></mat-divider>
+            </div>
+            <div *ngFor="let inp of watcherWorkerInfo.maintenance_procedure_inputs; let i = index"
+              class="maintenanceInput">
+              <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
+                <mat-label>Key</mat-label>
+                <input matInput [(ngModel)]="inp.key" [ngModelOptions]="{standalone: true}">
+                <mat-error senergyError label="Key"></mat-error>
+              </mat-form-field>
+              <span style="width: 2em"></span>
+              <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
+                <mat-label>Value</mat-label>
+                <input matInput [(ngModel)]="inp.value" [ngModelOptions]="{standalone: true}"
+                  matTooltip="preferred as json value">
+                <mat-error senergyError label="Value"></mat-error>
+              </mat-form-field>
+              <button mat-icon-button color="warn"
+                (click)="watcherWorkerInfo.maintenance_procedure_inputs.splice(i, 1)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <button mat-stroked-button color="accent"
+              (click)="watcherWorkerInfo.maintenance_procedure_inputs.push({key: '', value: ''})">Add Input</button>
+            <div class="divider">
+              <mat-divider></mat-divider>
+            </div>
           </div>
-        </ng-container>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
-  <mat-accordion>
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          PreScript
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      <div>
-        <a href="https://raw.githubusercontent.com/SENERGY-Platform/smart-service-module-worker-lib/main/doc/jsdoc.js" target="_blank">JsDoc</a>
-        <div #preScriptEditor id="preScriptEditor" class="ace-editor"></div>
-      </div>
-    </mat-expansion-panel>
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          PostScript
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      <div>
-        <a href="https://raw.githubusercontent.com/SENERGY-Platform/smart-service-module-worker-lib/main/doc/jsdoc.js" target="_blank">JsDoc</a>
-        <div #postScriptEditor id="postScriptEditor" class="ace-editor"></div>
-      </div>
-    </mat-expansion-panel>
-  </mat-accordion>
+          <div>
+            <mat-form-field appearance="outline" class="full-width" color="accent">
+              <mat-label>Watch Operation</mat-label>
+              <mat-select [(ngModel)]="watcherWorkerInfo.operation">
+                <mat-option value="devices_by_criteria">Watch Devices by Criteria</mat-option>
+                <mat-option value="watch_request">Watch Generic Request</mat-option>
+              </mat-select>
+              <mat-error senergyError label="Watch Operation"></mat-error>
+            </mat-form-field>
+          </div>
+          <ng-container *ngIf="watcherWorkerInfo.operation === 'devices_by_criteria'">
+            <mat-divider [inset]="true"></mat-divider>
+            <h4 class="mat-h4">Criteria</h4>
+            <mat-accordion>
+              <mat-expansion-panel
+                *ngFor="let criteria of watcherWorkerInfo.devices_by_criteria.criteria; let i = index">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    {{criteriaToLabel(criteria)}}
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div>
+                  <div>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Interaction</mat-label>
+                      <mat-select [(ngModel)]="criteria.interaction">
+                        <mat-option [value]="undefined">NONE</mat-option>
+                        <mat-option value="event">event</mat-option>
+                        <mat-option value="request">request</mat-option>
+                        <mat-option value="event+request">event+request</mat-option>
+                      </mat-select>
+                      <mat-error senergyError label="Interaction"></mat-error>
+                    </mat-form-field>
+                  </div>
+                  <div>
+                    <div>
+                      <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                        <mat-label>Function</mat-label>
+                        <mtx-select [(ngModel)]="criteria.function_id" [items]="functions" bindLabel="name"
+                          bindValue="id" appendTo=".root">
+                        </mtx-select>
+                        <mat-error senergyError label="Function"></mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div>
+                      <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                        <mat-label>Aspect</mat-label>
+                        <mtx-select [(ngModel)]="criteria.aspect_id" [items]="aspects" bindLabel="name" bindValue="id"
+                          appendTo=".root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
+                          [compareWith]="compareAspectsWith">
+                        </mtx-select>
+                        <mat-error senergyError label="Aspect"></mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div>
+                      <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                        <mat-label>Device Class</mat-label>
+                        <mtx-select [(ngModel)]="criteria.device_class_id" [items]="deviceClasses" bindLabel="name"
+                          bindValue="id" appendTo=".root">
+                        </mtx-select>
+                        <mat-error senergyError label="Device Class"></mat-error>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div>
+                    <button mat-raised-button color="accent"
+                      (click)="watcherWorkerInfo.devices_by_criteria.criteria = removeCriteria(watcherWorkerInfo.devices_by_criteria.criteria, i)">Remove
+                      Criteria</button>
+                  </div>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+            <div>
+              <button mat-raised-button color="accent"
+                (click)="watcherWorkerInfo.devices_by_criteria.criteria = addCriteria(watcherWorkerInfo.devices_by_criteria.criteria)">Add
+                Criteria</button>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="watcherWorkerInfo.operation === 'watch_request'">
+            <div>
+              <mat-form-field appearance="outline" class="full-width" color="accent">
+                <mat-label>Method</mat-label>
+                <mat-select [(ngModel)]="watcherWorkerInfo.request.method">
+                  <mat-option value="GET">GET</mat-option>
+                  <mat-option value="HEAD">HEAD</mat-option>
+                  <mat-option value="POST">POST</mat-option>
+                  <mat-option value="PUT">PUT</mat-option>
+                  <mat-option value="DELETE">DELETE</mat-option>
+                  <mat-option value="PATCH">PATCH</mat-option>
+                </mat-select>
+                <mat-error senergyError label="Method"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Endpoint</mat-label>
+                <input matInput [(ngModel)]="watcherWorkerInfo.request.endpoint" type="text">
+                <mat-error senergyError label="Endpoint"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Body</mat-label>
+                <input matInput [(ngModel)]="watcherWorkerInfo.request.body" type="text"
+                  matTooltip="as base64 encoded byte array">
+                <mat-error senergyError label="Body"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Headers</mat-label>
+                <input matInput [(ngModel)]="watcherWorkerInfoRequestHeader" type="text" isValidJson>
+                <mat-error senergyError label="Headers"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-checkbox class="checkbox-margin" [(ngModel)]="watcherWorkerInfo.request.add_auth_token"
+                matTooltip="adds the users platform auth token to the request">
+                Add Auth-Token
+              </mat-checkbox>
+            </div>
+          </ng-container>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            PreScript
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <a href="https://raw.githubusercontent.com/SENERGY-Platform/smart-service-module-worker-lib/main/doc/jsdoc.js"
+            target="_blank">JsDoc</a>
+          <div #preScriptEditor id="preScriptEditor" class="ace-editor"></div>
+        </div>
+      </mat-expansion-panel>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            PostScript
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <a href="https://raw.githubusercontent.com/SENERGY-Platform/smart-service-module-worker-lib/main/doc/jsdoc.js"
+            target="_blank">JsDoc</a>
+          <div #postScriptEditor id="postScriptEditor" class="ace-editor"></div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

@@ -81,8 +81,16 @@ export class AxisConfigComponent {
         }
     }
 
-    getTags(element: ChartsExportVAxesModel): Map<string, { value: string; parent: string }[]> {
-        return this.exportTags.get(element.instanceId || '') || new Map();
+    getTags(element: ChartsExportVAxesModel): {group: string; value: string; parent: string }[] {
+        const res: {group: string; value: string; parent: string }[] = [];
+        this.exportTags.get(element.instanceId || '')?.forEach((v, k) => {
+            v.forEach(v2 => {
+                const v3 = v2 as {group: string; value: string; parent: string };
+                v3.group = k;
+                res.push(v3);
+            });
+        });
+        return res;
     }
 
     getTagOptionDisabledFunction(tab: ChartsExportVAxesModel): (option: { value: string; parent: string }) => boolean {

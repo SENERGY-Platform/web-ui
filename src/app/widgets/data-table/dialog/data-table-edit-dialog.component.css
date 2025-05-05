@@ -33,3 +33,7 @@ table {
 .order-select {
     min-height: 65px;
 }
+
+.root {
+    position: relative;
+}

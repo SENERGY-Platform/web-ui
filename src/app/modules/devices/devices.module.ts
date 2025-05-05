@@ -69,6 +69,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { DeviceInstancesFilterDialogComponent } from './device-instances/dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 import { DeviceInstancesReplaceDialogComponent } from './device-instances/dialogs/device-instances-replace-dialog/device-instances-replace-dialog.component';
 import { WidgetModule } from 'src/app/widgets/widget.module';
+import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
 
 const networks: Route = { path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: { header: 'Networks' } };
 const deviceInstances: Route = {
@@ -170,6 +171,8 @@ const locationsEdit: Route = {
         MatDatepickerModule,
         MatSnackBarModule,
         WidgetModule,
+        MtxSelect,
+        MtxOption,
     ],
     declarations: [
         NetworksComponent,

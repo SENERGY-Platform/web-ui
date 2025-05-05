@@ -13,225 +13,221 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<div class="button-header background-color-accent">
-    <button mat-icon-button (click)="goBack()" matTooltip="Back">
-        <mat-icon>arrow_back</mat-icon>
-    </button>
-</div>
-<form [formGroup]="exportForm" (submit)="onSubmit()">
-    <div class="main-panel">
-        <mat-card appearance="outlined" class="layout-margin" *ngIf="ready">
-            <div fxLayout="column">
-                <div fxLayout="row" class="source-container">
-                    <div class="source-label">Source:</div>
-                    <mat-radio-group formControlName="selector" class="radio-group">
-                        <mat-radio-button class="radio-button" value="device">Device</mat-radio-button>
-                        <mat-radio-button class="radio-button" value="pipe">Pipeline</mat-radio-button>
-                        <mat-radio-button class="radio-button" value="import">Import</mat-radio-button>
-                    </mat-radio-group>
-                </div>
-                <div fxLayout="row" class="source-container">
-                    <div class="source-label">Target:</div>
-                    <mat-radio-group formControlName="targetSelector" class="radio-group">
-                        <mat-radio-button class="radio-button" [value]="targetDb">Database</mat-radio-button>
-                        <mat-radio-button class="radio-button" [value]="targetBroker">Broker</mat-radio-button>
-                    </mat-radio-group>
-                </div>
-                <mat-form-field fxFlex color="accent" appearance="outline"
-                                *ngIf="exportForm.getRawValue().targetSelector === targetDb">
-                    <mat-label>Database</mat-label>
-                    <mat-select formControlName="exportDatabaseId" required>
-                        <mat-option *ngFor="let db of exportDatabases" [value]="db.ID">{{db.Name}}</mat-option>
-                    </mat-select>
-					<mat-error senergyError label="Database"></mat-error>
-                </mat-form-field>
-                <div fxLayout="row" class="source-container"
-                     *ngIf="exportForm.controls.targetSelector.value === targetBroker">
-                    <mat-slide-toggle formControlName="customBrokerEnabled">Custom Broker</mat-slide-toggle>
-                </div>
-                <div fxLayout="column" class="source-container" *ngIf="exportForm.controls.customBrokerEnabled.value">
-                    <mat-form-field fxFill color="accent" appearance="outline">
-                        <mat-label>Mqtt Broker Address</mat-label>
-                        <input matInput formControlName="customMqttBroker" placeholder="Broker"/>
-                        <mat-error senergyError label="Mqtt Broker Address"></mat-error>
-                    </mat-form-field>
-                    <mat-form-field fxFill color="accent" appearance="outline">
-                        <mat-label>Mqtt User</mat-label>
-                        <input matInput formControlName="customMqttUser" placeholder="User"/>
-                        <mat-error senergyError label="Mqtt User"></mat-error>
-                    </mat-form-field>
-                    <mat-form-field fxFill color="accent" appearance="outline">
-                        <mat-label>Mqtt Password</mat-label>
-                        <input matInput formControlName="customMqttPassword" placeholder="Password"/>
-                        <mat-error senergyError label="Mqtt Password"></mat-error>
-                    </mat-form-field>
-                    <mat-form-field fxFill color="accent" appearance="outline">
-                        <mat-label>Mqtt Base Topic</mat-label>
-                        <input matInput formControlName="customMqttBaseTopic" placeholder="Base Topic"/>
-                        <mat-error senergyError label="Mqtt Base Topic"></mat-error>
-                    </mat-form-field>
-                </div>
-                <mat-form-field fxFill color="accent" appearance="outline">
-                    <mat-label>Name</mat-label>
-                    <input matInput formControlName="name" required="true"/>
-                    <mat-error senergyError label="Name"></mat-error>
-                </mat-form-field>
-
-                <mat-form-field fxFill color="accent" appearance="outline">
-                    <mat-label>Description</mat-label>
-                    <input matInput formControlName="description"/>
-                    <mat-error senergyError label="Description"></mat-error>
-                </mat-form-field>
-
-                <mat-form-field fxFlex color="accent" appearance="outline"
-                                *ngIf="exportForm.getRawValue().selector ==='device'">
-                    <mat-label>Device</mat-label>
-                    <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="device"
-                                           [options]="devices" useOptionViewProperty="display_name" [required]="true">
-                    </senergy-select-search>
-					<mat-error senergyError label="Device"></mat-error>
-                </mat-form-field>
-
-                <mat-form-field fxFlex color="accent" appearance="outline"
-                                *ngIf="exportForm.getRawValue().selector ==='pipe'">
-                    <mat-label>Pipeline</mat-label>
-                    <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="pipeline"
-                                           [options]="pipelines" useOptionViewProperty="name" [required]="true">
-                    </senergy-select-search>
-					<mat-error senergyError label="Pipeline"></mat-error>
-                </mat-form-field>
-
-                <mat-form-field fxFlex color="accent" appearance="outline"
-                                *ngIf="exportForm.getRawValue().selector ==='import'">
-                    <mat-label>Import</mat-label>
-                    <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="import"
-                                           [options]="imports" useOptionViewProperty="name" [required]="true">
-                    </senergy-select-search>
-					<mat-error senergyError label="Import"></mat-error>
-                </mat-form-field>
-
-                <mat-form-field fxFlex color="accent" appearance="outline"
-                                *ngIf="exportForm.getRawValue().selector === 'device'">
-                    <mat-label>Service</mat-label>
-                    <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="service"
-                                           [options]="deviceType.services"
-                                           useOptionViewProperty="name" [required]="true">
-                    </senergy-select-search>
-					<mat-error senergyError label="Service"></mat-error>
-                </mat-form-field>
-
-                <mat-accordion fxFlex *ngIf="exportForm.getRawValue().selector ==='pipe'" class="operator-accordion"
-                               [ngClass]="{'operator-accordion-error': exportForm.controls.operator.invalid}">
-                    <mat-expansion-panel [disabled]="exportForm.value.pipeline === null"
-                                         style="margin-bottom: 10px;" fxFlex
-                                         class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title class="operator-titel"
-                                             [ngClass]="{'operator-titel-error': exportForm.controls.operator.invalid}">
-                                Operator *
-                            </mat-panel-title>
-                            <mat-panel-description *ngIf="operator.id">
-                                {{operator?.name}}
-                                -
-                                {{operator?.id}}
-                            </mat-panel-description>
-                        </mat-expansion-panel-header>
-                        <span class="widget-image" [innerHtml]="image"
-                              (click)="selectOperator($event)">
-                                </span>
-                    </mat-expansion-panel>
-                </mat-accordion>
-                <div class="operator-error" *ngIf="exportForm.controls.operator.invalid">Please select an operator
-                    by
-                    clicking on it.
-                </div>
-
-                <mat-form-field fxFill color="accent" appearance="outline"
-                                *ngIf="exportForm.getRawValue().targetSelector === targetDb">
-                    <mat-label>Time Path</mat-label>
-                    <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="timePath" [options]="getPathsKeyOptions()">
-                    </senergy-select-search>
-					<mat-error senergyError label="Time Path"></mat-error>
-                </mat-form-field>
-
-                <mat-form-field fxFill color="accent" appearance="outline" *ngIf="isTimescaleSelected()">
-                    <mat-label>Timestamp Format</mat-label>
-                    <input matInput
-                           formControlName="timestampFormat"
-                           placeholder="Choose or write yourself"
-                           [formControl]="formatControl"
-                           [matAutocomplete]="auto"/>
-                    <mat-autocomplete #auto="matAutocomplete">
-                        <mat-option *ngFor='let format of filtered_formats| async' [value]="format">{{format}}</mat-option>
-                    </mat-autocomplete>
-                    <mat-error senergyError label="Timestamp Format"></mat-error>
-                </mat-form-field>
-
-                <mat-checkbox formControlName="allMessages">Consume all messages</mat-checkbox>
-
-                <div formArrayName="exportValues" *ngFor="let group of getExportValuesControls(); let key = index"
-                     fxLayout="row" class="layout-value">
-                    <div [formGroupName]="key+offset" fxFlex fxLayoutAlign="center center">
-                        <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
-                            <mat-label>{{exportForm.get('targetSelector')?.value === targetDb ? 'Name' : 'Topic'}}</mat-label>
-                            <input #input matInput formControlName="Name"/>
-                            <mat-error senergyError label="Name"></mat-error>
-                        </mat-form-field>
-                        <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
-                            <mat-label>Path</mat-label>
-                            <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="Path" (ngModelChange)="pathChanged(key+offset)"
-                                                   [options]="getPathsKeyOptions()">
-                            </senergy-select-search>
-                            <mat-error senergyError label="Path"></mat-error>
-                        </mat-form-field>
-                        <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
-                            <mat-label>Type</mat-label>
-                            <mat-select formControlName="Type">
-                                <mat-option *ngFor="let option of dropdown | keyvalue" [value]="option.value">
-                                    {{option.value}}
-                                </mat-option>
-                            </mat-select>
-                            <mat-error senergyError label="Type"></mat-error>
-                        </mat-form-field>
-                        <mat-checkbox formControlName="Tag" (ngModelChange)="pathChanged(key+offset)"
-                                      class="inline layout-value pad-right"
-                                      *ngIf="exportForm.getRawValue().targetSelector === targetDb">Tag
-                        </mat-checkbox>
-                        <button mat-icon-button>
-                            <mat-icon (click)="deleteValue(key+offset)" color="warn" class="inline">
-                                delete
-                            </mat-icon>
-                        </button>
-                    </div>
-                </div>
-                <mat-paginator [length]="exportValues.controls.length"
-                               [pageSize]="defaultPageSize"
-                               [pageSizeOptions]="[5, 10, 20]"
-                               (page)="movePage($event)"
-                               showFirstLastButtons
-                               aria-label="Select page">
-                </mat-paginator>
-                <div fxLayout="row" class="button-footer">
-                    <div fxLayout="column" fxFlex fxLayoutAlign="center start">
-                        <button type="button" mat-raised-button color="accent" (click)="autofillValues()"
-                                disabled="{{paths.size === 0}}">
-                            Autofill Export Values
-                        </button>
-                    </div>
-                    <div fxLayout="column" fxFlex fxLayoutAlign="center end">
-                        <button type="button" mat-raised-button color="accent" (click)="addValue()">Add Export Value
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </mat-card>
-        <senergy-spinner [show]="!ready"></senergy-spinner>
+<div class="root">
+    <div class="button-header background-color-accent">
+        <button mat-icon-button (click)="goBack()" matTooltip="Back">
+            <mat-icon>arrow_back</mat-icon>
+        </button>
     </div>
-    <button *ngIf="id === null" mat-fab class="fab" type="submit" matTooltip="Start Export">
-        <mat-icon>play_arrow</mat-icon>
-    </button>
-    <button *ngIf="id !== null" mat-fab class="fab" type="submit" matTooltip="Edit Export">
-        <mat-icon>play_arrow</mat-icon>
-    </button>
-</form>
+    <form [formGroup]="exportForm" (submit)="onSubmit()">
+        <div class="main-panel">
+            <mat-card appearance="outlined" class="layout-margin" *ngIf="ready">
+                <div fxLayout="column">
+                    <div fxLayout="row" class="source-container">
+                        <div class="source-label">Source:</div>
+                        <mat-radio-group formControlName="selector" class="radio-group">
+                            <mat-radio-button class="radio-button" value="device">Device</mat-radio-button>
+                            <mat-radio-button class="radio-button" value="pipe">Pipeline</mat-radio-button>
+                            <mat-radio-button class="radio-button" value="import">Import</mat-radio-button>
+                        </mat-radio-group>
+                    </div>
+                    <div fxLayout="row" class="source-container">
+                        <div class="source-label">Target:</div>
+                        <mat-radio-group formControlName="targetSelector" class="radio-group">
+                            <mat-radio-button class="radio-button" [value]="targetDb">Database</mat-radio-button>
+                            <mat-radio-button class="radio-button" [value]="targetBroker">Broker</mat-radio-button>
+                        </mat-radio-group>
+                    </div>
+                    <mat-form-field fxFlex color="accent" appearance="outline"
+                        *ngIf="exportForm.getRawValue().targetSelector === targetDb">
+                        <mat-label>Database</mat-label>
+                        <mat-select formControlName="exportDatabaseId" required>
+                            <mat-option *ngFor="let db of exportDatabases" [value]="db.ID">{{db.Name}}</mat-option>
+                        </mat-select>
+                        <mat-error senergyError label="Database"></mat-error>
+                    </mat-form-field>
+                    <div fxLayout="row" class="source-container"
+                        *ngIf="exportForm.controls.targetSelector.value === targetBroker">
+                        <mat-slide-toggle formControlName="customBrokerEnabled">Custom Broker</mat-slide-toggle>
+                    </div>
+                    <div fxLayout="column" class="source-container"
+                        *ngIf="exportForm.controls.customBrokerEnabled.value">
+                        <mat-form-field fxFill color="accent" appearance="outline">
+                            <mat-label>Mqtt Broker Address</mat-label>
+                            <input matInput formControlName="customMqttBroker" placeholder="Broker" />
+                            <mat-error senergyError label="Mqtt Broker Address"></mat-error>
+                        </mat-form-field>
+                        <mat-form-field fxFill color="accent" appearance="outline">
+                            <mat-label>Mqtt User</mat-label>
+                            <input matInput formControlName="customMqttUser" placeholder="User" />
+                            <mat-error senergyError label="Mqtt User"></mat-error>
+                        </mat-form-field>
+                        <mat-form-field fxFill color="accent" appearance="outline">
+                            <mat-label>Mqtt Password</mat-label>
+                            <input matInput formControlName="customMqttPassword" placeholder="Password" />
+                            <mat-error senergyError label="Mqtt Password"></mat-error>
+                        </mat-form-field>
+                        <mat-form-field fxFill color="accent" appearance="outline">
+                            <mat-label>Mqtt Base Topic</mat-label>
+                            <input matInput formControlName="customMqttBaseTopic" placeholder="Base Topic" />
+                            <mat-error senergyError label="Mqtt Base Topic"></mat-error>
+                        </mat-form-field>
+                    </div>
+                    <mat-form-field fxFill color="accent" appearance="outline">
+                        <mat-label>Name</mat-label>
+                        <input matInput formControlName="name" required="true" />
+                        <mat-error senergyError label="Name"></mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field fxFill color="accent" appearance="outline">
+                        <mat-label>Description</mat-label>
+                        <input matInput formControlName="description" />
+                        <mat-error senergyError label="Description"></mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field fxFlex color="accent" appearance="outline"
+                        *ngIf="exportForm.getRawValue().selector ==='device'">
+                        <mat-label>Device</mat-label>
+                        <mtx-select formControlName="device" [items]="devices" bindLabel="display_name" required
+                            appendTo=".root">
+                        </mtx-select>
+                        <mat-error senergyError label="Device"></mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field fxFlex color="accent" appearance="outline"
+                        *ngIf="exportForm.getRawValue().selector ==='pipe'">
+                        <mat-label>Pipeline</mat-label>
+                        <mtx-select formControlName="pipeline" [items]="pipelines" bindLabel="name" required
+                            appendTo=".root">
+                        </mtx-select>
+                        <mat-error senergyError label="Pipeline"></mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field fxFlex color="accent" appearance="outline"
+                        *ngIf="exportForm.getRawValue().selector ==='import'">
+                        <mat-label>Import</mat-label>
+                        <mtx-select formControlName="import" [items]="imports" bindLabel="name" required
+                            appendTo=".root">
+                        </mtx-select>
+                        <mat-error senergyError label="Import"></mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field fxFlex color="accent" appearance="outline"
+                        *ngIf="exportForm.getRawValue().selector === 'device'">
+                        <mat-label>Service</mat-label>
+                        <mtx-select formControlName="service" [items]="deviceType.services" bindLabel="name" required
+                            appendTo=".root">
+                        </mtx-select>
+                        <mat-error senergyError label="Service"></mat-error>
+                    </mat-form-field>
+
+                    <mat-accordion fxFlex *ngIf="exportForm.getRawValue().selector ==='pipe'" class="operator-accordion"
+                        [ngClass]="{'operator-accordion-error': exportForm.controls.operator.invalid}">
+                        <mat-expansion-panel [disabled]="exportForm.value.pipeline === null"
+                            style="margin-bottom: 10px;" fxFlex
+                            class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title class="operator-titel"
+                                    [ngClass]="{'operator-titel-error': exportForm.controls.operator.invalid}">
+                                    Operator *
+                                </mat-panel-title>
+                                <mat-panel-description *ngIf="operator.id">
+                                    {{operator?.name}}
+                                    -
+                                    {{operator?.id}}
+                                </mat-panel-description>
+                            </mat-expansion-panel-header>
+                            <span class="widget-image" [innerHtml]="image" (click)="selectOperator($event)">
+                            </span>
+                        </mat-expansion-panel>
+                    </mat-accordion>
+                    <div class="operator-error" *ngIf="exportForm.controls.operator.invalid">Please select an operator
+                        by
+                        clicking on it.
+                    </div>
+
+                    <mat-form-field fxFill color="accent" appearance="outline"
+                        *ngIf="exportForm.getRawValue().targetSelector === targetDb">
+                        <mat-label>Time Path</mat-label>
+                        <mtx-select formControlName="timePath" [items]="getPathsKeyOptions()" appendTo=".root">
+                        </mtx-select>
+                        <mat-error senergyError label="Time Path"></mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field fxFill color="accent" appearance="outline" *ngIf="isTimescaleSelected()">
+                        <mat-label>Timestamp Format</mat-label>
+                        <input matInput formControlName="timestampFormat" placeholder="Choose or write yourself"
+                            [formControl]="formatControl" [matAutocomplete]="auto" />
+                        <mat-autocomplete #auto="matAutocomplete">
+                            <mat-option *ngFor='let format of filtered_formats| async'
+                                [value]="format">{{format}}</mat-option>
+                        </mat-autocomplete>
+                        <mat-error senergyError label="Timestamp Format"></mat-error>
+                    </mat-form-field>
+
+                    <mat-checkbox formControlName="allMessages">Consume all messages</mat-checkbox>
+
+                    <div formArrayName="exportValues" *ngFor="let group of getExportValuesControls(); let key = index"
+                        fxLayout="row" class="layout-value">
+                        <div [formGroupName]="key+offset" fxFlex fxLayoutAlign="center center">
+                            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
+                                <mat-label>{{exportForm.get('targetSelector')?.value === targetDb ? 'Name' :
+                                    'Topic'}}</mat-label>
+                                <input #input matInput formControlName="Name" />
+                                <mat-error senergyError label="Name"></mat-error>
+                            </mat-form-field>
+                            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
+                                <mat-label>Path</mat-label>
+                                <mtx-select formControlName="Path" (ngModelChange)="pathChanged(key+offset)"
+                                    [items]="getPathsKeyOptions()" appendTo=".root">
+                                </mtx-select>
+                                <mat-error senergyError label="Path"></mat-error>
+                            </mat-form-field>
+                            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
+                                <mat-label>Type</mat-label>
+                                <mat-select formControlName="Type">
+                                    <mat-option *ngFor="let option of dropdown | keyvalue" [value]="option.value">
+                                        {{option.value}}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error senergyError label="Type"></mat-error>
+                            </mat-form-field>
+                            <mat-checkbox formControlName="Tag" (ngModelChange)="pathChanged(key+offset)"
+                                class="inline layout-value pad-right"
+                                *ngIf="exportForm.getRawValue().targetSelector === targetDb">Tag
+                            </mat-checkbox>
+                            <button mat-icon-button>
+                                <mat-icon (click)="deleteValue(key+offset)" color="warn" class="inline">
+                                    delete
+                                </mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <mat-paginator [length]="exportValues.controls.length" [pageSize]="defaultPageSize"
+                        [pageSizeOptions]="[5, 10, 20]" (page)="movePage($event)" showFirstLastButtons
+                        aria-label="Select page">
+                    </mat-paginator>
+                    <div fxLayout="row" class="button-footer">
+                        <div fxLayout="column" fxFlex fxLayoutAlign="center start">
+                            <button type="button" mat-raised-button color="accent" (click)="autofillValues()"
+                                disabled="{{paths.size === 0}}">
+                                Autofill Export Values
+                            </button>
+                        </div>
+                        <div fxLayout="column" fxFlex fxLayoutAlign="center end">
+                            <button type="button" mat-raised-button color="accent" (click)="addValue()">Add Export Value
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </mat-card>
+            <senergy-spinner [show]="!ready"></senergy-spinner>
+        </div>
+        <button *ngIf="id === null" mat-fab class="fab" type="submit" matTooltip="Start Export">
+            <mat-icon>play_arrow</mat-icon>
+        </button>
+        <button *ngIf="id !== null" mat-fab class="fab" type="submit" matTooltip="Edit Export">
+            <mat-icon>play_arrow</mat-icon>
+        </button>
+    </form>
+</div>

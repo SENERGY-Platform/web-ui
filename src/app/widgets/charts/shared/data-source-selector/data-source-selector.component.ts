@@ -1,24 +1,24 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {AbstractControl, ControlEvent, FormArray, FormBuilder, FormControl, FormGroup, TouchedChangeEvent, UntypedFormGroup, ValidatorFn, Validators} from '@angular/forms';
-import {catchError, concatMap, defaultIfEmpty, forkJoin, map, Observable, of, Subject, throwError} from 'rxjs';
-import {DeviceGroupCriteriaModel, DeviceGroupDisplayModel} from 'src/app/modules/devices/device-groups/shared/device-groups.model';
-import {DeviceInstanceModel} from 'src/app/modules/devices/device-instances/shared/device-instances.model';
-import {ExportModel, ExportResponseModel, ExportValueModel} from 'src/app/modules/exports/shared/export.model';
-import {ConceptsCharacteristicsModel} from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
-import {ConceptsService} from 'src/app/modules/metadata/concepts/shared/concepts.service';
-import {DeviceTypeAspectModel, DeviceTypeContentVariableModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeModel} from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
-import {ChartsExportMeasurementDisplayModel, ChartsExportVAxesModel} from '../../export/shared/charts-export-properties.model';
-import {environment} from 'src/environments/environment';
-import {ChartsExportRangeTimeTypeEnum} from '../../export/shared/charts-export-range-time-type.enum';
-import {ExportService} from 'src/app/modules/exports/shared/export.service';
-import {DeviceInstancesService} from 'src/app/modules/devices/device-instances/shared/device-instances.service';
-import {DeviceGroupsService} from 'src/app/modules/devices/device-groups/shared/device-groups.service';
-import {LocationDisplayModel} from 'src/app/modules/devices/locations/shared/locations.model';
-import {LocationsService} from 'src/app/modules/devices/locations/shared/locations.service';
-import {FunctionsService} from 'src/app/modules/metadata/functions/shared/functions.service';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AbstractControl, ControlEvent, FormArray, FormBuilder, FormControl, FormGroup, TouchedChangeEvent, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { catchError, concatMap, defaultIfEmpty, forkJoin, map, Observable, of, Subject, throwError } from 'rxjs';
+import { DeviceGroupCriteriaModel, DeviceGroupDisplayModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { ExportModel, ExportResponseModel, ExportValueModel } from 'src/app/modules/exports/shared/export.model';
+import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
+import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
+import { DeviceTypeAspectModel, DeviceTypeContentVariableModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
+import { ChartsExportMeasurementDisplayModel, ChartsExportVAxesModel } from '../../export/shared/charts-export-properties.model';
+import { environment } from 'src/environments/environment';
+import { ChartsExportRangeTimeTypeEnum } from '../../export/shared/charts-export-range-time-type.enum';
+import { ExportService } from 'src/app/modules/exports/shared/export.service';
+import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
+import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
+import { LocationDisplayModel } from 'src/app/modules/devices/locations/shared/locations.model';
+import { LocationsService } from 'src/app/modules/devices/locations/shared/locations.service';
+import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
 import _ from 'lodash';
-import {debounceTime, switchMap} from 'rxjs/operators';
+import { debounceTime, switchMap } from 'rxjs/operators';
 
 export interface DataSourceConfig {
     exports?: (ChartsExportMeasurementDisplayModel | DeviceInstanceModel | DeviceGroupDisplayModel | LocationDisplayModel)[];
@@ -39,6 +39,10 @@ export interface DataSourceConfig {
 }
 
 
+interface ChartsExportVAxesModelWithGroup extends ChartsExportVAxesModel {
+    group?: string;
+}
+
 @Component({
     selector: 'data-source-selector',
     templateUrl: './data-source-selector.component.html',
@@ -56,7 +60,7 @@ export class DataSourceSelectorComponent implements OnInit {
     functions: DeviceTypeFunctionModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     concepts: Map<string, ConceptsCharacteristicsModel | null> = new Map();
-    fieldOptionsTMP: Map<string, ChartsExportVAxesModel[]> = new Map();
+    fieldOptionsTMP: ChartsExportVAxesModelWithGroup[] = [];
 
     timeRangeEnum = ChartsExportRangeTimeTypeEnum;
     timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.RelativeAhead, this.timeRangeEnum.Absolute];
@@ -142,7 +146,15 @@ export class DataSourceSelectorComponent implements OnInit {
         this.setupDataSources().pipe(
             concatMap(() => this.loadFieldOptions(this.dataSourceConfig?.exports || [])),
             map((fieldOptions) => {
-                this.fieldOptionsTMP = fieldOptions;
+                const tmp: ChartsExportVAxesModelWithGroup[] = [];
+                fieldOptions.forEach((v, k) => {
+                    v.forEach(v2 => {
+                        const v3 = v2 as ChartsExportVAxesModelWithGroup;
+                        v3.group = k;
+                        tmp.push(v3);
+                    });
+                });
+                this.fieldOptionsTMP = tmp;
                 const f = this.form.get('fieldOptions');
                 if (f !== null) {
                     f.patchValue(fieldOptions);
@@ -233,7 +245,7 @@ export class DataSourceSelectorComponent implements OnInit {
                 });
         });
 
-        this.form.controls['dataSourceClasses'].valueChanges.subscribe(chosenClasses=> { // delete exports of class when class gets unselected
+        this.form.controls['dataSourceClasses'].valueChanges.subscribe(chosenClasses => { // delete exports of class when class gets unselected
             const notChosen = this.dataSourceClasses.filter(x => !chosenClasses.includes(x));
             this.exportsControlBySource.controls.forEach(control => {
                 const sourceClass = this.getSourceClass(control);
@@ -359,7 +371,7 @@ export class DataSourceSelectorComponent implements OnInit {
         );
     }
 
-    private updateLocationFields(location: LocationDisplayModel): Observable<{ name: string; fieldOptions: ChartsExportVAxesModel[] } | null>  {
+    private updateLocationFields(location: LocationDisplayModel): Observable<{ name: string; fieldOptions: ChartsExportVAxesModel[] } | null> {
         return this.updateDeviceTypes(location.device_ids).pipe(
             switchMap((results: { device: DeviceInstanceModel, type: DeviceTypeModel }[]) => {
                 const observables: Observable<{ name: string; fieldOptions: ChartsExportVAxesModel[] } | null>[] = [];
@@ -397,24 +409,24 @@ export class DataSourceSelectorComponent implements OnInit {
 
                 location.device_group_ids.forEach(deviceGroupId => {
                     observables.push(
-                    this.deviceGroupsService.getDeviceGroup(deviceGroupId).pipe(
-                        switchMap(deviceGroup => {
-                            if (!deviceGroup) {
-                                return of(null);
-                            }
-                            return this.updateGroupFields(deviceGroup).pipe(
-                                map(options => {
-                                    options?.fieldOptions.forEach(o => o.deviceGroupId = undefined);
-                                    return options;
-                                })
-                            );
-                        })
-                    ));
+                        this.deviceGroupsService.getDeviceGroup(deviceGroupId).pipe(
+                            switchMap(deviceGroup => {
+                                if (!deviceGroup) {
+                                    return of(null);
+                                }
+                                return this.updateGroupFields(deviceGroup).pipe(
+                                    map(options => {
+                                        options?.fieldOptions.forEach(o => o.deviceGroupId = undefined);
+                                        return options;
+                                    })
+                                );
+                            })
+                        ));
                 });
 
                 return forkJoin(observables).pipe(
                     map(options => {
-                        const res: { name: string; fieldOptions: ChartsExportVAxesModel[]} = {
+                        const res: { name: string; fieldOptions: ChartsExportVAxesModel[] } = {
                             name: location.name,
                             fieldOptions: []
                         };
@@ -546,52 +558,52 @@ export class DataSourceSelectorComponent implements OnInit {
     getExports(request: { search?: string, limit?: number, offset?: number }) {
         return this.exportService.getExports(
             true, request.search, request.limit, request.offset, 'name', 'asc', undefined, undefined).pipe(
-            map((exports: ExportResponseModel | null) => {
-                if (exports !== null) {
-                    const exportList: ChartsExportMeasurementDisplayModel[] = [];
-                    exports.instances?.forEach((exportModel: ExportModel) => {
-                        if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                            exportList.push({
-                                id: exportModel.ID,
-                                name: exportModel.Name,
-                                values: exportModel.Values,
-                                exportDatabaseId: exportModel.ExportDatabaseID,
-                                display_name: exportModel.Name
-                            });
-                        }
-                    });
-
-                    let newOptions: any[];
-                    if (request.offset === 0) {
-                        const selectedOnes = this.selectedExportsBySource.get('Exports') as ChartsExportMeasurementDisplayModel[]|| [];
-                        newOptions = _.unionBy(selectedOnes, exportList, 'id');
-                    } else {
-                        const current = this.dataSourceOptions.get('Exports') as ChartsExportMeasurementDisplayModel[] || [];
-                        newOptions = _.unionBy(current, exportList, 'id');
-
-                    }
-                    newOptions = newOptions.map(value => this.setDisplayName(value) as ChartsExportMeasurementDisplayModel);
-                    this.dataSourceOptions.set('Exports', newOptions);
-
-                    if (this.dataSourceConfig?.exports != null) {
-                        // exports values or names might have changed
-                        this.dataSourceConfig.exports.forEach((selected) => {
-                            const latestExisting = exports.instances?.find((existing) => existing.ID === (selected as ChartsExportMeasurementDisplayModel).id);
-                            if (latestExisting !== undefined && latestExisting.Name !== undefined && latestExisting.ID !== undefined) {
-                                (selected as ChartsExportMeasurementDisplayModel).values = latestExisting.Values;
-                                (selected as ChartsExportMeasurementDisplayModel).name = latestExisting.Name;
-                                selected.display_name = selected.display_name?selected.display_name:(selected as ChartsExportMeasurementDisplayModel).name;
+                map((exports: ExportResponseModel | null) => {
+                    if (exports !== null) {
+                        const exportList: ChartsExportMeasurementDisplayModel[] = [];
+                        exports.instances?.forEach((exportModel: ExportModel) => {
+                            if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
+                                exportList.push({
+                                    id: exportModel.ID,
+                                    name: exportModel.Name,
+                                    values: exportModel.Values,
+                                    exportDatabaseId: exportModel.ExportDatabaseID,
+                                    display_name: exportModel.Name
+                                });
                             }
                         });
+
+                        let newOptions: any[];
+                        if (request.offset === 0) {
+                            const selectedOnes = this.selectedExportsBySource.get('Exports') as ChartsExportMeasurementDisplayModel[] || [];
+                            newOptions = _.unionBy(selectedOnes, exportList, 'id');
+                        } else {
+                            const current = this.dataSourceOptions.get('Exports') as ChartsExportMeasurementDisplayModel[] || [];
+                            newOptions = _.unionBy(current, exportList, 'id');
+
+                        }
+                        newOptions = newOptions.map(value => this.setDisplayName(value) as ChartsExportMeasurementDisplayModel);
+                        this.dataSourceOptions.set('Exports', newOptions);
+
+                        if (this.dataSourceConfig?.exports != null) {
+                            // exports values or names might have changed
+                            this.dataSourceConfig.exports.forEach((selected) => {
+                                const latestExisting = exports.instances?.find((existing) => existing.ID === (selected as ChartsExportMeasurementDisplayModel).id);
+                                if (latestExisting !== undefined && latestExisting.Name !== undefined && latestExisting.ID !== undefined) {
+                                    (selected as ChartsExportMeasurementDisplayModel).values = latestExisting.Values;
+                                    (selected as ChartsExportMeasurementDisplayModel).name = latestExisting.Name;
+                                    selected.display_name = selected.display_name ? selected.display_name : (selected as ChartsExportMeasurementDisplayModel).name;
+                                }
+                            });
+                        }
                     }
-                }
-            }),
-            catchError(err => {
-                console.log('could not get exports');
-                console.log(err);
-                return throwError(() => err);
-            })
-        );
+                }),
+                catchError(err => {
+                    console.log('could not get exports');
+                    console.log(err);
+                    return throwError(() => err);
+                })
+            );
     }
 
     getDevices(request: { limit: number, offset: number, searchText?: string }) {
@@ -600,7 +612,7 @@ export class DataSourceSelectorComponent implements OnInit {
                 const newResults: DeviceInstanceModel[] = devices.result;
                 let newOptions: any[];
                 if (request.offset === 0) {  // create new item list
-                    const selectedOnes = this.selectedExportsBySource.get('Devices') as DeviceInstanceModel[]|| [];
+                    const selectedOnes = this.selectedExportsBySource.get('Devices') as DeviceInstanceModel[] || [];
                     newOptions = _.unionBy(selectedOnes, newResults, 'id');
                 } else {                    // append newly loaded items
                     const current = this.dataSourceOptions.get('Devices') as DeviceInstanceModel[] || [];
@@ -634,10 +646,10 @@ export class DataSourceSelectorComponent implements OnInit {
                     dg.criteria = criteria;
                 });
 
-                const newResults: DeviceGroupDisplayModel [] = deviceGroups;
+                const newResults: DeviceGroupDisplayModel[] = deviceGroups;
                 let newOptions: any[];
                 if (request.offset === 0) {  // create new item list
-                    const selectedOnes = this.selectedExportsBySource.get('Device Groups') as DeviceGroupDisplayModel[]|| [];
+                    const selectedOnes = this.selectedExportsBySource.get('Device Groups') as DeviceGroupDisplayModel[] || [];
                     newOptions = _.unionBy(selectedOnes, newResults, 'id');
                 } else {                    // append newly loaded items
                     const current = this.dataSourceOptions.get('Device Groups') as DeviceGroupDisplayModel[] || [];
@@ -661,7 +673,7 @@ export class DataSourceSelectorComponent implements OnInit {
                 let newOptions: any[];
 
                 if (request.offset === 0) {  // create new item list
-                    const selectedOnes = this.selectedExportsBySource.get('Locations') as LocationDisplayModel[]|| [];
+                    const selectedOnes = this.selectedExportsBySource.get('Locations') as LocationDisplayModel[] || [];
                     newOptions = _.unionBy(selectedOnes, newResults, 'id');
                 } else {                    // append newly loaded items
                     const current = this.dataSourceOptions.get('Locations') as LocationDisplayModel[] || [];
@@ -676,16 +688,16 @@ export class DataSourceSelectorComponent implements OnInit {
         const obs: Observable<any>[] = [];
 
         if (this.showExportsAsSource) {
-            obs.push(this.getExports({limit: this.scrollDynInitLimit, offset: 0}));
+            obs.push(this.getExports({ limit: this.scrollDynInitLimit, offset: 0 }));
         }
         if (this.showDevicesAsSource) {
-            obs.push(this.getDevices({limit: this.scrollDynInitLimit, offset: 0}));
+            obs.push(this.getDevices({ limit: this.scrollDynInitLimit, offset: 0 }));
         }
         if (this.showDeviceGroupsAsSource) {
-            obs.push(this.getDeviceGroups({limit: this.scrollDynInitLimit, offset: 0}));
+            obs.push(this.getDeviceGroups({ limit: this.scrollDynInitLimit, offset: 0 }));
         }
         if (this.showLocationsAsSource) {
-            obs.push(this.getLocations({limit: this.scrollDynInitLimit, offset: 0}));
+            obs.push(this.getLocations({ limit: this.scrollDynInitLimit, offset: 0 }));
         }
 
         obs.push(this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').pipe(map(functions => this.functions = functions.result)));
@@ -701,7 +713,15 @@ export class DataSourceSelectorComponent implements OnInit {
         const selectedExports = this.form.get('exports')?.value;
         this.loadFieldOptions(selectedExports).pipe(
             map((fieldOptions) => {
-                this.fieldOptionsTMP = fieldOptions;
+                const tmp: ChartsExportVAxesModelWithGroup[] = [];
+                fieldOptions.forEach((v, k) => {
+                    v.forEach(v2 => {
+                        const v3 = v2 as ChartsExportVAxesModelWithGroup;
+                        v3.group = k;
+                        tmp.push(v3);
+                    });
+                });
+                this.fieldOptionsTMP = tmp;
                 setTimeout(() => {
                     let f = this.form.get('fieldOptions');
                     if (f !== null) {
@@ -876,12 +896,12 @@ export class DataSourceSelectorComponent implements OnInit {
             return null;
         }
         if (control.value === undefined || control.value === null || control.value.length === 0) {
-            return {validateInterval: {value: control.value}};
+            return { validateInterval: { value: control.value } };
         }
         const re = new RegExp('\\d+(ns|u|µ|ms|s|months|y|m|h|d|w)');
         const matches = re.exec(control.value);
         if (matches == null || matches.length === 0 || matches[0].length !== control.value.length) {
-            return {validateInterval: {value: control.value}};
+            return { validateInterval: { value: control.value } };
         }
         return null;
     };
@@ -905,14 +925,14 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
     setDisplayName(dataSource: ChartsExportMeasurementDisplayModel | DeviceInstanceModel | LocationDisplayModel | DeviceGroupDisplayModel) {
-        if (dataSource.display_name===undefined && 'name' in dataSource) {
+        if (dataSource.display_name === undefined && 'name' in dataSource) {
             dataSource.display_name = dataSource?.name;
         }
         return dataSource;
     }
 
     patchFields(fields: ChartsExportVAxesModel[]) {
-        this.form.patchValue({fields});
+        this.form.patchValue({ fields });
     }
 
 
@@ -925,11 +945,11 @@ export class DataSourceSelectorComponent implements OnInit {
         }
     }
 
-    private getPreSelectionsByClass(): Map <string, {ids:string[], exports:any[]}> {
+    private getPreSelectionsByClass(): Map<string, { ids: string[], exports: any[] }> {
         const preExports = this.dataSourceConfig?.exports;
-        const selections: Map <string, {ids:string[], exports:any[]}> = new Map();
+        const selections: Map<string, { ids: string[], exports: any[] }> = new Map();
         this.dataSourceClasses.forEach((sourceClass) => {
-            selections.set(sourceClass, {ids:[], exports:[]});
+            selections.set(sourceClass, { ids: [], exports: [] });
         });
         if (preExports !== undefined) {
             preExports.forEach(exp => {
@@ -941,10 +961,10 @@ export class DataSourceSelectorComponent implements OnInit {
         return selections;
     }
 
-    private getSourceClassFromId(id: string):string {
+    private getSourceClassFromId(id: string): string {
         if (id.includes('device-group')) {
             return 'Device Groups';
-        } else if (id.includes('device')){
+        } else if (id.includes('device')) {
             return 'Devices';
         } else if (id.includes('location')) {
             return 'Locations';
@@ -970,27 +990,27 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
 
-    private updateExportSelections(sourceControl:AbstractControl, changedIds:string[]) {
+    private updateExportSelections(sourceControl: AbstractControl, changedIds: string[]) {
         const sourceExports: any[] = [];
         const sourceClass = this.getSourceClass(sourceControl);
-        changedIds.forEach((id:string) => {
+        changedIds.forEach((id: string) => {
             const exp = this.getExportById(id, sourceClass);
-            if (exp!==null){
+            if (exp !== null) {
                 sourceExports.push(exp);
             } else {
-                throwError(()=> new Error('Could not add export with id: ' + id));
+                throwError(() => new Error('Could not add export with id: ' + id));
             }
         });
         this.selectedExportsBySource.set(sourceClass, sourceExports);
 
         let allExports: any[] = [];
-        this.selectedExportsBySource.forEach((value:any[]) => {
+        this.selectedExportsBySource.forEach((value: any[]) => {
             allExports = [...allExports, ...value];
         });
         this.form.controls['exports'].patchValue(allExports);
     }
 
-    private getExportById(id: string, sourceClass:string) {
+    private getExportById(id: string, sourceClass: string) {
         const options = this.dataSourceOptions.get(sourceClass) || [];
         const exportIdx = options.findIndex(exp => exp.id === id);
         let exp = null;
@@ -1033,7 +1053,7 @@ export class DataSourceSelectorComponent implements OnInit {
         this.resetDataSourceOptions(sourceForm);
     }
 
-    initOnSelectSearch(){
+    initOnSelectSearch() {
         this.searchSubject.pipe(
             debounceTime(250)
         ).subscribe(({ term, sourceForm }) => {
@@ -1057,17 +1077,17 @@ export class DataSourceSelectorComponent implements OnInit {
                     lastOffset: 0,
                 });
             })).subscribe({
-            next: () => {
-                this.cdref.detectChanges();
-            },
-            error: (err) => {
-                console.log('Could not reload ' + sourceClass + ':' + err);
-            }
-        });
+                next: () => {
+                    this.cdref.detectChanges();
+                },
+                error: (err) => {
+                    console.log('Could not reload ' + sourceClass + ':' + err);
+                }
+            });
     }
 
     loadNextOptionsBatch(scrollStart: number, scrollEnd: number,
-                         sourceForm: AbstractControl, limit: number, offset: number, searchTerm: string) {
+        sourceForm: AbstractControl, limit: number, offset: number, searchTerm: string) {
         const sourceClass = this.getSourceClass(sourceForm);
         sourceForm.patchValue({
             lastScrollStart: scrollStart,
@@ -1089,13 +1109,13 @@ export class DataSourceSelectorComponent implements OnInit {
 
     loadDataSourceOptions(sourceClass: string, limit: number, offset: number, search?: string) {
         if (sourceClass === 'Exports') {
-            return this.getExports({limit: limit, offset: offset, search: search});
+            return this.getExports({ limit: limit, offset: offset, search: search });
         } else if (sourceClass === 'Devices') {
-            return this.getDevices({limit: limit, offset: offset, searchText: search});
+            return this.getDevices({ limit: limit, offset: offset, searchText: search });
         } else if (sourceClass === 'Device Groups') {
-            return this.getDeviceGroups({limit: limit, offset: offset, search: search});
+            return this.getDeviceGroups({ limit: limit, offset: offset, search: search });
         } else if (sourceClass === 'Locations') {
-            return this.getLocations({limit: limit, offset: offset, search: search});
+            return this.getLocations({ limit: limit, offset: offset, search: search });
         }
         return throwError(() => new Error('No valid DataSourceClass'));
     }
@@ -1117,22 +1137,22 @@ export class DataSourceSelectorComponent implements OnInit {
         }
     }
 
-    private updateDeviceTypes(deviceIds: string[]): Observable<{device:DeviceInstanceModel, type:DeviceTypeModel}[]> {
+    private updateDeviceTypes(deviceIds: string[]): Observable<{ device: DeviceInstanceModel, type: DeviceTypeModel }[]> {
         const obs: Observable<any>[] = [];
         deviceIds.forEach(deviceId => {
             obs.push(this.deviceInstancesService.getDeviceInstance(deviceId).pipe(switchMap(
-                (device:any) => {
-                    if (device !== null){
-                        if(!this.deviceTypes.has((device as DeviceInstanceModel).device_type_id)) {
+                (device: any) => {
+                    if (device !== null) {
+                        if (!this.deviceTypes.has((device as DeviceInstanceModel).device_type_id)) {
                             return this.deviceTypeService.getDeviceType(device.device_type_id).pipe(map(dType => {
                                 if (dType !== null) {
                                     this.deviceTypes.set((device as DeviceInstanceModel).device_type_id, dType);
-                                    return {device: device, type: dType};
+                                    return { device: device, type: dType };
                                 }
                                 return null;
                             }));
                         } else {
-                            return of({device: device, type:  this.deviceTypes.get((device as DeviceInstanceModel).device_type_id)});
+                            return of({ device: device, type: this.deviceTypes.get((device as DeviceInstanceModel).device_type_id) });
                         }
                     } else {
                         return of(null);

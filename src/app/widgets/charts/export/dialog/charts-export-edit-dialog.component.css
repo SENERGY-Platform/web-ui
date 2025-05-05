@@ -69,3 +69,7 @@ senergy-axis-config {
     border-top: dotted;
     text-align: center;
 }
+
+.root {
+    position: relative;
+}

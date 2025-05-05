@@ -26,3 +26,7 @@
     padding-bottom: 12px;
     padding-top: 8px;
 }
+
+.root {
+    position: relative;
+}

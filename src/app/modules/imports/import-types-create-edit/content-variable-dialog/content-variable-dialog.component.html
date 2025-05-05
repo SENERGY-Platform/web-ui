@@ -17,71 +17,69 @@
 </h2>
 
 <mat-dialog-content>
-    <form [formGroup]="form" fxLayout="column">
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill [hintLabel]="nameHint()">
-                <mat-label>Name</mat-label>
-                <input matInput formControlName="name" required>
-                <mat-error senergyError label="Name"></mat-error>
-            </mat-form-field>
-        </div>
+    <div class="root">
+        <form [formGroup]="form" fxLayout="column">
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill [hintLabel]="nameHint()">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name" required>
+                    <mat-error senergyError label="Name"></mat-error>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Aspect</mat-label>
-                <!-- TODO replace with mtx-select --> <senergy-select-search noneView="--None--" [options]="aspectOptions"
-                                       useOptionValueProperty="id"
-                                       useOptionViewProperty="name"
-                                       formControlName="aspect_id"></senergy-select-search>
-                <mat-error senergyError label="Aspect"></mat-error>
-            </mat-form-field>
-        </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Aspect</mat-label>
+                    <mtx-select [items]="aspectOptions" bindValue="id" bindLabel="name" formControlName="aspect_id"
+                        groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
+                        appendTo=".root" [compareWith]="compareAspectsWith"></mtx-select>
+                    <mat-error senergyError label="Aspect"></mat-error>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Function</mat-label>
-                <!-- TODO replace with mtx-select --> <senergy-select-search noneView="--None--" [options]="data.functions"
-                                       useOptionValueProperty="id"
-                                       useOptionViewProperty="name"
-                                       formControlName="function_id"></senergy-select-search>
-                <mat-error senergyError label="Function"></mat-error>
-            </mat-form-field>
-        </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Function</mat-label>
+                    <mtx-select [items]="data.functions" bindValue="id" bindLabel="name"
+                        formControlName="function_id" appendTo=".root"></mtx-select>
+                    <mat-error senergyError label="Function"></mat-error>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Type</mat-label>
-                <mat-select formControlName="type" required>
-                    <mat-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mat-option>
-                </mat-select>
-                <mat-error senergyError label="Type"></mat-error>
-            </mat-form-field>
-        </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Type</mat-label>
+                    <mat-select formControlName="type" required>
+                        <mat-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mat-option>
+                    </mat-select>
+                    <mat-error senergyError label="Type"></mat-error>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Characteristic</mat-label>
-                <!-- TODO replace with mtx-select --> <senergy-select-search noneView="--None--" [options]="getConceptCharacteristics()"
-                                       useOptionValueProperty="id"
-                                       useOptionViewProperty="name"
-                                       formControlName="characteristic_id"></senergy-select-search>
-                <mat-error senergyError label="Characteristic"></mat-error>
-            </mat-form-field>
-        </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Characteristic</mat-label>
+                    <mtx-select [items]="getConceptCharacteristics()" bindValue="id" bindLabel="name"
+                        formControlName="characteristic_id" appendTo=".root"></mtx-select>
+                    <mat-error senergyError label="Characteristic"></mat-error>
+                </mat-form-field>
+            </div>
 
-        <div>
-            <mat-checkbox formControlName="use_as_tag" matTooltip="If the import provides data of multiple unique
+            <div>
+                <mat-checkbox formControlName="use_as_tag" matTooltip="If the import provides data of multiple unique
              measurements and this variable identifies a single measurement, please check this box. If a measurement is only
              identified by multiple variables, set this flag for all these variables.">
-                Identifies measurement
-            </mat-checkbox>
-        </div>
+                    Identifies measurement
+                </mat-checkbox>
+            </div>
 
-    </form>
+        </form>
+    </div>
 </mat-dialog-content>
 
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()" *ngIf="!data.infoOnly" [disabled]="form.invalid">Save</button>
+    <button mat-raised-button color="accent" (click)="save()" *ngIf="!data.infoOnly"
+        [disabled]="form.invalid">Save</button>
 </mat-dialog-actions>

@@ -39,6 +39,11 @@ interface DeviceTypeFunctionClassModel extends DeviceTypeFunctionModel {
     class: string;
 }
 
+
+interface DeviceTypeAspectModelWithRootName extends DeviceTypeAspectModel {
+    root_name?: string;
+}
+
 @Component({
     templateUrl: './device-types-content-variable-dialog.component.html',
     styleUrls: ['./device-types-content-variable-dialog.component.css'],
@@ -54,7 +59,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     characteristics: DeviceTypeCharacteristicsClassModel[] = [];
     concepts: ConceptsCharacteristicsModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
-    aspectOptions: Map<string, DeviceTypeAspectModel[]> = new Map();
+    aspectOptions: DeviceTypeAspectModelWithRootName[] = [];
     allowVoid = false;
     prohibitedNames: string[] = [];
 
@@ -102,8 +107,9 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         }
         this.initTypeOptionControl();
         this.aspects.forEach(a => {
-            this.aspectOptions.set(a.name, this.getAllAspectsOnTree(a));
+            this.aspectOptions.push(...this.getAllAspectsOnTree(a, '', a.name));
         });
+        this.aspectOptions = this.aspectOptions.filter(a => !this.aspectDisabled(a));
         this.highlightCharacteristics();
         this.highlightFunctions();
     }
@@ -329,8 +335,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         return !(aspect.sub_aspects === null || aspect.sub_aspects === undefined || aspect.sub_aspects.length == 0);
     }
 
-    copyAspect(aspect: DeviceTypeAspectModel): DeviceTypeAspectModel {
-        const result: DeviceTypeAspectModel = {
+    copyAspect(aspect: DeviceTypeAspectModel): DeviceTypeAspectModelWithRootName {
+        const result: DeviceTypeAspectModelWithRootName = {
             id: aspect.id,
             name: aspect.name,
             sub_aspects: [],
@@ -339,12 +345,13 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         return result;
     }
 
-    private getAllAspectsOnTree(a: DeviceTypeAspectModel, prefix: string=''): DeviceTypeAspectModel[] {
-        const res: DeviceTypeAspectModel[] = [];
+    private getAllAspectsOnTree(a: DeviceTypeAspectModelWithRootName, prefix: string='', rootName: string=''): DeviceTypeAspectModelWithRootName[] {
+        const res: DeviceTypeAspectModelWithRootName[] = [];
         const element = this.copyAspect(a);
         element.name = prefix+element.name;
+        element.root_name = rootName;
         res.push(element);
-        element.sub_aspects?.forEach(sub => res.push(...this.getAllAspectsOnTree(sub, element.name+'.')));
+        element.sub_aspects?.forEach(sub => res.push(...this.getAllAspectsOnTree(sub, element.name+'.', rootName)));
         return res;
     }
 

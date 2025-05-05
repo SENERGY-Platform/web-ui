@@ -43,6 +43,7 @@ import { ImportTypesComponent } from '../import-types/import-types.component';
 import { ConceptsService } from '../../metadata/concepts/shared/concepts.service';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { MtxSelect } from '@ng-matero/extensions/select';
 
 describe('ImportTypesCreateEditComponent', () => {
 
@@ -150,7 +151,8 @@ describe('ImportTypesCreateEditComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [ImportTypesCreateEditComponent],
-    imports: [CoreModule,
+    imports: [
+        CoreModule,
         RouterModule.forRoot([
             {
                 path: 'imports/types/list',
@@ -173,7 +175,9 @@ describe('ImportTypesCreateEditComponent', () => {
         MatSelectModule,
         MatDialogModule,
         MatTreeModule,
-        WidgetModule],
+        WidgetModule,
+        MtxSelect,
+    ],
     providers: [
         { provide: DeviceTypeService, useValue: deviceTypeService },
         { provide: AspectsService, useValue: aspectsServiceSpy },

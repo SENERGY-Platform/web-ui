@@ -54,3 +54,7 @@
 .mat-tree-node:hover {
     color: lightcoral;
 }
+
+.root {
+    position: relative;
+}

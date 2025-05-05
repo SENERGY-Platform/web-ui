@@ -1,60 +1,63 @@
 <h2 mat-dialog-title>Filter</h2>
 
 <mat-dialog-content>
-    <senergy-spinner [show]="!ready"></senergy-spinner>
+    <div class="root">
+        <senergy-spinner [show]="!ready"></senergy-spinner>
 
-    <div [formGroup]="form" fxFlex fxLayout="column" id="filter-container" *ngIf="ready">
-        <div>
-            <mat-form-field fxFlex color="accent" appearance="outline">
-                <mat-icon matPrefix>place</mat-icon>
-                <mat-label>Location</mat-label>
-                <!-- TODO replace with mtx-select --> <senergy-select-search [options]="locationOptions" formControlName="location" [multiple]="false" useOptionViewProperty="name"
-                    useOptionValueProperty="id"></senergy-select-search>
-                <mat-error senergyError label="Location"></mat-error>
-            </mat-form-field>
-            <button mat-button (click)="resetLocationFilter()"><mat-icon>cancel</mat-icon></button>
+        <div [formGroup]="form" fxFlex fxLayout="column" id="filter-container" *ngIf="ready">
+            <div>
+                <mat-form-field fxFlex color="accent" appearance="outline">
+                    <mat-icon matPrefix>place</mat-icon>
+                    <mat-label>Location</mat-label>
+                    <mtx-select [items]="locationOptions"
+                        formControlName="location"  bindLabel="name"
+                        bindValue="id" appendTo=".root"></mtx-select>
+                    <mat-error senergyError label="Location"></mat-error>
+                </mat-form-field>
+                <button mat-button (click)="resetLocationFilter()"><mat-icon>cancel</mat-icon></button>
+            </div>
+
+            <div>
+                <mat-form-field fxFlex color="accent" appearance="outline">
+                    <mat-icon matPrefix>device_hub</mat-icon>
+                    <mat-label>Network</mat-label>
+                    <mtx-select [items]="networkOptions"
+                        formControlName="network" bindLabel="name"
+                        bindValue="id" appendTo=".root"></mtx-select>
+                    <mat-error senergyError label="Network"></mat-error>
+                </mat-form-field>
+                <button mat-button (click)="resetNetworkFilter()"><mat-icon>cancel</mat-icon></button>
+            </div>
+
+            <div>
+                <mat-form-field fxFlex color="accent" appearance="outline">
+                    <mat-icon matPrefix>important_devices</mat-icon>
+                    <mat-label>Device Type</mat-label>
+                    <mtx-select  [items]="deviceTypeOptions"
+                        formControlName="deviceTypes" multiple closeOnSelect="false" bindLabel="name"
+                        bindValue="id" appendTo=".root"></mtx-select>
+                    <mat-error senergyError label="Device Type"></mat-error>
+                </mat-form-field>
+                <button mat-button (click)="resetDeviceTypeFilter()"><mat-icon>cancel</mat-icon></button>
+            </div>
+
+            <div>
+                <mat-form-field fxFlex color="accent" appearance="outline">
+                    <mat-icon matPrefix>cloud</mat-icon>
+                    <mat-label>Connection State</mat-label>
+                    <mtx-select [items]="connectionOptions"
+                        formControlName="connectionState" bindLabel="name"
+                        bindValue="value" appendTo=".root"></mtx-select>
+                    <mat-error senergyError label="Connection State"></mat-error>
+                </mat-form-field>
+                <button mat-button (click)="resetConnectionFilter()"><mat-icon>cancel</mat-icon></button>
+            </div>
+
         </div>
-
-        <div> 
-            <mat-form-field fxFlex color="accent" appearance="outline">
-                <mat-icon matPrefix>device_hub</mat-icon>
-                <mat-label>Network</mat-label>
-                <!-- TODO replace with mtx-select --> <senergy-select-search [options]="networkOptions" formControlName="network" [multiple]="false" useOptionViewProperty="name"
-                    useOptionValueProperty="id"></senergy-select-search>
-                <mat-error senergyError label="Network"></mat-error>
-            </mat-form-field>
-            <button mat-button (click)="resetNetworkFilter()"><mat-icon>cancel</mat-icon></button>
-        </div>
-
-        <div>
-            <mat-form-field fxFlex color="accent" appearance="outline">
-                <mat-icon matPrefix>important_devices</mat-icon>
-                <mat-label>Device Type</mat-label>
-                <!-- TODO replace with mtx-select --> <senergy-select-search [options]="deviceTypeOptions" formControlName="deviceTypes" [multiple]="true" useOptionViewProperty="name"
-                    useOptionValueProperty="id"></senergy-select-search>
-                <mat-error senergyError label="Device Type"></mat-error>
-            </mat-form-field>
-            <button mat-button (click)="resetDeviceTypeFilter()"><mat-icon>cancel</mat-icon></button>
-        </div>
-
-        <div>
-            <mat-form-field fxFlex color="accent" appearance="outline">
-                <mat-icon matPrefix>cloud</mat-icon>
-                <mat-label>Connection State</mat-label>
-                <!-- TODO replace with mtx-select --> <senergy-select-search [options]="connectionOptions" formControlName="connectionState" [multiple]="false" useOptionViewProperty="name"
-                    useOptionValueProperty="value"></senergy-select-search>
-                <mat-error senergyError label="Connection State"></mat-error>
-            </mat-form-field>
-            <button mat-button (click)="resetConnectionFilter()"><mat-icon>cancel</mat-icon></button>
-        </div>
-
     </div>
-
-
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="filter()" [disabled]="form.invalid">Filter</button>
 </mat-dialog-actions>
-

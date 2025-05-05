@@ -15,132 +15,101 @@
   -->
 <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
 
-<div *ngIf="ready" class="container" fxLayout="column">
-
-    <form [formGroup]="form">
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Name</mat-label>
-                <input matInput formControlName="name" required>
-                <mat-error senergyError label="Name"></mat-error>
-            </mat-form-field>
-        </div>
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Description</mat-label>
-                <input matInput formControlName="description">
-                <mat-error senergyError label="Description"></mat-error>
-            </mat-form-field>
-        </div>
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Image</mat-label>
-                <input matInput formControlName="image" required>
-                <mat-error senergyError label="Image"></mat-error>
-            </mat-form-field>
-        </div>
-        <mat-divider></mat-divider>
-
-        <div>
-            <h4 fxFlex>Configs</h4>
-            <button mat-icon-button color="accent" (click)="addConfig(undefined)" *ngIf="!detailsMode">
-                <mat-icon>add</mat-icon>
-            </button>
-        </div>
-
-        <div formArrayName="configs">
-            <div *ngFor="let conf of getConfigsFormArrayGroups(); let index = index" [formGroup]="conf">
-                <mat-divider></mat-divider>
-                <div fxLayout="row" fxLayoutGap="8px">
-                    <mat-form-field color="accent" appearance="outline" fxFlex="30">
-                        <mat-label>Name</mat-label>
-                        <input matInput formControlName="name" required>
-                        <mat-error senergyError label="Name"></mat-error>
-                    </mat-form-field>
-                    <mat-form-field color="accent" appearance="outline" fxFlex>
-                        <mat-label>Description</mat-label>
-                        <input matInput formControlName="description">
-                        <mat-error senergyError label="Description"></mat-error>
-                    </mat-form-field>
-                    <span class="spacer40"></span>
-                </div>
-                <div fxLayout="row" fxLayoutGap="8px">
-                    <mat-form-field color="accent" appearance="outline" fxFlex="30">
-                        <mat-label>Type</mat-label>
-                        <mat-select formControlName="type" required>
-                            <mat-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mat-option>
-                        </mat-select>
-                        <mat-error senergyError label="Type"></mat-error>
-                    </mat-form-field>
-
-                    <mat-form-field color="accent" appearance="outline" fxFlex>
-                        <mat-label>Default Value</mat-label>
-                        <input matInput formControlName="default_value">
-                        <mat-error senergyError label="Default Value"></mat-error>
-                    </mat-form-field>
-
-                    <button mat-icon-button color="warn" (click)="deleteConfig(index)" class="inline"
-                            *ngIf="!detailsMode">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </div>
+<div class="root">
+    <div *ngIf="ready" class="container" fxLayout="column">
+        <form [formGroup]="form">
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name" required>
+                    <mat-error senergyError label="Name"></mat-error>
+                </mat-form-field>
             </div>
-        </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Description</mat-label>
+                    <input matInput formControlName="description">
+                    <mat-error senergyError label="Description"></mat-error>
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Image</mat-label>
+                    <input matInput formControlName="image" required>
+                    <mat-error senergyError label="Image"></mat-error>
+                </mat-form-field>
+            </div>
+            <mat-divider></mat-divider>
 
-        <mat-divider></mat-divider>
+            <div>
+                <h4 fxFlex>Configs</h4>
+                <button mat-icon-button color="accent" (click)="addConfig(undefined)" *ngIf="!detailsMode">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </div>
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Time Aspect</mat-label>
-                <!-- TODO replace with mtx-select --> <senergy-select-search noneView="--None--" [options]="aspects"
-                                       useOptionValueProperty="id"
-                                       useOptionViewProperty="name"
-                                       [formControl]="timeAspect"></senergy-select-search>
-                <mat-error senergyError label="Time Aspect"></mat-error>
-            </mat-form-field>
-        </div>
+            <div formArrayName="configs">
+                <div *ngFor="let conf of getConfigsFormArrayGroups(); let index = index" [formGroup]="conf">
+                    <mat-divider></mat-divider>
+                    <div fxLayout="row" fxLayoutGap="8px">
+                        <mat-form-field color="accent" appearance="outline" fxFlex="30">
+                            <mat-label>Name</mat-label>
+                            <input matInput formControlName="name" required>
+                            <mat-error senergyError label="Name"></mat-error>
+                        </mat-form-field>
+                        <mat-form-field color="accent" appearance="outline" fxFlex>
+                            <mat-label>Description</mat-label>
+                            <input matInput formControlName="description">
+                            <mat-error senergyError label="Description"></mat-error>
+                        </mat-form-field>
+                        <span class="spacer40"></span>
+                    </div>
+                    <div fxLayout="row" fxLayoutGap="8px">
+                        <mat-form-field color="accent" appearance="outline" fxFlex="30">
+                            <mat-label>Type</mat-label>
+                            <mat-select formControlName="type" required>
+                                <mat-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mat-option>
+                            </mat-select>
+                            <mat-error senergyError label="Type"></mat-error>
+                        </mat-form-field>
 
-        <div>
-            <h4 fxFlex>Output</h4>
-            <button mat-icon-button color="accent" (click)="addOutput()" *ngIf="!detailsMode">
-                <mat-icon>add</mat-icon>
-            </button>
-        </div>
+                        <mat-form-field color="accent" appearance="outline" fxFlex>
+                            <mat-label>Default Value</mat-label>
+                            <input matInput formControlName="default_value">
+                            <mat-error senergyError label="Default Value"></mat-error>
+                        </mat-form-field>
 
-
-        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree mat-elevation-z1">
-            <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-                <li class="mat-tree-node" fxLayout="row">
-                    <button mat-icon-button disabled></button>
-                    <span fxFlex>{{node.name}}</span>
-                    <span *ngIf="!detailsMode">
-                        <button mat-icon-button (click)="deleteContentVariable(node)" color="warn">
+                        <button mat-icon-button color="warn" (click)="deleteConfig(index)" class="inline"
+                            *ngIf="!detailsMode">
                             <mat-icon>delete</mat-icon>
                         </button>
-                        <button mat-icon-button (click)="editContentVariable(node)" color="accent">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                        <button mat-icon-button (click)="addSubContentVariable(node)" color="accent"
-                                [disabled]="!isComplex(node)">
-                            <mat-icon>add</mat-icon>
-                        </button>
-                    </span>
-                    <span *ngIf="detailsMode">
-                        <button mat-icon-button (click)="viewContentVariable(node)" color="accent">
-                            <mat-icon>info</mat-icon>
-                        </button>
-                    </span>
-                </li>
-            </mat-tree-node>
-            <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
-                <li>
-                    <div class="mat-tree-node" fxLayout="row">
-                        <button mat-icon-button matTreeNodeToggle
-                                [attr.aria-label]="'Toggle ' + node.name">
-                            <mat-icon class="mat-icon-rtl-mirror">
-                                {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-                            </mat-icon>
-                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Time Aspect</mat-label>
+                    <mtx-select [items]="aspects" bindValue="id" bindLabel="name" [formControl]="timeAspect"
+                        appendTo=".root"></mtx-select>
+                    <mat-error senergyError label="Time Aspect"></mat-error>
+                </mat-form-field>
+            </div>
+
+            <div>
+                <h4 fxFlex>Output</h4>
+                <button mat-icon-button color="accent" (click)="addOutput()" *ngIf="!detailsMode">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </div>
+
+
+            <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree mat-elevation-z1">
+                <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
+                    <li class="mat-tree-node" fxLayout="row">
+                        <button mat-icon-button disabled></button>
                         <span fxFlex>{{node.name}}</span>
                         <span *ngIf="!detailsMode">
                             <button mat-icon-button (click)="deleteContentVariable(node)" color="warn">
@@ -159,39 +128,68 @@
                                 <mat-icon>info</mat-icon>
                             </button>
                         </span>
-                    </div>
-                    <ul [class.tree-invisible]="!treeControl.isExpanded(node)">
-                        <ng-container matTreeNodeOutlet></ng-container>
-                    </ul>
-                </li>
-            </mat-nested-tree-node>
-        </mat-tree>
+                    </li>
+                </mat-tree-node>
+                <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+                    <li>
+                        <div class="mat-tree-node" fxLayout="row">
+                            <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
+                                <mat-icon class="mat-icon-rtl-mirror">
+                                    {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                                </mat-icon>
+                            </button>
+                            <span fxFlex>{{node.name}}</span>
+                            <span *ngIf="!detailsMode">
+                                <button mat-icon-button (click)="deleteContentVariable(node)" color="warn">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                                <button mat-icon-button (click)="editContentVariable(node)" color="accent">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                                <button mat-icon-button (click)="addSubContentVariable(node)" color="accent"
+                                    [disabled]="!isComplex(node)">
+                                    <mat-icon>add</mat-icon>
+                                </button>
+                            </span>
+                            <span *ngIf="detailsMode">
+                                <button mat-icon-button (click)="viewContentVariable(node)" color="accent">
+                                    <mat-icon>info</mat-icon>
+                                </button>
+                            </span>
+                        </div>
+                        <ul [class.tree-invisible]="!treeControl.isExpanded(node)">
+                            <ng-container matTreeNodeOutlet></ng-container>
+                        </ul>
+                    </li>
+                </mat-nested-tree-node>
+            </mat-tree>
 
-        <mat-divider></mat-divider>
+            <mat-divider></mat-divider>
 
-        <div>
-            <mat-checkbox formControlName="default_restart" matTooltip="Should be checked, if the import is regularly
+            <div>
+                <mat-checkbox formControlName="default_restart" matTooltip="Should be checked, if the import is regularly
              importing recent data. If it only imports historic data once, it should not be checked.">
-                Restart
-            </mat-checkbox>
-        </div>
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Cost</mat-label>
-                <input matInput type="number" formControlName="cost" required>
-                <mat-error senergyError label="Cost"></mat-error>
-            </mat-form-field>
-        </div>
+                    Restart
+                </mat-checkbox>
+            </div>
+            <div>
+                <mat-form-field color="accent" appearance="outline" fxFill>
+                    <mat-label>Cost</mat-label>
+                    <input matInput type="number" formControlName="cost" required>
+                    <mat-error senergyError label="Cost"></mat-error>
+                </mat-form-field>
+            </div>
 
-    </form>
-    <div fxLayout="row" style="margin-top: 30px">
-        <button mat-raised-button color="primary" (click)="navigateToList()">
-            Back
-        </button>
-        <span fxFlex></span>
+        </form>
+        <div fxLayout="row" style="margin-top: 30px">
+            <button mat-raised-button color="primary" (click)="navigateToList()">
+                Back
+            </button>
+            <span fxFlex></span>
 
-        <button mat-raised-button color="accent" (click)="save()" *ngIf="!detailsMode" [disabled]="form.invalid">
-            Save
-        </button>
+            <button mat-raised-button color="accent" (click)="save()" *ngIf="!detailsMode" [disabled]="form.invalid">
+                Save
+            </button>
+        </div>
     </div>
 </div>

@@ -61,6 +61,7 @@ import 'brace/mode/javascript';
 import 'brace/mode/json';
 import 'brace/ext/language_tools';
 import { completer } from './ace-code-completer';
+import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
 // import * as langTools from 'brace/ext/language_tools';
 
 interface Criteria {
@@ -76,6 +77,10 @@ interface GenericWatcherRequest {
     body?: string; // base64 encoded byte array
     add_auth_token: boolean;
     header?: { [index: string]: string[] };
+}
+
+interface DeviceTypeAspectNodeModelWithRootName extends DeviceTypeAspectNodeModel {
+    root_name?: string;
 }
 
 @Component({
@@ -216,16 +221,13 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
             this.deviceClasses = value.result;
         });
         this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
-            const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
-            const asp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            const tmp: DeviceTypeAspectNodeModelWithRootName[] = [];
             aspects.forEach(a => {
-                if (!tmp.has(a.root_id)) {
-                    tmp.set(a.root_id, []);
-                }
-                tmp.get(a.root_id)?.push(a);
+                const t = a as DeviceTypeAspectNodeModelWithRootName;
+                t.root_name = aspects.find(x => x.id === t.root_id)?.name;
+                tmp.push(t);
             });
-            tmp.forEach((v, k) => asp.set(aspects.find(a => a.id === k)?.name || '', v));
-            this.nestedAspects = asp;
+            this.aspects = tmp;
         });
         const processModelId = this.result.inputs.find(value => value.name === 'process_deployment.process_model_id')?.value || '';
         if (processModelId !== '') {
@@ -324,13 +326,11 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
                 });
             });
 
-            that.nestedAspects.forEach(list => {
-                list.forEach(value => {
-                    completers.push({
-                        caption: 'aspect: ' + value.name,
-                        value: `"${value.id}"/*${value.name}*/`,
-                        meta: 'static'
-                    });
+            that.aspects.forEach(value => {
+                completers.push({
+                    caption: 'aspect: ' + value.name,
+                    value: `"${value.id}"/*${value.name}*/`,
+                    meta: 'static'
                 });
             });
 
@@ -1367,7 +1367,7 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
 
     functions: (FunctionsPermSearchModel | { id?: string; name: string })[] = [];
     deviceClasses: (DeviceTypeDeviceClassModel | { id?: string; name: string })[] = [];
-    nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+    aspects: DeviceTypeAspectNodeModelWithRootName[] = [];
 
     removeCriteria(list: Criteria[], index: number): Criteria[] {
         list.splice(index, 1);
@@ -1390,13 +1390,10 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
         }
         let aspectName = '';
         if (criteria.aspect_id) {
-            this.nestedAspects.forEach((value, _) => {
-                const temp = value.find(v => v.id === criteria.aspect_id)?.name;
-                if (temp) {
-                    aspectName = temp;
-                }
-            });
-            if (!aspectName) {
+            const temp = this.aspects.find(v => v.id === criteria.aspect_id);
+            if (temp) {
+                aspectName = temp.name;
+            } else {
                 aspectName = criteria.aspect_id;
             }
         }
@@ -1416,6 +1413,33 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
         }
         return parts.join(' | ');
     }
+
+    getRootAspect(): GroupValueFn {
+        return (_, children): any => {
+            children = children as DeviceTypeAspectNodeModelWithRootName[];
+            const id = children[0].root_id;
+            if (id !== undefined) {
+                return { id };
+            }
+            return null;
+        };
+    }
+
+    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectNodeModelWithRootName | string, b: DeviceTypeAspectNodeModelWithRootName | string) => {
+        const aIsStr = typeof a === 'string' || a instanceof String;
+        const bIsStr = typeof b === 'string' || b instanceof String;
+
+        if (aIsStr && bIsStr) {
+            return a === b;
+        }
+        if (!aIsStr && !bIsStr) {
+            return a.id === b.id;
+        }
+        if (aIsStr) {
+            return a === (b as DeviceTypeAspectNodeModelWithRootName).id;
+        }
+        return a.id === b;
+    };
 
     watcherMaintenanceProducerFieldKey = 'watcher.maintenance_procedure';
     watcherWatchIntervalFieldKey = 'watcher.watch_interval';

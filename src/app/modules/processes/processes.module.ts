@@ -69,7 +69,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { DesignerSnackBarComponent } from './designer/snack-bar/designer-snack-bar.component';
 import { MatBadgeModule } from '@angular/material/badge';
-import { FilterCriteriaDialogComponent } from './designer/dialogs/filter-criteria-dialog/filter-criteria-dialog.component';
 import { DeploymentsStartParameterDialogComponent } from './deployments/dialogs/deployments-start-parameter-dialog.component';
 import {ProcessIoDesignerDialogComponent} from './designer/dialogs/process-io-designer-dialog/process-io-designer-dialog.component';
 import {MatExpansionModule} from '@angular/material/expansion';
@@ -78,6 +77,7 @@ import {ShortKeyPipe} from './process-io/shared/short-key.pipe';
 import {ProcessIoVariableEditDialogComponent} from './process-io/dialogs/process-io-variable-edit-dialog.component';
 import {ConditionalEventDialogComponent} from './designer/dialogs/conditional-event-dialog/conditional-event-dialog.component';
 import { IncidentDialogComponent } from './designer/dialogs/incident-dialog/incident-dialog.component';
+import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
 
 const processRepo: Route = {
     path: 'processes/repository',
@@ -165,6 +165,8 @@ const processIo: Route = {
         MatChipsModule,
         MatBadgeModule,
         MatExpansionModule,
+        MtxSelect,
+        MtxOption,
     ],
     declarations: [
         ProcessRepoComponent,
@@ -187,7 +189,6 @@ const processIo: Route = {
         EmailConfigDialogComponent,
         DeploymentsMissingDependenciesDialogComponent,
         TaskConfigDialogComponent,
-        FilterCriteriaDialogComponent,
         ConditionalEventDialogComponent,
         NotificationConfigDialogComponent,
         DesignerSnackBarComponent,

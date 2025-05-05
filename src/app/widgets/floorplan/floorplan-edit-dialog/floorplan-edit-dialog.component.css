@@ -84,3 +84,7 @@
 .value-form {
   display: flex;
 }
+
+.root {
+  position: relative;
+}

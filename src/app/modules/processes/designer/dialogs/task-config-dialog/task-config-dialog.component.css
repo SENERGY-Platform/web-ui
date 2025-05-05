@@ -32,3 +32,6 @@
     margin: 5px;
 }
 
+.root {
+    position: relative;
+}

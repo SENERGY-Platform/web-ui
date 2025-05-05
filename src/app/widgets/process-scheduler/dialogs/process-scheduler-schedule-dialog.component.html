@@ -17,43 +17,45 @@
 <h2 mat-dialog-title>Schedule</h2>
 
 <mat-dialog-content>
-    <div fxLayout="column" [formGroup]="form">
-        <mat-slide-toggle color="accent" class="toggle-padding" formControlName="enable">Enable</mat-slide-toggle>
+    <div class="root">
+        <div fxLayout="column" [formGroup]="form">
+            <mat-slide-toggle color="accent" class="toggle-padding" formControlName="enable">Enable</mat-slide-toggle>
 
-        <mat-form-field class="full-width" appearance="outline" color="accent">
-            <mat-label>Alias</mat-label>
-            <input formControlName="process_alias" matInput type="text">
-            <mat-error senergyError label="Alias"></mat-error>
-        </mat-form-field>
+            <mat-form-field class="full-width" appearance="outline" color="accent">
+                <mat-label>Alias</mat-label>
+                <input formControlName="process_alias" matInput type="text">
+                <mat-error senergyError label="Alias"></mat-error>
+            </mat-form-field>
 
-        <mat-form-field class="full-width" appearance="outline" color="accent">
-            <mat-label>Time</mat-label>
-            <input formControlName="time" matInput type="time" required>
-            <mat-error senergyError label="Time"></mat-error>
-        </mat-form-field>
+            <mat-form-field class="full-width" appearance="outline" color="accent">
+                <mat-label>Time</mat-label>
+                <input formControlName="time" matInput type="time" required>
+                <mat-error senergyError label="Time"></mat-error>
+            </mat-form-field>
 
-        <section formArrayName="days">
-            <mat-checkbox class="checkbox-margin" formControlName="1">Monday</mat-checkbox>
-            <mat-checkbox class="checkbox-margin" formControlName="2">Tuesday</mat-checkbox>
-            <mat-checkbox class="checkbox-margin" formControlName="3">Wednesday</mat-checkbox>
-            <mat-checkbox class="checkbox-margin" formControlName="4">Thursday</mat-checkbox>
-            <mat-checkbox class="checkbox-margin" formControlName="5">Friday</mat-checkbox>
-            <mat-checkbox class="checkbox-margin" formControlName="6">Saturday</mat-checkbox>
-            <mat-checkbox class="checkbox-margin" formControlName="0">Sunday</mat-checkbox>
-        </section>
+            <section formArrayName="days">
+                <mat-checkbox class="checkbox-margin" formControlName="1">Monday</mat-checkbox>
+                <mat-checkbox class="checkbox-margin" formControlName="2">Tuesday</mat-checkbox>
+                <mat-checkbox class="checkbox-margin" formControlName="3">Wednesday</mat-checkbox>
+                <mat-checkbox class="checkbox-margin" formControlName="4">Thursday</mat-checkbox>
+                <mat-checkbox class="checkbox-margin" formControlName="5">Friday</mat-checkbox>
+                <mat-checkbox class="checkbox-margin" formControlName="6">Saturday</mat-checkbox>
+                <mat-checkbox class="checkbox-margin" formControlName="0">Sunday</mat-checkbox>
+            </section>
 
-        <mat-form-field class="full-width deployment" appearance="outline" color="accent">
-            <mat-label>Deployment</mat-label>
-            <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="processId" [required]="true" [compareWith]="compare"
-                    [options]="deployments" useOptionViewProperty="name" useOptionValueProperty="id">
-            </senergy-select-search>
-            <mat-error senergyError label="Deployment"></mat-error>
-        </mat-form-field>
+            <mat-form-field class="full-width deployment" appearance="outline" color="accent">
+                <mat-label>Deployment</mat-label>
+                <mtx-select formControlName="processId" [required]="true" [compareWith]="compare" [items]="deployments"
+                    bindLabel="name" bindValue="id" appendTo=".root">
+                </mtx-select>
+                <mat-error senergyError label="Deployment"></mat-error>
+            </mat-form-field>
+        </div>
     </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="this.form.invalid || !daySelected()" (click)="save()">Save</button>
+    <button mat-raised-button color="accent" [disabled]="this.form.invalid || !daySelected()"
+        (click)="save()">Save</button>
 </mat-dialog-actions>
-

@@ -14,295 +14,274 @@
   ~ limitations under the License.
   -->
 <senergy-spinner [show]="!ready"></senergy-spinner>
-<div class="device-type-container">
-    <mat-card class="root-card" *ngIf="ready">
-        <mat-card-content>
-            <mat-accordion>
-                <mat-expansion-panel expanded>
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>Information</mat-panel-title>
-                    </mat-expansion-panel-header>
-                    <form [formGroup]="firstFormGroup">
-                        <ng-template matStepLabel>Information</ng-template>
-                        <div class="form">
-                            <mat-form-field appearance="outline" class="full-width" color="accent">
-                                <mat-label>ID</mat-label>
-                                <input matInput formControlName="id">
-                                <mat-error senergyError label="ID"></mat-error>
-                            </mat-form-field>
-                            <mat-form-field appearance="outline" class="full-width" color="accent">
-                                <mat-label>Name</mat-label>
-                                <input matInput formControlName="name" required>
-                                <mat-error senergyError label="Name"></mat-error>
-                            </mat-form-field>
-                            <mat-form-field appearance="outline" class="full-width" color="accent">
-                                <mat-label>Description</mat-label>
-                                <input matInput formControlName="description">
-                                <mat-error senergyError label="Description"></mat-error>
-                            </mat-form-field>
-                            <table class="full-width">
-                                <tr>
-                                    <td>
-                                        <mat-form-field appearance="outline" class="full-width" color="accent">
-                                            <mat-label>Device Class</mat-label>
-                                            <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="device_class_id" [required]="true"
-                                                [options]="deviceTypeDeviceClasses" useOptionViewProperty="name"
-                                                useOptionValueProperty="id">
-                                            </senergy-select-search>
-                                            <mat-error senergyError label="Device Class"></mat-error>
-                                        </mat-form-field>
-                                    </td>
-                            </table>
-                        </div>
-                    </form>
-                    <form [formGroup]="attrFormGroup">
-                        <div class="divider">
-                            Attributes
-                            <mat-divider></mat-divider>
-                        </div>
-                        <div formArrayName="attributes">
-                            <div [formGroupName]="i" *ngFor="let attr of deviceTypeAttributes.controls; let i = index"
-                                class="attribute">
-                                <mat-form-field appearance="outline" class="third-width" color="accent">
-                                    <mat-label>Key</mat-label>
-                                    <input matInput formControlName="key">
-                                    <mat-error senergyError label="Key"></mat-error>
+<div class="root">
+    <div class="device-type-container">
+        <mat-card class="root-card" *ngIf="ready">
+            <mat-card-content>
+                <mat-accordion>
+                    <mat-expansion-panel expanded>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>Information</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <form [formGroup]="firstFormGroup">
+                            <ng-template matStepLabel>Information</ng-template>
+                            <div class="form">
+                                <mat-form-field appearance="outline" class="full-width" color="accent">
+                                    <mat-label>ID</mat-label>
+                                    <input matInput formControlName="id">
+                                    <mat-error senergyError label="ID"></mat-error>
                                 </mat-form-field>
-                                =
-                                <mat-form-field appearance="outline" class="third-width" color="accent">
-                                    <mat-label>Value</mat-label>
-                                    <input matInput formControlName="value">
-                                    <mat-error senergyError label="Value"></mat-error>
+                                <mat-form-field appearance="outline" class="full-width" color="accent">
+                                    <mat-label>Name</mat-label>
+                                    <input matInput formControlName="name" required>
+                                    <mat-error senergyError label="Name"></mat-error>
                                 </mat-form-field>
-                                <button mat-icon-button color="warn" [disabled]="!editable"
-                                    (click)="removeDeviceTypeAttr(i)">
-                                    <mat-icon>delete</mat-icon>
+                                <mat-form-field appearance="outline" class="full-width" color="accent">
+                                    <mat-label>Description</mat-label>
+                                    <input matInput formControlName="description">
+                                    <mat-error senergyError label="Description"></mat-error>
+                                </mat-form-field>
+                                <table class="full-width">
+                                    <tr>
+                                        <td>
+                                            <mat-form-field appearance="outline" class="full-width" color="accent">
+                                                <mat-label>Device Class</mat-label>
+                                                <mtx-select
+                                                    formControlName="device_class_id" required
+                                                    [items]="deviceTypeDeviceClasses" bindLabel="name" bindValue="id"
+                                                    appendTo=".root">
+                                                </mtx-select>
+                                                <mat-error senergyError label="Device Class"></mat-error>
+                                            </mat-form-field>
+                                        </td>
+                                </table>
+                            </div>
+                        </form>
+                        <form [formGroup]="attrFormGroup">
+                            <div class="divider">
+                                Attributes
+                                <mat-divider></mat-divider>
+                            </div>
+                            <div formArrayName="attributes">
+                                <div [formGroupName]="i"
+                                    *ngFor="let attr of deviceTypeAttributes.controls; let i = index" class="attribute">
+                                    <mat-form-field appearance="outline" class="third-width" color="accent">
+                                        <mat-label>Key</mat-label>
+                                        <input matInput formControlName="key">
+                                        <mat-error senergyError label="Key"></mat-error>
+                                    </mat-form-field>
+                                    =
+                                    <mat-form-field appearance="outline" class="third-width" color="accent">
+                                        <mat-label>Value</mat-label>
+                                        <input matInput formControlName="value">
+                                        <mat-error senergyError label="Value"></mat-error>
+                                    </mat-form-field>
+                                    <button mat-icon-button color="warn" [disabled]="!editable"
+                                        (click)="removeDeviceTypeAttr(i)">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                                <button mat-stroked-button color="accent" (click)="addDeviceTypeAttr()"
+                                    [disabled]="!editable">Add
+                                    Attribute
                                 </button>
                             </div>
-                            <button mat-stroked-button color="accent" (click)="addDeviceTypeAttr()"
-                                [disabled]="!editable">Add
-                                Attribute
-                            </button>
-                        </div>
-                    </form>
-                </mat-expansion-panel>
-                <mat-expansion-panel>
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>Services</mat-panel-title>
-                    </mat-expansion-panel-header>
-                    <ng-template matExpansionPanelContent>
-                        <form [formGroup]="secondFormGroup">
-                            <ng-template matStepLabel>Service</ng-template>
-                            <mat-accordion formArrayName="services" cdkDropListGroup multi>
-                                <mat-expansion-panel
-                                    *ngFor="let group of serviceGroupsAndUngroupedServices; trackBy:trackByKey"
-                                    [expanded]="serviceGroupsAndUngroupedServices.length === 1" cdkDropList
-                                    (cdkDropListDropped)="moveServiceToGroup($event, group.key)">
-                                    <mat-expansion-panel-header>
-                                        {{group.title}}
-                                    </mat-expansion-panel-header>
-                                    <ng-template matExpansionPanelContent>
-                                        <div *ngIf="group.isGroup" [formGroup]="getServiceGroup(group.key)">
-                                            <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                <mat-label>Name</mat-label>
-                                                <input matInput formControlName="name">
-                                                <mat-error senergyError label="Name"></mat-error>
-                                            </mat-form-field>
-                                            <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                <mat-label>Description</mat-label>
-                                                <input matInput formControlName="description">
-                                                <mat-error senergyError label="Description"></mat-error>
-                                            </mat-form-field>
-                                        </div>
+                        </form>
+                    </mat-expansion-panel>
+                    <mat-expansion-panel>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>Services</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <ng-template matExpansionPanelContent>
+                            <form [formGroup]="secondFormGroup">
+                                <ng-template matStepLabel>Service</ng-template>
+                                <mat-accordion formArrayName="services" cdkDropListGroup multi>
+                                    <mat-expansion-panel
+                                        *ngFor="let group of serviceGroupsAndUngroupedServices; trackBy:trackByKey"
+                                        [expanded]="serviceGroupsAndUngroupedServices.length === 1" cdkDropList
+                                        (cdkDropListDropped)="moveServiceToGroup($event, group.key)">
+                                        <mat-expansion-panel-header>
+                                            {{group.title}}
+                                        </mat-expansion-panel-header>
+                                        <ng-template matExpansionPanelContent>
+                                            <div *ngIf="group.isGroup" [formGroup]="getServiceGroup(group.key)">
+                                                <mat-form-field appearance="outline" class="full-width" color="accent">
+                                                    <mat-label>Name</mat-label>
+                                                    <input matInput formControlName="name">
+                                                    <mat-error senergyError label="Name"></mat-error>
+                                                </mat-form-field>
+                                                <mat-form-field appearance="outline" class="full-width" color="accent">
+                                                    <mat-label>Description</mat-label>
+                                                    <input matInput formControlName="description">
+                                                    <mat-error senergyError label="Description"></mat-error>
+                                                </mat-form-field>
+                                            </div>
 
-                                        <mat-accordion>
-                                            <mat-expansion-panel [id]="serviceAndIndex.index"
-                                                *ngFor="let serviceAndIndex of group.serviceAndIndices;"
-                                                [formGroupName]="serviceAndIndex.index" cdkDrag
-                                                cdkDragDisabled="{{!editable}}">
-                                                <mat-expansion-panel-header cdkDragHandle>
-                                                    <mat-panel-title>
-                                                        Service {{serviceAndIndex.service.get('name')?.value}}
-                                                    </mat-panel-title>
-                                                </mat-expansion-panel-header>
-                                                <ng-template matExpansionPanelContent>
-                                                    <mat-tab-group color="accent" headerPosition="above"
-                                                        dynamicHeight="true">
-                                                        <mat-tab label="Information">
-                                                            <div class="form">
-                                                                <mat-form-field appearance="outline" class="full-width"
-                                                                    color="accent">
-                                                                    <mat-label>ID</mat-label>
-                                                                    <input matInput formControlName="id">
-                                                                    <mat-error senergyError label="ID"></mat-error>
-                                                                </mat-form-field>
-                                                                <mat-form-field appearance="outline" class="full-width"
-                                                                    color="accent">
-                                                                    <mat-label>Name</mat-label>
-                                                                    <input matInput formControlName="name" required>
-                                                                    <mat-error senergyError label="Name"></mat-error>
-                                                                </mat-form-field>
-                                                                <mat-form-field appearance="outline" class="full-width"
-                                                                    color="accent">
-                                                                    <mat-label>Description</mat-label>
-                                                                    <input matInput formControlName="description">
-                                                                    <mat-error senergyError
-                                                                        label="Description"></mat-error>
-                                                                </mat-form-field>
-                                                                <mat-form-field appearance="outline" class="full-width"
-                                                                    color="accent">
-                                                                    <mat-label>Local ID</mat-label>
-                                                                    <input matInput formControlName="local_id" required>
-                                                                    <mat-error senergyError
-                                                                        label="Local ID"></mat-error>
-                                                                </mat-form-field>
-                                                                <mat-form-field appearance="outline" class="full-width"
-                                                                    color="accent">
-                                                                    <mat-label>Protocol</mat-label>
-                                                                    <mat-select formControlName="protocol_id" required>
-                                                                        <mat-option *ngFor="let item of protocols"
-                                                                            [value]="item.id">
-                                                                            {{item.name}}
-                                                                        </mat-option>
-                                                                    </mat-select>
-                                                                    <mat-error senergyError
-                                                                        label="Protocol"></mat-error>
-                                                                </mat-form-field>
-                                                                <mat-form-field appearance="outline" class="full-width"
-                                                                    color="accent">
-                                                                    <mat-label>Interaction</mat-label>
-                                                                    <mat-select formControlName="interaction" required>
-                                                                        <mat-option *ngFor="let item of interactionList"
-                                                                            [value]="item">
-                                                                            {{item}}
-                                                                        </mat-option>
-                                                                    </mat-select>
-                                                                    <mat-error senergyError
-                                                                        label="Interaction"></mat-error>
-                                                                </mat-form-field>
-                                                            </div>
-                                                        </mat-tab>
-                                                        <mat-tab label="Attributes" formArrayName="attributes">
-                                                            <div [formGroupName]="i"
-                                                                *ngFor="let attr of serviceAttributeArray(serviceAndIndex.service).controls; let i = index"
-                                                                class="attribute">
-                                                                <mat-form-field appearance="outline" class="third-width"
-                                                                    color="accent">
-                                                                    <mat-label>Key</mat-label>
-                                                                    <input matInput formControlName="key">
-                                                                    <mat-error senergyError label="Key"></mat-error>
-                                                                </mat-form-field>
-                                                                =
-                                                                <mat-form-field appearance="outline" class="third-width"
-                                                                    color="accent">
-                                                                    <mat-label>Value</mat-label>
-                                                                    <input matInput placeholder="Value"
-                                                                        formControlName="value"
-                                                                        *ngIf="attr.get('key')?.value !== timeAttributeKey">
-                                                                    <!-- TODO replace with mtx-select --> <senergy-select-search
-                                                                        [options]="getTimePathOptions(serviceAndIndex.index)"
-                                                                        *ngIf="attr.get('key')?.value === timeAttributeKey"
-                                                                        placeholder="Path" formControlName="value"
-                                                                        noneView="--- None ---">
-                                                                    </senergy-select-search>
-                                                                    <mat-error senergyError label="Value"></mat-error>
-                                                                </mat-form-field>
-
-                                                                <button mat-icon-button color="warn"
-                                                                    [disabled]="!editable || attr.get('key')?.value === timeAttributeKey"
-                                                                    (click)="removeServiceAttr(serviceAndIndex.service, i)">
-                                                                    <mat-icon>delete</mat-icon>
-                                                                </button>
-                                                            </div>
-                                                            <button mat-stroked-button color="accent"
-                                                                class="button-margin"
-                                                                (click)="addServiceAttr(serviceAndIndex.service)"
-                                                                [disabled]="!editable">Add Attribute</button>
-                                                        </mat-tab>
-                                                        <mat-tab label="{{tab.label}}"
-                                                            disabled="{{serviceAndIndex.service.value.protocol_id === null}}"
-                                                            formArrayName="{{tab.formArrayName}}"
-                                                            *ngFor="let tab of [{label: 'Input', formArrayName: 'inputs'},{label: 'Output', formArrayName: 'outputs'}]">
-                                                            <div [formGroupName]="i"
-                                                                *ngFor="let inOut of inputOutputArray(serviceAndIndex.service, tab.formArrayName);  let i = index; trackBy: trackById">
-                                                                <div fxLayout="row" fxLayoutAlign="start center">
-                                                                    <button mat-icon-button class="mat-accent"
-                                                                        (click)="expand(serviceAndIndex.service, tab.formArrayName, i)">
-                                                                        <mat-icon>{{inOut.show ? 'expand_less' :
-                                                                            'expand_more'}}</mat-icon>
-                                                                    </button>
-                                                                    <div>{{inOut.name}}</div>
+                                            <mat-accordion>
+                                                <mat-expansion-panel [id]="serviceAndIndex.index"
+                                                    *ngFor="let serviceAndIndex of group.serviceAndIndices;"
+                                                    [formGroupName]="serviceAndIndex.index" cdkDrag
+                                                    cdkDragDisabled="{{!editable}}">
+                                                    <mat-expansion-panel-header cdkDragHandle>
+                                                        <mat-panel-title>
+                                                            Service {{serviceAndIndex.service.get('name')?.value}}
+                                                        </mat-panel-title>
+                                                    </mat-expansion-panel-header>
+                                                    <ng-template matExpansionPanelContent>
+                                                        <mat-tab-group color="accent" headerPosition="above"
+                                                            dynamicHeight="true">
+                                                            <mat-tab label="Information">
+                                                                <div class="form">
+                                                                    <mat-form-field appearance="outline"
+                                                                        class="full-width" color="accent">
+                                                                        <mat-label>ID</mat-label>
+                                                                        <input matInput formControlName="id">
+                                                                        <mat-error senergyError label="ID"></mat-error>
+                                                                    </mat-form-field>
+                                                                    <mat-form-field appearance="outline"
+                                                                        class="full-width" color="accent">
+                                                                        <mat-label>Name</mat-label>
+                                                                        <input matInput formControlName="name" required>
+                                                                        <mat-error senergyError
+                                                                            label="Name"></mat-error>
+                                                                    </mat-form-field>
+                                                                    <mat-form-field appearance="outline"
+                                                                        class="full-width" color="accent">
+                                                                        <mat-label>Description</mat-label>
+                                                                        <input matInput formControlName="description">
+                                                                        <mat-error senergyError
+                                                                            label="Description"></mat-error>
+                                                                    </mat-form-field>
+                                                                    <mat-form-field appearance="outline"
+                                                                        class="full-width" color="accent">
+                                                                        <mat-label>Local ID</mat-label>
+                                                                        <input matInput formControlName="local_id"
+                                                                            required>
+                                                                        <mat-error senergyError
+                                                                            label="Local ID"></mat-error>
+                                                                    </mat-form-field>
+                                                                    <mat-form-field appearance="outline"
+                                                                        class="full-width" color="accent">
+                                                                        <mat-label>Protocol</mat-label>
+                                                                        <mat-select formControlName="protocol_id"
+                                                                            required>
+                                                                            <mat-option *ngFor="let item of protocols"
+                                                                                [value]="item.id">
+                                                                                {{item.name}}
+                                                                            </mat-option>
+                                                                        </mat-select>
+                                                                        <mat-error senergyError
+                                                                            label="Protocol"></mat-error>
+                                                                    </mat-form-field>
+                                                                    <mat-form-field appearance="outline"
+                                                                        class="full-width" color="accent">
+                                                                        <mat-label>Interaction</mat-label>
+                                                                        <mat-select formControlName="interaction"
+                                                                            required>
+                                                                            <mat-option
+                                                                                *ngFor="let item of interactionList"
+                                                                                [value]="item">
+                                                                                {{item}}
+                                                                            </mat-option>
+                                                                        </mat-select>
+                                                                        <mat-error senergyError
+                                                                            label="Interaction"></mat-error>
+                                                                    </mat-form-field>
                                                                 </div>
+                                                            </mat-tab>
+                                                            <mat-tab label="Attributes" formArrayName="attributes">
+                                                                <div [formGroupName]="i"
+                                                                    *ngFor="let attr of serviceAttributeArray(serviceAndIndex.service).controls; let i = index"
+                                                                    class="attribute">
+                                                                    <mat-form-field appearance="outline"
+                                                                        class="third-width" color="accent">
+                                                                        <mat-label>Key</mat-label>
+                                                                        <input matInput formControlName="key">
+                                                                        <mat-error senergyError label="Key"></mat-error>
+                                                                    </mat-form-field>
+                                                                    =
+                                                                    <mat-form-field appearance="outline"
+                                                                        class="third-width" color="accent">
+                                                                        <mat-label>Value</mat-label>
+                                                                        <input matInput placeholder="Value"
+                                                                            formControlName="value"
+                                                                            *ngIf="attr.get('key')?.value !== timeAttributeKey">
+                                                                        <mtx-select
+                                                                            [items]="getTimePathOptions(serviceAndIndex.index)"
+                                                                            *ngIf="attr.get('key')?.value === timeAttributeKey"
+                                                                            placeholder="Path" formControlName="value"
+                                                                            appendTo=".root">
+                                                                        </mtx-select>
+                                                                        <mat-error senergyError
+                                                                            label="Value"></mat-error>
+                                                                    </mat-form-field>
 
-                                                                <div fxLayout="row" [fxShow]="inOut.show === true">
-                                                                    <div fxFlex>
-                                                                        <mat-form-field appearance="outline"
-                                                                            class="full-width" color="accent">
-                                                                            <mat-label>Serialization</mat-label>
-                                                                            <!-- TODO replace with mtx-select --> <senergy-select-search
-                                                                                [options]="serializations"
-                                                                                formControlName="serialization"
-                                                                                [required]="inOut.dataSource && inOut.dataSource.data.length > 0"
-                                                                                noneView="-- None --"></senergy-select-search>
-                                                                            <mat-error senergyError
-                                                                                label="Serialization"></mat-error>
-                                                                        </mat-form-field>
-                                                                        <div *ngIf="inOut.dataSource">
-                                                                            <button mat-raised-button color="accent"
-                                                                                class="button-margin"
-                                                                                (click)="addContentVariable(tab.label === 'Input', inOut, [])"
-                                                                                [disabled]="inOut.dataSource.data.length === 1 || !editable">
-                                                                                ADD ContentVariable
-                                                                            </button>
-                                                                            <button mat-raised-button color="accent"
-                                                                                class="button-margin"
-                                                                                (click)="addContentVariableFromJson(inOut,[])"
-                                                                                [disabled]="inOut.dataSource.data.length === 1 || !editable">
-                                                                                Import JSON as ContentVariable
-                                                                            </button>
-                                                                        </div>
-                                                                        <div *ngIf="inOut.dataSource && inOut.tree">
-                                                                            <mat-tree [dataSource]="inOut.dataSource"
-                                                                                [treeControl]="inOut.tree"
-                                                                                class="example-tree">
-                                                                                <!-- This is the tree node template for leaf nodes -->
-                                                                                <mat-tree-node
-                                                                                    *matTreeNodeDef="let node"
-                                                                                    matTreeNodeToggle>
-                                                                                    <li class="mat-tree-node">
-                                                                                        <!-- use a disabled button to provide padding for tree leaf -->
-                                                                                        <button mat-icon-button
-                                                                                            disabled></button>
-                                                                                        <button mat-stroked-button
-                                                                                            (click)="editContent(tab.label === 'Input', node, inOut)">
-                                                                                            {{node.name}}
-                                                                                        </button>
-                                                                                        <button mat-icon-button
-                                                                                            [disabled]="!editable"
-                                                                                            (click)="deleteContentVariable(inOut, node.indices)">
-                                                                                            <mat-icon>delete_outline</mat-icon>
-                                                                                        </button>
-                                                                                        <mat-icon *ngIf="!node.type"
-                                                                                            color="warn"
-                                                                                            matTooltip="missing type">warning</mat-icon>
-                                                                                    </li>
-                                                                                </mat-tree-node>
-                                                                                <!-- This is the tree node template for expandable nodes -->
-                                                                                <mat-nested-tree-node
-                                                                                    *matTreeNodeDef="let node; when: hasChild">
-                                                                                    <li>
-                                                                                        <div class="mat-tree-node">
+                                                                    <button mat-icon-button color="warn"
+                                                                        [disabled]="!editable || attr.get('key')?.value === timeAttributeKey"
+                                                                        (click)="removeServiceAttr(serviceAndIndex.service, i)">
+                                                                        <mat-icon>delete</mat-icon>
+                                                                    </button>
+                                                                </div>
+                                                                <button mat-stroked-button color="accent"
+                                                                    class="button-margin"
+                                                                    (click)="addServiceAttr(serviceAndIndex.service)"
+                                                                    [disabled]="!editable">Add Attribute</button>
+                                                            </mat-tab>
+                                                            <mat-tab label="{{tab.label}}"
+                                                                disabled="{{serviceAndIndex.service.value.protocol_id === null}}"
+                                                                formArrayName="{{tab.formArrayName}}"
+                                                                *ngFor="let tab of [{label: 'Input', formArrayName: 'inputs'},{label: 'Output', formArrayName: 'outputs'}]">
+                                                                <div [formGroupName]="i"
+                                                                    *ngFor="let inOut of inputOutputArray(serviceAndIndex.service, tab.formArrayName);  let i = index; trackBy: trackById">
+                                                                    <div fxLayout="row" fxLayoutAlign="start center">
+                                                                        <button mat-icon-button class="mat-accent"
+                                                                            (click)="expand(serviceAndIndex.service, tab.formArrayName, i)">
+                                                                            <mat-icon>{{inOut.show ? 'expand_less' :
+                                                                                'expand_more'}}</mat-icon>
+                                                                        </button>
+                                                                        <div>{{inOut.name}}</div>
+                                                                    </div>
+
+                                                                    <div fxLayout="row" [fxShow]="inOut.show === true">
+                                                                        <div fxFlex>
+                                                                            <mat-form-field appearance="outline"
+                                                                                class="full-width" color="accent">
+                                                                                <mat-label>Serialization</mat-label>
+                                                                                <mtx-select
+                                                                                    [items]="serializations"
+                                                                                    formControlName="serialization"
+                                                                                    [required]="inOut.dataSource && inOut.dataSource.data.length > 0"
+                                                                                    appendTo=".root"></mtx-select>
+                                                                                <mat-error senergyError
+                                                                                    label="Serialization"></mat-error>
+                                                                            </mat-form-field>
+                                                                            <div *ngIf="inOut.dataSource">
+                                                                                <button mat-raised-button color="accent"
+                                                                                    class="button-margin"
+                                                                                    (click)="addContentVariable(tab.label === 'Input', inOut, [])"
+                                                                                    [disabled]="inOut.dataSource.data.length === 1 || !editable">
+                                                                                    ADD ContentVariable
+                                                                                </button>
+                                                                                <button mat-raised-button color="accent"
+                                                                                    class="button-margin"
+                                                                                    (click)="addContentVariableFromJson(inOut,[])"
+                                                                                    [disabled]="inOut.dataSource.data.length === 1 || !editable">
+                                                                                    Import JSON as ContentVariable
+                                                                                </button>
+                                                                            </div>
+                                                                            <div *ngIf="inOut.dataSource && inOut.tree">
+                                                                                <mat-tree
+                                                                                    [dataSource]="inOut.dataSource"
+                                                                                    [treeControl]="inOut.tree"
+                                                                                    class="example-tree">
+                                                                                    <!-- This is the tree node template for leaf nodes -->
+                                                                                    <mat-tree-node
+                                                                                        *matTreeNodeDef="let node"
+                                                                                        matTreeNodeToggle>
+                                                                                        <li class="mat-tree-node">
+                                                                                            <!-- use a disabled button to provide padding for tree leaf -->
                                                                                             <button mat-icon-button
-                                                                                                matTreeNodeToggle
-                                                                                                [attr.aria-label]="'toggle ' + node.name">
-                                                                                                <mat-icon
-                                                                                                    class="mat-icon-rtl-mirror">
-                                                                                                    {{inOut.tree.isExpanded(node)
-                                                                                                    ?
-                                                                                                    'expand_more' :
-                                                                                                    'chevron_right'}}
-                                                                                                </mat-icon>
-                                                                                            </button>
+                                                                                                disabled></button>
                                                                                             <button mat-stroked-button
                                                                                                 (click)="editContent(tab.label === 'Input', node, inOut)">
                                                                                                 {{node.name}}
@@ -312,87 +291,123 @@
                                                                                                 (click)="deleteContentVariable(inOut, node.indices)">
                                                                                                 <mat-icon>delete_outline</mat-icon>
                                                                                             </button>
-                                                                                            <button mat-icon-button
-                                                                                                *ngIf="editable"
-                                                                                                (click)="addContentVariableFromJson(inOut, node.indices)">
-                                                                                                <mat-icon>data_object</mat-icon>
-                                                                                            </button>
-                                                                                            <button mat-icon-button
-                                                                                                [disabled]="!editable"
-                                                                                                (click)="addContentVariable(tab.label === 'Input', inOut, node.indices)">
-                                                                                                <mat-icon>add</mat-icon>
-                                                                                            </button>
                                                                                             <mat-icon *ngIf="!node.type"
                                                                                                 color="warn"
                                                                                                 matTooltip="missing type">warning</mat-icon>
-                                                                                        </div>
-                                                                                        <ul
-                                                                                            [class.example-tree-invisible]="!inOut.tree.isExpanded(node)">
-                                                                                            <ng-container
-                                                                                                matTreeNodeOutlet></ng-container>
-                                                                                        </ul>
-                                                                                    </li>
-                                                                                </mat-nested-tree-node>
-                                                                            </mat-tree>
+                                                                                        </li>
+                                                                                    </mat-tree-node>
+                                                                                    <!-- This is the tree node template for expandable nodes -->
+                                                                                    <mat-nested-tree-node
+                                                                                        *matTreeNodeDef="let node; when: hasChild">
+                                                                                        <li>
+                                                                                            <div class="mat-tree-node">
+                                                                                                <button mat-icon-button
+                                                                                                    matTreeNodeToggle
+                                                                                                    [attr.aria-label]="'toggle ' + node.name">
+                                                                                                    <mat-icon
+                                                                                                        class="mat-icon-rtl-mirror">
+                                                                                                        {{inOut.tree.isExpanded(node)
+                                                                                                        ?
+                                                                                                        'expand_more' :
+                                                                                                        'chevron_right'}}
+                                                                                                    </mat-icon>
+                                                                                                </button>
+                                                                                                <button
+                                                                                                    mat-stroked-button
+                                                                                                    (click)="editContent(tab.label === 'Input', node, inOut)">
+                                                                                                    {{node.name}}
+                                                                                                </button>
+                                                                                                <button mat-icon-button
+                                                                                                    [disabled]="!editable"
+                                                                                                    (click)="deleteContentVariable(inOut, node.indices)">
+                                                                                                    <mat-icon>delete_outline</mat-icon>
+                                                                                                </button>
+                                                                                                <button mat-icon-button
+                                                                                                    *ngIf="editable"
+                                                                                                    (click)="addContentVariableFromJson(inOut, node.indices)">
+                                                                                                    <mat-icon>data_object</mat-icon>
+                                                                                                </button>
+                                                                                                <button mat-icon-button
+                                                                                                    [disabled]="!editable"
+                                                                                                    (click)="addContentVariable(tab.label === 'Input', inOut, node.indices)">
+                                                                                                    <mat-icon>add</mat-icon>
+                                                                                                </button>
+                                                                                                <mat-icon
+                                                                                                    *ngIf="!node.type"
+                                                                                                    color="warn"
+                                                                                                    matTooltip="missing type">warning</mat-icon>
+                                                                                            </div>
+                                                                                            <ul
+                                                                                                [class.example-tree-invisible]="!inOut.tree.isExpanded(node)">
+                                                                                                <ng-container
+                                                                                                    matTreeNodeOutlet></ng-container>
+                                                                                            </ul>
+                                                                                        </li>
+                                                                                    </mat-nested-tree-node>
+                                                                                </mat-tree>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        </mat-tab>
-                                                    </mat-tab-group>
-                                                    <div fxLayoutAlign="end center" cdkDragHandle>
-                                                        <button (click)="cloneService(serviceAndIndex.index)"
-                                                            mat-icon-button class="mat-accent"
-                                                            matTooltip="clone service" [disabled]="!editable">
-                                                            <mat-icon>content_copy</mat-icon>
-                                                        </button>
-                                                        <button (click)="deleteService(serviceAndIndex.service.value)"
-                                                            mat-icon-button class="mat-accent"
-                                                            matTooltip="delete service" [disabled]="!editable">
-                                                            <mat-icon>delete</mat-icon>
-                                                        </button>
-                                                    </div>
-                                                </ng-template>
-                                            </mat-expansion-panel>
-                                        </mat-accordion>
-                                        <div class="button-margin" fxLayoutAlign="center center" *ngIf="editable">
-                                            <button mat-raised-button color="accent" (click)="addService(group.key)">ADD
-                                                Service</button>
-                                        </div>
-                                        <div fxLayoutAlign="end center" *ngIf="group.isGroup">
-                                            <button (click)="cloneServiceGroup(group)" mat-icon-button
-                                                class="mat-accent" matTooltip="clone service group"
-                                                [disabled]="!editable">
-                                                <mat-icon>content_copy</mat-icon>
-                                            </button>
-                                            <button (click)="deleteServiceGroup(group.key)" mat-icon-button
-                                                class="mat-accent" matTooltip="delete service group"
-                                                [disabled]="!editable || group.serviceAndIndices.length > 0">
-                                                <mat-icon>delete</mat-icon>
-                                            </button>
-                                        </div>
-                                    </ng-template>
-                                </mat-expansion-panel>
-                            </mat-accordion>
-                            <div class="button-margin" fxLayoutAlign="center center" *ngIf="editable">
-                                <button mat-raised-button color="accent" (click)="addServiceGroup()">ADD Service
-                                    Group</button>
-                            </div>
-                        </form>
-                    </ng-template>
-                </mat-expansion-panel>
-            </mat-accordion>
-        </mat-card-content>
-        <mat-card-footer *ngIf="editable">
-            <div *ngIf="firstFormGroup.invalid || secondFormGroup.invalid">Can't save, please fix errors.</div>
-            <div *ngIf="firstFormGroup.invalid">Error in section "Information".</div>
-            <div *ngIf="secondFormGroup.invalid">Error in section "Service". You need at least one service.</div>
-        </mat-card-footer>
-    </mat-card>
-    <button *ngIf="editable" mat-fab class="fab" (click)="save()" matTooltip="Edit device type">
-        <mat-icon>save</mat-icon>
-    </button>
-    <button *ngIf="!editable && userHasEditAuthorization" mat-fab class="fab" (click)="editDeviceType()" matTooltip="Edit device type">
-        <mat-icon>edit</mat-icon>
-    </button>
+                                                            </mat-tab>
+                                                        </mat-tab-group>
+                                                        <div fxLayoutAlign="end center" cdkDragHandle>
+                                                            <button (click)="cloneService(serviceAndIndex.index)"
+                                                                mat-icon-button class="mat-accent"
+                                                                matTooltip="clone service" [disabled]="!editable">
+                                                                <mat-icon>content_copy</mat-icon>
+                                                            </button>
+                                                            <button
+                                                                (click)="deleteService(serviceAndIndex.service.value)"
+                                                                mat-icon-button class="mat-accent"
+                                                                matTooltip="delete service" [disabled]="!editable">
+                                                                <mat-icon>delete</mat-icon>
+                                                            </button>
+                                                        </div>
+                                                    </ng-template>
+                                                </mat-expansion-panel>
+                                            </mat-accordion>
+                                            <div class="button-margin" fxLayoutAlign="center center" *ngIf="editable">
+                                                <button mat-raised-button color="accent"
+                                                    (click)="addService(group.key)">ADD
+                                                    Service</button>
+                                            </div>
+                                            <div fxLayoutAlign="end center" *ngIf="group.isGroup">
+                                                <button (click)="cloneServiceGroup(group)" mat-icon-button
+                                                    class="mat-accent" matTooltip="clone service group"
+                                                    [disabled]="!editable">
+                                                    <mat-icon>content_copy</mat-icon>
+                                                </button>
+                                                <button (click)="deleteServiceGroup(group.key)" mat-icon-button
+                                                    class="mat-accent" matTooltip="delete service group"
+                                                    [disabled]="!editable || group.serviceAndIndices.length > 0">
+                                                    <mat-icon>delete</mat-icon>
+                                                </button>
+                                            </div>
+                                        </ng-template>
+                                    </mat-expansion-panel>
+                                </mat-accordion>
+                                <div class="button-margin" fxLayoutAlign="center center" *ngIf="editable">
+                                    <button mat-raised-button color="accent" (click)="addServiceGroup()">ADD Service
+                                        Group</button>
+                                </div>
+                            </form>
+                        </ng-template>
+                    </mat-expansion-panel>
+                </mat-accordion>
+            </mat-card-content>
+            <mat-card-footer *ngIf="editable">
+                <div *ngIf="firstFormGroup.invalid || secondFormGroup.invalid">Can't save, please fix errors.</div>
+                <div *ngIf="firstFormGroup.invalid">Error in section "Information".</div>
+                <div *ngIf="secondFormGroup.invalid">Error in section "Service". You need at least one service.</div>
+            </mat-card-footer>
+        </mat-card>
+        <button *ngIf="editable" mat-fab class="fab" (click)="save()" matTooltip="Edit device type">
+            <mat-icon>save</mat-icon>
+        </button>
+        <button *ngIf="!editable && userHasEditAuthorization" mat-fab class="fab" (click)="editDeviceType()"
+            matTooltip="Edit device type">
+            <mat-icon>edit</mat-icon>
+        </button>
+    </div>
 </div>

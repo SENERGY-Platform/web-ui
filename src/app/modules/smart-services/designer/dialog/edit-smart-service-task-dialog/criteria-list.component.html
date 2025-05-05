@@ -1,79 +1,68 @@
-<mat-accordion>
-    <mat-expansion-panel *ngFor="let criteria of criteriaList; let i = index">
-        <mat-expansion-panel-header>
-            <mat-panel-title>
-                {{criteriaToLabel(criteria)}}
-            </mat-panel-title>
-        </mat-expansion-panel-header>
-        <div>
-            <div>
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Interaction</mat-label>
-                    <mat-select [(ngModel)]="criteria.interaction" (selectionChange)="emitUpdate()">
-                        <mat-option [value]="undefined">NONE</mat-option>
-                        <mat-option value="event">event</mat-option>
-                        <mat-option value="request">request</mat-option>
-                        <mat-option value="event+request">event+request</mat-option>
-                    </mat-select>
-                    <mat-error senergyError label="Interaction"></mat-error>
-                </mat-form-field>
-            </div>
+<div class="root">
+    <mat-accordion>
+        <mat-expansion-panel *ngFor="let criteria of criteriaList; let i = index">
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    {{criteriaToLabel(criteria)}}
+                </mat-panel-title>
+            </mat-expansion-panel-header>
             <div>
                 <div>
-                    <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                        <mat-label>Function</mat-label>
-                        <!-- TODO replace with mtx-select --> <senergy-select-search
-                                               [(ngModel)]="criteria.function_id"
-                                               [options]="functions"
-                                               (selectionChange)="emitUpdate()"
-                                               noneView="NONE"
-                                               useOptionViewProperty="name"
-                                               useOptionValueProperty="id">
-                        </senergy-select-search>
-                        <mat-error senergyError label="Function"></mat-error>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Interaction</mat-label>
+                        <mat-select [(ngModel)]="criteria.interaction" (selectionChange)="emitUpdate()">
+                            <mat-option [value]="undefined">NONE</mat-option>
+                            <mat-option value="event">event</mat-option>
+                            <mat-option value="request">request</mat-option>
+                            <mat-option value="event+request">event+request</mat-option>
+                        </mat-select>
+                        <mat-error senergyError label="Interaction"></mat-error>
                     </mat-form-field>
                 </div>
                 <div>
-                    <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                        <mat-label>Aspect</mat-label>
-                        <!-- TODO replace with mtx-select --> <senergy-select-search
-                                               [(ngModel)]="criteria.aspect_id"
-                                               [options]="nestedAspects"
-                                               (selectionChange)="emitUpdate()"
-                                               noneView="NONE"
-                                               useOptionViewProperty="name"
-                                               useOptionValueProperty="id">
-                        </senergy-select-search>
-                        <mat-error senergyError label="Aspect"></mat-error>
-                    </mat-form-field>
+                    <div>
+                        <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                            <mat-label>Function</mat-label>
+                            <mtx-select [(ngModel)]="criteria.function_id" [items]="functions" (change)="emitUpdate()"
+                                bindLabel="name" bindValue="id" appendTo=".root">
+                            </mtx-select>
+                            <mat-error senergyError label="Function"></mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div>
+                        <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                            <mat-label>Aspect</mat-label>
+                            <mtx-select [(ngModel)]="criteria.aspect_id" [items]="aspects" bindLabel="name"
+                                bindValue="id" appendTo=".root" groupBy="root_name" selectableGroup
+                                [groupValue]="getRootAspect()" [compareWith]="compareAspectsWith"
+                                (change)="emitUpdate()">
+                            </mtx-select>
+                            <mat-error senergyError label="Aspect"></mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div>
+                        <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                            <mat-label>Device Class</mat-label>
+                            <mtx-select [(ngModel)]="criteria.device_class_id" [items]="deviceClasses"
+                                (change)="emitUpdate()" bindLabel="name" bindValue="id" appendTo=".root">
+                            </mtx-select>
+                            <mat-error senergyError label="Device Class"></mat-error>
+                        </mat-form-field>
+                    </div>
                 </div>
                 <div>
-                    <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                        <mat-label>Device Class</mat-label>
-                        <!-- TODO replace with mtx-select --> <senergy-select-search
-                                               [(ngModel)]="criteria.device_class_id"
-                                               [options]="deviceClasses"
-                                               (selectionChange)="emitUpdate()"
-                                               noneView="NONE"
-                                               useOptionViewProperty="name"
-                                               useOptionValueProperty="id">
-                        </senergy-select-search>
-                        <mat-error senergyError label="Device Class"></mat-error>
-                    </mat-form-field>
-                </div>
-            </div>
-            <div>
-                <button mat-raised-button color="accent"
+                    <button mat-raised-button color="accent"
                         (click)="criteriaList = removeCriteria(criteriaList, i); emitUpdate()">
-                    Remove Criteria
-                </button>
+                        Remove Criteria
+                    </button>
+                </div>
             </div>
-        </div>
-    </mat-expansion-panel>
-</mat-accordion>
-<div>
-    <button mat-raised-button color="accent" class="add-criteria-button"
+        </mat-expansion-panel>
+    </mat-accordion>
+    <div>
+        <button mat-raised-button color="accent" class="add-criteria-button"
             (click)="criteriaList = addCriteria(criteriaList); emitUpdate()">
-        Add Criteria
-    </button>
+            Add Criteria
+        </button>
+    </div>
 </div>

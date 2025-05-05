@@ -19,7 +19,7 @@
     width: 100%;
 }
 
-.smart-service-input-tab{
+.smart-service-input-tab {
     margin-top: 15px;
 }
 
@@ -29,4 +29,8 @@
 
 .edit-smart-service-input-dialog {
     min-width: 50vw;
+}
+
+.root {
+    position: relative;
 }

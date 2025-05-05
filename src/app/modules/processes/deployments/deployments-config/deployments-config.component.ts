@@ -40,6 +40,10 @@ import { OperatorModel } from '../../../data/operator-repo/shared/operator.model
 import { CharacteristicsService } from '../../../metadata/characteristics/shared/characteristics.service';
 import { DeviceTypeAspectNodeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 
+interface V2DeploymentsPreparedSelectionOptionModelWithGroup extends V2DeploymentsPreparedSelectionOptionModel {
+    group?: string;
+}
+
 @Component({
     selector: 'senergy-process-deployments-config',
     templateUrl: './deployments-config.component.html',
@@ -56,7 +60,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     operatorImageList: { _id?: string; name: string }[] = [];
     handlerList: { _id?: string; name: string }[] = [];
     ready = false;
-    optionGroups: Map<number, Map<string, V2DeploymentsPreparedSelectionOptionModel[]>> = new Map();
+    optionGroups: Map<number, V2DeploymentsPreparedSelectionOptionModelWithGroup[]> = new Map();
     deploymentsService: {
         getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null>;
         v2getDeployments(deploymentId: string): Observable<V2DeploymentsPreparedModel | null>;
@@ -206,7 +210,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         this.changeElementSelectionOption(selectedElementIndex, selectionOptionIndex, 'task');
     }
 
-    changeConditionalEventSelectionOption(selectedElementIndex: number, selectionOptionIndex: number): void {
+    changeConditionalEventSelectionOption(selectedElementIndex: number, selectionOptionIndex: number): void  {
         this.changeElementSelectionOption(selectedElementIndex, selectionOptionIndex, 'conditional_event');
     }
 
@@ -449,28 +453,25 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     private static getOptionGroups(
         selectionOptions: V2DeploymentsPreparedSelectionOptionModel[],
-    ): Map<string, V2DeploymentsPreparedSelectionOptionModel[]> {
-        const devices: V2DeploymentsPreparedSelectionOptionModel[] = [];
-        const deviceGroups: V2DeploymentsPreparedSelectionOptionModel[] = [];
-        const imports: V2DeploymentsPreparedSelectionOptionModel[] = [];
+    ): V2DeploymentsPreparedSelectionOptionModelWithGroup[] {
+        const result: V2DeploymentsPreparedSelectionOptionModel[] = [];
         if (!selectionOptions) {
             selectionOptions = [];
         }
         for (const option of selectionOptions) {
             if (option.device) {
-                devices.push(option);
+                (option as V2DeploymentsPreparedSelectionOptionModelWithGroup).group = 'Devices';
+                result.push(option);
             }
             if (option.device_group) {
-                deviceGroups.push(option);
+                (option as V2DeploymentsPreparedSelectionOptionModelWithGroup).group = 'Device-Groups';
+                result.push(option);
             }
             if (option.import) {
-                imports.push(option);
+                (option as V2DeploymentsPreparedSelectionOptionModelWithGroup).group = 'Imports';
+                result.push(option);
             }
         }
-        const result = new Map<string, V2DeploymentsPreparedSelectionOptionModel[]>();
-        result.set('Devices', devices);
-        result.set('Device-Groups', deviceGroups);
-        result.set('Imports', imports);
         return result;
     }
 
@@ -553,5 +554,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 });
             }
         });
+    }
+
+    groupOptionByFn(_: any) {
+        return '';
     }
 }

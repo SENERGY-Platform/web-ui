@@ -44,7 +44,7 @@ import { OperatorModel } from '../../operator-repo/shared/operator.model';
 import { OperatorRepoService } from '../../operator-repo/shared/operator-repo.service';
 import { ImportInstancesService } from '../../../imports/import-instances/shared/import-instances.service';
 import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
-import { GroupValueFn } from '@ng-matero/extensions/select';
+import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
 
 interface CustomSelectable {
     id: string;
@@ -1209,4 +1209,20 @@ export class DeployFlowComponent implements OnInit {
             return null;
         };
     }
+
+    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectModel | string, b: DeviceTypeAspectModel | string) => {
+            const aIsStr = typeof a === 'string' || a instanceof String;
+            const bIsStr = typeof b === 'string' || b instanceof String;
+    
+            if (aIsStr && bIsStr) {
+                return a === b;
+            }
+            if (!aIsStr && !bIsStr) {
+                return a.id === b.id;
+            }
+            if (aIsStr) {
+                return a === (b as DeviceTypeAspectModel).id;
+            }
+            return a.id === b;
+        };
 }

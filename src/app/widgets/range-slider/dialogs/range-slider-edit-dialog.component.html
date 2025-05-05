@@ -17,62 +17,65 @@
 <h2 mat-dialog-title>Edit Range Slider</h2>
 
 <mat-dialog-content>
-	<form [formGroup]="formGroup">
-		<div fxLayout="column" *ngIf="userHasUpdateNameAuthorization">
-			<mat-form-field appearance="outline" color="accent">
-				<mat-label>Widget Name</mat-label>
-				<label>
-					<input matInput formControlName="name">
-				</label>
-				<mat-error senergyError label="Widget Name"></mat-error>
-			</mat-form-field>
-		</div>
-		<span *ngIf="userHasUpdatePropertiesAuthorization">
-			<div>
-				<mat-form-field appearance="outline" color="accent" class="user-input">
-					<mat-label>Deployment</mat-label>
-					<!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Deployment" formControlName="deployment" [compareWith]="compareDeployments"
-						[options]="deployments" useOptionViewProperty="name">
-					</senergy-select-search>
-					<mat-error senergyError label="Deployment"></mat-error>
-				</mat-form-field>
-				<mat-form-field appearance="outline" color="accent" class="user-input">
-					<mat-label>Parameter</mat-label>
-					<!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Parameter" formControlName="parameter" [options]="parameters">
-					</senergy-select-search>
-					<mat-error senergyError label="Parameter"></mat-error>
-				</mat-form-field>
-				<mat-form-field appearance="outline" color="accent" class="unit">
-					<mat-label>Unit</mat-label>
+	<div class="root">
+		<form [formGroup]="formGroup">
+			<div fxLayout="column" *ngIf="userHasUpdateNameAuthorization">
+				<mat-form-field appearance="outline" color="accent">
+					<mat-label>Widget Name</mat-label>
 					<label>
-						<input type="text" matInput formControlName="unit">
+						<input matInput formControlName="name">
 					</label>
-					<mat-error senergyError label="Unit"></mat-error>
+					<mat-error senergyError label="Widget Name"></mat-error>
 				</mat-form-field>
 			</div>
-			<div [formGroup]="formGroup">
-				<mat-form-field appearance="outline" color="accent" class="user-input">
-					<mat-label>Minimum Value</mat-label>
-					<label>
-						<input placeholder="Choose Minimum Value" matInput type="number" formControlName="minValue">
-					</label>
-					<mat-error senergyError label="Minimum Value"></mat-error>
-				</mat-form-field>
-				<mat-form-field appearance="outline" color="accent" class="user-input">
-					<mat-label>Maximum Value</mat-label>
-					<label>
-						<input matInput placeholder="Choose Maximum Value" type="number" formControlName="maxValue">
-					</label>
-					<mat-error senergyError label="Maximum Value"></mat-error>
-				</mat-form-field>
-			</div>
-		</span>
-	</form>
+			<span *ngIf="userHasUpdatePropertiesAuthorization">
+				<div>
+					<mat-form-field appearance="outline" color="accent" class="user-input">
+						<mat-label>Deployment</mat-label>
+						<mtx-select placeholder="Choose Deployment" formControlName="deployment"
+							[compareWith]="compareDeployments" [items]="deployments" bindLabel="name" appendTo=".root">
+						</mtx-select>
+						<mat-error senergyError label="Deployment"></mat-error>
+					</mat-form-field>
+					<mat-form-field appearance="outline" color="accent" class="user-input">
+						<mat-label>Parameter</mat-label>
+						<mtx-select placeholder="Choose Parameter" formControlName="parameter" [items]="parameters"
+							appendTo=".root">
+						</mtx-select>
+						<mat-error senergyError label="Parameter"></mat-error>
+					</mat-form-field>
+					<mat-form-field appearance="outline" color="accent" class="unit">
+						<mat-label>Unit</mat-label>
+						<label>
+							<input type="text" matInput formControlName="unit">
+						</label>
+						<mat-error senergyError label="Unit"></mat-error>
+					</mat-form-field>
+				</div>
+				<div [formGroup]="formGroup">
+					<mat-form-field appearance="outline" color="accent" class="user-input">
+						<mat-label>Minimum Value</mat-label>
+						<label>
+							<input placeholder="Choose Minimum Value" matInput type="number" formControlName="minValue">
+						</label>
+						<mat-error senergyError label="Minimum Value"></mat-error>
+					</mat-form-field>
+					<mat-form-field appearance="outline" color="accent" class="user-input">
+						<mat-label>Maximum Value</mat-label>
+						<label>
+							<input matInput placeholder="Choose Maximum Value" type="number" formControlName="maxValue">
+						</label>
+						<mat-error senergyError label="Maximum Value"></mat-error>
+					</mat-form-field>
+				</div>
+			</span>
+		</form>
+	</div>
 </mat-dialog-content>
 
 
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()" cdkFocusInitial>Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()" [disabled]="formGroup.invalid">Save</button>
+	<button mat-raised-button color="primary" (click)="close()" cdkFocusInitial>Cancel</button>
+	<button mat-raised-button color="accent" (click)="save()" [disabled]="formGroup.invalid">Save</button>
 </mat-dialog-actions>

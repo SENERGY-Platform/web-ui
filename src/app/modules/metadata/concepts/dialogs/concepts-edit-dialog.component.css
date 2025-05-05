@@ -42,6 +42,7 @@
     align-items: baseline;
     padding-bottom: 0.3rem
 }
+
 .divider {
     margin-top: 20px;
     margin-bottom: 20px;
@@ -54,4 +55,8 @@
 
 .code-tryout mat-icon {
     transform: scale(2);
+}
+
+.root {
+    position: relative;
 }

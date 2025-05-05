@@ -121,7 +121,7 @@
                                 <mat-label>Aspect</mat-label>
                                 <mtx-select [items]="this.aspects" bindLabel="name"
                                     bindValue="id" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
-                                    formControlName="aspectId" appendTo=".root">
+                                    formControlName="aspectId" appendTo=".root" [compareWith]="compareAspectsWith">
                                 </mtx-select>
                                 <mat-error senergyError label="Aspect"></mat-error>
                             </mat-form-field>

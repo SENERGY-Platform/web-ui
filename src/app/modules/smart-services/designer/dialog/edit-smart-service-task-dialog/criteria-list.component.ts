@@ -16,18 +16,23 @@
 
 
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
-import {FunctionsService} from '../../../../metadata/functions/shared/functions.service';
-import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
-import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
-import {FunctionsPermSearchModel} from '../../../../metadata/functions/shared/functions-perm-search.model';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
+import { FunctionsService } from '../../../../metadata/functions/shared/functions.service';
+import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
+import { DeviceClassesService } from '../../../../metadata/device-classes/shared/device-classes.service';
+import { FunctionsPermSearchModel } from '../../../../metadata/functions/shared/functions-perm-search.model';
+import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
 
 interface Criteria {
     interaction?: string;
     function_id?: string;
     device_class_id?: string;
     aspect_id?: string;
+}
+
+interface DeviceTypeAspectNodeModelWithRootName extends DeviceTypeAspectNodeModel {
+    root_name?: string;
 }
 
 @Component({
@@ -40,15 +45,15 @@ export class CriteriaListComponent implements OnInit {
     @Input() criteria_json = '[]';
     @Output() changed: EventEmitter<string> = new EventEmitter<string>();
 
-    functions: (FunctionsPermSearchModel | {id?: string; name: string})[] = [];
-    deviceClasses: (DeviceTypeDeviceClassModel | {id?: string; name: string})[] = [];
-    nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+    functions: (FunctionsPermSearchModel | { id?: string; name: string })[] = [];
+    deviceClasses: (DeviceTypeDeviceClassModel | { id?: string; name: string })[] = [];
+    aspects: DeviceTypeAspectNodeModelWithRootName[] = [];
 
     criteriaList: Criteria[] = [];
 
     constructor(private functionsService: FunctionsService,
-                private deviceTypesService: DeviceTypeService,
-                private deviceClassService: DeviceClassesService) {
+        private deviceTypesService: DeviceTypeService,
+        private deviceClassService: DeviceClassesService) {
         this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.functions = value.result;
         });
@@ -56,16 +61,13 @@ export class CriteriaListComponent implements OnInit {
             this.deviceClasses = value.result;
         });
         this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
-            const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
-            const asp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            const tmp: DeviceTypeAspectNodeModelWithRootName[] = [];
             aspects.forEach(a => {
-                if (!tmp.has(a.root_id)) {
-                    tmp.set(a.root_id, []);
-                }
-                tmp.get(a.root_id)?.push(a);
+                const t = a as DeviceTypeAspectNodeModelWithRootName;
+                t.root_name = aspects.find(x => x.id === t.root_id)?.name;
+                tmp.push(t);
             });
-            tmp.forEach((v, k) => asp.set(aspects.find(a => a.id === k)?.name || '', v));
-            this.nestedAspects = asp;
+            this.aspects = tmp;
         });
     }
 
@@ -83,45 +85,69 @@ export class CriteriaListComponent implements OnInit {
     }
 
     addCriteria(list: Criteria[]): Criteria[] {
-        list.push({interaction: 'request', aspect_id: '', device_class_id: '', function_id: ''});
+        list.push({ interaction: 'request', aspect_id: '', device_class_id: '', function_id: '' });
         return list;
     }
 
-    criteriaToLabel(criteria: {interaction?: string; function_id?: string; device_class_id?: string; aspect_id?: string}): string {
+    criteriaToLabel(criteria: { interaction?: string; function_id?: string; device_class_id?: string; aspect_id?: string }): string {
         let functionName = '';
-        if(criteria.function_id) {
+        if (criteria.function_id) {
             functionName = this.functions.find(v => v.id === criteria.function_id)?.name || criteria.function_id;
         }
         let deviceClassName = '';
-        if(criteria.device_class_id) {
+        if (criteria.device_class_id) {
             deviceClassName = this.deviceClasses.find(v => v.id === criteria.device_class_id)?.name || criteria.device_class_id;
         }
         let aspectName = '';
-        if(criteria.aspect_id) {
-            this.nestedAspects.forEach((value, _) => {
-                const temp = value.find(v => v.id === criteria.aspect_id)?.name;
-                if(temp) {
-                    aspectName = temp;
-                }
-            });
-            if(!aspectName) {
+        if (criteria.aspect_id) {
+            const temp = this.aspects.find(v => v.id === criteria.aspect_id);
+            if (temp) {
+                aspectName = temp.name;
+            } else {
                 aspectName = criteria.aspect_id;
             }
         }
 
         const parts: string[] = [];
-        if(criteria.interaction) {
+        if (criteria.interaction) {
             parts.push(criteria.interaction);
         }
-        if(aspectName) {
+        if (aspectName) {
             parts.push(aspectName);
         }
-        if(deviceClassName) {
+        if (deviceClassName) {
             parts.push(deviceClassName);
         }
-        if(functionName) {
+        if (functionName) {
             parts.push(functionName);
         }
         return parts.join(' | ');
     }
+
+    getRootAspect(): GroupValueFn {
+        return (_, children): any => {
+            children = children as DeviceTypeAspectNodeModelWithRootName[];
+            const id = children[0].root_id;
+            if (id !== undefined) {
+                return { id };
+            }
+            return null;
+        };
+    }
+
+    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectNodeModelWithRootName | string, b: DeviceTypeAspectNodeModelWithRootName | string) => {
+        const aIsStr = typeof a === 'string' || a instanceof String;
+        const bIsStr = typeof b === 'string' || b instanceof String;
+
+        if (aIsStr && bIsStr) {
+            return a === b;
+        }
+        if (!aIsStr && !bIsStr) {
+            return a.id === b.id;
+        }
+        if (aIsStr) {
+            return a === (b as DeviceTypeAspectNodeModelWithRootName).id;
+        }
+        return a.id === b;
+    };
 }

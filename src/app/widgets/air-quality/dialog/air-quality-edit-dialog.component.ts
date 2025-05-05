@@ -617,7 +617,6 @@ export class AirQualityEditDialogComponent implements OnInit {
     }
 
     insideExportChanged(option: MeasurementModel) {
-        // console.log(option)
         if (option.export === null || option.export === undefined) {
             return;
         }

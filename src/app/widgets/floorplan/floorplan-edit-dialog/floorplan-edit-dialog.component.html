@@ -16,121 +16,122 @@
 
 <h2 mat-dialog-title>Edit Floorplan</h2>
 <mat-dialog-content>
-  <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-  <div [hidden]="!ready">
-    <mat-form-field appearance="outline" style="display: flex;" color="accent" *ngIf="userHasUpdateNameAuthorization">
-      <mat-label>Widget Name</mat-label>
-      <input type="text" matInput [formControl]="name" required>
-      <mat-error senergyError label="Widget Name"></mat-error>
-    </mat-form-field>
+  <div class="root">
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    <div [hidden]="!ready">
+      <mat-form-field appearance="outline" style="display: flex;" color="accent" *ngIf="userHasUpdateNameAuthorization">
+        <mat-label>Widget Name</mat-label>
+        <input type="text" matInput [formControl]="name" required>
+        <mat-error senergyError label="Widget Name"></mat-error>
+      </mat-form-field>
 
-    <mat-form-field *ngIf="userHasUpdatePropertiesAuthorization" appearance="outline" color="accent"
-      style="display: flex;" [formGroup]="form">
-      <mat-label>Point Size</mat-label>
-      <input type="number" formControlName="dotSize" matInput>
-      <mat-error senergyError label="Point Size"></mat-error>
-    </mat-form-field>
+      <mat-form-field *ngIf="userHasUpdatePropertiesAuthorization" appearance="outline" color="accent"
+        style="display: flex;" [formGroup]="form">
+        <mat-label>Point Size</mat-label>
+        <input type="number" formControlName="dotSize" matInput>
+        <mat-error senergyError label="Point Size"></mat-error>
+      </mat-form-field>
 
-    <div *ngIf="userHasUpdatePropertiesAuthorization" class="file-upload-wrapper" (drop)="onFileDrop($event)"
-      (dragover)="onDragOver($event)">
-      <input type="file" accept="image/*" (change)="onFileChange($event)" hidden #fileInput />
-      <div *ngIf="form.value.image === null || form.value.image === undefined" class="upload-wrapper">
-        <button mat-icon-button (click)="fileInput.click()"><mat-icon>upload</mat-icon></button>
-        <p>Upload Image</p>
-      </div>
-      <div *ngIf="form.value.image !== null && form.value.image !== undefined" class="delete-wrapper">
-        <button mat-icon-button color="warn" (click)="removeImage()"><mat-icon>delete</mat-icon></button>
-      </div>
-      <div *ngIf="form.value.image !== null && form.value.image !== undefined"
-        [hidden]="form.value.image === null && form.value.image === undefined" class="image-wrapper" #imageWrapper>
-        <canvas #canvas [ngClass]="{'placing': placing !== undefined}" (click)="placeSelected($event)"> </canvas>
+      <div *ngIf="userHasUpdatePropertiesAuthorization" class="file-upload-wrapper" (drop)="onFileDrop($event)"
+        (dragover)="onDragOver($event)">
+        <input type="file" accept="image/*" (change)="onFileChange($event)" hidden #fileInput />
+        <div *ngIf="form.value.image === null || form.value.image === undefined" class="upload-wrapper">
+          <button mat-icon-button (click)="fileInput.click()"><mat-icon>upload</mat-icon></button>
+          <p>Upload Image</p>
+        </div>
+        <div *ngIf="form.value.image !== null && form.value.image !== undefined" class="delete-wrapper">
+          <button mat-icon-button color="warn" (click)="removeImage()"><mat-icon>delete</mat-icon></button>
+        </div>
+        <div *ngIf="form.value.image !== null && form.value.image !== undefined"
+          [hidden]="form.value.image === null && form.value.image === undefined" class="image-wrapper" #imageWrapper>
+          <canvas #canvas [ngClass]="{'placing': placing !== undefined}" (click)="placeSelected($event)"> </canvas>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div *ngIf="userHasUpdatePropertiesAuthorization" [formGroup]="form">
-    <mat-accordion>
-      <mat-expansion-panel *ngFor="let tab of form.controls.placements.controls; let i = index" [formGroup]="tab"
-        [expanded]="step === i">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.value.alias}} </span>
-          </mat-panel-title>
-          <mat-panel-description>{{i}}</mat-panel-description>
-        </mat-expansion-panel-header>
+    <div *ngIf="userHasUpdatePropertiesAuthorization" [formGroup]="form">
+      <mat-accordion>
+        <mat-expansion-panel *ngFor="let tab of form.controls.placements.controls; let i = index" [formGroup]="tab"
+          [expanded]="step === i">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.value.alias}} </span>
+            </mat-panel-title>
+            <mat-panel-description>{{i}}</mat-panel-description>
+          </mat-expansion-panel-header>
 
-        <ng-template matExpansionPanelContent>
-          <div style="display: flex; justify-content: end;">
-            <button mat-icon-button color="accent" (click)="placePlacement(i); false" matTooltip="Place on Map">
-              <mat-icon>point_scan</mat-icon>
-            </button>
-            <button mat-icon-button color="accent" (click)="copyPlacement(i); false">
-              <mat-icon>content_copy</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" (click)="removePlacement(i); false">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-          <mat-form-field appearance="outline" color="accent" style="display: flex;">
-            <mat-label>Alias</mat-label>
-            <input type="text" matInput formControlName="alias" required>
-            <mat-error senergyError label="Alias"></mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" color="accent" style="display: flex;">
-            <mat-label>Device Group</mat-label>
-            <mtx-select required formControlName="deviceGroupId" [hideSelected]="false" closeOnSelect
-              virtualScroll="true" placeholder="Type to search" bindLabel="name" bindValue="id" [items]="deviceGroups"
-              (scroll)="onSelectScroll($event)" (search)="onSelectSearch($event)">
-            </mtx-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" color="accent" style="display: flex;">
-            <mat-label>Criteria</mat-label>
-            <mtx-select required formControlName="criteria" [hideSelected]="false" closeOnSelect virtualScroll="true"
-              placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria">
-              <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
-                [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
-            </mtx-select>
-          </mat-form-field>
-
-          <div class="colorbar"
-            [style]="'background-image: linear-gradient(to right, ' + (tab.value.colorLow || 'black') + ', ' + (tab.value.colorHigh || 'black') + ');'">
-          </div>
-
-          <div class="color-row">
-            <div class="color-column">
-              <input class="value-form" [(colorPicker)]="tab.controls.colorLow.value" cpAlphaChannel="disabled"
-                [style.background]="tab.controls.colorLow.value"
-                (colorPickerChange)="colorSelected($event, tab.controls.colorLow)" />
-              <mat-form-field appearance="outline" color="accent" class="value-form">
-                <mat-label>Low Value</mat-label>
-                <input type="number" matInput formControlName="valueLow">
-                <mat-error senergyError label="Low Value"></mat-error>
-              </mat-form-field>
+          <ng-template matExpansionPanelContent>
+            <div style="display: flex; justify-content: end;">
+              <button mat-icon-button color="accent" (click)="placePlacement(i); false" matTooltip="Place on Map">
+                <mat-icon>point_scan</mat-icon>
+              </button>
+              <button mat-icon-button color="accent" (click)="copyPlacement(i); false">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="removePlacement(i); false">
+                <mat-icon>delete</mat-icon>
+              </button>
             </div>
-            <div class="color-column">
-              <input class="value-form" [(colorPicker)]="tab.controls.colorHigh.value" cpAlphaChannel="disabled"
-                [style.background]="tab.controls.colorHigh.value"
-                (colorPickerChange)="colorSelected($event, tab.controls.colorHigh)" />
-              <mat-form-field appearance="outline" color="accent" class="value-form">
-                <mat-label>High Value</mat-label>
-                <input type="number" matInput formControlName="valueHigh">
-                <mat-error senergyError label="Low Value"></mat-error>
-              </mat-form-field>
+            <mat-form-field appearance="outline" color="accent" style="display: flex;">
+              <mat-label>Alias</mat-label>
+              <input type="text" matInput formControlName="alias" required>
+              <mat-error senergyError label="Alias"></mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" color="accent" style="display: flex;">
+              <mat-label>Device Group</mat-label>
+              <mtx-select required formControlName="deviceGroupId" [hideSelected]="false" closeOnSelect
+                virtualScroll="true" placeholder="Type to search" bindLabel="name" bindValue="id" [items]="deviceGroups"
+                (scroll)="onSelectScroll($event)" (search)="onSelectSearch($event)" appendTo=".root">
+              </mtx-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" color="accent" style="display: flex;">
+              <mat-label>Criteria</mat-label>
+              <mtx-select required formControlName="criteria" [hideSelected]="false" closeOnSelect virtualScroll="true"
+                placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria" appendTo=".root">
+                <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
+                  [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
+              </mtx-select>
+            </mat-form-field>
+
+            <div class="colorbar"
+              [style]="'background-image: linear-gradient(to right, ' + (tab.value.colorLow || 'black') + ', ' + (tab.value.colorHigh || 'black') + ');'">
             </div>
-          </div>
 
-        </ng-template>
-      </mat-expansion-panel>
-    </mat-accordion>
+            <div class="color-row">
+              <div class="color-column">
+                <input class="value-form" [(colorPicker)]="tab.controls.colorLow.value" cpAlphaChannel="disabled"
+                  [style.background]="tab.controls.colorLow.value"
+                  (colorPickerChange)="colorSelected($event, tab.controls.colorLow)" />
+                <mat-form-field appearance="outline" color="accent" class="value-form">
+                  <mat-label>Low Value</mat-label>
+                  <input type="number" matInput formControlName="valueLow">
+                  <mat-error senergyError label="Low Value"></mat-error>
+                </mat-form-field>
+              </div>
+              <div class="color-column">
+                <input class="value-form" [(colorPicker)]="tab.controls.colorHigh.value" cpAlphaChannel="disabled"
+                  [style.background]="tab.controls.colorHigh.value"
+                  (colorPickerChange)="colorSelected($event, tab.controls.colorHigh)" />
+                <mat-form-field appearance="outline" color="accent" class="value-form">
+                  <mat-label>High Value</mat-label>
+                  <input type="number" matInput formControlName="valueHigh">
+                  <mat-error senergyError label="Low Value"></mat-error>
+                </mat-form-field>
+              </div>
+            </div>
 
-    <button (click)="addNewPlacement()" mat-icon-button matTooltip="Add element">
-      <mat-icon>add</mat-icon>
-    </button>
+          </ng-template>
+        </mat-expansion-panel>
+      </mat-accordion>
 
+      <button (click)="addNewPlacement()" mat-icon-button matTooltip="Add element">
+        <mat-icon>add</mat-icon>
+      </button>
+
+    </div>
   </div>
-
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

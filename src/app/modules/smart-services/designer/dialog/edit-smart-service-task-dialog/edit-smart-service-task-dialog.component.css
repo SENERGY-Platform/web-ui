@@ -99,3 +99,7 @@
 .module-data-editor{
     margin-bottom: 15px;
 }
+
+.root {
+    position: relative;
+}

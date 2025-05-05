@@ -19,40 +19,41 @@
 
 
 <mat-dialog-content>
-    <form class="form">
-        <mat-form-field appearance="outline" class="form-field" color="accent">
-            <mat-label>Aspect</mat-label>
-            <!-- TODO replace with mtx-select --> <senergy-select-search
-                        [formControl]="aspectFormControl" [required]="true"
-                        [options]="this.aspects" useOptionViewProperty="name" useOptionValueProperty="id">
-            </senergy-select-search>
-            <mat-error senergyError label="Aspect"></mat-error>
-        </mat-form-field>
+    <div class="root">
+        <form class="form">
+            <mat-form-field appearance="outline" class="form-field" color="accent">
+                <mat-label>Aspect</mat-label>
+                <mtx-select [formControl]="aspectFormControl" required [items]="aspects" bindLabel="name"
+                    bindValue="id" appendTo=".root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
+                    [compareWith]="compareAspectsWith">
+                </mtx-select>
+                <mat-error senergyError label="Aspect"></mat-error>
+            </mat-form-field>
 
-        <mat-form-field appearance="outline" class="form-field" color="accent">
-            <mat-label>Function</mat-label>
-            <!-- TODO replace with mtx-select --> <senergy-select-search [compareWith]="compare"
-                        [formControl]="functionFormControl" [required]="true"
-                        [options]="functions" useOptionViewProperty="name">
-            </senergy-select-search>
-            <mat-error senergyError label="Function"></mat-error>
-        </mat-form-field>
+            <mat-form-field appearance="outline" class="form-field" color="accent">
+                <mat-label>Function</mat-label>
+                <mtx-select [compareWith]="compare" [formControl]="functionFormControl" required [items]="functions"
+                    bindLabel="name" appendTo=".root">
+                </mtx-select>
+                <mat-error senergyError label="Function"></mat-error>
+            </mat-form-field>
 
-        <mat-form-field appearance="outline" class="form-field" color="accent">
-            <mat-label>Qos</mat-label>
-            <mat-select [(ngModel)]="result.qos" [ngModelOptions]="{standalone: true}">
-                <mat-option value="0">0</mat-option>
-                <mat-option value="1">1</mat-option>
-            </mat-select>
-            <mat-error senergyError label="Qos"></mat-error>
-        </mat-form-field>
+            <mat-form-field appearance="outline" class="form-field" color="accent">
+                <mat-label>Qos</mat-label>
+                <mat-select [(ngModel)]="result.qos" [ngModelOptions]="{standalone: true}">
+                    <mat-option value="0">0</mat-option>
+                    <mat-option value="1">1</mat-option>
+                </mat-select>
+                <mat-error senergyError label="Qos"></mat-error>
+            </mat-form-field>
 
-        <mat-form-field appearance="outline" class="form-field" color="accent">
-            <mat-label>Script</mat-label>
-            <input matInput [(ngModel)]="result.script" [ngModelOptions]="{standalone: true}">
-            <mat-error senergyError label="Script"></mat-error>
-        </mat-form-field>
-    </form>
+            <mat-form-field appearance="outline" class="form-field" color="accent">
+                <mat-label>Script</mat-label>
+                <input matInput [(ngModel)]="result.script" [ngModelOptions]="{standalone: true}">
+                <mat-error senergyError label="Script"></mat-error>
+            </mat-form-field>
+        </form>
+    </div>
 </mat-dialog-content>
 
 
@@ -60,4 +61,3 @@
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" [disabled]="!functionFormControl.value" (click)="save()">Save</button>
 </mat-dialog-actions>
-

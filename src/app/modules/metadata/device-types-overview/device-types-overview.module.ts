@@ -23,12 +23,6 @@ import {CommonModule} from '@angular/common';
 import {CoreModule} from '../../../core/core.module';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {
-    DeviceTypesNewDeviceClassDialogComponent
-} from './device-types/dialogs/device-types-new-device-class-dialog.component';
-import {DeviceTypesNewFunctionDialogComponent} from './device-types/dialogs/device-types-new-function-dialog.component';
-import {DeviceTypesNewAspectDialogComponent} from './device-types/dialogs/device-types-new-aspect-dialog.component';
-import {DeviceTypesShowConceptDialogComponent} from './device-types/dialogs/device-types-show-concept-dialog.component';
 import {MatCardModule} from '@angular/material/card';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
@@ -63,6 +57,7 @@ import {
 } from './device-types/dialogs/device-types-content-variable-json-dialog.component';
 import {IsNotProhibitedNameValidatorDirective} from './device-types/shared/is-not-prohibited-name.directive';
 import {UsedInDeviceTypesDialogComponent} from './dialogs/used-in-device-types-dialog.component';
+import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
 
 const devicetypes: Route = {
     path: 'metadata/devicetypesoverview/devicetypes',
@@ -113,22 +108,15 @@ const devicetypesEdit: Route = {
         MatTreeModule,
         WidgetModule,
         DragDropModule,
-        MatCheckboxModule
+        MtxSelect,
+        MtxOption,
     ],
     declarations: [
         DeviceTypesComponent,
-        DeviceTypesNewDeviceClassDialogComponent,
-        DeviceTypesNewFunctionDialogComponent,
-        DeviceTypesNewAspectDialogComponent,
-        DeviceTypesShowConceptDialogComponent,
         DeviceTypesContentVariableDialogComponent,
         DeviceTypesContentVariableJsonDialogComponent,
         IsNotProhibitedNameValidatorDirective,
         UsedInDeviceTypesDialogComponent,
-        DeviceTypesNewDeviceClassDialogComponent,
-        DeviceTypesNewFunctionDialogComponent,
-        DeviceTypesNewAspectDialogComponent,
-        DeviceTypesShowConceptDialogComponent,
         DeviceTypesContentVariableDialogComponent,
     ],
 })

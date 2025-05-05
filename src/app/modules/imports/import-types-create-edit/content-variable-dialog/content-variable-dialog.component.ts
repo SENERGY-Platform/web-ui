@@ -13,18 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, Inject, OnInit} from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import {
     MAT_DIALOG_DATA,
     MatDialogRef
 } from '@angular/material/dialog';
-import {ImportTypeContentVariableModel} from '../../import-types/shared/import-types.model';
-import {AbstractControl, UntypedFormBuilder, ValidationErrors, Validators} from '@angular/forms';
+import { ImportTypeContentVariableModel } from '../../import-types/shared/import-types.model';
+import { AbstractControl, UntypedFormBuilder, ValidationErrors, Validators } from '@angular/forms';
 import {
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel
 } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { CompareWithFn, GroupValueFn, TrackByFn } from '@ng-matero/extensions/select';
+
+interface DeviceTypeAspectModelWithRootName extends DeviceTypeAspectModel {
+    root_name?: string;
+}
+
+interface DeviceTypeCharacteristicsModelWithGroup extends DeviceTypeCharacteristicsModel {
+    group?: string;
+}
 
 @Component({
     selector: 'senergy-import-content-variable-dialog',
@@ -34,12 +43,12 @@ import {
 export class ContentVariableDialogComponent implements OnInit {
     static notNamedTimeAndNotEmpty(control: AbstractControl): ValidationErrors | null {
         if (control.value === '') {
-            const err = {notNamedTimeAndNotEmpty: 'Name required'};
+            const err = { notNamedTimeAndNotEmpty: 'Name required' };
             control.setErrors(err);
             return err;
         }
         if (control.value === 'time') {
-            const err = {notNamedTimeAndNotEmpty: 'Name time not allowed at this level'};
+            const err = { notNamedTimeAndNotEmpty: 'Name time not allowed at this level' };
             // necessary for analytics pipelines
             control.setErrors(err);
             return err;
@@ -65,15 +74,16 @@ export class ContentVariableDialogComponent implements OnInit {
     LIST = 'https://schema.org/ItemList';
 
     types: { id: string; name: string }[] = [
-        {id: this.STRING, name: 'string'},
-        {id: this.INTEGER, name: 'int'},
-        {id: this.FLOAT, name: 'float'},
-        {id: this.BOOLEAN, name: 'bool'},
-        {id: this.STRUCTURE, name: 'Structure'},
-        {id: this.LIST, name: 'List'},
+        { id: this.STRING, name: 'string' },
+        { id: this.INTEGER, name: 'int' },
+        { id: this.FLOAT, name: 'float' },
+        { id: this.BOOLEAN, name: 'bool' },
+        { id: this.STRUCTURE, name: 'Structure' },
+        { id: this.LIST, name: 'List' },
     ];
 
-    aspectOptions: Map<string, DeviceTypeAspectModel[]> = new Map();
+    aspectOptions: DeviceTypeAspectModelWithRootName[] = [];
+    rootAspects = new Map<string, string>();
 
     constructor(
         @Inject(MAT_DIALOG_DATA)
@@ -103,11 +113,17 @@ export class ContentVariableDialogComponent implements OnInit {
             this.form.disable();
         }
         this.form.get('type')?.valueChanges.subscribe((_) => {
-            this.form.patchValue({characteristic_id: null});
+            this.form.patchValue({ characteristic_id: null });
         });
+        const tmp: DeviceTypeAspectModelWithRootName[] = [];
         this.data.aspects?.forEach(a => {
-            this.aspectOptions.set(a.name, this.getAllAspectsOnTree(a));
+            a.sub_aspects?.forEach(sub => {
+                this.rootAspects.set(sub.id, a.id);
+                (sub as DeviceTypeAspectModelWithRootName).root_name = a.name;
+                tmp.push(sub);
+            });
         });
+        this.aspectOptions = tmp;
     }
 
     save() {
@@ -128,9 +144,16 @@ export class ContentVariableDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    getConceptCharacteristics(): Map<string, DeviceTypeCharacteristicsModel[]> {
+    getConceptCharacteristics(): DeviceTypeCharacteristicsModelWithGroup[] {
         const type = this.form.get('type')?.value;
-        return this.data.typeConceptCharacteristics.get(type) || new Map();
+        const res: DeviceTypeCharacteristicsModelWithGroup[] = [];
+        this.data.typeConceptCharacteristics.get(type)?.forEach((v, k) => {
+            v.forEach(e => {
+                (e as DeviceTypeCharacteristicsModelWithGroup).group = k;
+                res.push(e);
+            });
+        });
+        return res;
     }
 
     nameHint(): string {
@@ -141,10 +164,35 @@ export class ContentVariableDialogComponent implements OnInit {
         return errors['notNamedTimeAndNotEmpty'];
     }
 
-    private getAllAspectsOnTree(a: DeviceTypeAspectModel): DeviceTypeAspectModel[] {
-        const res: DeviceTypeAspectModel[] = [];
-        res.push(a);
-        a.sub_aspects?.forEach(sub => res.push(...this.getAllAspectsOnTree(sub)));
-        return res;
+    getRootAspect(): GroupValueFn {
+        const that = this;
+        return (_, children): any => {
+            children = children as DeviceTypeAspectModel[];
+            const id = that.rootAspects.get(children[0].id);
+            if (id !== undefined) {
+                return { id };
+            }
+            return null;
+        };
     }
+
+    trackby: TrackByFn = (a: DeviceTypeAspectModel) => {
+        return a.id;
+    };
+
+    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectModel | string, b: DeviceTypeAspectModel | string) => {
+        const aIsStr = typeof a === 'string' || a instanceof String;
+        const bIsStr = typeof b === 'string' || b instanceof String;
+
+        if (aIsStr && bIsStr) {
+            return a === b;
+        }
+        if (!aIsStr && !bIsStr) {
+            return a.id === b.id;
+        }
+        if (aIsStr) {
+            return a === (b as DeviceTypeAspectModel).id;
+        }
+        return a.id === b;
+    };
 }

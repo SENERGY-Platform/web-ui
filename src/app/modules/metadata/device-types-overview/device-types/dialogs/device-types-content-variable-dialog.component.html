@@ -17,86 +17,96 @@
 <h2 mat-dialog-title>Content Variable</h2>
 
 <mat-dialog-content>
-    <mat-radio-group [formControl]="typeOptionsControl">
-        <mat-radio-button value="primitive">primitive</mat-radio-button>
-        <mat-radio-button value="non-primitive">non-primitive</mat-radio-button>
-        <mat-radio-button value="void" *ngIf="allowVoid">void</mat-radio-button>
-    </mat-radio-group>
-    <form [formGroup]="firstFormGroup" class="form">
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>ID</mat-label>
-            <input matInput formControlName="id">
-            <mat-error senergyError label="ID"></mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isVoidType()">
-            <mat-label>Name</mat-label>
-            <input matInput formControlName="name" required>
-            <mat-error senergyError label="Name"></mat-error>
-        </mat-form-field>
+    <div class="root">
+        <mat-radio-group [formControl]="typeOptionsControl">
+            <mat-radio-button value="primitive">primitive</mat-radio-button>
+            <mat-radio-button value="non-primitive">non-primitive</mat-radio-button>
+            <mat-radio-button value="void" *ngIf="allowVoid">void</mat-radio-button>
+        </mat-radio-group>
+        <form [formGroup]="firstFormGroup" class="form">
+            <mat-form-field appearance="outline" class="full-width" color="accent">
+                <mat-label>ID</mat-label>
+                <input matInput formControlName="id">
+                <mat-error senergyError label="ID"></mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isVoidType()">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" required>
+                <mat-error senergyError label="Name"></mat-error>
+            </mat-form-field>
 
-        <mat-checkbox formControlName="omit_empty">Omit Empty</mat-checkbox>
+            <mat-checkbox formControlName="omit_empty">Omit Empty</mat-checkbox>
 
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Aspect</mat-label>
-            <!-- TODO replace with mtx-select --> <senergy-select-search [options]="aspectOptions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
-                                   formControlName="aspect_id" [getOptionDisabled]="aspectDisabled"></senergy-select-search>
-            <mat-error senergyError label="Aspect"></mat-error>
-        </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width" color="accent">
+                <mat-label>Aspect</mat-label>
+                <mtx-select [items]="aspectOptions" bindValue="id" bindLabel="name" formControlName="aspect_id"
+                    appendTo=".root"></mtx-select>
+                <mat-error senergyError label="Aspect"></mat-error>
+            </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Function</mat-label>
-            <!-- TODO replace with mtx-select --> <senergy-select-search [options]="functions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
-                                   formControlName="function_id" useOptionClassProperty="class"></senergy-select-search>
-            <mat-error senergyError label="Function"></mat-error>
-        </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width" color="accent">
+                <mat-label>Function</mat-label>
+                <mtx-select formControlName="function_id" appendTo=".root">
+                    <mtx-option *ngFor="let option of functions" [value]="option.id"><span
+                            [class]="option.class">{{option.name}}</span></mtx-option>
+                </mtx-select>
+                <mat-error senergyError label="Function"></mat-error>
+            </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isVoidType()">
-            <mat-label>Characteristic</mat-label>
-            <!-- TODO replace with mtx-select --> <senergy-select-search formControlName="characteristic_id" noneView="-- None --"
-                                   [options]="characteristics" useOptionViewProperty="name" useOptionValueProperty="id"
-                                   useOptionClassProperty="class">
-            </senergy-select-search>
-            <mat-error *ngIf="firstFormGroup.get('characteristic_id')?.invalid">{{getCharacteristicError(firstFormGroup.get('characteristic_id')) || ''}}</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
-            <mat-label>Type</mat-label>
-            <mat-select formControlName="type" required>
-                <mat-option *ngFor="let primitive of primitiveTypes"
-                            [value]="primitive.type">
-                    {{primitive.typeShort}}
-                </mat-option>
-            </mat-select>
-            <mat-error senergyError label="Type"></mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isPrimitiveType() && !isVoidType()">
-            <mat-label>Type</mat-label>
-            <mat-select formControlName="type" required>
-                <mat-option *ngFor="let nonPrimitive of nonPrimitiveTypes"
-                            [value]="nonPrimitive.type">
-                    {{nonPrimitive.typeShort}}
-                </mat-option>
-            </mat-select>
-            <mat-error senergyError label="Type"></mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
-            <mat-label>Serialization Options</mat-label>
-            <input matInput formControlName="serialization_options">
-            <mat-error senergyError label="Serialization Options"></mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
-            <mat-label>Unit reference</mat-label>
-            <input matInput formControlName="unit_reference">
-            <mat-error senergyError label="Unit reference"></mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType() && !isOmitEmpty()">
-            <mat-label>Value</mat-label>
-            <input matInput formControlName="value">
-            <mat-error senergyError label="Value"></mat-error>
-        </mat-form-field>
-    </form>
+            <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isVoidType()">
+                <mat-label>Characteristic</mat-label>
+                <mtx-select formControlName="characteristic_id" appendTo=".root">
+                    <mtx-option *ngFor="let option of characteristics" [value]="option.id"><span
+                            [class]="option.class">{{option.name}}</span></mtx-option>
+                </mtx-select>
+                <mat-error
+                    *ngIf="firstFormGroup.get('characteristic_id')?.invalid">{{getCharacteristicError(firstFormGroup.get('characteristic_id'))
+                    || ''}}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width" color="accent"
+                *ngIf="isPrimitiveType() && !isVoidType()">
+                <mat-label>Type</mat-label>
+                <mat-select formControlName="type" required>
+                    <mat-option *ngFor="let primitive of primitiveTypes" [value]="primitive.type">
+                        {{primitive.typeShort}}
+                    </mat-option>
+                </mat-select>
+                <mat-error senergyError label="Type"></mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width" color="accent"
+                *ngIf="!isPrimitiveType() && !isVoidType()">
+                <mat-label>Type</mat-label>
+                <mat-select formControlName="type" required>
+                    <mat-option *ngFor="let nonPrimitive of nonPrimitiveTypes" [value]="nonPrimitive.type">
+                        {{nonPrimitive.typeShort}}
+                    </mat-option>
+                </mat-select>
+                <mat-error senergyError label="Type"></mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width" color="accent"
+                *ngIf="isPrimitiveType() && !isVoidType()">
+                <mat-label>Serialization Options</mat-label>
+                <input matInput formControlName="serialization_options">
+                <mat-error senergyError label="Serialization Options"></mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width" color="accent"
+                *ngIf="isPrimitiveType() && !isVoidType()">
+                <mat-label>Unit reference</mat-label>
+                <input matInput formControlName="unit_reference">
+                <mat-error senergyError label="Unit reference"></mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width" color="accent"
+                *ngIf="isPrimitiveType() && !isVoidType() && !isOmitEmpty()">
+                <mat-label>Value</mat-label>
+                <input matInput formControlName="value">
+                <mat-error senergyError label="Value"></mat-error>
+            </mat-form-field>
+        </form>
+    </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Close</button>
-    <button mat-raised-button color="accent" [disabled]="disabled || firstFormGroup.invalid" (click)="save()">Save</button>
+    <button mat-raised-button color="accent" [disabled]="disabled || firstFormGroup.invalid"
+        (click)="save()">Save</button>
 </mat-dialog-actions>

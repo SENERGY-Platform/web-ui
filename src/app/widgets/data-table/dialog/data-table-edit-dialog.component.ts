@@ -45,7 +45,7 @@ import {
     DeviceTypeServiceModel,
 } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceInstanceModel, DeviceSelectablesModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
-import { DataTableHelperService } from '../shared/data-table-helper.service';
+import { DataTableHelperService, DeviceTypeAspectNodeModelWithRootName } from '../shared/data-table-helper.service';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { PipelineModel, PipelineOperatorModel } from '../../../modules/data/pipeline-registry/shared/pipeline.model';
 import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
@@ -55,13 +55,14 @@ import { ProcessSchedulerService } from '../../process-scheduler/shared/process-
 import { DataTableService } from '../shared/data-table.service';
 import { boundaryValidator, elementDetailsValidator, exportValidator } from './data-table-edit-dialog.validators';
 import { environment } from '../../../../environments/environment';
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
+import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
 
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
@@ -177,7 +178,7 @@ export class DataTableEditDialogComponent implements OnInit {
                     return;
                 }
                 if (v > 1) {
-                    dg?.patchValue({deviceGroupAggregation: SingleValueAggregations.Latest});
+                    dg?.patchValue({ deviceGroupAggregation: SingleValueAggregations.Latest });
                     dg?.get('deviceGroupAggregation')?.disable();
                 } else {
                     dg?.get('deviceGroupAggregation')?.enable();
@@ -314,7 +315,7 @@ export class DataTableEditDialogComponent implements OnInit {
                     { validators: [elementDetailsValidator()] },
                 ),
             },
-            {validators: [exportValidator()]},
+            { validators: [exportValidator()] },
         );
 
         // Init valueChanges listeners
@@ -423,10 +424,10 @@ export class DataTableEditDialogComponent implements OnInit {
         });
 
         newGroup.get('elementDetails.deviceGroup.deviceGroupCriteria')?.valueChanges.subscribe(criteria => {
-            if(criteria == null) {
+            if (criteria == null) {
                 return;
             }
-            const update = function(that: DataTableEditDialogComponent) {
+            const update = function (that: DataTableEditDialogComponent) {
                 if (that.functions.length === 0) { // delay until functions populated
                     setTimeout(() => update(that), 100);
                     return;
@@ -870,21 +871,21 @@ export class DataTableEditDialogComponent implements OnInit {
         }
         let values: ExportValueBaseModel[] = [];
         switch (type) {
-        case this.elementTypes.PIPELINE:
-            values = this.getOperatorValues(element);
-            break;
-        case this.elementTypes.DEVICE:
-            values = this.getServiceValues(element);
-            break;
-        case this.elementTypes.IMPORT:
-            values = this.dataTableHelperService.getImportTypeValues(element.get('elementDetails.import.typeId')?.value);
-            break;
-        case this.elementTypes.DEVICE_GROUP:
-            // NOP
-            break;
-        default:
-            throw new Error('DataTableEditDialogComponent:onExportValueSelected:Unknown type');
-            return;
+            case this.elementTypes.PIPELINE:
+                values = this.getOperatorValues(element);
+                break;
+            case this.elementTypes.DEVICE:
+                values = this.getServiceValues(element);
+                break;
+            case this.elementTypes.IMPORT:
+                values = this.dataTableHelperService.getImportTypeValues(element.get('elementDetails.import.typeId')?.value);
+                break;
+            case this.elementTypes.DEVICE_GROUP:
+                // NOP
+                break;
+            default:
+                throw new Error('DataTableEditDialogComponent:onExportValueSelected:Unknown type');
+                return;
         }
 
         const value = values.find((val) => val.Path === path);
@@ -904,46 +905,46 @@ export class DataTableEditDialogComponent implements OnInit {
 
     private enableDisableElementDetailsFields(element: AbstractControl, elementType: DataTableElementTypesEnum) {
         switch (elementType) {
-        case this.elementTypes.PIPELINE:
-            element.get('elementDetails')?.get('device')?.disable();
-            element.get('elementDetails')?.get('pipeline')?.enable();
-            element.get('elementDetails')?.get('import')?.disable();
-            element.get('elementDetails')?.get('deviceGroup')?.disable();
-            element.get('exportId')?.enable();
-            element.get('exportValueName')?.enable();
-            element.get('exportValuePath')?.enable();
-            break;
-        case this.elementTypes.DEVICE:
-            element.get('elementDetails')?.get('pipeline')?.disable();
-            element.get('elementDetails')?.get('device')?.enable();
-            element.get('elementDetails')?.get('import')?.disable();
-            element.get('exportId')?.disable();
-            element.get('exportValueName')?.enable();
-            element.get('exportValuePath')?.enable();
-            element.get('elementDetails')?.get('deviceGroup')?.disable();
-            break;
-        case this.elementTypes.IMPORT:
-            element.get('elementDetails')?.get('pipeline')?.disable();
-            element.get('elementDetails')?.get('device')?.disable();
-            element.get('elementDetails')?.get('import')?.enable();
-            element.get('elementDetails')?.get('deviceGroup')?.disable();
-            element.get('exportId')?.enable();
-            element.get('exportValueName')?.enable();
-            element.get('exportValuePath')?.enable();
-            break;
-        case this.elementTypes.DEVICE_GROUP:
-            element.get('elementDetails')?.get('pipeline')?.disable();
-            element.get('elementDetails')?.get('device')?.disable();
-            element.get('elementDetails')?.get('import')?.disable();
-            element.get('elementDetails')?.get('deviceGroup')?.enable();
-            element.patchValue({ exportId: 'null', exportValueName: 'null', exportValuePath: 'null' });
-            element.get('exportId')?.disable();
-            element.get('exportValueName')?.disable();
-            element.get('exportValuePath')?.disable();
-            if ((this.formGroup.get('valuesPerElement')?.value || 0) > 1) {
-                element.get('elementDetails.deviceGroup.deviceGroupAggregation')?.disable();
-            }
-            break;
+            case this.elementTypes.PIPELINE:
+                element.get('elementDetails')?.get('device')?.disable();
+                element.get('elementDetails')?.get('pipeline')?.enable();
+                element.get('elementDetails')?.get('import')?.disable();
+                element.get('elementDetails')?.get('deviceGroup')?.disable();
+                element.get('exportId')?.enable();
+                element.get('exportValueName')?.enable();
+                element.get('exportValuePath')?.enable();
+                break;
+            case this.elementTypes.DEVICE:
+                element.get('elementDetails')?.get('pipeline')?.disable();
+                element.get('elementDetails')?.get('device')?.enable();
+                element.get('elementDetails')?.get('import')?.disable();
+                element.get('exportId')?.disable();
+                element.get('exportValueName')?.enable();
+                element.get('exportValuePath')?.enable();
+                element.get('elementDetails')?.get('deviceGroup')?.disable();
+                break;
+            case this.elementTypes.IMPORT:
+                element.get('elementDetails')?.get('pipeline')?.disable();
+                element.get('elementDetails')?.get('device')?.disable();
+                element.get('elementDetails')?.get('import')?.enable();
+                element.get('elementDetails')?.get('deviceGroup')?.disable();
+                element.get('exportId')?.enable();
+                element.get('exportValueName')?.enable();
+                element.get('exportValuePath')?.enable();
+                break;
+            case this.elementTypes.DEVICE_GROUP:
+                element.get('elementDetails')?.get('pipeline')?.disable();
+                element.get('elementDetails')?.get('device')?.disable();
+                element.get('elementDetails')?.get('import')?.disable();
+                element.get('elementDetails')?.get('deviceGroup')?.enable();
+                element.patchValue({ exportId: 'null', exportValueName: 'null', exportValuePath: 'null' });
+                element.get('exportId')?.disable();
+                element.get('exportValueName')?.disable();
+                element.get('exportValuePath')?.disable();
+                if ((this.formGroup.get('valuesPerElement')?.value || 0) > 1) {
+                    element.get('elementDetails.deviceGroup.deviceGroupAggregation')?.disable();
+                }
+                break;
         }
     }
 
@@ -998,26 +999,26 @@ export class DataTableEditDialogComponent implements OnInit {
             element.get('exportId')?.enable(); // if field is disabled, value will be omitted
             let preparedExport: ExportModel = {} as ExportModel;
             switch (element.get('elementDetails')?.get('elementType')?.value) {
-            case this.elementTypes.DEVICE:
-                const deviceId = element.get('elementDetails')?.get('device')?.get('deviceId')?.value;
-                const selectedDevice = this.getSelectables(element).find((d) => d.device.id === deviceId)?.device;
-                const selectedService = this.getSelectedService(element);
-                if (selectedDevice === undefined || selectedService === undefined) {
-                    return;
-                }
-                const exports = this.exportService.prepareDeviceServiceExport(selectedDevice, selectedService);
-                if (exports.length !== 1) {
-                    console.error('DataTableEditDialogComponent: No support for devices with multiple outputs!');
-                    return;
-                }
-                preparedExport = exports[0];
-                break;
-            case this.elementTypes.PIPELINE:
-                preparedExport = this.preparePipelineOperatorExport(element);
-                break;
-            case this.elementTypes.IMPORT:
-                preparedExport = this.prepareImportExport(element);
-                break;
+                case this.elementTypes.DEVICE:
+                    const deviceId = element.get('elementDetails')?.get('device')?.get('deviceId')?.value;
+                    const selectedDevice = this.getSelectables(element).find((d) => d.device.id === deviceId)?.device;
+                    const selectedService = this.getSelectedService(element);
+                    if (selectedDevice === undefined || selectedService === undefined) {
+                        return;
+                    }
+                    const exports = this.exportService.prepareDeviceServiceExport(selectedDevice, selectedService);
+                    if (exports.length !== 1) {
+                        console.error('DataTableEditDialogComponent: No support for devices with multiple outputs!');
+                        return;
+                    }
+                    preparedExport = exports[0];
+                    break;
+                case this.elementTypes.PIPELINE:
+                    preparedExport = this.preparePipelineOperatorExport(element);
+                    break;
+                case this.elementTypes.IMPORT:
+                    preparedExport = this.prepareImportExport(element);
+                    break;
             }
             preparedExport.Name = 'Widget: ' + this.formGroup.get('name')?.value;
             preparedExport.Description = 'generated Export';
@@ -1199,12 +1200,21 @@ export class DataTableEditDialogComponent implements OnInit {
         this.ready = this.numReady === this.numReadyNeeded;
     }
 
-    getTags(tab: AbstractControl): Map<string, { value: string; parent: string }[]> {
+    getTags(tab: AbstractControl):  {group: string; value: string; parent: string }[] {
         const expId = tab.get('exportId')?.value;
         if (expId === undefined) {
-            return new Map();
+            return [];
         }
-        return this.dataTableHelperService.getExportTags(expId);
+        const res:{group: string; value: string; parent: string }[] = [];
+        this.dataTableHelperService.getExportTags(expId)?.forEach((v, k) => {
+            v.forEach(v2 => {
+                const v3 = v2 as  {group: string; value: string; parent: string };
+                v3.group = k;
+                res.push(v3);
+            });
+        });
+
+        return res;
     }
 
     getTagOptionDisabledFunction(tab: AbstractControl): (option: { value: string; parent: string }) => boolean {
@@ -1310,4 +1320,31 @@ export class DataTableEditDialogComponent implements OnInit {
     getDisplayUnit(c: DeviceTypeCharacteristicsModel): string {
         return c.display_unit || c.name;
     }
+
+    getRootAspect(): GroupValueFn {
+        return (_, children): any => {
+            children = children as DeviceTypeAspectNodeModelWithRootName[];
+            const id = children[0].root_id;
+            if (id !== undefined) {
+                return { id };
+            }
+            return null;
+        };
+    }
+
+    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectNodeModelWithRootName | string, b: DeviceTypeAspectNodeModelWithRootName | string) => {
+        const aIsStr = typeof a === 'string' || a instanceof String;
+        const bIsStr = typeof b === 'string' || b instanceof String;
+
+        if (aIsStr && bIsStr) {
+            return a === b;
+        }
+        if (!aIsStr && !bIsStr) {
+            return a.id === b.id;
+        }
+        if (aIsStr) {
+            return a === (b as DeviceTypeAspectNodeModelWithRootName).id;
+        }
+        return a.id === b;
+    };
 }

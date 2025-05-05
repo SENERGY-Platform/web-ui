@@ -16,51 +16,55 @@
 
 <h2 mat-dialog-title>Extract Json</h2>
 <mat-dialog-content class="edit-smart-service-json-extraction-dialog">
-  <mat-accordion>
-    <mat-expansion-panel *ngFor="let exportInfo of exports; let i = index" [expanded]="opened[i]">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          {{exportInfo.OutputName}} = {{exportInfo.JsonSource}}{{exportInfo.FieldPath.startsWith(".") || exportInfo.FieldPath.startsWith("[") || exportInfo.FieldPath === "" ? exportInfo.FieldPath : "."+exportInfo.FieldPath}}
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      <div>
-        <div>
-          <mat-form-field appearance="outline"  color="accent" class="full-width">
-            <mat-label>Name</mat-label>
-            <input matInput placeholder="Name of the new variable" [(ngModel)]="exportInfo.OutputName">
-            <mat-error senergyError label="Name"></mat-error>
-          </mat-form-field>
-        </div>
+  <div class="root">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let exportInfo of exports; let i = index" [expanded]="opened[i]">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{exportInfo.OutputName}} = {{exportInfo.JsonSource}}{{exportInfo.FieldPath.startsWith(".") ||
+            exportInfo.FieldPath.startsWith("[") || exportInfo.FieldPath === "" ? exportInfo.FieldPath :
+            "."+exportInfo.FieldPath}}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
         <div>
           <div>
-            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-              <mat-label>Variable</mat-label>
-              <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Variable with json string" [(ngModel)]="exportInfo.JsonSource"
-                                     [options]="availableProcessVariables.get('all') || []"
-                                     useOptionViewProperty="name"
-                                     useOptionValueProperty="name">
-              </senergy-select-search>
-              <mat-error senergyError label="Variable"></mat-error>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Name</mat-label>
+              <input matInput placeholder="Name of the new variable" [(ngModel)]="exportInfo.OutputName">
+              <mat-error senergyError label="Name"></mat-error>
             </mat-form-field>
           </div>
+          <div>
+            <div>
+              <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                <mat-label>Variable</mat-label>
+                <mtx-select placeholder="Variable with json string" [(ngModel)]="exportInfo.JsonSource"
+                  [items]="availableProcessVariables.get('all') || []" bindLabel="name" bindValue="name"
+                  appendTo=".root">
+                </mtx-select>
+                <mat-error senergyError label="Variable"></mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Path</mat-label>
+              <input matInput placeholder="Path to the value in the source json string"
+                [(ngModel)]="exportInfo.FieldPath">
+              <mat-error senergyError label="Path"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <button mat-icon-button matTooltip="Remove Extraction" (click)="removeExtraction(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
         </div>
-        <div>
-          <mat-form-field  appearance="outline" color="accent" class="full-width">
-            <mat-label>Path</mat-label>
-            <input matInput placeholder="Path to the value in the source json string" [(ngModel)]="exportInfo.FieldPath">
-            <mat-error senergyError label="Path"></mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <button mat-icon-button matTooltip="Remove Extraction" (click)="removeExtraction(i)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-      </div>
-    </mat-expansion-panel>
-  </mat-accordion>
-  <div>
-    <button mat-raised-button color="accent" (click)="addExtraction()">Add Extraction</button>
+      </mat-expansion-panel>
+    </mat-accordion>
+    <div>
+      <button mat-raised-button color="accent" (click)="addExtraction()">Add Extraction</button>
+    </div>
   </div>
 </mat-dialog-content>
 

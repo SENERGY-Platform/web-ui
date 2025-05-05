@@ -75,15 +75,16 @@
                     </div>
                 </div>
                 <div class="row w-100">
-                    <div [hidden]="getTags(element).size === 0">
+                    <div [hidden]="getTags(element).length === 0">
                         <mat-form-field color="accent" appearance="outline">
                             <mat-label>Tags</mat-label>
-                            <!-- TODO replace with mtx-select --> <senergy-select-search placeholder="Choose Tags" [multiple]="true"
-                                [disabled]="getTags(element).size === 0" [options]="getTags(element)"
-                                [getOptionDisabled]="getTagOptionDisabledFunction(element)"
-                                [getOptionValue]="getTagValue" [(ngModel)]="element.tagSelection"
-                                useOptionViewProperty="value">
-                            </senergy-select-search>
+                            <mtx-select placeholder="Choose Tags" multiple closeOnSelect="false"
+                                [disabled]="getTags(element).length === 0" [(ngModel)]="element.tagSelection"
+                                appendTo=".root" groupBy="group">
+                                <mtx-option *ngFor="let option of getTags(element)"
+                                    [disabled]="getTagOptionDisabledFunction(element)(option)"
+                                    [value]="getTagValue(option)">{{option.value}}</mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Tags"></mat-error>
                         </mat-form-field>
                     </div>
@@ -113,8 +114,9 @@
                         </button>
                     </div>
                 </div>
-                <div class="column w-100 drop-zone" [ngClass]="{'drop-zone-active': dragging}"  cdkDropList (cdkDropListDropped)="dropped.emit({$event, target: element})"
-                    [id]="getId()" [cdkDropListConnectedTo]="connectedNodes(element)">
+                <div class="column w-100 drop-zone" [ngClass]="{'drop-zone-active': dragging}" cdkDropList
+                    (cdkDropListDropped)="dropped.emit({$event, target: element})" [id]="getId()"
+                    [cdkDropListConnectedTo]="connectedNodes(element)">
                     <senergy-axis-config *ngFor="let child of element.subAxes" class="w-100" [element]="child"
                         [treeControl]="treeControl" [groupTypeIsDifference]="groupTypeIsDifference"
                         [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"
