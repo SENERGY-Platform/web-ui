@@ -52,7 +52,7 @@
                 </div>
                 <ng-container *ngIf="concept">
                     <div *ngFor="let conversion of concept.conversions; let i = index" class="conversion">
-                        <mat-form-field appearance="outline" class="forth-width">
+                        <mat-form-field appearance="outline" class="forth-width" color="accent">
                             <mat-label>From</mat-label>
                             <mtx-select [(ngModel)]="conversion.from" [ngModelOptions]="{standalone: true}" required appendTo=".root">
                                 <mtx-option *ngFor="let characteristic of characteristicsControl.value"
@@ -62,7 +62,7 @@
                             </mtx-select>
                             <mat-error senergyError label="From"></mat-error>
                         </mat-form-field>
-                        <mat-form-field appearance="outline" class="forth-width">
+                        <mat-form-field appearance="outline" class="forth-width" color="accent">
                             <mat-label>To</mat-label>
                             <mtx-select [(ngModel)]="conversion.to" [ngModelOptions]="{standalone: true}" required appendTo=".root">
                                 <mtx-option *ngFor="let characteristic of characteristicsControl.value"

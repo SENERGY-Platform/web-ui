@@ -116,7 +116,7 @@
                                 </mat-expansion-panel-header>
                                 <div>
                                     <div>
-                                        <mat-form-field appearance="outline" class="full-width">
+                                        <mat-form-field appearance="outline" class="full-width" color="accent">
                                             <mat-label>Interaction</mat-label>
                                             <mtx-select [(ngModel)]="criteria.interaction" appendTo=".root">
                                                 <mtx-option [value]="undefined">NONE</mtx-option>
@@ -176,7 +176,7 @@
 
                     <ng-container *ngIf="!input.iot_selectors">
                         <div>
-                            <mat-form-field appearance="outline" class="full-width">
+                            <mat-form-field appearance="outline" class="full-width" color="accent">
                                 <mat-label>Type</mat-label>
                                 <mtx-select [(ngModel)]="input.type" appendTo=".root">
                                     <mtx-option value="string">string</mtx-option>
@@ -188,14 +188,14 @@
                         </div>
 
                         <div *ngIf="input.type === 'string'">
-                            <mat-form-field appearance="outline" class="full-width">
+                            <mat-form-field appearance="outline" class="full-width" color="accent">
                                 <mat-label>Default Value</mat-label>
                                 <input matInput [(ngModel)]="input.default_value" type="text">
                                 <mat-error senergyError label="Default Value"></mat-error>
                             </mat-form-field>
                         </div>
                         <div *ngIf="input.type === 'long'">
-                            <mat-form-field appearance="outline" class="full-width">
+                            <mat-form-field appearance="outline" class="full-width" color="accent">
                                 <mat-label>Default Value</mat-label>
                                 <input matInput [(ngModel)]="input.default_value" type="number">
                                 <mat-error senergyError label="Default Value"></mat-error>
@@ -223,17 +223,17 @@
                             <mat-divider [inset]="true"></mat-divider>
                             <h4 class="mat-h4">Options</h4>
                             <div *ngFor="let option of input.options" class="full-width">
-                                <mat-form-field appearance="outline">
+                                <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Name</mat-label>
                                     <input matInput [(ngModel)]="option.key">
                                     <mat-error senergyError label="Name"></mat-error>
                                 </mat-form-field>
-                                <mat-form-field appearance="outline" *ngIf="input.type === 'string'">
+                                <mat-form-field appearance="outline" *ngIf="input.type === 'string'" color="accent">
                                     <mat-label>Value</mat-label>
                                     <input matInput [(ngModel)]="option.value" type="text">
                                     <mat-error senergyError label="Value"></mat-error>
                                 </mat-form-field>
-                                <mat-form-field appearance="outline" *ngIf="input.type === 'long'">
+                                <mat-form-field appearance="outline" *ngIf="input.type === 'long'" color="accent">
                                     <mat-label>Value</mat-label>
                                     <input matInput [(ngModel)]="option.value" type="number">
                                     <mat-error senergyError label="Value"></mat-error>

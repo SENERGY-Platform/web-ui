@@ -31,7 +31,7 @@
             </mat-radio-button>
         </div>
         <div class="role-user">
-            <mat-form-field appearance="outline" *ngIf="permission.mode === 'user'">
+            <mat-form-field appearance="outline" *ngIf="permission.mode === 'user'" color="accent">
                 <mat-label>User</mat-label>
                 <mtx-select [(ngModel)]="permission.subject" appendTo=".root">
                     <mtx-option *ngFor="let user of users" [value]="user.username">
@@ -40,7 +40,7 @@
                 </mtx-select>
                 <mat-error senergyError label="User"></mat-error>
             </mat-form-field>
-            <mat-form-field appearance="outline" *ngIf="permission.mode === 'role'">
+            <mat-form-field appearance="outline" *ngIf="permission.mode === 'role'" color="accent">
                 <mat-label>Role</mat-label>
                 <mtx-select [(ngModel)]="permission.subject" appendTo=".root">
                     <mtx-option *ngFor="let role of roles" [value]="role.name">
@@ -49,7 +49,7 @@
                 </mtx-select>
                 <mat-error senergyError label="Role"></mat-error>
             </mat-form-field>
-            <mat-form-field appearance="outline" *ngIf="permission.mode === 'client'">
+            <mat-form-field appearance="outline" *ngIf="permission.mode === 'client'" color="accent">
                 <mat-label>Client</mat-label>
                 <mtx-select [(ngModel)]="permission.subject" appendTo=".root">
                     <mtx-option *ngFor="let client of clients" [value]="client.clientId">
@@ -70,7 +70,7 @@
             </div>
         </div>
         <div>
-            <mat-form-field appearance="outline" class="endpoint">
+            <mat-form-field appearance="outline" class="endpoint" color="accent">
                 <mat-label>Endpoint</mat-label>
                 <input [formControl]="endpointControl" [matAutocomplete]="auto" aria-label="Number" matInput
                     type="text">

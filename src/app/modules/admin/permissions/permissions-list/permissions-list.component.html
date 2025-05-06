@@ -77,7 +77,7 @@
 
         <mat-card appearance="outlined" *ngIf="ready" class="search-card">
             <mat-card-content class="search">
-                <mat-form-field appearance="outline">
+                <mat-form-field appearance="outline" color="accent">
                     <mat-label>Search</mat-label>
                     <mat-icon matPrefix>search</mat-icon>
                     <input (ngModelChange)="filter($event)" [(ngModel)]="query"
@@ -89,7 +89,7 @@
                 </mat-form-field>
 
                 <div id="filter">
-                    <mat-form-field appearance="outline">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>User</mat-label>
                         <mtx-select [(ngModel)]="selectedUser" (ngModelChange)="filter($event)" appendTo=".root">
                             <mtx-option *ngFor="let user of users" [value]="user.username">
@@ -98,7 +98,7 @@
                         </mtx-select>
                         <mat-error senergyError label="User"></mat-error>
                     </mat-form-field>
-                    <mat-form-field appearance="outline">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Role</mat-label>
                         <mtx-select [(ngModel)]="selectedRole" (ngModelChange)="filter($event)" appendTo=".root">
                             <mtx-option *ngFor="let role of roles" [value]="role.name">
@@ -107,7 +107,7 @@
                         </mtx-select>
                         <mat-error senergyError label="Role"></mat-error>
                     </mat-form-field>
-                    <mat-form-field appearance="outline">
+                    <mat-form-field appearance="outline" color="accent">
                         <mat-label>Client</mat-label>
                         <mtx-select [(ngModel)]="selectedClientID" (ngModelChange)="filter($event)" appendTo=".root">
                             <mtx-option *ngFor="let client of clients" [value]="client.clientId">
@@ -116,7 +116,7 @@
                         </mtx-select>
                         <mat-error senergyError label="Client"></mat-error>
                     </mat-form-field>
-                    <mat-form-field appearance="outline" class="endpoint">
+                    <mat-form-field appearance="outline" class="endpoint" color="accent">
                         <mat-label>Endpoint</mat-label>
                         <input [matAutocomplete]="auto" aria-label="Number" matInput placeholder="Endpoint" type="text"
                             [(ngModel)]="selectedEndpoint" (ngModelChange)="filter($event)">
