@@ -212,10 +212,10 @@
                         </section>
                         <mat-form-field appearance="outline">
                             <mat-label>Merge Strategy</mat-label>
-                            <mat-select formControlName="mergeStrategy">
-                                <mat-option value="inner">Inner Join (Default)</mat-option>
-                                <mat-option value="outer">Outer Join</mat-option>
-                            </mat-select>
+                            <mtx-select formControlName="mergeStrategy" appendTo=".root">
+                                <mtx-option value="inner">Inner Join (Default)</mtx-option>
+                                <mtx-option value="outer">Outer Join</mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Merge Strategy"></mat-error>
                         </mat-form-field>
                     </div>

@@ -54,3 +54,7 @@ table {
 .suffix {
     padding-top: 15px;
 }
+
+.root {
+    position: relative;
+}

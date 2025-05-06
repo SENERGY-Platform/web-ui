@@ -17,177 +17,183 @@
 <h2 mat-dialog-title>Edit Multi Value</h2>
 
 <mat-dialog-content>
-    <form [formGroup]="formGroup">
-        <table>
-            <tr>
-                <td *ngIf="userHasUpdateNameAuthorization">
-                    <mat-form-field appearance="outline" color="accent">
-                        <mat-label>Widget Name</mat-label>
-                        <input type="text" matInput formControlName="name">
-                        <mat-error senergyError label="Widget Name"></mat-error>
-                    </mat-form-field>
-                </td>
-                <td *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-form-field appearance="outline" color="accent">
-                        <mat-label>Default Order</mat-label>
-                        <mat-select formControlName="order" placeholder="Order by" [compareWith]="compareStrings"
-                            required>
-                            <mat-option [value]="orderValues.Default">As listed</mat-option>
-                            <mat-option [value]="orderValues.AlphabeticallyAsc">Name</mat-option>
-                            <mat-option [value]="orderValues.AlphabeticallyDesc">Name desc</mat-option>
-                            <mat-option [value]="orderValues.ValueAsc">Value</mat-option>
-                            <mat-option [value]="orderValues.ValueDesc">Value desc</mat-option>
-                            <mat-option [value]="orderValues.TimeAsc">Time</mat-option>
-                            <mat-option [value]="orderValues.TimeDesc">Time desc</mat-option>
-                        </mat-select>
-                        <mat-error senergyError label="Default Order"></mat-error>
-                    </mat-form-field>
-                </td>
-                <td *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-form-field appearance="outline" color="accent">
-                        <mat-label>Value Alias</mat-label>
-                        <input type="text" matInput placeholder="Value" formControlName="valueAlias">
-                        <mat-error senergyError label="Value Alias"></mat-error>
-                    </mat-form-field>
-                </td>
-            </tr>
-        </table>
-        <span *ngIf="userHasUpdatePropertiesAuthorization">
-            <mat-accordion>
-                <mat-expansion-panel *ngFor="let tab of getMeasurements().controls; let index = index"
-                    [expanded]="step === index">
-                    <mat-expansion-panel-header class="right-aligned-header">
-                        <mat-panel-title>
-                            <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.get('name')?.value}} </span>
-                        </mat-panel-title>
-                        <mat-panel-description>
-                            <span [ngClass]="{'color-warn': tab.invalid}"> {{index}} </span>
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <ng-template matExpansionPanelContent>
-                        <table [formGroup]="getMeasurement(index)">
-                            <tr>
-                                <td>
-                                    <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Alias</mat-label>
-                                        <input type="text" matInput required formControlName="name">
-                                        <mat-error senergyError label="Alias"></mat-error>
-                                    </mat-form-field>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Export</mat-label>
-                                        <mat-select formControlName="export" required [compareWith]="compareExports"
-                                            placeholder="Choose Export">
-                                            <mat-option *ngFor="let option of exports" [value]="option">
-                                                {{option.name}}
-                                            </mat-option>
-                                        </mat-select>
-                                        <mat-error senergyError label="Export"></mat-error>
-                                    </mat-form-field>
-                                </td>
-                                <td>
-                                    <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Value</mat-label>
-                                        <mat-select [compareWith]="compare" formControlName="column"
-                                            required>
-                                            <mat-option *ngFor="let column of (tab.get('export')?.value.values)"
-                                                [value]="column">
-                                                {{column.Name}}
-                                            </mat-option>
-                                        </mat-select>
-                                        <mat-error senergyError label="Value"></mat-error>
-                                    </mat-form-field>
-                                </td>
-                                <td>
-                                    <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Unit</mat-label>
-                                        <input type="text" matInput formControlName="unit">
-                                        <mat-error senergyError label="Unit"></mat-error>
-                                    </mat-form-field>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Type</mat-label>
-                                        <mat-select formControlName="type"
-                                            [compareWith]="compareStrings" required>
-                                            <mat-option [value]="'String'">String</mat-option>
-                                            <mat-option [value]="'Number'">Number</mat-option>
-                                            <mat-option [value]="'Date'">Date</mat-option>
-                                            <mat-option [value]="'Currency'">Currency</mat-option>
-                                            <mat-option [value]="'Percent'">Percent</mat-option>
-                                            <mat-option [value]="'Boolean'">Boolean</mat-option>
-                                        </mat-select>
-										<mat-error senergyError label="Type"></mat-error>
-                                    </mat-form-field>
-                                </td>
-                                <td>
-                                    <mat-form-field appearance="outline" color="accent" hintLabel="For use in Angular pipes">
-                                        <mat-label>Format</mat-label>
-                                        <input type="text" matInput formControlName="format">
-										<mat-error senergyError label="Format"></mat-error>
-                                    </mat-form-field>
-                                </td>
-                                <td>
-                                    <mat-form-field appearance="outline" color="accent" matTooltip="{{getMathWarningTooltip(index)}}">
-                                        <mat-label>Math</mat-label>
-                                        <input type="text" matInput formControlName="math">
-										<mat-error senergyError label="Math"></mat-error>
-                                    </mat-form-field>
-                                </td>
-                            </tr>
-                            <tr [formGroup]="getWarningGroup(index)" matTooltip="{{getBoundaryWarningTooltip(index)}}">
+    <div class="root">
+        <form [formGroup]="formGroup">
+            <table>
+                <tr>
+                    <td *ngIf="userHasUpdateNameAuthorization">
+                        <mat-form-field appearance="outline" color="accent">
+                            <mat-label>Widget Name</mat-label>
+                            <input type="text" matInput formControlName="name">
+                            <mat-error senergyError label="Widget Name"></mat-error>
+                        </mat-form-field>
+                    </td>
+                    <td *ngIf="userHasUpdatePropertiesAuthorization">
+                        <mat-form-field appearance="outline" color="accent">
+                            <mat-label>Default Order</mat-label>
+                            <mtx-select formControlName="order" placeholder="Order by" [compareWith]="compareStrings"
+                                required appendTo=".root">
+                                <mtx-option [value]="orderValues.Default">As listed</mtx-option>
+                                <mtx-option [value]="orderValues.AlphabeticallyAsc">Name</mtx-option>
+                                <mtx-option [value]="orderValues.AlphabeticallyDesc">Name desc</mtx-option>
+                                <mtx-option [value]="orderValues.ValueAsc">Value</mtx-option>
+                                <mtx-option [value]="orderValues.ValueDesc">Value desc</mtx-option>
+                                <mtx-option [value]="orderValues.TimeAsc">Time</mtx-option>
+                                <mtx-option [value]="orderValues.TimeDesc">Time desc</mtx-option>
+                            </mtx-select>
+                            <mat-error senergyError label="Default Order"></mat-error>
+                        </mat-form-field>
+                    </td>
+                    <td *ngIf="userHasUpdatePropertiesAuthorization">
+                        <mat-form-field appearance="outline" color="accent">
+                            <mat-label>Value Alias</mat-label>
+                            <input type="text" matInput placeholder="Value" formControlName="valueAlias">
+                            <mat-error senergyError label="Value Alias"></mat-error>
+                        </mat-form-field>
+                    </td>
+                </tr>
+            </table>
+            <span *ngIf="userHasUpdatePropertiesAuthorization">
+                <mat-accordion>
+                    <mat-expansion-panel *ngFor="let tab of getMeasurements().controls; let index = index"
+                        [expanded]="step === index">
+                        <mat-expansion-panel-header class="right-aligned-header">
+                            <mat-panel-title>
+                                <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.get('name')?.value}} </span>
+                            </mat-panel-title>
+                            <mat-panel-description>
+                                <span [ngClass]="{'color-warn': tab.invalid}"> {{index}} </span>
+                            </mat-panel-description>
+                        </mat-expansion-panel-header>
+                        <ng-template matExpansionPanelContent>
+                            <table [formGroup]="getMeasurement(index)">
+                                <tr>
+                                    <td>
+                                        <mat-form-field appearance="outline" color="accent">
+                                            <mat-label>Alias</mat-label>
+                                            <input type="text" matInput required formControlName="name">
+                                            <mat-error senergyError label="Alias"></mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <mat-form-field appearance="outline" color="accent">
+                                            <mat-label>Export</mat-label>
+                                            <mtx-select formControlName="export" required [compareWith]="compareExports"
+                                                placeholder="Choose Export" appendTo=".root">
+                                                <mtx-option *ngFor="let option of exports" [value]="option">
+                                                    {{option.name}}
+                                                </mtx-option>
+                                            </mtx-select>
+                                            <mat-error senergyError label="Export"></mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field appearance="outline" color="accent">
+                                            <mat-label>Value</mat-label>
+                                            <mtx-select [compareWith]="compare" formControlName="column" required
+                                                appendTo=".root">
+                                                <mtx-option *ngFor="let column of (tab.get('export')?.value.values)"
+                                                    [value]="column">
+                                                    {{column.Name}}
+                                                </mtx-option>
+                                            </mtx-select>
+                                            <mat-error senergyError label="Value"></mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field appearance="outline" color="accent">
+                                            <mat-label>Unit</mat-label>
+                                            <input type="text" matInput formControlName="unit">
+                                            <mat-error senergyError label="Unit"></mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <mat-form-field appearance="outline" color="accent">
+                                            <mat-label>Type</mat-label>
+                                            <mtx-select formControlName="type" [compareWith]="compareStrings" required
+                                                appendTo=".root">
+                                                <mtx-option [value]="'String'">String</mtx-option>
+                                                <mtx-option [value]="'Number'">Number</mtx-option>
+                                                <mtx-option [value]="'Date'">Date</mtx-option>
+                                                <mtx-option [value]="'Currency'">Currency</mtx-option>
+                                                <mtx-option [value]="'Percent'">Percent</mtx-option>
+                                                <mtx-option [value]="'Boolean'">Boolean</mtx-option>
+                                            </mtx-select>
+                                            <mat-error senergyError label="Type"></mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field appearance="outline" color="accent"
+                                            hintLabel="For use in Angular pipes">
+                                            <mat-label>Format</mat-label>
+                                            <input type="text" matInput formControlName="format">
+                                            <mat-error senergyError label="Format"></mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field appearance="outline" color="accent"
+                                            matTooltip="{{getMathWarningTooltip(index)}}">
+                                            <mat-label>Math</mat-label>
+                                            <input type="text" matInput formControlName="math">
+                                            <mat-error senergyError label="Math"></mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                                <tr [formGroup]="getWarningGroup(index)"
+                                    matTooltip="{{getBoundaryWarningTooltip(index)}}">
 
-                                <td>
-                                    <mat-slide-toggle formControlName="warning_enabled">Enable warnings
-                                    </mat-slide-toggle>
-                                </td>
-                                <td>
-                                    <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Lower Boundary</mat-label>
-                                        <input matInput type="number" formControlName="lowerBoundary">
-										<mat-error senergyError label="Lower Boundary"></mat-error>
-                                    </mat-form-field>
-                                </td>
-                                <td>
-                                    <mat-form-field appearance="outline" color="accent">
-                                        <mat-label>Upper Boundary</mat-label>
-                                        <input matInput type="number" formControlName="upperBoundary">
-										<mat-error senergyError label="Upper Boundary"></mat-error>
-                                    </mat-form-field>
-                                </td>
-                            </tr>
-                        </table>
-                        <div>
-                            <span matTooltip="Move this measurement up or down">
-                                <button mat-icon-button
-                                    [disabled]="this.getMeasurements().controls.length === 1 || index === 0"
-                                    (click)="moveUp(index)">
-                                    <mat-icon>arrow_upward</mat-icon>
+                                    <td>
+                                        <mat-slide-toggle formControlName="warning_enabled">Enable warnings
+                                        </mat-slide-toggle>
+                                    </td>
+                                    <td>
+                                        <mat-form-field appearance="outline" color="accent">
+                                            <mat-label>Lower Boundary</mat-label>
+                                            <input matInput type="number" formControlName="lowerBoundary">
+                                            <mat-error senergyError label="Lower Boundary"></mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field appearance="outline" color="accent">
+                                            <mat-label>Upper Boundary</mat-label>
+                                            <input matInput type="number" formControlName="upperBoundary">
+                                            <mat-error senergyError label="Upper Boundary"></mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div>
+                                <span matTooltip="Move this measurement up or down">
+                                    <button mat-icon-button
+                                        [disabled]="this.getMeasurements().controls.length === 1 || index === 0"
+                                        (click)="moveUp(index)">
+                                        <mat-icon>arrow_upward</mat-icon>
+                                    </button>
+                                    <button mat-icon-button
+                                        [disabled]="this.getMeasurements().controls.length === 1 || index === this.getMeasurements().controls.length - 1"
+                                        (click)="moveDown(index)">
+                                        <mat-icon>arrow_downward</mat-icon>
+                                    </button>
+                                </span>
+                                <button mat-icon-button style="float: right"
+                                    [disabled]="this.getMeasurements().controls.length === 1"
+                                    (click)="removeTab(index)">
+                                    <mat-icon>delete</mat-icon>
                                 </button>
-                                <button mat-icon-button
-                                    [disabled]="this.getMeasurements().controls.length === 1 || index === this.getMeasurements().controls.length - 1"
-                                    (click)="moveDown(index)">
-                                    <mat-icon>arrow_downward</mat-icon>
-                                </button>
-                            </span>
-                            <button mat-icon-button style="float: right"
-                                [disabled]="this.getMeasurements().controls.length === 1" (click)="removeTab(index)">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                        </div>
-                    </ng-template>
-                </mat-expansion-panel>
-            </mat-accordion>
-            <button (click)="addNewMeasurement()" mat-icon-button>
-                <mat-icon>add</mat-icon>
-            </button>
-        </span>
-    </form>
+                            </div>
+                        </ng-template>
+                    </mat-expansion-panel>
+                </mat-accordion>
+                <button (click)="addNewMeasurement()" mat-icon-button>
+                    <mat-icon>add</mat-icon>
+                </button>
+            </span>
+        </form>
+    </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

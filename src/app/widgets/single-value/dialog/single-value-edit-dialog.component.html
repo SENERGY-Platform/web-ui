@@ -167,14 +167,14 @@
                             <div>
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Type</mat-label>
-                                    <mat-select placeholder="Choose Type" formControlName="type"
-                                        [compareWith]="compareStrings">
-                                        <mat-option [value]="'String'">String</mat-option>
-                                        <mat-option [value]="'Number'">Number</mat-option>
-                                        <mat-option [value]="'Date'">Date</mat-option>
-                                        <mat-option [value]="'Currency'">Currency</mat-option>
-                                        <mat-option [value]="'Percent'">Percent</mat-option>
-                                    </mat-select>
+                                    <mtx-select placeholder="Choose Type" formControlName="type"
+                                        [compareWith]="compareStrings" appendTo=".root">
+                                        <mtx-option [value]="'String'">String</mtx-option>
+                                        <mtx-option [value]="'Number'">Number</mtx-option>
+                                        <mtx-option [value]="'Date'">Date</mtx-option>
+                                        <mtx-option [value]="'Currency'">Currency</mtx-option>
+                                        <mtx-option [value]="'Percent'">Percent</mtx-option>
+                                    </mtx-select>
                                     <mat-error senergyError label="Type"></mat-error>
                                 </mat-form-field>
                             </div>
@@ -191,12 +191,12 @@
                             <div>
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Group Type</mat-label>
-                                    <mat-select placeholder="Choose Group Type" formControlName="type">
-                                        <mat-option [value]="">none</mat-option>
-                                        <mat-option *ngFor="let t of groupTypes" [value]="t">
+                                    <mtx-select placeholder="Choose Group Type" formControlName="type" appendTo=".root">
+                                        <mtx-option [value]="">none</mtx-option>
+                                        <mtx-option *ngFor="let t of groupTypes" [value]="t">
                                             {{t}}
-                                        </mat-option>
-                                    </mat-select>
+                                        </mtx-option>
+                                    </mtx-select>
                                     <mat-error senergyError label="Group Type"></mat-error>
                                 </mat-form-field>
                             </div>
@@ -249,14 +249,14 @@
                             <div>
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Warning Time Level</mat-label>
-                                    <mat-select placeholder="Choose Warning Time Level"
-                                        formControlName="warningTimeLevel">
-                                        <mat-option value="s">Seconds</mat-option>
-                                        <mat-option value="min">Minutes</mat-option>
-                                        <mat-option value="h">Hours</mat-option>
-                                        <mat-option value="d">Days</mat-option>
-                                        <mat-option value="m">Months</mat-option>
-                                    </mat-select>
+                                    <mtx-select placeholder="Choose Warning Time Level"
+                                        formControlName="warningTimeLevel" appendTo=".root">
+                                        <mtx-option value="s">Seconds</mtx-option>
+                                        <mtx-option value="min">Minutes</mtx-option>
+                                        <mtx-option value="h">Hours</mtx-option>
+                                        <mtx-option value="d">Days</mtx-option>
+                                        <mtx-option value="m">Months</mtx-option>
+                                    </mtx-select>
                                     <mat-error senergyError label="Time Warning Level"></mat-error>
                                 </mat-form-field>
                             </div>
@@ -274,14 +274,14 @@
                             <div>
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Problem Time Level</mat-label>
-                                    <mat-select placeholder="Choose Problem Time Level"
-                                        formControlName="problemTimeLevel">
-                                        <mat-option value="s">Seconds</mat-option>
-                                        <mat-option value="min">Minutes</mat-option>
-                                        <mat-option value="h">Hours</mat-option>
-                                        <mat-option value="d">Days</mat-option>
-                                        <mat-option value="m">Months</mat-option>
-                                    </mat-select>
+                                    <mtx-select placeholder="Choose Problem Time Level"
+                                        formControlName="problemTimeLevel" appendTo=".root">
+                                        <mtx-option value="s">Seconds</mtx-option>
+                                        <mtx-option value="min">Minutes</mtx-option>
+                                        <mtx-option value="h">Hours</mtx-option>
+                                        <mtx-option value="d">Days</mtx-option>
+                                        <mtx-option value="m">Months</mtx-option>
+                                    </mtx-select>
                                     <mat-error senergyError label="Problem Time Level"></mat-error>
                                 </mat-form-field>
                             </div>

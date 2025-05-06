@@ -31,13 +31,9 @@
                     <h2>Anomaly Export</h2>
                     <mat-form-field color="accent" appearance="outline" fxFlex="47">
                         <mat-label>Choose Export</mat-label>
-                        <input type="text" matInput formControlName="export" [matAutocomplete]="auto" required>
                         <mat-error senergyError [label]="'Export'"></mat-error>
-                        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                            <mat-option *ngFor="let option of exports" [value]="option">
-                                {{option.name}}
-                            </mat-option>
-                        </mat-autocomplete>
+                        <mtx-select formControlName="export" required [items]="exports" bindLabel="name" appendTo=".root">
+                        </mtx-select>
                     </mat-form-field>
 
                     <data-source-selector [dataSourceConfig]="form.controls.timeRangeConfig.value"
@@ -49,11 +45,11 @@
                     <h2>Type of Visualization</h2>
                     <mat-form-field color="accent" appearance="outline" fxFlex="47">
                         <mat-label>Choose Visualization</mat-label>
-                        <mat-select formControlName="visualizationType">
-                            <mat-option *ngFor="let visOption of visualizationTypes" [value]="visOption">
+                        <mtx-select formControlName="visualizationType" appendTo=".root">
+                            <mtx-option *ngFor="let visOption of visualizationTypes" [value]="visOption">
                                 {{visOption.name}}
-                            </mat-option>
-                        </mat-select>
+                            </mtx-option>
+                        </mtx-select>
                         <mat-error senergyError label="Choose Visualization"></mat-error>
                     </mat-form-field>
 

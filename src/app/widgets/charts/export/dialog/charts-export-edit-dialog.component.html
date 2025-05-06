@@ -32,11 +32,11 @@
                         <td>
                             <mat-form-field color="accent" appearance="outline" class="full-width">
                                 <mat-label>Chart Type</mat-label>
-                                <mat-select formControlName="chartType" required>
-                                    <mat-option *ngFor="let chartType of chartTypes" [value]="chartType">
+                                <mtx-select formControlName="chartType" required appendTo=".root">
+                                    <mtx-option *ngFor="let chartType of chartTypes" [value]="chartType">
                                         {{chartType}}
-                                    </mat-option>
-                                </mat-select>
+                                    </mtx-option>
+                                </mtx-select>
                                 <mat-error senergyError label="Chart Type"></mat-error>
                             </mat-form-field>
                         </td>

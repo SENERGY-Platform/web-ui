@@ -33,16 +33,16 @@
                     <td *ngIf="userHasUpdatePropertiesAuthorization">
                         <mat-form-field appearance="outline" color="accent" class="order-select">
                             <mat-label>Default Order</mat-label>
-                            <mat-select formControlName="order" placeholder="Order by" [compareWith]="compareStrings"
-                                required>
-                                <mat-option [value]="orderValues.Default">As listed</mat-option>
-                                <mat-option [value]="orderValues.AlphabeticallyAsc">Name</mat-option>
-                                <mat-option [value]="orderValues.AlphabeticallyDesc">Name desc</mat-option>
-                                <mat-option [value]="orderValues.ValueAsc">Value</mat-option>
-                                <mat-option [value]="orderValues.ValueDesc">Value desc</mat-option>
-                                <mat-option [value]="orderValues.TimeAsc">Time</mat-option>
-                                <mat-option [value]="orderValues.TimeDesc">Time desc</mat-option>
-                            </mat-select>
+                            <mtx-select formControlName="order" placeholder="Order by" [compareWith]="compareStrings"
+                                required appendTo=".root">
+                                <mtx-option [value]="orderValues.Default">As listed</mtx-option>
+                                <mtx-option [value]="orderValues.AlphabeticallyAsc">Name</mtx-option>
+                                <mtx-option [value]="orderValues.AlphabeticallyDesc">Name desc</mtx-option>
+                                <mtx-option [value]="orderValues.ValueAsc">Value</mtx-option>
+                                <mtx-option [value]="orderValues.ValueDesc">Value desc</mtx-option>
+                                <mtx-option [value]="orderValues.TimeAsc">Time</mtx-option>
+                                <mtx-option [value]="orderValues.TimeDesc">Time desc</mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Default Order"></mat-error>
                         </mat-form-field>
                     </td>
@@ -84,17 +84,17 @@
                         <td>
                             <mat-form-field appearance="outline" color="accent">
                                 <mat-label>Icon</mat-label>
-                                <mat-select formControlName="icon" placeholder="Choose Icon" class="convert-input">
-                                    <mat-select-trigger>
+                                <mtx-select formControlName="icon" placeholder="Choose Icon" class="convert-input" appendTo=".root">
+                                    <ng-template ng-label-tmp>
                                         <mat-icon
                                             [ngStyle]="{'color': getColor(convertRuleIndex)}">{{getIcon(convertRuleIndex)}}</mat-icon>
-                                    </mat-select-trigger>
-                                    <mat-option>-- None --</mat-option>
-                                    <mat-option *ngFor="let icon of icons" [value]="icon">
+                                    </ng-template>
+                                    <mtx-option>-- None --</mtx-option>
+                                    <mtx-option *ngFor="let icon of icons" [value]="icon">
                                         <mat-icon>{{icon}}</mat-icon>
                                         {{icon}}
-                                    </mat-option>
-                                </mat-select>
+                                    </mtx-option>
+                                </mtx-select>
                                 <mat-error senergyError label="Icon"></mat-error>
                             </mat-form-field>
                         </td>

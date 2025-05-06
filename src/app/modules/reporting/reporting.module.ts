@@ -28,7 +28,6 @@ import {MatTableModule} from '@angular/material/table';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {ReportComponent} from './report/report.component';
-import {MatSelectModule} from '@angular/material/select';
 import {MatCardModule} from '@angular/material/card';
 import {ReportObjectComponent} from './report/report-object/report-object.component';
 import {MatInputModule} from '@angular/material/input';
@@ -60,7 +59,6 @@ const reportFilesList: Route = { path: 'reporting/files/:reportId', pathMatch: '
         MatCheckboxModule,
         MatIconModule,
         MatPaginatorModule,
-        MatSelectModule,
         MatAutocompleteModule,
         MatFormFieldModule,
         MatSortModule,

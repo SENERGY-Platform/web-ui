@@ -35,7 +35,6 @@ import { EnergyPredictionRequirementsService } from '../shared/energy-prediction
 })
 export class EnergyPredictionEditDialogComponent implements OnInit {
     exports: ChartsExportMeasurementModel[] = [];
-    filteredExports: Observable<ChartsExportMeasurementModel[]> = new Observable();
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
@@ -112,20 +111,17 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     initDeployments() {
         this.exportService.getExports(true, '', 9999, 0, 'name', 'asc', undefined, undefined).subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
+                const tmp: ChartsExportMeasurementModel[] = [];
                 exports.instances?.forEach((exportModel: ExportModel) => {
                     if (
                         exportModel.ID !== undefined &&
                         exportModel.Name !== undefined &&
                         EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
                     ) {
-                        this.exports.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID });
+                        tmp.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID });
                     }
                 });
-                this.filteredExports = (this.form.get('export') as FormControl).valueChanges.pipe(
-                    startWith<string | ChartsExportMeasurementModel>(''),
-                    map((value) => (typeof value === 'string' ? value : value?.name)),
-                    map((name) => (name ? this._filter(name) : this.exports.slice())),
-                );
+                this.exports = tmp;
             }
         });
     }
@@ -173,16 +169,6 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
             if(!errorOccured) {
                 this.dialogRef.close(this.widget);
             }
-        });
-    }
-
-    private _filter(value: string): ChartsExportMeasurementModel[] {
-        const filterValue = value.toLowerCase();
-        return this.exports.filter((option) => {
-            if (option.name) {
-                return option.name.toLowerCase().indexOf(filterValue) === 0;
-            }
-            return false;
         });
     }
 

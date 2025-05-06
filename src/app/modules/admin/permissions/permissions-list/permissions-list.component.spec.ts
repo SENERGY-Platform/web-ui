@@ -26,7 +26,6 @@ import { MatDialogHarness } from '@angular/material/dialog/testing';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
@@ -59,7 +58,6 @@ xdescribe('PermissionsListComponent', () => {
                 MatFormFieldModule,
                 FormsModule,
                 BrowserAnimationsModule,
-                MatSelectModule,
                 ReactiveFormsModule,
                 MatInputModule,
             ],

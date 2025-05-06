@@ -54,11 +54,11 @@
                     <div>
                         <mat-form-field color="accent" class="full-width" appearance="outline">
                             <mat-label>Time Range Type</mat-label>
-                            <mat-select formControlName="type" required>
-                                <mat-option *ngFor="let timeRange of timeRangeTypes" [value]="timeRange">
+                            <mtx-select formControlName="type" required appendTo=".root">
+                                <mtx-option *ngFor="let timeRange of timeRangeTypes" [value]="timeRange">
                                     {{timeRange}}
-                                </mat-option>
-                            </mat-select>
+                                </mtx-option>
+                            </mtx-select>
                             <mat-error senergyError [label]="'Time Range Type'"></mat-error>
                         </mat-form-field>
                     </div>
@@ -74,12 +74,12 @@
                         *ngIf="form.get('timeRange.type')?.value === timeRangeEnum.RelativeAhead || form.get('timeRange.type')?.value === timeRangeEnum.Relative">
                         <mat-form-field color="accent" class="full-width" appearance="outline">
                             <mat-label>Interval</mat-label>
-                            <mat-select formControlName="level" placeholder="Group Type">
-                                <mat-option [value]="">none</mat-option>
-                                <mat-option *ngFor="let level of levels" [value]="level.value">
+                            <mtx-select formControlName="level" placeholder="Group Type" appendTo=".root">
+                                <mtx-option [value]="">none</mtx-option>
+                                <mtx-option *ngFor="let level of levels" [value]="level.value">
                                     {{level.name}}
-                                </mat-option>
-                            </mat-select>
+                                </mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Interval"></mat-error>
                         </mat-form-field>
                     </div>
@@ -106,12 +106,12 @@
                     <div>
                         <mat-form-field color="accent" class="full-width" appearance="outline">
                             <mat-label>Type</mat-label>
-                            <mat-select formControlName="type" placeholder="">
-                                <mat-option [value]="">none</mat-option>
-                                <mat-option *ngFor="let groupLevel of groupTypes" [value]="groupLevel.value">
+                            <mtx-select formControlName="type" placeholder="" appendTo=".root">
+                                <mtx-option [value]="">none</mtx-option>
+                                <mtx-option *ngFor="let groupLevel of groupTypes" [value]="groupLevel.value">
                                     {{groupLevel.name}}
-                                </mat-option>
-                            </mat-select>
+                                </mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Type"></mat-error>
                         </mat-form-field>
                     </div>
@@ -127,12 +127,12 @@
                     <div>
                         <mat-form-field color="accent" class="full-width" appearance="outline">
                             <mat-label>Interval</mat-label>
-                            <mat-select formControlName="level" placeholder="">
-                                <mat-option [value]="">none</mat-option>
-                                <mat-option *ngFor="let level of levels" [value]="level.value">
+                            <mtx-select formControlName="level" placeholder="" appendTo=".root">
+                                <mtx-option [value]="">none</mtx-option>
+                                <mtx-option *ngFor="let level of levels" [value]="level.value">
                                     {{level.name}}
-                                </mat-option>
-                            </mat-select>
+                                </mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Interval"></mat-error>
                         </mat-form-field>
                     </div>

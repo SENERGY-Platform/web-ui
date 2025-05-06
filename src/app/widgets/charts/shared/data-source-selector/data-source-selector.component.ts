@@ -951,7 +951,7 @@ export class DataSourceSelectorComponent implements OnInit {
         this.dataSourceClasses.forEach((sourceClass) => {
             selections.set(sourceClass, { ids: [], exports: [] });
         });
-        if (preExports !== undefined) {
+        if (preExports !== undefined && Array.isArray(preExports)) {
             preExports.forEach(exp => {
                 const dataSourceClass = this.getSourceClassFromId(exp.id);
                 selections.get(dataSourceClass)?.ids.push(exp.id);

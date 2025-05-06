@@ -40,7 +40,7 @@
 						<mat-form-field appearance="outline" color="accent" class="user-input">
 							<mat-label>Deployment</mat-label>
 							<input type="text" placeholder="Choose Deployment" matInput formControlName="deployment" [matAutocomplete]="auto">
-							<mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+							<mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"> <!-- TODO replace with mtx-select; redesign formGroup -->
 								<mat-option *ngFor="let option of filteredDeployments | async" [value]="option">
 									{{option.name}}
 								</mat-option>

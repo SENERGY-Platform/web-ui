@@ -14,37 +14,36 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
+import { NgModule } from '@angular/core';
 
-import {Route, RouterModule} from '@angular/router';
-import {OperatorRepoComponent} from './operator-repo/operator-repo.component';
-import {CommonModule} from '@angular/common';
-import {CoreModule} from '../../core/core.module';
-import {FlexLayoutModule} from '@ngbracket/ngx-layout';
-import {OperatorRepoModule} from './operator-repo/operator-repo.module';
-import {ExportModule} from '../exports/export.module';
-import {FlowDesignerComponent} from './flow-designer/flow-designer.component';
-import {FormsModule} from '@angular/forms';
-import {FlowRepoComponent} from './flow-repo/flow-repo.component';
-import {FlowRepoModule} from './flow-repo/flow-repo.module';
-import {PipelineRegistryComponent} from './pipeline-registry/pipeline-registry.component';
-import {PipelineRegistryModule} from './pipeline-registry/pipeline-registry.module';
-import {MatGridListModule} from '@angular/material/grid-list';
-import {MatIconModule} from '@angular/material/icon';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatListModule} from '@angular/material/list';
-import {MatButtonModule} from '@angular/material/button';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatTableModule} from '@angular/material/table';
-import {MatInputModule} from '@angular/material/input';
-import {MatCardModule} from '@angular/material/card';
-import {MatSortModule} from '@angular/material/sort';
-import {InfiniteScrollModule} from 'ngx-infinite-scroll';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatOptionModule} from '@angular/material/core';
-import {MatSelectModule} from '@angular/material/select';
-import {MatPaginatorModule} from '@angular/material/paginator';
+import { Route, RouterModule } from '@angular/router';
+import { OperatorRepoComponent } from './operator-repo/operator-repo.component';
+import { CommonModule } from '@angular/common';
+import { CoreModule } from '../../core/core.module';
+import { FlexLayoutModule } from '@ngbracket/ngx-layout';
+import { OperatorRepoModule } from './operator-repo/operator-repo.module';
+import { ExportModule } from '../exports/export.module';
+import { FlowDesignerComponent } from './flow-designer/flow-designer.component';
+import { FormsModule } from '@angular/forms';
+import { FlowRepoComponent } from './flow-repo/flow-repo.component';
+import { FlowRepoModule } from './flow-repo/flow-repo.module';
+import { PipelineRegistryComponent } from './pipeline-registry/pipeline-registry.component';
+import { PipelineRegistryModule } from './pipeline-registry/pipeline-registry.module';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatListModule } from '@angular/material/list';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { MatInputModule } from '@angular/material/input';
+import { MatCardModule } from '@angular/material/card';
+import { MatSortModule } from '@angular/material/sort';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatOptionModule } from '@angular/material/core';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { CostModule } from '../cost/cost.module';
 
 const operatorRepo: Route = { path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Operators' } };
@@ -79,7 +78,6 @@ const pipelineRegistry: Route = { path: 'data/pipelines', pathMatch: 'full', com
         InfiniteScrollModule,
         MatCheckboxModule,
         MatOptionModule,
-        MatSelectModule,
         CostModule,
     ],
     declarations: [OperatorRepoComponent, FlowDesignerComponent, FlowRepoComponent, PipelineRegistryComponent],

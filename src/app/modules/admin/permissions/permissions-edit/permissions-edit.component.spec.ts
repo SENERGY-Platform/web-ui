@@ -5,7 +5,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
@@ -53,7 +52,6 @@ describe('PermissionsEditComponent', () => {
                 MatAutocompleteModule,
                 MatCheckboxModule,
                 MatRadioModule,
-                MatSelectModule,
                 MatFormFieldModule,
                 BrowserAnimationsModule,
                 FormsModule,

@@ -34,7 +34,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { ProcessesModule } from '../../processes.module';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -61,7 +60,6 @@ describe('ProcessDeploymentsConfigComponent', () => {
         ReactiveFormsModule,
         FlexLayoutModule,
         MatInputModule,
-        MatSelectModule,
         ProcessesModule],
     providers: [
         { provide: KeycloakService, useClass: MockKeycloakService },

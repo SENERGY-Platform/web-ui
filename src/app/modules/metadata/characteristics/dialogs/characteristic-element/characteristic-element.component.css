@@ -45,3 +45,7 @@
 .characteristics-allowed-values-wrapper {
     margin-bottom: 5px;
 }
+
+.root {
+    position: relative;
+}

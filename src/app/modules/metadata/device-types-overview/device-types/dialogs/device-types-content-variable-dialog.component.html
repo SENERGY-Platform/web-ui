@@ -66,21 +66,21 @@
             <mat-form-field appearance="outline" class="full-width" color="accent"
                 *ngIf="isPrimitiveType() && !isVoidType()">
                 <mat-label>Type</mat-label>
-                <mat-select formControlName="type" required>
-                    <mat-option *ngFor="let primitive of primitiveTypes" [value]="primitive.type">
+                <mtx-select formControlName="type" required appendTo=".root">
+                    <mtx-option *ngFor="let primitive of primitiveTypes" [value]="primitive.type">
                         {{primitive.typeShort}}
-                    </mat-option>
-                </mat-select>
+                    </mtx-option>
+                </mtx-select>
                 <mat-error senergyError label="Type"></mat-error>
             </mat-form-field>
             <mat-form-field appearance="outline" class="full-width" color="accent"
                 *ngIf="!isPrimitiveType() && !isVoidType()">
                 <mat-label>Type</mat-label>
-                <mat-select formControlName="type" required>
-                    <mat-option *ngFor="let nonPrimitive of nonPrimitiveTypes" [value]="nonPrimitive.type">
+                <mtx-select formControlName="type" required appendTo=".root">
+                    <mtx-option *ngFor="let nonPrimitive of nonPrimitiveTypes" [value]="nonPrimitive.type">
                         {{nonPrimitive.typeShort}}
-                    </mat-option>
-                </mat-select>
+                    </mtx-option>
+                </mtx-select>
                 <mat-error senergyError label="Type"></mat-error>
             </mat-form-field>
             <mat-form-field appearance="outline" class="full-width" color="accent"

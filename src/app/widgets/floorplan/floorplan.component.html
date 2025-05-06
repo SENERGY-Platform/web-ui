@@ -25,7 +25,7 @@
       <div class="image-wrapper" #imageWrapper>
         <canvas #canvas baseChart [data]="chartjs.data" [options]="chartjs.options" type="scatter"
           id="chartjs-{{widget.id}}" 
-          [plugins]="chartjs.plugins" [ngClass]="{'hidden': draws < 2}"></canvas> <!-- TODO zoom reset on right click (contextmenu)="resetChartjsZoom($event); false" -->
+          [plugins]="chartjs.plugins" [ngClass]="{'hidden': draws < 2}"></canvas>
         <div *ngIf="chartjs.tooltipContext !== undefined" id="chartjs-tooltip"
           class="mat-elevation-z4" [ngStyle]="chartjsTooltipStyle">
           <table>

@@ -46,14 +46,14 @@
             <div>
                 <mat-form-field color="accent" appearance="outline" fxFill>
                     <mat-label>Target</mat-label>
-                    <mat-select formControlName="target" required>
-                        <mat-option [value]="'device'">
+                    <mtx-select formControlName="target" required appendTo=".root">
+                        <mtx-option [value]="'device'">
                             Devices
-                        </mat-option>
-                        <mat-option [value]="'export'">
+                        </mtx-option>
+                        <mtx-option [value]="'export'">
                             Exports
-                        </mat-option>
-                    </mat-select>
+                        </mtx-option>
+                    </mtx-select>
                     <mat-error senergyError label="Target"></mat-error>
                 </mat-form-field>
             </div>

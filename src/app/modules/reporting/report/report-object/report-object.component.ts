@@ -30,6 +30,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {QueryPreviewDialogComponent} from './query-preview/query-preview-dialog.component';
 import {map, Observable, of} from 'rxjs';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
+import { AddTagFn } from '@ng-matero/extensions/select';
 
 class TimeUnit {
     constructor(unit: string, desc: string) {
@@ -79,7 +80,7 @@ export class ReportObjectComponent implements OnInit, OnChanges {
     ];
     resultObjectTypes=['','key','array'];
     timeframe = {number: '', unit: ''};
-    deviceQueryLastValues=[undefined,'2d','7d','30d'];
+    deviceQueryLastValues=['2d','7d','30d'];
 
     constructor(
         private deviceTypeService: DeviceTypeService,
@@ -383,5 +384,15 @@ export class ReportObjectComponent implements OnInit, OnChanges {
             this.data.children[(Math.max(...numberArray)+1).toString()] = JSON.parse(JSON.stringify(this.data.children[evt]));
             this.data.length = Object.keys(this.data.children).length;
         }
+    }
+
+    addDeviceQueryLastValue(): AddTagFn {
+        const that = this;
+        return (text: string) => {
+            that.deviceQueryLastValues.push(text);
+            const tmp = that.deviceQueryLastValues;
+            that.deviceQueryLastValues = [];
+            that.deviceQueryLastValues = tmp;
+        };
     }
 }

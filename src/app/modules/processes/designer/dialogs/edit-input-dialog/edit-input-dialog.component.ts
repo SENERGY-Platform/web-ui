@@ -18,6 +18,7 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BpmnElement, BpmnParameter } from '../../shared/designer.model';
 import { DesignerHelperService } from '../../shared/designer-helper.service';
+import { AddTagFn } from '@ng-matero/extensions/select';
 
 @Component({
     templateUrl: './edit-input-dialog.component.html',
@@ -26,6 +27,7 @@ import { DesignerHelperService } from '../../shared/designer-helper.service';
 export class EditInputDialogComponent {
     inputs: BpmnParameter[];
     outputs: BpmnParameter[];
+    customOptions: string[] = [];
 
     constructor(
         private dialogRef: MatDialogRef<EditInputDialogComponent>,
@@ -35,7 +37,7 @@ export class EditInputDialogComponent {
         this.outputs = this.designerService.getIncomingOutputs(dialogParams.inputElement);
         const extensionValues = dialogParams.inputElement.businessObject.extensionElements.values;
         if (extensionValues) {
-            this.inputs = extensionValues[0].inputParameters;
+            this.inputs = extensionValues[0].inputParameters || [];
         } else {
             this.inputs = [];
         }
@@ -43,5 +45,15 @@ export class EditInputDialogComponent {
 
     close(): void {
         this.dialogRef.close();
+    }
+
+    addTag(): AddTagFn {
+        const that = this;
+        return (text: string) => {
+            that.customOptions.push(text);
+            const tmp = this.customOptions;
+            this.customOptions = [];
+            this.customOptions = tmp;
+        };
     }
 }

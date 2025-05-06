@@ -41,9 +41,9 @@
                     <mat-form-field fxFlex color="accent" appearance="outline"
                         *ngIf="exportForm.getRawValue().targetSelector === targetDb">
                         <mat-label>Database</mat-label>
-                        <mat-select formControlName="exportDatabaseId" required>
-                            <mat-option *ngFor="let db of exportDatabases" [value]="db.ID">{{db.Name}}</mat-option>
-                        </mat-select>
+                        <mtx-select formControlName="exportDatabaseId" required appendTo=".root">
+                            <mtx-option *ngFor="let db of exportDatabases" [value]="db.ID">{{db.Name}}</mtx-option>
+                        </mtx-select>
                         <mat-error senergyError label="Database"></mat-error>
                     </mat-form-field>
                     <div fxLayout="row" class="source-container"
@@ -156,12 +156,9 @@
 
                     <mat-form-field fxFill color="accent" appearance="outline" *ngIf="isTimescaleSelected()">
                         <mat-label>Timestamp Format</mat-label>
-                        <input matInput formControlName="timestampFormat" placeholder="Choose or write yourself"
-                            [formControl]="formatControl" [matAutocomplete]="auto" />
-                        <mat-autocomplete #auto="matAutocomplete">
-                            <mat-option *ngFor='let format of filtered_formats| async'
-                                [value]="format">{{format}}</mat-option>
-                        </mat-autocomplete>
+                        <mtx-select formControlName="timestampFormat" placeholder="Choose or write yourself"
+                            [formControl]="formatControl" [addTag]="addTimestampFormat()" [items]="timestamp_formats" appendTo=".root">
+                        </mtx-select>
                         <mat-error senergyError label="Timestamp Format"></mat-error>
                     </mat-form-field>
 
@@ -185,11 +182,11 @@
                             </mat-form-field>
                             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
                                 <mat-label>Type</mat-label>
-                                <mat-select formControlName="Type">
-                                    <mat-option *ngFor="let option of dropdown | keyvalue" [value]="option.value">
+                                <mtx-select formControlName="Type" appendTo=".root">
+                                    <mtx-option *ngFor="let option of dropdown | keyvalue" [value]="option.value">
                                         {{option.value}}
-                                    </mat-option>
-                                </mat-select>
+                                    </mtx-option>
+                                </mtx-select>
                                 <mat-error senergyError label="Type"></mat-error>
                             </mat-form-field>
                             <mat-checkbox formControlName="Tag" (ngModelChange)="pathChanged(key+offset)"

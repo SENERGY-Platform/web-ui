@@ -37,7 +37,6 @@ import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatOptionModule } from '@angular/material/core';
-import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTableModule } from '@angular/material/table';
@@ -63,7 +62,7 @@ import {
     EditSmartServiceJsonExtractionDialogComponent
 } from './designer/dialog/edit-smart-service-json-extraction-dialog/edit-smart-service-json-extraction-dialog.component';
 import {CriteriaListComponent} from './designer/dialog/edit-smart-service-task-dialog/criteria-list.component';
-import { MtxSelect } from '@ng-matero/extensions/select';
+import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
 
 const designs: Route = {
     path: 'smart-services/designs',
@@ -126,7 +125,6 @@ const designer: Route = {
         ReactiveFormsModule,
         MatDividerModule,
         MatOptionModule,
-        MatSelectModule,
         MatAutocompleteModule,
         MatDatepickerModule,
         MatNativeDateModule,
@@ -140,6 +138,7 @@ const designer: Route = {
         MatBadgeModule,
         MatExpansionModule,
         MtxSelect,
+        MtxOption,
     ],
     declarations: [
         SmartServiceReleasesComponent,

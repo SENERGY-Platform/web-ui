@@ -44,7 +44,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatOptionModule } from '@angular/material/core';
-import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -61,7 +60,7 @@ import { FunctionsCreateDialogComponent } from './functions/dialog/functions-cre
 import { CharacteristicElementComponent } from './characteristics/dialogs/characteristic-element/characteristic-element.component';
 import { MatTreeModule } from '@angular/material/tree';
 import {DragDropModule} from '@angular/cdk/drag-drop';
-import { MtxSelect } from '@ng-matero/extensions/select';
+import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
 
 const deviceTypes: Route = {
     path: 'metadata/devicetypesoverview',
@@ -108,11 +107,9 @@ const deviceClasses: Route = {
         MatTableModule,
         MatPaginatorModule,
         MatOptionModule,
-        MatSelectModule,
         ReactiveFormsModule,
         MatAutocompleteModule,
         MatStepperModule,
-        MatSelectModule,
         MatExpansionModule,
         MatTabsModule,
         MatCheckboxModule,
@@ -123,6 +120,7 @@ const deviceClasses: Route = {
         MatTreeModule,
         DragDropModule,
         MtxSelect,
+        MtxOption,
     ],
     declarations: [
         DeviceTypesOverviewComponent,

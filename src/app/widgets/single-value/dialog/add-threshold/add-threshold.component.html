@@ -1,30 +1,33 @@
 <mat-dialog-content>
-    <div [formGroup]="form" fxLayout="column" >
-        <mat-form-field appearance="outline" color="accent">
-            <mat-label>Threshold</mat-label>
-            <input matInput type="text" formControlName="threshold">
-            <mat-error senergyError label="Threshold"></mat-error>
-        </mat-form-field>
+    <div class="root">
+        <div [formGroup]="form" fxLayout="column">
+            <mat-form-field appearance="outline" color="accent">
+                <mat-label>Threshold</mat-label>
+                <input matInput type="text" formControlName="threshold">
+                <mat-error senergyError label="Threshold"></mat-error>
+            </mat-form-field>
 
-        <mat-form-field appearance="outline" color="accent">
-            <mat-label>Direction</mat-label>
-            <mat-select formControlName="direction">
-                <mat-option value="<="><=</mat-option>
-                <mat-option value=">=">>=</mat-option>
-            </mat-select>        
-            <mat-error senergyError label="Direction"></mat-error>
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline" color="accent">
-            <mat-label>Color</mat-label>
-            <input matInput type="text" formControlName="color">
-            <mat-error senergyError label="Color"></mat-error>
-        </mat-form-field>
+            <mat-form-field appearance="outline" color="accent">
+                <mat-label>Direction</mat-label>
+                <mtx-select formControlName="direction" appendTo=".root">
+                    <mtx-option value="<="><=</mtx-option>
+                    <mtx-option value=">=">>=</mtx-option>
+                </mtx-select>
+                <mat-error senergyError label="Direction"></mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" color="accent">
+                <mat-label>Color</mat-label>
+                <input matInput type="text" formControlName="color">
+                <mat-error senergyError label="Color"></mat-error>
+            </mat-form-field>
+        </div>
     </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="accent" type="submit" (click)="cancel()">Cancel</button>
-    <button mat-raised-button color="accent" type="submit" [disabled]="!form.valid" (click)="add()">{{submitButtonText}}</button>
+    <button mat-raised-button color="accent" type="submit" [disabled]="!form.valid"
+        (click)="add()">{{submitButtonText}}</button>
 
 </mat-dialog-actions>

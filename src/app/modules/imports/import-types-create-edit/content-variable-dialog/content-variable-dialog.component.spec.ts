@@ -27,7 +27,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { DeviceTypeCharacteristicsModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MtxSelect } from '@ng-matero/extensions/select';
@@ -68,7 +67,6 @@ describe('ContentVariableDialogComponent', () => {
                 MatButtonModule,
                 MatFormFieldModule,
                 MatInputModule,
-                MatSelectModule,
                 MatDialogModule,
                 MtxSelect,
             ],

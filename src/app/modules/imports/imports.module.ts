@@ -32,7 +32,6 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { CoreModule } from '../../core/core.module';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatSelectModule } from '@angular/material/select';
 import { ImportTypesCreateEditComponent } from './import-types-create-edit/import-types-create-edit.component';
 import { ContentVariableDialogComponent } from './import-types-create-edit/content-variable-dialog/content-variable-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -40,7 +39,7 @@ import { MatTreeModule } from '@angular/material/tree';
 import { ImportDeployEditDialogComponent } from './import-deploy-edit-dialog/import-deploy-edit-dialog.component';
 import { ImportInstanceExportDialogComponent } from './import-instances/import-instance-export-dialog/import-instance-export-dialog.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { MtxSelect } from '@ng-matero/extensions/select';
+import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
 
 const types: Route = {
     path: 'imports/types/list',
@@ -100,10 +99,10 @@ const instances: Route = {
         MatCheckboxModule,
         CoreModule,
         MatDividerModule,
-        MatSelectModule,
         MatDialogModule,
         MatTreeModule,
         MtxSelect,
+        MtxOption,
     ],
 })
 export class ImportsModule {}

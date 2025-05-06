@@ -34,7 +34,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatSelectModule } from '@angular/material/select';
 import { MatTreeModule } from '@angular/material/tree';
 import { ImportTypesService } from '../import-types/shared/import-types.service';
 import { environment } from '../../../../environments/environment';
@@ -172,7 +171,6 @@ describe('ImportTypesCreateEditComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatDividerModule,
-        MatSelectModule,
         MatDialogModule,
         MatTreeModule,
         WidgetModule,

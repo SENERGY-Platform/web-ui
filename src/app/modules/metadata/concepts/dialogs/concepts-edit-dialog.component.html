@@ -38,11 +38,11 @@
             </mat-form-field>
             <mat-form-field class="full-width" appearance="outline" color="accent">
                 <mat-label>Base Characteristic</mat-label>
-                <mat-select [formControl]="baseCharacteristicControl" required>
-                    <mat-option *ngFor="let characteristic of characteristicsControl.value" [value]="characteristic.id">
+                <mtx-select [formControl]="baseCharacteristicControl" required appendTo=".root">
+                    <mtx-option *ngFor="let characteristic of characteristicsControl.value" [value]="characteristic.id">
                         {{characteristic.name}}
-                    </mat-option>
-                </mat-select>
+                    </mtx-option>
+                </mtx-select>
                 <mat-error senergyError label="Base Characteristic"></mat-error>
             </mat-form-field>
             <div class="conversions">
@@ -54,22 +54,22 @@
                     <div *ngFor="let conversion of concept.conversions; let i = index" class="conversion">
                         <mat-form-field appearance="outline" class="forth-width">
                             <mat-label>From</mat-label>
-                            <mat-select [(ngModel)]="conversion.from" [ngModelOptions]="{standalone: true}" required>
-                                <mat-option *ngFor="let characteristic of characteristicsControl.value"
+                            <mtx-select [(ngModel)]="conversion.from" [ngModelOptions]="{standalone: true}" required appendTo=".root">
+                                <mtx-option *ngFor="let characteristic of characteristicsControl.value"
                                     [value]="characteristic.id">
                                     {{characteristic.name}}
-                                </mat-option>
-                            </mat-select>
+                                </mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="From"></mat-error>
                         </mat-form-field>
                         <mat-form-field appearance="outline" class="forth-width">
                             <mat-label>To</mat-label>
-                            <mat-select [(ngModel)]="conversion.to" [ngModelOptions]="{standalone: true}" required>
-                                <mat-option *ngFor="let characteristic of characteristicsControl.value"
+                            <mtx-select [(ngModel)]="conversion.to" [ngModelOptions]="{standalone: true}" required appendTo=".root">
+                                <mtx-option *ngFor="let characteristic of characteristicsControl.value"
                                     [value]="characteristic.id">
                                     {{characteristic.name}}
-                                </mat-option>
-                            </mat-select>
+                                </mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="To"></mat-error>
                         </mat-form-field>
                         <mat-form-field appearance="outline" class="third-width" color="accent">

@@ -17,40 +17,45 @@
 <h2 mat-dialog-title>Add Widget</h2>
 
 <mat-dialog-content>
-    <form class="form">
-        <mat-form-field class="full-width" appearance="outline" color="accent">
-            <mat-label>Type</mat-label>
-            <mat-select #select (selectionChange)="activateCategory()" [(ngModel)]="selectedType"
-                        name="type">
-                <mat-option *ngFor="let type of types" [value]="type" [disabled]="type.disabled">
-                    <span fxFlex>{{type.viewValue}}</span>
-                    <mat-icon *ngIf="type.disabled && type.tooltip !== ''" matTooltip="{{type.tooltip}}" inline>help_outlined</mat-icon>
-                </mat-option>
-            </mat-select>
-            <mat-error senergyError label="Type"></mat-error>
-        </mat-form-field>
+    <div class="root">
+        <form class="form">
+            <mat-form-field class="full-width" appearance="outline" color="accent">
+                <mat-label>Type</mat-label>
+                <mtx-select #select (change)="activateCategory()" [(ngModel)]="selectedType" name="type"
+                    appendTo=".root">
+                    <mtx-option *ngFor="let type of types" [value]="type" [disabled]="type.disabled">
+                        <span fxFlex>{{type.viewValue}}</span>
+                        <mat-icon *ngIf="type.disabled && type.tooltip !== ''" matTooltip="{{type.tooltip}}"
+                            inline>help_outlined</mat-icon>
+                    </mtx-option>
+                </mtx-select>
+                <mat-error senergyError label="Type"></mat-error>
+            </mat-form-field>
 
-        <mat-form-field [class.cdk-visually-hidden]="categoryDisabled" class="full-width" appearance="outline" color="accent">
-            <mat-label>Category</mat-label>
-            <mat-select [(ngModel)]="selectedCategory" name="category">
-                <mat-option *ngFor="let category of categories" [value]="category" [disabled]="category.disabled">
-                    <span fxFlex>{{category.viewValue}}</span>
-                    <mat-icon *ngIf="category.disabled && category.tooltip !== ''" matTooltip="{{category.tooltip}}" inline>help_outlined</mat-icon>
-                </mat-option>
-            </mat-select>
-            <mat-error senergyError label="Category"></mat-error>
-        </mat-form-field>
+            <mat-form-field [class.cdk-visually-hidden]="categoryDisabled" class="full-width" appearance="outline"
+                color="accent">
+                <mat-label>Category</mat-label>
+                <mtx-select [(ngModel)]="selectedCategory" name="category" appendTo=".root">
+                    <mtx-option *ngFor="let category of categories" [value]="category" [disabled]="category.disabled">
+                        <span fxFlex>{{category.viewValue}}</span>
+                        <mat-icon *ngIf="category.disabled && category.tooltip !== ''" matTooltip="{{category.tooltip}}"
+                            inline>help_outlined</mat-icon>
+                    </mtx-option>
+                </mtx-select>
+                <mat-error senergyError label="Category"></mat-error>
+            </mat-form-field>
 
-        <mat-form-field class="full-width" appearance="outline" color="accent">
-            <mat-label>Name</mat-label>
-            <input #inputName matInput>
-        </mat-form-field>
-    </form>
+            <mat-form-field class="full-width" appearance="outline" color="accent">
+                <mat-label>Name</mat-label>
+                <input #inputName matInput>
+            </mat-form-field>
+        </form>
+    </div>
 </mat-dialog-content>
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent"
-            [disabled]="selectedType.value === '' || (categoryDisabled === false && selectedCategory === null)"
-            (click)="create(inputName.value)">Create
+        [disabled]="selectedType.value === '' || (categoryDisabled === false && selectedCategory === null)"
+        (click)="create(inputName.value)">Create
     </button>
 </mat-dialog-actions>

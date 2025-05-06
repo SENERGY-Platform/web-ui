@@ -10,12 +10,12 @@
                 <div>
                     <mat-form-field appearance="outline" class="full-width">
                         <mat-label>Interaction</mat-label>
-                        <mat-select [(ngModel)]="criteria.interaction" (selectionChange)="emitUpdate()">
-                            <mat-option [value]="undefined">NONE</mat-option>
-                            <mat-option value="event">event</mat-option>
-                            <mat-option value="request">request</mat-option>
-                            <mat-option value="event+request">event+request</mat-option>
-                        </mat-select>
+                        <mtx-select [(ngModel)]="criteria.interaction" (change)="emitUpdate()" appendTo=".root">
+                            <mtx-option [value]="undefined">NONE</mtx-option>
+                            <mtx-option value="event">event</mtx-option>
+                            <mtx-option value="request">request</mtx-option>
+                            <mtx-option value="event+request">event+request</mtx-option>
+                        </mtx-select>
                         <mat-error senergyError label="Interaction"></mat-error>
                     </mat-form-field>
                 </div>

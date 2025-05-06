@@ -33,11 +33,11 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CoreModule } from '../../core/core.module';
+import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
 
 @NgModule({
     imports: [
@@ -54,7 +54,6 @@ import { CoreModule } from '../../core/core.module';
         MatFormFieldModule,
         MatInputModule,
         WidgetModule,
-        MatSelectModule,
         MatOptionModule,
         FormsModule,
         GridsterModule,
@@ -62,6 +61,8 @@ import { CoreModule } from '../../core/core.module';
         ReactiveFormsModule,
         DragDropModule,
         CoreModule,
+        MtxSelect,
+        MtxOption,
     ],
     declarations: [DashboardComponent, DashboardNewDialogComponent, DashboardNewWidgetDialogComponent, DashboardEditDialogComponent],
 })

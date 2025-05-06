@@ -317,10 +317,10 @@
             <div>
               <mat-form-field appearance="outline" class="full-width" color="accent">
                 <mat-label>Pipeline Merge Strategy</mat-label>
-                <mat-select [(ngModel)]="analyticsMergeStrategy">
-                  <mat-option value="inner">inner</mat-option>
-                  <mat-option value="outer">outer</mat-option>
-                </mat-select>
+                <mtx-select [(ngModel)]="analyticsMergeStrategy" appendTo=".root">
+                  <mtx-option value="inner">inner</mtx-option>
+                  <mtx-option value="outer">outer</mtx-option>
+                </mtx-select>
                 <mat-error senergyError label="Pipeline Merge Strategy"></mat-error>
               </mat-form-field>
             </div>
@@ -474,11 +474,11 @@
           <div>
             <mat-form-field appearance="outline" color="accent" class="full-width">
               <mat-label>Filter Type</mat-label>
-              <mat-select [(ngModel)]="exportRequest.FilterType" required>
-                <mat-option value="deviceId">deviceId</mat-option>
-                <mat-option value="operatorId">operatorId</mat-option>
-                <mat-option value="import_id">import_id</mat-option>
-              </mat-select>
+              <mtx-select [(ngModel)]="exportRequest.FilterType" required appendTo=".root">
+                <mtx-option value="deviceId">deviceId</mtx-option>
+                <mtx-option value="operatorId">operatorId</mtx-option>
+                <mtx-option value="import_id">import_id</mtx-option>
+              </mtx-select>
               <mat-error senergyError label="Filter Type"></mat-error>
             </mat-form-field>
           </div>
@@ -565,10 +565,10 @@
           <div>
             <mat-form-field appearance="outline" color="accent" class="full-width">
               <mat-label>Offset</mat-label>
-              <mat-select [(ngModel)]="exportRequest.Offset" required>
-                <mat-option value="largest">largest</mat-option>
-                <mat-option value="smallest">smallest</mat-option>
-              </mat-select>
+              <mtx-select [(ngModel)]="exportRequest.Offset" required appendTo=".root">
+                <mtx-option value="largest">largest</mtx-option>
+                <mtx-option value="smallest">smallest</mtx-option>
+              </mtx-select>
               <mat-error senergyError label="Offset"></mat-error>
             </mat-form-field>
           </div>
@@ -600,12 +600,12 @@
                 <div>
                   <mat-form-field appearance="outline" color="accent" class="full-width">
                     <mat-label>Type</mat-label>
-                    <mat-select [(ngModel)]="value.Type" required>
-                      <mat-option value="string">string</mat-option>
-                      <mat-option value="float">float</mat-option>
-                      <mat-option value="bool">bool</mat-option>
-                      <mat-option value="string_json">string_json</mat-option>
-                    </mat-select>
+                    <mtx-select [(ngModel)]="value.Type" required appendTo=".root">
+                      <mtx-option value="string">string</mtx-option>
+                      <mtx-option value="float">float</mtx-option>
+                      <mtx-option value="bool">bool</mtx-option>
+                      <mtx-option value="string_json">string_json</mtx-option>
+                    </mtx-select>
                     <mat-error senergyError label="Type"></mat-error>
                   </mat-form-field>
                 </div>
@@ -642,11 +642,11 @@
           <div>
             <mat-form-field appearance="outline" color="accent" class="full-width">
               <mat-label>Import-Type</mat-label>
-              <mat-select [(ngModel)]="importTypeId">
-                <mat-option *ngFor="let importType of importTypes" [value]="importType.id">
+              <mtx-select [(ngModel)]="importTypeId" appendTo=".root">
+                <mtx-option *ngFor="let importType of importTypes" [value]="importType.id">
                   {{importType.name}}
-                </mat-option>
-              </mat-select>
+                </mtx-option>
+              </mtx-select>
               <mat-error senergyError label="Import Type"></mat-error>
             </mat-form-field>
           </div>
@@ -779,9 +779,9 @@
           <div>
             <mat-form-field appearance="outline" class="full-width" color="accent">
               <mat-label>Operation</mat-label>
-              <mat-select [(ngModel)]="deviceRepositoryWorkerInfo.operation">
-                <mat-option value="create_device_group">Create Device-Group</mat-option>
-              </mat-select>
+              <mtx-select [(ngModel)]="deviceRepositoryWorkerInfo.operation" appendTo=".root">
+                <mtx-option value="create_device_group">Create Device-Group</mtx-option>
+              </mtx-select>
               <mat-error senergyError label="Operation"></mat-error>
             </mat-form-field>
           </div>
@@ -832,10 +832,10 @@
           <div>
             <mat-form-field appearance="outline" class="full-width" color="accent">
               <mat-label>Hash Type</mat-label>
-              <mat-select [(ngModel)]="watcherWorkerInfo.hash_type">
-                <mat-option value="deviceids">deviceids</mat-option>
-                <mat-option value="md5">md5</mat-option>
-              </mat-select>
+              <mtx-select [(ngModel)]="watcherWorkerInfo.hash_type" appendTo=".root">
+                <mtx-option value="deviceids">deviceids</mtx-option>
+                <mtx-option value="md5">md5</mtx-option>
+              </mtx-select>
               <mat-error senergyError label="Hash Type"></mat-error>
             </mat-form-field>
           </div>
@@ -879,10 +879,10 @@
           <div>
             <mat-form-field appearance="outline" class="full-width" color="accent">
               <mat-label>Watch Operation</mat-label>
-              <mat-select [(ngModel)]="watcherWorkerInfo.operation">
-                <mat-option value="devices_by_criteria">Watch Devices by Criteria</mat-option>
-                <mat-option value="watch_request">Watch Generic Request</mat-option>
-              </mat-select>
+              <mtx-select [(ngModel)]="watcherWorkerInfo.operation" appendTo=".root">
+                <mtx-option value="devices_by_criteria">Watch Devices by Criteria</mtx-option>
+                <mtx-option value="watch_request">Watch Generic Request</mtx-option>
+              </mtx-select>
               <mat-error senergyError label="Watch Operation"></mat-error>
             </mat-form-field>
           </div>
@@ -901,12 +901,12 @@
                   <div>
                     <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Interaction</mat-label>
-                      <mat-select [(ngModel)]="criteria.interaction">
-                        <mat-option [value]="undefined">NONE</mat-option>
-                        <mat-option value="event">event</mat-option>
-                        <mat-option value="request">request</mat-option>
-                        <mat-option value="event+request">event+request</mat-option>
-                      </mat-select>
+                      <mtx-select [(ngModel)]="criteria.interaction" appendTo=".root">
+                        <mtx-option [value]="undefined">NONE</mtx-option>
+                        <mtx-option value="event">event</mtx-option>
+                        <mtx-option value="request">request</mtx-option>
+                        <mtx-option value="event+request">event+request</mtx-option>
+                      </mtx-select>
                       <mat-error senergyError label="Interaction"></mat-error>
                     </mat-form-field>
                   </div>
@@ -958,14 +958,14 @@
             <div>
               <mat-form-field appearance="outline" class="full-width" color="accent">
                 <mat-label>Method</mat-label>
-                <mat-select [(ngModel)]="watcherWorkerInfo.request.method">
-                  <mat-option value="GET">GET</mat-option>
-                  <mat-option value="HEAD">HEAD</mat-option>
-                  <mat-option value="POST">POST</mat-option>
-                  <mat-option value="PUT">PUT</mat-option>
-                  <mat-option value="DELETE">DELETE</mat-option>
-                  <mat-option value="PATCH">PATCH</mat-option>
-                </mat-select>
+                <mtx-select [(ngModel)]="watcherWorkerInfo.request.method" appendTo=".root">
+                  <mtx-option value="GET">GET</mtx-option>
+                  <mtx-option value="HEAD">HEAD</mtx-option>
+                  <mtx-option value="POST">POST</mtx-option>
+                  <mtx-option value="PUT">PUT</mtx-option>
+                  <mtx-option value="DELETE">DELETE</mtx-option>
+                  <mtx-option value="PATCH">PATCH</mtx-option>
+                </mtx-select>
                 <mat-error senergyError label="Method"></mat-error>
               </mat-form-field>
             </div>

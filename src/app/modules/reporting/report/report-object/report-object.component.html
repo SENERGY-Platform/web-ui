@@ -77,20 +77,18 @@
 
                     <mat-form-field fxFill color="accent" appearance="outline">
                         <mat-label>Path</mat-label>
-                        <input matInput [(ngModel)]="data.query!.columns[0].name" placeholder="Choose or write yourself"
-                            [matAutocomplete]="auto" />
-                        <mat-autocomplete #auto="matAutocomplete">
-                            <mat-option *ngFor="let path of queryServicePaths | keyvalue"
-                                [value]="path.value">{{path.value}}</mat-option>
-                        </mat-autocomplete>
+                        <mtx-select matInput [(ngModel)]="data.query!.columns[0].name" placeholder="Choose or write yourself" appendTo=".root">
+                            <mtx-option *ngFor="let path of queryServicePaths | keyvalue"
+                                [value]="path.value">{{path.value}}</mtx-option>
+                        </mtx-select>
                         <mat-error senergyError label="Path"></mat-error>
                     </mat-form-field>
                     <div role="group" class="form-grouping">
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Field Group Type</mat-label>
-                            <mat-select [(ngModel)]="data.query!.columns[0].groupType">
-                                <mat-option *ngFor="let type of fieldGroupTypes" [value]="type">{{type}}</mat-option>
-                            </mat-select>
+                            <mtx-select [(ngModel)]="data.query!.columns[0].groupType" appendTo=".root">
+                                <mtx-option *ngFor="let type of fieldGroupTypes" [value]="type">{{type}}</mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Field Group Type"></mat-error>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
@@ -100,18 +98,18 @@
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Sorting</mat-label>
-                            <mat-select [(ngModel)]="data.query!.orderDirection">
-                                <mat-option *ngFor="let type of sortTypes" [value]="type">{{type}}</mat-option>
-                            </mat-select>
+                            <mtx-select [(ngModel)]="data.query!.orderDirection" appendTo=".root">
+                                <mtx-option *ngFor="let type of sortTypes" [value]="type">{{type}}</mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Sorting"></mat-error>
                         </mat-form-field>
                     </div>
                     <div role="group" class="form-grouping">
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>ResultObject</mat-label>
-                            <mat-select [(ngModel)]="data.queryOptions!.resultObject">
-                                <mat-option *ngFor="let type of resultObjectTypes" [value]="type">{{type}}</mat-option>
-                            </mat-select>
+                            <mtx-select [(ngModel)]="data.queryOptions!.resultObject" appendTo=".root">
+                                <mtx-option *ngFor="let type of resultObjectTypes" [value]="type">{{type}}</mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="ResultObject"></mat-error>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
@@ -128,10 +126,10 @@
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Grouping Time Unit</mat-label>
-                            <mat-select [(ngModel)]="groupingTime.unit" (ngModelChange)="setGroupingTime()">
-                                <mat-option *ngFor="let units of timeUnits"
-                                    [value]="units.unit">{{units.desc}}</mat-option>
-                            </mat-select>
+                            <mtx-select [(ngModel)]="groupingTime.unit" (ngModelChange)="setGroupingTime()" appendTo=".root">
+                                <mtx-option *ngFor="let units of timeUnits"
+                                    [value]="units.unit">{{units.desc}}</mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Grouping Time Unit"></mat-error>
                         </mat-form-field>
                     </div>
@@ -143,10 +141,10 @@
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Time Frame Unit</mat-label>
-                            <mat-select [(ngModel)]="timeframe.unit" (ngModelChange)="setTimeframe()">
-                                <mat-option *ngFor="let units of timeUnits"
-                                    [value]="units.unit">{{units.desc}}</mat-option>
-                            </mat-select>
+                            <mtx-select [(ngModel)]="timeframe.unit" (ngModelChange)="setTimeframe()" appendTo=".root">
+                                <mtx-option *ngFor="let units of timeUnits"
+                                    [value]="units.unit">{{units.desc}}</mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Time Frame Unit"></mat-error>
                         </mat-form-field>
                     </div>
@@ -162,12 +160,12 @@
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Rolling Start Date</mat-label>
-                            <mat-select [(ngModel)]="data.queryOptions!.rollingStartDate"
-                                (ngModelChange)="setStartOffset()">
-                                <mat-option [value]="''"></mat-option>
-                                <mat-option [value]="'month'">Monat</mat-option>
-                                <mat-option [value]="'year'">Jahr</mat-option>
-                            </mat-select>
+                            <mtx-select [(ngModel)]="data.queryOptions!.rollingStartDate"
+                                (ngModelChange)="setStartOffset()" appendTo=".root">
+                                <mtx-option [value]="''"></mtx-option>
+                                <mtx-option [value]="'month'">Monat</mtx-option>
+                                <mtx-option [value]="'year'">Jahr</mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Rolling Start Date"></mat-error>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
@@ -181,12 +179,12 @@
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Rolling End Date</mat-label>
-                            <mat-select [(ngModel)]="data.queryOptions!.rollingEndDate"
-                                (ngModelChange)="setEndOffset()">
-                                <mat-option [value]="''"></mat-option>
-                                <mat-option [value]="'month'">Monat</mat-option>
-                                <mat-option [value]="'year'">Jahr</mat-option>
-                            </mat-select>
+                            <mtx-select [(ngModel)]="data.queryOptions!.rollingEndDate"
+                                (ngModelChange)="setEndOffset()" appendTo=".root">
+                                <mtx-option [value]="''"></mtx-option>
+                                <mtx-option [value]="'month'">Monat</mtx-option>
+                                <mtx-option [value]="'year'">Jahr</mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Rolling End Date"></mat-error>
                         </mat-form-field>
                     </div>
@@ -226,12 +224,11 @@
                 <div *ngIf="inputType === 'devices'" fxLayout="column">
                     <mat-form-field fxFill color="accent" appearance="outline">
                         <mat-label>Last Days</mat-label>
-                        <input matInput [(ngModel)]="this.data!.deviceQuery!.last"
-                            placeholder="Choose or write yourself" [matAutocomplete]="auto" />
-                        <mat-autocomplete #auto="matAutocomplete">
-                            <mat-option *ngFor="let values of deviceQueryLastValues | keyvalue"
-                                [value]="values.value">{{values.value}}</mat-option>
-                        </mat-autocomplete>
+                        <mtx-select [(ngModel)]="this.data!.deviceQuery!.last"
+                            placeholder="Choose or write yourself" [addTag]="addDeviceQueryLastValue()" appendTo=".root">
+                            <mtx-option *ngFor="let values of deviceQueryLastValues | keyvalue"
+                                [value]="values.value">{{values.value}}</mtx-option>
+                        </mtx-select>
                         <mat-error senergyError label="Path"></mat-error>
                     </mat-form-field>
                 </div>

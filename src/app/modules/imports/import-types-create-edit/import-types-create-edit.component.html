@@ -67,9 +67,9 @@
                     <div fxLayout="row" fxLayoutGap="8px">
                         <mat-form-field color="accent" appearance="outline" fxFlex="30">
                             <mat-label>Type</mat-label>
-                            <mat-select formControlName="type" required>
-                                <mat-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mat-option>
-                            </mat-select>
+                            <mtx-select formControlName="type" required appendTo=".root">
+                                <mtx-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mtx-option>
+                            </mtx-select>
                             <mat-error senergyError label="Type"></mat-error>
                         </mat-form-field>
 

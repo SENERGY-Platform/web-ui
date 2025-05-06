@@ -29,3 +29,7 @@ table {
 .margin-add-convert-button {
     margin: 8px
 }
+
+.root {
+    position: relative;
+}

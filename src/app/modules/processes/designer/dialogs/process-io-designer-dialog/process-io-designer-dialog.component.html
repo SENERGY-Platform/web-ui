@@ -18,101 +18,102 @@
 <h2 mat-dialog-title>Process-IO</h2>
 
 <mat-dialog-content class="process-io-designer-dialog">
-  <mat-accordion>
-    <mat-expansion-panel [expanded]="info.set.length > 0 && info.get.length === 0">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          Set {{info.set.length}}
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      <div>
-        <div *ngFor="let set of info.set; let i = index" class="variables">
-          <mat-form-field appearance="outline" color="accent">
-            <mat-label>Binding</mat-label>
-            <mat-select [(ngModel)]="set.binding" required>
-              <mat-option value="global">
-                global
-              </mat-option>
-              <mat-option value="instance">
-                instance
-              </mat-option>
-              <mat-option value="definition">
-                definition
-              </mat-option>
-            </mat-select>
-            <mat-error senergyError label="Binding"></mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="third-width" color="accent">
-            <mat-label>Key</mat-label>
-            <input matInput [(ngModel)]="set.key" type="text" required>
-            <mat-error senergyError label="Key"></mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="third-width" color="accent">
-            <mat-label>Value</mat-label>
-            <input matInput [(ngModel)]="set.value" type="text">
-            <mat-error senergyError label="Value"></mat-error>
-          </mat-form-field>
-          <button mat-icon-button (click)="removeSet(i)">
-            <mat-icon>delete</mat-icon>
+  <div class="root">
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="info.set.length > 0 && info.get.length === 0">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Set {{info.set.length}}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <div *ngFor="let set of info.set; let i = index" class="variables">
+            <mat-form-field appearance="outline" color="accent">
+              <mat-label>Binding</mat-label>
+              <mtx-select [(ngModel)]="set.binding" required appendTo=".root">
+                <mtx-option value="global">
+                  global
+                </mtx-option>
+                <mtx-option value="instance">
+                  instance
+                </mtx-option>
+                <mtx-option value="definition">
+                  definition
+                </mtx-option>
+              </mtx-select>
+              <mat-error senergyError label="Binding"></mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="third-width" color="accent">
+              <mat-label>Key</mat-label>
+              <input matInput [(ngModel)]="set.key" type="text" required>
+              <mat-error senergyError label="Key"></mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="third-width" color="accent">
+              <mat-label>Value</mat-label>
+              <input matInput [(ngModel)]="set.value" type="text">
+              <mat-error senergyError label="Value"></mat-error>
+            </mat-form-field>
+            <button mat-icon-button (click)="removeSet(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <button mat-icon-button color="accent" (click)="addSet()">
+            <mat-icon>add</mat-icon>
           </button>
         </div>
-        <button mat-icon-button color="accent" (click)="addSet()">
-          <mat-icon>add</mat-icon>
-        </button>
-      </div>
-    </mat-expansion-panel>
-    <mat-expansion-panel [expanded]="info.get.length > 0 && info.set.length === 0">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          Get {{info.get.length}}
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      <div>
-        <div *ngFor="let get of info.get; let i = index" class="variables">
-          <mat-form-field appearance="outline" color="accent">
-            <mat-label>Binding</mat-label>
-            <mat-select [(ngModel)]="get.binding" required>
-              <mat-option value="global">
-                global
-              </mat-option>
-              <mat-option value="instance">
-                instance
-              </mat-option>
-              <mat-option value="definition">
-                definition
-              </mat-option>
-            </mat-select>
-            <mat-error senergyError label="Binding"></mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="fifth-width" color="accent">
-            <mat-label>Key</mat-label>
-            <input matInput [(ngModel)]="get.key" type="text" required>
-            <mat-error senergyError label="Key"></mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="fifth-width" color="accent">
-            <mat-label>Output Name</mat-label>
-            <input matInput [(ngModel)]="get.outputVariableName" type="text" required>
-            <mat-error senergyError label="Output Name"></mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="fifth-width" color="accent">
-            <mat-label>Default Value</mat-label>
-            <input matInput [(ngModel)]="get.defaultValue" type="text" required>
-            <mat-error senergyError label="Default Value"></mat-error>
-          </mat-form-field>
-          <button mat-icon-button  (click)="removeGet(i)">
-            <mat-icon>delete</mat-icon>
+      </mat-expansion-panel>
+      <mat-expansion-panel [expanded]="info.get.length > 0 && info.set.length === 0">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Get {{info.get.length}}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <div *ngFor="let get of info.get; let i = index" class="variables">
+            <mat-form-field appearance="outline" color="accent">
+              <mat-label>Binding</mat-label>
+              <mtx-select [(ngModel)]="get.binding" required appendTo=".root">
+                <mtx-option value="global">
+                  global
+                </mtx-option>
+                <mtx-option value="instance">
+                  instance
+                </mtx-option>
+                <mtx-option value="definition">
+                  definition
+                </mtx-option>
+              </mtx-select>
+              <mat-error senergyError label="Binding"></mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="fifth-width" color="accent">
+              <mat-label>Key</mat-label>
+              <input matInput [(ngModel)]="get.key" type="text" required>
+              <mat-error senergyError label="Key"></mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="fifth-width" color="accent">
+              <mat-label>Output Name</mat-label>
+              <input matInput [(ngModel)]="get.outputVariableName" type="text" required>
+              <mat-error senergyError label="Output Name"></mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="fifth-width" color="accent">
+              <mat-label>Default Value</mat-label>
+              <input matInput [(ngModel)]="get.defaultValue" type="text" required>
+              <mat-error senergyError label="Default Value"></mat-error>
+            </mat-form-field>
+            <button mat-icon-button (click)="removeGet(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <button mat-icon-button color="accent" (click)="addGet()">
+            <mat-icon>add</mat-icon>
           </button>
         </div>
-        <button mat-icon-button color="accent" (click)="addGet()">
-          <mat-icon>add</mat-icon>
-        </button>
-      </div>
-    </mat-expansion-panel>
-  </mat-accordion>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   <button mat-raised-button color="accent" [disabled]="isInvalid()" (click)="ok()">Save</button>
 </mat-dialog-actions>
-

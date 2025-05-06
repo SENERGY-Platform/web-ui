@@ -17,23 +17,22 @@
 <h2 mat-dialog-title>Edit PV Prediction</h2>
 
 <mat-dialog-content>
-    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-    <div *ngIf="ready">
-        <form fxLayout="column" [formGroup]="form">
+    <div class="root">
+        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+        <div *ngIf="ready">
+            <form fxLayout="column" [formGroup]="form">
                 <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
                     <mat-label>Widget Name</mat-label>
                     <input type="text" matInput formControlName="name">
                     <mat-error senergyError label="Widget Name"></mat-error>
                 </mat-form-field>
-    
-                <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdatePropertiesAuthorization">
+
+                <mat-form-field appearance="outline" color="accent" fxFlex="47"
+                    *ngIf="userHasUpdatePropertiesAuthorization">
                     <mat-label>Export</mat-label>
-                    <input type="text" matInput placeholder="Export" formControlName="export" [matAutocomplete]="auto" required>
-                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                        <mat-option *ngFor="let option of exports" [value]="option">
-                            {{option.name}}
-                        </mat-option>
-                    </mat-autocomplete>
+                    <mtx-select type="text" matInput placeholder="Export" formControlName="export" [items]="exports"
+                        bindLabel="name" required appendTo=".root">
+                    </mtx-select>
                     <mat-error senergyError label="Export"></mat-error>
                 </mat-form-field>
 
@@ -50,18 +49,18 @@
                     </mat-form-field>
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Interval</mat-label>
-                        <mat-select formControlName="level" placeholder="">
-                            <mat-option [value]="">none</mat-option>
-                            <mat-option *ngFor="let level of levels" [value]="level.value">
+                        <mtx-select formControlName="level" placeholder="" appendTo=".root">
+                            <mtx-option [value]="">none</mtx-option>
+                            <mtx-option *ngFor="let level of levels" [value]="level.value">
                                 {{level.name}}
-                            </mat-option>
-                        </mat-select>
+                            </mtx-option>
+                        </mtx-select>
                         <mat-error senergyError label="Interval"></mat-error>
                     </mat-form-field>
                 </div>
-        </form>
+            </form>
+        </div>
     </div>
-
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

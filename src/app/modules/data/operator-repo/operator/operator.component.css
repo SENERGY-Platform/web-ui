@@ -59,3 +59,7 @@ mat-grid-list {
     right: 15px;
     z-index: 100;
 }
+
+.root {
+    position: relative;
+}

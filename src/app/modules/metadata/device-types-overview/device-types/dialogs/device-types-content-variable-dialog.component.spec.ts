@@ -26,7 +26,6 @@ import {
 } from '../../shared/device-type.model';
 import {MatRadioModule} from '@angular/material/radio';
 import {ReactiveFormsModule} from '@angular/forms';
-import {MatSelectModule} from '@angular/material/select';
 import {MatInputModule} from '@angular/material/input';
 import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
 import {MatCheckboxModule} from '@angular/material/checkbox';
@@ -41,7 +40,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         createSpyFromClass<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
     function init(contentVariable: DeviceTypeContentVariableModel, concepts: ConceptsCharacteristicsModel[], functions: DeviceTypeFunctionModel[], aspects: DeviceTypeAspectModel[]) {
         TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-            imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatSelectModule, MatInputModule, MatCheckboxModule, MtxSelect],
+            imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule, MtxSelect],
             declarations: [DeviceTypesContentVariableDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: matDialogRefSpy },

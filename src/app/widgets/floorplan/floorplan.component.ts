@@ -94,14 +94,6 @@ export class FloorplanComponent implements OnInit, OnDestroy {
               this.cd.detectChanges();
             },
           },
-          zoom: {
-            zoom: {
-              drag: {
-                enabled: true
-              },
-              mode: 'x',
-            },
-          },
         },
         scales: {
           'y': {

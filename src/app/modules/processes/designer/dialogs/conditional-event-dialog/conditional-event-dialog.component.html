@@ -40,10 +40,10 @@
 
             <mat-form-field appearance="outline" class="form-field" color="accent">
                 <mat-label>Qos</mat-label>
-                <mat-select [(ngModel)]="result.qos" [ngModelOptions]="{standalone: true}">
-                    <mat-option value="0">0</mat-option>
-                    <mat-option value="1">1</mat-option>
-                </mat-select>
+                <mtx-select [(ngModel)]="result.qos" [ngModelOptions]="{standalone: true}" appendTo=".root">
+                    <mtx-option value="0">0</mtx-option>
+                    <mtx-option value="1">1</mtx-option>
+                </mtx-select>
                 <mat-error senergyError label="Qos"></mat-error>
             </mat-form-field>
 

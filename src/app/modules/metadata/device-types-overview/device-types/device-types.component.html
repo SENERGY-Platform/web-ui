@@ -163,27 +163,27 @@
                                                                     <mat-form-field appearance="outline"
                                                                         class="full-width" color="accent">
                                                                         <mat-label>Protocol</mat-label>
-                                                                        <mat-select formControlName="protocol_id"
-                                                                            required>
-                                                                            <mat-option *ngFor="let item of protocols"
+                                                                        <mtx-select formControlName="protocol_id"
+                                                                            required appendTo=".root">
+                                                                            <mtx-option *ngFor="let item of protocols"
                                                                                 [value]="item.id">
                                                                                 {{item.name}}
-                                                                            </mat-option>
-                                                                        </mat-select>
+                                                                            </mtx-option>
+                                                                        </mtx-select>
                                                                         <mat-error senergyError
                                                                             label="Protocol"></mat-error>
                                                                     </mat-form-field>
                                                                     <mat-form-field appearance="outline"
                                                                         class="full-width" color="accent">
                                                                         <mat-label>Interaction</mat-label>
-                                                                        <mat-select formControlName="interaction"
-                                                                            required>
-                                                                            <mat-option
+                                                                        <mtx-select formControlName="interaction"
+                                                                            required appendTo=".root">
+                                                                            <mtx-option
                                                                                 *ngFor="let item of interactionList"
                                                                                 [value]="item">
                                                                                 {{item}}
-                                                                            </mat-option>
-                                                                        </mat-select>
+                                                                            </mtx-option>
+                                                                        </mtx-select>
                                                                         <mat-error senergyError
                                                                             label="Interaction"></mat-error>
                                                                     </mat-form-field>

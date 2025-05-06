@@ -45,6 +45,7 @@ import {AbstractControl, FormArray, FormControl, UntypedFormBuilder, Validators}
 import * as _ from 'lodash';
 import {BrokerExportService} from '../shared/broker-export.service';
 import {PageEvent} from '@angular/material/paginator';
+import { AddTagFn } from '@ng-matero/extensions/select';
 
 @Component({
     selector: 'senergy-new-export',
@@ -60,7 +61,6 @@ export class NewExportComponent implements OnInit {
 
     formatControl = new FormControl('');
     timestamp_formats: string[] = ['%Y-%m-%dT%H:%M:%S.%fZ'];
-    filtered_formats: Observable<string[]> = new Observable();
 
     exportForm = this.fb.group({
         selector: ['', Validators.required],
@@ -281,11 +281,6 @@ export class NewExportComponent implements OnInit {
             }, 0);
             this.ready = true;
         });
-
-        this.filtered_formats = this.formatControl.valueChanges.pipe(
-            startWith(''),
-            map(value => this._filter(value || '')),
-        );
     }
 
     onSubmit() {
@@ -801,8 +796,14 @@ export class NewExportComponent implements OnInit {
         return this.exportDatabases.find((e: ExportDatabaseModel) => e.ID === this.exportForm.getRawValue().exportDatabaseId)?.Type === DatabaseType.timescaledb;
     }
 
-    private _filter(value: string): string[] {
-        const filterValue = value.toLowerCase();
-        return this.timestamp_formats.filter(format => format.toLowerCase().includes(filterValue));
+    addTimestampFormat(): AddTagFn {
+        const that = this;
+        return (text: string) => {
+            that.timestamp_formats.push(text);
+            const tmp = that.timestamp_formats;
+            that.timestamp_formats = [];
+            that.timestamp_formats = tmp;
+            that.formatControl.updateValueAndValidity(); // triggers valueChanges pipe
+        };
     }
 }

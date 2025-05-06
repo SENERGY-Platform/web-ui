@@ -33,7 +33,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatCardModule } from '@angular/material/card';
@@ -44,7 +43,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MtxSelect } from '@ng-matero/extensions/select';
+import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
 
 const exp: Route = { path: 'exports/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'New Export' } };
 const dataExport: Route = { path: 'exports/db', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' } };
@@ -72,7 +71,6 @@ const brokerDataExport: Route = { path: 'exports/broker', pathMatch: 'full', com
         FormsModule,
         ReactiveFormsModule,
         MatCheckboxModule,
-        MatSelectModule,
         MatRadioModule,
         InfiniteScrollModule,
         MatAutocompleteModule,
@@ -81,6 +79,7 @@ const brokerDataExport: Route = { path: 'exports/broker', pathMatch: 'full', com
         MatExpansionModule,
         MatSlideToggleModule,
         MtxSelect,
+        MtxOption,
     ],
     declarations: [ExportComponent, NewExportComponent, ExportDetailsComponent],
 })

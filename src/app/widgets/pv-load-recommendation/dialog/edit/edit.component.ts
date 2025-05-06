@@ -116,15 +116,17 @@ export class PVLoadRecommendationEditComponent implements OnInit {
         return this.exportService.getExports(true, '', 9999, 0, 'name', 'asc', undefined, undefined).pipe(
             map((exports: ExportResponseModel | null) => {
                 if (exports !== null) {
+                    const tmp: ChartsExportMeasurementModel[] = [];
                     exports.instances?.forEach((exportModel: ExportModel) => {
                         if (
                             exportModel.ID !== undefined &&
                   exportModel.Name !== undefined // &&
                   // EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
                         ) {
-                            this.exports.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID });
+                            tmp.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID });
                         }
                     });
+                    this.exports = tmp;
                 }
                 return exports;
             })

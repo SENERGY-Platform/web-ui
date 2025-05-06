@@ -45,7 +45,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatOptionModule } from '@angular/material/core';
-import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -146,11 +145,9 @@ const locationsEdit: Route = {
         MatTableModule,
         MatPaginatorModule,
         MatOptionModule,
-        MatSelectModule,
         ReactiveFormsModule,
         MatAutocompleteModule,
         MatStepperModule,
-        MatSelectModule,
         MatExpansionModule,
         MatTabsModule,
         MatCheckboxModule,

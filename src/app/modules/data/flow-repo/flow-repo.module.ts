@@ -33,7 +33,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { DeployFlowClassicComponent } from './deploy-flow/classic/deploy-flow-component-classic.component';
 import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
@@ -64,7 +63,6 @@ const deployClassic: Route = {
         MatInputModule,
         FormsModule,
         MatCheckboxModule,
-        MatSelectModule,
         MatCardModule,
         ReactiveFormsModule,
         MtxSelect,

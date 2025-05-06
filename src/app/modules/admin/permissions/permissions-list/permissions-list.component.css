@@ -98,8 +98,15 @@ mat-form-field {
     margin-right: 5px;
 }
 
-.mat-column-edit, .mat-column-delete, .mat-column-GET, .mat-column-POST, .mat-column-PUT,
-.mat-column-PATCH, .mat-column-DELETE, .mat-column-HEAD, .mat-column-mode {
+.mat-column-edit,
+.mat-column-delete,
+.mat-column-GET,
+.mat-column-POST,
+.mat-column-PUT,
+.mat-column-PATCH,
+.mat-column-DELETE,
+.mat-column-HEAD,
+.mat-column-mode {
     max-width: 90px;
 }
 
@@ -117,7 +124,9 @@ mat-form-field {
     font-size: 3em;
 }
 
-th.mat-mdc-header-cell, td.mat-mdc-cell, td.mat-mdc-footer-cell {
+th.mat-mdc-header-cell,
+td.mat-mdc-cell,
+td.mat-mdc-footer-cell {
     border-bottom-style: hidden;
 }
 
@@ -125,4 +134,8 @@ th.mat-mdc-header-cell, td.mat-mdc-cell, td.mat-mdc-footer-cell {
     padding-top: 10px;
     padding-left: 12px;
     padding-bottom: 10px;
+}
+
+.root {
+    position: relative;
 }

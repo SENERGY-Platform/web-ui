@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-.form{
+.form {
     min-width: 600px;
 
 }
@@ -29,4 +29,8 @@ table {
 
 td {
     width: 50%;
+}
+
+.root {
+    position: relative;
 }

@@ -14,34 +14,33 @@
   ~ limitations under the License.
   -->
 
-  <h2 mat-dialog-title>Edit Consumption Profile</h2>
+<h2 mat-dialog-title>Edit Consumption Profile</h2>
 
-  <mat-dialog-content>
-      <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-      <div *ngIf="ready">
-          <form fxLayout="column" [formGroup]="form">
-                  <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
-                      <mat-label>Widget Name</mat-label>
-					  <input type="text" matInput formControlName="name" required>
-					  <mat-error senergyError label="Widget Name"></mat-error>
-				  </mat-form-field>
-      
-                  <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdatePropertiesAuthorization">
-                      <mat-label>Export</mat-label>
-                      <input type="text" matInput placeholder="Choose Export" formControlName="export" [matAutocomplete]="auto" required>
-                      <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                          <mat-option *ngFor="let option of exports" [value]="option">
-                              {{option.Name}}
-                          </mat-option>
-                      </mat-autocomplete>
-					  <mat-error senergyError label="Export"></mat-error>
-                  </mat-form-field>
-          </form>
-      </div>
-  
-  </mat-dialog-content>
-  
-  <mat-dialog-actions fxLayoutAlign="end center">
-      <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-      <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
-  </mat-dialog-actions>
+<mat-dialog-content>
+    <div class="root">
+        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+        <div *ngIf="ready">
+            <form fxLayout="column" [formGroup]="form">
+                <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
+                    <mat-label>Widget Name</mat-label>
+                    <input type="text" matInput formControlName="name" required>
+                    <mat-error senergyError label="Widget Name"></mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" color="accent" fxFlex="47"
+                    *ngIf="userHasUpdatePropertiesAuthorization">
+                    <mat-label>Export</mat-label>
+                    <mtx-select placeholder="Choose Export" formControlName="export" required [items]="exports"
+                        bindLabel="name" appendTo=".root">
+                    </mtx-select>
+                    <mat-error senergyError label="Export"></mat-error>
+                </mat-form-field>
+            </form>
+        </div>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+    <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
+</mat-dialog-actions>

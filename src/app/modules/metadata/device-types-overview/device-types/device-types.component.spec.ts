@@ -23,7 +23,6 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {ActivatedRoute, convertToParamMap, Route} from '@angular/router';
 import {MatStepperModule} from '@angular/material/stepper';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
@@ -154,7 +153,6 @@ describe('DeviceTypesComponent', () => {
         MatSnackBarModule,
         MatStepperModule,
         MatFormFieldModule,
-        MatSelectModule,
         MatIconModule,
         ReactiveFormsModule,
         MatInputModule,

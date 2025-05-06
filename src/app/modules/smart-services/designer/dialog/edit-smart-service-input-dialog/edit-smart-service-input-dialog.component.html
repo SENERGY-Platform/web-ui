@@ -96,12 +96,12 @@
                         <div>
                             <mat-form-field appearance="outline" class="full-width" color="accent">
                                 <mat-label>IoT-Selectors</mat-label>
-                                <mat-select [(ngModel)]="input.iot_selectors" multiple>
-                                    <mat-option value="device">Device</mat-option>
-                                    <mat-option value="device_service_group">Service-Group Device</mat-option>
-                                    <mat-option value="group">Device-Group</mat-option>
-                                    <mat-option value="import">Import</mat-option>
-                                </mat-select>
+                                <mtx-select [(ngModel)]="input.iot_selectors" multiple appendTo=".root">
+                                    <mtx-option value="device">Device</mtx-option>
+                                    <mtx-option value="device_service_group">Service-Group Device</mtx-option>
+                                    <mtx-option value="group">Device-Group</mtx-option>
+                                    <mtx-option value="import">Import</mtx-option>
+                                </mtx-select>
                                 <mat-error senergyError label="IoT-Selectors"></mat-error>
                             </mat-form-field>
                         </div>
@@ -118,12 +118,12 @@
                                     <div>
                                         <mat-form-field appearance="outline" class="full-width">
                                             <mat-label>Interaction</mat-label>
-                                            <mat-select [(ngModel)]="criteria.interaction">
-                                                <mat-option [value]="undefined">NONE</mat-option>
-                                                <mat-option value="event">event</mat-option>
-                                                <mat-option value="request">request</mat-option>
-                                                <mat-option value="event+request">event+request</mat-option>
-                                            </mat-select>
+                                            <mtx-select [(ngModel)]="criteria.interaction" appendTo=".root">
+                                                <mtx-option [value]="undefined">NONE</mtx-option>
+                                                <mtx-option value="event">event</mtx-option>
+                                                <mtx-option value="request">request</mtx-option>
+                                                <mtx-option value="event+request">event+request</mtx-option>
+                                            </mtx-select>
                                             <mat-error senergyError label="Interaction"></mat-error>
                                         </mat-form-field>
                                     </div>
@@ -178,11 +178,11 @@
                         <div>
                             <mat-form-field appearance="outline" class="full-width">
                                 <mat-label>Type</mat-label>
-                                <mat-select [(ngModel)]="input.type">
-                                    <mat-option value="string">string</mat-option>
-                                    <mat-option value="long">number</mat-option>
-                                    <mat-option value="boolean">boolean</mat-option>
-                                </mat-select>
+                                <mtx-select [(ngModel)]="input.type" appendTo=".root">
+                                    <mtx-option value="string">string</mtx-option>
+                                    <mtx-option value="long">number</mtx-option>
+                                    <mtx-option value="boolean">boolean</mtx-option>
+                                </mtx-select>
                                 <mat-error senergyError label="Type"></mat-error>
                             </mat-form-field>
                         </div>

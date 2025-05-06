@@ -21,7 +21,6 @@ import { CoreModule } from '../../../../core/core.module';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import {ActivatedRoute, convertToParamMap, Route} from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -519,7 +518,6 @@ describe('DeviceGroupsEditComponent', () => {
         RouterTestingModule.withRoutes([deviceGroupsEdit]),
         MatSnackBarModule,
         MatFormFieldModule,
-        MatSelectModule,
         MatIconModule,
         ReactiveFormsModule,
         MatInputModule,

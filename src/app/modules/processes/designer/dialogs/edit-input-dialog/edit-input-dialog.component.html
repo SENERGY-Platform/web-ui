@@ -18,26 +18,30 @@
 <h2 mat-dialog-title>Edit Input Variable Values</h2>
 
 <mat-dialog-content>
-  <form>
-    <div *ngFor="let input of inputs; let i = index;">
-      <mat-form-field appearance="outline" color="accent" *ngIf="i>0" matTooltip="type literal or select reference to output" matTooltipPosition="below">
-        <input matInput type="text" [(ngModel)]="input.value" name="field_{{i}}" [matAutocomplete]="auto">
-        <mat-label>{{input.name | shortInputVariableName}}</mat-label>
-        <mat-autocomplete #auto="matAutocomplete">
-          <mat-option [value]="input.value">
-            {{input.value}}
-          </mat-option>
-          <mat-option *ngFor="let output of outputs" [value]="'${'+output.name+'}'">
-            {{output.name}}
-          </mat-option>
-        </mat-autocomplete>
-        <mat-error senergyError></mat-error>
-      </mat-form-field>
-    </div>
-  </form>
+  <div class="root">
+    <form>
+      <div *ngFor="let input of inputs; let i = index;">
+        <mat-form-field appearance="outline" color="accent" *ngIf="i>0"
+          matTooltip="type literal or select reference to output" matTooltipPosition="below">
+          <mtx-select [(ngModel)]="input.value" name="field_{{i}}" [addTag]="addTag()" appendTo=".root">
+            <mat-label>{{input.name | shortInputVariableName}}</mat-label>
+            <mtx-option [value]="input.value">
+              {{input.value}}
+            </mtx-option>
+            <mtx-option *ngFor="let output of outputs" [value]="'${'+output.name+'}'">
+              {{output.name}}
+            </mtx-option>
+            <mtx-option *ngFor="let output of customOptions" [value]="output">
+              {{output}}
+            </mtx-option>
+          </mtx-select>
+          <mat-error senergyError></mat-error>
+        </mat-form-field>
+      </div>
+    </form>
+  </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
   <button mat-raised-button color="accent" (click)="close()">Close</button>
 </mat-dialog-actions>
-
