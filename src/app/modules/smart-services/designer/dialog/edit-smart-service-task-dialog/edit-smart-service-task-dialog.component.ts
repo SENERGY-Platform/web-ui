@@ -292,7 +292,7 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
     }
 
     private setAceJsCompleter(session: any, pos: any, callback: any) {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
+         
         const that = this;
         completer.getCompletions(null, session, pos, null, function (_: any, completers: { caption: string; value: string; meta: string }[]) {
             if (!completers) {

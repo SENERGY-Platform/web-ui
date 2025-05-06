@@ -16,9 +16,8 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { AbstractControl, FormControl, UntypedFormBuilder, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, ValidatorFn, Validators } from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';

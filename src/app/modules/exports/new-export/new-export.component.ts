@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {Location} from '@angular/common';
-import {DeviceInstancesService} from '../../devices/device-instances/shared/device-instances.service';
-import {DeviceInstanceModel} from '../../devices/device-instances/shared/device-instances.model';
-import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
+import { Component, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
+import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
+import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
+import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import {
     DeviceTypeContentModel,
     DeviceTypeContentVariableModel,
     DeviceTypeModel,
     DeviceTypeServiceModel,
 } from '../../metadata/device-types-overview/shared/device-type.model';
-import {DatabaseType, ExportDatabaseModel, ExportModel, ExportValueModel} from '../shared/export.model';
-import {ExportService} from '../shared/export.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {PipelineModel, PipelineOperatorModel} from '../../data/pipeline-registry/shared/pipeline.model';
-import {PipelineRegistryService} from '../../data/pipeline-registry/shared/pipeline-registry.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {IOModel, OperatorModel} from '../../data/operator-repo/shared/operator.model';
-import {OperatorRepoService} from '../../data/operator-repo/shared/operator-repo.service';
-import {environment} from '../../../../environments/environment';
-import {forkJoin, Observable, of} from 'rxjs';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {ImportInstancesService} from '../../imports/import-instances/shared/import-instances.service';
-import {ImportInstancesModel} from '../../imports/import-instances/shared/import-instances.model';
-import {ImportTypeContentVariableModel, ImportTypeModel} from '../../imports/import-types/shared/import-types.model';
-import {ImportTypesService} from '../../imports/import-types/shared/import-types.service';
-import {map, startWith} from 'rxjs/operators';
-import {AbstractControl, FormArray, FormControl, UntypedFormBuilder, Validators} from '@angular/forms';
+import { DatabaseType, ExportDatabaseModel, ExportModel, ExportValueModel } from '../shared/export.model';
+import { ExportService } from '../shared/export.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { PipelineModel, PipelineOperatorModel } from '../../data/pipeline-registry/shared/pipeline.model';
+import { PipelineRegistryService } from '../../data/pipeline-registry/shared/pipeline-registry.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { IOModel, OperatorModel } from '../../data/operator-repo/shared/operator.model';
+import { OperatorRepoService } from '../../data/operator-repo/shared/operator-repo.service';
+import { environment } from '../../../../environments/environment';
+import { forkJoin, Observable, of } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ImportInstancesService } from '../../imports/import-instances/shared/import-instances.service';
+import { ImportInstancesModel } from '../../imports/import-instances/shared/import-instances.model';
+import { ImportTypeContentVariableModel, ImportTypeModel } from '../../imports/import-types/shared/import-types.model';
+import { ImportTypesService } from '../../imports/import-types/shared/import-types.service';
+import { map } from 'rxjs/operators';
+import { AbstractControl, FormArray, FormControl, UntypedFormBuilder, Validators } from '@angular/forms';
 import * as _ from 'lodash';
-import {BrokerExportService} from '../shared/broker-export.service';
-import {PageEvent} from '@angular/material/paginator';
+import { BrokerExportService } from '../shared/broker-export.service';
+import { PageEvent } from '@angular/material/paginator';
 import { AddTagFn } from '@ng-matero/extensions/select';
 
 @Component({
