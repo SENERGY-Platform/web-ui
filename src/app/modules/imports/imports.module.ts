@@ -39,7 +39,7 @@ import { MatTreeModule } from '@angular/material/tree';
 import { ImportDeployEditDialogComponent } from './import-deploy-edit-dialog/import-deploy-edit-dialog.component';
 import { ImportInstanceExportDialogComponent } from './import-instances/import-instance-export-dialog/import-instance-export-dialog.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
 
 const types: Route = {
     path: 'imports/types/list',
@@ -101,8 +101,7 @@ const instances: Route = {
         MatDividerModule,
         MatDialogModule,
         MatTreeModule,
-        MtxSelect,
-        MtxOption,
+        MtxSelectModule,
     ],
 })
 export class ImportsModule {}

@@ -31,7 +31,7 @@ import { CoreModule } from '../../core/core.module';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TableComponent } from './dialogs/permission/table/table.component';
 import { MatDividerModule } from '@angular/material/divider';
-import { MtxSelect } from '@ng-matero/extensions/select';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
 
 @NgModule({
     imports: [
@@ -49,7 +49,7 @@ import { MtxSelect } from '@ng-matero/extensions/select';
         CoreModule,
         MatTooltipModule,
         MatDividerModule,
-        MtxSelect,
+        MtxSelectModule,
     ],
     declarations: [PermissionDialogComponent, TableComponent],
 })

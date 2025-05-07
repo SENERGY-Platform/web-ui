@@ -52,7 +52,7 @@ import {
     TimescaleRulesCreateEditTemplateComponent
 } from './timescale-rules/timescale-rules-create-edit-template/timescale-rules-create-edit-template.component';
 import {MatExpansionModule} from '@angular/material/expansion';
-import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
 
 const listRules: Route[] = [
     {
@@ -111,8 +111,7 @@ const listRules: Route[] = [
         MatPaginatorModule,
         FlexLayoutModule,
         MatExpansionModule,
-        MtxSelect,
-        MtxOption,
+        MtxSelectModule,
     ]
 })
 export class AdminModule {

@@ -37,7 +37,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CoreModule } from '../../core/core.module';
-import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
 
 @NgModule({
     imports: [
@@ -61,8 +61,7 @@ import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
         ReactiveFormsModule,
         DragDropModule,
         CoreModule,
-        MtxSelect,
-        MtxOption,
+        MtxSelectModule,
     ],
     declarations: [DashboardComponent, DashboardNewDialogComponent, DashboardNewWidgetDialogComponent, DashboardEditDialogComponent],
 })

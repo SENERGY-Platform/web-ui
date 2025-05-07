@@ -62,7 +62,7 @@ import {
     EditSmartServiceJsonExtractionDialogComponent
 } from './designer/dialog/edit-smart-service-json-extraction-dialog/edit-smart-service-json-extraction-dialog.component';
 import {CriteriaListComponent} from './designer/dialog/edit-smart-service-task-dialog/criteria-list.component';
-import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
 
 const designs: Route = {
     path: 'smart-services/designs',
@@ -137,8 +137,7 @@ const designer: Route = {
         MatChipsModule,
         MatBadgeModule,
         MatExpansionModule,
-        MtxSelect,
-        MtxOption,
+        MtxSelectModule,
     ],
     declarations: [
         SmartServiceReleasesComponent,

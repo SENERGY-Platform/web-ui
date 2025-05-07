@@ -27,7 +27,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
 
 
 
@@ -47,8 +47,7 @@ import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
         MatDatepickerModule,
         ReactiveFormsModule,
         MatInputModule,
-        MtxSelect,
-        MtxOption,
+        MtxSelectModule,
     ]
 })
 export class CostModule { }

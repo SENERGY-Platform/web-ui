@@ -41,7 +41,7 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatDatepickerModule} from '@angular/material/datepicker';
-import {MtxOption, MtxSelect} from '@ng-matero/extensions/select';
+import {MtxSelectModule} from '@ng-matero/extensions/select';
 
 const templateList: Route = { path: 'reporting/templates', pathMatch: 'full', component: TemplatesComponent, data: { header: 'Templates' } };
 const reportsList: Route = { path: 'reporting/reports', pathMatch: 'full', component: ReportsComponent, data: { header: 'Reports' } };
@@ -73,8 +73,7 @@ const reportFilesList: Route = { path: 'reporting/files/:reportId', pathMatch: '
         MatDialogModule,
         MatExpansionModule,
         MatDatepickerModule,
-        MtxSelect,
-        MtxOption,
+        MtxSelectModule,
     ]
 })
 export class ReportingModule { }

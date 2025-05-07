@@ -76,7 +76,7 @@ import {ShortKeyPipe} from './process-io/shared/short-key.pipe';
 import {ProcessIoVariableEditDialogComponent} from './process-io/dialogs/process-io-variable-edit-dialog.component';
 import {ConditionalEventDialogComponent} from './designer/dialogs/conditional-event-dialog/conditional-event-dialog.component';
 import { IncidentDialogComponent } from './designer/dialogs/incident-dialog/incident-dialog.component';
-import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
 
 const processRepo: Route = {
     path: 'processes/repository',
@@ -163,8 +163,7 @@ const processIo: Route = {
         MatChipsModule,
         MatBadgeModule,
         MatExpansionModule,
-        MtxSelect,
-        MtxOption,
+        MtxSelectModule,
     ],
     declarations: [
         ProcessRepoComponent,

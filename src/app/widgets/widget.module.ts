@@ -128,7 +128,7 @@ import { MatTreeModule } from '@angular/material/tree';
 import { AxisConfigComponent } from './charts/export/dialog/axis-config/axis-config.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
-import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { FloorplanComponent } from './floorplan/floorplan.component';
 import { FloorplanEditDialogComponent } from './floorplan/floorplan-edit-dialog/floorplan-edit-dialog.component';
@@ -173,8 +173,7 @@ registerLocaleData(localeDe, 'de');
         NgApexchartsModule,
         MatTreeModule,
         DragDropModule,
-        MtxSelect,
-        MtxOption,
+        MtxSelectModule,
         BaseChartDirective,
         ColorPickerComponent,
         ColorPickerDirective, 

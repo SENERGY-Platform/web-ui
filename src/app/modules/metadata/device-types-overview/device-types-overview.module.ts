@@ -56,7 +56,7 @@ import {
 } from './device-types/dialogs/device-types-content-variable-json-dialog.component';
 import {IsNotProhibitedNameValidatorDirective} from './device-types/shared/is-not-prohibited-name.directive';
 import {UsedInDeviceTypesDialogComponent} from './dialogs/used-in-device-types-dialog.component';
-import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
 
 const devicetypes: Route = {
     path: 'metadata/devicetypesoverview/devicetypes',
@@ -105,8 +105,7 @@ const devicetypesEdit: Route = {
         MatTreeModule,
         WidgetModule,
         DragDropModule,
-        MtxSelect,
-        MtxOption,
+        MtxSelectModule,
     ],
     declarations: [
         DeviceTypesComponent,

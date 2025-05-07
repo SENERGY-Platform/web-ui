@@ -33,7 +33,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
 
 const operator: Route = { path: 'data/operator-repo/op', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' } };
 const operatorEdit: Route = { path: 'data/operator-repo/op/:id', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' } };
@@ -56,8 +56,7 @@ const operatorEdit: Route = { path: 'data/operator-repo/op/:id', pathMatch: 'ful
         MatInputModule,
         FormsModule,
         MatCheckboxModule,
-        MtxSelect,
-        MtxOption,
+        MtxSelectModule,
     ],
     declarations: [OperatorComponent],
 })

@@ -60,7 +60,7 @@ import { FunctionsCreateDialogComponent } from './functions/dialog/functions-cre
 import { CharacteristicElementComponent } from './characteristics/dialogs/characteristic-element/characteristic-element.component';
 import { MatTreeModule } from '@angular/material/tree';
 import {DragDropModule} from '@angular/cdk/drag-drop';
-import { MtxOption, MtxSelect } from '@ng-matero/extensions/select';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
 
 const deviceTypes: Route = {
     path: 'metadata/devicetypesoverview',
@@ -119,8 +119,7 @@ const deviceClasses: Route = {
         RouterModule.forChild([deviceTypes, concepts, characteristics, functions, aspects, deviceClasses]),
         MatTreeModule,
         DragDropModule,
-        MtxSelect,
-        MtxOption,
+        MtxSelectModule,
     ],
     declarations: [
         DeviceTypesOverviewComponent,
