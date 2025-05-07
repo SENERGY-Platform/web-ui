@@ -32,9 +32,17 @@ export interface FloorplanWidgetCapabilityModel {
         x: number | null;
         y: number | null;
     },
+    coloring: {
+        value: number;
+        color: string;
+    }[],
+    /**  @deprecated use @link coloring */
     valueLow: number | null;
+    /**  @deprecated use @link coloring */
     valueHigh: number | null;
+    /**  @deprecated use @link coloring */
     colorLow: string | null;
+    /**  @deprecated use @link coloring */
     colorHigh: string | null;
 }
 
@@ -87,4 +95,24 @@ export function draw(canvas: HTMLCanvasElement, properties: FloorplanWidgetPrope
     });
 
     return { centerShiftX, centerShiftY, ratio };
+}
+
+
+/** Migrates deprecated properties */
+export function migrateColoring(properties: FloorplanWidgetPropertiesModel) {
+    properties.floorplan?.placements.forEach(p => {
+        if (p.coloring === undefined) {
+            p.coloring = [];
+        }
+        if (p.colorLow && p.valueLow) {
+            p.coloring.push({ value: p.valueLow, color: p.colorLow });
+            p.colorLow = null;
+            p.valueLow = null;
+        }
+        if (p.colorHigh && p.valueHigh) {
+            p.coloring.push({ value: Math.max(p.valueHigh, 100000), color: p.colorHigh });
+            p.colorHigh = null;
+            p.valueHigh = null;
+        }
+    });
 }

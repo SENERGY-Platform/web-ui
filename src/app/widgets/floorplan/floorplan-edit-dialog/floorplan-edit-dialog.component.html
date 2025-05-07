@@ -95,33 +95,44 @@
               </mtx-select>
             </mat-form-field>
 
-            <div class="colorbar"
-              [style]="'background-image: linear-gradient(to right, ' + (tab.value.colorLow || 'black') + ', ' + (tab.value.colorHigh || 'black') + ');'">
-            </div>
-
-            <div class="color-row">
-              <div class="color-column">
-                <input class="value-form" [(colorPicker)]="tab.controls.colorLow.value" cpAlphaChannel="disabled"
-                  [style.background]="tab.controls.colorLow.value"
-                  (colorPickerChange)="colorSelected($event, tab.controls.colorLow)" />
-                <mat-form-field appearance="outline" color="accent" class="value-form">
-                  <mat-label>Low Value</mat-label>
-                  <input type="number" matInput formControlName="valueLow">
-                  <mat-error senergyError label="Low Value"></mat-error>
-                </mat-form-field>
-              </div>
-              <div class="color-column">
-                <input class="value-form" [(colorPicker)]="tab.controls.colorHigh.value" cpAlphaChannel="disabled"
-                  [style.background]="tab.controls.colorHigh.value"
-                  (colorPickerChange)="colorSelected($event, tab.controls.colorHigh)" />
-                <mat-form-field appearance="outline" color="accent" class="value-form">
-                  <mat-label>High Value</mat-label>
-                  <input type="number" matInput formControlName="valueHigh">
-                  <mat-error senergyError label="Low Value"></mat-error>
-                </mat-form-field>
-              </div>
-            </div>
-
+            <table style="width: 100%;">
+              <tr *ngFor="let c of getColoringControls(tab).controls; let colorIndex = index" [formGroup]="c">
+                <td>
+                  <div>
+                    <button mat-icon-button [(colorPicker)]="c.value.color" cpAlphaChannel="disabled"
+                      [style.color]="c.value.color" (colorPickerChange)="colorSelected($event, c.controls.color)">
+                      <mat-icon matTooltip="Change color">palette</mat-icon>
+                    </button>
+                    <span class="color-text"
+                      *ngIf="getColoringControls(tab).controls.length > 1 && colorIndex < getColoringControls(tab).controls.length - 1">until
+                      value reaches</span>
+                    <span class="color-text" *ngIf="getColoringControls(tab).controls.length === 1">for all
+                      values</span>
+                    <mat-form-field appearance="outline" color="accent" class="value-form"
+                      *ngIf="colorIndex !== getColoringControls(tab).controls.length - 1">
+                      <mat-label>Value</mat-label>
+                      <input type="number" matInput formControlName="value">
+                      <mat-error senergyError label="Value"></mat-error>
+                    </mat-form-field>
+                    <span class="color-text"
+                      *ngIf="colorIndex === getColoringControls(tab).controls.length - 1 && getColoringControls(tab).controls.length > 1">for
+                      all higher values</span>
+                  </div>
+                </td>
+                <td>
+                  <button mat-icon-button color="warn" class="color-button"
+                    (click)="getColoringControls(tab).removeAt(colorIndex)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </table>
+            <button (click)="sortAllColors()" mat-icon-button matTooltip="Sort coloring">
+              <mat-icon>swap_vert</mat-icon>
+            </button>
+            <button (click)="addNewColoring(getColoringControls(tab))" mat-icon-button matTooltip="Add coloring">
+              <mat-icon>add</mat-icon>
+            </button>
           </ng-template>
         </mat-expansion-panel>
       </mat-accordion>

@@ -28,7 +28,7 @@ import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devi
 import { DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeAspectNodeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
-import { dotSize, draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, image } from '../shared/floorplan.model';
+import { dotSize, draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, image, migrateColoring } from '../shared/floorplan.model';
 
 @Component({
   selector: 'senergy-floorplan-edit-dialog',
@@ -56,7 +56,7 @@ export class FloorplanEditDialogComponent implements OnInit {
   form = new FormGroup({
     image: new FormControl<string | null>(null),
     placements: new FormArray([].map(this.newPlacement)),
-    dotSize: new FormControl<number>(5, {validators: [Validators.required, Validators.min(1)]}),
+    dotSize: new FormControl<number>(5, { validators: [Validators.required, Validators.min(1)] }),
   });
   name = new FormControl<string>('', Validators.required);
 
@@ -93,11 +93,15 @@ export class FloorplanEditDialogComponent implements OnInit {
         this.widget = w;
         let r = of(null);
         if (w.properties.floorplan !== undefined) {
+          migrateColoring(w.properties);
           this.form.patchValue(w.properties.floorplan);
           w.properties.floorplan.placements.forEach(p => {
             const placement = this.newPlacement();
             placement.patchValue(p);
             this.form.controls.placements.push(placement);
+            p.coloring.forEach(c => {
+              ((this.form.controls.placements as FormArray).at(this.form.controls.placements.length -1) as any).controls.coloring.push(this.newColoring(c));
+            });
           });
           const dgIds = w.properties.floorplan.placements.map(x => x.deviceGroupId);
           if (dgIds !== undefined && dgIds.length > 0) {
@@ -156,6 +160,7 @@ export class FloorplanEditDialogComponent implements OnInit {
   }
 
   updateProperties(): Observable<DashboardResponseMessageModel> {
+    this.sortAllColors();
     return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widgetId, [], { floorplan: this.form.getRawValue() });
   }
 
@@ -243,6 +248,7 @@ export class FloorplanEditDialogComponent implements OnInit {
         x: new FormControl<number>(0),
         y: new FormControl<number>(0),
       }),
+      coloring: new FormArray([].map(this.newColoring)),
       valueLow: new FormControl<number | null>(null),
       valueHigh: new FormControl<number | null>(null),
       colorLow: new FormControl<string>('#808080'),
@@ -252,6 +258,32 @@ export class FloorplanEditDialogComponent implements OnInit {
       fg.patchValue(value);
     }
     return fg;
+  }
+
+  addNewColoring(arr: FormArray): void {
+    let val = {value: 100000, color: '#000000'};
+    if (arr.length > 0) {
+      val = arr.at(arr.length -1).getRawValue();
+    }
+    arr.push(this.newColoring(val));
+  }
+
+  newColoring(value?: {
+    value: number;
+    color: string;
+  }): FormGroup {
+    const fg = this.fb.group({
+      value: new FormControl<number>(0),
+      color: new FormControl(''),
+    });
+    if (value !== undefined) {
+      fg.patchValue(value);
+    }
+    return fg;
+  }
+
+  sortAllColors() {
+    this.form.controls.placements.controls.forEach(p => this.getColoringControls(p).controls.sort((a, b) => a.value.value - b.value.value));
   }
 
   copyPlacement(i: number) {
@@ -329,5 +361,9 @@ export class FloorplanEditDialogComponent implements OnInit {
 
   colorSelected($event: string, control: AbstractControl<any, any>) {
     control.setValue($event);
+  }
+
+  getColoringControls(tab: FormGroup<any>): FormArray<FormGroup> {
+    return tab.controls.coloring as FormArray;
   }
 }

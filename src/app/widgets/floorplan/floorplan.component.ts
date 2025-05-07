@@ -21,7 +21,7 @@ import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
 import { map, Observable, Subscription, of, forkJoin, concatMap } from 'rxjs';
-import { dotSize, image } from './shared/floorplan.model';
+import { dotSize, image, migrateColoring } from './shared/floorplan.model';
 import { DeviceCommandModel, DeviceCommandResponseModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
 import { Point } from '@angular/cdk/drag-drop';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
@@ -177,6 +177,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    migrateColoring(this.widget.properties);
     this.img = image(this.widget.properties);
     const obs: Observable<unknown>[] = [];
     obs.push(this.refresh());
@@ -227,38 +228,15 @@ export class FloorplanComponent implements OnInit, OnDestroy {
       const x = (this.widget.properties.floorplan.placements[i].position.x || 0) * this.img.naturalWidth * this.drawShift.ratio + this.drawShift.centerShiftX;
       const y = (this.widget.properties.floorplan.placements[i].position.y || 0) * this.img.naturalHeight * this.drawShift.ratio + this.drawShift.centerShiftY;
       let color = 'grey';
-      if (!isNaN(r.message) && this.widget.properties.floorplan.placements[i].colorHigh !== null && this.widget.properties.floorplan.placements[i].colorLow !== null && this.widget.properties.floorplan.placements[i].valueLow !== null && this.widget.properties.floorplan.placements[i].valueHigh !== null && this.widget.properties.floorplan.placements[i].colorHigh !== undefined && this.widget.properties.floorplan.placements[i].colorLow !== undefined && this.widget.properties.floorplan.placements[i].valueLow !== undefined && this.widget.properties.floorplan.placements[i].valueHigh !== undefined) {
-        // @ts-expect-error just ensured above...
-        if (r.message < this.widget.properties.floorplan.placements[i].valueLow) {
-          // @ts-expect-error just ensured above...
-          color = this.widget.properties.floorplan.placements[i].colorLow;
-          // @ts-expect-error just ensured above...
-        } else if (r.message > this.widget.properties.floorplan.placements[i].valueHigh) {
-          // @ts-expect-error just ensured above...
-          color = this.widget.properties.floorplan.placements[i].colorHigh;
-        } else {
-          // @ts-expect-error just ensured above...
-          const ratio = (r.message - this.widget.properties.floorplan.placements[i].valueLow) / (this.widget.properties.floorplan.placements[i].valueHigh - this.widget.properties.floorplan.placements[i].valueLow);
-
-          const w = ratio * 2 - 1;
-          const w2 = (w / 1 + 1) / 2;
-          const w1 = 1 - w2;
-
-          // @ts-expect-error just ensured above...
-          const red = parseInt(this.widget.properties.floorplan.placements[i].colorLow.substring(1, 3), 16) * w1 + parseInt(this.widget.properties.floorplan.placements[i].colorHigh.substring(1, 3), 16) * w2;
-
-          // @ts-expect-error just ensured above...
-          const green = parseInt(this.widget.properties.floorplan.placements[i].colorLow.substring(3, 5), 16) * w1 + parseInt(this.widget.properties.floorplan.placements[i].colorHigh.substring(3, 5), 16) * w2;
-
-          // @ts-expect-error just ensured above...
-          const blue = parseInt(this.widget.properties.floorplan.placements[i].colorLow.substring(5, 7), 16) * w1 + parseInt(this.widget.properties.floorplan.placements[i].colorHigh.substring(5, 7), 16) * w2;
-
-          color = `rgb(${Math.round(red)},${Math.round(green)},${Math.round(blue)}`;
-        }
+      if (!isNaN(r.message) && this.widget.properties.floorplan.placements[i].coloring !== undefined && this.widget.properties.floorplan.placements[i].coloring.length > 0) {
+        color = this.widget.properties.floorplan.placements[i].coloring[0].color;
+        for (let j = 1; j < this.widget.properties.floorplan.placements[i].coloring.length && r.message > this.widget.properties.floorplan.placements[i].coloring[j-1].value; j++)  {
+          color = this.widget.properties.floorplan.placements[i].coloring[j].color;
+        }        
       }
       let label = '' + r.message;
       if (this.functionIdToUnit.has(this.widget.properties.floorplan.placements[i].criteria.function_id)) {
-        label += ' ' + this.functionIdToUnit.get(this.widget.properties.floorplan.placements[i].criteria.function_id);
+        label += ' ' + this.functionIdToUnit.get(this.widget.properties.floorplan.placements[i].criteria.function_id); // TODO check not working?
       }
       datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color, };
     });

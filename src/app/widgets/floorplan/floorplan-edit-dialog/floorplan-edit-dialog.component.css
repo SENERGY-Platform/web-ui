@@ -65,26 +65,26 @@
   line-height: 1.5;
 }
 
-.colorbar {
-  display: flex;
-  height: 1em;
-  margin-bottom: 1em;
-}
-
-.color-row {
-  display: flex;
-  justify-content: space-between;
-}
-
-.color-column {
-  display: flex;
-  flex-direction: column;
-}
-
 .value-form {
-  display: flex;
+  margin-right: 2em;
 }
 
 .root {
   position: relative;
+}
+
+.color-preview {
+  height: 4em;
+  margin-top: 0.5em;
+}
+
+.color-button {
+  margin-top: -1em;
+}
+
+.color-text {
+  height: 4em;
+  margin-right: 2em;
+  margin-top: 0.5em;
+  line-height: 4em;
 }
