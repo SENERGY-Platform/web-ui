@@ -29,6 +29,7 @@ import { DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeAspectNo
 import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
 import { dotSize, draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, image, migrateColoring } from '../shared/floorplan.model';
+import { materialIconNames } from 'src/app/core/model/icon.model';
 
 @Component({
   selector: 'senergy-floorplan-edit-dialog',
@@ -52,11 +53,12 @@ export class FloorplanEditDialogComponent implements OnInit {
   dotSize = dotSize;
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
   step: number | undefined;
+  materialIconNames = materialIconNames;
 
   form = new FormGroup({
     image: new FormControl<string | null>(null),
     placements: new FormArray([].map(this.newPlacement)),
-    dotSize: new FormControl<number>(5, { validators: [Validators.required, Validators.min(1)] }),
+    dotSize: new FormControl<number>(25, { validators: [Validators.required, Validators.min(1)] }),
   });
   name = new FormControl<string>('', Validators.required);
 
@@ -249,6 +251,7 @@ export class FloorplanEditDialogComponent implements OnInit {
         y: new FormControl<number>(0),
       }),
       coloring: new FormArray([].map(this.newColoring)),
+      icon: new FormControl<string>('circle'),
       valueLow: new FormControl<number | null>(null),
       valueHigh: new FormControl<number | null>(null),
       colorLow: new FormControl<string>('#808080'),

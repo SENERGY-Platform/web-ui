@@ -126,6 +126,52 @@ export class FloorplanComponent implements OnInit, OnDestroy {
           point: {
             radius: this.widget.properties?.floorplan?.dotSize || 5,
             hoverRadius: this.widget.properties?.floorplan?.dotSize || 5,
+            pointStyle: (ctx) => {
+              const def = 'circle';
+              const dsIndex = this.chartjs.data?.datasets.findIndex(d => {
+                const data = d.data[0] as { x: number, y: number };
+                return data.x === ctx.parsed.x && data.y === ctx.parsed.y;
+              });
+              if (dsIndex === undefined) {
+                return def;
+              }
+              const ds = this.chartjs.data?.datasets[dsIndex];
+              if (ds === undefined) {
+                return def;
+              }
+              const placement = this.widget.properties.floorplan?.placements[dsIndex];
+              if (placement === undefined) {
+                return def;
+              }
+              const icon = placement.icon;
+              if (icon === undefined) {
+                return def;
+              }
+              const canvas = document.createElement('canvas');
+              let size = this.widget.properties?.floorplan?.dotSize || 5;
+              if (this.zoom) {
+                size *= 2;
+              }
+              canvas.width = size;
+              canvas.height = canvas.width;
+              const canvasCtx = canvas.getContext('2d');
+              if (canvasCtx == null) {
+                return def;
+              }
+              canvasCtx.clearRect(0,0,canvas.width, canvas.width);
+
+              canvasCtx.beginPath();
+              canvasCtx.arc(canvas.width/2, canvas.width/2, canvas.width/2, 0, 2 * Math.PI);
+              canvasCtx.fillStyle = ds.backgroundColor as string;
+              canvasCtx.fill();
+
+              canvasCtx.font = canvas.width + 'px Material Symbols Outlined';
+              canvasCtx.fillStyle = 'white';
+              canvasCtx.textBaseline = 'middle';
+              canvasCtx.textAlign = 'center';
+              canvasCtx.fillText(icon, canvas.width / 2, canvas.width / 2 + canvas.width/12);
+              return canvas;
+            },
           },
         },
       },
@@ -230,13 +276,13 @@ export class FloorplanComponent implements OnInit, OnDestroy {
       let color = 'grey';
       if (!isNaN(r.message) && this.widget.properties.floorplan.placements[i].coloring !== undefined && this.widget.properties.floorplan.placements[i].coloring.length > 0) {
         color = this.widget.properties.floorplan.placements[i].coloring[0].color;
-        for (let j = 1; j < this.widget.properties.floorplan.placements[i].coloring.length && r.message > this.widget.properties.floorplan.placements[i].coloring[j-1].value; j++)  {
+        for (let j = 1; j < this.widget.properties.floorplan.placements[i].coloring.length && r.message > this.widget.properties.floorplan.placements[i].coloring[j - 1].value; j++) {
           color = this.widget.properties.floorplan.placements[i].coloring[j].color;
-        }        
+        }
       }
       let label = '' + r.message;
       if (this.functionIdToUnit.has(this.widget.properties.floorplan.placements[i].criteria.function_id)) {
-        label += ' ' + this.functionIdToUnit.get(this.widget.properties.floorplan.placements[i].criteria.function_id); // TODO check not working?
+        label += ' ' + this.functionIdToUnit.get(this.widget.properties.floorplan.placements[i].criteria.function_id);
       }
       datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color, };
     });

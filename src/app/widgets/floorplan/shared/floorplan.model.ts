@@ -36,6 +36,7 @@ export interface FloorplanWidgetCapabilityModel {
         value: number;
         color: string;
     }[],
+    icon?: string;
     /**  @deprecated use @link coloring */
     valueLow: number | null;
     /**  @deprecated use @link coloring */

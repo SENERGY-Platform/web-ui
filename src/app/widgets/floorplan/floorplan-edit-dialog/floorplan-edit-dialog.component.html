@@ -72,11 +72,24 @@
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
-            <mat-form-field appearance="outline" color="accent" style="display: flex;">
+            <div style="display: flex; justify-content: space-between;">
+            <mat-form-field appearance="outline" color="accent" >
               <mat-label>Alias</mat-label>
               <input type="text" matInput formControlName="alias" required>
               <mat-error senergyError label="Alias"></mat-error>
             </mat-form-field>
+
+            <mat-form-field appearance="outline" color="accent">
+              <mat-label>Icon</mat-label>
+              <mtx-select formControlName="icon" required [items]="materialIconNames" appendTo=".root" virtualScroll>
+                <ng-template ng-label-tmp ng-option-tmp let-item="item"  let-index="index" let-search="searchTerm">
+                  <mat-icon color="accent">{{item}}</mat-icon>
+                </ng-template>
+              </mtx-select>
+              <mat-error senergyError label="Icon"></mat-error>
+            </mat-form-field>
+            </div>
+
 
             <mat-form-field appearance="outline" color="accent" style="display: flex;">
               <mat-label>Device Group</mat-label>
@@ -101,7 +114,7 @@
                   <div>
                     <button mat-icon-button [(colorPicker)]="c.value.color" cpAlphaChannel="disabled"
                       [style.color]="c.value.color" (colorPickerChange)="colorSelected($event, c.controls.color)">
-                      <mat-icon matTooltip="Change color">palette</mat-icon>
+                      <mat-icon matTooltip="Change color">{{tab.value.icon}}</mat-icon>
                     </button>
                     <span class="color-text"
                       *ngIf="getColoringControls(tab).controls.length > 1 && colorIndex < getColoringControls(tab).controls.length - 1">until
