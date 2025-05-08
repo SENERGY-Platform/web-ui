@@ -62,6 +62,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
     tooltipDatasets: { datasetIndex: number, label: string, formattedValue: string, drawToLeft: boolean }[];
     annotations?: AnnotationOptions[];
     plugins: Plugin<keyof ChartTypeRegistry, AnyObject>[];
+    showValueWhenZoomed: boolean[];
   } = {
       options: {
         animation: false,
@@ -158,18 +159,47 @@ export class FloorplanComponent implements OnInit, OnDestroy {
               if (canvasCtx == null) {
                 return def;
               }
-              canvasCtx.clearRect(0,0,canvas.width, canvas.width);
-
-              canvasCtx.beginPath();
-              canvasCtx.arc(canvas.width/2, canvas.width/2, canvas.width/2, 0, 2 * Math.PI);
-              canvasCtx.fillStyle = ds.backgroundColor as string;
-              canvasCtx.fill();
-
-              canvasCtx.font = canvas.width + 'px Material Symbols Outlined';
-              canvasCtx.fillStyle = 'white';
+              const fontSize = canvas.width * .75 + 'px';
+              canvasCtx.font = fontSize + ' Material Symbols Outlined';
               canvasCtx.textBaseline = 'middle';
               canvasCtx.textAlign = 'center';
-              canvasCtx.fillText(icon, canvas.width / 2, canvas.width / 2 + canvas.width/12);
+              canvasCtx.fillStyle = ds.backgroundColor as string;
+
+
+              if (this.zoom && this.chartjs.showValueWhenZoomed[dsIndex]) {
+                const originWidth = canvas.width;
+                const iconWidth = canvasCtx.measureText(icon).width;
+                canvasCtx.font = fontSize + ' Arial';
+                const right = iconWidth + canvasCtx.measureText(ds.label || '').width;
+                canvas.width += right;
+
+                canvasCtx.beginPath();
+                canvasCtx.arc(originWidth / 2, originWidth / 2, originWidth / 2, Math.PI * .5, Math.PI * 1.5);
+                canvasCtx.lineTo(originWidth + right, 0);
+                canvasCtx.arc(originWidth / 2 + right, originWidth / 2, originWidth / 2, Math.PI * 1.5, Math.PI * .5);
+                canvasCtx.lineTo(0, originWidth);
+                canvasCtx.fillStyle = ds.backgroundColor as string;
+                canvasCtx.fill();
+
+                canvasCtx.fillStyle = 'white';
+                canvasCtx.textBaseline = 'middle';
+                canvasCtx.textAlign = 'center';
+                canvasCtx.font = fontSize + ' Material Symbols Outlined';
+                canvasCtx.fillText(icon, originWidth / 2, originWidth / 2 + originWidth / size);
+
+                canvasCtx.font = fontSize + ' Roboto, sans-serif';
+                canvasCtx.textAlign = 'left';
+                canvasCtx.fillText(ds.label || '', originWidth / 2 + iconWidth, originWidth / 2 + originWidth / size);
+
+              } else {
+                canvasCtx.beginPath();
+                canvasCtx.arc(canvas.width / 2, canvas.width / 2, canvas.width / 2, 0, 2 * Math.PI);
+                canvasCtx.fill();
+
+                canvasCtx.fillStyle = 'white';
+
+                canvasCtx.fillText(icon, canvas.width / 2, canvas.width / 2 + canvas.width / size);
+              }
               return canvas;
             },
           },
@@ -211,6 +241,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
           return true;
         }
       }],
+      showValueWhenZoomed: [],
     };
 
   constructor(
@@ -244,7 +275,10 @@ export class FloorplanComponent implements OnInit, OnDestroy {
         }),
         )));
     }
-    forkJoin(obs).subscribe(_ => this.ready = true);
+    forkJoin(obs).subscribe(_ => {
+      this.draw();
+      this.ready = true;
+    });
     this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
       if (event === 'reloadAll' || event === this.widget.id) {
         this.refresh().subscribe();
@@ -267,6 +301,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
       this.chartjs.options.elements.point.hoverRadius = this.widget.properties?.floorplan?.dotSize || 5;
     }
     const datasets: ChartDataset[] = new Array(this.values.length - 1).fill({});
+    const showValueWhenZoomed: boolean[] = [];
     this.values.forEach((r, i) => {
       if (this.widget.properties.floorplan === undefined || this.widget.properties.floorplan.placements === null || this.img === undefined) {
         return;
@@ -274,19 +309,24 @@ export class FloorplanComponent implements OnInit, OnDestroy {
       const x = (this.widget.properties.floorplan.placements[i].position.x || 0) * this.img.naturalWidth * this.drawShift.ratio + this.drawShift.centerShiftX;
       const y = (this.widget.properties.floorplan.placements[i].position.y || 0) * this.img.naturalHeight * this.drawShift.ratio + this.drawShift.centerShiftY;
       let color = 'grey';
+      let zoom = false;
       if (!isNaN(r.message) && this.widget.properties.floorplan.placements[i].coloring !== undefined && this.widget.properties.floorplan.placements[i].coloring.length > 0) {
         color = this.widget.properties.floorplan.placements[i].coloring[0].color;
+        zoom = this.widget.properties.floorplan.placements[i].coloring[0].showValueWhenZoomed;
         for (let j = 1; j < this.widget.properties.floorplan.placements[i].coloring.length && r.message > this.widget.properties.floorplan.placements[i].coloring[j - 1].value; j++) {
           color = this.widget.properties.floorplan.placements[i].coloring[j].color;
+          zoom = this.widget.properties.floorplan.placements[i].coloring[j].showValueWhenZoomed;
         }
       }
       let label = '' + r.message;
       if (this.functionIdToUnit.has(this.widget.properties.floorplan.placements[i].criteria.function_id)) {
         label += ' ' + this.functionIdToUnit.get(this.widget.properties.floorplan.placements[i].criteria.function_id);
       }
-      datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color, };
+      showValueWhenZoomed[i] = zoom;
+      datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color };
     });
     this.chartjs.data = { datasets };
+    this.chartjs.showValueWhenZoomed = showValueWhenZoomed;
     const chart = this.chartjsChart;
     if (chart === undefined) {
       return;

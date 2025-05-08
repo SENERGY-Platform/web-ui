@@ -264,7 +264,7 @@ export class FloorplanEditDialogComponent implements OnInit {
   }
 
   addNewColoring(arr: FormArray): void {
-    let val = {value: 100000, color: '#000000'};
+    let val = {value: 100000, color: '#000000', showValueWhenZoomed: false};
     if (arr.length > 0) {
       val = arr.at(arr.length -1).getRawValue();
     }
@@ -274,10 +274,12 @@ export class FloorplanEditDialogComponent implements OnInit {
   newColoring(value?: {
     value: number;
     color: string;
+    showValueWhenZoomed: boolean;
   }): FormGroup {
     const fg = this.fb.group({
       value: new FormControl<number>(0),
       color: new FormControl(''),
+      showValueWhenZoomed: new FormControl(false),
     });
     if (value !== undefined) {
       fg.patchValue(value);
