@@ -32,7 +32,7 @@
               <mat-form-field appearance="outline" color="accent" class="full-width">
                 <mat-label>Process Model</mat-label>
                 <mtx-select [(ngModel)]="input.value" [items]="processModels || []"
-                  (change)="ensureProcessTaskParameter($event)" bindLabel="name" bindValue="_id" appendTo=".root">
+                  (change)="ensureProcessTaskParameter($event._id)" bindLabel="name" bindValue="_id" appendTo=".root">
                 </mtx-select>
                 <mat-error senergyError label="Process Model"></mat-error>
               </mat-form-field>
