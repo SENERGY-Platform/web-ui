@@ -102,7 +102,7 @@ export class FloorplanEditDialogComponent implements OnInit {
             placement.patchValue(p);
             this.form.controls.placements.push(placement);
             p.coloring.forEach(c => {
-              ((this.form.controls.placements as FormArray).at(this.form.controls.placements.length -1) as any).controls.coloring.push(this.newColoring(c));
+              ((this.form.controls.placements as FormArray).at(this.form.controls.placements.length - 1) as any).controls.coloring.push(this.newColoring(c));
             });
           });
           const dgIds = w.properties.floorplan.placements.map(x => x.deviceGroupId);
@@ -264,9 +264,9 @@ export class FloorplanEditDialogComponent implements OnInit {
   }
 
   addNewColoring(arr: FormArray): void {
-    let val = {value: 100000, color: '#000000', showValueWhenZoomed: false};
+    let val = { value: 100000, color: '#000000', showValueWhenZoomed: false };
     if (arr.length > 0) {
-      val = arr.at(arr.length -1).getRawValue();
+      val = arr.at(arr.length - 1).getRawValue();
     }
     arr.push(this.newColoring(val));
   }
@@ -296,6 +296,9 @@ export class FloorplanEditDialogComponent implements OnInit {
     this.form.controls.placements.push(this.newPlacement(this.form.controls.placements.at(i).value));
     this.form.controls.placements.updateValueAndValidity();
     this.step = this.form.controls.placements.length - 1;
+    (this.form.controls.placements.at(i).controls.coloring as FormArray).controls.forEach(c =>
+      (this.form.controls.placements.at(this.step || 0).controls.coloring as FormArray).push(this.newColoring(c.getRawValue()))
+    );
     this.cd.detectChanges();
   }
 
