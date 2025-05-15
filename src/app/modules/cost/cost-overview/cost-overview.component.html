@@ -39,7 +39,7 @@
         <div class="spacer-w20"></div>
         <mat-form-field appearance="outline" color="accent" (click)="dp.open()" *ngIf="dates.length > 0">
           <mat-label>Month and Year</mat-label>
-          <input matInput [matDatepicker]="dp" [formControl]="date" [min]="dates[0]" [max]="now">
+          <input matInput [matDatepicker]="dp" [formControl]="date" [min]="dates[dates.length - 1]" [max]="now" [matDatepickerFilter]="dateFilter">
           <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
           <mat-datepicker #dp startView="multi-year" (monthSelected)="setMonthAndYear($event, dp)">
           </mat-datepicker>

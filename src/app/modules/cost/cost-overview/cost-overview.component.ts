@@ -21,7 +21,7 @@ import { KeyValue } from '@angular/common';
 import {Observable, forkJoin, map, mergeMap, of, concatMap} from 'rxjs';
 import { BillingService } from '../shared/billing.service';
 import { FormControl } from '@angular/forms';
-import { MatDatepicker } from '@angular/material/datepicker';
+import { DateFilterFn, MatDatepicker } from '@angular/material/datepicker';
 import { BillingInformationModel } from '../shared/billing.model';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { OperatorRepoService } from '../../data/operator-repo/shared/operator-repo.service';
@@ -222,4 +222,12 @@ export class CostOverviewComponent implements OnInit {
         return total;
     }
 
+    dateFilter: DateFilterFn<Date|null> = (d: Date|null): boolean => {
+        if (d === null) {
+            return false;
+        }
+        const val =  d.valueOf() - d.getTimezoneOffset() * 60000;
+        const found = this.dates.find(date => val === date.valueOf()) !== undefined;
+        return found;
+    };
 }
