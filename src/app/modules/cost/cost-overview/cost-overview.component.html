@@ -57,7 +57,7 @@
       <mat-accordion multi *ngIf="tree !== undefined && tree.size != 0">
         <senergy-cost-element *ngFor="let cat of tree | keyvalue: originalOrder" [pipelines]="pipelines"
           [imports]="imports" [operators]="operators" [devices]="devices" [name]="cat.key" [exports]="exports"
-          [brokerExports]="brokerExports" [element]="cat.value" />
+          [brokerExports]="brokerExports" [reports]="reports" [element]="cat.value" />
       </mat-accordion>
 
       <h4 *ngIf="tree !== undefined && tree.size != 0" class="total-cost">

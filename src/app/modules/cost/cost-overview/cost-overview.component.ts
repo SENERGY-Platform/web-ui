@@ -34,6 +34,8 @@ import { DeviceInstanceModel, DeviceInstancesTotalModel } from '../../devices/de
 import { ExportService } from '../../exports/shared/export.service';
 import { ExportModel } from '../../exports/shared/export.model';
 import { BrokerExportService } from '../../exports/shared/broker-export.service';
+import { ReportModel } from '../../reporting/shared/reporting.model';
+import { ReportingService } from '../../reporting/shared/reporting.service';
 
 @Component({
     selector: 'senergy-cost-overview',
@@ -57,6 +59,7 @@ export class CostOverviewComponent implements OnInit {
     devices: DeviceInstanceModel[] = [];
     exports: ExportModel[] = [];
     brokerExports: ExportModel[] = [];
+    reports: ReportModel[] = [];
 
     constructor(
         private costService: CostService,
@@ -68,6 +71,7 @@ export class CostOverviewComponent implements OnInit {
         private deviceInstancesService: DeviceInstancesService,
         private exportService: ExportService,
         private brokerExportService: BrokerExportService,
+        private reportingService: ReportingService,
     ) {
         this.isAdmin = this.authorizationService.userIsAdmin();
         if (this.isAdmin) {
@@ -128,12 +132,18 @@ export class CostOverviewComponent implements OnInit {
             } else {
                 obs[4] = of([]);
             }
+            if ((this.tree as any)['Reporting'] !== undefined){
+                obs[5] = this.reportingService.getReports().pipe(map(reports => reports?.data || []));
+            } else {
+                obs[5] = of([]);
+            }
             return forkJoin(obs).pipe(mergeMap(obsres => {
                 this.pipelines = obsres[0];
                 this.operators = obsres[1];
                 this.imports = obsres[2];
                 this.exports = obsres[3];
                 this.brokerExports = obsres[4];
+                this.reports = obsres[5];
                 const obs2: Observable<any>[] = [of(null)];
 
                 if (this.billingService.userHasReadAuthorization()) {

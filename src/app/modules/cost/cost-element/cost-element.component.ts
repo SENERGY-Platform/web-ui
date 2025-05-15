@@ -21,6 +21,7 @@ import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.mode
 import { OperatorModel } from '../../data/operator-repo/shared/operator.model';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 import { ExportModel } from '../../exports/shared/export.model';
+import { ReportModel } from '../../reporting/shared/reporting.model';
 
 @Component({
     selector: 'senergy-cost-element',
@@ -39,6 +40,7 @@ export class CostElementComponent {
     @Input() devices: DeviceInstanceModel[] = [];
     @Input() exports: ExportModel[] = [];
     @Input() brokerExports: ExportModel[] = [];
+    @Input() reports: ReportModel[] = [];
     @Input() parentName: string = '';
     @Input()
     get element() {
@@ -60,6 +62,13 @@ export class CostElementComponent {
                 dis.displayName = exp.Name;
             } else {
                 dis.displayName = 'MQTT Export ' + this.name + ' (deleted)';
+            }
+        } else if (this.parentName === 'Reporting') {
+            const report = this.reports.find(e => e.id === this.name);
+            if (report !== undefined) {
+                dis.displayName = report.name;
+            } else {
+                dis.displayName = 'Report ' + this.name + ' (deleted/unknown)';
             }
         }
         if (this._element.children !== undefined && this._element.children !== null) {
