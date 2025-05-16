@@ -110,7 +110,7 @@ export class FloorplanEditDialogComponent implements OnInit {
             r = this.deviceGroupsService.getDeviceGroupListByIds(dgIds.filter(x => x !== null) as string[], true).pipe(
               map(dg => {
                 dg.forEach(d => this.filterCriteria(d));
-                this.deviceGroups = [...this.deviceGroups, ...dg];
+                this.deviceGroups = [...this.deviceGroups, ...dg.filter(d => this.deviceGroups.find(d2 => d.id === d2.id) === undefined)];
                 return null;
               }));
           }
@@ -124,7 +124,7 @@ export class FloorplanEditDialogComponent implements OnInit {
         dg.result.forEach(d => this.filterCriteria(d));
         return dg.result;
       }),
-      map(dg => this.deviceGroups = [...this.deviceGroups, ...dg])));
+      map(dg => this.deviceGroups = [...this.deviceGroups, ...dg.filter(d => this.deviceGroups.find(d2 => d.id === d2.id) === undefined)])));
 
     obs.push(this.functionService.getFunctions('', 9999, 0, 'name', 'asc').pipe(map(f => this.functions = f.result)));
     obs.push(this.deviceGroupsService.getAspectListByIds(undefined).pipe(map(a => this.aspects = a)));
