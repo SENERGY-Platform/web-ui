@@ -107,8 +107,9 @@ export class FloorplanEditDialogComponent implements OnInit {
           });
           const dgIds = w.properties.floorplan.placements.map(x => x.deviceGroupId);
           if (dgIds !== undefined && dgIds.length > 0) {
-            r = this.deviceGroupsService.getDeviceGroupListByIds(dgIds.filter(x => x !== null) as string[]).pipe(
+            r = this.deviceGroupsService.getDeviceGroupListByIds(dgIds.filter(x => x !== null) as string[], true).pipe(
               map(dg => {
+                dg.forEach(d => this.filterCriteria(d));
                 this.deviceGroups = [...this.deviceGroups, ...dg];
                 return null;
               }));
@@ -120,6 +121,7 @@ export class FloorplanEditDialogComponent implements OnInit {
     obs.push(this.deviceGroupsService.getDeviceGroups('', 30, 0, 'name', 'asc', true).pipe(
       map(dg => {
         this.deviceGroupsTotal = dg.total;
+        dg.result.forEach(d => this.filterCriteria(d));
         return dg.result;
       }),
       map(dg => this.deviceGroups = [...this.deviceGroups, ...dg])));
@@ -334,6 +336,7 @@ export class FloorplanEditDialogComponent implements OnInit {
       return;
     }
     this.deviceGroupLoadingSubscription = this.deviceGroupsService.getDeviceGroups('', 100, this.deviceGroups.length, 'name', 'asc', true).subscribe(dg => {
+      dg.result.forEach(d => this.filterCriteria(d));
       // dg.result can contain device groups, which are already loaded
       this.deviceGroups = [... this.deviceGroups, ...dg.result.filter(d => this.deviceGroups.find(d2 => d.id === d2.id) === undefined)];
     });
@@ -344,6 +347,7 @@ export class FloorplanEditDialogComponent implements OnInit {
       return;
     }
     this.deviceGroupLoadingSubscription = this.deviceGroupsService.getDeviceGroups(search.term, 100, 0, 'name', 'asc', true).subscribe(dg => {
+      dg.result.forEach(d => this.filterCriteria(d));
       // dg.result can contain device groups, which are already loaded
       this.deviceGroups = [...this.deviceGroups, ...dg.result.filter(d => this.deviceGroups.find(d2 => d.id === d2.id) === undefined)];
     });
@@ -373,5 +377,10 @@ export class FloorplanEditDialogComponent implements OnInit {
 
   getColoringControls(tab: FormGroup<any>): FormArray<FormGroup> {
     return tab.controls.coloring as FormArray;
+  }
+
+  private filterCriteria(d: DeviceGroupModel) {
+    d.criteria?.forEach(c => c.interaction = '');
+    d.criteria = d.criteria?.filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i);
   }
 }

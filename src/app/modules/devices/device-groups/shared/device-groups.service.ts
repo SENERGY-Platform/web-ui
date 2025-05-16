@@ -163,8 +163,8 @@ export class DeviceGroupsService {
             .pipe(catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'deleteDeviceGroup', false)));
     }
 
-    getDeviceGroupListByIds(ids: string[]): Observable<DeviceGroupModel[]> {
-        return this._getDeviceGroups({ids}).pipe(map(x => x.result));
+    getDeviceGroupListByIds(ids: string[], filterGenericDuplicateCriteria = false): Observable<DeviceGroupModel[]> {
+        return this._getDeviceGroups({ids, filterGenericDuplicateCriteria}).pipe(map(x => x.result));
     }
 
     getFunctionListByIds(ids: string[]): Observable<DeviceTypeFunctionModel[]> {
