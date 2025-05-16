@@ -101,8 +101,12 @@ export class SidenavService implements OnDestroy {
         }
     }
 
-    toggle(sidenavOpen: boolean): void {
-        this.isToggled = sidenavOpen;
+    toggle(sidenavOpen: boolean | undefined = undefined): void {
+        if (sidenavOpen === undefined) {
+            this.isToggled = !this.isToggled;
+        } else {
+            this.isToggled = sidenavOpen;
+        }
         this.toggleChanged.emit(this.isToggled);
     }
 
@@ -308,5 +312,9 @@ export class SidenavService implements OnDestroy {
 
         this.sections = sections;
         return sections;
+    }
+
+    isOpen(): boolean {
+        return this.isToggled;
     }
 }

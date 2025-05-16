@@ -15,14 +15,13 @@
   -->
 
 <mat-toolbar class="shadow" color="primary">
-    <button mat-icon-button color="accent" fxHide.gt-sm (click)="toggle(true)">
+    <button mat-icon-button color="accent" (click)="toggle()">
         <mat-icon>menu</mat-icon>
     </button>
-    <a routerLink="/dashboard" (click)="resetSidenav()" class="image-wrapper" fxHide fxShow.gt-sm>
+    <a routerLink="/dashboard" (click)="resetSidenav()" class="image-wrapper">
         <img class="logo"
              src="{{getLogoUrl()}}">
     </a>
-    <div fxFlex class="mat-h4 color-accent header-text">{{header}}</div>
     <span class="fill-remaining-space"></span>
     <button *ngIf="userHasNotificationsReadAuthorization" mat-icon-button color="accent" (click)="openNotificationsDialog()">
         <mat-icon *ngIf="unreadCounter < 1">notifications_none</mat-icon>

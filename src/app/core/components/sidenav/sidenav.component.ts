@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, map, mergeMap } from 'rxjs/operators';
@@ -37,11 +37,24 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     openSection: null | string = null;
     zIndex = -1;
 
+    get shouldStartOpen(): boolean {
+        return JSON.parse(sessionStorage.getItem('SidenavComponent/shouldStartOpen') || 'true');
+    }
+
+    set shouldStartOpen(b: boolean) {
+        if (!b) {
+            sessionStorage.setItem('SidenavComponent/shouldStartOpen', 'false');
+        } else {
+            sessionStorage.removeItem('SidenavComponent/shouldStartOpen');
+        }
+    }
+
     constructor(
         private activatedRoute: ActivatedRoute,
         private router: Router,
         private sidenavService: SidenavService,
         private responsiveService: ResponsiveService,
+        private cd: ChangeDetectorRef,
     ) {
     }
 
@@ -52,7 +65,9 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
+        this.sidenav.mode = 'side';
         this.sidenavChangeListener();
+        this.sidenavService.toggle(this.shouldStartOpen);
     }
 
     isSectionOpen(section: SidenavSectionModel): boolean {
@@ -77,17 +92,20 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     }
 
     private sidenavChangeListener(): void {
-        this.sidenavService.toggleChanged.subscribe((isToggle: boolean) => {
-            if (isToggle) {
+        this.sidenavService.toggleChanged.subscribe((state: boolean) => {
+            this.shouldStartOpen = this.sidenav.mode !== 'side' || state;
+            if (state) {
                 this.zIndex = 0;
             } else {
                 this.zIndex = -1;
             }
-            this.sidenav.toggle(isToggle);
+            this.sidenav.toggle(state);
+            this.cd.detectChanges();
         });
         this.sidenavService.sectionChanged.subscribe((section: SidenavSectionModel) => {
             this.openSection = section.state;
         });
+        this.sidenav.openedChange.subscribe(o => this.sidenavService.toggle(o));
     }
 
     private showOrHideSidenav(): void {
@@ -100,10 +118,12 @@ export class SidenavComponent implements OnInit, AfterViewInit {
                 this.zIndex = -1;
             } else {
                 this.sidenav.mode = 'side';
-                this.sidenav.open();
                 this.sidenav.disableClose = true;
                 this.sidenav.fixedTopGap = 64;
                 this.zIndex = -1;
+                if (this.shouldStartOpen) {
+                    this.sidenav.open();
+                }
             }
         });
     }

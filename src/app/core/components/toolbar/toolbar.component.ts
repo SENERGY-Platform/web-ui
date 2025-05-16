@@ -32,7 +32,6 @@ import { InfoService } from 'src/app/modules/info/shared/info.service';
 })
 export class ToolbarComponent implements OnInit {
     userName = '';
-    header = '';
     notifications: NotificationModel[] = [];
     unreadCounter = 0;
     userHasSettingsUpdateAuthorization = false;
@@ -66,8 +65,8 @@ export class ToolbarComponent implements OnInit {
         this.userHasNotificationsReadAuthorization = this.notificationService.userHasReadAuthorization();
     }
 
-    toggle(sidenavOpen: boolean): void {
-        this.sidenavService.toggle(sidenavOpen);
+    toggle(): void {
+        this.sidenavService.toggle();
     }
 
     resetSidenav(): void {
@@ -100,9 +99,7 @@ export class ToolbarComponent implements OnInit {
                 }),
                 mergeMap((route: any) => route.data),
             )
-            .subscribe((data: any) => {
-                this.header = data.header;
-            });
+            .subscribe();
     }
 
     openNotificationsDialog() {
