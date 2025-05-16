@@ -300,7 +300,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
       this.chartjs.options.elements.point.radius = this.widget.properties?.floorplan?.dotSize || 5;
       this.chartjs.options.elements.point.hoverRadius = this.widget.properties?.floorplan?.dotSize || 5;
     }
-    const datasets: ChartDataset[] = new Array(this.values.length - 1).fill({});
+    const datasets: ChartDataset[] = new Array(Math.max(this.values.length - 1, 0)).fill({});
     const showValueWhenZoomed: boolean[] = [];
     this.values.forEach((r, i) => {
       if (this.widget.properties.floorplan === undefined || this.widget.properties.floorplan.placements === null || this.img === undefined) {
