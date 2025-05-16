@@ -71,3 +71,7 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
     padding-top: 0.5em;
     padding-bottom: 0.5em;
 }
+
+.mdc-tab__content{
+    pointer-events: all!important;
+}
