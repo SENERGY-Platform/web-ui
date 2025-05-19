@@ -17,44 +17,61 @@
 <!DOCTYPE html>
 
 <html lang="de">
+
 <head> <!-- Title added by ThemingService -->
-    <base href="/"/>
-    <meta name="theme-color" content="#ffffff">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/assets/fonts/google-icons.css"/>
-    <link rel="stylesheet" href="/assets/fonts/roboto.css">
-    <script src="assets/env.js"></script>
+  <base href="/" />
+  <meta name="theme-color" content="#ffffff">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/fonts/google-icons.css" />
+  <link rel="stylesheet" href="/assets/fonts/roboto.css">
+  <script src="assets/env.js"></script>
   <meta name="theme-color" content="#1976d2">
-  
+
 </head>
+
 <body class="mat-typography">
   <senergy-root>
     <style>
       .loader {
-        position: fixed;
-        top: 50%;
-        left: 50%;
         border: 8px solid #f3f3f3;
         border-radius: 50%;
         border-top: 8px solid #3498db;
         width: 50px;
         height: 50px;
-        -webkit-animation: spin 1s linear infinite; /* Safari */
+        -webkit-animation: spin 1s linear infinite;
+        /* Safari */
         animation: spin 1s linear infinite;
       }
-      
+
+      .loader-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
       /* Safari */
       @-webkit-keyframes spin {
-        0% { -webkit-transform: rotate(0deg); }
-        100% { -webkit-transform: rotate(360deg); }
+        0% {
+          -webkit-transform: rotate(0deg);
+        }
+
+        100% {
+          -webkit-transform: rotate(360deg);
+        }
       }
-      
+
       @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
       }
 
       /* Error Message Box */
@@ -67,21 +84,26 @@
         margin-bottom: 15px;
         display: none
       }
-      .alert.warning {background-color: #ff9800;}
+
+      .alert.warning {
+        background-color: #ff9800;
+      }
 
       .show {
         display: block
       }
+    </style>
 
-      </style>
-            
+    <div class="loader-wrapper">
       <div class="loader"></div>
+    </div>
 
-      <div class="alert warning">
-        <strong>Warning!</strong> There was a problem loading this page. Please reload!
-      </div>
-      
+    <div class="alert warning">
+      <strong>Warning!</strong> There was a problem loading this page. Please reload!
+    </div>
+
   </senergy-root>
   <noscript>Please enable JavaScript to continue using this application.</noscript>
 </body>
+
 </html>
