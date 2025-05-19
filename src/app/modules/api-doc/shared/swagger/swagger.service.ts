@@ -18,7 +18,7 @@
 
 import { HttpClient } from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
+import {Observable} from 'rxjs';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { environment } from 'src/environments/environment';
@@ -28,9 +28,6 @@ import {DocInfo, SwaggerModel} from './swagger.model';
     providedIn: 'root',
 })
 export class SwaggerService {
-    private cachedSwagger: SwaggerModel[] = [];
-    private invalidAfter: Date = new Date();
-
     public baseUrl: string = environment.swaggerUrl;
     authorizationsSwagger: PermissionTestResponse;
     authorizationsAsyncAPI: PermissionTestResponse;
@@ -44,12 +41,8 @@ export class SwaggerService {
         this.authorizationsAsyncAPI = this.ladonService.getUserAuthorizationsForURI(environment.swaggerUrl + '/storage/asyncapi');
     }
 
-    public getSwagger(): Observable<SwaggerModel[]> {
-        if (this.needsReload()) {
-            return this.loadSwagger();
-        } else {
-            return of(this.cachedSwagger);
-        }
+    public getSwagger(): Observable<DocInfo[]> {
+         return this.http.get<DocInfo[]>(this.baseUrl + '/storage/swagger');
     }
 
     public getAsync(): Observable<DocInfo[]> {
@@ -57,47 +50,15 @@ export class SwaggerService {
     }
 
 
-    public getSingleSwagger(title: string): Observable<SwaggerModel> {
-        if (this.needsReload()) {
-            return new Observable<SwaggerModel>((obs) => {
-                this.loadSwagger().subscribe((_) => {
-                    obs.next(this.filterSingleSwagger(title));
-                    obs.complete();
-                });
-            });
-        }
-        return of(this.filterSingleSwagger(title));
+    public getSingleSwagger(id: string): Observable<SwaggerModel> {
+       return this.http.get<SwaggerModel>(this.baseUrl + '/docs/swagger/' + id);
     }
 
     public getSingleAsync(id: string): Observable<any> {
-        return this.http.get<DocInfo[]>(this.baseUrl + '/docs/asyncapi/' + id);
+        return this.http.get(this.baseUrl + '/docs/asyncapi/' + id);
     }
 
-    private loadSwagger(): Observable<SwaggerModel[]> {
-        return new Observable<SwaggerModel[]>((obs) => {
-            this.http.get(this.baseUrl+'/swagger').subscribe((res) => {
-                this.cachedSwagger = res as SwaggerModel[];
-                const d = new Date();
-                d.setHours(d.getHours() + 1);
-                this.invalidAfter = d;
-                obs.next(this.cachedSwagger);
-                obs.complete();
-            });
-        });
-    }
-
-    private needsReload(): boolean {
-        return this.cachedSwagger === undefined || new Date() > this.invalidAfter;
-    }
-
-    private filterSingleSwagger(title: string): SwaggerModel {
-        for (const api of this.cachedSwagger) {
-            if (api.info.title === title) {
-                return api;
-            }
-        }
-        return {} as SwaggerModel;
-    }
+    
 
     userHasReadAuthorization(): boolean {
         return this.authorizationsSwagger['GET'] || this.authorizationsAsyncAPI['GET'];

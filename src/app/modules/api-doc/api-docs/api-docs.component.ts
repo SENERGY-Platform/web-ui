@@ -17,7 +17,7 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { DocInfo, SwaggerModel } from '../shared/swagger/swagger.model';
+import { DocInfo } from '../shared/swagger/swagger.model';
 import { SwaggerService } from '../shared/swagger/swagger.service';
 import { forkJoin, map, Observable, of } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -29,8 +29,8 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 })
 export class ApiDocsComponent implements OnInit {
     public title = 'SEPL API Documentation';
-    public swaggerList: SwaggerModel[] = [];
-    public swaggerListShown: SwaggerModel[] = [];
+    public swaggerList: DocInfo[] = [];
+    public swaggerListShown: DocInfo[] = [];
     public asyncList: DocInfo[] = [];
     public asyncListShown: DocInfo[] = [];
     public searchPlaceholder: any;
@@ -62,7 +62,7 @@ export class ApiDocsComponent implements OnInit {
 
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             const insensitiveQuery = new RegExp(searchText, 'gi');
-            this.swaggerListShown = this.swaggerList.filter((api) => insensitiveQuery.test(api.info.description) || insensitiveQuery.test(api.info.title));
+            this.swaggerListShown = this.swaggerList.filter((api) => insensitiveQuery.test(api.description) || insensitiveQuery.test(api.title));
             this.asyncListShown = this.asyncList.filter((api) => insensitiveQuery.test(api.description) || insensitiveQuery.test(api.title));
         });
     }
