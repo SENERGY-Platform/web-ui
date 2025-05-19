@@ -17,17 +17,60 @@
 <div class="device-instance-container layout-margin" fxLayout="column">
     <span fxLayout="row" class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
-            <button mat-icon-button (click)="openFilterDialog()" matTooltip="Filter" color="accent" class="suffix-button">
-                <mat-icon>filter_alt</mat-icon>
-            </button>
+        <button mat-icon-button (click)="openFilterDialog()" matTooltip="Filter" color="accent" class="suffix-button">
+            <mat-icon>filter_alt</mat-icon>
+        </button>
     </span>
+    <div style="margin-bottom: 1em;">
+        <mat-chip-set>
+            <mat-chip
+                *ngIf="routerConnectionState !== undefined && routerConnectionState !== null && routerConnectionState !== DeviceInstancesRouterStateTabEnum.ALL">
+                <mat-icon matChipAvatar>cloud</mat-icon>
+                <span *ngIf="routerConnectionState === DeviceInstancesRouterStateTabEnum.OFFLINE">Offline</span>
+                <span *ngIf="routerConnectionState === DeviceInstancesRouterStateTabEnum.ONLINE">Online</span>
+                <span *ngIf="routerConnectionState === DeviceInstancesRouterStateTabEnum.UNKNOWN">Unknown</span>
+                <button matChipRemove (click)="this.routerConnectionState = undefined; reload()">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip>
+            <mat-chip *ngIf="routerNetwork !== undefined && routerNetwork !== null && routerNetwork !== ''">
+                <mat-icon matChipAvatar>device_hub</mat-icon>
+                {{routerNetworkName}}
+                <button matChipRemove (click)="this.routerNetwork = undefined; reload()">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip>
+            <mat-chip *ngIf="routerLocation !== undefined && routerLocation !== null && routerLocation !== ''">
+                <mat-icon matChipAvatar>place</mat-icon>
+                {{routerLocationName}}
+                <button matChipRemove (click)="this.routerLocation = undefined; reload()">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip>
+            <mat-chip *ngFor="let dt of routerDeviceType; let i = index">
+                <mat-icon matChipAvatar>important_devices</mat-icon>
+                {{routerDeviceTypeNames[i]}}
+                <button matChipRemove (click)="this.routerDeviceType!.splice(i, 1); this.routerDeviceTypeNames.splice(i, 1) ; reload()">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip>
+            <mat-chip *ngIf="routerDeviceIds !== undefined">
+                <mat-icon matChipAvatar>devices</mat-icon>
+                {{routerDeviceIds.length}} Device Ids
+                <button matChipRemove (click)="this.routerDeviceIds = undefined; reload()">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip>
+        </mat-chip-set>
+    </div>
 
     <div *ngIf="dataSource.data.length === 0 && ready">No devices found.</div>
     <senergy-spinner [show]="!ready"></senergy-spinner>
 
     <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
         <div class="table-container">
-            <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)" [matSortActive]="sortBy" [matSortDirection]="sortDirection">
+            <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)"
+                [matSortActive]="sortBy" [matSortDirection]="sortDirection">
                 <ng-container matColumnDef="select">
                     <th mat-header-cell *matHeaderCellDef class="button-column">
                         <mat-checkbox (change)="$event ? masterToggle() : null"
@@ -52,7 +95,8 @@
                 <ng-container matColumnDef="device_type">
                     <th mat-header-cell *matHeaderCellDef>Type</th>
                     <td mat-cell *matCellDef="let device">
-                        <a [routerLink]="'/metadata/devicetypesoverview/devicetypes/' + device.device_type_id" [queryParams]="{'function': 'details'}">{{device.device_type_name}}</a>
+                        <a [routerLink]="'/metadata/devicetypesoverview/devicetypes/' + device.device_type_id"
+                            [queryParams]="{'function': 'details'}">{{device.device_type_name}}</a>
                     </td>
                 </ng-container>
 
@@ -60,7 +104,8 @@
                     <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Connection
                     </th>
                     <td mat-cell *matCellDef="let device">
-                        <senergy-state-icon *ngIf="isActive(device)" [state]="device.connection_state"></senergy-state-icon>
+                        <senergy-state-icon *ngIf="isActive(device)"
+                            [state]="device.connection_state"></senergy-state-icon>
                         <senergy-state-icon *ngIf="!isActive(device)" [state]="'inactive'"></senergy-state-icon>
                     </td>
                 </ng-container>
@@ -76,7 +121,8 @@
                 <ng-container matColumnDef="shared">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Shared</th>
                     <td mat-cell *matCellDef="let device">
-                        <mat-icon matTooltip="Device is shared by {{userIdToName[device.creator]}}" *ngIf="device.shared" class="color-sidenav info-icon">
+                        <mat-icon matTooltip="Device is shared by {{userIdToName[device.creator]}}"
+                            *ngIf="device.shared" class="color-sidenav info-icon">
                             share
                         </mat-icon>
                     </td>
@@ -143,35 +189,34 @@
                             </button>
                         </td>
                     </ng-container>
-    
+
                     <ng-container matColumnDef="header-delete-all">
                         <th mat-header-cell *matHeaderCellDef colspan="10">
                             <div fxLayout="row">
                                 <div fxLayoutAlign="center center">You have
                                     selected {{selection.selected.length}} items
                                 </div>
-                                <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
+                                <button matTooltip="Delete" mat-icon-button color="accent"
+                                    (click)="deleteMultipleItems()">
                                     <mat-icon>delete</mat-icon>
                                 </button>
                             </div>
                         </th>
                     </ng-container>
-    
-                    <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
+
+                    <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
+                        [hidden]="selection.selected.length === 0">
                     </tr>
                 </span>
-                
-                <tr mat-header-row
-                    *matHeaderRowDef="displayedColumns; sticky: true">
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true">
                 </tr>
-                <tr mat-row
-                    *matRowDef="let m; columns: displayedColumns;"
-                    [ngClass]="{'inactive': m.active === false}">
+                <tr mat-row *matRowDef="let m; columns: displayedColumns;" [ngClass]="{'inactive': m.active === false}">
                 </tr>
             </table>
         </div>
 
-        <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-            showFirstLastButtons></mat-paginator>
+        <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize"
+            [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
     </div>
 </div>

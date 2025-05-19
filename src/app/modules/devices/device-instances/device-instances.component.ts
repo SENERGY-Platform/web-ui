@@ -98,10 +98,14 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
     routerNetwork: string | undefined = undefined;
+    routerNetworkName: string | undefined = undefined;
     routerDeviceType: string[] | undefined = undefined;
+    routerDeviceTypeNames: string[] = [];
     routerLocation: string | undefined = undefined;
+    routerLocationName: string | undefined = undefined;
     routerDeviceIds: string[] | undefined = undefined;
     routerConnectionState: DeviceInstancesRouterStateTabEnum | undefined = undefined;
+    DeviceInstancesRouterStateTabEnum = DeviceInstancesRouterStateTabEnum;
 
     private searchSub: Subscription = new Subscription();
     sortBy = 'display_name';
@@ -200,19 +204,24 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
             connectionState: this.routerConnectionState,
             network: this.routerNetwork,
             deviceTypes: this.routerDeviceType,
-            location: this.routerLocation
+            location: this.routerLocation,
+            deviceTypesNames: [],
         };
 
         const editDialogRef = this.dialog.open(DeviceInstancesFilterDialogComponent, {
-            data: filterSelection
+            data: filterSelection,
+            minWidth: '50vw',
         });
         editDialogRef.afterClosed().subscribe({
             next: (filterSelectionInner: FilterSelection) => {
                 if (filterSelectionInner != null) {
                     this.routerConnectionState = filterSelectionInner.connectionState;
                     this.routerDeviceType = filterSelectionInner.deviceTypes;
+                    this.routerDeviceTypeNames = filterSelectionInner.deviceTypesNames;
                     this.routerNetwork = filterSelectionInner.network;
+                    this.routerNetworkName = filterSelectionInner.networkName;
                     this.routerLocation = filterSelectionInner.location;
+                    this.routerLocationName = filterSelectionInner.locationName;
                 }
                 this.reload();
             }
@@ -381,12 +390,15 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                 switch (state.type) {
                 case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
                     this.routerDeviceType = [(state.value as DeviceTypeModel).id];
+                    this.routerDeviceTypeNames = [(state.value as DeviceTypeModel).name];
                     break;
                 case DeviceInstancesRouterStateTypesEnum.NETWORK:
                     this.routerNetwork = (state.value as HubModel).id;
+                    this.routerNetworkName = (state.value as HubModel).name;
                     break;
                 case DeviceInstancesRouterStateTypesEnum.LOCATION:
                     this.routerLocation = (state.value as LocationModel).id;
+                    this.routerLocationName = (state.value as LocationModel).name;
                     break;
                 case DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP:
                     this.routerDeviceIds = state.value as string[];

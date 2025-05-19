@@ -39,9 +39,9 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
     networkOptions: HubModel[] = [];
     deviceTypeOptions: DeviceTypeModel[] = [];
     connectionOptions: DeviceConnectionState[] = [
-        {name: 'connected', value: DeviceInstancesRouterStateTabEnum.ONLINE},
-        {name: 'unconnected', value: DeviceInstancesRouterStateTabEnum.OFFLINE},
-        {name: 'unknown', value: DeviceInstancesRouterStateTabEnum.UNKNOWN}
+        {name: 'Online', value: DeviceInstancesRouterStateTabEnum.ONLINE},
+        {name: 'Offline', value: DeviceInstancesRouterStateTabEnum.OFFLINE},
+        {name: 'Unknown', value: DeviceInstancesRouterStateTabEnum.UNKNOWN}
     ];
 
     form = new FormGroup({
@@ -61,7 +61,6 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
     private networksService: NetworksService,
     private deviceTypesService: DeviceTypeService,
     private deviceInstancesService: DeviceInstancesService,
-    private fb: UntypedFormBuilder,
     ) {
         this.savedFilterSelection = data;
     }
@@ -149,6 +148,13 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
     }
 
     filter() {
-        this.dialogRef.close(this.form.value);
+        const filterSelection: FilterSelection = this.form.value as FilterSelection;
+        filterSelection.networkName = this.networkOptions.find(n => n.id === filterSelection.network)?.name;
+        filterSelection.locationName = this.locationOptions.find(n => n.id === filterSelection.location)?.name;
+        filterSelection.deviceTypesNames = [];
+        filterSelection.deviceTypes?.forEach(dt => {
+            filterSelection.deviceTypesNames?.push(this.deviceTypeOptions.find(d => d.id === dt)?.name || '');
+        });        
+        this.dialogRef.close(filterSelection);
     }
 }

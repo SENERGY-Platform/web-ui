@@ -94,8 +94,11 @@ export interface SelectedTag {
 export interface FilterSelection {
     connectionState?: DeviceInstancesRouterStateTabEnum;
     deviceTypes?: string[];
+    deviceTypesNames: string[];
     location?: string;
+    locationName?: string;
     network?: string;
+    networkName?: string;
 }
 
  
