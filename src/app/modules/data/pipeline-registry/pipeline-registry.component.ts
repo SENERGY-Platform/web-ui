@@ -27,6 +27,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 import { forkJoin, Observable, Subscription, concatMap, of, map } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -34,7 +35,7 @@ import { UtilService } from 'src/app/core/services/util.service';
     styleUrls: ['./pipeline-registry.component.css'],
 })
 export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestroy {
-    pageSize = 20;
+    pageSize = this.preferencesService.pageSize;
     offset = 0;
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
     ready = false;
@@ -57,7 +58,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         public snackBar: MatSnackBar,
         private searchbarService: SearchbarService,
         private dialogsService: DialogsService,
-        public utilsService: UtilService
+        public utilsService: UtilService,
+        public preferencesService: PreferencesService,
     ) {}
 
     ngOnInit() {
@@ -100,7 +102,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     }
 
     ngAfterViewInit() {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe((e)=>{
+            this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageIndex*this.paginator.pageSize;
 

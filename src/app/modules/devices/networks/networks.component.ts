@@ -37,6 +37,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {PermissionsService} from '../../permissions/shared/permissions.service';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-networks',
@@ -45,7 +46,7 @@ import {PermissionsService} from '../../permissions/shared/permissions.service';
 })
 export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'connection', 'shared', 'name', 'number_devices', 'show', 'clear'];
-    pageSize = 20;
+    pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<HubModel>();
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
@@ -73,6 +74,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
         private permissionsDialogService: PermissionsDialogService,
         private authService: AuthorizationService,
         private permissionsService: PermissionsService,
+        private preferencesService: PreferencesService,
     ) {}
 
     ngOnInit() {
@@ -121,7 +123,8 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe((e)=>{
+            this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getNetworks().subscribe({

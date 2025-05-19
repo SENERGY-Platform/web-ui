@@ -146,8 +146,8 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             </table>
         </div>
-        <mat-paginator #paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
-            (page)="selectionClear()" showFirstLastButtons></mat-paginator>
+        <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+            (page)="selectionClear($event)" showFirstLastButtons></mat-paginator>
         <div *ngIf="devices.length === 0 && ready">No devices found.</div>
     </div>
     <senergy-spinner [show]="!ready"></senergy-spinner>

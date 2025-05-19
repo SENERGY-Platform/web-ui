@@ -32,6 +32,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement } from '../device-types-overview/shared/used-in-device-type.model';
 import {DeviceTypeService} from '../device-types-overview/shared/device-type.service';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-characteristic',
@@ -40,7 +41,7 @@ import {DeviceTypeService} from '../device-types-overview/shared/device-type.ser
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];
-    pageSize = 20;
+    pageSize = this.preferencesService.pageSize;
     ready = false;
     dataSource = new MatTableDataSource<DeviceTypeCharacteristicsModel>();
     selection = new SelectionModel<DeviceTypeCharacteristicsModel>(true, []);
@@ -66,7 +67,8 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
         private snackBar: MatSnackBar,
         private router: Router,
         private dialogsService: DialogsService,
-        private deviceTypeService: DeviceTypeService
+        private deviceTypeService: DeviceTypeService,
+        private preferencesService: PreferencesService,
     ) {
         this.getRouterParams();
     }
@@ -109,7 +111,8 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe((e)=>{
+            this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getCharacteristics().subscribe();

@@ -23,11 +23,12 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { Subscription, merge } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { startWith, switchMap } from 'rxjs/operators';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-operator-repo',
@@ -64,7 +65,8 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         public snackBar: MatSnackBar,
         private dialogsService: DialogsService,
         protected permission: PermissionsService,
-    ) {}
+        public preferencesService: PreferencesService,
+    ) { }
 
     ngOnInit() {
         this.userHasCreateAuthorization = this.operatorRepoService.userHasCreateAuthorization();
@@ -73,13 +75,13 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         this.initSearchAndGetOperators();
 
         this.userHasDeleteAuthorization = this.operatorRepoService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
+        if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
 
 
         this.userHasUpdateAuthorization = this.operatorRepoService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
+        if (this.userHasUpdateAuthorization) {
             this.displayedColumns.push('edit');
         }
     }
@@ -164,7 +166,10 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         });
     }
 
-    selectionClear(): void {
+    selectionClear($event: PageEvent | undefined = undefined): void {
+        if ($event !== undefined) {
+            this.preferencesService.pageSize = $event.pageSize;
+        }
         this.selection.clear();
     }
 

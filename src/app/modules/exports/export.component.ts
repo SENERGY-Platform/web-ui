@@ -24,7 +24,7 @@ import { SearchbarService } from '../../core/components/searchbar/shared/searchb
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { of } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 import { BrokerExportService } from './shared/broker-export.service';
@@ -37,6 +37,7 @@ import { PermissionsService } from '../permissions/shared/permissions.service';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { PermissionsRightsModel } from '../permissions/shared/permissions-rights.model';
 import { PermissionsV2RightsAndIdModel } from '../permissions/shared/permissions-resource.model';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-export',
@@ -102,7 +103,8 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
         private exportDataService: ExportDataService,
         private permissionsDialogService: PermissionsDialogService,
         private permissionsService: PermissionsService,
-        private userService: AuthorizationService
+        private userService: AuthorizationService,
+        public preferencesService: PreferencesService,
     ) { }
 
     ngAfterViewInit(): void {
@@ -304,7 +306,10 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
         return res;
     }
 
-    selectionClear(): void {
+    selectionClear($event: PageEvent | undefined = undefined): void {
+        if ($event !== undefined) {
+            this.preferencesService.pageSize = $event.pageSize;
+        }
         this.selection.clear();
     }
 

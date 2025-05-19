@@ -201,7 +201,7 @@
                         </div>
                     </div>
                     <mat-paginator [length]="exportValues.controls.length" [pageSize]="defaultPageSize"
-                        [pageSizeOptions]="[5, 10, 20]" (page)="movePage($event)" showFirstLastButtons
+                        [pageSizeOptions]="[20, 50, 75, 100]" (page)="movePage($event)" showFirstLastButtons
                         aria-label="Select page">
                     </mat-paginator>
                     <div fxLayout="row" class="button-footer">

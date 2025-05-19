@@ -34,6 +34,7 @@ import {PermissionImportModel} from '../permissions-dialog-import/permissions-di
 import {PermissionsEditComponent} from '../permissions-edit/permissions-edit.component';
 import {DialogsService} from '../../../../core/services/dialogs.service';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-permissions-list',
@@ -95,6 +96,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
                 private sanitizer: DomSanitizer,
                 private kongService: KongService,
                 private dialogsService: DialogsService,
+                public preferencesService: PreferencesService,
     ) {
         this.authService.loadAllRoles().subscribe((roles: any | { error: string }) => {
             if (roles != null) {
@@ -133,6 +135,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
 
     ngAfterViewInit() {
         this.subscriptions.push(this.paginator.page.subscribe((e) => {
+            this.preferencesService.pageSize = e.pageSize;
             this.sortData(this.sort, this.policies, e);
         }));
     }

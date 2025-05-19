@@ -106,8 +106,8 @@
                                 <tr mat-row *matRowDef="let row; columns: displayedColumnsRunning;"></tr>
                             </table>
                         </div>
-                        <mat-paginator #paginatorRunning [length]="totalCountRunning" [pageSize]="20"
-                            [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
+                        <mat-paginator #paginatorRunning [length]="totalCountRunning" [pageSize]="preferencesService.pageSize"
+                            [pageSizeOptions]="[20, 50, 75, 100]" (page)="paginatorRunningPage($event)" showFirstLastButtons></mat-paginator>
                     </div>
                     <div *ngIf="!animation && !isLoadingResultsRunning && totalCountRunning === 0">No entries found.
                     </div>
@@ -235,8 +235,8 @@
                                 <tr mat-row *matRowDef="let row; columns: displayedColumnsFinished;"></tr>
                             </table>
                         </div>
-                        <mat-paginator #paginatorFinished [length]="totalCountFinished" [pageSize]="20"
-                            [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear()" showFirstLastButtons>
+                        <mat-paginator #paginatorFinished [length]="totalCountFinished" [pageSize]="preferencesService.pageSize"
+                            [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)" showFirstLastButtons>
                         </mat-paginator>
                     </div>
                     <div *ngIf="!animation && !isLoadingResultsFinished && totalCountFinished === 0">No entries found.

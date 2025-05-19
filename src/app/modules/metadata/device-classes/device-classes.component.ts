@@ -33,6 +33,7 @@ import {
     UsedInDeviceTypeResponseElement
 } from '../device-types-overview/shared/used-in-device-type.model';
 import {DeviceTypeService} from '../device-types-overview/shared/device-type.service';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-device-classes',
@@ -41,7 +42,7 @@ import {DeviceTypeService} from '../device-types-overview/shared/device-type.ser
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];
-    pageSize = 20;
+    pageSize = this.preferencesService.pageSize;
     ready = false;
     dataSource = new MatTableDataSource<DeviceTypeDeviceClassModel>();
     selection = new SelectionModel<DeviceTypeDeviceClassModel>(true, []);
@@ -67,6 +68,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit 
         private dialogsService: DialogsService,
         private authService: AuthorizationService,
         private deviceTypeService: DeviceTypeService,
+        private preferencesService: PreferencesService,
     ) {}
 
     ngOnInit() {
@@ -76,7 +78,8 @@ export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit 
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe((e)=>{
+            this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceClasses().subscribe();

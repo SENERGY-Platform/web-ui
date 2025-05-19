@@ -27,12 +27,13 @@ import { MonitorProcessTotalModel } from './shared/monitor-process-total.model';
 import { Navigation, Router } from '@angular/router';
 import { DeploymentsModel } from '../deployments/shared/deployments.model';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { MonitorFogFactory } from './shared/monitor-fog.service';
 import { UtilService } from 'src/app/core/services/util.service';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -93,7 +94,8 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         private router: Router,
         private hubsService: NetworksService,
         private fogMonitorFactory: MonitorFogFactory,
-        public utilsService: UtilService
+        public utilsService: UtilService,
+        public preferencesService: PreferencesService,
     ) {
         this.monitorService = plattformMonitorService;
         this.getRouterParams();
@@ -238,7 +240,10 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         });
     }
 
-    selectionClear(): void {
+    selectionClear($event: PageEvent | undefined = undefined): void {
+        if ($event !== undefined) {
+            this.preferencesService.pageSize = $event?.pageSize;
+        }
         this.selection.clear();
     }
 
@@ -249,6 +254,10 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     removeChip(): void {
         this.selectedDeployment = null;
         this.reload();
+    }
+
+    paginatorRunningPage($event: PageEvent) {
+        this.preferencesService.pageSize = $event.pageSize;
     }
 
     private initRunning() {

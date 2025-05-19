@@ -30,6 +30,7 @@ import { DeviceGroupModel } from './shared/device-groups.model';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 
 @Component({
@@ -39,7 +40,7 @@ import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissi
 })
 export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'show'];
-    pageSize = 20;
+    pageSize = this.preferencesService.pageSize;
     selection = new SelectionModel<DeviceGroupModel>(true, []);
     totalCount = 200;
     instances = [];
@@ -68,6 +69,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         private searchbarService: SearchbarService,
         private permissionsDialogService: PermissionsDialogService,
         private permissionsService: PermissionsService,
+        private preferencesService: PreferencesService,
     ) {}
 
     ngOnInit() {
@@ -76,7 +78,8 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe((e)=>{
+            this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceGroups().subscribe();

@@ -29,6 +29,7 @@ import {Sort, SortDirection} from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-concepts',
@@ -37,7 +38,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 })
 export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'info', 'characteristic'];
-    pageSize = 20;
+    pageSize = this.preferencesService.pageSize;
     concepts: DeviceTypeConceptModel[] = [];
     ready = false;
     dataSource = new MatTableDataSource(this.concepts);
@@ -60,6 +61,7 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
         private conceptsService: ConceptsService,
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
+        private preferencesService: PreferencesService,
     ) {}
 
     ngOnInit() {
@@ -85,7 +87,8 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe((e)=>{
+            this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getConcepts().subscribe();

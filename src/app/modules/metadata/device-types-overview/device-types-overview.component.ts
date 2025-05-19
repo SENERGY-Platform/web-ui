@@ -29,6 +29,7 @@ import { Sort, SortDirection } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UntypedFormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-device-types',
@@ -37,7 +38,7 @@ import { MatPaginator } from '@angular/material/paginator';
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'info', 'copy', 'new', 'show'];
-    pageSize = 20;
+    pageSize = this.preferencesSerivce.pageSize;
     deviceTypes: DeviceTypeModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     dataSource = new MatTableDataSource<DeviceTypeModel>();
@@ -62,6 +63,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
         private dialogsService: DialogsService,
         private router: Router,
         private deviceInstancesDialogService: DeviceInstancesDialogService,
+        private preferencesSerivce: PreferencesService,
     ) {}
 
     ngOnInit() {
@@ -93,7 +95,8 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe((e)=>{
+            this.preferencesSerivce.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceTypes().subscribe();

@@ -34,6 +34,7 @@ import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissi
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-import-instances',
@@ -56,10 +57,11 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
         private permissionsDialogService: PermissionsDialogService,
         private permissionsService: PermissionsService,
         private userService: AuthorizationService,
+        private preferencesService: PreferencesService,
     ) {}
 
     searchText = '';
-    pageSize = 20;
+    pageSize = this.preferencesService.pageSize;
     totalCount = 200;
     selection = new SelectionModel<ImportInstancesModel>(true, []);
     searchSub: Subscription = new Subscription();
@@ -106,7 +108,8 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe((e)=>{
+            this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load().subscribe();

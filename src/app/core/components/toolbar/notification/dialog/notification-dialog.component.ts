@@ -28,6 +28,7 @@ import { map } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { environment } from '../../../../../../environments/environment';
 import { AuthorizationService } from '../../../../services/authorization.service';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
  
 export enum Modes {
@@ -81,6 +82,7 @@ export class NotificationDialogComponent implements OnInit {
         private dialogRef: MatDialogRef<NotificationDialogComponent>,
         private fb: UntypedFormBuilder,
         private authorizationService: AuthorizationService,
+        public preferencesService: PreferencesService,
         @Inject(MAT_DIALOG_DATA) data: { notifications: NotificationModel[]; notificationService: NotificationService },
     ) {
         this.notifications = data.notifications;
@@ -150,10 +152,12 @@ export class NotificationDialogComponent implements OnInit {
     }
 
     moveNotificationPage($event: PageEvent) {
+        this.preferencesService.pageSize = $event.pageSize;
         this.lastNotificationPageEvent = $event;
     }
 
     moveBrokerPage($event: PageEvent) {
+        this.preferencesService.pageSize = $event.pageSize;
         this.lastBrokerPageEvent = $event;
         this.notificationService.listBrokers($event.pageSize, $event.pageIndex * $event.pageSize).subscribe(list => {
             this.brokers.data = list.brokers;

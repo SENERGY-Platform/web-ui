@@ -35,6 +35,7 @@ import {
     UsedInDeviceTypeQuery,
     UsedInDeviceTypeResponseElement
 } from '../device-types-overview/shared/used-in-device-type.model';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-functions',
@@ -43,7 +44,7 @@ import {
 })
 export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];
-    pageSize = 20;
+    pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<DeviceTypeFunctionModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<DeviceTypeFunctionModel>(true, []);
@@ -68,7 +69,8 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
         private authService: AuthorizationService,
-        private deviceTypeService: DeviceTypeService
+        private deviceTypeService: DeviceTypeService,
+        private preferencesService: PreferencesService,
     ) {}
 
     ngOnInit() {
@@ -78,7 +80,8 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=> {
+        this.paginator.page.subscribe((e)=> {
+            this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getFunctions().subscribe();

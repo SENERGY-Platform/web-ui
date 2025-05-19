@@ -22,7 +22,7 @@ import {
     MatSnackBarRef
 } from '@angular/material/snack-bar';
 import {merge, Subscription} from 'rxjs';
-import {MatPaginator} from '@angular/material/paginator';
+import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatTableDataSource} from '@angular/material/table';
@@ -36,6 +36,7 @@ import {
     WaitingRoomMultiWmbusKeyEditDialogComponent
 } from './dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
 import {ClosableSnackBarComponent} from '../../../core/components/closable-snack-bar/closable-snack-bar.component';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-waiting-room',
@@ -71,6 +72,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         private waitingRoomService: WaitingRoomService,
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
+        public preferencesService: PreferencesService,
     ) {}
 
     ngOnInit() {
@@ -100,7 +102,10 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         this.ready = false;
     }
 
-    selectionClear(): void {
+    selectionClear($event: PageEvent | undefined = undefined): void {
+        if ($event !== undefined) {
+            this.preferencesService.pageSize = $event.pageSize;
+        }
         this.selection.clear();
     }
 

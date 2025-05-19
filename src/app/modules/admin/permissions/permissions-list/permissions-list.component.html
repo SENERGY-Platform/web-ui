@@ -257,7 +257,7 @@
                         <mat-row *matRowDef="let row; columns: displayedColumns;" mat-row></mat-row>
 
                     </mat-table>
-                    <mat-paginator #paginator [length]="total" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
+                    <mat-paginator #paginator [length]="total" [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
                         showFirstLastButtons></mat-paginator>
                 </div>
             </mat-card-content>

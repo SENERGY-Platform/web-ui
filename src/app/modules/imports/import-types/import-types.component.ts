@@ -32,6 +32,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { CostService } from '../../cost/shared/cost.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-import-types',
@@ -40,7 +41,7 @@ import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissi
 })
 export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
     displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share'];
-    pageSize = 20;
+    pageSize = this.prefeencesService.pageSize;
     dataSource = new MatTableDataSource<ImportTypeModelWithCostEstimation>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<ImportTypeModel>(true, []);
@@ -65,6 +66,7 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
         private searchbarService: SearchbarService,
         private costService: CostService,
         private permissionsService: PermissionsService,
+        private prefeencesService: PreferencesService,
     ) { }
 
     ngOnInit(): void {
@@ -77,7 +79,8 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(() => {
+        this.paginator.page.subscribe((e) => {
+            this.prefeencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load().subscribe();

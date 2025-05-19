@@ -28,6 +28,7 @@ import {SearchbarService} from '../../../../core/components/searchbar/shared/sea
 import {forkJoin, Observable, Subscription} from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UtilService } from 'src/app/core/services/util.service';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 
 
@@ -37,7 +38,7 @@ import { UtilService } from 'src/app/core/services/util.service';
     styleUrls: ['./variables.component.css'],
 })
 export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, OnInit {
-    pageSize = 20;
+    pageSize = this.preferencesService.pageSize;
     sort = 'unix_timestamp_in_s.desc';
     keyRegex = '';
     ready = false;
@@ -63,7 +64,8 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
         private dialogsService: DialogsService,
         private dialog: MatDialog,
         private searchbarService: SearchbarService,
-        public utilsService: UtilService
+        public utilsService: UtilService,
+        private preferencesService: PreferencesService,
     ) {
         this.userHasCreateAuthorization = this.processIoService.userHasCreateAuthorization();
 
@@ -89,7 +91,8 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe((e)=>{
+            this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.loadVariables();

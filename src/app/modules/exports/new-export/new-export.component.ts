@@ -46,6 +46,7 @@ import * as _ from 'lodash';
 import { BrokerExportService } from '../shared/broker-export.service';
 import { PageEvent } from '@angular/material/paginator';
 import { AddTagFn } from '@ng-matero/extensions/select';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
     selector: 'senergy-new-export',
@@ -55,7 +56,7 @@ import { AddTagFn } from '@ng-matero/extensions/select';
 export class NewExportComponent implements OnInit {
     targetDb = 'db';
     targetBroker = 'broker';
-    defaultPageSize = 5;
+    defaultPageSize = this.preferencesService.pageSize;
     offset = 0;
     lastPageEvent: PageEvent | undefined;
 
@@ -132,6 +133,7 @@ export class NewExportComponent implements OnInit {
         private importInstancesService: ImportInstancesService,
         private importTypesService: ImportTypesService,
         private fb: UntypedFormBuilder,
+        private preferencesService: PreferencesService,
     ) {
         this.id = this.route.snapshot.paramMap.get('id');
 
@@ -780,6 +782,7 @@ export class NewExportComponent implements OnInit {
     }
 
     movePage($event: PageEvent) {
+        this.preferencesService.pageSize = $event.pageSize;
         this.lastPageEvent = $event;
         this.offset = this.lastPageEvent.pageIndex * this.lastPageEvent.pageSize;
     }

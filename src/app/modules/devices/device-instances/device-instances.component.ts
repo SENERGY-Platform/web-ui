@@ -42,6 +42,7 @@ import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 import {concatMap} from 'rxjs/operators';
 import {PermissionsService} from '../../permissions/shared/permissions.service';
 import { HubModel } from '../networks/shared/networks.model';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -75,6 +76,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         private dialog: MatDialog,
         private exportDataService: ExportDataService,
         private permissionsService: PermissionsService,
+        public preferencesService: PreferencesService,
     ) {
         this.getRouterParams();
     }
@@ -120,7 +122,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(() => {
+        this.paginator.page.subscribe((e) => {
+            this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load().subscribe();

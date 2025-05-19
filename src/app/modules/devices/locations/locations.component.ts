@@ -30,6 +30,7 @@ import { Sort, SortDirection } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 
 @Component({
@@ -61,6 +62,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         private snackBar: MatSnackBar,
         private router: Router,
         private dialogsService: DialogsService,
+        public preferencesService: PreferencesService,
     ) {}
 
     ngOnInit() {
@@ -73,7 +75,8 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe((e)=>{
+            this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getLocations().subscribe();
