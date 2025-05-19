@@ -158,3 +158,7 @@ table {
     padding-left: 8px;
     width: 100%;
 }
+
+.root {
+    position: relative;
+}

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Attribute, DeviceInstanceModel } from '../shared/device-instances.model';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { senergyConnectorLocalIdConstraint } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { AddTagFn } from '@ng-matero/extensions/select';
 
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',
@@ -32,6 +33,7 @@ export class DeviceInstancesEditDialogComponent {
     nicknameAttributeOrigin = 'shared';
     action = 'Edit';
     localIdIsEditable = false;
+    knownAttributes = ['anomaly-detector', 'timezone', 'inactive', 'last_message_max_age', 'monitor_connection_state', 'platform/mute-format-error', 'senergy/snowflake-canary-device', 'senergy/canary-device'];
 
     protocolConstraints: string[] = [];
     userHasUpdateDisplayNameAuthorization = false;
@@ -40,6 +42,7 @@ export class DeviceInstancesEditDialogComponent {
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesEditDialogComponent>,
         private deviceTypeService: DeviceTypeService,
+        private cd: ChangeDetectorRef,
 
         @Inject(MAT_DIALOG_DATA) private data: {
             device: DeviceInstanceModel;
@@ -55,18 +58,20 @@ export class DeviceInstancesEditDialogComponent {
         this.device.attributes?.forEach(value => {
             if (value.key === this.nicknameAttributeKey) {
                 this.displayname = value.value;
+            } else if (this.knownAttributes.indexOf(value.key) === -1) {
+                this.addAttribute()(value.key);
             }
         });
 
         const protocolsToConstraints: Map<string, string[]> = new Map<string, string[]>();
         this.deviceTypeService.getProtocols(9999, 0, 'name', 'asc').subscribe(protocols => {
-            if(protocols){
+            if (protocols) {
                 protocols.forEach(p => {
                     protocolsToConstraints.set(p.id, p.constraints);
                 });
             }
             this.deviceTypeService.getDeviceType(this.device.device_type_id).subscribe(dt => {
-                if(dt) {
+                if (dt) {
                     dt.services.forEach(s => {
                         this.protocolConstraints = this.protocolConstraints.concat(protocolsToConstraints.get(s.protocol_id) || []);
                     });
@@ -74,11 +79,11 @@ export class DeviceInstancesEditDialogComponent {
             });
         });
 
-        if(data.action != null) {
+        if (data.action != null) {
             this.action = data.action;
         }
 
-        if(data.localIdIsEditable != null) {
+        if (data.localIdIsEditable != null) {
             this.localIdIsEditable = data.localIdIsEditable;
         }
 
@@ -104,7 +109,7 @@ export class DeviceInstancesEditDialogComponent {
         if (!this.device.attributes) {
             this.device.attributes = [];
         }
-        this.device.attributes.push({ key: '', value: '', origin: 'web-ui'});
+        this.device.attributes.push({ key: '', value: '', origin: 'web-ui' });
     }
 
     editableAttribute(attr: Attribute) {
@@ -112,10 +117,10 @@ export class DeviceInstancesEditDialogComponent {
     }
 
     private setDisplayNameAttribute() {
-        if(!this.device.attributes) {
+        if (!this.device.attributes) {
             this.device.attributes = [];
         }
-        this.device.attributes = this.device.attributes?.filter((value)=>value.key !== this.nicknameAttributeKey);
+        this.device.attributes = this.device.attributes?.filter((value) => value.key !== this.nicknameAttributeKey);
         if (this.displayname !== '') {
             this.device.attributes?.push({
                 key: this.nicknameAttributeKey,
@@ -127,20 +132,20 @@ export class DeviceInstancesEditDialogComponent {
     }
 
     isValid(): boolean {
-        if(!this.localIdFieldIsValid()) {
+        if (!this.localIdFieldIsValid()) {
             return false;
         }
         return true;
     }
 
-    localIdFieldIsValid(): boolean{
+    localIdFieldIsValid(): boolean {
         return !this.protocolConstraints?.includes(senergyConnectorLocalIdConstraint) || isValidLocalId(this.device.local_id);
     }
 
     isValidLocalIdValidator(c: AbstractControl): ValidationErrors | null {
         if (!this.protocolConstraints?.includes(senergyConnectorLocalIdConstraint) || isValidLocalId(c.value)) {
             return null;
-        }else{
+        } else {
             return {
                 validateLocalId: {
                     valid: false
@@ -148,10 +153,22 @@ export class DeviceInstancesEditDialogComponent {
             };
         }
     }
+
+    addAttribute(): AddTagFn {
+        const that = this;
+        return (text: string) => {
+            that.knownAttributes.push(text);
+            const tmp = [...that.knownAttributes];
+            tmp.sort((a, b)  =>  a.toLowerCase().localeCompare(b.toLowerCase()));
+            that.knownAttributes = [];
+            that.knownAttributes = tmp;
+            that.cd.detectChanges();
+        };
+    }
 }
 
 function isValidLocalId(value: string): boolean {
-    if(!value) {
+    if (!value) {
         return true;
     }
     return !(value.includes && (value.includes('#') || value.includes('+') || value.includes('/')));

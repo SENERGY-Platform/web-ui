@@ -67,7 +67,7 @@
                                     *ngFor="let attr of deviceTypeAttributes.controls; let i = index" class="attribute">
                                     <mat-form-field appearance="outline" class="third-width" color="accent">
                                         <mat-label>Key</mat-label>
-                                        <input matInput formControlName="key">
+                                        <mtx-select formControlName="key" appendTo=".root" [items]="knownDTAttributes" [addTag]="addDTAttribute()"></mtx-select>
                                         <mat-error senergyError label="Key"></mat-error>
                                     </mat-form-field>
                                     =
@@ -196,7 +196,7 @@
                                                                     <mat-form-field appearance="outline"
                                                                         class="third-width" color="accent">
                                                                         <mat-label>Key</mat-label>
-                                                                        <input matInput formControlName="key">
+                                                                        <mtx-select formControlName="key" appendTo=".root" [items]="knownServiceAttributes" [addTag]="addServiceAttribute()"></mtx-select>
                                                                         <mat-error senergyError label="Key"></mat-error>
                                                                     </mat-form-field>
                                                                     =

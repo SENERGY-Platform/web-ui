@@ -15,55 +15,59 @@
   -->
 
 <h2 mat-dialog-title>{{action}} Device</h2>
-
-<mat-dialog-content>
-    <form class="form">
-        <div *ngIf="userHasUpdateDisplayNameAuthorization">
-            <mat-form-field appearance="outline" class="full-width" color="accent">
-                <mat-label>Display Name</mat-label>
-                <input matInput [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}">
-                <mat-error senergyError label="Display Name"></mat-error>
-            </mat-form-field>
-        </div>
-  
-        <div *ngIf="localIdIsEditable">
-            <mat-form-field appearance="outline" class="full-width" color="accent">
-                <mat-label>Local ID</mat-label>
-                <input matInput [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}" [generic_validator]="isValidLocalIdValidator">
-                <mat-error senergyError label="Local ID"></mat-error>
-            </mat-form-field>
-        </div>
-
-        <div class="attributes" *ngIf="userHasUpdateAttributesAuthorization">
-            <div class="divider">
-                Attributes
-                <mat-divider></mat-divider>
+<div class="root">
+    <mat-dialog-content>
+        <form class="form">
+            <div *ngIf="userHasUpdateDisplayNameAuthorization">
+                <mat-form-field appearance="outline" class="full-width" color="accent">
+                    <mat-label>Display Name</mat-label>
+                    <input matInput [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}">
+                    <mat-error senergyError label="Display Name"></mat-error>
+                </mat-form-field>
             </div>
-            <div *ngFor="let attr of device.attributes; let i = index" class="attribute">
-                <ng-container *ngIf="attr.key !== nicknameAttributeKey">
-                    <mat-form-field appearance="outline" class="third-width" color="accent">
-                        <mat-label>Key</mat-label>
-                        <input matInput [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
-                        <mat-error senergyError label="Key"></mat-error>
-                    </mat-form-field>
-                    =
-                    <mat-form-field appearance="outline" class="third-width" color="accent">
-                        <mat-label>Value</mat-label>
-                        <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
-                        <mat-error senergyError label="Value"></mat-error>
-                    </mat-form-field>
-                    <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </ng-container>
+
+            <div *ngIf="localIdIsEditable">
+                <mat-form-field appearance="outline" class="full-width" color="accent">
+                    <mat-label>Local ID</mat-label>
+                    <input matInput [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}"
+                        [generic_validator]="isValidLocalIdValidator">
+                    <mat-error senergyError label="Local ID"></mat-error>
+                </mat-form-field>
             </div>
-            <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
-        </div>
-    </form>
-</mat-dialog-content>
+
+            <div class="attributes" *ngIf="userHasUpdateAttributesAuthorization">
+                <div class="divider">
+                    Attributes
+                    <mat-divider></mat-divider>
+                </div>
+                <div *ngFor="let attr of device.attributes; let i = index" class="attribute">
+                    <ng-container *ngIf="attr.key !== nicknameAttributeKey">
+                        <mat-form-field appearance="outline" class="third-width" color="accent">
+                            <mat-label>Key</mat-label>
+                            <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" dropdownPosition="top"
+                                [disabled]="!editableAttribute(attr)" [items]="knownAttributes" appendTo=".root" [addTag]="addAttribute()"></mtx-select>
+                            <mat-error senergyError label="Key"></mat-error>
+                        </mat-form-field>
+                        =
+                        <mat-form-field appearance="outline" class="third-width" color="accent">
+                            <mat-label>Value</mat-label>
+                            <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
+                                [disabled]="!editableAttribute(attr)">
+                            <mat-error senergyError label="Value"></mat-error>
+                        </mat-form-field>
+                        <button mat-icon-button color="warn" (click)="removeAttr(i)"
+                            [disabled]="!editableAttribute(attr)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </ng-container>
+                </div>
+                <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+            </div>
+        </form>
+    </mat-dialog-content>
+</div>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="save()" [disabled]="!isValid()">Save</button>
 </mat-dialog-actions>
-

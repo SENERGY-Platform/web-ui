@@ -25,13 +25,14 @@ import {
     DeviceGroupHelperResultModel,
     DeviceGroupModel,
 } from '../shared/device-groups.model';
-import {Attribute, DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
+import { Attribute, DeviceInstancesBaseModel } from '../../device-instances/shared/device-instances.model';
 import { debounceTime, delay } from 'rxjs/operators';
 import { DeviceTypeAspectModel, DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
 import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/pipeline-registry.service';
-import {DeviceInstancesService} from '../../device-instances/shared/device-instances.service';
+import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
+import { AddTagFn } from '@ng-matero/extensions/select';
 
 @Component({
     selector: 'senergy-device-groups-edit',
@@ -42,6 +43,7 @@ export class DeviceGroupsEditComponent implements OnInit {
     id = '';
     deviceGroupForm!: FormGroup; // DeviceGroupModel
     attributes: Attribute[] = [];
+    knownAttributes = ['platform/generated', 'platform/smart_service_task', 'platform/smart_service_instance', 'platform/smart_service_definition'];
 
     selectedForm: FormControl = new FormControl([]); // []DeviceInstancesBaseModel
     selectableForm: FormControl = new FormControl([]); // []DeviceGroupHelperOptionsModel
@@ -107,7 +109,7 @@ export class DeviceGroupsEditComponent implements OnInit {
         }
     }
 
-    close(): void {}
+    close(): void { }
 
     save(): void {
         const deviceGroup = this.getDeviceGroupFromForm();
@@ -126,7 +128,18 @@ export class DeviceGroupsEditComponent implements OnInit {
         if (!this.attributes) {
             this.attributes = [];
         }
-        this.attributes.push({ key: '', value: '', origin: 'web-ui'});
+        this.attributes.push({ key: '', value: '', origin: 'web-ui' });
+    }
+
+    addAttributeKey(): AddTagFn {
+        const that = this;
+        return (text: string) => {
+            that.knownAttributes.push(text);
+            const tmp = [...that.knownAttributes];
+            tmp.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+            that.knownAttributes = [];
+            that.knownAttributes = tmp;
+        };
     }
 
     editableAttribute(attr: Attribute) {
@@ -212,7 +225,7 @@ export class DeviceGroupsEditComponent implements OnInit {
 
     private reload(deviceGroup: DeviceGroupModel | null) {
         if (deviceGroup) {
-            this.router.routeReuseStrategy.shouldReuseRoute = function() {
+            this.router.routeReuseStrategy.shouldReuseRoute = function () {
                 return false;
             };
             this.router.onSameUrlNavigation = 'reload';
@@ -234,6 +247,11 @@ export class DeviceGroupsEditComponent implements OnInit {
                 if (deviceGroup !== null) {
                     this.initDeviceGroupFormGroup(deviceGroup);
                     this.attributes = deviceGroup.attributes || [];
+                    this.attributes.forEach(a => {
+                        if (this.knownAttributes.indexOf(a.key) === -1) {
+                            this.addAttributeKey()(a.key);
+                        }
+                    });
                 }
             });
         } else {
@@ -274,7 +292,7 @@ export class DeviceGroupsEditComponent implements OnInit {
         };
 
         if (idsForRepoSearch.length) {
-            this.deviceInstanceService.getDeviceInstances({limit: idsForRepoSearch.length, offset: 0, deviceIds: idsForRepoSearch}).subscribe((devices) => {
+            this.deviceInstanceService.getDeviceInstances({ limit: idsForRepoSearch.length, offset: 0, deviceIds: idsForRepoSearch }).subscribe((devices) => {
                 const d = devices.result;
                 for (const device of d) {
                     this.deviceCache.set(device.id, device);

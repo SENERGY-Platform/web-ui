@@ -53,6 +53,7 @@ import {
     DeviceTypesContentVariableJsonDialogComponent
 } from './dialogs/device-types-content-variable-json-dialog.component';
 import { Attribute } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { AddTagFn } from '@ng-matero/extensions/select';
 
 interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     tree?: NestedTreeControl<DeviceTypeContentVariableModel>;
@@ -88,6 +89,8 @@ export class DeviceTypesComponent implements OnInit {
     userHasEditAuthorization = this.deviceTypeService.userHasUpdateAuthorization();
 
     timeAttributeKey = 'senergy/time_path';
+    knownDTAttributes = ['senergy/canary-device-type', 'senergy/snowflake-canary-device-type', 'senergy/local-mqtt', 'senergy/zigbee-dc', 'senergy/zigbee-vendor', 'senergy/zigbee-model', 'senergy/zwave-dc', 'senergy/zwave-type-mapping-key'];
+    knownServiceAttributes = ['senergy/local-mqtt/event-topic-tmpl', 'senergy/local-mqtt/cmd-topic-tmpl', 'senergy/local-mqtt/resp-topic-tmpl', 'senergy/time_path', 'json-unwrap-input', 'json-unwrap-output', 'mgw-service-selection-condition'];
 
     constructor(
         private _formBuilder: FormBuilder,
@@ -418,7 +421,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     editDeviceType() {
-        this.reload({id: this.id} as DeviceTypeModel); // no more info needed
+        this.reload({ id: this.id } as DeviceTypeModel); // no more info needed
     }
 
     private cleanUpServices(): DeviceTypeServiceModel[] {
@@ -463,6 +466,12 @@ export class DeviceTypesComponent implements OnInit {
                         this.initFirstFormGroup(deviceType);
                         this.initSecondFormGroup(deviceType);
                         this.initAttrFormGroup(deviceType);
+
+                        deviceType.attributes?.forEach(a => {
+                            if (this.knownDTAttributes.indexOf(a.key) === -1) {
+                                this.addDTAttribute()(a.key);
+                            }
+                        });
                     }
 
                     // after loading data and init first and second form group
@@ -569,13 +578,6 @@ export class DeviceTypesComponent implements OnInit {
                     deviceTypeService.attributes ? deviceTypeService.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : []
                 )
             });
-            if ((fg.get('attributes') as FormArray).controls.find(c => c.get('key')?.value === this.timeAttributeKey) === undefined) {
-                (fg.get('attributes') as FormArray).insert(0, this.createAttrGroup({
-                    key: this.timeAttributeKey,
-                    value: '',
-                    origin: 'web-ui'
-                }));
-            }
             return fg;
         }
     }
@@ -770,7 +772,7 @@ export class DeviceTypesComponent implements OnInit {
         );
 
         observables.push(
-            this.conceptsService.getConceptsWithCharacteristics({limit: 9999}).pipe(
+            this.conceptsService.getConceptsWithCharacteristics({ limit: 9999 }).pipe(
                 map((concepts) => {
                     this.concepts = concepts.result;
                 }),
@@ -930,5 +932,27 @@ export class DeviceTypesComponent implements OnInit {
         }
         cv.sub_content_variables?.forEach(sub => this.getPathOptionsRec(sub, characteristicIds, result, path));
         return result;
+    }
+
+    addDTAttribute(): AddTagFn {
+        const that = this;
+        return (text: string) => {
+            that.knownDTAttributes.push(text);
+            const tmp = [...that.knownDTAttributes];
+            tmp.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+            that.knownDTAttributes = [];
+            that.knownDTAttributes = tmp;
+        };
+    }
+
+    addServiceAttribute(): AddTagFn {
+        const that = this;
+        return (text: string) => {
+            that.knownServiceAttributes.push(text);
+            const tmp = [...that.knownServiceAttributes];
+            tmp.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+            that.knownServiceAttributes = [];
+            that.knownServiceAttributes = tmp;
+        };
     }
 }

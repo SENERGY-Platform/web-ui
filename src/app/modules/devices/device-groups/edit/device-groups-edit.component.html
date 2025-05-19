@@ -13,134 +13,129 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="device-group-edit-container" fxLayout="column" fxLayout.gt-xs="row">
+<div class="root">
+    <div class="device-group-edit-container" fxLayout="column" fxLayout.gt-xs="row">
 
-    <div fxLayout="column" fxFlex class="device-group-state" [ngClass.gt-xs]="'device-group-state-large'">
-        <h2>Device-Group</h2>
+        <div fxLayout="column" fxFlex class="device-group-state" [ngClass.gt-xs]="'device-group-state-large'">
+            <h2>Device-Group</h2>
 
-        <div *ngIf="deviceGroupForm" [formGroup]="deviceGroupForm">
-            <mat-form-field appearance="outline" class="full-width" color="accent">
-                <mat-label>Name</mat-label>
-                <input matInput formControlName="name" required>
-                <mat-error senergyError label="Name"></mat-error>
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width" color="accent">
-                <mat-label>Image</mat-label>
-                <input matInput formControlName="image">
-                <mat-error senergyError label=""></mat-error>
-            </mat-form-field>
+            <div *ngIf="deviceGroupForm" [formGroup]="deviceGroupForm">
+                <mat-form-field appearance="outline" class="full-width" color="accent">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name" required>
+                    <mat-error senergyError label="Name"></mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width" color="accent">
+                    <mat-label>Image</mat-label>
+                    <input matInput formControlName="image">
+                    <mat-error senergyError label=""></mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="capabilities-container">
+                <mat-label>Capabilities</mat-label>
+                <mat-chip-listbox aria-label="Capabilities">
+                    <mat-chip-option *ngFor="let capability of capabilities.value">
+                        {{capability.interaction}} {{capability.function_description || capability.function_name ||
+                        capability.function_id}} {{capability.aspect_name || capability.device_class_name}}
+                    </mat-chip-option>
+                </mat-chip-listbox>
+            </div>
+
+            <div class="selected-devices-container">
+                <mat-label>Selected Devices</mat-label>
+                <div *ngIf="selectedForm.value.length > 0">
+                    <mat-card appearance="outlined" *ngFor="let item of selectedForm.value" fxLayout="row"
+                        fxLayoutAlign="space-between center" class="selected-device-card">
+                        <mat-card-title>
+                            <div class="selected-device-info">
+                                <div class="selected-device-name">
+                                    {{item.display_name || item.name || item.id}}
+                                </div>
+                            </div>
+                        </mat-card-title>
+                        <mat-card-actions>
+                            <div class="selected-device-ctrl">
+                                <button mat-icon-button color="accent" [disabled]="isSaving"
+                                    (click)="removeDevice(item.id)" matTooltip="Remove">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
+                        </mat-card-actions>
+                    </mat-card>
+                </div>
+
+            </div>
+
+            <div class="attributes">
+                <div class="divider">
+                    Attributes
+                    <mat-divider></mat-divider>
+                </div>
+                <div *ngFor="let attr of attributes; let i = index" class="attribute">
+                    <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
+                        <mat-label>Key</mat-label>
+                        <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
+                            [disabled]="!editableAttribute(attr)" appendTo=".root" [items]="knownAttributes" [addTag]="addAttributeKey()"></mtx-select>
+                        <mat-error senergyError label="Key"></mat-error>
+                    </mat-form-field>
+                    <span style="width: 2em"></span>
+                    <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
+                        <mat-label>Value</mat-label>
+                        <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
+                            [disabled]="!editableAttribute(attr)">
+                        <mat-error senergyError label="Value"></mat-error>
+                    </mat-form-field>
+                    <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+                <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+            </div>
+
+            <div class="controls" fxLayoutAlign="end center">
+                <button mat-raised-button color="accent" [class.spinner]="isSaving" [disabled]="isSaving"
+                    (click)="save()">Save
+                </button>
+            </div>
         </div>
-
-        <div class="capabilities-container">
-            <mat-label>Capabilities</mat-label>
-            <mat-chip-listbox aria-label="Capabilities">
-                <mat-chip-option *ngFor="let capability of capabilities.value">
-                    {{capability.interaction}} {{capability.function_description || capability.function_name || capability.function_id}} {{capability.aspect_name || capability.device_class_name}}
-                </mat-chip-option>
-            </mat-chip-listbox>
-        </div>
-
-        <div class="selected-devices-container">
-            <mat-label>Selected Devices</mat-label>
-            <div *ngIf="selectedForm.value.length > 0">
-                <mat-card appearance="outlined" *ngFor="let item of selectedForm.value" fxLayout="row"
-                          fxLayoutAlign="space-between center" class="selected-device-card">
+        <div fxLayout="column" Class="selectables" [ngClass.gt-xs]="'selectables-large'">
+            <h2>Selectable-Devices</h2>
+            <mat-form-field appearance="outline" class="full-width" color="accent">
+                <mat-label>Search</mat-label>
+                <input matInput [formControl]="searchText">
+                <mat-icon matPrefix *ngIf="searchText.value === ''">search</mat-icon>
+                <mat-icon class="pointer" matPrefix *ngIf="searchText.value !== ''" (click)="resetSearchText()">close
+                </mat-icon>
+                <mat-error senergyError label="Search"></mat-error>
+            </mat-form-field>
+            <div class="selectable-devices">
+                <mat-card appearance="outlined" fxLayout="row" fxLayoutAlign="space-between center"
+                    *ngFor="let option of selectableForm.value" class="selectable-card">
                     <mat-card-title>
-                    <div class="selected-device-info">
-                        <div class="selected-device-name">
-                            {{item.display_name || item.name || item.id}}
+                        <div class="selectable-device-info">
+                            <div matTooltip="{{option.device.display_name || option.device.name || option.device.id}}"
+                                class="selectable-device-name">
+                                {{option.device.display_name || option.device.name || option.device.id}}
+                            </div>
                         </div>
-                    </div>
                     </mat-card-title>
                     <mat-card-actions>
-                    <div class="selected-device-ctrl">
-                        <button mat-icon-button color="accent" [disabled]="isSaving" (click)="removeDevice(item.id)"
-                                matTooltip="Remove">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
+                        <div class="selectable-device-ctrl">
+                            <button mat-icon-button color="accent" [disabled]="isSaving"
+                                (click)="addDevice(option.device.id)" matTooltip="Add"
+                                *ngIf="option.maintains_group_usability">
+                                <mat-icon>add</mat-icon>
+                            </button>
+                            <button mat-icon-button color="warn" [disabled]="isSaving"
+                                (click)="addDevice(option.device.id)" matTooltip="Add (wont maintain group usability)"
+                                *ngIf="!option.maintains_group_usability">
+                                <mat-icon>add</mat-icon>
+                            </button>
+                        </div>
                     </mat-card-actions>
                 </mat-card>
             </div>
-
-        </div>
-
-        <div class="attributes">
-            <div class="divider">
-                Attributes
-                <mat-divider></mat-divider>
-            </div>
-            <div *ngFor="let attr of attributes; let i = index" class="attribute">
-                <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
-                    <mat-label>Key</mat-label>
-					<input matInput [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
-                           [disabled]="!editableAttribute(attr)">
-                    <mat-error senergyError label="Key"></mat-error>
-                </mat-form-field>
-                <span style="width: 2em"></span>
-                <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
-                    <mat-label>Value</mat-label>
-                    <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
-                           [disabled]="!editableAttribute(attr)">
-                    <mat-error senergyError label="Value"></mat-error>
-                </mat-form-field>
-                <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">
-                    <mat-icon>delete</mat-icon>
-                </button>
-            </div>
-            <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
-        </div>
-
-        <div class="controls" fxLayoutAlign="end center">
-            <button mat-raised-button color="accent"
-                    [class.spinner]="isSaving"
-                    [disabled]="isSaving"
-                    (click)="save()">Save
-            </button>
-        </div>
-    </div>
-    <div fxLayout="column" Class="selectables" [ngClass.gt-xs]="'selectables-large'">
-        <h2>Selectable-Devices</h2>
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Search</mat-label>
-            <input matInput [formControl]="searchText">
-            <mat-icon matPrefix *ngIf="searchText.value === ''">search</mat-icon>
-            <mat-icon class="pointer" matPrefix *ngIf="searchText.value !== ''" (click)="resetSearchText()">close
-            </mat-icon>
-            <mat-error senergyError label="Search"></mat-error>
-        </mat-form-field>
-        <div class="selectable-devices">
-            <mat-card appearance="outlined" fxLayout="row" fxLayoutAlign="space-between center"
-                      *ngFor="let option of selectableForm.value" class="selectable-card">
-                <mat-card-title>
-                    <div class="selectable-device-info">
-                        <div matTooltip="{{option.device.display_name || option.device.name || option.device.id}}"
-                             class="selectable-device-name">
-                            {{option.device.display_name || option.device.name || option.device.id}}
-                        </div>
-                    </div>
-                </mat-card-title>
-                <mat-card-actions>
-                    <div class="selectable-device-ctrl">
-                        <button mat-icon-button color="accent" [disabled]="isSaving"
-                                (click)="addDevice(option.device.id)" matTooltip="Add"
-                                *ngIf="option.maintains_group_usability">
-                            <mat-icon>add</mat-icon>
-                        </button>
-                        <button mat-icon-button color="warn" [disabled]="isSaving" (click)="addDevice(option.device.id)"
-                                matTooltip="Add (wont maintain group usability)"
-                                *ngIf="!option.maintains_group_usability">
-                            <mat-icon>add</mat-icon>
-                        </button>
-                    </div>
-                </mat-card-actions>
-            </mat-card>
         </div>
     </div>
 </div>
-
-
-
-
-
-

@@ -307,9 +307,7 @@ describe('DeviceTypesComponent', () => {
                     description: 'serv_desc',
                     protocol_id: 'protocol_1',
                     interaction: 'event',
-                    attributes: [
-                        {key: 'senergy/time_path', value: '', origin: 'web-ui'}
-                    ],
+                    attributes: [],
                     inputs: [
                         {
                             id: '',
@@ -376,9 +374,7 @@ describe('DeviceTypesComponent', () => {
                         description: 'serv_desc',
                         protocol_id: 'protocol_1',
                         interaction: 'event',
-                        attributes: [
-                            {key: 'senergy/time_path', value: '', origin: 'web-ui'}
-                        ],
+                        attributes: [],
                         inputs: [
                             {
                                 id: 'input_id_1',
