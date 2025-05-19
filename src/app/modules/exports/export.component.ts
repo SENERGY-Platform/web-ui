@@ -237,7 +237,18 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.sort.direction,
                 this.showGenerated ? undefined : false,
                 this.searchField,
-            );
+            ).pipe(
+                map((resp: ExportResponseModel | null) => {
+                    if (resp !== null) {
+                        this.exports = resp.instances || [];
+                        if (this.exports === undefined) {
+                            this.exports = [];
+                        }
+                        this.totalCount = resp.total || 0;
+                        this.exportsDataSource.data = this.exports;
+                    }
+                    return resp;
+                }));
         } else {
             obs = this.exportService.getExports(
                 false,
@@ -262,7 +273,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 }),
                 concatMap(_ => this.loadExportPermissions()),
                 concatMap(_ => {
-                    if (this.exports !=null && this.exports !== undefined && this.exports.length > 0) {
+                    if (this.exports != null && this.exports !== undefined && this.exports.length > 0) {
                         const exportIds = this.exports.filter(e => e.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb && e.ID !== undefined && this.permissionsPerExports.find(x => x.id === e.ID)?.execute === true).map(e => e.ID) as string[];
                         return this.exportDataService.getTimescaleExportUsage(exportIds).pipe(map(usage => {
                             this.usage = usage;
