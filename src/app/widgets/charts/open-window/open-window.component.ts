@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, HostListener, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Subscription, map, Observable, concatMap, of, forkJoin, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
@@ -29,8 +29,8 @@ import { OpenWindowEditComponent } from './dialog/edit/edit.component';
 import { TimelineComponent } from '../shared/chart-types/timeline/timeline.component';
 
 interface InitCheck {
-  message: string;
-  anyExportInInitPhase: boolean;
+    message: string;
+    anyExportInInitPhase: boolean;
 }
 
 @Component({
@@ -38,7 +38,7 @@ interface InitCheck {
     templateUrl: './open-window.component.html',
     styleUrls: ['./open-window.component.css']
 })
-export class OpenWindowComponent implements OnInit, OnChanges {
+export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
     ready = false;
     init = false;
     refreshing = false;
@@ -59,30 +59,33 @@ export class OpenWindowComponent implements OnInit, OnChanges {
     @Input() userHasUpdateNameAuthorization = false;
 
     constructor(
-      private dashboardService: DashboardService,
-      private elementSizeService: ElementSizeService,
-      private exportDataService: ExportDataService,
-      private errorHandlerService: ErrorHandlerService,
-      private dialog: MatDialog
-    ) {}
+        private dashboardService: DashboardService,
+        private elementSizeService: ElementSizeService,
+        private exportDataService: ExportDataService,
+        private errorHandlerService: ErrorHandlerService,
+        private dialog: MatDialog,
+        private el: ElementRef,
+    ) { }
 
-
-    resizeTimeout = 0;
-    @HostListener('window:resize')
-    onResize() {
-        if (this.resizeTimeout === 0) {
-            this.resizeTimeout = window.setTimeout(() => {
+    resizeTimeout: any;
+    ngAfterViewInit(): void {
+        // use this hook, to get the resize sizes from the correct widget
+        const ro = new ResizeObserver((_ => {
+            // debouncing redraws due to many resize calls
+            clearTimeout(this.resizeTimeout);
+            this.resizeTimeout = setTimeout(() => {
                 this.resize();
-                this.resizeTimeout = 0;
-            }, 500);
-        }
+
+            }, 30);
+        }));
+        ro.observe(this.el.nativeElement);
     }
 
     @ViewChild(TimelineComponent) timelineChart!: TimelineComponent;
 
     ngOnInit(): void {
         this.widgetIsConfigured();
-        if(!this.notConfigured) {
+        if (!this.notConfigured) {
             this.update();
         }
         this.scheduleRefresh();
@@ -94,7 +97,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
 
     widgetIsConfigured() {
         this.notConfigured = this.widget.properties.windowExports === undefined;
-        if(this.notConfigured) {
+        if (this.notConfigured) {
             return;
         }
     }
@@ -102,7 +105,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
     private update() {
         this.operatorInInitPhase().pipe(
             concatMap((initPhase: InitCheck) => {
-                if(initPhase.anyExportInInitPhase) {
+                if (initPhase.anyExportInInitPhase) {
                     this.message = initPhase.message;
                     return of(true);
                 }
@@ -128,7 +131,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
         const exports = this.widget.properties?.windowExports || [];
 
         exports.forEach(exportConfig => {
-            if(exportConfig.id != null) {
+            if (exportConfig.id != null) {
                 requestPayloads.push({
                     exportId: exportConfig.id,
                     measurement: exportConfig.id,
@@ -139,16 +142,16 @@ export class OpenWindowComponent implements OnInit, OnChanges {
 
         return this.exportDataService.getLastValuesTimescale(requestPayloads).pipe(
             map((lastValuePerExport: TimeValuePairModel[]) => {
-                if(lastValuePerExport.length === 0) {
-                    throw(new Error('No last value for init check'));
+                if (lastValuePerExport.length === 0) {
+                    throw (new Error('No last value for init check'));
                 }
 
-                let initCheck = {message: '', anyExportInInitPhase: false};
+                let initCheck = { message: '', anyExportInInitPhase: false };
                 lastValuePerExport.forEach(lastValue => {
                     const initPhase = lastValue.value as string;
                     const exportIsInInitPhase = initPhase !== '' && initPhase != null;
-                    if(exportIsInInitPhase) {
-                        initCheck = {message: initPhase, anyExportInInitPhase: true};
+                    if (exportIsInInitPhase) {
+                        initCheck = { message: initPhase, anyExportInInitPhase: true };
                     }
                 });
 
@@ -222,29 +225,29 @@ export class OpenWindowComponent implements OnInit, OnChanges {
         const timeRangeType = this.widget.properties.windowTimeRange?.type || '';
 
         requestRange.set('timeRangeType', timeRangeType);
-        if(timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute) {
+        if (timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute) {
             const start = this.widget.properties.windowTimeRange?.start;
-            if(start != null && start !== '') {
+            if (start != null && start !== '') {
                 const date = new Date(start);
-                time['start'] =  date.toISOString();
+                time['start'] = date.toISOString();
                 requestRange.set('start', date);
             }
             const end = this.widget.properties.windowTimeRange?.end;
-            if(end != null && end !== '') {
+            if (end != null && end !== '') {
                 const date = new Date(end);
-                time['end'] =  date.toISOString();
+                time['end'] = date.toISOString();
                 requestRange.set('end', date);
             }
-        } else if(timeRangeType === ChartsExportRangeTimeTypeEnum.Relative) {
+        } else if (timeRangeType === ChartsExportRangeTimeTypeEnum.Relative) {
             const last = this.widget.properties.windowTimeRange?.time;
-            if(last != null) {
+            if (last != null) {
                 time['last'] = last + timeRangeLevel;
                 requestRange.set('timeRangeLevel', timeRangeLevel);
                 requestRange.set('timeCount', last);
             }
-        } else if(timeRangeType === ChartsExportRangeTimeTypeEnum.RelativeAhead) {
+        } else if (timeRangeType === ChartsExportRangeTimeTypeEnum.RelativeAhead) {
             const ahead = this.widget.properties.windowTimeRange?.time;
-            if(ahead != null) {
+            if (ahead != null) {
                 time['ahead'] = ahead + timeRangeLevel;
                 requestRange.set('timeRangeLevel', timeRangeLevel);
                 requestRange.set('timeCount', ahead);
@@ -271,7 +274,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
                     return throwError(() => resp.error);
                 }
 
-                if(((resp as any).length || 0) === 0) {
+                if (((resp as any).length || 0) === 0) {
                     this.message = 'No data';
                     return throwError(() => new Error('no data'));
                 }
@@ -285,10 +288,10 @@ export class OpenWindowComponent implements OnInit, OnChanges {
     }
 
     getMedianTimeGap(deviceData: any[][]): number {
-        if (deviceData.length < 2){
+        if (deviceData.length < 2) {
             return 0;
         }
-        const testSet = deviceData.length>1000 ? deviceData.slice(0, 1000) : deviceData;
+        const testSet = deviceData.length > 1000 ? deviceData.slice(0, 1000) : deviceData;
         let pred = new Date(deviceData[0][0]);
         const timeGaps = [];
         for (let i = 1; i < testSet.length; i++) {
@@ -309,19 +312,19 @@ export class OpenWindowComponent implements OnInit, OnChanges {
 
     calcRelativeTimeRange(timeRangeType: string, timeRangeLevel: string, timeCount: number): [Date, Date] {
         const now = new Date();
-        if (timeRangeLevel === 'months'){
-            if (timeRangeType==='relative') {
+        if (timeRangeLevel === 'months') {
+            if (timeRangeType === 'relative') {
                 const start = new Date(new Date(now).setMonth(now.getMonth() - timeCount));
                 return [start, now];
-            }else{
+            } else {
                 const end = new Date(new Date(now).setMonth(now.getMonth() + timeCount));
                 return [now, end];
             }
         } else if (timeRangeLevel === 'y') {
-            if (timeRangeType==='relative') {
+            if (timeRangeType === 'relative') {
                 const start = new Date(new Date(now).setFullYear(now.getFullYear() - timeCount));
                 return [start, now];
-            }else{
+            } else {
                 const end = new Date(new Date(now).setFullYear(now.getFullYear() + timeCount));
                 return [now, end];
             }
@@ -343,7 +346,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
                 throw new Error('Open Window Widget: No valid TimeRangeType given');
             }
 
-            if (timeRangeType==='relative') {
+            if (timeRangeType === 'relative') {
                 const start = new Date(now.getTime() - delta);
                 return [start, now];
             } else {
@@ -353,11 +356,11 @@ export class OpenWindowComponent implements OnInit, OnChanges {
         }
     }
 
-    getTimeRange(timeRequest: Map<string,any>): [Date, Date] {
+    getTimeRange(timeRequest: Map<string, any>): [Date, Date] {
         if (timeRequest.has('timeRangeType')) {
             const timeRangeType = timeRequest.get('timeRangeType');
             if (timeRangeType === 'absolute') {
-                if (timeRequest.has('start')  && timeRequest.has('end')) {
+                if (timeRequest.has('start') && timeRequest.has('end')) {
                     return [timeRequest.get('start') as Date, timeRequest.get('end') as Date];
                 }
             } else if (timeRangeType === 'relative' || timeRangeType === 'relative ahead') {
@@ -369,25 +372,25 @@ export class OpenWindowComponent implements OnInit, OnChanges {
         throw new Error('Open Window Widget: No valid TimeRangeType given');
     }
 
-    fillDataGaps(deviceData: any[][], timeRequest: Map<string,any>, resolution: number = 30): any[][] {
+    fillDataGaps(deviceData: any[][], timeRequest: Map<string, any>, resolution: number = 30): any[][] {
         if (resolution === 0) {
             throw new RangeError('Open Window Widget: resolution to fill data gaps must not be 0.');
         }
         const thresh = this.getGapThreshold(resolution);
         const [startTime, endTime] = this.getTimeRange(timeRequest);
         let succ: Date = endTime;
-        const updates: any [][] = [];
-        for (let i = 0; i < deviceData.length+1; i++) {
-            const current = i < deviceData.length ? new Date(deviceData[i][0]): startTime;
+        const updates: any[][] = [];
+        for (let i = 0; i < deviceData.length + 1; i++) {
+            const current = i < deviceData.length ? new Date(deviceData[i][0]) : startTime;
             const diffTime = Math.abs(succ.getTime() - current.getTime());
             const gapSec = Math.floor(diffTime / (1000));
             if (gapSec > thresh) {
-                const succTimeDiff = i===0 ? 0: (resolution * 1000); // end point can be taken as it is, else create new point with timediff
+                const succTimeDiff = i === 0 ? 0 : (resolution * 1000); // end point can be taken as it is, else create new point with timediff
                 const newEndDate = new Date(succ.getTime() - succTimeDiff);
                 const newEndDp = [newEndDate.toISOString(), null];
                 updates.push([i, newEndDp]);
 
-                const startTimeDiff = i===deviceData.length ? 0: (resolution * 1000); // start point can be taken as it is
+                const startTimeDiff = i === deviceData.length ? 0 : (resolution * 1000); // start point can be taken as it is
                 const newStartDate = new Date(current.getTime() + startTimeDiff);
                 const newStartDp = [newStartDate.toISOString(), null];
                 updates.push([i, newStartDp]);
@@ -396,7 +399,7 @@ export class OpenWindowComponent implements OnInit, OnChanges {
         }
         let counter = 0;
         updates.forEach((update) => {
-            deviceData.splice(update[0]+counter, 0, update[1]);
+            deviceData.splice(update[0] + counter, 0, update[1]);
             counter = counter + 1;
         });
         return deviceData;
@@ -404,18 +407,18 @@ export class OpenWindowComponent implements OnInit, OnChanges {
 
     getGapThreshold(res: number): number {
         const resolutionToGapThreshold = {
-            '1min' : (5*60), // in seconds
-            '5min' : (15*60),
-            '15min' : (30*60),
+            '1min': (5 * 60), // in seconds
+            '5min': (15 * 60),
+            '15min': (30 * 60),
         };
-        if (res<=(60)) {
+        if (res <= (60)) {
             return resolutionToGapThreshold['1min'];
-        } else if (res<=(5*60)) {
+        } else if (res <= (5 * 60)) {
             return resolutionToGapThreshold['5min'];
-        } else if (res<=(15*60)) {
+        } else if (res <= (15 * 60)) {
             return resolutionToGapThreshold['15min'];
         } else {
-            return 3*res;
+            return 3 * res;
         }
     }
 

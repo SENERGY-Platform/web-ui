@@ -31,10 +31,10 @@
             <mat-error senergyError label="Description"></mat-error>
         </mat-form-field>
         <div fxLayout="row">
-            <div id="senergy-diagram-editor" fxFlex="70">
+            <div id="senergy-diagram-editor" style="width: 70%">
                 <senergy-diagram-editor></senergy-diagram-editor>
             </div>
-            <div id="diagram-operators" fxFlex="30" class="mat-elevation-z1" >
+            <div id="diagram-operators" style="width: 30%" class="mat-elevation-z1" >
                 <div style="overflow: auto; height: {{listHeight}} px">
                     <mat-list>
                         <mat-list-item *ngFor="let item of operators">

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ResponsiveService } from '../../core/services/responsive.service';
 import { DashboardService } from './shared/dashboard.service';
 import { DashboardModel } from './shared/dashboard.model';
@@ -22,7 +22,7 @@ import { WidgetModel, WidgetUpdatePosition } from './shared/dashboard-widget.mod
 import { DashboardWidgetManipulationModel } from './shared/dashboard-widget-manipulation.model';
 import { DashboardManipulationEnum } from './shared/dashboard-manipulation.enum';
 import { DashboardManipulationModel } from './shared/dashboard-manipulation.model';
-import { DisplayGrid, GridsterConfig, GridsterItem, GridType } from 'angular-gridster2';
+import { DisplayGrid, GridsterComponent, GridsterConfig, GridsterItem, GridType } from 'angular-gridster2';
 import { catchError, forkJoin, Observable, of, Subscription } from 'rxjs';
 import { DashboardTypesEnum } from './shared/dashboard-types.enum';
 import { DeviceStatusService } from '../../widgets/device-status/shared/device-status.service';
@@ -35,6 +35,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatTabGroup } from '@angular/material/tabs';
 import { ChartsService } from '../../widgets/charts/shared/charts.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
+import { SidenavService } from 'src/app/core/components/sidenav/shared/sidenav.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -64,6 +65,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     dragging = false;
     mouseHoverHeaderIndex = -1;
     @ViewChild(MatTabGroup, { static: false }) matTabGroup!: MatTabGroup;
+    @ViewChild(GridsterComponent) gridster: GridsterComponent|undefined;
 
     // Authorization
     userHasUpdateDashboardAuthorization = false;
@@ -88,14 +90,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private chartsService: ChartsService,
         private route: ActivatedRoute,
         private router: Router,
-        private errorHandlerService: ErrorHandlerService
-    ) {}
+        private errorHandlerService: ErrorHandlerService,
+        private sidenavService: SidenavService,
+        private el: ElementRef,
+    ) { }
 
     ngOnInit() {
         this.initGridCols();
         this.initDashboard();
         this.initWidgets();
         this.checkAuthorization();
+        this.sidenavService.toggleChanged.subscribe(_ => {
+            if (this.options.api && this.options.api.resize) {
+                this.options.api.resize();
+            } else if (this.gridster !== undefined) {
+                console.warn('api is undefined, gridster is DEfined'); // TODO
+                this.gridster?.onResize();
+            } else {
+                console.warn('could not resize gridster: api is undefined, gridster is undefined'); // TODO
+            }
+        });
     }
 
     ngOnDestroy(): void {
@@ -297,7 +311,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     if (widgetId) {
                         const widgetIndex = this.dashboards[idx].widgets.findIndex(w => w.id === widgetId);
                         if (widgetIndex !== -1 && widgetIndex !== this.zoomedWidgetIndex) {
-                            setTimeout(() => this.zoomWidget({widgetId, widget: this.dashboards[idx].widgets[widgetIndex], manipulation: DashboardManipulationEnum.Zoom, reloadAfterZoom: true, initialWidgetData: null}), 0);
+                            setTimeout(() => this.zoomWidget({ widgetId, widget: this.dashboards[idx].widgets[widgetIndex], manipulation: DashboardManipulationEnum.Zoom, reloadAfterZoom: true, initialWidgetData: null }), 0);
                         }
                     }
                 }
@@ -307,18 +321,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.dashSubscription = this.dashboardService.dashboardObservable.subscribe(
             (dashboardManipulationModel: DashboardManipulationModel) => {
                 switch (dashboardManipulationModel.manipulation) {
-                case DashboardManipulationEnum.Create: {
-                    this.addDashboard(dashboardManipulationModel);
-                    break;
-                }
-                case DashboardManipulationEnum.Delete: {
-                    this.deleteDashboard(dashboardManipulationModel);
-                    break;
-                }
-                case DashboardManipulationEnum.Update: {
-                    this.updateDashboard(dashboardManipulationModel);
-                    break;
-                }
+                    case DashboardManipulationEnum.Create: {
+                        this.addDashboard(dashboardManipulationModel);
+                        break;
+                    }
+                    case DashboardManipulationEnum.Delete: {
+                        this.deleteDashboard(dashboardManipulationModel);
+                        break;
+                    }
+                    case DashboardManipulationEnum.Update: {
+                        this.updateDashboard(dashboardManipulationModel);
+                        break;
+                    }
                 }
             },
         );
@@ -396,22 +410,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.dashWidgetSubscription = this.dashboardService.dashboardWidgetObservable.subscribe(
             (widgetManipulationModel: DashboardWidgetManipulationModel) => {
                 switch (widgetManipulationModel.manipulation) {
-                case DashboardManipulationEnum.Create: {
-                    this.addWidget(widgetManipulationModel);
-                    break;
-                }
-                case DashboardManipulationEnum.Delete: {
-                    this.deleteWidget(widgetManipulationModel);
-                    break;
-                }
-                case DashboardManipulationEnum.Update: {
-                    this.updateWidget(widgetManipulationModel);
-                    break;
-                }
-                case DashboardManipulationEnum.Zoom: {
-                    this.zoomWidget(widgetManipulationModel);
-                    break;
-                }
+                    case DashboardManipulationEnum.Create: {
+                        this.addWidget(widgetManipulationModel);
+                        break;
+                    }
+                    case DashboardManipulationEnum.Delete: {
+                        this.deleteWidget(widgetManipulationModel);
+                        break;
+                    }
+                    case DashboardManipulationEnum.Update: {
+                        this.updateWidget(widgetManipulationModel);
+                        break;
+                    }
+                    case DashboardManipulationEnum.Zoom: {
+                        this.zoomWidget(widgetManipulationModel);
+                        break;
+                    }
                 }
             },
         );
@@ -438,29 +452,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     private cleanUp(widget: WidgetModel): void {
         switch (widget.type) {
-        case DashboardTypesEnum.DeviceStatus:
-            this.deviceStatusService.deleteElements(widget.properties.elements);
-            break;
-        case DashboardTypesEnum.ProcessScheduler:
-            this.dialogsService
-                .openDeleteDialog('schedules created by the widget ' + widget.name)
-                .afterClosed()
-                .subscribe((yes) => {
-                    if (yes === true) {
-                        this.processSchedulerService.deleteSchedulesByWidget(widget.id).subscribe(() => null);
-                    }
-                });
-            break;
-        case DashboardTypesEnum.DataTable:
-            this.dataTableService.deleteElements(widget.properties.dataTable?.elements);
-            break;
-        case DashboardTypesEnum.AirQuality:
-            this.airQualityService.cleanGeneratedContent(widget.properties);
-            break;
-        case DashboardTypesEnum.AcControl:
-        case DashboardTypesEnum.ChartExport:
-            this.chartsService.cleanup(widget);
-            break;
+            case DashboardTypesEnum.DeviceStatus:
+                this.deviceStatusService.deleteElements(widget.properties.elements);
+                break;
+            case DashboardTypesEnum.ProcessScheduler:
+                this.dialogsService
+                    .openDeleteDialog('schedules created by the widget ' + widget.name)
+                    .afterClosed()
+                    .subscribe((yes) => {
+                        if (yes === true) {
+                            this.processSchedulerService.deleteSchedulesByWidget(widget.id).subscribe(() => null);
+                        }
+                    });
+                break;
+            case DashboardTypesEnum.DataTable:
+                this.dataTableService.deleteElements(widget.properties.dataTable?.elements);
+                break;
+            case DashboardTypesEnum.AirQuality:
+                this.airQualityService.cleanGeneratedContent(widget.properties);
+                break;
+            case DashboardTypesEnum.AcControl:
+            case DashboardTypesEnum.ChartExport:
+                this.chartsService.cleanup(widget);
+                break;
         }
     }
 
@@ -481,7 +495,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (this.zoomedWidgetIndex === null && widgetManipulationModel.widget) {
             this.zoomedWidgetIndex = this.dashboards[this.activeTabIndex].widgets.indexOf(widgetManipulationModel.widget);
 
-            if(widgetManipulationModel.reloadAfterZoom === true) {
+            if (widgetManipulationModel.reloadAfterZoom === true) {
                 setTimeout(() => this.dashboardService.initWidget(widgetManipulationModel.widgetId), 0);
             } else {
                 this.initialWidgetData = widgetManipulationModel.initialWidgetData;
@@ -561,7 +575,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private navigate() {
         const url = '/dashboard/' + this.dashboards[this.activeTabIndex].id;
         if (this.zoomedWidgetIndex !== null) {
-            this.router.navigate([url], {queryParams: {zoomed_widget: this.dashboards[this.activeTabIndex].widgets[this.zoomedWidgetIndex].id}});
+            this.router.navigate([url], { queryParams: { zoomed_widget: this.dashboards[this.activeTabIndex].widgets[this.zoomedWidgetIndex].id } });
         } else {
             this.router.navigateByUrl(url);
         }

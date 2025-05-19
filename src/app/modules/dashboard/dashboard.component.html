@@ -90,7 +90,7 @@
 
                 </div>
 
-                <gridster *ngIf="zoomedWidgetIndex === null" [options]="options" id="gridster" [ngClass]="{'gridster-with-button': userHasCreateWidgetAuthorization, 'gridster-without-button': !userHasCreateWidgetAuthorization}">
+                <gridster #gridster *ngIf="zoomedWidgetIndex === null" [options]="options" id="gridster" [ngClass]="{'gridster-with-button': userHasCreateWidgetAuthorization, 'gridster-without-button': !userHasCreateWidgetAuthorization}">
                     <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets"
                                    [ngClass]="inDragMode ? 'highlight color-sidenav' : ''"
                                    class="mat-elevation-z1">

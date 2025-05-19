@@ -15,7 +15,7 @@
  */
 
 
-import { ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable, Subscription, concatMap, forkJoin, map, of } from 'rxjs';
@@ -36,7 +36,7 @@ import { materialIconNames } from 'src/app/core/model/icon.model';
   templateUrl: './floorplan-edit-dialog.component.html',
   styleUrl: './floorplan-edit-dialog.component.css'
 })
-export class FloorplanEditDialogComponent implements OnInit {
+export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   dashboardId = '';
   widgetId = '';
   userHasUpdateNameAuthorization = false;
@@ -75,6 +75,7 @@ export class FloorplanEditDialogComponent implements OnInit {
     private functionService: FunctionsService,
     private deviceClassService: DeviceClassesService,
     private cd: ChangeDetectorRef,
+    private el: ElementRef,
     @Inject(MAT_DIALOG_DATA) data: {
       dashboardId: string;
       widgetId: string;
@@ -141,9 +142,18 @@ export class FloorplanEditDialogComponent implements OnInit {
     });
   }
 
-  @HostListener('window:resize')
-  onResize() {
-    this.draw();
+  resizeTimeout: any;
+  ngAfterViewInit(): void {
+    // use this hook, to get the resize sizes from the correct widget
+    const ro = new ResizeObserver((_ => {
+      // debouncing redraws due to many resize calls
+      clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(() => {
+        this.draw();
+        this.cd.detectChanges();
+      }, 30);
+    }));
+    ro.observe(this.el.nativeElement);
   }
 
   draw() {

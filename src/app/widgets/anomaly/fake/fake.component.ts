@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewChecked, Component, HostListener, Input } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input } from '@angular/core';
 import { concatMap, of, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
@@ -26,7 +26,7 @@ import { ChartsExportService } from '../../charts/export/shared/charts-export.se
     templateUrl: './fake.component.html',
     styleUrls: ['./fake.component.css']
 })
-export class FakeAnomalyComponent implements AfterViewChecked {
+export class FakeAnomalyComponent implements AfterViewInit, AfterViewChecked {
     type = 'curve_anomaly'; // time, schema, curve_anomaly
     style = '';
 
@@ -108,19 +108,29 @@ export class FakeAnomalyComponent implements AfterViewChecked {
         }]
     };
 
-    @HostListener('window:resize')
-    onResize() {
-        this.resize();
-    }
 
     constructor(
         private chartsExportService: ChartsExportService,
         private errorHandlerService: ErrorHandlerService,
-        private elementSizeService: ElementSizeService
-    ) {}
+        private elementSizeService: ElementSizeService,
+        private el: ElementRef,
+    ) { }
+
+    resizeTimeout: any = undefined;
+    ngAfterViewInit() {
+        const ro = new ResizeObserver((_ => {
+            // debouncing redraws due to many resize calls
+            clearTimeout(this.resizeTimeout);
+            this.resizeTimeout = setTimeout(() => {
+                this.resize();
+
+            }, 30);
+        }));
+        ro.observe(this.el.nativeElement);
+    }
 
     ngAfterViewChecked(): void {
-        if(!this.initialized) {
+        if (!this.initialized) {
             // this.lastAnomaly();
             this.loadTimelineData(this.properties).subscribe({
                 next: (chartData) => {
@@ -150,7 +160,7 @@ export class FakeAnomalyComponent implements AfterViewChecked {
                     this.errorMessage = 'No data';
                 } else if (resp != null) {
                     const data = resp[0][0];
-                    data.sort((a,b) => new Date(b[0] as string).getTime() - new Date(a[0] as string).getTime());
+                    data.sort((a, b) => new Date(b[0] as string).getTime() - new Date(a[0] as string).getTime());
 
                     let intervalFound = true;
                     for (let index = 0; index < data.length; index++) {
@@ -158,16 +168,16 @@ export class FakeAnomalyComponent implements AfterViewChecked {
                         const currentValue = row[1];
                         const ts = row[0];
                         let prevTs = new Date().toDateString();
-                        if(index > 0) {
-                            const prevRow = data[index-1];
+                        if (index > 0) {
+                            const prevRow = data[index - 1];
                             prevTs = prevRow[0];
                         }
 
-                        if(currentValue > threshold && intervalFound) {
+                        if (currentValue > threshold && intervalFound) {
                             this.toTimestamp = ts;
                             intervalFound = false;
                         }
-                        if(currentValue < threshold && !intervalFound) {
+                        if (currentValue < threshold && !intervalFound) {
                             this.fromTimestamp = prevTs;
                             intervalFound = true;
                         }
@@ -190,7 +200,7 @@ export class FakeAnomalyComponent implements AfterViewChecked {
     parseSingleExportData(data: any, threshold: any) {
         const chartData: any[] = [];
 
-        data.sort((a: any,b: any) => new Date(b[0] as string).getTime() - new Date(a[0] as string).getTime());
+        data.sort((a: any, b: any) => new Date(b[0] as string).getTime() - new Date(a[0] as string).getTime());
 
         let intervalFound = true;
         for (let index = 0; index < data.length; index++) {
@@ -198,20 +208,20 @@ export class FakeAnomalyComponent implements AfterViewChecked {
             const currentValue = row[1];
             const ts = row[0];
             let prevTs = new Date().toDateString();
-            if(index > 0) {
-                const prevRow = data[index-1];
+            if (index > 0) {
+                const prevRow = data[index - 1];
                 prevTs = prevRow[0];
             }
 
-            if(currentValue > threshold && intervalFound) {
+            if (currentValue > threshold && intervalFound) {
                 chartData.push([ts, 1]);
                 intervalFound = false;
-            } else if(currentValue < threshold && !intervalFound) {
+            } else if (currentValue < threshold && !intervalFound) {
                 chartData.push([prevTs, 1]);
                 intervalFound = true;
             } else if (intervalFound) {
                 chartData.push([ts, 0]);
-            } else if(!intervalFound && index === data.length -1) {
+            } else if (!intervalFound && index === data.length - 1) {
                 // anomaly at the beggining of the data history
                 chartData.push([ts, 1]);
             }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { GoogleChartComponent } from 'ng2-google-charts';
 import { ChartsModel } from '../../shared/charts.model';
@@ -29,13 +29,13 @@ import { ChartsService } from '../../shared/charts.service';
     templateUrl: './device-downtime-gateway.component.html',
     styleUrls: ['./device-downtime-gateway.component.css'],
 })
-export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
+export class DeviceDowntimeGatewayComponent implements OnInit, AfterViewInit, OnDestroy {
     deviceDowntimeGateway = {} as ChartsModel;
     ready = false;
     refreshing = false;
     destroy = new Subscription();
 
-    private resizeTimeout = 0;
+    private resizeTimeout: any;
 
     @ViewChild('deviceDowntimeGatewayChart', { static: false }) deviceDowntimeGatewayChart!: GoogleChartComponent;
     @Input() dashboardId = '';
@@ -45,22 +45,25 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
 
-    @HostListener('window:resize')
-    onResize() {
-        if (this.resizeTimeout === 0) {
-            this.resizeTimeout = window.setTimeout(() => {
+    ngAfterViewInit() {
+        const ro = new ResizeObserver((_ => {
+            // debouncing redraws due to many resize calls
+            clearTimeout(this.resizeTimeout);
+            this.resizeTimeout = setTimeout(() => {
                 this.resizeProcessInstancesStatusChart();
-                this.resizeTimeout = 0;
-            }, 300);
-        }
+            }, 30);
+        }));
+        ro.observe(this.el.nativeElement);
     }
+
 
     constructor(
         private chartsService: ChartsService,
         private deviceDowntimeGatewayService: DeviceDowntimeGatewayService,
         private elementSizeService: ElementSizeService,
         private dashboardService: DashboardService,
-    ) {}
+        private el: ElementRef,
+    ) { }
 
     ngOnInit() {
         this.getProcessInstances();

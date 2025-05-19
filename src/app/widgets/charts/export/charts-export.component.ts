@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { GoogleChartComponent, } from 'ng2-google-charts';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../core/services/element-size.service';
@@ -129,7 +129,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             cursorLocked: false,
         };
 
-    private resizeTimeout = 0;
+    private resizeTimeout: any;
     private timeRgx = /(\d+)(ms|s|months|m|h|d|w|y)/;
 
     @Input() dashboardId = '';
@@ -139,19 +139,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
     @Input() initialWidgetData: any;
-
-    @HostListener('window:resize')
-    onResize() {
-        if (this.resizeTimeout === 0) {
-            this.resizeTimeout = window.setTimeout(() => {
-                this.resizeChart();
-                if (this.chartExportData.dataTable != null && this.chartExportData.dataTable.length > 0 && this.chartExportData.dataTable[0].length > 0 && this.chartExport !== undefined) {
-                    this.chartExport.draw();
-                }
-                this.resizeTimeout = 0;
-            }, 500);
-        }
-    }
 
     // Use a setter for the chart which will get called when then ngif from ready evaluates to true
     // This is needed so the element is not undefined when called later to draw
@@ -170,6 +157,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         private errorHandlerService: ErrorHandlerService,
         private datePipe: DatePipe,
         private cd: ChangeDetectorRef,
+        private el: ElementRef,
     ) {
         Chart.register(zoomPlugin, annotationPlugin);
     }
@@ -188,7 +176,17 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     ngAfterViewInit(): void {
         // use this hook, to get the resize sizes from the correct widget
         this.setupInitialChartData();
-
+        const ro = new ResizeObserver((_ => {
+            // debouncing redraws due to many resize calls
+            clearTimeout(this.resizeTimeout);
+            this.resizeTimeout = setTimeout(() => {
+                this.resizeChart();
+                if (this.chartExportData.dataTable != null && this.chartExportData.dataTable.length > 0 && this.chartExportData.dataTable[0].length > 0 && this.chartExport !== undefined) {
+                    this.chartExport.draw();
+                }
+            }, 30);
+        }));
+        ro.observe(this.el.nativeElement);
     }
 
     setupInitialChartData() {
@@ -585,7 +583,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         });
                     }
                     this.resizeChart();
-                    this.onResize();
+                    this.chartExport?.draw();
                     this.cd.detectChanges();
                 }
                 this.ready = true;

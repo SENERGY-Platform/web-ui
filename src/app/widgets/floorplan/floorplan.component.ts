@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-edit-dialog.component';
@@ -35,7 +35,7 @@ import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concep
   templateUrl: './floorplan.component.html',
   styleUrl: './floorplan.component.css'
 })
-export class FloorplanComponent implements OnInit, OnDestroy {
+export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() dashboardId = '';
   @Input() widget: WidgetModel = {} as WidgetModel;
   @Input() zoom = false;
@@ -251,6 +251,7 @@ export class FloorplanComponent implements OnInit, OnDestroy {
     private cd: ChangeDetectorRef,
     private deviceGroupsService: DeviceGroupsService,
     private conceptsService: ConceptsService,
+    private el: ElementRef,
   ) { }
 
   ngOnInit(): void {
@@ -285,6 +286,20 @@ export class FloorplanComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  resizeTimeout: any = undefined;
+  ngAfterViewInit() {
+    const ro = new ResizeObserver((_ => {
+      // debouncing redraws due to many resize calls
+      clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(() => {
+        this.draw();
+        this.cd.detectChanges();
+      }, 30);
+    }));
+    ro.observe(this.el.nativeElement);
+  }
+
   ngOnDestroy(): void {
     this.destroy?.unsubscribe();
   }
@@ -336,14 +351,6 @@ export class FloorplanComponent implements OnInit, OnDestroy {
     this.draws++;
   }
 
-  @HostListener('window:resize')
-  onResize() {
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => {
-        this.draw();
-      }, i * 100);
-    }
-  }
 
   private refresh(): Observable<unknown> {
     if (this.widget.properties.floorplan === undefined || this.widget.properties.floorplan.placements === null) {

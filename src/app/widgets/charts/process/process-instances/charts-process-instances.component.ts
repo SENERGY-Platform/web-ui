@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { GoogleChartComponent } from 'ng2-google-charts';
 import { ChartsProcessInstancesService } from './shared/charts-process-instances.service';
@@ -29,13 +29,11 @@ import { ChartsService } from '../../shared/charts.service';
     templateUrl: './charts-process-instances.component.html',
     styleUrls: ['./charts-process-instances.component.css'],
 })
-export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
+export class ChartsProcessInstancesComponent implements OnInit, OnDestroy, AfterViewInit {
     processInstancesStatus = {} as ChartsModel;
     ready = false;
     refreshing = false;
     destroy = new Subscription();
-
-    private resizeTimeout = 0;
 
     @ViewChild('processInstancesStatusChart', { static: false }) processInstancesStatusChart!: GoogleChartComponent;
     @Input() dashboardId = '';
@@ -45,14 +43,18 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
 
-    @HostListener('window:resize')
-    onResize() {
-        if (this.resizeTimeout === 0) {
-            this.resizeTimeout = window.setTimeout(() => {
+
+    resizeTimeout: any;
+    ngAfterViewInit(): void {
+        // use this hook, to get the resize sizes from the correct widget
+        const ro = new ResizeObserver((_ => {
+            // debouncing redraws due to many resize calls
+            clearTimeout(this.resizeTimeout);
+            this.resizeTimeout = setTimeout(() => {
                 this.resizeProcessInstancesStatusChart();
-                this.resizeTimeout = 0;
-            }, 500);
-        }
+            }, 30);
+        }));
+        ro.observe(this.el.nativeElement);
     }
 
     constructor(
@@ -60,7 +62,8 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
         private chartsProcessInstancesService: ChartsProcessInstancesService,
         private elementSizeService: ElementSizeService,
         private dashboardService: DashboardService,
-    ) {}
+        private el: ElementRef,
+    ) { }
 
     ngOnInit() {
         this.getProcessInstances();

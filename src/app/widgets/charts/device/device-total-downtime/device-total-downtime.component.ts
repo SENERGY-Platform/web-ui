@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { GoogleChartComponent } from 'ng2-google-charts';
 import { ChartsModel } from '../../shared/charts.model';
@@ -29,13 +29,13 @@ import { ChartsService } from '../../shared/charts.service';
     templateUrl: './device-total-downtime.component.html',
     styleUrls: ['./device-total-downtime.component.css'],
 })
-export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
+export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy, AfterViewInit {
     deviceTotalDowntime: ChartsModel | undefined;
     ready = false;
     refeshing = false;
     destroy = new Subscription();
 
-    private resizeTimeout = 0;
+    private resizeTimeout: any;
 
     @ViewChild('deviceTotalDowntimeChart', { static: false }) deviceTotalDowntimeChart!: GoogleChartComponent;
     @Input() dashboardId = '';
@@ -45,14 +45,15 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
 
-    @HostListener('window:resize')
-    onResize() {
-        if (this.resizeTimeout === 0) {
-            this.resizeTimeout = window.setTimeout(() => {
+    ngAfterViewInit() {
+        const ro = new ResizeObserver((_ => {
+            // debouncing redraws due to many resize calls
+            clearTimeout(this.resizeTimeout);
+            this.resizeTimeout = setTimeout(() => {
                 this.resizeProcessInstancesStatusChart();
-                this.resizeTimeout = 0;
-            }, 300);
-        }
+            }, 30);
+        }));
+        ro.observe(this.el.nativeElement);
     }
 
     constructor(
@@ -60,6 +61,7 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
         private deviceDowntimeGatewayService: DeviceTotalDowntimeService,
         private elementSizeService: ElementSizeService,
         private dashboardService: DashboardService,
+        private el: ElementRef,
     ) {
     }
 
