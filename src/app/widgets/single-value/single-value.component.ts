@@ -182,6 +182,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         this.setConfigured();
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
+                this.setConfigured();
                 this.refreshView();
             }
         });

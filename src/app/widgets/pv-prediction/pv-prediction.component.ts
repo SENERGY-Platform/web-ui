@@ -46,15 +46,15 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
     configured = false;
 
     constructor(
-      private dashboardService: DashboardService,
-      private pvService: PvPredictionService
-    ) {}
+        private dashboardService: DashboardService,
+        private pvService: PvPredictionService
+    ) { }
 
     // Use a setter for the chart which will get called when then ngif from ready evaluates to true
     // This is needed so the element is not undefined when called later to draw
     private chartExport!: GoogleChartComponent;
-    @ViewChild('chartExport', {static: false}) set content(content: GoogleChartComponent) {
-        if(content) { // initially setter gets called with undefined
+    @ViewChild('chartExport', { static: false }) set content(content: GoogleChartComponent) {
+        if (content) { // initially setter gets called with undefined
             this.chartExport = content;
         }
     }
@@ -69,40 +69,39 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
     }
 
     private update() {
-        const exportID = this.widget.properties?.pvPrediction?.exportID;
-        if(exportID == null) {
-            console.error('Export ID missing');
-            return;
-        }
-
         this.destroy = this.dashboardService.initWidgetObservable.pipe(
             concatMap((event: string) => {
                 if (event === 'reloadAll' || event === this.widget.id) {
+                    this.configured = this.widget.properties.pvPrediction !== undefined;
+                    if (!this.configured) {
+                        return of();
+                    }
                     this.refreshing = true;
+                    const exportID = this.widget.properties.pvPrediction!.exportID;
                     return this.pvService.getPVPrediction(exportID);
                 }
                 return of();
             }),
             map((data: PVPredictionResult) => {
                 const nextValueConfig = this.widget.properties.pvPrediction?.nextValueConfig;
-                if(this.widget.properties.pvPrediction?.displayTimeline) {
+                if (this.widget.properties.pvPrediction?.displayTimeline) {
                     this.setupChartData(data);
-                } else if(this.widget.properties.pvPrediction?.displayNextValue && nextValueConfig) {
+                } else if (this.widget.properties.pvPrediction?.displayNextValue && nextValueConfig) {
                     this.calcNextPVPrediction(data, nextValueConfig.level, nextValueConfig.time);
                 }
                 return data;
             })).subscribe({
-            next: (_) => {
-                this.ready = true;
-                this.refreshing = false;
-            },
-            error: (err) => {
-                console.error(err);
-                this.error = err;
-                this.ready = true;
-                this.refreshing = false;
-            }
-        });
+                next: (_) => {
+                    this.ready = true;
+                    this.refreshing = false;
+                },
+                error: (err) => {
+                    console.error(err);
+                    this.error = err;
+                    this.ready = true;
+                    this.refreshing = false;
+                }
+            });
     }
 
     setupChartData(data: PVPredictionResult) {
@@ -111,7 +110,7 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
             dataTable.push([new Date(row.timestamp), row.value]);
         });
         this.chartExportData = new ChartsModel('LineChart', dataTable, {
-            legend: {position: 'none'},
+            legend: { position: 'none' },
             vAxis: {
                 title: 'Average Power in W'
             }
@@ -121,7 +120,7 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
 
     calcNextPVPrediction(data: PVPredictionResult, level: string, time: number) {
         // predictions are hourly
-        if(level === 'd') {
+        if (level === 'd') {
             time = time * 24;
         }
         const filteredData = data.predictions.slice(-time);

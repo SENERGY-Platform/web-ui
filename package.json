@@ -44,6 +44,7 @@
     "cronstrue": "^1.96.0",
     "dotenv": "^8.2.0",
     "file-saver": "^2.0.5",
+    "gridstack": "^12.1.2",
     "jointjs": "^3.7.7",
     "jquery": "^3.5.1",
     "keycloak-angular": "^16.1.0",

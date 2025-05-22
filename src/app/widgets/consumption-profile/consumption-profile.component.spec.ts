@@ -38,7 +38,7 @@ describe('ConsumptionProfileComponent', () => {
 
     fixture = TestBed.createComponent(ConsumptionProfileComponent);
     component = fixture.componentInstance;
-    component.widget = {properties: {consumptionProfile: undefined}, id: '', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1};
+    component.widget = {properties: {consumptionProfile: undefined}, id: '', name: '', type: '', y: 1, x: 1, w: 1, h: 1};
     fixture.detectChanges();
   });
 

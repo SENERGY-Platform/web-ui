@@ -81,6 +81,7 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
         this.setConfigured();
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
+                this.setConfigured();
                 this.refreshing = true;
                 const prediction = this.predictionService.getPrediction(this.widget);
                 prediction.subscribe(

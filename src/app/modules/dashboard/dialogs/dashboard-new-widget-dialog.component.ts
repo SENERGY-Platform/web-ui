@@ -168,8 +168,8 @@ export class DashboardNewWidgetDialogComponent implements OnInit{
             properties: {},
             x: -1,
             y: -1,
-            cols: -1,
-            rows: -1,
+            w: -1,
+            h: -1,
         };
         switch (this.selectedType.value) {
         case DashboardTypesEnum.Switch: {

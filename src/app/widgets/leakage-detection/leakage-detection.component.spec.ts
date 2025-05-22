@@ -38,7 +38,7 @@ describe('LeakageDetectionComponent', () => {
 
     fixture = TestBed.createComponent(LeakageDetectionComponent);
     component = fixture.componentInstance;
-    component.widget = {properties: {leakageDetection: undefined}, id: '', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1};
+    component.widget = {properties: {leakageDetection: undefined}, id: '', name: '', type: '', y: 1, x: 1, w: 1, h: 1};
     fixture.detectChanges();
   });
 

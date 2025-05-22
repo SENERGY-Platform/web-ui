@@ -22,7 +22,6 @@ import { DashboardNewDialogComponent } from './dialogs/dashboard-new-dialog.comp
 import { WidgetModule } from '../../widgets/widget.module';
 import { DashboardNewWidgetDialogComponent } from './dialogs/dashboard-new-widget-dialog.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { GridsterModule } from 'angular-gridster2';
 import { DashboardEditDialogComponent } from './dialogs/dashboard-edit-dialog.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,6 +37,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CoreModule } from '../../core/core.module';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { GridstackModule } from 'gridstack/dist/angular';
 
 @NgModule({
     imports: [
@@ -56,12 +56,12 @@ import { MtxSelectModule } from '@ng-matero/extensions/select';
         WidgetModule,
         MatOptionModule,
         FormsModule,
-        GridsterModule,
         MatTooltipModule,
         ReactiveFormsModule,
         DragDropModule,
         CoreModule,
         MtxSelectModule,
+        GridstackModule,
     ],
     declarations: [DashboardComponent, DashboardNewDialogComponent, DashboardNewWidgetDialogComponent, DashboardEditDialogComponent],
 })

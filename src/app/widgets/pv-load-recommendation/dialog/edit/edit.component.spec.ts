@@ -43,7 +43,7 @@ describe('PVLoadRecommendationEditComponent', () => {
 
         fixture = TestBed.createComponent(PVLoadRecommendationEditComponent);
         component = fixture.componentInstance;
-        component.widget = {properties: {measurement: undefined}, id: '', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1};
+        component.widget = {properties: {measurement: undefined}, id: '', name: '', type: '', y: 1, x: 1, w: 1, h: 1};
         fixture.detectChanges();
     });
 

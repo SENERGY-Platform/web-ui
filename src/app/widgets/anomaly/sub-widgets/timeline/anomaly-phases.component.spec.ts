@@ -53,7 +53,7 @@ describe('AnomalyPhasesComponent', () => {
         },
         visualizationType: 'line'
       }
-    }, id: '', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1};
+    }, id: '', name: '', type: '', y: 1, x: 1, w: 1, h: 1};
     fixture.detectChanges();
   });
 

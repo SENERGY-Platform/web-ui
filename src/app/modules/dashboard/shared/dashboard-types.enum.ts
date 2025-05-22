@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- 
+
 export enum DashboardTypesEnum {
     Switch = 'switch',
     RangeSlider = 'range_slider',
@@ -44,4 +44,51 @@ export enum DashboardTypesEnum {
     ConsumptionProfile = 'consumption_profile',
     BadVentilation = 'bad_ventilation',
     Floorplan = 'floorplan',
+    ChartsProcessInstances = 'charts_process_instances',
+    ChartsProcessDeployments = 'charts_process_deployments',
+    ChartsDevicePerGateway = 'charts_device_per_gateway',
+    ChartsDeviceDowntimeRatePerGateway = 'charts_device_downtime_rate_per_gateway',
+    ChartsDeviceTotalDowntime = 'charts_device_total_downtime',
+}
+
+export function dashboardTypesEnumFromString(s: string): DashboardTypesEnum {
+    return s as DashboardTypesEnum;
+}
+
+export function resizable(type: DashboardTypesEnum): boolean {
+    switch (type) {
+        case DashboardTypesEnum.Switch: return true;
+        case DashboardTypesEnum.RangeSlider: return true;
+        case DashboardTypesEnum.Chart: return true;
+        case DashboardTypesEnum.ChartExport: return true; 
+        case DashboardTypesEnum.DevicesState: return false;
+        case DashboardTypesEnum.ProcessState: return true;
+        case DashboardTypesEnum.EventList: return true;
+        case DashboardTypesEnum.RankingList: return true;
+        case DashboardTypesEnum.ProcessModelList: return true;
+        case DashboardTypesEnum.DeviceDowntimeList: return true;
+        case DashboardTypesEnum.SingleValue: return false;
+        case DashboardTypesEnum.MultiValue: return false;
+        case DashboardTypesEnum.EnergyPrediction: return false;
+        case DashboardTypesEnum.AirQuality: return false;
+        case DashboardTypesEnum.ProcessIncidentList: return true;
+        case DashboardTypesEnum.ProcessScheduler: return true;
+        case DashboardTypesEnum.DeviceStatus: return false;
+        case DashboardTypesEnum.DataTable: return true;
+        case DashboardTypesEnum.AcControl: return true;
+        case DashboardTypesEnum.AnomalyDetection: return false;
+        case DashboardTypesEnum.OpenWindow: return false;
+        case DashboardTypesEnum.FakeAnomalyDetection: return false;
+        case DashboardTypesEnum.PVPrediction: return false;
+        case DashboardTypesEnum.PVLoadRecommendation: return false;
+        case DashboardTypesEnum.LeakageDetection: return false;
+        case DashboardTypesEnum.ConsumptionProfile: return false;
+        case DashboardTypesEnum.BadVentilation: return false;
+        case DashboardTypesEnum.Floorplan: return true;
+        case DashboardTypesEnum.ChartsProcessInstances: return true;
+        case DashboardTypesEnum.ChartsProcessDeployments: return true;
+        case DashboardTypesEnum.ChartsDevicePerGateway: return true;
+        case DashboardTypesEnum.ChartsDeviceDowntimeRatePerGateway: return true;
+        case DashboardTypesEnum.ChartsDeviceTotalDowntime: return true;
+    }
 }

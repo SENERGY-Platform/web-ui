@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ResponsiveService } from '../../core/services/responsive.service';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DashboardService } from './shared/dashboard.service';
 import { DashboardModel } from './shared/dashboard.model';
 import { WidgetModel, WidgetUpdatePosition } from './shared/dashboard-widget.model';
 import { DashboardWidgetManipulationModel } from './shared/dashboard-widget-manipulation.model';
 import { DashboardManipulationEnum } from './shared/dashboard-manipulation.enum';
 import { DashboardManipulationModel } from './shared/dashboard-manipulation.model';
-import { DisplayGrid, GridsterComponent, GridsterConfig, GridsterItem, GridType } from 'angular-gridster2';
 import { catchError, forkJoin, Observable, of, Subscription } from 'rxjs';
-import { DashboardTypesEnum } from './shared/dashboard-types.enum';
+import { DashboardTypesEnum, dashboardTypesEnumFromString, resizable } from './shared/dashboard-types.enum';
 import { DeviceStatusService } from '../../widgets/device-status/shared/device-status.service';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { DialogsService } from '../../core/services/dialogs.service';
@@ -35,15 +33,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatTabGroup } from '@angular/material/tabs';
 import { ChartsService } from '../../widgets/charts/shared/charts.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
-import { SidenavService } from 'src/app/core/components/sidenav/shared/sidenav.service';
-
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 2],
-    ['md', 2],
-    ['lg', 4],
-    ['xl', 4],
-]);
+import { elementCB, GridstackComponent } from 'gridstack/dist/angular';
+import { GridStack, GridStackWidget } from 'gridstack';
 
 @Component({
     selector: 'senergy-dashboard',
@@ -51,12 +42,10 @@ const grids = new Map([
     styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-    gridCols = 0;
     dashboards: DashboardModel[] = [];
     dashboardsRetrieved = false;
     activeTabIndex = 0;
     interval = 0;
-    options: GridsterConfig = {};
     zoomedWidgetIndex: number | null = null;
     dashWidgetSubscription = new Subscription();
     dashSubscription = new Subscription();
@@ -65,7 +54,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     dragging = false;
     mouseHoverHeaderIndex = -1;
     @ViewChild(MatTabGroup, { static: false }) matTabGroup!: MatTabGroup;
-    @ViewChild(GridsterComponent) gridster: GridsterComponent|undefined;
 
     // Authorization
     userHasUpdateDashboardAuthorization = false;
@@ -79,8 +67,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     initialWidgetData: any;
 
+    grid: GridStack | undefined;
+    @ViewChild(GridstackComponent)
+    set gridstackComponent(component: GridstackComponent | undefined) {
+        if (component !== undefined) {
+            this.grid = GridStack.init(undefined, component.el);
+            this.grid?.compact();
+            this.saveWidgetPositions();
+        }
+    }
+    resizable = resizable;
+    dashboardTypesEnumFromString = dashboardTypesEnumFromString;
+
     constructor(
-        private responsiveService: ResponsiveService,
         private dashboardService: DashboardService,
         private dialogsService: DialogsService,
         private processSchedulerService: ProcessSchedulerService,
@@ -91,25 +90,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute,
         private router: Router,
         private errorHandlerService: ErrorHandlerService,
-        private sidenavService: SidenavService,
-        private el: ElementRef,
+        private cd: ChangeDetectorRef,
     ) { }
 
     ngOnInit() {
-        this.initGridCols();
         this.initDashboard();
         this.initWidgets();
         this.checkAuthorization();
-        this.sidenavService.toggleChanged.subscribe(_ => {
-            if (this.options.api && this.options.api.resize) {
-                this.options.api.resize();
-            } else if (this.gridster !== undefined) {
-                console.warn('api is undefined, gridster is DEfined'); // TODO
-                this.gridster?.onResize();
-            } else {
-                console.warn('could not resize gridster: api is undefined, gridster is undefined'); // TODO
-            }
-        });
     }
 
     ngOnDestroy(): void {
@@ -166,10 +153,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.activeTabIndex = index;
             this.navigate();
         }
-        if (this.options.api === undefined) {
-            this.initDragAndDropOptions();
-            this.initDragAndDrop();
-        }
     }
 
     refreshTime(time: number): void {
@@ -181,8 +164,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     toggleDragMode() {
         this.inDragMode = !this.inDragMode;
-        this.initDragAndDropOptions();
-        this.initDragAndDrop();
+        // TODO after toggling drag mode gridstack no longer calculates number of columns
     }
 
     /**
@@ -209,91 +191,56 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
 
-    private initDragAndDrop() {
-        if (this.options.draggable) {
-            this.options.draggable.start = () => {
-                setTimeout(() => {
-                    this.dragging = true;
-                }, 0);
-            };
-            this.options.draggable.stop = (item: GridsterItem, _, event: MouseEvent) => {
-                setTimeout(() => {
-                    this.dragging = false;
-                    if (this.moveWidgetToDashboardIfNeeded(item, event)) {
-                        return;
-                    }
-                    let reorder = false;
-                    let swapIndex1 = 0;
-                    let swapIndex2 = 0;
-
-                    const widgetPositionUpdates: WidgetUpdatePosition[] = [];
-
-                    this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
-                        if (reorder === false) {
-                            if (widget.x !== undefined && widget.y !== undefined) {
-                                const gridIndex = widget.x + widget.y * this.gridCols;
-                                if (gridIndex >= this.dashboards[this.activeTabIndex].widgets.length) {
-                                    reorder = true;
-                                }
-                                if (gridIndex !== index) {
-                                    swapIndex1 = gridIndex;
-                                    swapIndex2 = index;
-                                    const dashboard = this.dashboards[this.activeTabIndex];
-
-                                    widgetPositionUpdates.push({
-                                        id: widget.id,
-                                        index: gridIndex,
-                                        dashboardDestination: dashboard.id,
-                                        dashboardOrigin: dashboard.id
-                                    });
-                                }
-                            }
-                        }
-                    });
-
-
-                    if (reorder) {
-                        this.reorderWidgets();
-                    } else {
-                        const dashboard = this.dashboards[this.activeTabIndex];
-
-                        const swap = dashboard.widgets[swapIndex1];
-                        dashboard.widgets[swapIndex1] = dashboard.widgets[swapIndex2];
-                        dashboard.widgets[swapIndex2] = swap;
-
-                        this.dashboardService.updateWidgetPosition(widgetPositionUpdates).pipe(
-                            catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' }))
-                        ).subscribe();
-                    }
-                }, 0);
-            };
-        }
+    startDrag() {
+        this.dragging = true;
     }
 
-    private initDragAndDropOptions() {
-        this.options = {
-            gridType: GridType.VerticalFixed,
-            fixedRowHeight: 350,
-            // outerMarginBottom: 100,
-            displayGrid: DisplayGrid.None,
-            minCols: this.gridCols,
-            maxCols: this.gridCols,
-            disableWindowResize: false,
-            scrollToNewItems: false,
-            disableWarnings: true,
-            ignoreMarginInRow: false,
-            swap: true,
-            pushItems: false,
-            draggable: {
-                ignoreContentClass: 'gridster-item-content',
-                ignoreContent: true,
-                dragHandleClass: 'drag-handler',
-                enabled: this.inDragMode,
-            },
-            resizable: {
-                enabled: false,
+    stopDrag($event: elementCB) {
+        this.dragging = false;
+        if (this.moveWidgetToDashboardIfNeeded($event.el, $event.event)) {
+            this.grid?.compact();
+            return;
+        }
+        this.saveWidgetPositions();
+    }
+
+    saveWidgetPositions() {
+        this.grid?.compact();
+        const dashboard = this.dashboards[this.activeTabIndex];
+        const widgetPositionUpdates: WidgetUpdatePosition[] = [];
+        const nodes = this.grid?.engine.nodes;
+        if (nodes === undefined) {
+            return;
+        }
+        dashboard.widgets?.forEach(widget => {
+            const node = nodes.find(n => n.el?.id === 'gridstack-item-' + widget.id);
+            if (node === undefined) {
+                return;
             }
-        };
+            if ((node.x || 0) !== widget.x || (node.y || 0) !== widget.y || node.w !== widget.w || node.h !== widget.h) {
+                widget.x = node.x || 0;
+                widget.y = node.y || 0;
+                widget.w = node.w;
+                widget.h = node.h;
+                widgetPositionUpdates.push({
+                    id: widget.id,
+                    x: widget.x,
+                    y: widget.y,
+                    w: widget.w,
+                    h: widget.h,
+                    dashboardDestination: dashboard.id,
+                    dashboardOrigin: dashboard.id
+                });
+            }
+        });
+
+        if (widgetPositionUpdates.length > 0) {
+            this.cd.detectChanges();
+            this.dashboardService.updateWidgetPosition(widgetPositionUpdates).pipe(
+                catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' }))
+            ).subscribe();
+        }
+
     }
 
     private initDashboard() {
@@ -309,7 +256,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     this.setTabIndex(idx);
                     const widgetId = this.route.snapshot.queryParams['zoomed_widget'];
                     if (widgetId) {
-                        const widgetIndex = this.dashboards[idx].widgets.findIndex(w => w.id === widgetId);
+                        const widgetIndex = this.dashboards[idx].widgets?.findIndex(w => w.id === widgetId);
                         if (widgetIndex !== -1 && widgetIndex !== this.zoomedWidgetIndex) {
                             setTimeout(() => this.zoomWidget({ widgetId, widget: this.dashboards[idx].widgets[widgetIndex], manipulation: DashboardManipulationEnum.Zoom, reloadAfterZoom: true, initialWidgetData: null }), 0);
                         }
@@ -375,37 +322,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
     }
 
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.initDragAndDropOptions();
-        this.initDragAndDrop();
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-            this.reorderWidgets();
-            if (this.gridCols < 2) {
-                this.inDragMode = false;
-                this.dragModeDisabled = true;
-            } else {
-                this.dragModeDisabled = false;
-            }
-        });
-    }
-
-    private reorderWidgets() {
-        this.options.maxCols = this.gridCols;
-        this.options.minCols = this.gridCols;
-        if (this.dashboards[this.activeTabIndex] && this.dashboards[this.activeTabIndex].widgets !== undefined) {
-            this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
-                widget.x = index % this.gridCols;
-                widget.y = Math.floor(index / this.gridCols);
-            });
-            if (this.options.api && this.options.api.optionsChanged && this.options.api.resize) {
-                this.options.api.optionsChanged();
-                this.options.api.resize();
-            }
-        }
-    }
-
     private initWidgets() {
         this.dashWidgetSubscription = this.dashboardService.dashboardWidgetObservable.subscribe(
             (widgetManipulationModel: DashboardWidgetManipulationModel) => {
@@ -427,16 +343,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         break;
                     }
                 }
+                this.cd.detectChanges();
+                this.saveWidgetPositions();
             },
         );
     }
 
     private updateWidget(widgetManipulationModel: DashboardWidgetManipulationModel) {
-        this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
-            if (widget.id === widgetManipulationModel.widgetId) {
-                this.dashboards[this.activeTabIndex].widgets[index] = widgetManipulationModel.widget || ({} as WidgetModel);
-            }
-        });
+        const i = this.dashboards[this.activeTabIndex].widgets.findIndex(w => w.id === widgetManipulationModel.widgetId);
+        if (i !== -1 && widgetManipulationModel.widget !== null) {
+            this.dashboards[this.activeTabIndex].widgets[i] = widgetManipulationModel.widget;
+        }
+        this.cd.detectChanges();
         this.refreshWidget(widgetManipulationModel);
     }
 
@@ -445,9 +363,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             if (widget.id === widgetManipulationModel.widgetId) {
                 this.cleanUp(widget);
                 this.dashboards[this.activeTabIndex].widgets.splice(index, 1);
-                this.reorderWidgets();
             }
         });
+        this.grid?.removeWidget('gridstack-item-' + widgetManipulationModel.widgetId);
     }
 
     private cleanUp(widget: WidgetModel): void {
@@ -529,38 +447,53 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (this.dashboards[toIndex].widgets === undefined) {
             this.dashboards[toIndex].widgets = [];
         }
-        this.dashboards[toIndex].widgets.push(widgets[0]);
+        let x = 0;
+        let y = 0;
+        this.dashboards[toIndex].widgets.forEach(element => {
+            if ((element.y || 0) > y) {
+                y = element.y || 0;
+            }
+            if ((element.x || 0) > y) {
+                x = element.x || 0;
+            }
+        });
+        widgets[0].x = x + 1;
+        widgets[0].y = y + 1;
         const widgetPositionUpdates: WidgetUpdatePosition[] = [{
             id,
+            x: widgets[0].x,
+            y: widgets[0].y,
+            w: widgets[0].w,
+            h: widgets[0].h,
             dashboardDestination: this.dashboards[toIndex].id,
             dashboardOrigin: this.dashboards[this.activeTabIndex].id
         }];
+        this.dashboards[toIndex].widgets.push(widgets[0]);
         return this.dashboardService.updateWidgetPosition(widgetPositionUpdates).pipe(
             catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' }))
         );
     }
-
-    private moveWidgetToDashboardIfNeeded(item: GridsterItem, $event: MouseEvent): boolean {
+    private moveWidgetToDashboardIfNeeded(item: any, $event: any): boolean {
         const headers = this.matTabGroup._elementRef.nativeElement.children[0].children[1].children[0].children[0].children;
         for (let i = 0; i < headers.length - 1; i++) {
             // last index is new dashboard button
             const rect: DOMRect = headers[i].getBoundingClientRect();
             if (
                 i !== this.activeTabIndex &&
-                $event.x < rect.right &&
-                $event.x > rect.left &&
-                $event.y > rect.top &&
-                $event.y < rect.bottom
+                $event.clientX < rect.right &&
+                $event.clientX > rect.left &&
+                $event.clientY > rect.top &&
+                $event.clientY < rect.bottom
             ) {
                 this.moveWidgetToDashboard(item.id, i).subscribe();
-                this.reorderWidgets();
                 this.setTabIndex(i);
-                this.reorderWidgets();
+                this.cd.detectChanges();
                 return true;
             }
         }
         return false;
     }
+
 
     mouseEnterHeader(i: number) {
         if (this.activeTabIndex !== i) {
@@ -579,5 +512,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         } else {
             this.router.navigateByUrl(url);
         }
+    }
+
+    trackById(_: number, x: { id: string }): string {
+        return x.id;
     }
 }

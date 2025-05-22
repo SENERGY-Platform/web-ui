@@ -38,7 +38,7 @@ describe('PvLoadRecommendationComponent', () => {
 
     fixture = TestBed.createComponent(PvLoadRecommendationComponent);
     component = fixture.componentInstance;
-    component.widget = {properties: {measurement: undefined, pvLoadRecommendation: {exportID: '1234'}}, id: '1234', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1};
+    component.widget = {properties: {measurement: undefined, pvLoadRecommendation: {exportID: '1234'}}, id: '1234', name: '', type: '', y: 1, x: 1, w: 1, h: 1};
     fixture.detectChanges();
   });
 

@@ -172,6 +172,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
     private update() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
+                this.checkConfigured();
                 this.refreshing = true;
 
                 const elements = this.widget.properties.dataTable?.elements;

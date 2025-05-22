@@ -26,7 +26,7 @@ import { DeviceStatusPropertiesModel } from '../../../widgets/device-status/shar
 import { ProcessSchedulerPropertiesModel } from '../../../widgets/process-scheduler/shared/process-scheduler.model';
 import { DataTableWidgetPropertiesModel } from '../../../widgets/data-table/shared/data-table.model';
 import { RangeSliderPropertiesModel } from '../../../widgets/range-slider/shared/range-slider-properties.model';
-import {AcControlPropertiesModel} from '../../../widgets/ac-control/shared/ac-control.model';
+import { AcControlPropertiesModel } from '../../../widgets/ac-control/shared/ac-control.model';
 import { OpenWindowPropertiesModel } from 'src/app/widgets/charts/open-window/model/model';
 import { PVLoadRecommendationWidgetPropertiesModel } from 'src/app/widgets/pv-load-recommendation/shared/recommendation.model';
 import { PVPredictionWidgetPropertiesModel } from 'src/app/widgets/pv-prediction/shared/prediction.model';
@@ -41,38 +41,41 @@ export interface WidgetModel {
     name: string;
     type: string;
     properties: WidgetPropertiesModels;
-    x: number;
-    y: number;
-    cols: number;
-    rows: number;
+    x?: number;
+    y?: number;
+    w?: number;
+    h?: number;
 }
 
 export interface WidgetUpdatePosition {
-    index?: number;
     id: string;
+    x?: number;
+    y?: number;
+    w?: number;
+    h?: number;
     dashboardOrigin: string;
     dashboardDestination: string;
 }
 
 export interface WidgetPropertiesModels
     extends SwitchPropertiesModel,
-        AcControlPropertiesModel,
-        RangeSliderPropertiesModel,
-        ChartsExportPropertiesModel,
-        OpenWindowPropertiesModel,
-        DeviceDowntimeGatewayPropertiesModel,
-        EnergyPredictionPropertiesModel,
-        AirQualityPropertiesModel,
-        SingleValuePropertiesModel,
-        MultiValuePropertiesModel,
-        ProcessIncidentPropertiesModel,
-        ProcessSchedulerPropertiesModel,
-        DataTableWidgetPropertiesModel,
-        PVLoadRecommendationWidgetPropertiesModel,
-        PVPredictionWidgetPropertiesModel,
-        AnomalyWidgetPropertiesModel,
-        LeakageDetectionWidgetPropertiesModel,
-        ConsumptionProfilePropertiesModel,
-        VentilationWidgetPropertiesModel,
-        FloorplanWidgetPropertiesModel,
-        DeviceStatusPropertiesModel {}
+    AcControlPropertiesModel,
+    RangeSliderPropertiesModel,
+    ChartsExportPropertiesModel,
+    OpenWindowPropertiesModel,
+    DeviceDowntimeGatewayPropertiesModel,
+    EnergyPredictionPropertiesModel,
+    AirQualityPropertiesModel,
+    SingleValuePropertiesModel,
+    MultiValuePropertiesModel,
+    ProcessIncidentPropertiesModel,
+    ProcessSchedulerPropertiesModel,
+    DataTableWidgetPropertiesModel,
+    PVLoadRecommendationWidgetPropertiesModel,
+    PVPredictionWidgetPropertiesModel,
+    AnomalyWidgetPropertiesModel,
+    LeakageDetectionWidgetPropertiesModel,
+    ConsumptionProfilePropertiesModel,
+    VentilationWidgetPropertiesModel,
+    FloorplanWidgetPropertiesModel,
+    DeviceStatusPropertiesModel { }

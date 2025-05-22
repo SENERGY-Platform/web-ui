@@ -39,7 +39,7 @@ describe('AnomalyComponent', () => {
 
         fixture = TestBed.createComponent(AnomalyComponent);
         component = fixture.componentInstance;
-        component.widget = {properties: {measurement: undefined, anomalyDetection: {export: '1234'} as AnomalyWidgetProperties}, id: '1234', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1};
+        component.widget = {properties: {measurement: undefined, anomalyDetection: {export: '1234'} as AnomalyWidgetProperties}, id: '1234', name: '', type: '', y: 1, x: 1, w: 1, h: 1};
         fixture.detectChanges();
     });
 

@@ -38,7 +38,7 @@ describe('PvPredictionComponent', () => {
 
     fixture = TestBed.createComponent(PvPredictionComponent);
     component = fixture.componentInstance;
-    component.widget = {properties: {measurement: undefined, pvPrediction: {exportID: '1234', displayNextValue: false, displayTimeline: false, nextValueConfig: {level: '', time: 0}}}, id: '1234', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1};
+    component.widget = {properties: {measurement: undefined, pvPrediction: {exportID: '1234', displayNextValue: false, displayTimeline: false, nextValueConfig: {level: '', time: 0}}}, id: '1234', name: '', type: '', y: 1, x: 1, w: 1, h: 1};
     fixture.detectChanges();
   });
 

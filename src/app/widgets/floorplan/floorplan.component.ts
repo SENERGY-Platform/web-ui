@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-edit-dialog.component';
@@ -353,10 +353,11 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   private refresh(): Observable<unknown> {
-    if (this.widget.properties.floorplan === undefined || this.widget.properties.floorplan.placements === null) {
+    if (this.widget.properties.floorplan === undefined) {
       return of(null);
     }
     this.refreshing = true;
+    this.img = image(this.widget.properties);
     const commands: DeviceCommandModel[] = [];
     this.widget.properties.floorplan.placements.forEach(p => commands.push({
       group_id: p.deviceGroupId || undefined,
@@ -365,8 +366,15 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       device_class_id: p.criteria.device_class_id,
       // TODO add input if controlling & required
     }));
-    return this.deviceCommandService.runCommands(commands, true).pipe(map(res => {
-      this.values = res;
+    let o: Observable<unknown> | undefined;
+    if (commands.length > 0) {
+      o = this.deviceCommandService.runCommands(commands, true).pipe(map(res => this.values = res));
+    } else {
+      o = of(null);
+      this.draw();
+      this.refreshing = false;
+    }
+    return o.pipe(map(_ => {
       this.draw();
       this.refreshing = false;
     }));

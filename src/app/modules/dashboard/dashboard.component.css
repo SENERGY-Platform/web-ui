@@ -14,29 +14,16 @@
  * limitations under the License.
  */
 
-gridster {
-  background-color: #fafafa;
+gridstack {
+  overflow-y: auto;
 }
 
-.gridster-with-button {
-  height: calc(100% - 120px);
+.gridstack-with-button {
+  margin-bottom: 72px;
 }
 
-.gridster-without-button {
-  height: calc(100%);
-}
-
-gridster-item {
-  border-radius: 4px;
-  min-height: 272px;
-}
-
-.dashboard-container gridster ::ng-deep gridster-preview {
-  background: #f0f0f0;
-}
-
-.dashboard-container ::ng-deep gridster-item.gridster-item-resizing, gridster-item.gridster-item-moving {
-  box-shadow: 0 0 3px 3px rgba(0, 0, 0, .05), 0 3px 5px 0 rgba(0, 0, 0, .03), 0 1px 9px 0 rgba(0, 0, 0, .03);
+.dashboard-container ::ng-deep gridster-item.gridster-item-resizing,
+gridster-item.gridster-item-moving {
 }
 
 
@@ -55,12 +42,7 @@ gridster-item {
 }
 
 .mdc-tab {
-  height: 54px!important;
-}
-
-
-.border-radius {
-  border-radius: 4px;
+  height: 54px !important;
 }
 
 .fab {
@@ -81,7 +63,7 @@ gridster-item {
 }
 
 .highlight {
-  box-shadow:  0px 0px 2px 2px;
+  box-shadow: 0px 0px 2px 2px;
 }
 
 .tab-label-drag {
@@ -91,4 +73,19 @@ gridster-item {
 
 .tab-label {
   margin: 1px;
+}
+
+.grid-stack-item ::ng-deep .ui-resizable-se {
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 12px solid rgba(0, 0, 0, 0.12);
+  rotate: 180deg;
+  right: -2px;
+  bottom: 4px;
+}
+
+.grid-stack ::ng-deep .ui-draggable-dragging {
+  _box-shadow: 0 0 3px 3px rgba(0, 0, 0, .05), 0 3px 5px 0 rgba(0, 0, 0, .03), 0 1px 9px 0 rgba(0, 0, 0, .03);
 }

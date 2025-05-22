@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<div [ngSwitch]="widget.type" fxFill class="gridster-item-content">
+<div [ngSwitch]="widget.type" fxFill>
   <div *ngSwitchCase="'switch'" fxFill>
     <senergy-switch class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-switch>
   </div>

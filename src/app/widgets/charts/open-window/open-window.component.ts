@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Subscription, map, Observable, concatMap, of, forkJoin, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
@@ -163,7 +163,10 @@ export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
     private scheduleRefresh() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.refresh();
+                this.widgetIsConfigured();
+                if (!this.notConfigured) {
+                    this.refresh();
+                }
             }
         });
     }

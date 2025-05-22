@@ -108,9 +108,6 @@ export class BadVentilationComponent implements OnInit {
     }
     ngOnInit(): void {
         this.configured = this.widget.properties.badVentilation !== undefined;
-        if(!this.configured) {
-            return;
-        }
         this.update();
     }
 
@@ -118,6 +115,7 @@ export class BadVentilationComponent implements OnInit {
         this.destroy = this.dashboardService.initWidgetObservable.pipe(
             concatMap((event: string) => {
                 if (event === 'reloadAll' || event === this.widget.id) {
+                    this.configured = this.widget.properties.badVentilation !== undefined;
                     this.refreshing = true;
                     const exportConfig = this.widget.properties.badVentilation?.exportConfig;
                     if(exportConfig == null || exportConfig.exports.length === 0) {

@@ -51,7 +51,7 @@
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Service</mat-label>
                                     <mtx-select placeholder="Choose Service" [items]="services"
-                                        formControlName="service" useOptionViewProperty="name"
+                                        formControlName="service" bindLabel="name"
                                         [compareWith]="compareIds" appendTo=".root">
                                     </mtx-select>
                                     <mat-error senergyError label="Service"></mat-error>

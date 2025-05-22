@@ -70,9 +70,6 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
 
     ngOnInit(): void {
         this.configured = this.widget.properties.anomalyDetection !== undefined;
-        if(!this.configured) {
-            return;
-        }
         this.update();
         this.configured = this.widget.properties.anomalyDetection !== undefined;
         this.showDebug = this.widget.properties.anomalyDetection?.showDebug || false;
@@ -254,6 +251,7 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
                     return of(null);
                 }
                 if (event === 'reloadAll' || event === this.widget.id) {
+                    this.configured = this.widget.properties.anomalyDetection !== undefined;
                     this.refreshing = true;
                     const exportID = this.widget.properties.anomalyDetection?.export;
                     return this.loadLastAnomaly(exportID);

@@ -43,9 +43,9 @@ export class PvLoadRecommendationComponent implements OnInit, OnDestroy {
 
 
     constructor(
-      private dashboardService: DashboardService,
-      private pvLoadService: PvLoadService
-    ) {}
+        private dashboardService: DashboardService,
+        private pvLoadService: PvLoadService
+    ) { }
 
     ngOnInit(): void {
         this.update();
@@ -57,37 +57,38 @@ export class PvLoadRecommendationComponent implements OnInit, OnDestroy {
     }
 
     private update() {
-        const exportID = this.widget.properties?.pvLoadRecommendation?.exportID;
-        if(exportID == null) {
-            console.error('Export ID missing');
-            return;
-        }
+
 
         this.destroy = this.dashboardService.initWidgetObservable.pipe(
             concatMap((event: string) => {
                 if (event === 'reloadAll' || event === this.widget.id) {
+                    this.configured = this.widget.properties.pvLoadRecommendation !== undefined;
+                    if (!this.configured) {
+                        return of(null);
+                    }
                     this.refreshing = true;
+                    const exportID = this.widget.properties.pvLoadRecommendation!.exportID;
                     return this.pvLoadService.getPVLoadRecommendation(exportID);
                 }
                 return of();
             })).subscribe({
-            next: (recommendation) => {
-                if(recommendation != null) {
-                    this.recommendation = recommendation;
+                next: (recommendation) => {
+                    if (recommendation != null) {
+                        this.recommendation = recommendation;
+                    }
+                    this.ready = true;
+                    this.refreshing = false;
+                },
+                error: (err) => {
+                    if (err.error) {
+                        this.error = err.error;
+                    } else {
+                        this.error = JSON.stringify(err);
+                    }
+                    this.ready = true;
+                    this.refreshing = false;
                 }
-                this.ready = true;
-                this.refreshing = false;
-            },
-            error: (err) => {
-                if(err.error) {
-                    this.error = err.error;
-                } else {
-                    this.error = JSON.stringify(err);
-                }
-                this.ready = true;
-                this.refreshing = false;
-            }
-        });
+            });
     }
 
     edit() {

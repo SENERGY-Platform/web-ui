@@ -71,6 +71,7 @@
               "node_modules/bpmn-js/dist/assets/diagram-js.css",
               "node_modules/bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css",
               "node_modules/bpmn-js-properties-panel/styles/properties.less",
+              "node_modules/gridstack/dist/gridstack.min.css",
               {
                 "input": "node_modules/swagger-ui/dist/swagger-ui.css",
                 "bundleName": "swagger-ui",

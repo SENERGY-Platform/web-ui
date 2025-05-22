@@ -38,7 +38,7 @@ describe('OpenWindowComponent', () => {
 
     fixture = TestBed.createComponent(OpenWindowComponent);
     component = fixture.componentInstance;
-    component.widget = {properties: {windowExports: []}, id: '', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1};
+    component.widget = {properties: {windowExports: []}, id: '', name: '', type: '', y: 1, x: 1, w: 1, h: 1};
 
     fixture.detectChanges();
   });

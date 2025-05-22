@@ -20,7 +20,7 @@
     <div *ngIf="ready && widget.properties.floorplan === undefined" class="content">
       <div>Please configure widget!</div>
     </div>
-    <senergy-widget-spinner [show]="widget.properties.floorplan === undefined || !ready || draws < 2"></senergy-widget-spinner>
+    <senergy-widget-spinner [show]="widget.properties.floorplan !== undefined && (!ready || draws < 2)"></senergy-widget-spinner>
     <div [hidden]="!ready || !widget.properties.floorplan === undefined" class="content">
       <div class="image-wrapper" #imageWrapper>
         <canvas #canvas baseChart [data]="chartjs.data" [options]="chartjs.options" type="scatter"
