@@ -19,6 +19,7 @@ export interface CostEntryModel  {
 	ram?: number;
 	storage?: number;
 	requests?: number;
+	requestedDatapoints?: number;
 }
 
 export interface CostModel  {
