@@ -34,7 +34,7 @@ import { MatTabGroup } from '@angular/material/tabs';
 import { ChartsService } from '../../widgets/charts/shared/charts.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { elementCB, GridstackComponent } from 'gridstack/dist/angular';
-import { GridStack, GridStackWidget } from 'gridstack';
+import { GridStack } from 'gridstack';
 
 @Component({
     selector: 'senergy-dashboard',
@@ -164,7 +164,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     toggleDragMode() {
         this.inDragMode = !this.inDragMode;
-        // TODO after toggling drag mode gridstack no longer calculates number of columns
     }
 
     /**
