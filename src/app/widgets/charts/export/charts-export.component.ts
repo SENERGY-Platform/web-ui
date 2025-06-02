@@ -448,6 +448,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
                     this.setupZoomChartSettings(lastOverride);
                     this.resizeChart();
+                    this.cd.detectChanges();
                     this.chartExport?.draw();
                 }
                 this.size = (this.chartExportData?.dataTable?.length || 0) * ((this.chartExportData?.dataTable?.[0]?.length || 0) - 1);

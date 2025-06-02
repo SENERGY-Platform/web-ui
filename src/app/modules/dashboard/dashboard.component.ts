@@ -351,7 +351,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private updateWidget(widgetManipulationModel: DashboardWidgetManipulationModel) {
         const i = this.dashboards[this.activeTabIndex].widgets.findIndex(w => w.id === widgetManipulationModel.widgetId);
         if (i !== -1 && widgetManipulationModel.widget !== null) {
-            this.dashboards[this.activeTabIndex].widgets[i] = widgetManipulationModel.widget;
+            const w = this.dashboards[this.activeTabIndex].widgets[i];
+            w.name = widgetManipulationModel.widget.name;
+            w.properties = widgetManipulationModel.widget.properties;
         }
         this.cd.detectChanges();
         this.refreshWidget(widgetManipulationModel);
