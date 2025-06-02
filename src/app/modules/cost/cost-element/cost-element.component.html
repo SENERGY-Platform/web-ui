@@ -48,6 +48,8 @@
                 <td *ngIf="element.month.storage !== undefined">{{element.month.storage | currency:'EUR'}}</td>
                 <td *ngIf="element.month.requests !== undefined"><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
                 <td *ngIf="element.month.requests !== undefined">{{element.month.requests | number: '1.0-0'}}</td>
+                <td *ngIf="element.month.requestedDatapoints !== undefined"><mat-icon matTooltip="Requested Datapoints" class="inline-icon">format_list_numbered</mat-icon></td>
+                <td *ngIf="element.month.requestedDatapoints !== undefined">{{element.month.requestedDatapoints | number: '1.0-0'}}</td>
                 </div>
         </tr>
         <tr *ngIf="element.estimation_month !== undefined">
@@ -61,6 +63,8 @@
                 <td *ngIf="element.estimation_month.storage !== undefined">{{element.estimation_month.storage | currency:'EUR'}}</td>
                 <td *ngIf="element.estimation_month.requests !== undefined"><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
                 <td *ngIf="element.estimation_month.requests !== undefined">{{element.estimation_month.requests | number: '1.0-0'}}</td>
+                <td *ngIf="element.estimation_month.requestedDatapoints !== undefined"><mat-icon matTooltip="Requested Datapoints" class="inline-icon">format_list_numbered</mat-icon></td>
+                <td *ngIf="element.estimation_month.requestedDatapoints !== undefined">{{element.estimation_month.requestedDatapoints | number: '1.0-0'}}</td>
             </div>
         </tr>
     </table>
