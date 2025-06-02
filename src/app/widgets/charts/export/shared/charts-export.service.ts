@@ -486,7 +486,7 @@ export class ChartsExportService {
         }
         const dataTable = new ChartDataTableModel([header]);
         let series2: any = [];
-        if (table.length > 0 && table[0].length > 2 && properties.chartType === 'ColumnChart') {
+        if (table.length > 0 && table[0].length > 2) {
             /* Grouped Column -> all values for on x tick value need to be in one list
             series = [
                 ["2023-07-18T00:00:00Z", 2.7930317029043543, 5, 3]
