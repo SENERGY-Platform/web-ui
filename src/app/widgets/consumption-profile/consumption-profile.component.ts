@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { map } from 'rxjs';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { map, Subscription } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ApexChartOptions } from '../charts/export/shared/charts-export-properties.model';
 import { ConsumptionProfileProperties, ConsumptionProfileResponse } from './shared/consumption-profile.model';
 import { ConsumptionProfileService } from './shared/consumption-profile.service';
+import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 
 @Component({
     selector: 'senergy-consumption-profile-widget',
     templateUrl: './consumption-profile.component.html',
     styleUrls: ['./consumption-profile.component.css']
 })
-export class ConsumptionProfileComponent implements OnInit {
+export class ConsumptionProfileComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
-    @ViewChild('content', {static: false}) contentBox!: ElementRef;
+    @ViewChild('content', { static: false }) contentBox!: ElementRef;
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
@@ -81,7 +82,7 @@ export class ConsumptionProfileComponent implements OnInit {
             points: [],
             xaxis: []
         },
-        tooltip:{
+        tooltip: {
             enabled: true,
             x: {
                 format: 'dd.MM',
@@ -93,15 +94,17 @@ export class ConsumptionProfileComponent implements OnInit {
     };
     operatorIsInitPhase = false;
     initialPhaseMsg = '';
+    destroy: Subscription | undefined;
 
     constructor(
         private consumptionService: ConsumptionProfileService,
+        private dashboardService: DashboardService,
     ) {
 
     }
 
     private checkForInit(data: ConsumptionProfileResponse) {
-        if(data.initial_phase !== '' && data.initial_phase !== null) {
+        if (data.initial_phase !== '' && data.initial_phase !== null) {
             this.operatorIsInitPhase = true;
             this.initialPhaseMsg = data.initial_phase;
             return true;
@@ -110,7 +113,7 @@ export class ConsumptionProfileComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        if(!this.widget.properties.consumptionProfile) {
+        if (!this.widget.properties.consumptionProfile) {
             this.configured = false;
             return;
         } else {
@@ -118,6 +121,21 @@ export class ConsumptionProfileComponent implements OnInit {
             this.widgetProperties = this.widget.properties.consumptionProfile || {};
         }
 
+        this.refresh();
+
+        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+            if (event === 'reloadAll' || event === this.widget.id) {
+                this.refresh();
+            }
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.destroy?.unsubscribe();
+    }
+
+    refresh() {
+        this.refreshing = true;
         this.consumptionService.getLatestConsumptionProfileOutput(this.widgetProperties.exportID).pipe(
             map((data) => {
                 this.setupChartData(data);
@@ -125,11 +143,14 @@ export class ConsumptionProfileComponent implements OnInit {
         ).subscribe({
             next: () => {
                 this.ready = true;
+                this.refreshing = false;
             },
             error: (err) => {
                 console.log(err);
                 this.ready = true;
                 this.error = true;
+                this.refreshing = false;
+
             }
         });
     }
@@ -139,9 +160,14 @@ export class ConsumptionProfileComponent implements OnInit {
         this.timeWindow = data.time_window;
 
         this.message = 'Normaler Verbrauch im Zeitfenster';
-        if(data.value===true) {
+        if (data.value === true) {
             const anomalyType = data.type === 'low' ? 'niedriger' : 'hoher';
             this.message = 'Ungewöhnlicher ' + anomalyType + ' Verbrauch im Zeitfenster';
+        }
+
+        if (this.chartData !== undefined) {
+            this.chartData.series = [];
+            this.chartData.colors = [];
         }
 
         const points: any[] = [];
@@ -151,7 +177,7 @@ export class ConsumptionProfileComponent implements OnInit {
             const value = row[1];
             const pointIsAnomaly = row[2];
 
-            if(pointIsAnomaly === 1) {
+            if (pointIsAnomaly === 1) {
                 anomalyPoints.push({
                     x: ts,
                     y: value
@@ -163,8 +189,8 @@ export class ConsumptionProfileComponent implements OnInit {
                 });
             }
         });
-        this.chartData?.series.push({data: points, name: 'Normal Consumption'});
-        this.chartData?.series.push({data: anomalyPoints, name: 'Anomalous Consumption'});
+        this.chartData?.series.push({ data: points, name: 'Normal Consumption' });
+        this.chartData?.series.push({ data: anomalyPoints, name: 'Anomalous Consumption' });
         this.chartData.colors = ['#008FFB', '#FF0000'];
     }
 

@@ -14,161 +14,186 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { map } from 'rxjs';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { map, Subscription } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ApexChartOptions } from '../charts/export/shared/charts-export-properties.model';
 import { LeackageDetectionProperties, LeakageDetectionResponse } from './shared/leakage-detction.model';
 import { LeakageDetectionService } from './shared/leakage-detection.service';
+import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 
 @Component({
     selector: 'senergy-leakage-detection-widget',
     templateUrl: './leakage-detection.component.html',
     styleUrls: ['./leakage-detection.component.css']
 })
-export class LeakageDetectionComponent implements OnInit {
-  @Input() dashboardId = '';
-  @Input() widget: WidgetModel = {} as WidgetModel;
-  @Input() zoom = false;
-  @ViewChild('content', {static: false}) contentBox!: ElementRef;
-  @Input() userHasDeleteAuthorization = false;
-  @Input() userHasUpdatePropertiesAuthorization = false;
-  @Input() userHasUpdateNameAuthorization = false;
-  refreshing = false;
-  error = false;
-  ready = false;
-  chartExportData: any;
-  configured = false;
-  widgetProperties!: LeackageDetectionProperties;
-  message = '';
-  timeWindow = '';
+export class LeakageDetectionComponent implements OnInit, OnDestroy {
+    @Input() dashboardId = '';
+    @Input() widget: WidgetModel = {} as WidgetModel;
+    @Input() zoom = false;
+    @ViewChild('content', { static: false }) contentBox!: ElementRef;
+    @Input() userHasDeleteAuthorization = false;
+    @Input() userHasUpdatePropertiesAuthorization = false;
+    @Input() userHasUpdateNameAuthorization = false;
+    refreshing = false;
+    error = false;
+    ready = false;
+    chartExportData: any;
+    configured = false;
+    widgetProperties!: LeackageDetectionProperties;
+    message = '';
+    timeWindow = '';
+    destroy: Subscription | undefined;
 
-  chartData: ApexChartOptions = {
-    series: [],
-    chart: {
-        redrawOnParentResize: true,
-        redrawOnWindowResize: true,
-        width: '100%',
-        height: 'auto',
-        animations: {
-            enabled: false
+    chartData: ApexChartOptions = {
+        series: [],
+        chart: {
+            redrawOnParentResize: true,
+            redrawOnWindowResize: true,
+            width: '100%',
+            height: 'auto',
+            animations: {
+                enabled: false
+            },
+            type: 'scatter',
+            toolbar: {
+                show: false
+            },
+            events: {}
         },
-        type: 'scatter',
-        toolbar: {
-            show: false
+        markers: {
+            size: 4
         },
-        events: {}
-    },
-    markers: {
-        size: 4
-    },
-    title: {},
-    plotOptions: {},
-    xaxis: {
-        type: 'datetime' as 'datetime' | 'category',
-        labels: {
-            datetimeUTC: false,
+        title: {},
+        plotOptions: {},
+        xaxis: {
+            type: 'datetime' as 'datetime' | 'category',
+            labels: {
+                datetimeUTC: false,
+            },
+            title: {
+                text: ''
+            }
         },
-        title: {
-            text: ''
+        yaxis: {
+            title: {
+                text: ''
+            },
+            decimalsInFloat: 3
+        },
+        colors: [],
+        legend: {
+            show: true
+        },
+        annotations: {
+            points: [],
+            xaxis: []
+        },
+        tooltip: {
+            enabled: true,
+            x: {
+                format: 'dd.MM HH:mm:ss.fff',
+            }
+        },
+    };
+    operatorIsInitPhase = false;
+    initialPhaseMsg = '';
+
+    constructor(
+        private leakageService: LeakageDetectionService,
+        private dashboardService: DashboardService,
+    ) {
+
+    }
+
+    ngOnInit(): void {
+        if (!this.widget.properties.leakageDetection) {
+            this.configured = false;
+            return;
+        } else {
+            this.configured = true;
+            this.widgetProperties = this.widget.properties.leakageDetection || {};
         }
-    },
-    yaxis: {
-        title: {
-            text: ''
-        },
-        decimalsInFloat: 3
-    },
-    colors: [],
-    legend: {
-        show: true
-    },
-    annotations: {
-        points: [],
-        xaxis: []
-    },
-    tooltip:{
-        enabled: true,
-        x: {
-            format: 'dd.MM HH:mm:ss.fff',
+
+        this.refresh();
+        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+            if (event === 'reloadAll' || event === this.widget.id) {
+                this.refresh();
+            }
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.destroy?.unsubscribe();
+    }
+
+    private checkForInit(data: LeakageDetectionResponse) {
+        if (data.initial_phase !== '' && data.initial_phase !== null) {
+            this.operatorIsInitPhase = true;
+            this.initialPhaseMsg = data.initial_phase;
+            return true;
         }
-    },
-  };
-  operatorIsInitPhase = false;
-  initialPhaseMsg = '';
+        return false;
+    }
 
-  constructor(
-      private leakageService: LeakageDetectionService
-  ) {
+    refresh() {
+        this.refreshing = true;
+        this.leakageService.getLatestLeakageDetectionOutput(this.widgetProperties.exportID).pipe(
+            map((data) => {
+                this.setupChartData(data);
+            })
+        ).subscribe({
+            next: () => {
+                this.ready = true;
+                this.refreshing = false;
+            },
+            error: (err) => {
+                console.log(err);
+                this.error = true;
+                this.ready = true;
+                this.refreshing = false;
+            }
+        });
+    }
 
-  }
+    setupChartData(data: LeakageDetectionResponse) {
+        this.checkForInit(data);
+        this.message = 'Normaler Wasserverbrauch im Zeitfenster';
+        if (data.value === 1) {
+            this.message = 'In den letzten 5 Minuten wurde übermäßig viel Wasser verbraucht';
+        }
+        this.timeWindow = data.time_window;
 
-  ngOnInit(): void {
-      if(!this.widget.properties.leakageDetection) {
-          this.configured = false;
-          return;
-      } else {
-          this.configured = true;
-          this.widgetProperties = this.widget.properties.leakageDetection || {};
-      }
+        if (this.chartData !== undefined) {
+            this.chartData.series = [];
+            this.chartData.colors = [];
+        }
 
-      this.leakageService.getLatestLeakageDetectionOutput(this.widgetProperties.exportID).pipe(
-          map((data) => {
-              this.setupChartData(data);
-          })
-      ).subscribe({
-          next: () => {
-              this.ready = true;
-          },
-          error: (err) => {
-              console.log(err);
-              this.error = true;
-              this.ready = true;
-          }
-      });
-  }
+        const points: any[] = [];
+        const anomalyPoints: any[] = [];
+        data.last_consumptions.forEach(row => {
+            const ts = new Date(row[0]).getTime();
+            const value = row[1];
+            const pointIsAnomaly = row[2];
 
-  private checkForInit(data: LeakageDetectionResponse) {
-      if(data.initial_phase !== '' && data.initial_phase !== null) {
-          this.operatorIsInitPhase = true;
-          this.initialPhaseMsg = data.initial_phase;
-          return true;
-      }
-      return false;
-  }
+            if (pointIsAnomaly === 1) {
+                anomalyPoints.push({
+                    x: ts,
+                    y: value
+                });
+            } else {
+                points.push({
+                    x: ts,
+                    y: value
+                });
+            }
+        });
+        this.chartData?.series.push({ data: points, name: 'Normal Consumption' });
+        this.chartData?.series.push({ data: anomalyPoints, name: 'Anomalous Consumption' });
+        this.chartData.colors = ['#008FFB', '#FF0000'];
+    }
 
-  setupChartData(data: LeakageDetectionResponse) {
-      this.checkForInit(data);
-      this.message = 'Normaler Wasserverbrauch im Zeitfenster';
-      if(data.value===1) {
-          this.message = 'In den letzten 5 Minuten wurde übermäßig viel Wasser verbraucht';
-      }
-      this.timeWindow = data.time_window;
-      const points: any[] = [];
-      const anomalyPoints: any[] = [];
-      data.last_consumptions.forEach(row => {
-          const ts = new Date(row[0]).getTime();
-          const value = row[1];
-          const pointIsAnomaly = row[2];
-
-          if(pointIsAnomaly === 1) {
-              anomalyPoints.push({
-                  x: ts,
-                  y: value
-              });
-          } else {
-              points.push({
-                  x: ts,
-                  y: value
-              });
-          }
-      });
-      this.chartData?.series.push({data: points, name: 'Normal Consumption'});
-      this.chartData?.series.push({data: anomalyPoints, name: 'Anomalous Consumption'});
-      this.chartData.colors = ['#008FFB', '#FF0000'];
-  }
-
-  edit() {
-      this.leakageService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
-  }
+    edit() {
+        this.leakageService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
+    }
 }
