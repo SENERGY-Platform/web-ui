@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {DeviceInstancesService} from './shared/device-instances.service';
 import {
@@ -77,6 +77,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         private exportDataService: ExportDataService,
         private permissionsService: PermissionsService,
         public preferencesService: PreferencesService,
+        private cd: ChangeDetectorRef,
     ) {
         this.getRouterParams();
     }
@@ -222,6 +223,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                     this.routerNetworkName = filterSelectionInner.networkName;
                     this.routerLocation = filterSelectionInner.location;
                     this.routerLocationName = filterSelectionInner.locationName;
+                    this.cd.detectChanges();
                 }
                 this.reload();
             }
@@ -486,5 +488,18 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
 
     isActive(device: DeviceInstanceModel): boolean {
         return device.attributes?.find(a => a.key === 'inactive' && a.value === 'true') === undefined;
+    }
+
+    private _chipDiv?: ElementRef;
+    @ViewChild('chipDiv')
+    set chipDivSetter(ref: ElementRef | undefined) {
+        this._chipDiv = ref;
+        this.cd.detectChanges();
+    }
+    calcTableMaxHeight(): string {
+        if (this._chipDiv === undefined) {
+            return '';
+        }
+        return 'calc(100vh - ' + (this._chipDiv.nativeElement.clientHeight + 216)+ 'px - 1em)';
     }
 }
