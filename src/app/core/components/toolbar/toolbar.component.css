@@ -32,6 +32,8 @@
 .shadow {
     padding-left: 8px;
     box-shadow: 0 0 0.2rem rgba(0, 0, 0, .1), 0 0.2rem 0.4rem rgba(0, 0, 0, .1);
+    z-index: 1;
+    position: relative;
 }
 
 .header-text {
