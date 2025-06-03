@@ -93,7 +93,7 @@ export class DeviceInstancesService {
 
     updateDeviceInstance(device: DeviceInstanceModel): Observable<DeviceInstanceModel | null> {
         return this.http
-            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(device.id), device)
+            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(device.id)+'?update-only-same-origin-attributes=web-ui', device)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', null)));
     }
 
@@ -105,7 +105,7 @@ export class DeviceInstancesService {
 
     updateDeviceInstanceAttributes(deviceId: string, attributes: Attribute[]) {
         return this.http
-            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes', attributes)
+            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes?update-only-same-origin-attributes=web-ui', attributes)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
     }
 
