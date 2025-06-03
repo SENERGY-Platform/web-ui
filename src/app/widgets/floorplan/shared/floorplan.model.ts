@@ -35,6 +35,7 @@ export interface FloorplanWidgetCapabilityModel {
     coloring: {
         value: number;
         color: string;
+        showValue: boolean;
         showValueWhenZoomed: boolean;
     }[],
     icon?: string;
@@ -107,12 +108,12 @@ export function migrateColoring(properties: FloorplanWidgetPropertiesModel) {
             p.coloring = [];
         }
         if (p.colorLow && p.valueLow) {
-            p.coloring.push({ value: p.valueLow, color: p.colorLow, showValueWhenZoomed: false });
+            p.coloring.push({ value: p.valueLow, color: p.colorLow, showValue: false, showValueWhenZoomed: false });
             p.colorLow = null;
             p.valueLow = null;
         }
         if (p.colorHigh && p.valueHigh) {
-            p.coloring.push({ value: Math.max(p.valueHigh, 100000), color: p.colorHigh, showValueWhenZoomed: false });
+            p.coloring.push({ value: Math.max(p.valueHigh, 100000), color: p.colorHigh, showValue: false, showValueWhenZoomed: false });
             p.colorHigh = null;
             p.valueHigh = null;
         }

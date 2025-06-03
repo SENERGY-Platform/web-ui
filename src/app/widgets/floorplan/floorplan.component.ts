@@ -21,7 +21,7 @@ import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
 import { map, Observable, Subscription, of, forkJoin, concatMap } from 'rxjs';
-import { dotSize, image, migrateColoring } from './shared/floorplan.model';
+import { image, migrateColoring } from './shared/floorplan.model';
 import { DeviceCommandModel, DeviceCommandResponseModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
 import { Point } from '@angular/cdk/drag-drop';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
@@ -48,7 +48,6 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   ready = true;
   refreshing = false;
   destroy: Subscription | undefined;
-  dotSize = dotSize;
   values: DeviceCommandResponseModel[] = [];
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
   img: HTMLImageElement | undefined;
@@ -62,6 +61,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     tooltipDatasets: { datasetIndex: number, label: string, formattedValue: string, drawToLeft: boolean }[];
     annotations?: AnnotationOptions[];
     plugins: Plugin<keyof ChartTypeRegistry, AnyObject>[];
+    showValue: boolean[];
     showValueWhenZoomed: boolean[];
   } = {
       options: {
@@ -125,8 +125,8 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
         },
         elements: {
           point: {
-            radius: this.widget.properties?.floorplan?.dotSize || 5,
-            hoverRadius: this.widget.properties?.floorplan?.dotSize || 5,
+            radius: this.dotSize,
+            hoverRadius: this.dotSize,
             pointStyle: (ctx) => {
               const def = 'circle';
               const dsIndex = this.chartjs.data?.datasets.findIndex(d => {
@@ -149,10 +149,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
                 return def;
               }
               const canvas = document.createElement('canvas');
-              let size = this.widget.properties?.floorplan?.dotSize || 5;
-              if (this.zoom) {
-                size *= 2;
-              }
+              const size = this.dotSize;
               canvas.width = size;
               canvas.height = canvas.width;
               const canvasCtx = canvas.getContext('2d');
@@ -166,7 +163,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
               canvasCtx.fillStyle = ds.backgroundColor as string;
 
 
-              if (this.zoom && this.chartjs.showValueWhenZoomed[dsIndex]) {
+              if ((this.zoom && this.chartjs.showValueWhenZoomed[dsIndex]) || (!this.zoom && this.chartjs.showValue[dsIndex])) {
                 const originWidth = canvas.width;
                 const iconWidth = canvasCtx.measureText(icon).width;
                 canvasCtx.font = fontSize + ' Arial';
@@ -242,6 +239,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }],
       showValueWhenZoomed: [],
+      showValue: [],
     };
 
   constructor(
@@ -312,10 +310,11 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       };
     }
     if (this.chartjs.options?.elements?.point !== undefined) {
-      this.chartjs.options.elements.point.radius = this.widget.properties?.floorplan?.dotSize || 5;
-      this.chartjs.options.elements.point.hoverRadius = this.widget.properties?.floorplan?.dotSize || 5;
+      this.chartjs.options.elements.point.radius = this.dotSize;
+      this.chartjs.options.elements.point.hoverRadius = this.dotSize;
     }
     const datasets: ChartDataset[] = new Array(Math.max(this.values.length - 1, 0)).fill({});
+    const showValue: boolean[] = [];
     const showValueWhenZoomed: boolean[] = [];
     this.values.forEach((r, i) => {
       if (this.widget.properties.floorplan === undefined || this.widget.properties.floorplan.placements === null || this.img === undefined) {
@@ -325,12 +324,15 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       const y = (this.widget.properties.floorplan.placements[i].position.y || 0) * this.img.naturalHeight * this.drawShift.ratio + this.drawShift.centerShiftY;
       let color = 'grey';
       let zoom = false;
+      let notZoom = false;
       if (!isNaN(r.message) && this.widget.properties.floorplan.placements[i].coloring !== undefined && this.widget.properties.floorplan.placements[i].coloring.length > 0) {
         color = this.widget.properties.floorplan.placements[i].coloring[0].color;
         zoom = this.widget.properties.floorplan.placements[i].coloring[0].showValueWhenZoomed;
+        notZoom = this.widget.properties.floorplan.placements[i].coloring[0].showValue;
         for (let j = 1; j < this.widget.properties.floorplan.placements[i].coloring.length && r.message > this.widget.properties.floorplan.placements[i].coloring[j - 1].value; j++) {
           color = this.widget.properties.floorplan.placements[i].coloring[j].color;
           zoom = this.widget.properties.floorplan.placements[i].coloring[j].showValueWhenZoomed;
+          notZoom = this.widget.properties.floorplan.placements[i].coloring[j].showValue;
         }
       }
       let label = '' + r.message;
@@ -338,10 +340,12 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
         label += ' ' + this.functionIdToUnit.get(this.widget.properties.floorplan.placements[i].criteria.function_id);
       }
       showValueWhenZoomed[i] = zoom;
+      showValue[i] = notZoom;
       datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color };
     });
     this.chartjs.data = { datasets };
     this.chartjs.showValueWhenZoomed = showValueWhenZoomed;
+    this.chartjs.showValue = showValue;
     const chart = this.chartjsChart;
     if (chart === undefined) {
       return;
@@ -423,5 +427,9 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get chartjsChart(): Chart | undefined {
     return Chart.getChart('chartjs-' + this.widget.id);
+  }
+
+  get dotSize(): number {
+    return Math.sqrt(this.el.nativeElement.clientHeight * this.el.nativeElement.clientWidth) * (this.widget.properties?.floorplan?.dotSize || 5) / 350;
   }
 }

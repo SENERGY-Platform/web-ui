@@ -28,7 +28,7 @@ import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devi
 import { DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeAspectNodeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
-import { dotSize, draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, image, migrateColoring } from '../shared/floorplan.model';
+import { draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, image, migrateColoring } from '../shared/floorplan.model';
 import { materialIconNames } from 'src/app/core/model/icon.model';
 
 @Component({
@@ -50,7 +50,6 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   functions: DeviceTypeFunctionModel[] = [];
   deviceClasses: DeviceTypeDeviceClassModel[] = [];
   placing: number | undefined;
-  dotSize = dotSize;
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
   step: number | undefined;
   materialIconNames = materialIconNames;
@@ -276,7 +275,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   }
 
   addNewColoring(arr: FormArray): void {
-    let val = { value: 100000, color: '#000000', showValueWhenZoomed: false };
+    let val = { value: 100000, color: '#000000', showValue: false, showValueWhenZoomed: false };
     if (arr.length > 0) {
       val = arr.at(arr.length - 1).getRawValue();
     }
@@ -286,11 +285,13 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   newColoring(value?: {
     value: number;
     color: string;
+    showValue: boolean;
     showValueWhenZoomed: boolean;
   }): FormGroup {
     const fg = this.fb.group({
       value: new FormControl<number>(0),
       color: new FormControl(''),
+      showValue: new FormControl(false),
       showValueWhenZoomed: new FormControl(false),
     });
     if (value !== undefined) {
