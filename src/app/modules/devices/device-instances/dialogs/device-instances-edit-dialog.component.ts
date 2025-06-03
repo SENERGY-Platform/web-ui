@@ -162,7 +162,6 @@ export class DeviceInstancesEditDialogComponent {
             tmp.sort((a, b)  =>  a.toLowerCase().localeCompare(b.toLowerCase()));
             that.knownAttributes = [];
             that.knownAttributes = tmp;
-            that.cd.detectChanges();
         };
     }
 }

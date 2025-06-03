@@ -125,7 +125,7 @@ export class DeviceInstancesDialogService {
 
     openDeviceEditDialog(device: DeviceInstanceModel, userHasUpdateAuthorization: boolean, userHasUpdateDisplayNameAuthorization: boolean, userHasUpdateAttributesAuthorization: boolean, setSpinnerState?: (state: boolean) => void) {
         const dialogConfig = new MatDialogConfig();
-        dialogConfig.width = '50vh';
+        dialogConfig.minWidth = '50vw';
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             device: JSON.parse(JSON.stringify(device)), // create copy of object
