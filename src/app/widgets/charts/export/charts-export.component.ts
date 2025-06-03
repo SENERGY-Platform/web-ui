@@ -30,8 +30,10 @@ import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartDataset, Ch
 import { DatePipe } from '@angular/common';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import annotationPlugin, { AnnotationOptions } from 'chartjs-plugin-annotation';
-import 'chartjs-adapter-moment';
 import moment from 'moment';
+import 'moment/min/locales.min';
+moment.locale('de');
+import 'chartjs-adapter-moment';
 import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
 import { findLabel, getLabelHitBoxes } from './chartjs-axis-click';
 
@@ -251,6 +253,38 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
         if (this.widget.properties.chartType === 'ColumnChart') {
             let dateFormat = this.hAxisFormat;
+            if (dateFormat === '' || dateFormat === null) {
+                const rgxRes = this.timeRgx.exec(this.groupTime || '');
+                if (rgxRes !== null) {
+                    const timeUnit = rgxRes[2];
+                    switch (timeUnit) {
+                        case 'y':
+                            dateFormat = this.xAxisFormat(DetailLevel.y);
+                            break;
+                        case 'months':
+                            dateFormat = this.xAxisFormat(DetailLevel.months);
+                            break;
+                        case 'w':
+                        case 'd':
+                            dateFormat = this.xAxisFormat(DetailLevel.d);
+                            break;
+                        case 'h':
+                            dateFormat = this.xAxisFormat(DetailLevel.h);
+                            break;
+                        case 'm':
+                            dateFormat = this.xAxisFormat(DetailLevel.m);
+                            break;
+                        case 's':
+                            dateFormat = this.xAxisFormat(DetailLevel.s);
+                            break;
+                        case 'ms':
+                            dateFormat = this.xAxisFormat(DetailLevel.ms);
+                            break;
+                    }
+                } else {
+                    dateFormat = 'LLL';
+                }
+            }
             switch (dateFormat) {
                 case 'EEE':
                 case 'EE':
@@ -260,10 +294,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 case 'dd.MM.':
                     dateFormat = 'DD.MM.';
                     break;
-            }
-            if (dateFormat === 'EEE' || dateFormat === 'EE' || dateFormat === 'E') {
-                dateFormat = 'ddd';
-                // was using Angular DatePipe before and uses moment-js now.
             }
             this.chartjs.options = {
                 animation: false,
