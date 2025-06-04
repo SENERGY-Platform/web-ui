@@ -35,7 +35,7 @@
             <mat-form-field color="accent" appearance="outline" class="selector">
                 <mat-label>User</mat-label>
                 <mtx-select [items]="adddableUsers" [formControl]="userFormControl" bindValue="id" bindLabel="username"
-                    appendTo=".root">
+                    appendTo="mat-dialog-container .root">
                 </mtx-select>
                 <mat-error senergyError label="User"></mat-error>
             </mat-form-field>
@@ -48,7 +48,7 @@
         <form class="user-input">
             <mat-form-field color="accent" appearance="outline" class="selector">
                 <mat-label>Group</mat-label>
-                <mtx-select [items]="adddableGroups" [formControl]="groupFormControl" appendTo=".root">
+                <mtx-select [items]="adddableGroups" [formControl]="groupFormControl" appendTo="mat-dialog-container .root">
                 </mtx-select>
                 <mat-error senergyError label="Group"></mat-error>
             </mat-form-field>
@@ -61,7 +61,7 @@
         <form *ngIf="isAdmin" class="user-input">
             <mat-form-field color="accent" appearance="outline" class="selector">
                 <mat-label>Role</mat-label>
-                <mtx-select [items]="adddableRoles" [formControl]="roleFormControl" appendTo=".root" dropdownPosition="top">
+                <mtx-select [items]="adddableRoles" [formControl]="roleFormControl" appendTo="mat-dialog-container .root" dropdownPosition="top">
                 </mtx-select>
                 <mat-error senergyError label="Role"></mat-error>
             </mat-form-field>

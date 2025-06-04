@@ -40,13 +40,13 @@
             <mat-form-field appearance="outline" class="full-width" color="accent">
                 <mat-label>Aspect</mat-label>
                 <mtx-select [items]="aspectOptions" bindValue="id" bindLabel="name" formControlName="aspect_id"
-                    appendTo=".root"></mtx-select>
+                    appendTo="mat-dialog-container .root"></mtx-select>
                 <mat-error senergyError label="Aspect"></mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width" color="accent">
                 <mat-label>Function</mat-label>
-                <mtx-select formControlName="function_id" appendTo=".root">
+                <mtx-select formControlName="function_id" appendTo="mat-dialog-container .root">
                     <mtx-option *ngFor="let option of functions" [value]="option.id"><span
                             [class]="option.class">{{option.name}}</span></mtx-option>
                 </mtx-select>
@@ -55,7 +55,7 @@
 
             <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!isVoidType()">
                 <mat-label>Characteristic</mat-label>
-                <mtx-select formControlName="characteristic_id" appendTo=".root">
+                <mtx-select formControlName="characteristic_id" appendTo="mat-dialog-container .root">
                     <mtx-option *ngFor="let option of characteristics" [value]="option.id"><span
                             [class]="option.class">{{option.name}}</span></mtx-option>
                 </mtx-select>
@@ -66,7 +66,7 @@
             <mat-form-field appearance="outline" class="full-width" color="accent"
                 *ngIf="isPrimitiveType() && !isVoidType()">
                 <mat-label>Type</mat-label>
-                <mtx-select formControlName="type" required appendTo=".root">
+                <mtx-select formControlName="type" required appendTo="mat-dialog-container .root">
                     <mtx-option *ngFor="let primitive of primitiveTypes" [value]="primitive.type">
                         {{primitive.typeShort}}
                     </mtx-option>
@@ -76,7 +76,7 @@
             <mat-form-field appearance="outline" class="full-width" color="accent"
                 *ngIf="!isPrimitiveType() && !isVoidType()">
                 <mat-label>Type</mat-label>
-                <mtx-select formControlName="type" required appendTo=".root">
+                <mtx-select formControlName="type" required appendTo="mat-dialog-container .root">
                     <mtx-option *ngFor="let nonPrimitive of nonPrimitiveTypes" [value]="nonPrimitive.type">
                         {{nonPrimitive.typeShort}}
                     </mtx-option>

@@ -92,7 +92,7 @@
                             <mat-form-field class="input-field" color="accent" appearance="outline">
                                 <mat-label>Enable Measurements</mat-label>
                                 <mtx-select multiple [(ngModel)]="measurementSelected"
-                                    (closed)="measurementsSelected(measurements, measurementSelected)" appendTo=".root">
+                                    (closed)="measurementsSelected(measurements, measurementSelected)" appendTo="mat-dialog-container .root">
                                     <mtx-option *ngFor="let option of measurements" [value]="option.name_html">
                                         <div [innerHTML]="option.name_html"></div>
                                     </mtx-option>
@@ -104,7 +104,7 @@
                             <mat-form-field class="input-field" color="accent" appearance="outline">
                                 <mat-label>Enable Pollen Warnings</mat-label>
                                 <mtx-select multiple [(ngModel)]="pollenSelected"
-                                    (closed)="measurementsSelected(pollen, pollenSelected)" appendTo=".root">
+                                    (closed)="measurementsSelected(pollen, pollenSelected)" appendTo="mat-dialog-container .root">
                                     <mtx-option *ngFor="let option of pollen" [value]="option.name_html">
                                         <div [innerHTML]="option.name_html"></div>
                                     </mtx-option>
@@ -152,7 +152,7 @@
                                                         (ngModelChange)="insideExportChanged(option)"
                                                         [compareWith]="compareExports" [items]="exports"
                                                         bindLabel="Name" [disabled]="option.insideDeviceId != null"
-                                                        appendTo=".root">
+                                                        appendTo="mat-dialog-container .root">
                                                     </mtx-select>
                                                     <mat-error senergyError label="Export"></mat-error>
                                                 </mat-form-field>
@@ -163,7 +163,7 @@
                                                     <mtx-select [(ngModel)]="option.data.column"
                                                         [compareWith]="compareExportValueModels"
                                                         [items]="option.export?.Values || []" bindLabel="Name"
-                                                        [disabled]="option.insideDeviceId != null" appendTo=".root">
+                                                        [disabled]="option.insideDeviceId != null" appendTo="mat-dialog-container .root">
                                                     </mtx-select>
                                                     <mat-error senergyError label="Value"></mat-error>
                                                 </mat-form-field>
@@ -183,7 +183,7 @@
                                                     <mtx-select [(ngModel)]="option.insideDeviceId"
                                                         (ngModelChange)="insideDeviceChanged(option)" [items]="devices"
                                                         bindLabel="name" bindValue="id"
-                                                        [disabled]="option.export != null" appendTo=".root">
+                                                        [disabled]="option.export != null" appendTo="mat-dialog-container .root">
                                                     </mtx-select>
                                                     <mat-error senergyError label="Device"></mat-error>
                                                 </mat-form-field>
@@ -194,7 +194,7 @@
                                                     <mtx-select [(ngModel)]="option.insideServiceId"
                                                         [items]="(getServices(option.insideDeviceId) | async) || []"
                                                         bindValue="id" [disabled]="option.export != null"
-                                                        bindLabel="name" appendTo=".root">
+                                                        bindLabel="name" appendTo="mat-dialog-container .root">
                                                     </mtx-select>
                                                     <mat-error senergyError label="Service"></mat-error>
                                                 </mat-form-field>
@@ -204,7 +204,7 @@
                                                     <mat-label>Value</mat-label>
                                                     <mtx-select [(ngModel)]="option.insideDeviceValuePath"
                                                         [items]="getServiceValues(option.insideDeviceId, option.insideServiceId)"
-                                                        [disabled]="option.export != null" appendTo=".root">
+                                                        [disabled]="option.export != null" appendTo="mat-dialog-container .root">
                                                     </mtx-select>
                                                     <mat-error senergyError label="Value"></mat-error>
                                                 </mat-form-field>
@@ -233,7 +233,7 @@
                                                             useOptionViewProperty="Name"
                                                             (ngModelChange)="outsideExportChanged(option)"
                                                             [disabled]="option.outsideDeviceId != null"
-                                                            appendTo=".root">
+                                                            appendTo="mat-dialog-container .root">
                                                         </mtx-select>
                                                         <mat-error senergyError label="Export"></mat-error>
                                                     </mat-form-field>
@@ -245,7 +245,7 @@
                                                             [compareWith]="compareExportValueModels"
                                                             [items]="option.outsideExport?.Values || []"
                                                             [disabled]="option.outsideDeviceId != null" bindLabel="Name"
-                                                            appendTo=".root"> </mtx-select>
+                                                            appendTo="mat-dialog-container .root"> </mtx-select>
                                                         <mat-error senergyError label="Value"></mat-error>
                                                     </mat-form-field>
                                                 </td>
@@ -264,7 +264,7 @@
                                                         <mtx-select [(ngModel)]="option.outsideDeviceId"
                                                             (ngModelChange)="outsideDeviceChanged(option)"
                                                             [items]="devices" bindLabel="name" bindValue="id"
-                                                            [disabled]="option.outsideExport !== null" appendTo=".root">
+                                                            [disabled]="option.outsideExport !== null" appendTo="mat-dialog-container .root">
                                                         </mtx-select>
                                                         <mat-error senergyError label="Device"></mat-error>
                                                     </mat-form-field>
@@ -275,7 +275,7 @@
                                                         <mtx-select [(ngModel)]="option.outsideServiceId"
                                                             [items]="(getServices(option.outsideDeviceId) | async) || []"
                                                             bindValue="id" [disabled]="option.outsideExport != null"
-                                                            bindLabel="name" appendTo=".root">
+                                                            bindLabel="name" appendTo="mat-dialog-container .root">
                                                         </mtx-select>
                                                         <mat-error senergyError label="Service"></mat-error>
                                                     </mat-form-field>
@@ -285,7 +285,7 @@
                                                         <mat-label>Value</mat-label>
                                                         <mtx-select [(ngModel)]="option.outsideDeviceValuePath"
                                                             [disabled]="option.outsideExport != null"
-                                                            [items]="getServiceValues(option.outsideDeviceId, option.outsideServiceId)" appendTo=".root">
+                                                            [items]="getServiceValues(option.outsideDeviceId, option.outsideServiceId)" appendTo="mat-dialog-container .root">
                                                         </mtx-select>
                                                         <mat-error senergyError label="Value"></mat-error>
                                                     </mat-form-field>
@@ -378,7 +378,7 @@
                                         <mat-form-field class="input-field" color="accent" appearance="outline">
                                             <mat-label>Warning Level</mat-label>
                                             <mtx-select required placeholder="Select warning level"
-                                                [(ngModel)]="option.boundaries.warn.upper" appendTo=".root">
+                                                [(ngModel)]="option.boundaries.warn.upper" appendTo="mat-dialog-container .root">
                                                 <mtx-option *ngFor="let level of pollenLevel" [value]="level.value">
                                                     {{level.name}}
                                                 </mtx-option>
@@ -390,7 +390,7 @@
                                         <mat-form-field class="input-field" color="accent" appearance="outline">
                                             <mat-label>Critical Level</mat-label>
                                             <mtx-select required placeholder="Select critical level"
-                                                [(ngModel)]="option.boundaries.critical.upper" appendTo=".root">
+                                                [(ngModel)]="option.boundaries.critical.upper" appendTo="mat-dialog-container .root">
                                                 <mtx-option *ngFor="let level of pollenLevel" [value]="level.value">
                                                     {{level.name}}
                                                 </mtx-option>

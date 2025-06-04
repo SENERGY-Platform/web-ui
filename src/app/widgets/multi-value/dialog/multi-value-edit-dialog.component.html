@@ -32,7 +32,7 @@
                         <mat-form-field appearance="outline" color="accent">
                             <mat-label>Default Order</mat-label>
                             <mtx-select formControlName="order" placeholder="Order by" [compareWith]="compareStrings"
-                                required appendTo=".root">
+                                required appendTo="mat-dialog-container .root">
                                 <mtx-option [value]="orderValues.Default">As listed</mtx-option>
                                 <mtx-option [value]="orderValues.AlphabeticallyAsc">Name</mtx-option>
                                 <mtx-option [value]="orderValues.AlphabeticallyDesc">Name desc</mtx-option>
@@ -81,7 +81,7 @@
                                         <mat-form-field appearance="outline" color="accent">
                                             <mat-label>Export</mat-label>
                                             <mtx-select formControlName="export" required [compareWith]="compareExports"
-                                                placeholder="Choose Export" appendTo=".root">
+                                                placeholder="Choose Export" appendTo="mat-dialog-container .root">
                                                 <mtx-option *ngFor="let option of exports" [value]="option">
                                                     {{option.name}}
                                                 </mtx-option>
@@ -93,7 +93,7 @@
                                         <mat-form-field appearance="outline" color="accent">
                                             <mat-label>Value</mat-label>
                                             <mtx-select [compareWith]="compare" formControlName="column" required
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                                 <mtx-option *ngFor="let column of (tab.get('export')?.value.values)"
                                                     [value]="column">
                                                     {{column.Name}}
@@ -115,7 +115,7 @@
                                         <mat-form-field appearance="outline" color="accent">
                                             <mat-label>Type</mat-label>
                                             <mtx-select formControlName="type" [compareWith]="compareStrings" required
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                                 <mtx-option [value]="'String'">String</mtx-option>
                                                 <mtx-option [value]="'Number'">Number</mtx-option>
                                                 <mtx-option [value]="'Date'">Date</mtx-option>

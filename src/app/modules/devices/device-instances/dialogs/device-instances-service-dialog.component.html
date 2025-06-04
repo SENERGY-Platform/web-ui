@@ -150,7 +150,7 @@
                                     <div fxLayout="column">
                                         <mat-form-field fxFlex color="accent" appearance="outline">
                                             <mat-label>Data Format</mat-label>
-                                            <mtx-select appendTo=".root" [formControl]="availabilityControl"
+                                            <mtx-select appendTo="mat-dialog-container .root" [formControl]="availabilityControl"
                                                 [compareWith]="compareAvailabilityValue" placeholder="Device">
                                                 <mtx-option *ngFor="let option of filterAvailability(i)" [value]="valueAvailability(option)">{{formatAvailability(option)}}</mtx-option>
                                             </mtx-select>

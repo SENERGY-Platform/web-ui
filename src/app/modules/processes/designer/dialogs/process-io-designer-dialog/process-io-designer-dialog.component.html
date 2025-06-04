@@ -30,7 +30,7 @@
           <div *ngFor="let set of info.set; let i = index" class="variables">
             <mat-form-field appearance="outline" color="accent">
               <mat-label>Binding</mat-label>
-              <mtx-select [(ngModel)]="set.binding" required appendTo=".root">
+              <mtx-select [(ngModel)]="set.binding" required appendTo="mat-dialog-container .root">
                 <mtx-option value="global">
                   global
                 </mtx-option>
@@ -72,7 +72,7 @@
           <div *ngFor="let get of info.get; let i = index" class="variables">
             <mat-form-field appearance="outline" color="accent">
               <mat-label>Binding</mat-label>
-              <mtx-select [(ngModel)]="get.binding" required appendTo=".root">
+              <mtx-select [(ngModel)]="get.binding" required appendTo="mat-dialog-container .root">
                 <mtx-option value="global">
                   global
                 </mtx-option>

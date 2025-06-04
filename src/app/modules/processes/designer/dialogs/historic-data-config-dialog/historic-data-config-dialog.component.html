@@ -24,7 +24,7 @@
       <h3>Aggregation</h3>
       <mat-form-field appearance="outline" color="accent" class="form-field">
         <mat-label>Action</mat-label>
-        <mtx-select placeholder="Select Action" [(ngModel)]="config.analysisAction" name="action" appendTo=".root">
+        <mtx-select placeholder="Select Action" [(ngModel)]="config.analysisAction" name="action" appendTo="mat-dialog-container .root">
           <mtx-option *ngFor="let action of availableActions" [value]="action.id">
             {{action.name}}
           </mtx-option>
@@ -43,7 +43,7 @@
 
       <mat-form-field appearance="outline" color="accent" class="form-field">
         <mat-label>Unit</mat-label>
-        <mtx-select [(ngModel)]="config.interval.type" name="unit" appendTo=".root">
+        <mtx-select [(ngModel)]="config.interval.type" name="unit" appendTo="mat-dialog-container .root">
           <mtx-option *ngFor="let time of times" [value]="time.id">
             {{time.name}}
           </mtx-option>

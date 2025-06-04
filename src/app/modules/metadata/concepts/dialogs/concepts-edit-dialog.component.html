@@ -32,13 +32,13 @@
             <mat-form-field fxFlex color="accent" appearance="outline">
                 <mat-label>Characteristics</mat-label>
                 <mtx-select [items]="characteristics" bindLabel="name" [formControl]="characteristicsControl" multiple
-                    [compareWith]="compareIds" appendTo=".root">
+                    [compareWith]="compareIds" appendTo="mat-dialog-container .root">
                 </mtx-select>
                 <mat-error senergyError label="Characteristics"></mat-error>
             </mat-form-field>
             <mat-form-field class="full-width" appearance="outline" color="accent">
                 <mat-label>Base Characteristic</mat-label>
-                <mtx-select [formControl]="baseCharacteristicControl" required appendTo=".root">
+                <mtx-select [formControl]="baseCharacteristicControl" required appendTo="mat-dialog-container .root">
                     <mtx-option *ngFor="let characteristic of characteristicsControl.value" [value]="characteristic.id">
                         {{characteristic.name}}
                     </mtx-option>
@@ -54,7 +54,7 @@
                     <div *ngFor="let conversion of concept.conversions; let i = index" class="conversion">
                         <mat-form-field appearance="outline" class="forth-width" color="accent">
                             <mat-label>From</mat-label>
-                            <mtx-select [(ngModel)]="conversion.from" [ngModelOptions]="{standalone: true}" required appendTo=".root">
+                            <mtx-select [(ngModel)]="conversion.from" [ngModelOptions]="{standalone: true}" required appendTo="mat-dialog-container .root">
                                 <mtx-option *ngFor="let characteristic of characteristicsControl.value"
                                     [value]="characteristic.id">
                                     {{characteristic.name}}
@@ -64,7 +64,7 @@
                         </mat-form-field>
                         <mat-form-field appearance="outline" class="forth-width" color="accent">
                             <mat-label>To</mat-label>
-                            <mtx-select [(ngModel)]="conversion.to" [ngModelOptions]="{standalone: true}" required appendTo=".root">
+                            <mtx-select [(ngModel)]="conversion.to" [ngModelOptions]="{standalone: true}" required appendTo="mat-dialog-container .root">
                                 <mtx-option *ngFor="let characteristic of characteristicsControl.value"
                                     [value]="characteristic.id">
                                     {{characteristic.name}}

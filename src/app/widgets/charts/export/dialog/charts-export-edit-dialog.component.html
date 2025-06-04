@@ -32,7 +32,7 @@
                         <td>
                             <mat-form-field color="accent" appearance="outline" class="full-width">
                                 <mat-label>Chart Type</mat-label>
-                                <mtx-select formControlName="chartType" required appendTo=".root">
+                                <mtx-select formControlName="chartType" required appendTo="mat-dialog-container .root">
                                     <mtx-option *ngFor="let chartType of chartTypes" [value]="chartType">
                                         {{chartType}}
                                     </mtx-option>

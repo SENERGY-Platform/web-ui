@@ -45,7 +45,7 @@
                         <mat-form-field appearance="outline" class="third-width" color="accent">
                             <mat-label>Key</mat-label>
                             <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" dropdownPosition="top"
-                                [disabled]="!editableAttribute(attr)" [items]="knownAttributes" appendTo=".root" [addTag]="addAttribute()"></mtx-select>
+                                [disabled]="!editableAttribute(attr)" [items]="knownAttributes" appendTo="mat-dialog-container .root" [addTag]="addAttribute()"></mtx-select>
                             <mat-error senergyError label="Key"></mat-error>
                         </mat-form-field>
                         =

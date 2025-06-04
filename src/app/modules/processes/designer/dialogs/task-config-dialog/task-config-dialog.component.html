@@ -29,7 +29,7 @@
                 *ngIf="optionsFormControl.value === 'Controlling'">
                 <mat-label>Device Class</mat-label>
                 <mtx-select [compareWith]="compare" [formControl]="deviceClassFormControl" required
-                    [items]="deviceClasses" bindLabel="name" appendTo=".root">
+                    [items]="deviceClasses" bindLabel="name" appendTo="mat-dialog-container .root">
                 </mtx-select>
                 <mat-error senergyError label="Device Class"></mat-error>
             </mat-form-field>
@@ -38,7 +38,7 @@
                 *ngIf="optionsFormControl.value === 'Measuring'">
                 <mat-label>Aspect</mat-label>
                 <mtx-select [formControl]="aspectFormControl" required [items]="aspects" bindLabel="name"
-                    appendTo=".root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
+                    appendTo="mat-dialog-container .root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
                     [compareWith]="compareAspectsWith">
                 </mtx-select>
                 <mat-error senergyError label="Aspect"></mat-error>
@@ -49,7 +49,7 @@
                 <mat-label>Function</mat-label>
                 <mtx-select  [compareWith]="compare"
                     [formControl]="functionFormControl" required [items]="functions"
-                    bindLabel="name" appendTo=".root">
+                    bindLabel="name" appendTo="mat-dialog-container .root">
         </mtx-select>
                 <mat-error senergyError label="Function"></mat-error>
             </mat-form-field>

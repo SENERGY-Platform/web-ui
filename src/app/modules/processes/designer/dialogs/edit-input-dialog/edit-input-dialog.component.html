@@ -23,7 +23,7 @@
       <div *ngFor="let input of inputs; let i = index;">
         <mat-form-field appearance="outline" color="accent" *ngIf="i>0"
           matTooltip="type literal or select reference to output" matTooltipPosition="below">
-          <mtx-select [(ngModel)]="input.value" name="field_{{i}}" [addTag]="addTag()" appendTo=".root">
+          <mtx-select [(ngModel)]="input.value" name="field_{{i}}" [addTag]="addTag()" appendTo="mat-dialog-container .root">
             <mat-label>{{input.name | shortInputVariableName}}</mat-label>
             <mtx-option [value]="input.value">
               {{input.value}}

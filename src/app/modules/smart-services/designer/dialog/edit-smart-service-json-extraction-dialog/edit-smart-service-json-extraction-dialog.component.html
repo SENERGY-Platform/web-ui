@@ -40,7 +40,7 @@
                 <mat-label>Variable</mat-label>
                 <mtx-select placeholder="Variable with json string" [(ngModel)]="exportInfo.JsonSource"
                   [items]="availableProcessVariables.get('all') || []" bindLabel="name" bindValue="name"
-                  appendTo=".root">
+                  appendTo="mat-dialog-container .root">
                 </mtx-select>
                 <mat-error senergyError label="Variable"></mat-error>
               </mat-form-field>

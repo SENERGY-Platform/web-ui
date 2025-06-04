@@ -46,7 +46,7 @@
             <mat-form-field class="full-width" appearance="outline" color="accent">
                 <mat-label>Concept</mat-label>
                 <mtx-select formControlName="concept_id" [items]="concepts" bindLabel="name" bindValue="id"
-                    appendTo=".root" dropdownPosition="top">
+                    appendTo="mat-dialog-container .root" dropdownPosition="top">
                 </mtx-select>
                 <mat-error senergyError label="Concept"></mat-error>
             </mat-form-field>

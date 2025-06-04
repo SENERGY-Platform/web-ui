@@ -33,7 +33,7 @@
         <div class="role-user">
             <mat-form-field appearance="outline" *ngIf="permission.mode === 'user'" color="accent">
                 <mat-label>User</mat-label>
-                <mtx-select [(ngModel)]="permission.subject" appendTo=".root">
+                <mtx-select [(ngModel)]="permission.subject" appendTo="mat-dialog-container .root">
                     <mtx-option *ngFor="let user of users" [value]="user.username">
                         {{user.username}}
                     </mtx-option>
@@ -42,7 +42,7 @@
             </mat-form-field>
             <mat-form-field appearance="outline" *ngIf="permission.mode === 'role'" color="accent">
                 <mat-label>Role</mat-label>
-                <mtx-select [(ngModel)]="permission.subject" appendTo=".root">
+                <mtx-select [(ngModel)]="permission.subject" appendTo="mat-dialog-container .root">
                     <mtx-option *ngFor="let role of roles" [value]="role.name">
                         {{role.name}}
                     </mtx-option>
@@ -51,7 +51,7 @@
             </mat-form-field>
             <mat-form-field appearance="outline" *ngIf="permission.mode === 'client'" color="accent">
                 <mat-label>Client</mat-label>
-                <mtx-select [(ngModel)]="permission.subject" appendTo=".root">
+                <mtx-select [(ngModel)]="permission.subject" appendTo="mat-dialog-container .root">
                     <mtx-option *ngFor="let client of clients" [value]="client.clientId">
                         {{client.clientId}}
                     </mtx-option>

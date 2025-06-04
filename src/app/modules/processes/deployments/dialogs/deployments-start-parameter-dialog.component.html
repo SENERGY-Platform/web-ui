@@ -23,7 +23,7 @@
             <mat-label>{{recipient.key}}: {{recipient.value.type}}</mat-label>
             <input *ngIf="recipient.value.type === 'String'" type="text" matInput [(ngModel)]="recipient.value.value">
             <input *ngIf="recipient.value.type === 'Long'" type="number" matInput [(ngModel)]="recipient.value.value">
-            <mtx-select *ngIf="recipient.value.type === 'Boolean'" [(ngModel)]="recipient.value.value" appendTo=".root">
+            <mtx-select *ngIf="recipient.value.type === 'Boolean'" [(ngModel)]="recipient.value.value" appendTo="mat-dialog-container .root">
                 <mtx-option [value]="true">True</mtx-option>
                 <mtx-option [value]="false">False</mtx-option>
             </mtx-select>

@@ -81,7 +81,7 @@
 
             <mat-form-field appearance="outline" color="accent">
               <mat-label>Icon</mat-label>
-              <mtx-select formControlName="icon" required [items]="materialIconNames" appendTo=".root" virtualScroll>
+              <mtx-select formControlName="icon" required [items]="materialIconNames" appendTo="mat-dialog-container .root" virtualScroll>
                 <ng-template ng-label-tmp ng-option-tmp let-item="item"  let-index="index" let-search="searchTerm">
                   <mat-icon color="accent">{{item}}</mat-icon>
                 </ng-template>
@@ -95,14 +95,14 @@
               <mat-label>Device Group</mat-label>
               <mtx-select required formControlName="deviceGroupId" [hideSelected]="false" closeOnSelect
                 virtualScroll="true" placeholder="Type to search" bindLabel="name" bindValue="id" [items]="deviceGroups"
-                (scroll)="onSelectScroll($event)" (search)="onSelectSearch($event)" appendTo=".root">
+                (scroll)="onSelectScroll($event)" (search)="onSelectSearch($event)" appendTo="mat-dialog-container .root">
               </mtx-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline" color="accent" style="display: flex;">
               <mat-label>Criteria</mat-label>
               <mtx-select required formControlName="criteria" [hideSelected]="false" closeOnSelect virtualScroll="true"
-                placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria" appendTo=".root">
+                placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria" appendTo="mat-dialog-container .root">
                 <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
                   [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
               </mtx-select>

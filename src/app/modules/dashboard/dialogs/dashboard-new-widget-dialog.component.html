@@ -22,7 +22,7 @@
             <mat-form-field class="full-width" appearance="outline" color="accent">
                 <mat-label>Type</mat-label>
                 <mtx-select #select (change)="activateCategory()" [(ngModel)]="selectedType" name="type"
-                    appendTo=".root">
+                    appendTo="mat-dialog-container .root">
                     <mtx-option *ngFor="let type of types" [value]="type" [disabled]="type.disabled">
                         <span fxFlex>{{type.viewValue}}</span>
                         <mat-icon *ngIf="type.disabled && type.tooltip !== ''" matTooltip="{{type.tooltip}}"
@@ -35,7 +35,7 @@
             <mat-form-field [class.cdk-visually-hidden]="categoryDisabled" class="full-width" appearance="outline"
                 color="accent">
                 <mat-label>Category</mat-label>
-                <mtx-select [(ngModel)]="selectedCategory" name="category" appendTo=".root">
+                <mtx-select [(ngModel)]="selectedCategory" name="category" appendTo="mat-dialog-container .root">
                     <mtx-option *ngFor="let category of categories" [value]="category" [disabled]="category.disabled">
                         <span fxFlex>{{category.viewValue}}</span>
                         <mat-icon *ngIf="category.disabled && category.tooltip !== ''" matTooltip="{{category.tooltip}}"

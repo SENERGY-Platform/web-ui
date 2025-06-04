@@ -34,7 +34,7 @@
                         <mat-form-field appearance="outline" color="accent" class="order-select">
                             <mat-label>Default Order</mat-label>
                             <mtx-select formControlName="order" placeholder="Order by" [compareWith]="compareStrings"
-                                required appendTo=".root">
+                                required appendTo="mat-dialog-container .root">
                                 <mtx-option [value]="orderValues.Default">As listed</mtx-option>
                                 <mtx-option [value]="orderValues.AlphabeticallyAsc">Name</mtx-option>
                                 <mtx-option [value]="orderValues.AlphabeticallyDesc">Name desc</mtx-option>
@@ -84,7 +84,7 @@
                         <td>
                             <mat-form-field appearance="outline" color="accent">
                                 <mat-label>Icon</mat-label>
-                                <mtx-select formControlName="icon" placeholder="Choose Icon" class="convert-input" appendTo=".root">
+                                <mtx-select formControlName="icon" placeholder="Choose Icon" class="convert-input" appendTo="mat-dialog-container .root">
                                     <ng-template ng-label-tmp>
                                         <mat-icon
                                             [ngStyle]="{'color': getColor(convertRuleIndex)}">{{getIcon(convertRuleIndex)}}</mat-icon>
@@ -162,7 +162,7 @@
                                         <mat-form-field appearance="outline" color="accent">
                                             <mat-label>Aspect</mat-label>
                                             <mtx-select formControlName="aspectId" required placeholder="Choose Aspect"
-                                                [items]="aspects" bindLabel="name" bindValue="id" appendTo=".root"
+                                                [items]="aspects" bindLabel="name" bindValue="id" appendTo="mat-dialog-container .root"
                                                 groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
                                                 [compareWith]="compareAspectsWith"></mtx-select>
                                             <mat-error senergyError label="Aspect"></mat-error>
@@ -174,7 +174,7 @@
                                             <mtx-select formControlName="functionId" required
                                                 placeholder="Choose Function" [compareWith]="compareStrings"
                                                 [items]="getFunctions(tab)" bindValue="id" bindLabel="name"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Function"></mat-error>
                                         </mat-form-field>
@@ -184,7 +184,7 @@
                                             <mat-label>Device</mat-label>
                                             <mtx-select [compareWith]="compareStrings" formControlName="deviceId"
                                                 placeholder="Choose Device" required [items]="getSelectables(tab)"
-                                                bindLabel="device.display_name" bindValue="device.id" appendTo=".root">
+                                                bindLabel="device.display_name" bindValue="device.id" appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Device"></mat-error>
                                         </mat-form-field>
@@ -197,7 +197,7 @@
                                             <mtx-select formControlName="serviceId" required
                                                 placeholder="Choose Service" [compareWith]="compareStrings"
                                                 [items]="getServices(tab)" bindValue="id" bindLabel="name"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Service"></mat-error>
                                         </mat-form-field>
@@ -208,7 +208,7 @@
                                             <mtx-select formControlName="exportValuePath" required
                                                 placeholder="Choose Value" [compareWith]="compareStrings"
                                                 [items]="getServiceValues(tab)" bindLabel="Name" bindValue="Path"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Value"></mat-error>
                                         </mat-form-field>
@@ -221,7 +221,7 @@
                                             <mtx-select formControlName="pipelineId" required
                                                 placeholder="Choose Pipeline" [compareWith]="compareStrings"
                                                 [items]="dataTableHelperService.getPipelines()" bindValue="id"
-                                                bindLabel="name" appendTo=".root">
+                                                bindLabel="name" appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Pipeline"></mat-error>
                                         </mat-form-field>
@@ -230,7 +230,7 @@
                                         <mat-form-field appearance="outline" color="accent" formGroupName="pipeline">
                                             <mat-label>Operator</mat-label>
                                             <mtx-select formControlName="operatorId" required
-                                                placeholder="Choose Operator" [compareWith]="compareStrings" appendTo=".root">
+                                                placeholder="Choose Operator" [compareWith]="compareStrings" appendTo="mat-dialog-container .root">
                                                 <mtx-option *ngFor="let option of getOperators(tab)"
                                                     [value]="option.id">{{getOperatorViewValue(option)}}</mtx-option>
                                             </mtx-select>
@@ -243,7 +243,7 @@
                                             <mtx-select formControlName="exportValuePath" required
                                                 placeholder="Choose Value" [compareWith]="compareStrings"
                                                 [items]="getOperatorValues(tab)" bindValue="Path" bindLabel="Name"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Value"></mat-error>
                                         </mat-form-field>
@@ -255,7 +255,7 @@
                                             <mat-label>Type</mat-label>
                                             <mtx-select formControlName="typeId" required placeholder="Choose Type"
                                                 [items]="dataTableHelperService.getImportTypes()" bindValue="id"
-                                                bindLabel="name" appendTo=".root">
+                                                bindLabel="name" appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Type"></mat-error>
                                         </mat-form-field>
@@ -266,7 +266,7 @@
                                             <mtx-select formControlName="instanceId" required
                                                 placeholder="Choose Instance"
                                                 [items]="dataTableHelperService.getImportInstancesOfType(tab.get('elementDetails.import.typeId')?.value)"
-                                                bindValue="id" bindLabel="name" appendTo=".root">
+                                                bindValue="id" bindLabel="name" appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Instance"></mat-error>
                                         </mat-form-field>
@@ -277,7 +277,7 @@
                                             <mtx-select formControlName="exportValuePath" required
                                                 placeholder="Choose Value"
                                                 [items]="dataTableHelperService.getImportTypeValues(tab.get('elementDetails.import.typeId')?.value)"
-                                                bindValue="Path" bindLabel="Name" appendTo=".root">
+                                                bindValue="Path" bindLabel="Name" appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Value"></mat-error>
                                         </mat-form-field>
@@ -289,7 +289,7 @@
                                             <mat-label>Device Group</mat-label>
                                             <mtx-select placeholder="Choose Device Group" [items]="deviceGroups"
                                                 formControlName="deviceGroupId" bindLabel="name" bindValue="id"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Device Group"></mat-error>
                                         </mat-form-field>
@@ -299,7 +299,7 @@
                                         <mat-form-field appearance="outline" color="accent">
                                             <mat-label>Criteria</mat-label>
                                             <mtx-select placeholder="Choose Criteria"
-                                                formControlName="deviceGroupCriteria" [compareWith]="compareCriteria" appendTo=".root">
+                                                formControlName="deviceGroupCriteria" [compareWith]="compareCriteria" appendTo="mat-dialog-container .root">
                                                 <mtx-option *ngFor="let option of getCriteria(tab)"
                                                     [value]="option">{{describeCriteria()(option)}}</mtx-option>
                                             </mtx-select>
@@ -311,7 +311,7 @@
                                     <td>
                                         <mat-form-field appearance="outline" color="accent">
                                             <mat-label>Unit</mat-label>
-                                            <mtx-select formControlName="unit" appendTo=".root">
+                                            <mtx-select formControlName="unit" appendTo="mat-dialog-container .root">
                                                 <mtx-option
                                                     *ngFor="let option of getConcept(tab)?.characteristics || []"
                                                     [value]="getDisplayUnit(option)">{{getDisplayUnit(option)}}</mtx-option>
@@ -323,7 +323,7 @@
                                         <mat-form-field appearance="outline" color="accent" formGroupName="deviceGroup">
                                             <mat-label>Aggregation</mat-label>
                                             <mtx-select [items]="aggregations" formControlName="deviceGroupAggregation"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Aggregation"></mat-error>
                                         </mat-form-field>
@@ -335,7 +335,7 @@
                                             <mat-label>Export</mat-label>
                                             <mtx-select formControlName="exportId" required placeholder="Choose Export"
                                                 [items]="getExports(tab)" bindLabel="Name" bindValue="ID"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Export"></mat-error>
                                         </mat-form-field>
@@ -346,7 +346,7 @@
                                         <mat-form-field appearance="outline" color="accent">
                                             <mat-label>Tags</mat-label>
                                             <mtx-select placeholder="Choose Tags" multiple closeOnSelect="false"
-                                                formControlName="exportTagSelection" groupBy="group" appendTo=".root">
+                                                formControlName="exportTagSelection" groupBy="group" appendTo="mat-dialog-container .root">
                                                 <mtx-option *ngFor="let option of getTags(tab)"
                                                     [value]="getTagValue(option)"
                                                     [disabled]="getTagOptionDisabledFunction(tab)(option)">{{option.value}}</mtx-option>
@@ -376,7 +376,7 @@
                                         <mat-form-field appearance="outline" color="accent">
                                             <mat-label>Group Type</mat-label>
                                             <mtx-select [items]="groupTypes" formControlName="groupType"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                             </mtx-select>
                                             <mat-error senergyError label="Group Type"></mat-error>
                                         </mat-form-field>

@@ -30,7 +30,7 @@
                     *ngIf="userHasUpdatePropertiesAuthorization">
                     <mat-label>Export</mat-label>
                     <mtx-select placeholder="Choose Export" formControlName="export" required [items]="exports"
-                        bindLabel="name" appendTo=".root">
+                        bindLabel="name" appendTo="mat-dialog-container .root">
                     </mtx-select>
                     <mat-error senergyError label="Export"></mat-error>
                 </mat-form-field>
@@ -52,7 +52,7 @@
                 <div fxLayout="row" fxLayoutAlign="space-between">
                     <mat-form-field appearance="outline" color="accent" fxFlex="47">
                         <mat-label>Prediction Type</mat-label>
-                        <mtx-select formControlName="predictionType" required appendTo=".root">
+                        <mtx-select formControlName="predictionType" required appendTo="mat-dialog-container .root">
                             <mtx-option *ngFor="let opt of options" [value]="opt">
                                 {{opt}}
                             </mtx-option>
@@ -84,7 +84,7 @@
                 <div fxLayout="row" fxLayoutAlign="space-between">
                     <mat-form-field appearance="outline" color="accent" fxFlex="47">
                         <mat-label>Threshold Type</mat-label>
-                        <mtx-select formControlName="thresholdOption" required appendTo=".root">
+                        <mtx-select formControlName="thresholdOption" required appendTo="mat-dialog-container .root">
                             <mtx-option *ngFor="let opt of thresholdOptions" [value]="opt">
                                 {{opt}}
                             </mtx-option>

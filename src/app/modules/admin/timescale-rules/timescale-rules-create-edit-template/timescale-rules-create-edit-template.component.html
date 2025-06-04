@@ -31,7 +31,7 @@
             <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Template</mat-label>
                <mtx-select formControlName="template" required bindLabel="name"
-                    bindValue="name" [items]="templates" appendTo=".root"></mtx-select>
+                    bindValue="name" [items]="templates" appendTo="mat-dialog-container .root"></mtx-select>
                 <mat-error senergyError label="Template"></mat-error>
             </mat-form-field>
 
@@ -46,7 +46,7 @@
             <div>
                 <mat-form-field color="accent" appearance="outline" fxFill>
                     <mat-label>Target</mat-label>
-                    <mtx-select formControlName="target" required appendTo=".root">
+                    <mtx-select formControlName="target" required appendTo="mat-dialog-container .root">
                         <mtx-option [value]="'device'">
                             Devices
                         </mtx-option>
@@ -62,7 +62,7 @@
                 <mat-form-field color="accent" appearance="outline" fxFill>
                     <mat-label>Users</mat-label>
                     <mtx-select formControlName="users" multiple closeOnSelect="false"
-                        bindLabel="username" bindValue="id" [items]="users" appendTo=".root"></mtx-select>
+                        bindLabel="username" bindValue="id" [items]="users" appendTo="mat-dialog-container .root"></mtx-select>
                     <mat-error senergyError label="Users"></mat-error>
                 </mat-form-field>
             </div>
@@ -71,7 +71,7 @@
                 <mat-form-field color="accent" appearance="outline" fxFill>
                     <mat-label>Roles</mat-label>
                     <mtx-select [items]="roles" multiple formControlName="roles"
-                        closeOnSelect="false" appendTo=".root"></mtx-select>
+                        closeOnSelect="false" appendTo="mat-dialog-container .root"></mtx-select>
                     <mat-error senergyError label="Roles"></mat-error>
                 </mat-form-field>
             </div>

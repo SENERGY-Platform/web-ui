@@ -46,7 +46,7 @@
             <mat-form-field class="full-width deployment" appearance="outline" color="accent">
                 <mat-label>Deployment</mat-label>
                 <mtx-select formControlName="processId" [required]="true" [compareWith]="compare" [items]="deployments"
-                    bindLabel="name" bindValue="id" appendTo=".root">
+                    bindLabel="name" bindValue="id" appendTo="mat-dialog-container .root">
                 </mtx-select>
                 <mat-error senergyError label="Deployment"></mat-error>
             </mat-form-field>

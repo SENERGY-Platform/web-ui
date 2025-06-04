@@ -51,7 +51,7 @@
                     <mat-label>Device Type</mat-label>
                     <mtx-select
                         [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting"
-                        [items]="filteredDeviceTypes" bindLabel="name" bindValue="id" appendTo=".root"
+                        [items]="filteredDeviceTypes" bindLabel="name" bindValue="id" appendTo="mat-dialog-container .root"
                         formControlName="deviceType"></mtx-select>
                     <mat-error senergyError label="Device Type"></mat-error>
                 </mat-form-field>
@@ -59,7 +59,7 @@
                     <mat-label>Device</mat-label>
                     <mtx-select
                         [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting"
-                        formControlName="device" appendTo=".root">
+                        formControlName="device" appendTo="mat-dialog-container .root">
                         <mtx-option
                             *ngFor="let option of deviceInstancesByType.get(form.get('existing.deviceType')?.value || '') || []"
                             [value]="option">{{getDeviceName(option)}}</mtx-option>

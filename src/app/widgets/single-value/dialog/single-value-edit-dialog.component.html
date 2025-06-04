@@ -41,7 +41,7 @@
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Device</mat-label>
                                     <mtx-select placeholder="Choose Device" [items]="devices" formControlName="device"
-                                        bindLabel="display_name" [compareWith]="compareIds" appendTo=".root">
+                                        bindLabel="display_name" [compareWith]="compareIds" appendTo="mat-dialog-container .root">
                                     </mtx-select>
                                     <mat-error senergyError label="Device"></mat-error>
                                 </mat-form-field>
@@ -52,7 +52,7 @@
                                     <mat-label>Service</mat-label>
                                     <mtx-select placeholder="Choose Service" [items]="services"
                                         formControlName="service" bindLabel="name"
-                                        [compareWith]="compareIds" appendTo=".root">
+                                        [compareWith]="compareIds" appendTo="mat-dialog-container .root">
                                     </mtx-select>
                                     <mat-error senergyError label="Service"></mat-error>
                                 </mat-form-field>
@@ -71,7 +71,7 @@
                                     <mat-label>Export</mat-label>
                                     <mtx-select placeholder="Choose Export" [items]="exports"
                                         formControlName="measurement" bindLabel="name" [compareWith]="compareIds"
-                                        appendTo=".root">
+                                        appendTo="mat-dialog-container .root">
                                     </mtx-select>
                                     <mat-error senergyError label="Export"></mat-error>
                                 </mat-form-field>
@@ -90,7 +90,7 @@
                                     <mat-label>Device Group</mat-label>
                                     <mtx-select placeholder="Choose Device Group" [items]="deviceGroups"
                                         formControlName="deviceGroupId" bindLabel="name" bindValue="id"
-                                        appendTo=".root">
+                                        appendTo="mat-dialog-container .root">
                                     </mtx-select>
                                     <mat-error senergyError label="Device Group"></mat-error>
                                 </mat-form-field>
@@ -100,7 +100,7 @@
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Criteria</mat-label>
                                     <mtx-select placeholder="Choose Criteria" formControlName="deviceGroupCriteria"
-                                        [compareWith]="compareCriteria" appendTo=".root">
+                                        [compareWith]="compareCriteria" appendTo="mat-dialog-container .root">
                                         <mtx-option *ngFor="let option of getCriteria()"
                                             [value]="option">{{describeCriteria()(option)}}</mtx-option>
                                     </mtx-select>
@@ -122,7 +122,7 @@
                                 <mat-label>Value</mat-label>
                                 <mtx-select placeholder="Choose Value" [items]="vAxisValues"
                                     [compareWith]="compareValues" bindLabel="Name" formControlName="vAxis"
-                                    appendTo=".root">
+                                    appendTo="mat-dialog-container .root">
                                 </mtx-select>
                                 <mat-error senergyError label="Value"></mat-error>
                             </mat-form-field>
@@ -131,7 +131,7 @@
                             <mat-form-field appearance="outline" color="accent">
                                 <mat-label>Value</mat-label>
                                 <mtx-select placeholder="Choose Value" bindLabel="Name" [items]="paths"
-                                    formControlName="vAxis" [compareWith]="compareNames" appendTo=".root">
+                                    formControlName="vAxis" [compareWith]="compareNames" appendTo="mat-dialog-container .root">
                                 </mtx-select>
                                 <mat-error senergyError label="Value"></mat-error>
                             </mat-form-field>
@@ -146,7 +146,7 @@
                             <mat-form-field appearance="outline" color="accent"
                                 *ngIf="form.get('sourceType')?.value === 'deviceGroup' && deviceGroups.length > 0">
                                 <mat-label>Unit</mat-label>
-                                <mtx-select placeholder="Choose Unit" formControlName="vAxisLabel" appendTo=".root">
+                                <mtx-select placeholder="Choose Unit" formControlName="vAxisLabel" appendTo="mat-dialog-container .root">
                                     <mtx-option *ngFor="let option of concept?.characteristics || []"
                                         [value]="getDisplay(option)">{{getDisplay(option)}}</mtx-option>
                                 </mtx-select>
@@ -158,7 +158,7 @@
                                 *ngIf="form.get('sourceType')?.value === 'deviceGroup'">
                                 <mat-label>Aggregation</mat-label>
                                 <mtx-select placeholder="Choose Aggregation" [items]="aggregations"
-                                    formControlName="deviceGroupAggregation" appendTo=".root">
+                                    formControlName="deviceGroupAggregation" appendTo="mat-dialog-container .root">
                                 </mtx-select>
                                 <mat-error senergyError label="Aggregation"></mat-error>
                             </mat-form-field>
@@ -168,7 +168,7 @@
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Type</mat-label>
                                     <mtx-select placeholder="Choose Type" formControlName="type"
-                                        [compareWith]="compareStrings" appendTo=".root">
+                                        [compareWith]="compareStrings" appendTo="mat-dialog-container .root">
                                         <mtx-option [value]="'String'">String</mtx-option>
                                         <mtx-option [value]="'Number'">Number</mtx-option>
                                         <mtx-option [value]="'Date'">Date</mtx-option>
@@ -191,7 +191,7 @@
                             <div>
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Group Type</mat-label>
-                                    <mtx-select placeholder="Choose Group Type" formControlName="type" appendTo=".root">
+                                    <mtx-select placeholder="Choose Group Type" formControlName="type" appendTo="mat-dialog-container .root">
                                         <mtx-option [value]="">none</mtx-option>
                                         <mtx-option *ngFor="let t of groupTypes" [value]="t">
                                             {{t}}
@@ -250,7 +250,7 @@
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Warning Time Level</mat-label>
                                     <mtx-select placeholder="Choose Warning Time Level"
-                                        formControlName="warningTimeLevel" appendTo=".root">
+                                        formControlName="warningTimeLevel" appendTo="mat-dialog-container .root">
                                         <mtx-option value="s">Seconds</mtx-option>
                                         <mtx-option value="min">Minutes</mtx-option>
                                         <mtx-option value="h">Hours</mtx-option>
@@ -275,7 +275,7 @@
                                 <mat-form-field appearance="outline" color="accent">
                                     <mat-label>Problem Time Level</mat-label>
                                     <mtx-select placeholder="Choose Problem Time Level"
-                                        formControlName="problemTimeLevel" appendTo=".root">
+                                        formControlName="problemTimeLevel" appendTo="mat-dialog-container .root">
                                         <mtx-option value="s">Seconds</mtx-option>
                                         <mtx-option value="min">Minutes</mtx-option>
                                         <mtx-option value="h">Hours</mtx-option>

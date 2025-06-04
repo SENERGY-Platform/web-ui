@@ -31,7 +31,7 @@
                     *ngIf="userHasUpdatePropertiesAuthorization">
                     <mat-label>Export</mat-label>
                     <mtx-select type="text" matInput placeholder="Export" formControlName="export" [items]="exports"
-                        bindLabel="name" required appendTo=".root">
+                        bindLabel="name" required appendTo="mat-dialog-container .root">
                     </mtx-select>
                     <mat-error senergyError label="Export"></mat-error>
                 </mat-form-field>
@@ -49,7 +49,7 @@
                     </mat-form-field>
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Interval</mat-label>
-                        <mtx-select formControlName="level" placeholder="" appendTo=".root">
+                        <mtx-select formControlName="level" placeholder="" appendTo="mat-dialog-container .root">
                             <mtx-option [value]="">none</mtx-option>
                             <mtx-option *ngFor="let level of levels" [value]="level.value">
                                 {{level.name}}

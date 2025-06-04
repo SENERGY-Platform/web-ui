@@ -32,7 +32,7 @@
                     <mat-label>Aspect</mat-label>
                     <mtx-select [items]="aspectOptions" bindValue="id" bindLabel="name" formControlName="aspect_id"
                         groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
-                        appendTo=".root" [compareWith]="compareAspectsWith"></mtx-select>
+                        appendTo="mat-dialog-container .root" [compareWith]="compareAspectsWith"></mtx-select>
                     <mat-error senergyError label="Aspect"></mat-error>
                 </mat-form-field>
             </div>
@@ -41,7 +41,7 @@
                 <mat-form-field color="accent" appearance="outline" fxFill>
                     <mat-label>Function</mat-label>
                     <mtx-select [items]="data.functions" bindValue="id" bindLabel="name"
-                        formControlName="function_id" appendTo=".root"></mtx-select>
+                        formControlName="function_id" appendTo="mat-dialog-container .root"></mtx-select>
                     <mat-error senergyError label="Function"></mat-error>
                 </mat-form-field>
             </div>
@@ -49,7 +49,7 @@
             <div>
                 <mat-form-field color="accent" appearance="outline" fxFill>
                     <mat-label>Type</mat-label>
-                    <mtx-select formControlName="type" required appendTo=".root">
+                    <mtx-select formControlName="type" required appendTo="mat-dialog-container .root">
                         <mtx-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mtx-option>
                     </mtx-select>
                     <mat-error senergyError label="Type"></mat-error>
@@ -60,7 +60,7 @@
                 <mat-form-field color="accent" appearance="outline" fxFill>
                     <mat-label>Characteristic</mat-label>
                     <mtx-select [items]="getConceptCharacteristics()" bindValue="id" bindLabel="name"
-                        formControlName="characteristic_id" appendTo=".root"></mtx-select>
+                        formControlName="characteristic_id" appendTo="mat-dialog-container .root"></mtx-select>
                     <mat-error senergyError label="Characteristic"></mat-error>
                 </mat-form-field>
             </div>

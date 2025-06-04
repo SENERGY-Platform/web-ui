@@ -28,7 +28,7 @@
             <div *ngIf="userHasUpdatePropertiesAuthorization" fxLayout="column">
                 <mat-form-field color="accent" appearance="outline">
                     <mat-label>Device/group</mat-label>
-                    <mtx-select ngDefaultControl formControlName="selectable" required appendTo=".root">
+                    <mtx-select ngDefaultControl formControlName="selectable" required appendTo="mat-dialog-container .root">
                         <mtx-option *ngFor="let option of selectables"
                             [value]="getSelectableId(option)">{{getSelectableName(option)}}</mtx-option>
                     </mtx-select>

@@ -56,7 +56,7 @@
                             <mat-form-field appearance="outline" color="accent">
                                 <mat-label>Icon</mat-label>
                                 <mtx-select formControlName="icon" placeholder="Choose Icon" class="convert-input"
-                                    appendTo=".root">
+                                    appendTo="mat-dialog-container .root">
                                     <ng-template ng-label-tmp>
                                         <mat-icon
                                             [ngStyle]="{'color': getColor(convertRuleIndex)}">{{getIcon(convertRuleIndex)}}</mat-icon>
@@ -114,7 +114,7 @@
                                         <mat-form-field appearance="outline" color="accent">
                                             <mat-label>Aspect</mat-label>
                                             <mtx-select formControlName="aspectId" required placeholder="Choose Aspect"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                                 <mtx-option *ngFor="let aspect of aspects" [value]="aspect.id">
                                                     {{aspect.name}}
                                                 </mtx-option>
@@ -127,7 +127,7 @@
                                             <mat-label>Function</mat-label>
                                             <mtx-select formControlName="function" required
                                                 placeholder="Choose Function" [compareWith]="compareFunc"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                                 <mtx-option *ngFor="let func of funcArray[elementIndex]" [value]="func">
                                                     {{func.name}}
                                                 </mtx-option>
@@ -140,7 +140,7 @@
                                             <mat-label>Device</mat-label>
                                             <mtx-select formControlName="selectable" required
                                                 placeholder="Choose Device" [compareWith]="compareSelectables"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                                 <mtx-option *ngFor="let selectable of selectablesArray[elementIndex]"
                                                     [value]="selectable">
                                                     {{selectable.device.display_name}}
@@ -155,7 +155,7 @@
                                         <mat-form-field appearance="outline" color="accent">
                                             <mat-label>Service</mat-label>
                                             <mtx-select formControlName="service" required placeholder="Choose Service"
-                                                [compareWith]="compareServices" appendTo=".root">
+                                                [compareWith]="compareServices" appendTo="mat-dialog-container .root">
                                                 <mtx-option *ngFor="let item of serviceExportValueArray[elementIndex]"
                                                     [value]="item.service">
                                                     {{item.service.name}}
@@ -169,7 +169,7 @@
                                             <mat-label>Value</mat-label>
                                             <mtx-select formControlName="exportValues" required
                                                 placeholder="Choose Value" [compareWith]="compareValues"
-                                                appendTo=".root">
+                                                appendTo="mat-dialog-container .root">
                                                 <mtx-option
                                                     *ngFor="let exportValue of getServiceExportValues(elementIndex)"
                                                     [value]="exportValue">

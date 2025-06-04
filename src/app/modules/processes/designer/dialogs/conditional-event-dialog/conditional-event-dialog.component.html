@@ -24,7 +24,7 @@
             <mat-form-field appearance="outline" class="form-field" color="accent">
                 <mat-label>Aspect</mat-label>
                 <mtx-select [formControl]="aspectFormControl" required [items]="aspects" bindLabel="name"
-                    bindValue="id" appendTo=".root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
+                    bindValue="id" appendTo="mat-dialog-container .root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
                     [compareWith]="compareAspectsWith">
                 </mtx-select>
                 <mat-error senergyError label="Aspect"></mat-error>
@@ -33,14 +33,14 @@
             <mat-form-field appearance="outline" class="form-field" color="accent">
                 <mat-label>Function</mat-label>
                 <mtx-select [compareWith]="compare" [formControl]="functionFormControl" required [items]="functions"
-                    bindLabel="name" appendTo=".root">
+                    bindLabel="name" appendTo="mat-dialog-container .root">
                 </mtx-select>
                 <mat-error senergyError label="Function"></mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field" color="accent">
                 <mat-label>Qos</mat-label>
-                <mtx-select [(ngModel)]="result.qos" [ngModelOptions]="{standalone: true}" appendTo=".root">
+                <mtx-select [(ngModel)]="result.qos" [ngModelOptions]="{standalone: true}" appendTo="mat-dialog-container .root">
                     <mtx-option value="0">0</mtx-option>
                     <mtx-option value="1">1</mtx-option>
                 </mtx-select>

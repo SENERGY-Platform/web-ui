@@ -64,7 +64,7 @@
                 <mat-form-field color="accent" appearance="outline" fxFill>
                     <mat-label>Users</mat-label>
                     <mtx-select formControlName="users" multiple closeOnSelect="false"
-                        bindLabel="username" bindValue="id" [items]="users" appendTo=".root"></mtx-select>
+                        bindLabel="username" bindValue="id" [items]="users" appendTo="mat-dialog-container .root"></mtx-select>
                     <mat-error senergyError label="Users"></mat-error>
                 </mat-form-field>
             </div>
@@ -73,7 +73,7 @@
                 <mat-form-field color="accent" appearance="outline" fxFill>
                     <mat-label>Roles</mat-label>
                     <mtx-select [items]="roles" multiple formControlName="roles"
-                        closeOnSelect="false" appendTo=".root"></mtx-select>
+                        closeOnSelect="false" appendTo="mat-dialog-container .root"></mtx-select>
                     <mat-error senergyError label="Roles"></mat-error>
                 </mat-form-field>
             </div>

@@ -96,7 +96,7 @@
                         <div>
                             <mat-form-field appearance="outline" class="full-width" color="accent">
                                 <mat-label>IoT-Selectors</mat-label>
-                                <mtx-select [(ngModel)]="input.iot_selectors" multiple appendTo=".root">
+                                <mtx-select [(ngModel)]="input.iot_selectors" multiple appendTo="mat-dialog-container .root">
                                     <mtx-option value="device">Device</mtx-option>
                                     <mtx-option value="device_service_group">Service-Group Device</mtx-option>
                                     <mtx-option value="group">Device-Group</mtx-option>
@@ -118,7 +118,7 @@
                                     <div>
                                         <mat-form-field appearance="outline" class="full-width" color="accent">
                                             <mat-label>Interaction</mat-label>
-                                            <mtx-select [(ngModel)]="criteria.interaction" appendTo=".root">
+                                            <mtx-select [(ngModel)]="criteria.interaction" appendTo="mat-dialog-container .root">
                                                 <mtx-option [value]="undefined">NONE</mtx-option>
                                                 <mtx-option value="event">event</mtx-option>
                                                 <mtx-option value="request">request</mtx-option>
@@ -133,7 +133,7 @@
                                                 color="accent">
                                                 <mat-label>Function</mat-label>
                                                 <mtx-select [(ngModel)]="criteria.function_id" [items]="functions"
-                                                    bindLabel="name" bindValue="id" appendTo=".root">
+                                                    bindLabel="name" bindValue="id" appendTo="mat-dialog-container .root">
                                                 </mtx-select>
                                                 <mat-error senergyError label="Function"></mat-error>
                                             </mat-form-field>
@@ -143,7 +143,7 @@
                                                 color="accent">
                                                 <mat-label>Aspect</mat-label>
                                                 <mtx-select  [(ngModel)]="criteria.aspect_id" [items]="aspects" bindLabel="name" bindValue="id"
-                                                appendTo=".root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
+                                                appendTo="mat-dialog-container .root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
                                                 [compareWith]="compareAspectsWith">
                                             </mtx-select>
 
@@ -156,7 +156,7 @@
                                                 color="accent">
                                                 <mat-label>Device-Class</mat-label>
                                                 <mtx-select [(ngModel)]="criteria.device_class_id"
-                                                    [items]="deviceClasses" bindLabel="name" bindValue="id" appendTo=".root">
+                                                    [items]="deviceClasses" bindLabel="name" bindValue="id" appendTo="mat-dialog-container .root">
                                                 </mtx-select>
                                                 <mat-error senergyError label="Device-Class"></mat-error>
                                             </mat-form-field>
@@ -178,7 +178,7 @@
                         <div>
                             <mat-form-field appearance="outline" class="full-width" color="accent">
                                 <mat-label>Type</mat-label>
-                                <mtx-select [(ngModel)]="input.type" appendTo=".root">
+                                <mtx-select [(ngModel)]="input.type" appendTo="mat-dialog-container .root">
                                     <mtx-option value="string">string</mtx-option>
                                     <mtx-option value="long">number</mtx-option>
                                     <mtx-option value="boolean">boolean</mtx-option>
@@ -213,7 +213,7 @@
                                 <mat-label>Characteristic</mat-label>
                                 <mtx-select
                                     [(ngModel)]="input.characteristic_id" [items]="characteristics"
-                                    bindLabel="name" bindValue="id" appendTo=".root">
+                                    bindLabel="name" bindValue="id" appendTo="mat-dialog-container .root">
                                 </mtx-select>
                                 <mat-error senergyError label="Characteristic"></mat-error>
                             </mat-form-field>
