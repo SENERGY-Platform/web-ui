@@ -15,274 +15,269 @@
   ~     limitations under the License.
   ~
   -->
-<div class="root">
-    <section *ngIf="userIsAdmin" class="layout-margin outer">
-        <mat-card appearance="outlined" *ngIf="ready" class="test">
-            <mat-card-title>Rule Tester</mat-card-title>
-            <mat-card-content>
-                <div>
-                    <mat-form-field appearance="outline" color="accent">
-                        <mat-label>User</mat-label>
-                        <mtx-select (change)="setTestUser($event)" appendTo=".root">
-                            <mtx-option *ngFor="let user of users" [value]="user">
-                                {{user.username}}
-                            </mtx-option>
-                        </mtx-select>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" color="accent">
-                        <mat-label>Role</mat-label>
-                        <mtx-select (change)="setTestRole($event)" required appendTo=".root">
-                            <mtx-option *ngFor="let role of roles" [value]="role.name">
-                                {{role.name}}
-                            </mtx-option>
-                        </mtx-select>
-                    </mat-form-field>
-                </div>
-
-                <div>
-                    <mat-form-field appearance="outline" color="accent">
-                        <mat-label>Client</mat-label>
-                        <mtx-select (change)="setTestClient($event)" appendTo=".root">
-                            <mtx-option *ngFor="let client of clients" [value]="client.clientId">
-                                {{client.clientId}}
-                            </mtx-option>
-                        </mtx-select>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="endpoint" color="accent">
-                        <mat-label>Endpoint</mat-label>
-                        <input [formControl]="endpointControl" [matAutocomplete]="auto" aria-label="Number" matInput
-                            type="text">
-                        <mat-autocomplete #auto="matAutocomplete">
-                            <mat-option *ngFor="let uri of filteredOptions | async" [value]="uri">
-                                {{uri}}
-                            </mat-option>
-                        </mat-autocomplete>
-                        <mat-error senergyError label="Endpoint"></mat-error>
-                    </mat-form-field>
-                </div>
-
-                <div>
-                    <mat-checkbox [checked]="testResult.GET" disabled fxFlex>GET</mat-checkbox>
-                    <mat-checkbox [checked]="testResult.POST" disabled fxFlex>POST</mat-checkbox>
-                    <mat-checkbox [checked]="testResult.PUT" disabled fxFlex>PUT</mat-checkbox>
-                    <mat-checkbox [checked]="testResult.PATCH" disabled fxFlex>PATCH</mat-checkbox>
-                    <mat-checkbox [checked]="testResult.DELETE" disabled fxFlex>DELETE</mat-checkbox>
-                    <mat-checkbox [checked]="testResult.HEAD" disabled fxFlex>HEAD</mat-checkbox>
-                </div>
-
-            </mat-card-content>
-        </mat-card>
-
-        <mat-card appearance="outlined" *ngIf="ready" class="search-card">
-            <mat-card-content class="search">
+<section *ngIf="userIsAdmin" class="layout-margin outer">
+    <mat-card appearance="outlined" *ngIf="ready" class="test">
+        <mat-card-title>Rule Tester</mat-card-title>
+        <mat-card-content>
+            <div>
                 <mat-form-field appearance="outline" color="accent">
-                    <mat-label>Search</mat-label>
-                    <mat-icon matPrefix>search</mat-icon>
-                    <input (ngModelChange)="filter($event)" [(ngModel)]="query"
-                        [placeholder]="'Search (for users, roles, actions or resources)'" matInput type="text">
-                    <button (click)="clearSearch()" *ngIf="query.length > 0" mat-icon-button matSuffix>
-                        <mat-icon>clear</mat-icon>
-                    </button>
-                    <mat-error senergyError label="Search"></mat-error>
+                    <mat-label>User</mat-label>
+                    <mtx-select (change)="setTestUser($event)" appendTo=".ng-select-anchor">
+                        <mtx-option *ngFor="let user of users" [value]="user">
+                            {{user.username}}
+                        </mtx-option>
+                    </mtx-select>
                 </mat-form-field>
 
-                <div id="filter">
-                    <mat-form-field appearance="outline" color="accent">
-                        <mat-label>User</mat-label>
-                        <mtx-select [(ngModel)]="selectedUser" (ngModelChange)="filter($event)" appendTo=".root">
-                            <mtx-option *ngFor="let user of users" [value]="user.username">
-                                {{user.username}}
-                            </mtx-option>
-                        </mtx-select>
-                        <mat-error senergyError label="User"></mat-error>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" color="accent">
-                        <mat-label>Role</mat-label>
-                        <mtx-select [(ngModel)]="selectedRole" (ngModelChange)="filter($event)" appendTo=".root">
-                            <mtx-option *ngFor="let role of roles" [value]="role.name">
-                                {{role.name}}
-                            </mtx-option>
-                        </mtx-select>
-                        <mat-error senergyError label="Role"></mat-error>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" color="accent">
-                        <mat-label>Client</mat-label>
-                        <mtx-select [(ngModel)]="selectedClientID" (ngModelChange)="filter($event)" appendTo=".root">
-                            <mtx-option *ngFor="let client of clients" [value]="client.clientId">
-                                {{client.clientId}}
-                            </mtx-option>
-                        </mtx-select>
-                        <mat-error senergyError label="Client"></mat-error>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" class="endpoint" color="accent">
-                        <mat-label>Endpoint</mat-label>
-                        <input [matAutocomplete]="auto" aria-label="Number" matInput placeholder="Endpoint" type="text"
-                            [(ngModel)]="selectedEndpoint" (ngModelChange)="filter($event)">
-                        <mat-autocomplete #auto="matAutocomplete">
-                            <mat-option *ngFor="let uri of filteredOptions | async" [value]="uri">
-                                {{uri}}
-                            </mat-option>
-                        </mat-autocomplete>
-                        <mat-error senergyError label="Endpoint"></mat-error>
-                    </mat-form-field>
-                </div>
-            </mat-card-content>
-        </mat-card>
+                <mat-form-field appearance="outline" color="accent">
+                    <mat-label>Role</mat-label>
+                    <mtx-select (change)="setTestRole($event)" required appendTo=".ng-select-anchor">
+                        <mtx-option *ngFor="let role of roles" [value]="role.name">
+                            {{role.name}}
+                        </mtx-option>
+                    </mtx-select>
+                </mat-form-field>
+            </div>
 
-        <mat-card appearance="outlined" [fxHide]="!ready" class="table-card">
-            <mat-card-content>
-                <div>
-                    <mat-table #table (matSortChange)="sortData($event)" [dataSource]="sortedData" [hidden]="!ready"
-                        matSort>
-                        <ng-container matColumnDef="select">
-                            <th mat-header-cell *matHeaderCellDef>
-                                <mat-checkbox (change)="$event ? masterToggle() : null"
-                                    [checked]="selection.hasValue() && isAllSelected()"
-                                    [indeterminate]="selection.hasValue() && !isAllSelected()">
-                                </mat-checkbox>
-                            </th>
-                            <td mat-cell *matCellDef="let element">
-                                <mat-checkbox (click)="$event.stopPropagation()"
-                                    (change)="$event ? selection.toggle(element) : null"
-                                    [disabled]="element.id === 'admin-all'" [checked]="selection.isSelected(element)">
-                                </mat-checkbox>
-                            </td>
-                        </ng-container>
+            <div>
+                <mat-form-field appearance="outline" color="accent">
+                    <mat-label>Client</mat-label>
+                    <mtx-select (change)="setTestClient($event)" appendTo=".ng-select-anchor">
+                        <mtx-option *ngFor="let client of clients" [value]="client.clientId">
+                            {{client.clientId}}
+                        </mtx-option>
+                    </mtx-select>
+                </mat-form-field>
 
-                        <ng-container matColumnDef="mode">
-                            <mat-header-cell *matHeaderCellDef>Type</mat-header-cell>
-                            <mat-cell *matCellDef="let element">
-                                <mat-icon *ngIf="element.mode === 'user'">account_circle</mat-icon>
-                                <mat-icon *ngIf="element.mode === 'role'">group</mat-icon>
-                                <mat-icon *ngIf="element.mode === 'client'">computer</mat-icon>
-                            </mat-cell>
-                        </ng-container>
+                <mat-form-field appearance="outline" class="endpoint" color="accent">
+                    <mat-label>Endpoint</mat-label>
+                    <input [formControl]="endpointControl" [matAutocomplete]="auto" aria-label="Number" matInput
+                        type="text">
+                    <mat-autocomplete #auto="matAutocomplete">
+                        <mat-option *ngFor="let uri of filteredOptions | async" [value]="uri">
+                            {{uri}}
+                        </mat-option>
+                    </mat-autocomplete>
+                    <mat-error senergyError label="Endpoint"></mat-error>
+                </mat-form-field>
+            </div>
 
-                        <ng-container matColumnDef="subject">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header="subject">Subject</mat-header-cell>
-                            <mat-cell *matCellDef="let element">{{element.subject}}</mat-cell>
-                        </ng-container>
+            <div>
+                <mat-checkbox [checked]="testResult.GET" disabled fxFlex>GET</mat-checkbox>
+                <mat-checkbox [checked]="testResult.POST" disabled fxFlex>POST</mat-checkbox>
+                <mat-checkbox [checked]="testResult.PUT" disabled fxFlex>PUT</mat-checkbox>
+                <mat-checkbox [checked]="testResult.PATCH" disabled fxFlex>PATCH</mat-checkbox>
+                <mat-checkbox [checked]="testResult.DELETE" disabled fxFlex>DELETE</mat-checkbox>
+                <mat-checkbox [checked]="testResult.HEAD" disabled fxFlex>HEAD</mat-checkbox>
+            </div>
 
-                        <ng-container matColumnDef="GET">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header="GET">GET</mat-header-cell>
-                            <mat-cell *matCellDef="let element">
-                                <mat-checkbox [checked]="element.actions.includes('GET')"
-                                    disabled="true"></mat-checkbox>
-                            </mat-cell>
-                        </ng-container>
-                        <ng-container matColumnDef="POST">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header="POST">POST</mat-header-cell>
-                            <mat-cell *matCellDef="let element">
-                                <mat-checkbox [checked]="element.actions.includes('POST')"
-                                    disabled="true"></mat-checkbox>
-                            </mat-cell>
-                        </ng-container>
-                        <ng-container matColumnDef="PATCH">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header="PATCH">PATCH</mat-header-cell>
-                            <mat-cell *matCellDef="let element">
-                                <mat-checkbox [checked]="element.actions.includes('PATCH')"
-                                    disabled="true"></mat-checkbox>
-                            </mat-cell>
-                        </ng-container>
-                        <ng-container matColumnDef="DELETE">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header="DELETE">DELETE</mat-header-cell>
-                            <mat-cell *matCellDef="let element">
-                                <mat-checkbox [checked]="element.actions.includes('DELETE')"
-                                    disabled="true"></mat-checkbox>
-                            </mat-cell>
-                        </ng-container>
-                        <ng-container matColumnDef="PUT">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header="PUT">PUT</mat-header-cell>
-                            <mat-cell *matCellDef="let element">
-                                <mat-checkbox [checked]="element.actions.includes('PUT')"
-                                    disabled="true"></mat-checkbox>
-                            </mat-cell>
-                        </ng-container>
-                        <ng-container matColumnDef="HEAD">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header="HEAD">HEAD</mat-header-cell>
-                            <mat-cell *matCellDef="let element">
-                                <mat-checkbox [checked]="element.actions.includes('HEAD')"
-                                    disabled="true"></mat-checkbox>
-                            </mat-cell>
-                        </ng-container>
+        </mat-card-content>
+    </mat-card>
 
-                        <!-- Resource Column -->
-                        <ng-container matColumnDef="resource">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header="resource">Resource</mat-header-cell>
-                            <mat-cell *matCellDef="let element">{{element.resource}}</mat-cell>
-                        </ng-container>
+    <mat-card appearance="outlined" *ngIf="ready" class="search-card">
+        <mat-card-content class="search">
+            <mat-form-field appearance="outline" color="accent">
+                <mat-label>Search</mat-label>
+                <mat-icon matPrefix>search</mat-icon>
+                <input (ngModelChange)="filter($event)" [(ngModel)]="query"
+                    [placeholder]="'Search (for users, roles, actions or resources)'" matInput type="text">
+                <button (click)="clearSearch()" *ngIf="query.length > 0" mat-icon-button matSuffix>
+                    <mat-icon>clear</mat-icon>
+                </button>
+                <mat-error senergyError label="Search"></mat-error>
+            </mat-form-field>
 
-                        <!-- Delete Column -->
-                        <ng-container matColumnDef="delete">
-                            <mat-header-cell *matHeaderCellDef> Delete</mat-header-cell>
-                            <mat-cell *matCellDef="let element">
-                                <button (click)="askfordelete(element)" [disabled]="element.id === 'admin-all'"
-                                    mat-icon-button>
+            <div id="filter">
+                <mat-form-field appearance="outline" color="accent">
+                    <mat-label>User</mat-label>
+                    <mtx-select [(ngModel)]="selectedUser" (ngModelChange)="filter($event)"
+                        appendTo=".ng-select-anchor">
+                        <mtx-option *ngFor="let user of users" [value]="user.username">
+                            {{user.username}}
+                        </mtx-option>
+                    </mtx-select>
+                    <mat-error senergyError label="User"></mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" color="accent">
+                    <mat-label>Role</mat-label>
+                    <mtx-select [(ngModel)]="selectedRole" (ngModelChange)="filter($event)"
+                        appendTo=".ng-select-anchor">
+                        <mtx-option *ngFor="let role of roles" [value]="role.name">
+                            {{role.name}}
+                        </mtx-option>
+                    </mtx-select>
+                    <mat-error senergyError label="Role"></mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" color="accent">
+                    <mat-label>Client</mat-label>
+                    <mtx-select [(ngModel)]="selectedClientID" (ngModelChange)="filter($event)"
+                        appendTo=".ng-select-anchor">
+                        <mtx-option *ngFor="let client of clients" [value]="client.clientId">
+                            {{client.clientId}}
+                        </mtx-option>
+                    </mtx-select>
+                    <mat-error senergyError label="Client"></mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="endpoint" color="accent">
+                    <mat-label>Endpoint</mat-label>
+                    <input [matAutocomplete]="auto" aria-label="Number" matInput placeholder="Endpoint" type="text"
+                        [(ngModel)]="selectedEndpoint" (ngModelChange)="filter($event)">
+                    <mat-autocomplete #auto="matAutocomplete">
+                        <mat-option *ngFor="let uri of filteredOptions | async" [value]="uri">
+                            {{uri}}
+                        </mat-option>
+                    </mat-autocomplete>
+                    <mat-error senergyError label="Endpoint"></mat-error>
+                </mat-form-field>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" [fxHide]="!ready" class="table-card">
+        <mat-card-content>
+            <div>
+                <mat-table #table (matSortChange)="sortData($event)" [dataSource]="sortedData" [hidden]="!ready"
+                    matSort>
+                    <ng-container matColumnDef="select">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <mat-checkbox (change)="$event ? masterToggle() : null"
+                                [checked]="selection.hasValue() && isAllSelected()"
+                                [indeterminate]="selection.hasValue() && !isAllSelected()">
+                            </mat-checkbox>
+                        </th>
+                        <td mat-cell *matCellDef="let element">
+                            <mat-checkbox (click)="$event.stopPropagation()"
+                                (change)="$event ? selection.toggle(element) : null"
+                                [disabled]="element.id === 'admin-all'" [checked]="selection.isSelected(element)">
+                            </mat-checkbox>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="mode">
+                        <mat-header-cell *matHeaderCellDef>Type</mat-header-cell>
+                        <mat-cell *matCellDef="let element">
+                            <mat-icon *ngIf="element.mode === 'user'">account_circle</mat-icon>
+                            <mat-icon *ngIf="element.mode === 'role'">group</mat-icon>
+                            <mat-icon *ngIf="element.mode === 'client'">computer</mat-icon>
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="subject">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header="subject">Subject</mat-header-cell>
+                        <mat-cell *matCellDef="let element">{{element.subject}}</mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="GET">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header="GET">GET</mat-header-cell>
+                        <mat-cell *matCellDef="let element">
+                            <mat-checkbox [checked]="element.actions.includes('GET')" disabled="true"></mat-checkbox>
+                        </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="POST">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header="POST">POST</mat-header-cell>
+                        <mat-cell *matCellDef="let element">
+                            <mat-checkbox [checked]="element.actions.includes('POST')" disabled="true"></mat-checkbox>
+                        </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="PATCH">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header="PATCH">PATCH</mat-header-cell>
+                        <mat-cell *matCellDef="let element">
+                            <mat-checkbox [checked]="element.actions.includes('PATCH')" disabled="true"></mat-checkbox>
+                        </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="DELETE">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header="DELETE">DELETE</mat-header-cell>
+                        <mat-cell *matCellDef="let element">
+                            <mat-checkbox [checked]="element.actions.includes('DELETE')" disabled="true"></mat-checkbox>
+                        </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="PUT">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header="PUT">PUT</mat-header-cell>
+                        <mat-cell *matCellDef="let element">
+                            <mat-checkbox [checked]="element.actions.includes('PUT')" disabled="true"></mat-checkbox>
+                        </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="HEAD">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header="HEAD">HEAD</mat-header-cell>
+                        <mat-cell *matCellDef="let element">
+                            <mat-checkbox [checked]="element.actions.includes('HEAD')" disabled="true"></mat-checkbox>
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Resource Column -->
+                    <ng-container matColumnDef="resource">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header="resource">Resource</mat-header-cell>
+                        <mat-cell *matCellDef="let element">{{element.resource}}</mat-cell>
+                    </ng-container>
+
+                    <!-- Delete Column -->
+                    <ng-container matColumnDef="delete">
+                        <mat-header-cell *matHeaderCellDef> Delete</mat-header-cell>
+                        <mat-cell *matCellDef="let element">
+                            <button (click)="askfordelete(element)" [disabled]="element.id === 'admin-all'"
+                                mat-icon-button>
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Edit Column -->
+                    <ng-container matColumnDef="edit">
+                        <mat-header-cell *matHeaderCellDef> Edit</mat-header-cell>
+                        <mat-cell *matCellDef="let element">
+                            <button (click)="editPolicy(element)" [disabled]="element.id === 'admin-all'"
+                                [matTooltip]="element.id === 'admin-all' ? 'Diese Policy kann nicht bearbeitet werden' : ''"
+                                mat-icon-button>
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="header-delete-all">
+                        <th mat-header-cell *matHeaderCellDef colspan="10">
+                            <div fxLayout="row">
+                                <div fxLayoutAlign="center center">You have
+                                    selected {{selection.selected.length}} items
+                                </div>
+                                <button matTooltip="Delete" mat-icon-button color="accent"
+                                    (click)="deleteMultipleItems()">
                                     <mat-icon>delete</mat-icon>
                                 </button>
-                            </mat-cell>
-                        </ng-container>
+                            </div>
+                        </th>
+                    </ng-container>
 
-                        <!-- Edit Column -->
-                        <ng-container matColumnDef="edit">
-                            <mat-header-cell *matHeaderCellDef> Edit</mat-header-cell>
-                            <mat-cell *matCellDef="let element">
-                                <button (click)="editPolicy(element)" [disabled]="element.id === 'admin-all'"
-                                    [matTooltip]="element.id === 'admin-all' ? 'Diese Policy kann nicht bearbeitet werden' : ''"
-                                    mat-icon-button>
-                                    <mat-icon>edit</mat-icon>
-                                </button>
-                            </mat-cell>
-                        </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
+                        [hidden]="selection.selected.length === 0"></tr>
+                    <mat-header-row *matHeaderRowDef="displayedColumns" mat-header-row></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumns;" mat-row></mat-row>
 
-                        <ng-container matColumnDef="header-delete-all">
-                            <th mat-header-cell *matHeaderCellDef colspan="10">
-                                <div fxLayout="row">
-                                    <div fxLayoutAlign="center center">You have
-                                        selected {{selection.selected.length}} items
-                                    </div>
-                                    <button matTooltip="Delete" mat-icon-button color="accent"
-                                        (click)="deleteMultipleItems()">
-                                        <mat-icon>delete</mat-icon>
-                                    </button>
-                                </div>
-                            </th>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
-                            [hidden]="selection.selected.length === 0"></tr>
-                        <mat-header-row *matHeaderRowDef="displayedColumns" mat-header-row></mat-header-row>
-                        <mat-row *matRowDef="let row; columns: displayedColumns;" mat-row></mat-row>
-
-                    </mat-table>
-                    <mat-paginator #paginator [length]="total" [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-                        showFirstLastButtons></mat-paginator>
-                </div>
-            </mat-card-content>
-        </mat-card>
-        <div *ngIf="!ready" fxLayout="row" fxLayoutAlign="center center">
-            <senergy-spinner [show]="!ready"></senergy-spinner>
-        </div>
-        <span *ngIf="importing" class="import-hint color-accent">Importing takes a few seconds...</span>
-    </section>
+                </mat-table>
+                <mat-paginator #paginator [length]="total" [pageSize]="preferencesService.pageSize"
+                    [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
+            </div>
+        </mat-card-content>
+    </mat-card>
+    <div *ngIf="!ready" fxLayout="row" fxLayoutAlign="center center">
+        <senergy-spinner [show]="!ready"></senergy-spinner>
+    </div>
+    <span *ngIf="importing" class="import-hint color-accent">Importing takes a few seconds...</span>
+</section>
 
 
-    <a [hidden]="!ready || !sortedData || sortedData.length === 0" [href]="export()" class="fabs download"
-        download="permissions.json" matTooltip="Exportieren">
-        <button mat-fab>
-            <mat-icon>cloud_download</mat-icon>
-        </button>
-    </a>
-    <a [hidden]="!ready" class="upload">
-        <button (click)="import()" class="fabs upload" mat-fab matTooltip="Importieren">
-            <mat-icon>cloud_upload</mat-icon>
-        </button>
-    </a>
-    <a [hidden]="!ready" class="fabs add" matTooltip="Hinzufügen">
-        <button (click)="createPolicy()" mat-fab>
-            <mat-icon>add</mat-icon>
-        </button>
-    </a>
-</div>
+<a [hidden]="!ready || !sortedData || sortedData.length === 0" [href]="export()" class="fabs download"
+    download="permissions.json" matTooltip="Exportieren">
+    <button mat-fab>
+        <mat-icon>cloud_download</mat-icon>
+    </button>
+</a>
+<a [hidden]="!ready" class="upload">
+    <button (click)="import()" class="fabs upload" mat-fab matTooltip="Importieren">
+        <mat-icon>cloud_upload</mat-icon>
+    </button>
+</a>
+<a [hidden]="!ready" class="fabs add" matTooltip="Hinzufügen">
+    <button (click)="createPolicy()" mat-fab>
+        <mat-icon>add</mat-icon>
+    </button>
+</a>

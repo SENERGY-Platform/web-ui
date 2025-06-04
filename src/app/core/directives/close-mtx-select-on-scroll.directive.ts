@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 InfAI (CC SES)
+ * Copyright 2025 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-.form {
-    /*min-width: 150px;*/
-    /*max-width: 500px;*/
-    width: 430px;
-}
+import { ContentChildren, Directive, HostListener, QueryList } from '@angular/core';
+import { MtxSelect } from '@ng-matero/extensions/select';
 
-.full-width {
-    width: 100%;
-    padding-top: 8px;
+@Directive({
+  selector: '[senergy-close-mtx-select-on-scroll, mat-dialog-content]',
+  standalone: true
+})
+export class CloseMtxSelectOnScrollDirective {
+  @ContentChildren(MtxSelect, {descendants: true}) private selects: QueryList<MtxSelect> | undefined;
+  @HostListener('scroll') private _(_: Event): void {
+    this.selects?.forEach(s => s.close());
+  };
 }
-

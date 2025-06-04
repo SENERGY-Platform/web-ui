@@ -17,190 +17,184 @@
 <h2 mat-dialog-title>Edit Device Status</h2>
 
 <mat-dialog-content>
-    <div class="root">
-        <form [formGroup]="formGroup">
-            <table>
-                <tr>
-                    <td *ngIf="userHasUpdateNameAuthorization">
+    <form [formGroup]="formGroup">
+        <table>
+            <tr>
+                <td *ngIf="userHasUpdateNameAuthorization">
+                    <mat-form-field appearance="outline" color="accent">
+                        <mat-label>Widget Name</mat-label>
+                        <input type="text" matInput formControlName="name">
+                        <mat-error senergyError label="Widget Name"></mat-error>
+                    </mat-form-field>
+                </td>
+                <td *ngIf="userHasUpdatePropertiesAuthorization">
+                    <mat-form-field appearance="outline" color="accent">
+                        <mat-label>Refresh Time</mat-label>
+                        <input type="number" matInput formControlName="refreshTime">
+                        <mat-error senergyError label="Refresh Time"></mat-error>
+                    </mat-form-field>
+                </td>
+            </tr>
+        </table>
+
+        <span *ngIf="userHasUpdatePropertiesAuthorization">
+            <div class="margin-add-convert-button">
+                <button mat-stroked-button color="accent" (click)="addConvertRule()">add Convert Rule</button>
+            </div>
+            <table formArrayName="convertRules">
+                <tr [formGroupName]="convertRuleIndex"
+                    *ngFor="let convertRule of convertRulesControl.controls; let convertRuleIndex = index">
+                    <td>
                         <mat-form-field appearance="outline" color="accent">
-                            <mat-label>Widget Name</mat-label>
-                            <input type="text" matInput formControlName="name">
-                            <mat-error senergyError label="Widget Name"></mat-error>
+                            <mat-label>Status</mat-label>
+                            <input class="convert-input" type="text" matInput formControlName="status">
+                            <mat-error senergyError label="Status"></mat-error>
                         </mat-form-field>
                     </td>
-                    <td *ngIf="userHasUpdatePropertiesAuthorization">
+                    <td>
                         <mat-form-field appearance="outline" color="accent">
-                            <mat-label>Refresh Time</mat-label>
-                            <input type="number" matInput formControlName="refreshTime">
-                            <mat-error senergyError label="Refresh Time"></mat-error>
+                            <mat-label>Icon</mat-label>
+                            <mtx-select formControlName="icon" placeholder="Choose Icon" class="convert-input"
+                                appendTo=".ng-select-anchor">
+                                <ng-template ng-label-tmp>
+                                    <mat-icon
+                                        [ngStyle]="{'color': getColor(convertRuleIndex)}">{{getIcon(convertRuleIndex)}}</mat-icon>
+                                </ng-template>
+                                <mtx-option>-- None --</mtx-option>
+                                <mtx-option *ngFor="let icon of icons" [value]="icon">
+                                    <mat-icon>{{icon}}</mat-icon>
+                                    {{icon}}
+                                </mtx-option>
+                            </mtx-select>
+                            <mat-error senergyError label="Icon"></mat-error>
                         </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field appearance="outline" color="accent">
+                            <mat-label>Color</mat-label>
+                            <input class="convert-input" type="text" matInput placeholder="Icon"
+                                formControlName="color">
+                            <mat-error senergyError label="Color"></mat-error>
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <button mat-icon-button (click)="deleteConvertRule(convertRuleIndex)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
                     </td>
                 </tr>
             </table>
 
-            <span *ngIf="userHasUpdatePropertiesAuthorization">
-                <div class="margin-add-convert-button">
-                    <button mat-stroked-button color="accent" (click)="addConvertRule()">add Convert Rule</button>
-                </div>
-                <table formArrayName="convertRules">
-                    <tr [formGroupName]="convertRuleIndex"
-                        *ngFor="let convertRule of convertRulesControl.controls; let convertRuleIndex = index">
-                        <td>
-                            <mat-form-field appearance="outline" color="accent">
-                                <mat-label>Status</mat-label>
-                                <input class="convert-input" type="text" matInput formControlName="status">
-                                <mat-error senergyError label="Status"></mat-error>
-                            </mat-form-field>
-                        </td>
-                        <td>
-                            <mat-form-field appearance="outline" color="accent">
-                                <mat-label>Icon</mat-label>
-                                <mtx-select formControlName="icon" placeholder="Choose Icon" class="convert-input"
-                                    appendTo="mat-dialog-container .root">
-                                    <ng-template ng-label-tmp>
-                                        <mat-icon
-                                            [ngStyle]="{'color': getColor(convertRuleIndex)}">{{getIcon(convertRuleIndex)}}</mat-icon>
-                                    </ng-template>
-                                    <mtx-option>-- None --</mtx-option>
-                                    <mtx-option *ngFor="let icon of icons" [value]="icon">
-                                        <mat-icon>{{icon}}</mat-icon>
-                                        {{icon}}
-                                    </mtx-option>
-                                </mtx-select>
-                                <mat-error senergyError label="Icon"></mat-error>
-                            </mat-form-field>
-                        </td>
-                        <td>
-                            <mat-form-field appearance="outline" color="accent">
-                                <mat-label>Color</mat-label>
-                                <input class="convert-input" type="text" matInput placeholder="Icon"
-                                    formControlName="color">
-                                <mat-error senergyError label="Color"></mat-error>
-                            </mat-form-field>
-                        </td>
-                        <td>
-                            <button mat-icon-button (click)="deleteConvertRule(convertRuleIndex)">
+            <mat-accordion formArrayName="elements">
+                <mat-expansion-panel [formGroupName]="elementIndex"
+                    *ngFor="let elementControl of elementsControl.controls; let elementIndex = index">
+                    <mat-expansion-panel-header class="right-aligned-header">
+                        <mat-panel-title>
+                            <span [ngClass]="{'color-warn': elementControl.invalid}"> {{elementControl.value.name}}
+                            </span>
+                        </mat-panel-title>
+                        <mat-panel-description>
+                            <span [ngClass]="{'color-warn': elementControl.invalid}"> {{elementIndex}} </span>
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <ng-template matExpansionPanelContent>
+                        <table>
+                            <tr>
+                                <td>
+                                    <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Alias</mat-label>
+                                        <input type="text" matInput required formControlName="name">
+                                        <mat-error senergyError label="Alias"></mat-error>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Aspect</mat-label>
+                                        <mtx-select formControlName="aspectId" required placeholder="Choose Aspect"
+                                            appendTo=".ng-select-anchor">
+                                            <mtx-option *ngFor="let aspect of aspects" [value]="aspect.id">
+                                                {{aspect.name}}
+                                            </mtx-option>
+                                        </mtx-select>
+                                        <mat-error senergyError label="Aspect"></mat-error>
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Function</mat-label>
+                                        <mtx-select formControlName="function" required placeholder="Choose Function"
+                                            [compareWith]="compareFunc" appendTo=".ng-select-anchor">
+                                            <mtx-option *ngFor="let func of funcArray[elementIndex]" [value]="func">
+                                                {{func.name}}
+                                            </mtx-option>
+                                        </mtx-select>
+                                        <mat-error senergyError label="Function"></mat-error>
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Device</mat-label>
+                                        <mtx-select formControlName="selectable" required placeholder="Choose Device"
+                                            [compareWith]="compareSelectables" appendTo=".ng-select-anchor">
+                                            <mtx-option *ngFor="let selectable of selectablesArray[elementIndex]"
+                                                [value]="selectable">
+                                                {{selectable.device.display_name}}
+                                            </mtx-option>
+                                        </mtx-select>
+                                        <mat-error senergyError label="Device"></mat-error>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Service</mat-label>
+                                        <mtx-select formControlName="service" required placeholder="Choose Service"
+                                            [compareWith]="compareServices" appendTo=".ng-select-anchor">
+                                            <mtx-option *ngFor="let item of serviceExportValueArray[elementIndex]"
+                                                [value]="item.service">
+                                                {{item.service.name}}
+                                            </mtx-option>
+                                        </mtx-select>
+                                        <mat-error senergyError label="Service"></mat-error>
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-form-field appearance="outline" color="accent">
+                                        <mat-label>Value</mat-label>
+                                        <mtx-select formControlName="exportValues" required placeholder="Choose Value"
+                                            [compareWith]="compareValues" appendTo=".ng-select-anchor">
+                                            <mtx-option *ngFor="let exportValue of getServiceExportValues(elementIndex)"
+                                                [value]="exportValue">
+                                                {{exportValue.Name}}
+                                            </mtx-option>
+                                        </mtx-select>
+                                        <mat-error senergyError label="Value"></mat-error>
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-checkbox color="accent" formControlName="requestDevice">Request
+                                        device</mat-checkbox>
+                                </td>
+                            </tr>
+                        </table>
+                        <div>
+                            <div fxFlex></div>
+                            <button mat-icon-button [disabled]="elementsControl.length === 1"
+                                (click)="deleteElement(elementIndex)">
                                 <mat-icon>delete</mat-icon>
                             </button>
-                        </td>
-                    </tr>
-                </table>
-
-                <mat-accordion formArrayName="elements">
-                    <mat-expansion-panel [formGroupName]="elementIndex"
-                        *ngFor="let elementControl of elementsControl.controls; let elementIndex = index">
-                        <mat-expansion-panel-header class="right-aligned-header">
-                            <mat-panel-title>
-                                <span [ngClass]="{'color-warn': elementControl.invalid}"> {{elementControl.value.name}}
-                                </span>
-                            </mat-panel-title>
-                            <mat-panel-description>
-                                <span [ngClass]="{'color-warn': elementControl.invalid}"> {{elementIndex}} </span>
-                            </mat-panel-description>
-                        </mat-expansion-panel-header>
-                        <ng-template matExpansionPanelContent>
-                            <table>
-                                <tr>
-                                    <td>
-                                        <mat-form-field appearance="outline" color="accent">
-                                            <mat-label>Alias</mat-label>
-                                            <input type="text" matInput required formControlName="name">
-                                            <mat-error senergyError label="Alias"></mat-error>
-                                        </mat-form-field>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <mat-form-field appearance="outline" color="accent">
-                                            <mat-label>Aspect</mat-label>
-                                            <mtx-select formControlName="aspectId" required placeholder="Choose Aspect"
-                                                appendTo="mat-dialog-container .root">
-                                                <mtx-option *ngFor="let aspect of aspects" [value]="aspect.id">
-                                                    {{aspect.name}}
-                                                </mtx-option>
-                                            </mtx-select>
-                                            <mat-error senergyError label="Aspect"></mat-error>
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field appearance="outline" color="accent">
-                                            <mat-label>Function</mat-label>
-                                            <mtx-select formControlName="function" required
-                                                placeholder="Choose Function" [compareWith]="compareFunc"
-                                                appendTo="mat-dialog-container .root">
-                                                <mtx-option *ngFor="let func of funcArray[elementIndex]" [value]="func">
-                                                    {{func.name}}
-                                                </mtx-option>
-                                            </mtx-select>
-                                            <mat-error senergyError label="Function"></mat-error>
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field appearance="outline" color="accent">
-                                            <mat-label>Device</mat-label>
-                                            <mtx-select formControlName="selectable" required
-                                                placeholder="Choose Device" [compareWith]="compareSelectables"
-                                                appendTo="mat-dialog-container .root">
-                                                <mtx-option *ngFor="let selectable of selectablesArray[elementIndex]"
-                                                    [value]="selectable">
-                                                    {{selectable.device.display_name}}
-                                                </mtx-option>
-                                            </mtx-select>
-                                            <mat-error senergyError label="Device"></mat-error>
-                                        </mat-form-field>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <mat-form-field appearance="outline" color="accent">
-                                            <mat-label>Service</mat-label>
-                                            <mtx-select formControlName="service" required placeholder="Choose Service"
-                                                [compareWith]="compareServices" appendTo="mat-dialog-container .root">
-                                                <mtx-option *ngFor="let item of serviceExportValueArray[elementIndex]"
-                                                    [value]="item.service">
-                                                    {{item.service.name}}
-                                                </mtx-option>
-                                            </mtx-select>
-                                            <mat-error senergyError label="Service"></mat-error>
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field appearance="outline" color="accent">
-                                            <mat-label>Value</mat-label>
-                                            <mtx-select formControlName="exportValues" required
-                                                placeholder="Choose Value" [compareWith]="compareValues"
-                                                appendTo="mat-dialog-container .root">
-                                                <mtx-option
-                                                    *ngFor="let exportValue of getServiceExportValues(elementIndex)"
-                                                    [value]="exportValue">
-                                                    {{exportValue.Name}}
-                                                </mtx-option>
-                                            </mtx-select>
-                                            <mat-error senergyError label="Value"></mat-error>
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-checkbox color="accent" formControlName="requestDevice">Request
-                                            device</mat-checkbox>
-                                    </td>
-                                </tr>
-                            </table>
-                            <div>
-                                <div fxFlex></div>
-                                <button mat-icon-button [disabled]="elementsControl.length === 1"
-                                    (click)="deleteElement(elementIndex)">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </div>
-                        </ng-template>
-                    </mat-expansion-panel>
-                </mat-accordion>
-                <button (click)="add()" mat-icon-button>
-                    <mat-icon>add</mat-icon>
-                </button>
-            </span>
-        </form>
-    </div>
+                        </div>
+                    </ng-template>
+                </mat-expansion-panel>
+            </mat-accordion>
+            <button (click)="add()" mat-icon-button>
+                <mat-icon>add</mat-icon>
+            </button>
+        </span>
+    </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

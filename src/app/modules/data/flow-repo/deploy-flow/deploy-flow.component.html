@@ -13,219 +13,219 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="root">
-    <div class="main-panel">
-        <button mat-raised-button *ngIf="!editMode && ready" (click)="switchToClassic()" color="accent"
-            class="layout-margin">Use classic deployment
-        </button>
-        <div class="layout-margin" fxLayout="column" *ngIf="ready === true" [formGroup]="form">
-            <mat-accordion class="example-headers-align" multi>
-                <mat-expansion-panel expanded>
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            <div fxLayout="row" fxLayoutAlign="none center">
-                                <mat-icon>folder</mat-icon>
-                                <div fxFlexOffset="5px">General</div>
-                            </div>
-                        </mat-panel-title>
-                        <mat-panel-description>
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <ng-template matExpansionPanelContent>
-                        <div class="panel_content" fxLayout="column">
-                            <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-label>Name</mat-label>
-                                <input matInput formControlName="name" required="true" />
-                                <mat-error senergyError label="Name"></mat-error>
-                            </mat-form-field>
-                            <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-label>Description</mat-label>
-                                <input matInput formControlName="description">
-                                <mat-error senergyError label="Description"></mat-error>
-                            </mat-form-field>
+<div class="main-panel">
+    <button mat-raised-button *ngIf="!editMode && ready" (click)="switchToClassic()" color="accent"
+        class="layout-margin">Use classic deployment
+    </button>
+    <div class="layout-margin" fxLayout="column" *ngIf="ready === true" [formGroup]="form">
+        <mat-accordion class="example-headers-align" multi>
+            <mat-expansion-panel expanded>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <div fxLayout="row" fxLayoutAlign="none center">
+                            <mat-icon>folder</mat-icon>
+                            <div fxFlexOffset="5px">General</div>
                         </div>
-                    </ng-template>
-                </mat-expansion-panel>
-                <mat-expansion-panel
-                    *ngFor="let node of getSubElementAsGroupArray(form, 'nodes'); let nodeIndex = index"
-                    [formGroup]="node">
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            <div fxLayout="row" fxLayoutAlign="none center">
-                                <mat-icon>poll</mat-icon>
-                                <div fxFlexOffset="5px">{{node.get('name')?.value}}</div>
-                            </div>
-                        </mat-panel-title>
-                        <mat-panel-description>
-                            {{node.get('id')?.value}}
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <ng-template matExpansionPanelContent>
-                        <div class="panel_content" fxLayout="column"
-                            *ngFor="let input of getSubElementAsGroupArray(node, 'inputs'), let inputIndex = index"
-                            [formGroup]="input">
-                            <h4>{{ input.get('name')?.value }}</h4>
-                            <button mat-stroked-button color="accent" class="add-pipeline-button"
-                                (click)="addPipeline(input)">
-                                Add pipeline as input
-                            </button>
-                            <div fxFlex fxLayout="column"
-                                *ngFor="let pipeline of getSubElementAsGroupArray(input, 'pipelines'); let pipelineIndex = index"
-                                [formGroup]="pipeline">
-                                <mat-form-field fxFlex color="accent" appearance="outline">
-                                    <mat-label>Pipeline</mat-label>
-                                   <mtx-select [items]="pipelines" formControlName="pipelineId" bindValue="id"
-                                        bindLabel="name" appendTo=".root">
-                                    </mtx-select>
-                                    <mat-error senergyError label="Pipeline"></mat-error>
-                                </mat-form-field>
-                                <mat-accordion class="operator-accordion">
-                                    <mat-expansion-panel style="margin-bottom: 10px;" fxFlex
-                                        [disabled]="pipeline.get('pipelineId')?.value === ''"
-                                        class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick">
-                                        <mat-expansion-panel-header>
-                                            <mat-panel-title>Operator</mat-panel-title>
-                                            <mat-panel-description>
-                                                {{this.getPipelineOperator(pipeline.get('pipelineId')?.value,
-                                                pipeline.get('operatorId')?.value)?.name}}
-                                                -
-                                                {{this.getPipelineOperator(pipeline.get('pipelineId')?.value,
-                                                pipeline.get('operatorId')?.value)?.id}}
-                                            </mat-panel-description>
-                                        </mat-expansion-panel-header>
-                                        <div>Select an operator by clicking on it</div>
-                                        <span class="widget-image" [innerHtml]="getImage(pipeline)"
-                                            (click)="selectOperator($event, pipeline)">
-                                        </span>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+                <ng-template matExpansionPanelContent>
+                    <div class="panel_content" fxLayout="column">
+                        <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-label>Name</mat-label>
+                            <input matInput formControlName="name" required="true" />
+                            <mat-error senergyError label="Name"></mat-error>
+                        </mat-form-field>
+                        <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-label>Description</mat-label>
+                            <input matInput formControlName="description">
+                            <mat-error senergyError label="Description"></mat-error>
+                        </mat-form-field>
+                    </div>
+                </ng-template>
+            </mat-expansion-panel>
+            <mat-expansion-panel *ngFor="let node of getSubElementAsGroupArray(form, 'nodes'); let nodeIndex = index"
+                [formGroup]="node">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <div fxLayout="row" fxLayoutAlign="none center">
+                            <mat-icon>poll</mat-icon>
+                            <div fxFlexOffset="5px">{{node.get('name')?.value}}</div>
+                        </div>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                        {{node.get('id')?.value}}
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+                <ng-template matExpansionPanelContent>
+                    <div class="panel_content" fxLayout="column"
+                        *ngFor="let input of getSubElementAsGroupArray(node, 'inputs'), let inputIndex = index"
+                        [formGroup]="input">
+                        <h4>{{ input.get('name')?.value }}</h4>
+                        <button mat-stroked-button color="accent" class="add-pipeline-button"
+                            (click)="addPipeline(input)">
+                            Add pipeline as input
+                        </button>
+                        <div fxFlex fxLayout="column"
+                            *ngFor="let pipeline of getSubElementAsGroupArray(input, 'pipelines'); let pipelineIndex = index"
+                            [formGroup]="pipeline">
+                            <mat-form-field fxFlex color="accent" appearance="outline">
+                                <mat-label>Pipeline</mat-label>
+                                <mtx-select [items]="pipelines" formControlName="pipelineId" bindValue="id"
+                                    bindLabel="name" appendTo=".ng-select-anchor">
+                                </mtx-select>
+                                <mat-error senergyError label="Pipeline"></mat-error>
+                            </mat-form-field>
+                            <mat-accordion class="operator-accordion">
+                                <mat-expansion-panel style="margin-bottom: 10px;" fxFlex
+                                    [disabled]="pipeline.get('pipelineId')?.value === ''"
+                                    class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick">
+                                    <mat-expansion-panel-header>
+                                        <mat-panel-title>Operator</mat-panel-title>
+                                        <mat-panel-description>
+                                            {{this.getPipelineOperator(pipeline.get('pipelineId')?.value,
+                                            pipeline.get('operatorId')?.value)?.name}}
+                                            -
+                                            {{this.getPipelineOperator(pipeline.get('pipelineId')?.value,
+                                            pipeline.get('operatorId')?.value)?.id}}
+                                        </mat-panel-description>
+                                    </mat-expansion-panel-header>
+                                    <div>Select an operator by clicking on it</div>
+                                    <span class="widget-image" [innerHtml]="getImage(pipeline)"
+                                        (click)="selectOperator($event, pipeline)">
+                                    </span>
 
-                                    </mat-expansion-panel>
-                                </mat-accordion>
+                                </mat-expansion-panel>
+                            </mat-accordion>
 
-                                <mat-form-field fxFlex color="accent" appearance="outline">
-                                    <mat-label>Path</mat-label>
-                                    <mtx-select
-                                        [items]="getOperatorPaths(pipeline.get('pipelineId')?.value, pipeline.get('operatorId')?.value)"
-                                        formControlName="path" appendTo=".root">
-                                    </mtx-select>
-                                    <mat-error senergyError label="Path"></mat-error>
-                                </mat-form-field>
-                                <div fxLayout="row">
-                                    <span class="fill-delete"></span>
-                                    <button mat-icon-button color="warn" (click)="removePipeline(input, pipelineIndex)">
-                                        <mat-icon>delete</mat-icon>
-                                    </button>
-                                </div>
-                                <mat-divider class="post-pipeline-divider"></mat-divider>
-                            </div>
                             <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-label>Aspect</mat-label>
-                                <mtx-select [items]="this.aspects" bindLabel="name"
-                                    bindValue="id" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
-                                    formControlName="aspectId" appendTo=".root" [compareWith]="compareAspectsWith">
-                                </mtx-select>
-                                <mat-error senergyError label="Aspect"></mat-error>
-                            </mat-form-field>
-                            <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-label>Function</mat-label>
-                                <mtx-select [items]="getAspectFunctions(input.get('aspectId')?.value)" bindLabel="name"
-                                    bindValue="id" formControlName="functionId" appendTo=".root">
-                                </mtx-select>
-                                <mat-error senergyError label="Function"></mat-error>
-                            </mat-form-field>
-                            <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-label>Characteristics</mat-label>
-                                <mtx-select [items]="getFunctionCharacteristics(input.get('functionId')?.value)"
-                                    bindLabel="name" bindValue="id" formControlName="characteristics" multiple
-                                    closeOnSelect="false" appendTo=".root">
-                                </mtx-select>
-                                <mat-error senergyError label="Characteristics"></mat-error>
-                            </mat-form-field>
-                            <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-label>Device/group/import</mat-label>
+                                <mat-label>Path</mat-label>
                                 <mtx-select
-                                    [items]="getSelectables(input.get('aspectId')?.value, input.get('functionId')?.value, input.get('characteristics')?.value)"
-                                    bindLabel="name" bindValue="id" placeholder="Device/Group"
-                                    formControlName="selectableId" groupBy="groupName" appendTo=".root">
+                                    [items]="getOperatorPaths(pipeline.get('pipelineId')?.value, pipeline.get('operatorId')?.value)"
+                                    formControlName="path" appendTo=".ng-select-anchor">
                                 </mtx-select>
-                                <mat-error senergyError label="Device/group/import"></mat-error>
+                                <mat-error senergyError label="Path"></mat-error>
                             </mat-form-field>
-                            <div fxFlex fxLayout="row"
-                                *ngFor="let deviceType of getSubElementAsGroupArray(input, 'deviceTypes')"
-                                [formGroup]="deviceType">
-                                <mat-form-field fxFlex color="accent" appearance="outline">
-                                    <mat-label
-                                        [ngClass]="{'device-type-not-used-label': getServiceOptions(input, deviceType.get('id')?.value).length === 0}">
-                                        {{getServiceOptions(input, deviceType.get('id')?.value).length > 0 ? 'Service/Path: ' + deviceType.get('name')?.value : deviceType.get('name')?.value + ' will not be used: no matching characteristic!'}}</mat-label>
-                                <mtx-select placeholder="Service" [multiple]="true" groupBy="group"
-                                    [compareWith]="comparePathOptions" appendTo=".root"
-                                    formControlName="selection" closeOnSelect="false">
-                                    <mtx-option *ngFor="let option of getServiceOptions(input, deviceType.get('id')?.value)"
-                                     [disabled]="getServiceOptionDisabledFunction(deviceType)(option)" [value]="option">{{option.path}}</mtx-option>
-                                </mtx-select>
-                                    <mat-error senergyError label=""></mat-error>
-                                </mat-form-field>
+                            <div fxLayout="row">
+                                <span class="fill-delete"></span>
+                                <button mat-icon-button color="warn" (click)="removePipeline(input, pipelineIndex)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
                             </div>
+                            <mat-divider class="post-pipeline-divider"></mat-divider>
                         </div>
-                        <h4>Configuration</h4>
-                        <section class="checkbox-section">
-                            <mat-checkbox class="checkbox-margin" formControlName="persistData">Persist data
-                            </mat-checkbox>
-                        </section>
-                        <div fxLayout="column" *ngFor="let config of getSubElementAsGroupArray(node, 'configs')"
-                            [formGroup]="config">
-                            <mat-form-field fxFill color="accent" appearance="outline">
-                                <mat-label></mat-label>
-                                <mat-label></mat-label>
-                                <mat-label>{{ config.get('name')?.value }}</mat-label>
-                                <input matInput formControlName="value" placeholder="{{config.get('name')?.value}}">
+                        <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-label>Aspect</mat-label>
+                            <mtx-select [items]="this.aspects" bindLabel="name" bindValue="id" groupBy="root_name"
+                                selectableGroup [groupValue]="getRootAspect()" formControlName="aspectId"
+                                appendTo=".ng-select-anchor" [compareWith]="compareAspectsWith">
+                            </mtx-select>
+                            <mat-error senergyError label="Aspect"></mat-error>
+                        </mat-form-field>
+                        <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-label>Function</mat-label>
+                            <mtx-select [items]="getAspectFunctions(input.get('aspectId')?.value)" bindLabel="name"
+                                bindValue="id" formControlName="functionId" appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Function"></mat-error>
+                        </mat-form-field>
+                        <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-label>Characteristics</mat-label>
+                            <mtx-select [items]="getFunctionCharacteristics(input.get('functionId')?.value)"
+                                bindLabel="name" bindValue="id" formControlName="characteristics" multiple
+                                closeOnSelect="false" appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Characteristics"></mat-error>
+                        </mat-form-field>
+                        <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-label>Device/group/import</mat-label>
+                            <mtx-select
+                                [items]="getSelectables(input.get('aspectId')?.value, input.get('functionId')?.value, input.get('characteristics')?.value)"
+                                bindLabel="name" bindValue="id" placeholder="Device/Group"
+                                formControlName="selectableId" groupBy="groupName" appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Device/group/import"></mat-error>
+                        </mat-form-field>
+                        <div fxFlex fxLayout="row"
+                            *ngFor="let deviceType of getSubElementAsGroupArray(input, 'deviceTypes')"
+                            [formGroup]="deviceType">
+                            <mat-form-field fxFlex color="accent" appearance="outline">
+                                <mat-label
+                                    [ngClass]="{'device-type-not-used-label': getServiceOptions(input, deviceType.get('id')?.value).length === 0}">
+                                    {{getServiceOptions(input, deviceType.get('id')?.value).length > 0 ? 'Service/Path:
+                                    ' + deviceType.get('name')?.value : deviceType.get('name')?.value + ' will not be
+                                    used: no matching characteristic!'}}</mat-label>
+                                <mtx-select placeholder="Service" [multiple]="true" groupBy="group"
+                                    [compareWith]="comparePathOptions" appendTo=".ng-select-anchor"
+                                    formControlName="selection" closeOnSelect="false">
+                                    <mtx-option
+                                        *ngFor="let option of getServiceOptions(input, deviceType.get('id')?.value)"
+                                        [disabled]="getServiceOptionDisabledFunction(deviceType)(option)"
+                                        [value]="option">{{option.path}}</mtx-option>
+                                </mtx-select>
                                 <mat-error senergyError label=""></mat-error>
                             </mat-form-field>
                         </div>
-                    </ng-template>
-                </mat-expansion-panel>
-                <!--
-            Global Settings
-            -->
-                <mat-expansion-panel>
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            <div fxLayout="row" fxLayoutAlign="none center">
-                                <mat-icon>settings</mat-icon>
-                                <div fxFlexOffset="5px">Global Settings</div>
-                            </div>
-                        </mat-panel-title>
-                        <mat-panel-description>
-                            Only change, if you know what you are doing
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <div class="panel_content">
-                        <mat-form-field class="full-width" color="accent" appearance="outline">
-                            <mat-label>Window Time</mat-label>
-                            <input matInput formControlName="windowTime">
-                            <mat-error senergyError label="Window Time"></mat-error>
-                        </mat-form-field>
-                        <section class="checkbox-section">
-                            <mat-checkbox class="checkbox-margin" formControlName="enable_metrics">Enable
-                                Metrics</mat-checkbox>
-                            <mat-checkbox class="checkbox-margin" formControlName="consume_all_msgs">Consume all
-                                messages</mat-checkbox>
-                        </section>
-                        <mat-form-field appearance="outline" color="accent">
-                            <mat-label>Merge Strategy</mat-label>
-                            <mtx-select formControlName="mergeStrategy" appendTo=".root">
-                                <mtx-option value="inner">Inner Join (Default)</mtx-option>
-                                <mtx-option value="outer">Outer Join</mtx-option>
-                            </mtx-select>
-                            <mat-error senergyError label="Merge Strategy"></mat-error>
+                    </div>
+                    <h4>Configuration</h4>
+                    <section class="checkbox-section">
+                        <mat-checkbox class="checkbox-margin" formControlName="persistData">Persist data
+                        </mat-checkbox>
+                    </section>
+                    <div fxLayout="column" *ngFor="let config of getSubElementAsGroupArray(node, 'configs')"
+                        [formGroup]="config">
+                        <mat-form-field fxFill color="accent" appearance="outline">
+                            <mat-label></mat-label>
+                            <mat-label></mat-label>
+                            <mat-label>{{ config.get('name')?.value }}</mat-label>
+                            <input matInput formControlName="value" placeholder="{{config.get('name')?.value}}">
+                            <mat-error senergyError label=""></mat-error>
                         </mat-form-field>
                     </div>
-                </mat-expansion-panel>
-            </mat-accordion>
-            <button mat-fab class="fab" (click)="startPipeline()"
-                matTooltip="{{editMode ? 'Update' : 'Start'}} Pipeline">
-                <mat-icon>play_arrow</mat-icon>
-            </button>
-        </div>
-        <senergy-spinner [show]="!ready"></senergy-spinner>
+                </ng-template>
+            </mat-expansion-panel>
+            <!--
+            Global Settings
+            -->
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <div fxLayout="row" fxLayoutAlign="none center">
+                            <mat-icon>settings</mat-icon>
+                            <div fxFlexOffset="5px">Global Settings</div>
+                        </div>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                        Only change, if you know what you are doing
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+                <div class="panel_content">
+                    <mat-form-field class="full-width" color="accent" appearance="outline">
+                        <mat-label>Window Time</mat-label>
+                        <input matInput formControlName="windowTime">
+                        <mat-error senergyError label="Window Time"></mat-error>
+                    </mat-form-field>
+                    <section class="checkbox-section">
+                        <mat-checkbox class="checkbox-margin" formControlName="enable_metrics">Enable
+                            Metrics</mat-checkbox>
+                        <mat-checkbox class="checkbox-margin" formControlName="consume_all_msgs">Consume all
+                            messages</mat-checkbox>
+                    </section>
+                    <mat-form-field appearance="outline" color="accent">
+                        <mat-label>Merge Strategy</mat-label>
+                        <mtx-select formControlName="mergeStrategy" appendTo=".ng-select-anchor">
+                            <mtx-option value="inner">Inner Join (Default)</mtx-option>
+                            <mtx-option value="outer">Outer Join</mtx-option>
+                        </mtx-select>
+                        <mat-error senergyError label="Merge Strategy"></mat-error>
+                    </mat-form-field>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+        <button mat-fab class="fab" (click)="startPipeline()" matTooltip="{{editMode ? 'Update' : 'Start'}} Pipeline">
+            <mat-icon>play_arrow</mat-icon>
+        </button>
     </div>
+    <senergy-spinner [show]="!ready"></senergy-spinner>
 </div>

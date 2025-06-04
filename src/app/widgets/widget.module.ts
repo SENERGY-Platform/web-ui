@@ -133,6 +133,7 @@ import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2
 import { FloorplanComponent } from './floorplan/floorplan.component';
 import { FloorplanEditDialogComponent } from './floorplan/floorplan-edit-dialog/floorplan-edit-dialog.component';
 import { ColorPickerComponent, ColorPickerDirective } from 'ngx-color-picker';
+import { CloseMtxSelectOnScrollDirective } from '../core/directives/close-mtx-select-on-scroll.directive';
 
 registerLocaleData(localeDe, 'de');
 
@@ -174,6 +175,7 @@ registerLocaleData(localeDe, 'de');
         MatTreeModule,
         DragDropModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
         BaseChartDirective,
         ColorPickerComponent,
         ColorPickerDirective, 

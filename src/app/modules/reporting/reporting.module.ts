@@ -42,6 +42,7 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MtxSelectModule} from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 const templateList: Route = { path: 'reporting/templates', pathMatch: 'full', component: TemplatesComponent, data: { header: 'Templates' } };
 const reportsList: Route = { path: 'reporting/reports', pathMatch: 'full', component: ReportsComponent, data: { header: 'Reports' } };
@@ -74,6 +75,7 @@ const reportFilesList: Route = { path: 'reporting/files/:reportId', pathMatch: '
         MatExpansionModule,
         MatDatepickerModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ]
 })
 export class ReportingModule { }

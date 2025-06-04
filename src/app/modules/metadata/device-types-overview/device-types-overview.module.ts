@@ -57,6 +57,7 @@ import {
 import {IsNotProhibitedNameValidatorDirective} from './device-types/shared/is-not-prohibited-name.directive';
 import {UsedInDeviceTypesDialogComponent} from './dialogs/used-in-device-types-dialog.component';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 const devicetypes: Route = {
     path: 'metadata/devicetypesoverview/devicetypes',
@@ -106,6 +107,7 @@ const devicetypesEdit: Route = {
         WidgetModule,
         DragDropModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ],
     declarations: [
         DeviceTypesComponent,

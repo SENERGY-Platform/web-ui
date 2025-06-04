@@ -15,29 +15,27 @@
   -->
 
 <mat-dialog-content>
-    <div class="root">
-        <div [formGroup]="form" fxLayout="column">
-            <mat-form-field appearance="outline" color="accent">
-                <mat-label>Threshold</mat-label>
-                <input matInput type="text" formControlName="threshold">
-                <mat-error senergyError label="Threshold"></mat-error>
-            </mat-form-field>
+    <div [formGroup]="form" fxLayout="column">
+        <mat-form-field appearance="outline" color="accent">
+            <mat-label>Threshold</mat-label>
+            <input matInput type="text" formControlName="threshold">
+            <mat-error senergyError label="Threshold"></mat-error>
+        </mat-form-field>
 
-            <mat-form-field appearance="outline" color="accent">
-                <mat-label>Direction</mat-label>
-                <mtx-select formControlName="direction" appendTo="mat-dialog-container .root">
-                    <mtx-option value="<="><=</mtx-option>
-                    <mtx-option value=">=">>=</mtx-option>
-                </mtx-select>
-                <mat-error senergyError label="Direction"></mat-error>
-            </mat-form-field>
+        <mat-form-field appearance="outline" color="accent">
+            <mat-label>Direction</mat-label>
+            <mtx-select formControlName="direction" appendTo=".ng-select-anchor">
+                <mtx-option value="<="><=</mtx-option>             
+                <mtx-option value=">=">>=</mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="Direction"></mat-error>
+        </mat-form-field>
 
-            <mat-form-field appearance="outline" color="accent">
-                <mat-label>Color</mat-label>
-                <input matInput type="text" formControlName="color">
-                <mat-error senergyError label="Color"></mat-error>
-            </mat-form-field>
-        </div>
+        <mat-form-field appearance="outline" color="accent">
+            <mat-label>Color</mat-label>
+            <input matInput type="text" formControlName="color">
+            <mat-error senergyError label="Color"></mat-error>
+        </mat-form-field>
     </div>
 </mat-dialog-content>
 

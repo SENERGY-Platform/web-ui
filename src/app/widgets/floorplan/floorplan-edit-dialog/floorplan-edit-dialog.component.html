@@ -16,64 +16,63 @@
 
 <h2 mat-dialog-title>Edit Floorplan</h2>
 <mat-dialog-content>
-  <div class="root">
-    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-    <div [hidden]="!ready">
-      <mat-form-field appearance="outline" style="display: flex;" color="accent" *ngIf="userHasUpdateNameAuthorization">
-        <mat-label>Widget Name</mat-label>
-        <input type="text" matInput [formControl]="name" required>
-        <mat-error senergyError label="Widget Name"></mat-error>
-      </mat-form-field>
+  <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+  <div [hidden]="!ready">
+    <mat-form-field appearance="outline" style="display: flex;" color="accent" *ngIf="userHasUpdateNameAuthorization">
+      <mat-label>Widget Name</mat-label>
+      <input type="text" matInput [formControl]="name" required>
+      <mat-error senergyError label="Widget Name"></mat-error>
+    </mat-form-field>
 
-      <mat-form-field *ngIf="userHasUpdatePropertiesAuthorization" appearance="outline" color="accent"
-        style="display: flex;" [formGroup]="form">
-        <mat-label>Point Size</mat-label>
-        <input type="number" formControlName="dotSize" matInput>
-        <mat-error senergyError label="Point Size"></mat-error>
-      </mat-form-field>
+    <mat-form-field *ngIf="userHasUpdatePropertiesAuthorization" appearance="outline" color="accent"
+      style="display: flex;" [formGroup]="form">
+      <mat-label>Point Size</mat-label>
+      <input type="number" formControlName="dotSize" matInput>
+      <mat-error senergyError label="Point Size"></mat-error>
+    </mat-form-field>
 
-      <div *ngIf="userHasUpdatePropertiesAuthorization" class="file-upload-wrapper" (drop)="onFileDrop($event)"
-        (dragover)="onDragOver($event)">
-        <input type="file" accept="image/*" (change)="onFileChange($event)" hidden #fileInput />
-        <div *ngIf="form.value.image === null || form.value.image === undefined" class="upload-wrapper">
-          <button mat-icon-button (click)="fileInput.click()"><mat-icon>upload</mat-icon></button>
-          <p>Upload Image</p>
-        </div>
-        <div *ngIf="form.value.image !== null && form.value.image !== undefined" class="delete-wrapper">
-          <button mat-icon-button color="warn" (click)="removeImage()"><mat-icon>delete</mat-icon></button>
-        </div>
-        <div *ngIf="form.value.image !== null && form.value.image !== undefined"
-          [hidden]="form.value.image === null && form.value.image === undefined" class="image-wrapper" #imageWrapper>
-          <canvas #canvas [ngClass]="{'placing': placing !== undefined}" (click)="placeSelected($event)"> </canvas>
-        </div>
+    <div *ngIf="userHasUpdatePropertiesAuthorization" class="file-upload-wrapper" (drop)="onFileDrop($event)"
+      (dragover)="onDragOver($event)">
+      <input type="file" accept="image/*" (change)="onFileChange($event)" hidden #fileInput />
+      <div *ngIf="form.value.image === null || form.value.image === undefined" class="upload-wrapper">
+        <button mat-icon-button (click)="fileInput.click()"><mat-icon>upload</mat-icon></button>
+        <p>Upload Image</p>
+      </div>
+      <div *ngIf="form.value.image !== null && form.value.image !== undefined" class="delete-wrapper">
+        <button mat-icon-button color="warn" (click)="removeImage()"><mat-icon>delete</mat-icon></button>
+      </div>
+      <div *ngIf="form.value.image !== null && form.value.image !== undefined"
+        [hidden]="form.value.image === null && form.value.image === undefined" class="image-wrapper" #imageWrapper>
+        <canvas #canvas [ngClass]="{'placing': placing !== undefined}" (click)="placeSelected($event)"> </canvas>
       </div>
     </div>
+  </div>
 
-    <div *ngIf="userHasUpdatePropertiesAuthorization" [formGroup]="form">
-      <mat-accordion>
-        <mat-expansion-panel *ngFor="let tab of form.controls.placements.controls; let i = index" [formGroup]="tab"
-          [expanded]="step === i">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.value.alias}} </span>
-            </mat-panel-title>
-            <mat-panel-description>{{i}}</mat-panel-description>
-          </mat-expansion-panel-header>
+  <div *ngIf="userHasUpdatePropertiesAuthorization" [formGroup]="form">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let tab of form.controls.placements.controls; let i = index" [formGroup]="tab"
+        [expanded]="step === i">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.value.alias}} </span>
+          </mat-panel-title>
+          <mat-panel-description>{{i}}</mat-panel-description>
+        </mat-expansion-panel-header>
 
-          <ng-template matExpansionPanelContent>
-            <div style="display: flex; justify-content: end;">
-              <button mat-icon-button color="accent" (click)="placePlacement(i); false" matTooltip="Place on Map">
-                <mat-icon>point_scan</mat-icon>
-              </button>
-              <button mat-icon-button color="accent" (click)="copyPlacement(i); false">
-                <mat-icon>content_copy</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" (click)="removePlacement(i); false">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-            <mat-form-field appearance="outline" color="accent" >
+        <ng-template matExpansionPanelContent>
+          <div style="display: flex; justify-content: end;">
+            <button mat-icon-button color="accent" (click)="placePlacement(i); false" matTooltip="Place on Map">
+              <mat-icon>point_scan</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" (click)="copyPlacement(i); false">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="removePlacement(i); false">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <mat-form-field appearance="outline" color="accent">
               <mat-label>Alias</mat-label>
               <input type="text" matInput formControlName="alias" required>
               <mat-error senergyError label="Alias"></mat-error>
@@ -81,82 +80,83 @@
 
             <mat-form-field appearance="outline" color="accent">
               <mat-label>Icon</mat-label>
-              <mtx-select formControlName="icon" required [items]="materialIconNames" appendTo="mat-dialog-container .root" virtualScroll>
-                <ng-template ng-label-tmp ng-option-tmp let-item="item"  let-index="index" let-search="searchTerm">
+              <mtx-select formControlName="icon" required [items]="materialIconNames" appendTo=".ng-select-anchor"
+                virtualScroll>
+                <ng-template ng-label-tmp ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
                   <mat-icon color="accent">{{item}}</mat-icon>
                 </ng-template>
               </mtx-select>
               <mat-error senergyError label="Icon"></mat-error>
             </mat-form-field>
-            </div>
+          </div>
 
 
-            <mat-form-field appearance="outline" color="accent" style="display: flex;">
-              <mat-label>Device Group</mat-label>
-              <mtx-select required formControlName="deviceGroupId" [hideSelected]="false" closeOnSelect
-                virtualScroll="true" placeholder="Type to search" bindLabel="name" bindValue="id" [items]="deviceGroups"
-                (scroll)="onSelectScroll($event)" (search)="onSelectSearch($event)" appendTo="mat-dialog-container .root">
-              </mtx-select>
-            </mat-form-field>
+          <mat-form-field appearance="outline" color="accent" style="display: flex;">
+            <mat-label>Device Group</mat-label>
+            <mtx-select required formControlName="deviceGroupId" [hideSelected]="false" closeOnSelect
+              virtualScroll="true" placeholder="Type to search" bindLabel="name" bindValue="id" [items]="deviceGroups"
+              (scroll)="onSelectScroll($event)" (search)="onSelectSearch($event)" appendTo=".ng-select-anchor">
+            </mtx-select>
+          </mat-form-field>
 
-            <mat-form-field appearance="outline" color="accent" style="display: flex;">
-              <mat-label>Criteria</mat-label>
-              <mtx-select required formControlName="criteria" [hideSelected]="false" closeOnSelect virtualScroll="true"
-                placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria" appendTo="mat-dialog-container .root">
-                <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
-                  [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
-              </mtx-select>
-            </mat-form-field>
+          <mat-form-field appearance="outline" color="accent" style="display: flex;">
+            <mat-label>Criteria</mat-label>
+            <mtx-select required formControlName="criteria" [hideSelected]="false" closeOnSelect virtualScroll="true"
+              placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria"
+              appendTo=".ng-select-anchor">
+              <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
+                [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
+            </mtx-select>
+          </mat-form-field>
 
-            <table style="width: 100%;">
-              <tr *ngFor="let c of getColoringControls(tab).controls; let colorIndex = index" [formGroup]="c">
-                <td>
-                  <div>
-                    <button mat-icon-button [(colorPicker)]="c.value.color" cpAlphaChannel="disabled"
-                      [style.color]="c.value.color" (colorPickerChange)="colorSelected($event, c.controls.color)">
-                      <mat-icon matTooltip="Change color">{{tab.value.icon}}</mat-icon>
-                    </button>
-                    <span class="color-text"
-                      *ngIf="getColoringControls(tab).controls.length > 1 && colorIndex < getColoringControls(tab).controls.length - 1">until
-                      value reaches</span>
-                    <span class="color-text" *ngIf="getColoringControls(tab).controls.length === 1">for all
-                      values</span>
-                    <mat-form-field appearance="outline" color="accent" class="value-form"
-                      *ngIf="colorIndex !== getColoringControls(tab).controls.length - 1">
-                      <mat-label>Value</mat-label>
-                      <input type="number" matInput formControlName="value">
-                      <mat-error senergyError label="Value"></mat-error>
-                    </mat-form-field>
-                    <span class="color-text"
-                      *ngIf="colorIndex === getColoringControls(tab).controls.length - 1 && getColoringControls(tab).controls.length > 1">for
-                      all higher values</span>
-                      <mat-checkbox formControlName="showValue">Display value</mat-checkbox>
-                      <mat-checkbox formControlName="showValueWhenZoomed">Display value when maximized</mat-checkbox>
-                  </div>
-                </td>
-                <td>
-                  <button mat-icon-button color="warn" class="color-button"
-                    (click)="getColoringControls(tab).removeAt(colorIndex)">
-                    <mat-icon>delete</mat-icon>
+          <table style="width: 100%;">
+            <tr *ngFor="let c of getColoringControls(tab).controls; let colorIndex = index" [formGroup]="c">
+              <td>
+                <div>
+                  <button mat-icon-button [(colorPicker)]="c.value.color" cpAlphaChannel="disabled"
+                    [style.color]="c.value.color" (colorPickerChange)="colorSelected($event, c.controls.color)">
+                    <mat-icon matTooltip="Change color">{{tab.value.icon}}</mat-icon>
                   </button>
-                </td>
-              </tr>
-            </table>
-            <button (click)="sortAllColors()" mat-icon-button matTooltip="Sort coloring">
-              <mat-icon>swap_vert</mat-icon>
-            </button>
-            <button (click)="addNewColoring(getColoringControls(tab))" mat-icon-button matTooltip="Add coloring">
-              <mat-icon>add</mat-icon>
-            </button>
-          </ng-template>
-        </mat-expansion-panel>
-      </mat-accordion>
+                  <span class="color-text"
+                    *ngIf="getColoringControls(tab).controls.length > 1 && colorIndex < getColoringControls(tab).controls.length - 1">until
+                    value reaches</span>
+                  <span class="color-text" *ngIf="getColoringControls(tab).controls.length === 1">for all
+                    values</span>
+                  <mat-form-field appearance="outline" color="accent" class="value-form"
+                    *ngIf="colorIndex !== getColoringControls(tab).controls.length - 1">
+                    <mat-label>Value</mat-label>
+                    <input type="number" matInput formControlName="value">
+                    <mat-error senergyError label="Value"></mat-error>
+                  </mat-form-field>
+                  <span class="color-text"
+                    *ngIf="colorIndex === getColoringControls(tab).controls.length - 1 && getColoringControls(tab).controls.length > 1">for
+                    all higher values</span>
+                  <mat-checkbox formControlName="showValue">Display value</mat-checkbox>
+                  <mat-checkbox formControlName="showValueWhenZoomed">Display value when maximized</mat-checkbox>
+                </div>
+              </td>
+              <td>
+                <button mat-icon-button color="warn" class="color-button"
+                  (click)="getColoringControls(tab).removeAt(colorIndex)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </table>
+          <button (click)="sortAllColors()" mat-icon-button matTooltip="Sort coloring">
+            <mat-icon>swap_vert</mat-icon>
+          </button>
+          <button (click)="addNewColoring(getColoringControls(tab))" mat-icon-button matTooltip="Add coloring">
+            <mat-icon>add</mat-icon>
+          </button>
+        </ng-template>
+      </mat-expansion-panel>
+    </mat-accordion>
 
-      <button (click)="addNewPlacement()" mat-icon-button matTooltip="Add element">
-        <mat-icon>add</mat-icon>
-      </button>
+    <button (click)="addNewPlacement()" mat-icon-button matTooltip="Add element">
+      <mat-icon>add</mat-icon>
+    </button>
 
-    </div>
   </div>
 </mat-dialog-content>
 

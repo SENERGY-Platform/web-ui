@@ -17,49 +17,47 @@
 <h2 mat-dialog-title>Edit PV Prediction</h2>
 
 <mat-dialog-content>
-    <div class="root">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready">
-            <form fxLayout="column" [formGroup]="form">
-                <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
-                    <mat-label>Widget Name</mat-label>
-                    <input type="text" matInput formControlName="name">
-                    <mat-error senergyError label="Widget Name"></mat-error>
-                </mat-form-field>
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    <div *ngIf="ready">
+        <form fxLayout="column" [formGroup]="form">
+            <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
+                <mat-label>Widget Name</mat-label>
+                <input type="text" matInput formControlName="name">
+                <mat-error senergyError label="Widget Name"></mat-error>
+            </mat-form-field>
 
-                <mat-form-field appearance="outline" color="accent" fxFlex="47"
-                    *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-label>Export</mat-label>
-                    <mtx-select type="text" matInput placeholder="Export" formControlName="export" [items]="exports"
-                        bindLabel="name" required appendTo="mat-dialog-container .root">
+            <mat-form-field appearance="outline" color="accent" fxFlex="47"
+                *ngIf="userHasUpdatePropertiesAuthorization">
+                <mat-label>Export</mat-label>
+                <mtx-select type="text" matInput placeholder="Export" formControlName="export" [items]="exports"
+                    bindLabel="name" required appendTo=".ng-select-anchor">
+                </mtx-select>
+                <mat-error senergyError label="Export"></mat-error>
+            </mat-form-field>
+
+            <p>Predictions are available for the next 48 hours</p>
+            <mat-checkbox formControlName="displayTimeline">Show next predictions as chart?</mat-checkbox>
+            <mat-checkbox formControlName="displayNextValue">Show next prediction as single value?</mat-checkbox>
+
+            <div *ngIf="form.controls.displayNextValue.value === true" formGroupName="nextValueConfig">
+                <p>Show prediction of the next?</p>
+                <mat-form-field appearance="outline" color="accent" class="full-width">
+                    <mat-label>Time</mat-label>
+                    <input type="number" matInput placeholder="e.g. 15, 1" formControlName="time">
+                    <mat-error senergyError label="Time"></mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" color="accent" class="full-width">
+                    <mat-label>Interval</mat-label>
+                    <mtx-select formControlName="level" placeholder="" appendTo=".ng-select-anchor">
+                        <mtx-option [value]="">none</mtx-option>
+                        <mtx-option *ngFor="let level of levels" [value]="level.value">
+                            {{level.name}}
+                        </mtx-option>
                     </mtx-select>
-                    <mat-error senergyError label="Export"></mat-error>
+                    <mat-error senergyError label="Interval"></mat-error>
                 </mat-form-field>
-
-                <p>Predictions are available for the next 48 hours</p>
-                <mat-checkbox formControlName="displayTimeline">Show next predictions as chart?</mat-checkbox>
-                <mat-checkbox formControlName="displayNextValue">Show next prediction as single value?</mat-checkbox>
-
-                <div *ngIf="form.controls.displayNextValue.value === true" formGroupName="nextValueConfig">
-                    <p>Show prediction of the next?</p>
-                    <mat-form-field appearance="outline" color="accent" class="full-width">
-                        <mat-label>Time</mat-label>
-                        <input type="number" matInput placeholder="e.g. 15, 1" formControlName="time">
-                        <mat-error senergyError label="Time"></mat-error>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" color="accent" class="full-width">
-                        <mat-label>Interval</mat-label>
-                        <mtx-select formControlName="level" placeholder="" appendTo="mat-dialog-container .root">
-                            <mtx-option [value]="">none</mtx-option>
-                            <mtx-option *ngFor="let level of levels" [value]="level.value">
-                                {{level.name}}
-                            </mtx-option>
-                        </mtx-select>
-                        <mat-error senergyError label="Interval"></mat-error>
-                    </mat-form-field>
-                </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </mat-dialog-content>
 

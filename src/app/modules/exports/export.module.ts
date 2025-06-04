@@ -44,6 +44,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 const exp: Route = { path: 'exports/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'New Export' } };
 const dataExport: Route = { path: 'exports/db', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' } };
@@ -79,6 +80,7 @@ const brokerDataExport: Route = { path: 'exports/broker', pathMatch: 'full', com
         MatExpansionModule,
         MatSlideToggleModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ],
     declarations: [ExportComponent, NewExportComponent, ExportDetailsComponent],
 })

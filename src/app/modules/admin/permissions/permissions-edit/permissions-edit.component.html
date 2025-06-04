@@ -16,72 +16,68 @@
   ~
   -->
 <h1 mat-dialog-title>{{title}}</h1>
-<div *ngIf="userIsAdmin" mat-dialog-content>
-    <div class="root">
-        <div>
-            <mat-radio-button (click)="onChange('role')" [checked]="permission.mode === 'role'" class="radio-button">
-                Role
-            </mat-radio-button>
-            <mat-radio-button (click)="onChange('user')" [checked]="permission.mode === 'user'" class="radio-button">
-                User
-            </mat-radio-button>
-            <mat-radio-button (click)="onChange('client')" [checked]="permission.mode === 'client'"
-                class="radio-button">
-                Client
-            </mat-radio-button>
+<div *ngIf="userIsAdmin" mat-dialog-content >
+    <div>
+        <mat-radio-button (click)="onChange('role')" [checked]="permission.mode === 'role'" class="radio-button">
+            Role
+        </mat-radio-button>
+        <mat-radio-button (click)="onChange('user')" [checked]="permission.mode === 'user'" class="radio-button">
+            User
+        </mat-radio-button>
+        <mat-radio-button (click)="onChange('client')" [checked]="permission.mode === 'client'" class="radio-button">
+            Client
+        </mat-radio-button>
+    </div>
+    <div class="role-user">
+        <mat-form-field appearance="outline" *ngIf="permission.mode === 'user'" color="accent">
+            <mat-label>User</mat-label>
+            <mtx-select [(ngModel)]="permission.subject" appendTo=".ng-select-anchor">
+                <mtx-option *ngFor="let user of users" [value]="user.username">
+                    {{user.username}}
+                </mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="User"></mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" *ngIf="permission.mode === 'role'" color="accent">
+            <mat-label>Role</mat-label>
+            <mtx-select [(ngModel)]="permission.subject" appendTo=".ng-select-anchor">
+                <mtx-option *ngFor="let role of roles" [value]="role.name">
+                    {{role.name}}
+                </mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="Role"></mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" *ngIf="permission.mode === 'client'" color="accent">
+            <mat-label>Client</mat-label>
+            <mtx-select [(ngModel)]="permission.subject" appendTo=".ng-select-anchor">
+                <mtx-option *ngFor="let client of clients" [value]="client.clientId">
+                    {{client.clientId}}
+                </mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="Client"></mat-error>
+        </mat-form-field>
+    </div>
+    <div [formGroup]="methods" class="rule">
+        <div class="action_checkboxes">
+            <mat-checkbox formControlName="get">GET</mat-checkbox>
+            <mat-checkbox formControlName="post">POST</mat-checkbox>
+            <mat-checkbox formControlName="patch">PATCH</mat-checkbox>
+            <mat-checkbox formControlName="delete">DELETE</mat-checkbox>
+            <mat-checkbox formControlName="put">PUT</mat-checkbox>
+            <mat-checkbox formControlName="head">HEAD</mat-checkbox>
         </div>
-        <div class="role-user">
-            <mat-form-field appearance="outline" *ngIf="permission.mode === 'user'" color="accent">
-                <mat-label>User</mat-label>
-                <mtx-select [(ngModel)]="permission.subject" appendTo="mat-dialog-container .root">
-                    <mtx-option *ngFor="let user of users" [value]="user.username">
-                        {{user.username}}
-                    </mtx-option>
-                </mtx-select>
-                <mat-error senergyError label="User"></mat-error>
-            </mat-form-field>
-            <mat-form-field appearance="outline" *ngIf="permission.mode === 'role'" color="accent">
-                <mat-label>Role</mat-label>
-                <mtx-select [(ngModel)]="permission.subject" appendTo="mat-dialog-container .root">
-                    <mtx-option *ngFor="let role of roles" [value]="role.name">
-                        {{role.name}}
-                    </mtx-option>
-                </mtx-select>
-                <mat-error senergyError label="Role"></mat-error>
-            </mat-form-field>
-            <mat-form-field appearance="outline" *ngIf="permission.mode === 'client'" color="accent">
-                <mat-label>Client</mat-label>
-                <mtx-select [(ngModel)]="permission.subject" appendTo="mat-dialog-container .root">
-                    <mtx-option *ngFor="let client of clients" [value]="client.clientId">
-                        {{client.clientId}}
-                    </mtx-option>
-                </mtx-select>
-                <mat-error senergyError label="Client"></mat-error>
-            </mat-form-field>
-        </div>
-        <div [formGroup]="methods" class="rule">
-            <div class="action_checkboxes">
-                <mat-checkbox formControlName="get">GET</mat-checkbox>
-                <mat-checkbox formControlName="post">POST</mat-checkbox>
-                <mat-checkbox formControlName="patch">PATCH</mat-checkbox>
-                <mat-checkbox formControlName="delete">DELETE</mat-checkbox>
-                <mat-checkbox formControlName="put">PUT</mat-checkbox>
-                <mat-checkbox formControlName="head">HEAD</mat-checkbox>
-            </div>
-        </div>
-        <div>
-            <mat-form-field appearance="outline" class="endpoint" color="accent">
-                <mat-label>Endpoint</mat-label>
-                <input [formControl]="endpointControl" [matAutocomplete]="auto" aria-label="Number" matInput
-                    type="text">
-                <mat-autocomplete #auto="matAutocomplete">
-                    <mat-option *ngFor="let uri of filteredOptions | async" [value]="uri">
-                        {{uri}}
-                    </mat-option>
-                </mat-autocomplete>
-                <mat-error senergyError label="Endpoint"></mat-error>
-            </mat-form-field>
-        </div>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" class="endpoint" color="accent">
+            <mat-label>Endpoint</mat-label>
+            <input [formControl]="endpointControl" [matAutocomplete]="auto" aria-label="Number" matInput type="text">
+            <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let uri of filteredOptions | async" [value]="uri">
+                    {{uri}}
+                </mat-option>
+            </mat-autocomplete>
+            <mat-error senergyError label="Endpoint"></mat-error>
+        </mat-form-field>
     </div>
 </div>
 <div mat-dialog-actions fxLayoutAlign="end center">

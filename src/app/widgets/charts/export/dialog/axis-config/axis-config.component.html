@@ -72,7 +72,7 @@
                         <mat-form-field color="accent" appearance="outline">
                             <mat-label>Filter</mat-label>
                             <mtx-select [compareWith]="compareFilterTypes" [(ngModel)]="element.filterType"
-                                (valueChange)="filerTypeSelected(element)" appendTo=".root">
+                                (valueChange)="filerTypeSelected(element)" appendTo=".ng-select-anchor">
                                 <mtx-option [value]="undefined">None</mtx-option>
                                 <mtx-option *ngFor="let option of [ '=', '!=', '>', '>=', '<' ,'<=']" [value]="option">
                                     {{option}}</mtx-option>
@@ -96,7 +96,7 @@
                             <mat-label>Tags</mat-label>
                             <mtx-select placeholder="Choose Tags" multiple closeOnSelect="false"
                                 [disabled]="getTags(element).length === 0" [(ngModel)]="element.tagSelection"
-                                appendTo=".root" groupBy="group">
+                                appendTo=".ng-select-anchor" groupBy="group">
                                 <mtx-option *ngFor="let option of getTags(element)"
                                     [disabled]="getTagOptionDisabledFunction(element)(option)"
                                     [value]="getTagValue(option)">{{option.value}}</mtx-option>
@@ -108,7 +108,7 @@
                         <mat-form-field color="accent" appearance="outline">
                             <mat-label>Merging Strategy</mat-label>
                             <mtx-select placeholder="Choose Tags" [disabled]="element.criteria === undefined"
-                                [(ngModel)]="element.deviceGroupMergingStrategy" appendTo=".root">
+                                [(ngModel)]="element.deviceGroupMergingStrategy" appendTo=".ng-select-anchor">
                                 <mtx-option
                                     [value]="chartsExportDeviceGroupMergingStrategy.Separate">Separate</mtx-option>
                                 <mtx-option [value]="chartsExportDeviceGroupMergingStrategy.Merge">Merge</mtx-option>

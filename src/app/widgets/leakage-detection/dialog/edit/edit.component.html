@@ -17,26 +17,24 @@
 <h2 mat-dialog-title>Edit Leakage Detection</h2>
 
 <mat-dialog-content>
-    <div class="root">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready">
-            <form fxLayout="column" [formGroup]="form">
-                <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
-                    <mat-label>Widget Name</mat-label>
-                    <input type="text" matInput formControlName="name">
-                    <mat-error senergyError label="Widget Name"></mat-error>
-                </mat-form-field>
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    <div *ngIf="ready">
+        <form fxLayout="column" [formGroup]="form">
+            <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
+                <mat-label>Widget Name</mat-label>
+                <input type="text" matInput formControlName="name">
+                <mat-error senergyError label="Widget Name"></mat-error>
+            </mat-form-field>
 
-                <mat-form-field appearance="outline" color="accent" fxFlex="47"
-                    *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-label>Export</mat-label>
-                    <mtx-select placeholder="Choose Export" formControlName="export" [items]="exports" required
-                        bindLabel="Name" appendTo="mat-dialog-container .root">
-                    </mtx-select>
-                    <mat-error senergyError label="Export"></mat-error>
-                </mat-form-field>
-            </form>
-        </div>
+            <mat-form-field appearance="outline" color="accent" fxFlex="47"
+                *ngIf="userHasUpdatePropertiesAuthorization">
+                <mat-label>Export</mat-label>
+                <mtx-select placeholder="Choose Export" formControlName="export" [items]="exports" required
+                    bindLabel="Name" appendTo=".ng-select-anchor">
+                </mtx-select>
+                <mat-error senergyError label="Export"></mat-error>
+            </mat-form-field>
+        </form>
     </div>
 </mat-dialog-content>
 

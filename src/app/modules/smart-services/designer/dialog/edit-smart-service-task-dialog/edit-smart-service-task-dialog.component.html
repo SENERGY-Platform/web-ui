@@ -15,8 +15,7 @@
   -->
 
 <h2 mat-dialog-title>Smart-Service Task</h2>
-<mat-dialog-content class="edit-smart-service-task-dialog">
-  <div class="root">
+<mat-dialog-content class="edit-smart-service-task-dialog" >
     <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true" [(selectedIndex)]="activeIndex">
       <mat-tab label="Process">
         <div class="smart-service-task-tab">
@@ -32,7 +31,7 @@
               <mat-form-field appearance="outline" color="accent" class="full-width">
                 <mat-label>Process Model</mat-label>
                 <mtx-select [(ngModel)]="input.value" [items]="processModels || []"
-                  (change)="ensureProcessTaskParameter($event._id)" bindLabel="name" bindValue="_id" appendTo="mat-dialog-container .root">
+                  (change)="ensureProcessTaskParameter($event._id)" bindLabel="name" bindValue="_id" appendTo=".ng-select-anchor">
                 </mtx-select>
                 <mat-error senergyError label="Process Model"></mat-error>
               </mat-form-field>
@@ -99,7 +98,7 @@
                         <mat-form-field appearance="outline" color="accent" class="full-width-minus-button">
                           <mat-label>IoT-Selection</mat-label>
                           <mtx-select placeholder="IoT-Selection" [(ngModel)]="input.value"
-                            [items]="availableProcessIotSelections" bindLabel="name" bindValue="value" appendTo="mat-dialog-container .root">
+                            [items]="availableProcessIotSelections" bindLabel="name" bindValue="value" appendTo=".ng-select-anchor">
                           </mtx-select>
                           <mat-error senergyError label="IoT-Selection"></mat-error>
                         </mat-form-field>
@@ -124,7 +123,7 @@
                         <mat-form-field appearance="outline" color="accent" class="full-width">
                           <mat-label>Event Flow</mat-label>
                           <mtx-select [(ngModel)]="input.value" [items]="flows || []" bindLabel="name" bindValue="_id"
-                            appendTo="mat-dialog-container .root">
+                            appendTo=".ng-select-anchor">
                           </mtx-select>
                           <mat-error senergyError label="Event Flow"></mat-error>
                         </mat-form-field>
@@ -282,7 +281,7 @@
               <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                 <mat-label>Flow</mat-label>
                 <mtx-select [(ngModel)]="analyticsFlowId" [items]="flows || []" bindLabel="name" bindValue="_id"
-                  appendTo="mat-dialog-container .root">
+                  appendTo=".ng-select-anchor">
                 </mtx-select>
                 <mat-error senergyError label="Flow"></mat-error>
               </mat-form-field>
@@ -317,7 +316,7 @@
             <div>
               <mat-form-field appearance="outline" class="full-width" color="accent">
                 <mat-label>Pipeline Merge Strategy</mat-label>
-                <mtx-select [(ngModel)]="analyticsMergeStrategy" appendTo="mat-dialog-container .root">
+                <mtx-select [(ngModel)]="analyticsMergeStrategy" appendTo=".ng-select-anchor">
                   <mtx-option value="inner">inner</mtx-option>
                   <mtx-option value="outer">outer</mtx-option>
                 </mtx-select>
@@ -350,7 +349,7 @@
                               <mat-label>IoT-Selection</mat-label>
                               <mtx-select placeholder="IoT-Selection" [(ngModel)]="input.value"
                                 [items]="availableAnalyticsIotSelections" bindLabel="name" bindValue="value"
-                                appendTo="mat-dialog-container .root">
+                                appendTo=".ng-select-anchor">
                               </mtx-select>
                               <mat-error senergyError label="IoT-Selection"></mat-error>
                             </mat-form-field>
@@ -474,7 +473,7 @@
           <div>
             <mat-form-field appearance="outline" color="accent" class="full-width">
               <mat-label>Filter Type</mat-label>
-              <mtx-select [(ngModel)]="exportRequest.FilterType" required appendTo="mat-dialog-container .root">
+              <mtx-select [(ngModel)]="exportRequest.FilterType" required appendTo=".ng-select-anchor">
                 <mtx-option value="deviceId">deviceId</mtx-option>
                 <mtx-option value="operatorId">operatorId</mtx-option>
                 <mtx-option value="import_id">import_id</mtx-option>
@@ -529,7 +528,7 @@
             <mat-form-field appearance="outline" color="accent" class="full-width">
               <mat-label>Export Database ID</mat-label>
               <mtx-select [(ngModel)]="exportRequest.ExportDatabaseID" [items]="exportDatabaseList || []"
-                bindLabel="Name" bindValue="ID" appendTo="mat-dialog-container .root">
+                bindLabel="Name" bindValue="ID" appendTo=".ng-select-anchor">
               </mtx-select>
               <mat-error senergyError label="Export Database ID"></mat-error>
             </mat-form-field>
@@ -565,7 +564,7 @@
           <div>
             <mat-form-field appearance="outline" color="accent" class="full-width">
               <mat-label>Offset</mat-label>
-              <mtx-select [(ngModel)]="exportRequest.Offset" required appendTo="mat-dialog-container .root">
+              <mtx-select [(ngModel)]="exportRequest.Offset" required appendTo=".ng-select-anchor">
                 <mtx-option value="largest">largest</mtx-option>
                 <mtx-option value="smallest">smallest</mtx-option>
               </mtx-select>
@@ -600,7 +599,7 @@
                 <div>
                   <mat-form-field appearance="outline" color="accent" class="full-width">
                     <mat-label>Type</mat-label>
-                    <mtx-select [(ngModel)]="value.Type" required appendTo="mat-dialog-container .root">
+                    <mtx-select [(ngModel)]="value.Type" required appendTo=".ng-select-anchor">
                       <mtx-option value="string">string</mtx-option>
                       <mtx-option value="float">float</mtx-option>
                       <mtx-option value="bool">bool</mtx-option>
@@ -642,7 +641,7 @@
           <div>
             <mat-form-field appearance="outline" color="accent" class="full-width">
               <mat-label>Import-Type</mat-label>
-              <mtx-select [(ngModel)]="importTypeId" appendTo="mat-dialog-container .root">
+              <mtx-select [(ngModel)]="importTypeId" appendTo=".ng-select-anchor">
                 <mtx-option *ngFor="let importType of importTypes" [value]="importType.id">
                   {{importType.name}}
                 </mtx-option>
@@ -779,7 +778,7 @@
           <div>
             <mat-form-field appearance="outline" class="full-width" color="accent">
               <mat-label>Operation</mat-label>
-              <mtx-select [(ngModel)]="deviceRepositoryWorkerInfo.operation" appendTo="mat-dialog-container .root">
+              <mtx-select [(ngModel)]="deviceRepositoryWorkerInfo.operation" appendTo=".ng-select-anchor">
                 <mtx-option value="create_device_group">Create Device-Group</mtx-option>
               </mtx-select>
               <mat-error senergyError label="Operation"></mat-error>
@@ -832,7 +831,7 @@
           <div>
             <mat-form-field appearance="outline" class="full-width" color="accent">
               <mat-label>Hash Type</mat-label>
-              <mtx-select [(ngModel)]="watcherWorkerInfo.hash_type" appendTo="mat-dialog-container .root">
+              <mtx-select [(ngModel)]="watcherWorkerInfo.hash_type" appendTo=".ng-select-anchor">
                 <mtx-option value="deviceids">deviceids</mtx-option>
                 <mtx-option value="md5">md5</mtx-option>
               </mtx-select>
@@ -879,7 +878,7 @@
           <div>
             <mat-form-field appearance="outline" class="full-width" color="accent">
               <mat-label>Watch Operation</mat-label>
-              <mtx-select [(ngModel)]="watcherWorkerInfo.operation" appendTo="mat-dialog-container .root">
+              <mtx-select [(ngModel)]="watcherWorkerInfo.operation" appendTo=".ng-select-anchor">
                 <mtx-option value="devices_by_criteria">Watch Devices by Criteria</mtx-option>
                 <mtx-option value="watch_request">Watch Generic Request</mtx-option>
               </mtx-select>
@@ -901,7 +900,7 @@
                   <div>
                     <mat-form-field appearance="outline" class="full-width" color="accent">
                       <mat-label>Interaction</mat-label>
-                      <mtx-select [(ngModel)]="criteria.interaction" appendTo="mat-dialog-container .root">
+                      <mtx-select [(ngModel)]="criteria.interaction" appendTo=".ng-select-anchor">
                         <mtx-option [value]="undefined">NONE</mtx-option>
                         <mtx-option value="event">event</mtx-option>
                         <mtx-option value="request">request</mtx-option>
@@ -915,7 +914,7 @@
                       <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                         <mat-label>Function</mat-label>
                         <mtx-select [(ngModel)]="criteria.function_id" [items]="functions" bindLabel="name"
-                          bindValue="id" appendTo="mat-dialog-container .root">
+                          bindValue="id" appendTo=".ng-select-anchor">
                         </mtx-select>
                         <mat-error senergyError label="Function"></mat-error>
                       </mat-form-field>
@@ -924,7 +923,7 @@
                       <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                         <mat-label>Aspect</mat-label>
                         <mtx-select [(ngModel)]="criteria.aspect_id" [items]="aspects" bindLabel="name" bindValue="id"
-                          appendTo="mat-dialog-container .root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
+                          appendTo=".ng-select-anchor" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
                           [compareWith]="compareAspectsWith">
                         </mtx-select>
                         <mat-error senergyError label="Aspect"></mat-error>
@@ -934,7 +933,7 @@
                       <mat-form-field appearance="outline" class="form-field full-width" color="accent">
                         <mat-label>Device Class</mat-label>
                         <mtx-select [(ngModel)]="criteria.device_class_id" [items]="deviceClasses" bindLabel="name"
-                          bindValue="id" appendTo="mat-dialog-container .root">
+                          bindValue="id" appendTo=".ng-select-anchor">
                         </mtx-select>
                         <mat-error senergyError label="Device Class"></mat-error>
                       </mat-form-field>
@@ -958,7 +957,7 @@
             <div>
               <mat-form-field appearance="outline" class="full-width" color="accent">
                 <mat-label>Method</mat-label>
-                <mtx-select [(ngModel)]="watcherWorkerInfo.request.method" appendTo="mat-dialog-container .root">
+                <mtx-select [(ngModel)]="watcherWorkerInfo.request.method" appendTo=".ng-select-anchor">
                   <mtx-option value="GET">GET</mtx-option>
                   <mtx-option value="HEAD">HEAD</mtx-option>
                   <mtx-option value="POST">POST</mtx-option>
@@ -1027,7 +1026,6 @@
         </div>
       </mat-expansion-panel>
     </mat-accordion>
-  </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

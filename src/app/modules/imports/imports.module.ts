@@ -40,6 +40,7 @@ import { ImportDeployEditDialogComponent } from './import-deploy-edit-dialog/imp
 import { ImportInstanceExportDialogComponent } from './import-instances/import-instance-export-dialog/import-instance-export-dialog.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 const types: Route = {
     path: 'imports/types/list',
@@ -102,6 +103,7 @@ const instances: Route = {
         MatDialogModule,
         MatTreeModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ],
 })
 export class ImportsModule {}

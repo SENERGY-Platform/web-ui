@@ -18,28 +18,26 @@
 <h2 mat-dialog-title>Edit Input Variable Values</h2>
 
 <mat-dialog-content>
-  <div class="root">
-    <form>
-      <div *ngFor="let input of inputs; let i = index;">
-        <mat-form-field appearance="outline" color="accent" *ngIf="i>0"
-          matTooltip="type literal or select reference to output" matTooltipPosition="below">
-          <mtx-select [(ngModel)]="input.value" name="field_{{i}}" [addTag]="addTag()" appendTo="mat-dialog-container .root">
-            <mat-label>{{input.name | shortInputVariableName}}</mat-label>
-            <mtx-option [value]="input.value">
-              {{input.value}}
-            </mtx-option>
-            <mtx-option *ngFor="let output of outputs" [value]="'${'+output.name+'}'">
-              {{output.name}}
-            </mtx-option>
-            <mtx-option *ngFor="let output of customOptions" [value]="output">
-              {{output}}
-            </mtx-option>
-          </mtx-select>
-          <mat-error senergyError></mat-error>
-        </mat-form-field>
-      </div>
-    </form>
-  </div>
+  <form>
+    <div *ngFor="let input of inputs; let i = index;">
+      <mat-form-field appearance="outline" color="accent" *ngIf="i>0"
+        matTooltip="type literal or select reference to output" matTooltipPosition="below">
+        <mtx-select [(ngModel)]="input.value" name="field_{{i}}" [addTag]="addTag()" appendTo=".ng-select-anchor">
+          <mat-label>{{input.name | shortInputVariableName}}</mat-label>
+          <mtx-option [value]="input.value">
+            {{input.value}}
+          </mtx-option>
+          <mtx-option *ngFor="let output of outputs" [value]="'${'+output.name+'}'">
+            {{output.name}}
+          </mtx-option>
+          <mtx-option *ngFor="let output of customOptions" [value]="output">
+            {{output}}
+          </mtx-option>
+        </mtx-select>
+        <mat-error senergyError></mat-error>
+      </mat-form-field>
+    </div>
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

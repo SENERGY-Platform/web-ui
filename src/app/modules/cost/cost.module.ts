@@ -28,6 +28,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 
 
@@ -48,6 +49,7 @@ import { MtxSelectModule } from '@ng-matero/extensions/select';
         ReactiveFormsModule,
         MatInputModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ]
 })
 export class CostModule { }

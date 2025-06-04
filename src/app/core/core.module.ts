@@ -62,6 +62,7 @@ import { KeycloakService } from 'keycloak-angular';
 import { KeycloakConfidentialService } from './services/keycloak-confidential.service';
 import { MatErrorMessagesDirective } from './directives/matError.directive';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from './directives/close-mtx-select-on-scroll.directive';
 
 export const keycloakServiceToken = new InjectionToken<KeycloakService>('KeycloakService');
 
@@ -92,6 +93,7 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         MatTableModule,
         MatButtonToggleModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ],
     declarations: [
         SidenavComponent,

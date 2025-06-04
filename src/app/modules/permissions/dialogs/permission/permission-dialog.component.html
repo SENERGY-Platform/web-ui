@@ -17,60 +17,57 @@
 <h2 mat-dialog-title>Permissions for {{name}}</h2>
 
 <mat-dialog-content>
-    <div class="root">
-        <senergy-permission-table #userTable [permissions]="permissions.user_permissions" [type]="permissionTypes.user"
-            [users]="users" [userId]="userId" [isAdmin]="isAdmin" [descriptions]="descriptions" [header]="true"
-            [icon]="'person'"></senergy-permission-table>
+    <senergy-permission-table #userTable [permissions]="permissions.user_permissions" [type]="permissionTypes.user"
+        [users]="users" [userId]="userId" [isAdmin]="isAdmin" [descriptions]="descriptions" [header]="true"
+        [icon]="'person'"></senergy-permission-table>
 
-        <mat-divider *ngIf="showDividerBeforeGroupTable()"></mat-divider>
-        <senergy-permission-table #groupTable [permissions]="permissions.group_permissions"
-            [type]="permissionTypes.group" [isAdmin]="isAdmin" [descriptions]="descriptions"
-            [icon]="'group'"></senergy-permission-table>
+    <mat-divider *ngIf="showDividerBeforeGroupTable()"></mat-divider>
+    <senergy-permission-table #groupTable [permissions]="permissions.group_permissions" [type]="permissionTypes.group"
+        [isAdmin]="isAdmin" [descriptions]="descriptions" [icon]="'group'"></senergy-permission-table>
 
-        <mat-divider *ngIf="showDividerBeforeRoleTable()"></mat-divider>
-        <senergy-permission-table #roleTable [permissions]="permissions.role_permissions" [type]="permissionTypes.role"
-            [isAdmin]="isAdmin" [descriptions]="descriptions" [icon]="'manage_accounts'"></senergy-permission-table>
+    <mat-divider *ngIf="showDividerBeforeRoleTable()"></mat-divider>
+    <senergy-permission-table #roleTable [permissions]="permissions.role_permissions" [type]="permissionTypes.role"
+        [isAdmin]="isAdmin" [descriptions]="descriptions" [icon]="'manage_accounts'"></senergy-permission-table>
 
-        <form class="user-input">
-            <mat-form-field color="accent" appearance="outline" class="selector">
-                <mat-label>User</mat-label>
-                <mtx-select [items]="adddableUsers" [formControl]="userFormControl" bindValue="id" bindLabel="username"
-                    appendTo="mat-dialog-container .root">
-                </mtx-select>
-                <mat-error senergyError label="User"></mat-error>
-            </mat-form-field>
-            <button [disabled]="adddableUsers.length === 0" class="margin add-button" mat-icon-button color="accent"
-                (click)="addUser()">
-                <mat-icon>add</mat-icon>
-            </button>
-        </form>
+    <form class="user-input">
+        <mat-form-field color="accent" appearance="outline" class="selector">
+            <mat-label>User</mat-label>
+            <mtx-select [items]="adddableUsers" [formControl]="userFormControl" bindValue="id" bindLabel="username"
+                appendTo=".ng-select-anchor">
+            </mtx-select>
+            <mat-error senergyError label="User"></mat-error>
+        </mat-form-field>
+        <button [disabled]="adddableUsers.length === 0" class="margin add-button" mat-icon-button color="accent"
+            (click)="addUser()">
+            <mat-icon>add</mat-icon>
+        </button>
+    </form>
 
-        <form class="user-input">
-            <mat-form-field color="accent" appearance="outline" class="selector">
-                <mat-label>Group</mat-label>
-                <mtx-select [items]="adddableGroups" [formControl]="groupFormControl" appendTo="mat-dialog-container .root">
-                </mtx-select>
-                <mat-error senergyError label="Group"></mat-error>
-            </mat-form-field>
-            <button [disabled]="adddableGroups.length === 0" class="margin add-button" mat-icon-button color="accent"
-                (click)="addGroup()">
-                <mat-icon>add</mat-icon>
-            </button>
-        </form>
+    <form class="user-input">
+        <mat-form-field color="accent" appearance="outline" class="selector">
+            <mat-label>Group</mat-label>
+            <mtx-select [items]="adddableGroups" [formControl]="groupFormControl" appendTo=".ng-select-anchor">
+            </mtx-select>
+            <mat-error senergyError label="Group"></mat-error>
+        </mat-form-field>
+        <button [disabled]="adddableGroups.length === 0" class="margin add-button" mat-icon-button color="accent"
+            (click)="addGroup()">
+            <mat-icon>add</mat-icon>
+        </button>
+    </form>
 
-        <form *ngIf="isAdmin" class="user-input">
-            <mat-form-field color="accent" appearance="outline" class="selector">
-                <mat-label>Role</mat-label>
-                <mtx-select [items]="adddableRoles" [formControl]="roleFormControl" appendTo="mat-dialog-container .root" dropdownPosition="top">
-                </mtx-select>
-                <mat-error senergyError label="Role"></mat-error>
-            </mat-form-field>
-            <button [disabled]="adddableRoles.length === 0" class="margin add-button" mat-icon-button color="accent"
-                (click)="addRole()">
-                <mat-icon>add</mat-icon>
-            </button>
-        </form>
-    </div>
+    <form *ngIf="isAdmin" class="user-input">
+        <mat-form-field color="accent" appearance="outline" class="selector">
+            <mat-label>Role</mat-label>
+            <mtx-select [items]="adddableRoles" [formControl]="roleFormControl" appendTo=".ng-select-anchor">
+            </mtx-select>
+            <mat-error senergyError label="Role"></mat-error>
+        </mat-form-field>
+        <button [disabled]="adddableRoles.length === 0" class="margin add-button" mat-icon-button color="accent"
+            (click)="addRole()">
+            <mat-icon>add</mat-icon>
+        </button>
+    </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

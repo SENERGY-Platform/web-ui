@@ -61,6 +61,7 @@ import { CharacteristicElementComponent } from './characteristics/dialogs/charac
 import { MatTreeModule } from '@angular/material/tree';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 const deviceTypes: Route = {
     path: 'metadata/devicetypesoverview',
@@ -120,6 +121,7 @@ const deviceClasses: Route = {
         MatTreeModule,
         DragDropModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ],
     declarations: [
         DeviceTypesOverviewComponent,

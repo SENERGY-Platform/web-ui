@@ -15,8 +15,8 @@
   -->
 
 <h2 mat-dialog-title>{{action}} Device</h2>
-<div class="root">
-    <mat-dialog-content>
+
+<mat-dialog-content>
         <form class="form">
             <div *ngIf="userHasUpdateDisplayNameAuthorization">
                 <mat-form-field appearance="outline" class="full-width" color="accent">
@@ -44,8 +44,9 @@
                     <ng-container *ngIf="attr.key !== nicknameAttributeKey">
                         <mat-form-field appearance="outline" class="third-width" color="accent">
                             <mat-label>Key</mat-label>
-                            <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" dropdownPosition="top"
-                                [disabled]="!editableAttribute(attr)" [items]="knownAttributes" appendTo="mat-dialog-container .root" [addTag]="addAttribute()"></mtx-select>
+                            <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
+                                [disabled]="!editableAttribute(attr)" [items]="knownAttributes" appendTo=".ng-select-anchor"
+                                 [addTag]="addAttribute()"></mtx-select>
                             <mat-error senergyError label="Key"></mat-error>
                         </mat-form-field>
                         =
@@ -64,8 +65,7 @@
                 <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
             </div>
         </form>
-    </mat-dialog-content>
-</div>
+</mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>

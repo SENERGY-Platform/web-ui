@@ -32,6 +32,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TableComponent } from './dialogs/permission/table/table.component';
 import { MatDividerModule } from '@angular/material/divider';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 @NgModule({
     imports: [
@@ -50,6 +51,7 @@ import { MtxSelectModule } from '@ng-matero/extensions/select';
         MatTooltipModule,
         MatDividerModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ],
     declarations: [PermissionDialogComponent, TableComponent],
 })

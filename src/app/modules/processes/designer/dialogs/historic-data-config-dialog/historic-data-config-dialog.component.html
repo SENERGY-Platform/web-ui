@@ -18,60 +18,59 @@
 <h2 mat-dialog-title>Select Date Time</h2>
 
 <mat-dialog-content>
-  <div class="root">
-    <form class="form">
+  <form class="form">
 
-      <h3>Aggregation</h3>
-      <mat-form-field appearance="outline" color="accent" class="form-field">
-        <mat-label>Action</mat-label>
-        <mtx-select placeholder="Select Action" [(ngModel)]="config.analysisAction" name="action" appendTo="mat-dialog-container .root">
-          <mtx-option *ngFor="let action of availableActions" [value]="action.id">
-            {{action.name}}
-          </mtx-option>
-        </mtx-select>
-        <mat-error senergyError label="Action"></mat-error>
-      </mat-form-field>
+    <h3>Aggregation</h3>
+    <mat-form-field appearance="outline" color="accent" class="form-field">
+      <mat-label>Action</mat-label>
+      <mtx-select placeholder="Select Action" [(ngModel)]="config.analysisAction" name="action"
+        appendTo=".ng-select-anchor">
+        <mtx-option *ngFor="let action of availableActions" [value]="action.id">
+          {{action.name}}
+        </mtx-option>
+      </mtx-select>
+      <mat-error senergyError label="Action"></mat-error>
+    </mat-form-field>
 
 
-      <h3>Data From the Last ...</h3>
+    <h3>Data From the Last ...</h3>
 
-      <mat-form-field appearance="outline" class="form-field" color="accent">
-        <mat-label>Time</mat-label>
-        <input matInput [(ngModel)]="config.interval.value" name="time" type="number" min="0" step="1">
-        <mat-error senergyError label="Time"></mat-error>
-      </mat-form-field>
+    <mat-form-field appearance="outline" class="form-field" color="accent">
+      <mat-label>Time</mat-label>
+      <input matInput [(ngModel)]="config.interval.value" name="time" type="number" min="0" step="1">
+      <mat-error senergyError label="Time"></mat-error>
+    </mat-form-field>
 
-      <mat-form-field appearance="outline" color="accent" class="form-field">
-        <mat-label>Unit</mat-label>
-        <mtx-select [(ngModel)]="config.interval.type" name="unit" appendTo="mat-dialog-container .root">
-          <mtx-option *ngFor="let time of times" [value]="time.id">
-            {{time.name}}
-          </mtx-option>
-        </mtx-select>
-        <mat-error senergyError label="Unit"></mat-error>
-      </mat-form-field>
+    <mat-form-field appearance="outline" color="accent" class="form-field">
+      <mat-label>Unit</mat-label>
+      <mtx-select [(ngModel)]="config.interval.type" name="unit" appendTo=".ng-select-anchor">
+        <mtx-option *ngFor="let time of times" [value]="time.id">
+          {{time.name}}
+        </mtx-option>
+      </mtx-select>
+      <mat-error senergyError label="Unit"></mat-error>
+    </mat-form-field>
 
-      <h3>Data From Static Interval</h3>
-      <mat-form-field appearance="outline" class="form-field" color="accent">
-        <mat-label>Begin</mat-label>
-        <input matInput [(ngModel)]="config.dateInterval.start" [matDatepicker]="picker_begin"
-          placeholder="Choose a date" name="intervalBegin" readonly>
-        <mat-datepicker-toggle matSuffix [for]="picker_begin"></mat-datepicker-toggle>
-        <mat-datepicker #picker_begin></mat-datepicker>
-        <mat-error senergyError label="Begin"></mat-error>
-      </mat-form-field>
+    <h3>Data From Static Interval</h3>
+    <mat-form-field appearance="outline" class="form-field" color="accent">
+      <mat-label>Begin</mat-label>
+      <input matInput [(ngModel)]="config.dateInterval.start" [matDatepicker]="picker_begin" placeholder="Choose a date"
+        name="intervalBegin" readonly>
+      <mat-datepicker-toggle matSuffix [for]="picker_begin"></mat-datepicker-toggle>
+      <mat-datepicker #picker_begin></mat-datepicker>
+      <mat-error senergyError label="Begin"></mat-error>
+    </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-field" color="accent">
-        <mat-label>End</mat-label>
-        <input matInput [(ngModel)]="config.dateInterval.end" [matDatepicker]="picker_end" placeholder="Choose a date"
-          name="intervalend" readonly>
-        <mat-datepicker-toggle matSuffix [for]="picker_end"></mat-datepicker-toggle>
-        <mat-datepicker #picker_end></mat-datepicker>
-        <mat-error senergyError label="End"></mat-error>
-      </mat-form-field>
+    <mat-form-field appearance="outline" class="form-field" color="accent">
+      <mat-label>End</mat-label>
+      <input matInput [(ngModel)]="config.dateInterval.end" [matDatepicker]="picker_end" placeholder="Choose a date"
+        name="intervalend" readonly>
+      <mat-datepicker-toggle matSuffix [for]="picker_end"></mat-datepicker-toggle>
+      <mat-datepicker #picker_end></mat-datepicker>
+      <mat-error senergyError label="End"></mat-error>
+    </mat-form-field>
 
-    </form>
-  </div>
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

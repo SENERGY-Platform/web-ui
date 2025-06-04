@@ -38,6 +38,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CoreModule } from '../../core/core.module';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { GridstackModule } from 'gridstack/dist/angular';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 @NgModule({
     imports: [
@@ -61,6 +62,7 @@ import { GridstackModule } from 'gridstack/dist/angular';
         DragDropModule,
         CoreModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
         GridstackModule,
     ],
     declarations: [DashboardComponent, DashboardNewDialogComponent, DashboardNewWidgetDialogComponent, DashboardEditDialogComponent],

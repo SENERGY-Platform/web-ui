@@ -15,129 +15,126 @@
   -->
 
 <h2 mat-dialog-title>Edit Chart Export</h2>
-<mat-dialog-content class="form">
-    <div class="root">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+<mat-dialog-content class="form" >
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
 
-        <div *ngIf="ready" fxLayout="column" [formGroup]="formGroupController">
-            <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
-                <mat-label>Widget Name</mat-label>
-                <input type="text" matInput placeholder="Name" formControlName="name" required>
-                <mat-error senergyError label="Widget Name"></mat-error>
-            </mat-form-field>
+    <div *ngIf="ready" fxLayout="column" [formGroup]="formGroupController">
+        <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
+            <mat-label>Widget Name</mat-label>
+            <input type="text" matInput placeholder="Name" formControlName="name" required>
+            <mat-error senergyError label="Widget Name"></mat-error>
+        </mat-form-field>
 
-            <div formGroupName="properties" *ngIf="userHasUpdatePropertiesAuthorization">
-                <table class="full-width">
-                    <tr>
-                        <td>
-                            <mat-form-field color="accent" appearance="outline" class="full-width">
-                                <mat-label>Chart Type</mat-label>
-                                <mtx-select formControlName="chartType" required appendTo="mat-dialog-container .root">
-                                    <mtx-option *ngFor="let chartType of chartTypes" [value]="chartType">
-                                        {{chartType}}
-                                    </mtx-option>
-                                </mtx-select>
-                                <mat-error senergyError label="Chart Type"></mat-error>
-                            </mat-form-field>
-                        </td>
-                        <td *ngIf="chartType.value === 'LineChart'">
-                            <mat-slide-toggle formControlName="curvedFunction"> Curved?
-                            </mat-slide-toggle>
-                            <mat-form-field color="accent" appearance="outline" style="width: 140px">
-                                <mat-label>Zoom Time Factor</mat-label>
-                                <input type="number" matInput formControlName="zoomTimeFactor">
-                                <mat-error senergyError label="Zoom Time Factor"></mat-error>
-                            </mat-form-field>
-                        </td>
-                        <td *ngIf="chartType.value === 'PieChart'">
-                            <mat-slide-toggle formControlName="calculateIntervals"> Calculate Intervals?
-                            </mat-slide-toggle>
-                        </td>
-                        <td *ngIf="chartType.value === 'ColumnChart'">
-                            <mat-slide-toggle formControlName="stacked"> Stacked?
-                            </mat-slide-toggle>
-                        </td>
-                    </tr>
-                </table>
+        <div formGroupName="properties" *ngIf="userHasUpdatePropertiesAuthorization">
+            <table class="full-width">
+                <tr>
+                    <td>
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
+                            <mat-label>Chart Type</mat-label>
+                            <mtx-select formControlName="chartType" required appendTo=".ng-select-anchor">
+                                <mtx-option *ngFor="let chartType of chartTypes" [value]="chartType">
+                                    {{chartType}}
+                                </mtx-option>
+                            </mtx-select>
+                            <mat-error senergyError label="Chart Type"></mat-error>
+                        </mat-form-field>
+                    </td>
+                    <td *ngIf="chartType.value === 'LineChart'">
+                        <mat-slide-toggle formControlName="curvedFunction"> Curved?
+                        </mat-slide-toggle>
+                        <mat-form-field color="accent" appearance="outline" style="width: 140px">
+                            <mat-label>Zoom Time Factor</mat-label>
+                            <input type="number" matInput formControlName="zoomTimeFactor">
+                            <mat-error senergyError label="Zoom Time Factor"></mat-error>
+                        </mat-form-field>
+                    </td>
+                    <td *ngIf="chartType.value === 'PieChart'">
+                        <mat-slide-toggle formControlName="calculateIntervals"> Calculate Intervals?
+                        </mat-slide-toggle>
+                    </td>
+                    <td *ngIf="chartType.value === 'ColumnChart'">
+                        <mat-slide-toggle formControlName="stacked"> Stacked?
+                        </mat-slide-toggle>
+                    </td>
+                </tr>
+            </table>
 
-                <data-source-selector #datasourceselector [dataSourceConfig]="dataSourceConfig"
-                    [enableAggretationConfig]="true" (updatedDataSourceConfig)="dataSourceConfigChanged($event)"
-                    [enableFieldSelection]="true" [showLocationsAsSource]="true"></data-source-selector>
+            <data-source-selector #datasourceselector [dataSourceConfig]="dataSourceConfig"
+                [enableAggretationConfig]="true" (updatedDataSourceConfig)="dataSourceConfigChanged($event)"
+                [enableFieldSelection]="true" [showLocationsAsSource]="true"></data-source-selector>
 
-                <h2>Configure Chart</h2>
+            <h2>Configure Chart</h2>
 
-                <table>
-                    <tr>
-                        <td>
-                            <mat-form-field color="accent" appearance="outline" class="full-width">
-                                <mat-label>X-Axis-Label</mat-label>
-                                <input type="text" matInput formControlName="hAxisLabel">
-                                <mat-error senergyError label="X-Axis-Label"></mat-error>
-                            </mat-form-field>
-                        </td>
-                        <td>
-                            <mat-form-field color="accent" appearance="outline" class="full-width">
-                                <mat-label>X-Axis-Format</mat-label>
-                                <input type="text" matInput formControlName="hAxisFormat"
-                                    matTooltip="Date format string">
-                                <mat-error senergyError label="X-Axis-Format"></mat-error>
-                            </mat-form-field>
-                        </td>
-                        <td>
-                            <mat-form-field color="accent" appearance="outline" class="full-width">
-                                <mat-label>Y-Axis-Label</mat-label>
-                                <input type="text" matInput formControlName="vAxisLabel">
-                                <mat-error senergyError label="Y-Axis-Label"></mat-error>
-                            </mat-form-field>
-                        </td>
-                        <td>
-                            <mat-form-field color="accent" appearance="outline" class="full-width">
-                                <mat-label>Second Y-Axis-Label</mat-label>
-                                <input type="text" matInput placeholder="Second-Y-Axis-Label"
-                                    formControlName="secondVAxisLabel">
-                                <mat-error senergyError label="Second Y-Axis-Label"></mat-error>
-                            </mat-form-field>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
+            <table>
+                <tr>
+                    <td>
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
+                            <mat-label>X-Axis-Label</mat-label>
+                            <input type="text" matInput formControlName="hAxisLabel">
+                            <mat-error senergyError label="X-Axis-Label"></mat-error>
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
+                            <mat-label>X-Axis-Format</mat-label>
+                            <input type="text" matInput formControlName="hAxisFormat" matTooltip="Date format string">
+                            <mat-error senergyError label="X-Axis-Format"></mat-error>
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
+                            <mat-label>Y-Axis-Label</mat-label>
+                            <input type="text" matInput formControlName="vAxisLabel">
+                            <mat-error senergyError label="Y-Axis-Label"></mat-error>
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
+                            <mat-label>Second Y-Axis-Label</mat-label>
+                            <input type="text" matInput placeholder="Second-Y-Axis-Label"
+                                formControlName="secondVAxisLabel">
+                            <mat-error senergyError label="Second Y-Axis-Label"></mat-error>
+                        </mat-form-field>
+                    </td>
+                </tr>
+            </table>
         </div>
 
-        <div>
-            <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree" cdkDropList
-                (cdkDropListDropped)="dropped($event)" [cdkDropListConnectedTo]="getConnectedNodesFn()(undefined)"
-                [cdkDropListEnterPredicate]="dontDropPredicate">
-                <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
-                    <senergy-axis-config [element]="node" [treeControl]="treeControl"
-                        [groupTypeIsDifference]="groupTypeIsDifference"
-                        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"
-                        [exportTags]="exportTags" [groupType]="formGroupController.get('properties.group-type')?.value"
-                        (copyClicked)="duplicate(node)" (deleteClicked)="deleteDuplicate(node)"
-                        (dragStart)="startDrag()" (dragEnd)="stopDrag()"
-                        [enableDragDrop]="formGroupController.get('properties.chartType')?.value === 'ColumnChart'"
-                        (dropped)="dropped($event.$event, $event.target)" [connectedNodes]="getConnectedNodesFn()"
-                        [dragging]="dragging">
-                    </senergy-axis-config>
-                </mat-tree-node>
+    </div>
 
-                <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
-                    <senergy-axis-config [element]="node" [treeControl]="treeControl"
-                        [groupTypeIsDifference]="groupTypeIsDifference"
-                        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"
-                        [exportTags]="exportTags" [groupType]="formGroupController.get('properties.group-type')?.value"
-                        (copyClicked)="duplicate(node)" (deleteClicked)="deleteDuplicate(node)"
-                        (dragStart)="startDrag()" (dragEnd)="stopDrag()"
-                        [enableDragDrop]="formGroupController.get('properties.chartType')?.value === 'ColumnChart'"
-                        (dropped)="dropped($event.$event, $event.target)" [connectedNodes]="getConnectedNodesFn()"
-                        [dragging]="dragging">
-                    </senergy-axis-config>
-                </mat-nested-tree-node>
-            </mat-tree>
-            <div [hidden]="!dragging" id="rootDropZone" cdkDropList (cdkDropListDropped)="dropped($event)"
-                [cdkDropListConnectedTo]="getConnectedNodesFn()(undefined)">
-                <h3 class="root-drop-zone color-accent">Move to top level</h3>
-            </div>
+    <div>
+        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree" cdkDropList
+            (cdkDropListDropped)="dropped($event)" [cdkDropListConnectedTo]="getConnectedNodesFn()(undefined)"
+            [cdkDropListEnterPredicate]="dontDropPredicate">
+            <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+                <senergy-axis-config [element]="node" [treeControl]="treeControl"
+                    [groupTypeIsDifference]="groupTypeIsDifference"
+                    [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"
+                    [exportTags]="exportTags" [groupType]="formGroupController.get('properties.group-type')?.value"
+                    (copyClicked)="duplicate(node)" (deleteClicked)="deleteDuplicate(node)" (dragStart)="startDrag()"
+                    (dragEnd)="stopDrag()"
+                    [enableDragDrop]="formGroupController.get('properties.chartType')?.value === 'ColumnChart'"
+                    (dropped)="dropped($event.$event, $event.target)" [connectedNodes]="getConnectedNodesFn()"
+                    [dragging]="dragging">
+                </senergy-axis-config>
+            </mat-tree-node>
+
+            <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+                <senergy-axis-config [element]="node" [treeControl]="treeControl"
+                    [groupTypeIsDifference]="groupTypeIsDifference"
+                    [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"
+                    [exportTags]="exportTags" [groupType]="formGroupController.get('properties.group-type')?.value"
+                    (copyClicked)="duplicate(node)" (deleteClicked)="deleteDuplicate(node)" (dragStart)="startDrag()"
+                    (dragEnd)="stopDrag()"
+                    [enableDragDrop]="formGroupController.get('properties.chartType')?.value === 'ColumnChart'"
+                    (dropped)="dropped($event.$event, $event.target)" [connectedNodes]="getConnectedNodesFn()"
+                    [dragging]="dragging">
+                </senergy-axis-config>
+            </mat-nested-tree-node>
+        </mat-tree>
+        <div [hidden]="!dragging" id="rootDropZone" cdkDropList (cdkDropListDropped)="dropped($event)"
+            [cdkDropListConnectedTo]="getConnectedNodesFn()(undefined)">
+            <h3 class="root-drop-zone color-accent">Move to top level</h3>
         </div>
     </div>
 </mat-dialog-content>

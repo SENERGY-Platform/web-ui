@@ -34,6 +34,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 const operator: Route = { path: 'data/operator-repo/op', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' } };
 const operatorEdit: Route = { path: 'data/operator-repo/op/:id', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' } };
@@ -57,6 +58,7 @@ const operatorEdit: Route = { path: 'data/operator-repo/op/:id', pathMatch: 'ful
         FormsModule,
         MatCheckboxModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ],
     declarations: [OperatorComponent],
 })

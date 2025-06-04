@@ -17,34 +17,32 @@
 <h2 mat-dialog-title>Edit Ventilation</h2>
 
 <mat-dialog-content>
-    <div class="root">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready">
-            <form fxLayout="column" [formGroup]="form">
-                <mat-form-field color="accent" appearance="outline" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
-                    <mat-label>Widget Name</mat-label>
-                    <input type="text" matInput formControlName="name" required>
-                    <mat-error senergyError [label]="'Widget name'"></mat-error>
-                </mat-form-field>
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    <div *ngIf="ready">
+        <form fxLayout="column" [formGroup]="form">
+            <mat-form-field color="accent" appearance="outline" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
+                <mat-label>Widget Name</mat-label>
+                <input type="text" matInput formControlName="name" required>
+                <mat-error senergyError [label]="'Widget name'"></mat-error>
+            </mat-form-field>
 
-                <data-source-selector [dataSourceConfig]="form.controls.exportConfig.value"
-                    [enableAggretationConfig]="false" (updatedDataSourceConfig)="exportConfigUpdated($event)"
-                    [enableFieldSelection]="false" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="false"
-                    [showExportsAsSource]="true" [showTimeRange]="false">
-                </data-source-selector>
+            <data-source-selector [dataSourceConfig]="form.controls.exportConfig.value"
+                [enableAggretationConfig]="false" (updatedDataSourceConfig)="exportConfigUpdated($event)"
+                [enableFieldSelection]="false" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="false"
+                [showExportsAsSource]="true" [showTimeRange]="false">
+            </data-source-selector>
 
-                <data-source-selector [dataSourceConfig]="form.controls.deviceValueConfig.value"
-                    [enableAggretationConfig]="false" (updatedDataSourceConfig)="deviceConfigUpdated($event)"
-                    [enableFieldSelection]="true" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="true"
-                    [showExportsAsSource]="false" [showTimeRange]="false">
-                </data-source-selector>
+            <data-source-selector [dataSourceConfig]="form.controls.deviceValueConfig.value"
+                [enableAggretationConfig]="false" (updatedDataSourceConfig)="deviceConfigUpdated($event)"
+                [enableFieldSelection]="true" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="true"
+                [showExportsAsSource]="false" [showTimeRange]="false">
+            </data-source-selector>
 
-                <data-source-selector [dataSourceConfig]="form.controls.timeRangeConfig.value"
-                    [enableAggretationConfig]="false" (updatedDataSourceConfig)="timeConfigUpdated($event)"
-                    [showTimeRange]="true" [showSource]="false">
-                </data-source-selector>
-            </form>
-        </div>
+            <data-source-selector [dataSourceConfig]="form.controls.timeRangeConfig.value"
+                [enableAggretationConfig]="false" (updatedDataSourceConfig)="timeConfigUpdated($event)"
+                [showTimeRange]="true" [showSource]="false">
+            </data-source-selector>
+        </form>
     </div>
 </mat-dialog-content>
 

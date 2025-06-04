@@ -17,90 +17,88 @@
 <h2 mat-dialog-title>Edit Energy Prediction</h2>
 
 <mat-dialog-content>
-    <div class="root">
-        <form class='form' fxLayout="column" [formGroup]="form">
+    <form class='form' fxLayout="column" [formGroup]="form">
+        <div fxLayout="row" fxLayoutAlign="space-between">
+            <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
+                <mat-label>Widget Name</mat-label>
+                <input type="text" matInput formControlName="name">
+                <mat-error senergyError label="Widget Name"></mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" color="accent" fxFlex="47"
+                *ngIf="userHasUpdatePropertiesAuthorization">
+                <mat-label>Export</mat-label>
+                <mtx-select placeholder="Choose Export" formControlName="export" required [items]="exports"
+                    bindLabel="name" appendTo=".ng-select-anchor">
+                </mtx-select>
+                <mat-error senergyError label="Export"></mat-error>
+            </mat-form-field>
+        </div>
+        <span *ngIf="userHasUpdatePropertiesAuthorization">
             <div fxLayout="row" fxLayoutAlign="space-between">
-                <mat-form-field appearance="outline" color="accent" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
-                    <mat-label>Widget Name</mat-label>
-                    <input type="text" matInput formControlName="name">
-                    <mat-error senergyError label="Widget Name"></mat-error>
+                <mat-form-field appearance="outline" color="accent" fxFlex="47">
+                    <mat-label>Math Operation</mat-label>
+                    <input type="text" matInput formControlName="math">
+                    <mat-error senergyError label="Math Operation"></mat-error>
                 </mat-form-field>
 
-                <mat-form-field appearance="outline" color="accent" fxFlex="47"
-                    *ngIf="userHasUpdatePropertiesAuthorization">
-                    <mat-label>Export</mat-label>
-                    <mtx-select placeholder="Choose Export" formControlName="export" required [items]="exports"
-                        bindLabel="name" appendTo="mat-dialog-container .root">
-                    </mtx-select>
-                    <mat-error senergyError label="Export"></mat-error>
+                <mat-form-field appearance="outline" color="accent" fxFlex="47">
+                    <mat-label>Unit</mat-label>
+                    <input type="text" matInput formControlName="unit">
+                    <mat-error senergyError label="Unit"></mat-error>
                 </mat-form-field>
             </div>
-            <span *ngIf="userHasUpdatePropertiesAuthorization">
-                <div fxLayout="row" fxLayoutAlign="space-between">
-                    <mat-form-field appearance="outline" color="accent" fxFlex="47">
-                        <mat-label>Math Operation</mat-label>
-                        <input type="text" matInput formControlName="math">
-                        <mat-error senergyError label="Math Operation"></mat-error>
-                    </mat-form-field>
+            <div fxLayout="row" fxLayoutAlign="space-between">
+                <mat-form-field appearance="outline" color="accent" fxFlex="47">
+                    <mat-label>Prediction Type</mat-label>
+                    <mtx-select formControlName="predictionType" required appendTo=".ng-select-anchor">
+                        <mtx-option *ngFor="let opt of options" [value]="opt">
+                            {{opt}}
+                        </mtx-option>
+                    </mtx-select>
+                    <mat-error senergyError label="Prediction Type"></mat-error>
+                </mat-form-field>
 
-                    <mat-form-field appearance="outline" color="accent" fxFlex="47">
-                        <mat-label>Unit</mat-label>
-                        <input type="text" matInput formControlName="unit">
-                        <mat-error senergyError label="Unit"></mat-error>
-                    </mat-form-field>
-                </div>
-                <div fxLayout="row" fxLayoutAlign="space-between">
-                    <mat-form-field appearance="outline" color="accent" fxFlex="47">
-                        <mat-label>Prediction Type</mat-label>
-                        <mtx-select formControlName="predictionType" required appendTo="mat-dialog-container .root">
-                            <mtx-option *ngFor="let opt of options" [value]="opt">
-                                {{opt}}
-                            </mtx-option>
-                        </mtx-select>
-                        <mat-error senergyError label="Prediction Type"></mat-error>
-                    </mat-form-field>
+                <mat-form-field class='smaller-hint' appearance="outline" color="accent" fxFlex="47">
+                    <mat-label>Number Format</mat-label>
+                    <mat-hint>For use in Angular pipe</mat-hint>
+                    <input type="text" matInput formControlName="numberFormat">
+                    <mat-error senergyError label="Number Format"></mat-error>
+                </mat-form-field>
+            </div>
 
-                    <mat-form-field class='smaller-hint' appearance="outline" color="accent" fxFlex="47">
-                        <mat-label>Number Format</mat-label>
-                        <mat-hint>For use in Angular pipe</mat-hint>
-                        <input type="text" matInput formControlName="numberFormat">
-                        <mat-error senergyError label="Number Format"></mat-error>
-                    </mat-form-field>
-                </div>
+            <div fxLayout="row" fxLayoutAlign="space-between">
+                <mat-form-field appearance="outline" color="accent" fxFlex="47">
+                    <mat-label>Price per Unit</mat-label>
+                    <input type="number" matInput formControlName="pricePerUnit" required>
+                    <mat-error senergyError label="Price per Unit"></mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" color="accent" fxFlex="47">
+                    <mat-label>Currency</mat-label>
+                    <input type="text" matInput formControlName="currency">
+                    <mat-error senergyError label="Currency"></mat-error>
+                </mat-form-field>
+            </div>
 
-                <div fxLayout="row" fxLayoutAlign="space-between">
-                    <mat-form-field appearance="outline" color="accent" fxFlex="47">
-                        <mat-label>Price per Unit</mat-label>
-                        <input type="number" matInput formControlName="pricePerUnit" required>
-                        <mat-error senergyError label="Price per Unit"></mat-error>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" color="accent" fxFlex="47">
-                        <mat-label>Currency</mat-label>
-                        <input type="text" matInput formControlName="currency">
-                        <mat-error senergyError label="Currency"></mat-error>
-                    </mat-form-field>
-                </div>
+            <div fxLayout="row" fxLayoutAlign="space-between">
+                <mat-form-field appearance="outline" color="accent" fxFlex="47">
+                    <mat-label>Threshold Type</mat-label>
+                    <mtx-select formControlName="thresholdOption" required appendTo=".ng-select-anchor">
+                        <mtx-option *ngFor="let opt of thresholdOptions" [value]="opt">
+                            {{opt}}
+                        </mtx-option>
+                    </mtx-select>
+                    <mat-error senergyError label="Threshold Type"></mat-error>
+                </mat-form-field>
 
-                <div fxLayout="row" fxLayoutAlign="space-between">
-                    <mat-form-field appearance="outline" color="accent" fxFlex="47">
-                        <mat-label>Threshold Type</mat-label>
-                        <mtx-select formControlName="thresholdOption" required appendTo="mat-dialog-container .root">
-                            <mtx-option *ngFor="let opt of thresholdOptions" [value]="opt">
-                                {{opt}}
-                            </mtx-option>
-                        </mtx-select>
-                        <mat-error senergyError label="Threshold Type"></mat-error>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" color="accent" fxFlex="47">
-                        <mat-label>Threshold</mat-label>
-                        <input type="number" matInput formControlName="threshold" required>
-                        <mat-error senergyError label="Threshold"></mat-error>
-                    </mat-form-field>
-                </div>
-            </span>
-        </form>
-    </div>
+                <mat-form-field appearance="outline" color="accent" fxFlex="47">
+                    <mat-label>Threshold</mat-label>
+                    <input type="number" matInput formControlName="threshold" required>
+                    <mat-error senergyError label="Threshold"></mat-error>
+                </mat-form-field>
+            </div>
+        </span>
+    </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

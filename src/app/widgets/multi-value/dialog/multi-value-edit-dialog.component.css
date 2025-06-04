@@ -33,6 +33,3 @@ mat-dialog-actions button:not(:last-child) {
     min-width: fit-content !important;
 }
 
-.root {
-    position: relative;
-}

@@ -16,111 +16,110 @@
 
 <h2 mat-dialog-title>Edit Concept</h2>
 
-<mat-dialog-content *ngIf="ready">
-    <div class="root">
-        <form class="form" fxLayout="column">
-            <mat-form-field class="full-width" appearance="outline" color="accent">
-                <mat-label>ID</mat-label>
-                <input matInput [formControl]="idFormControl">
-                <mat-error senergyError label="ID"></mat-error>
-            </mat-form-field>
-            <mat-form-field class="full-width" appearance="outline" color="accent">
-                <mat-label>Name</mat-label>
-                <input matInput [formControl]="nameFormControl" required>
-                <mat-error senergyError label="Name"></mat-error>
-            </mat-form-field>
-            <mat-form-field fxFlex color="accent" appearance="outline">
-                <mat-label>Characteristics</mat-label>
-                <mtx-select [items]="characteristics" bindLabel="name" [formControl]="characteristicsControl" multiple
-                    [compareWith]="compareIds" appendTo="mat-dialog-container .root">
-                </mtx-select>
-                <mat-error senergyError label="Characteristics"></mat-error>
-            </mat-form-field>
-            <mat-form-field class="full-width" appearance="outline" color="accent">
-                <mat-label>Base Characteristic</mat-label>
-                <mtx-select [formControl]="baseCharacteristicControl" required appendTo="mat-dialog-container .root">
-                    <mtx-option *ngFor="let characteristic of characteristicsControl.value" [value]="characteristic.id">
-                        {{characteristic.name}}
-                    </mtx-option>
-                </mtx-select>
-                <mat-error senergyError label="Base Characteristic"></mat-error>
-            </mat-form-field>
-            <div class="conversions">
-                <div class="divider">
-                    Conversions
-                    <mat-divider></mat-divider>
-                </div>
-                <ng-container *ngIf="concept">
-                    <div *ngFor="let conversion of concept.conversions; let i = index" class="conversion">
-                        <mat-form-field appearance="outline" class="forth-width" color="accent">
-                            <mat-label>From</mat-label>
-                            <mtx-select [(ngModel)]="conversion.from" [ngModelOptions]="{standalone: true}" required appendTo="mat-dialog-container .root">
-                                <mtx-option *ngFor="let characteristic of characteristicsControl.value"
-                                    [value]="characteristic.id">
-                                    {{characteristic.name}}
-                                </mtx-option>
-                            </mtx-select>
-                            <mat-error senergyError label="From"></mat-error>
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" class="forth-width" color="accent">
-                            <mat-label>To</mat-label>
-                            <mtx-select [(ngModel)]="conversion.to" [ngModelOptions]="{standalone: true}" required appendTo="mat-dialog-container .root">
-                                <mtx-option *ngFor="let characteristic of characteristicsControl.value"
-                                    [value]="characteristic.id">
-                                    {{characteristic.name}}
-                                </mtx-option>
-                            </mtx-select>
-                            <mat-error senergyError label="To"></mat-error>
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" class="third-width" color="accent">
-                            <mat-label>f({{conversion.placeholder_name}})</mat-label>
-                            <input matInput [(ngModel)]="conversion.formula" [ngModelOptions]="{standalone: true}"
-                                required>
-                            <mat-error senergyError label="f({{conversion.placeholder_name}})"></mat-error>
-                        </mat-form-field>
-                        <button mat-icon-button color="warn" (click)="removeConversion(i)" [disabled]="disabled">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
-                    <button mat-stroked-button color="accent" (click)="addConversion()" [disabled]="disabled">Add
-                        Conversion</button>
-                </ng-container>
+<mat-dialog-content *ngIf="ready" >
+    <form class="form" fxLayout="column">
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>ID</mat-label>
+            <input matInput [formControl]="idFormControl">
+            <mat-error senergyError label="ID"></mat-error>
+        </mat-form-field>
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameFormControl" required>
+            <mat-error senergyError label="Name"></mat-error>
+        </mat-form-field>
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>Characteristics</mat-label>
+            <mtx-select [items]="characteristics" bindLabel="name" [formControl]="characteristicsControl" multiple
+                [compareWith]="compareIds" appendTo=".ng-select-anchor">
+            </mtx-select>
+            <mat-error senergyError label="Characteristics"></mat-error>
+        </mat-form-field>
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Base Characteristic</mat-label>
+            <mtx-select [formControl]="baseCharacteristicControl" required appendTo=".ng-select-anchor">
+                <mtx-option *ngFor="let characteristic of characteristicsControl.value" [value]="characteristic.id">
+                    {{characteristic.name}}
+                </mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="Base Characteristic"></mat-error>
+        </mat-form-field>
+        <div class="conversions">
+            <div class="divider">
+                Conversions
+                <mat-divider></mat-divider>
             </div>
-            <mat-accordion class="code-tryout">
-                <mat-expansion-panel>
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>Converter Code Try</mat-panel-title>
-                    </mat-expansion-panel-header>
-                    <div>
-                        <mat-form-field appearance="outline" class="full-width" color="accent">
-                            <mat-label>Json Input</mat-label>
-                            <input matInput [(ngModel)]="testinput" [ngModelOptions]="{standalone: true}" isValidJson
-                                required>
-                            <mat-error senergyError label="Json Input"></mat-error>
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" class="full-width" color="accent">
-                            <mat-label>f(x)</mat-label>
-                            <input matInput [(ngModel)]="testformula" [ngModelOptions]="{standalone: true}" required>
-                            <button matSuffix mat-icon-button color="accent" (click)="tryFormula()">
-                                <mat-icon>play_arrow</mat-icon>
-                            </button>
-                            <mat-error senergyError label="f(x)"></mat-error>
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" class="full-width" color="warn" *ngIf="testerr">
-                            <mat-label>Output Error</mat-label>
-                            <input matInput [(ngModel)]="testerr" [ngModelOptions]="{standalone: true}" disabled>
-                            <mat-error senergyError label="Output Error"></mat-error>
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!testerr">
-                            <mat-label>Output Json</mat-label>
-                            <input matInput [(ngModel)]="testoutput" [ngModelOptions]="{standalone: true}" disabled>
-                            <mat-error senergyError label="Output Json"></mat-error>
-                        </mat-form-field>
-                    </div>
-                </mat-expansion-panel>
-            </mat-accordion>
-        </form>
-    </div>
+            <ng-container *ngIf="concept">
+                <div *ngFor="let conversion of concept.conversions; let i = index" class="conversion">
+                    <mat-form-field appearance="outline" class="forth-width" color="accent">
+                        <mat-label>From</mat-label>
+                        <mtx-select [(ngModel)]="conversion.from" [ngModelOptions]="{standalone: true}" required
+                            appendTo=".ng-select-anchor">
+                            <mtx-option *ngFor="let characteristic of characteristicsControl.value"
+                                [value]="characteristic.id">
+                                {{characteristic.name}}
+                            </mtx-option>
+                        </mtx-select>
+                        <mat-error senergyError label="From"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="forth-width" color="accent">
+                        <mat-label>To</mat-label>
+                        <mtx-select [(ngModel)]="conversion.to" [ngModelOptions]="{standalone: true}" required
+                            appendTo=".ng-select-anchor">
+                            <mtx-option *ngFor="let characteristic of characteristicsControl.value"
+                                [value]="characteristic.id">
+                                {{characteristic.name}}
+                            </mtx-option>
+                        </mtx-select>
+                        <mat-error senergyError label="To"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="third-width" color="accent">
+                        <mat-label>f({{conversion.placeholder_name}})</mat-label>
+                        <input matInput [(ngModel)]="conversion.formula" [ngModelOptions]="{standalone: true}" required>
+                        <mat-error senergyError label="f({{conversion.placeholder_name}})"></mat-error>
+                    </mat-form-field>
+                    <button mat-icon-button color="warn" (click)="removeConversion(i)" [disabled]="disabled">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+                <button mat-stroked-button color="accent" (click)="addConversion()" [disabled]="disabled">Add
+                    Conversion</button>
+            </ng-container>
+        </div>
+        <mat-accordion class="code-tryout">
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>Converter Code Try</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div>
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
+                        <mat-label>Json Input</mat-label>
+                        <input matInput [(ngModel)]="testinput" [ngModelOptions]="{standalone: true}" isValidJson
+                            required>
+                        <mat-error senergyError label="Json Input"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
+                        <mat-label>f(x)</mat-label>
+                        <input matInput [(ngModel)]="testformula" [ngModelOptions]="{standalone: true}" required>
+                        <button matSuffix mat-icon-button color="accent" (click)="tryFormula()">
+                            <mat-icon>play_arrow</mat-icon>
+                        </button>
+                        <mat-error senergyError label="f(x)"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width" color="warn" *ngIf="testerr">
+                        <mat-label>Output Error</mat-label>
+                        <input matInput [(ngModel)]="testerr" [ngModelOptions]="{standalone: true}" disabled>
+                        <mat-error senergyError label="Output Error"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="!testerr">
+                        <mat-label>Output Json</mat-label>
+                        <input matInput [(ngModel)]="testoutput" [ngModelOptions]="{standalone: true}" disabled>
+                        <mat-error senergyError label="Output Json"></mat-error>
+                    </mat-form-field>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+    </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center" *ngIf="!disabled">

@@ -75,3 +75,7 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
 .mdc-tab__content{
     pointer-events: all!important;
 }
+
+.mat-mdc-dialog-surface {
+    overflow-y: visible!important;
+}

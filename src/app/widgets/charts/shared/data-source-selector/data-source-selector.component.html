@@ -22,7 +22,7 @@
             <mat-form-field appearance="outline" color="accent">
                 <mat-label>Data Source Classes</mat-label>
                 <mtx-select formControlName="dataSourceClasses" multiple hideSelected="true"
-                    closeOnSelect="false" placeholder="Search" fixedPlaceholder="true" [items]="dataSourceClasses" appendTo=".root">
+                    closeOnSelect="false" placeholder="Search" fixedPlaceholder="true" [items]="dataSourceClasses" appendTo=".ng-select-anchor">
                 </mtx-select>
                 <mat-error senergyError label="Data Source Class"></mat-error>
             </mat-form-field>
@@ -39,7 +39,7 @@
                                 [items]="getExportOptions(getSourceClass(sourceForm))"
                                 (scroll)="onSelectScroll($event, sourceForm)"
                                 (scrollToEnd)="onSelectScrollEnd(sourceForm)"
-                                (search)="onSelectSearch($event, sourceForm)" (close)="onSelectClose(sourceForm)" appendTo=".root">
+                                (search)="onSelectSearch($event, sourceForm)" (close)="onSelectClose(sourceForm)" appendTo=".ng-select-anchor">
                             </mtx-select>
                         </mat-form-field>
                     </div>
@@ -57,7 +57,7 @@
                     <mat-label>Fields</mat-label>
                     <mtx-select required multiple closeOnSelect="false"
                         formControlName="fields" [items]="fieldOptionsTMP" bindLabel="valueName" groupBy="group"
-                        [compareWith]="compareFields" appendTo=".root">
+                        [compareWith]="compareFields" appendTo=".ng-select-anchor">
                 </mtx-select>
                     <mat-error senergyError [label]="'Fields'"></mat-error>
                 </mat-form-field>
@@ -70,7 +70,7 @@
                     <div>
                         <mat-form-field color="accent" class="full-width" appearance="outline">
                             <mat-label>Time Range Type</mat-label>
-                            <mtx-select formControlName="type" required appendTo=".root">
+                            <mtx-select formControlName="type" required appendTo=".ng-select-anchor">
                                 <mtx-option *ngFor="let timeRange of timeRangeTypes" [value]="timeRange">
                                     {{timeRange}}
                                 </mtx-option>
@@ -90,7 +90,7 @@
                         *ngIf="form.get('timeRange.type')?.value === timeRangeEnum.RelativeAhead || form.get('timeRange.type')?.value === timeRangeEnum.Relative">
                         <mat-form-field color="accent" class="full-width" appearance="outline">
                             <mat-label>Interval</mat-label>
-                            <mtx-select formControlName="level" placeholder="Group Type" appendTo=".root">
+                            <mtx-select formControlName="level" placeholder="Group Type" appendTo=".ng-select-anchor">
                                 <mtx-option [value]="">none</mtx-option>
                                 <mtx-option *ngFor="let level of levels" [value]="level.value">
                                     {{level.name}}
@@ -122,7 +122,7 @@
                     <div>
                         <mat-form-field color="accent" class="full-width" appearance="outline">
                             <mat-label>Type</mat-label>
-                            <mtx-select formControlName="type" placeholder="" appendTo=".root">
+                            <mtx-select formControlName="type" placeholder="" appendTo=".ng-select-anchor">
                                 <mtx-option [value]="">none</mtx-option>
                                 <mtx-option *ngFor="let groupLevel of groupTypes" [value]="groupLevel.value">
                                     {{groupLevel.name}}
@@ -143,7 +143,7 @@
                     <div>
                         <mat-form-field color="accent" class="full-width" appearance="outline">
                             <mat-label>Interval</mat-label>
-                            <mtx-select formControlName="level" placeholder="" appendTo=".root">
+                            <mtx-select formControlName="level" placeholder="" appendTo=".ng-select-anchor">
                                 <mtx-option [value]="">none</mtx-option>
                                 <mtx-option *ngFor="let level of levels" [value]="level.value">
                                     {{level.name}}

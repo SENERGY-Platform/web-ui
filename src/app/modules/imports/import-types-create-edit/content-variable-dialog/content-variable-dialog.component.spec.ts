@@ -30,6 +30,7 @@ import { MatInputModule } from '@angular/material/input';
 import { DeviceTypeCharacteristicsModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 describe('ContentVariableDialogComponent', () => {
     let component: ContentVariableDialogComponent;
@@ -69,6 +70,7 @@ describe('ContentVariableDialogComponent', () => {
                 MatInputModule,
                 MatDialogModule,
                 MtxSelectModule,
+                CloseMtxSelectOnScrollDirective,
             ],
             providers: [
                 { provide: MAT_DIALOG_DATA, useValue: dialogData },

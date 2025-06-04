@@ -63,6 +63,7 @@ import {
 } from './designer/dialog/edit-smart-service-json-extraction-dialog/edit-smart-service-json-extraction-dialog.component';
 import {CriteriaListComponent} from './designer/dialog/edit-smart-service-task-dialog/criteria-list.component';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 const designs: Route = {
     path: 'smart-services/designs',
@@ -138,6 +139,7 @@ const designer: Route = {
         MatBadgeModule,
         MatExpansionModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ],
     declarations: [
         SmartServiceReleasesComponent,

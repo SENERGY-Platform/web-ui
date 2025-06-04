@@ -43,6 +43,7 @@ import { ConceptsService } from '../../metadata/concepts/shared/concepts.service
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 describe('ImportTypesCreateEditComponent', () => {
 
@@ -175,6 +176,7 @@ describe('ImportTypesCreateEditComponent', () => {
         MatTreeModule,
         WidgetModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ],
     providers: [
         { provide: DeviceTypeService, useValue: deviceTypeService },

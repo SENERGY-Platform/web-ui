@@ -15,253 +15,251 @@
   -->
 
 <h2 mat-dialog-title>Smart-Service Inputs</h2>
-<mat-dialog-content class="edit-smart-service-input-dialog">
-    <div class="root">
-        <mat-accordion *ngIf="abstract && abstract.length > 0">
-            <mat-expansion-panel *ngFor="let input of abstract; let inputIndex = index">
-                <mat-expansion-panel-header>
-                    <mat-panel-title>
-                        {{input.label || input.id || "new-input"}}
-                    </mat-panel-title>
-                </mat-expansion-panel-header>
+<mat-dialog-content class="edit-smart-service-input-dialog" >
+    <mat-accordion *ngIf="abstract && abstract.length > 0">
+        <mat-expansion-panel *ngFor="let input of abstract; let inputIndex = index">
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    {{input.label || input.id || "new-input"}}
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
                 <div>
-                    <div>
-                        <mat-form-field appearance="outline" class="full-width" color="accent">
-                            <mat-label>ID</mat-label>
-                            <input matInput [(ngModel)]="input.id"
-                                [generic_validator]="isValidCamundaVariableNameValidator">
-                            <mat-error senergyError label="ID"></mat-error>
-                        </mat-form-field>
-                    </div>
-                    <div>
-                        <mat-form-field appearance="outline" class="full-width" color="accent">
-                            <mat-label>Label</mat-label>
-                            <input matInput [(ngModel)]="input.label">
-                            <mat-error senergyError label="Label"></mat-error>
-                        </mat-form-field>
-                    </div>
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
+                        <mat-label>ID</mat-label>
+                        <input matInput [(ngModel)]="input.id"
+                            [generic_validator]="isValidCamundaVariableNameValidator">
+                        <mat-error senergyError label="ID"></mat-error>
+                    </mat-form-field>
+                </div>
+                <div>
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
+                        <mat-label>Label</mat-label>
+                        <input matInput [(ngModel)]="input.label">
+                        <mat-error senergyError label="Label"></mat-error>
+                    </mat-form-field>
+                </div>
 
-                    <div>
-                        <mat-form-field appearance="outline" class="full-width" color="accent">
-                            <mat-label>Description</mat-label>
-                            <input matInput [(ngModel)]="input.description">
-                            <mat-error senergyError label="Description"></mat-error>
-                        </mat-form-field>
-                    </div>
+                <div>
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
+                        <mat-label>Description</mat-label>
+                        <input matInput [(ngModel)]="input.description">
+                        <mat-error senergyError label="Description"></mat-error>
+                    </mat-form-field>
+                </div>
 
-                    <div>
-                        <mat-form-field appearance="outline" class="full-width" color="accent">
-                            <mat-label>Order</mat-label>
-                            <input matInput [(ngModel)]="input.order" type="number">
-                            <mat-error senergyError label="Order"></mat-error>
-                        </mat-form-field>
-                    </div>
+                <div>
+                    <mat-form-field appearance="outline" class="full-width" color="accent">
+                        <mat-label>Order</mat-label>
+                        <input matInput [(ngModel)]="input.order" type="number">
+                        <mat-error senergyError label="Order"></mat-error>
+                    </mat-form-field>
+                </div>
 
+                <div>
+                    <mat-checkbox [(ngModel)]="input.multiple" [disabled]="input.auto_select_all"
+                        matTooltip="may only be deactivated if 'Auto Select All' is deactivated"
+                        [matTooltipDisabled]="!input.auto_select_all">
+                        Multiple
+                    </mat-checkbox>
+                </div>
+
+                <div>
+                    <mat-checkbox [(ngModel)]="input.auto_select_all" [disabled]="!input.multiple"
+                        matTooltip="the smart service will use all possible options as value without asking the user; may only be activated if 'Multiple' is activated">
+                        Auto Select All
+                    </mat-checkbox>
+                </div>
+
+                <div>
+                    <mat-checkbox [(ngModel)]="input.optional">
+                        Optional
+                    </mat-checkbox>
+                </div>
+
+
+                <div>
+                    <mat-checkbox [checked]="isIotInputProvider(input)"
+                        (change)="useIotSelectors($event.checked, input)">
+                        IoT
+                    </mat-checkbox>
+                </div>
+
+                <ng-container *ngIf="input.iot_selectors">
                     <div>
-                        <mat-checkbox [(ngModel)]="input.multiple" [disabled]="input.auto_select_all"
-                            matTooltip="may only be deactivated if 'Auto Select All' is deactivated"
-                            [matTooltipDisabled]="!input.auto_select_all">
-                            Multiple
+                        <mat-checkbox [(ngModel)]="input.entity_only"
+                            matTooltip="check if you want the options to only contain the entity itself, without services or paths. tasks that receive this option often need more criteria information.">
+                            EntityOnly
                         </mat-checkbox>
                     </div>
-
                     <div>
-                        <mat-checkbox [(ngModel)]="input.auto_select_all" [disabled]="!input.multiple"
-                            matTooltip="the smart service will use all possible options as value without asking the user; may only be activated if 'Multiple' is activated">
-                            Auto Select All
-                        </mat-checkbox>
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
+                            <mat-label>IoT-Selectors</mat-label>
+                            <mtx-select [(ngModel)]="input.iot_selectors" multiple appendTo=".ng-select-anchor">
+                                <mtx-option value="device">Device</mtx-option>
+                                <mtx-option value="device_service_group">Service-Group Device</mtx-option>
+                                <mtx-option value="group">Device-Group</mtx-option>
+                                <mtx-option value="import">Import</mtx-option>
+                            </mtx-select>
+                            <mat-error senergyError label="IoT-Selectors"></mat-error>
+                        </mat-form-field>
                     </div>
-
-                    <div>
-                        <mat-checkbox [(ngModel)]="input.optional">
-                            Optional
-                        </mat-checkbox>
-                    </div>
-
-
-                    <div>
-                        <mat-checkbox [checked]="isIotInputProvider(input)"
-                            (change)="useIotSelectors($event.checked, input)">
-                            IoT
-                        </mat-checkbox>
-                    </div>
-
-                    <ng-container *ngIf="input.iot_selectors">
-                        <div>
-                            <mat-checkbox [(ngModel)]="input.entity_only"
-                                matTooltip="check if you want the options to only contain the entity itself, without services or paths. tasks that receive this option often need more criteria information.">
-                                EntityOnly
-                            </mat-checkbox>
-                        </div>
-                        <div>
-                            <mat-form-field appearance="outline" class="full-width" color="accent">
-                                <mat-label>IoT-Selectors</mat-label>
-                                <mtx-select [(ngModel)]="input.iot_selectors" multiple appendTo="mat-dialog-container .root">
-                                    <mtx-option value="device">Device</mtx-option>
-                                    <mtx-option value="device_service_group">Service-Group Device</mtx-option>
-                                    <mtx-option value="group">Device-Group</mtx-option>
-                                    <mtx-option value="import">Import</mtx-option>
-                                </mtx-select>
-                                <mat-error senergyError label="IoT-Selectors"></mat-error>
-                            </mat-form-field>
-                        </div>
-                        <mat-divider [inset]="true"></mat-divider>
-                        <h4 class="mat-h4">Criteria</h4>
-                        <mat-accordion>
-                            <mat-expansion-panel *ngFor="let criteria of input.criteria_list; let i = index">
-                                <mat-expansion-panel-header>
-                                    <mat-panel-title>
-                                        {{criteriaToLabel(criteria)}}
-                                    </mat-panel-title>
-                                </mat-expansion-panel-header>
+                    <mat-divider [inset]="true"></mat-divider>
+                    <h4 class="mat-h4">Criteria</h4>
+                    <mat-accordion>
+                        <mat-expansion-panel *ngFor="let criteria of input.criteria_list; let i = index">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    {{criteriaToLabel(criteria)}}
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+                            <div>
+                                <div>
+                                    <mat-form-field appearance="outline" class="full-width" color="accent">
+                                        <mat-label>Interaction</mat-label>
+                                        <mtx-select [(ngModel)]="criteria.interaction" appendTo=".ng-select-anchor">
+                                            <mtx-option [value]="undefined">NONE</mtx-option>
+                                            <mtx-option value="event">event</mtx-option>
+                                            <mtx-option value="request">request</mtx-option>
+                                            <mtx-option value="event+request">event+request</mtx-option>
+                                        </mtx-select>
+                                        <mat-error senergyError label="Interaction"></mat-error>
+                                    </mat-form-field>
+                                </div>
                                 <div>
                                     <div>
-                                        <mat-form-field appearance="outline" class="full-width" color="accent">
-                                            <mat-label>Interaction</mat-label>
-                                            <mtx-select [(ngModel)]="criteria.interaction" appendTo="mat-dialog-container .root">
-                                                <mtx-option [value]="undefined">NONE</mtx-option>
-                                                <mtx-option value="event">event</mtx-option>
-                                                <mtx-option value="request">request</mtx-option>
-                                                <mtx-option value="event+request">event+request</mtx-option>
+                                        <mat-form-field appearance="outline" class="form-field full-width"
+                                            color="accent">
+                                            <mat-label>Function</mat-label>
+                                            <mtx-select [(ngModel)]="criteria.function_id" [items]="functions"
+                                                bindLabel="name" bindValue="id" appendTo=".ng-select-anchor">
                                             </mtx-select>
-                                            <mat-error senergyError label="Interaction"></mat-error>
+                                            <mat-error senergyError label="Function"></mat-error>
                                         </mat-form-field>
                                     </div>
                                     <div>
-                                        <div>
-                                            <mat-form-field appearance="outline" class="form-field full-width"
-                                                color="accent">
-                                                <mat-label>Function</mat-label>
-                                                <mtx-select [(ngModel)]="criteria.function_id" [items]="functions"
-                                                    bindLabel="name" bindValue="id" appendTo="mat-dialog-container .root">
-                                                </mtx-select>
-                                                <mat-error senergyError label="Function"></mat-error>
-                                            </mat-form-field>
-                                        </div>
-                                        <div>
-                                            <mat-form-field appearance="outline" class="form-field full-width"
-                                                color="accent">
-                                                <mat-label>Aspect</mat-label>
-                                                <mtx-select  [(ngModel)]="criteria.aspect_id" [items]="aspects" bindLabel="name" bindValue="id"
-                                                appendTo="mat-dialog-container .root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
+                                        <mat-form-field appearance="outline" class="form-field full-width"
+                                            color="accent">
+                                            <mat-label>Aspect</mat-label>
+                                            <mtx-select [(ngModel)]="criteria.aspect_id" [items]="aspects"
+                                                bindLabel="name" bindValue="id" appendTo=".ng-select-anchor"
+                                                groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
                                                 [compareWith]="compareAspectsWith">
                                             </mtx-select>
 
 
-                                                <mat-error senergyError label="Aspect"></mat-error>
-                                            </mat-form-field>
-                                        </div>
-                                        <div>
-                                            <mat-form-field appearance="outline" class="form-field full-width"
-                                                color="accent">
-                                                <mat-label>Device-Class</mat-label>
-                                                <mtx-select [(ngModel)]="criteria.device_class_id"
-                                                    [items]="deviceClasses" bindLabel="name" bindValue="id" appendTo="mat-dialog-container .root">
-                                                </mtx-select>
-                                                <mat-error senergyError label="Device-Class"></mat-error>
-                                            </mat-form-field>
-                                        </div>
+                                            <mat-error senergyError label="Aspect"></mat-error>
+                                        </mat-form-field>
                                     </div>
                                     <div>
-                                        <button mat-raised-button color="accent"
-                                            (click)="removeCriteria(input, i)">Remove Criteria</button>
+                                        <mat-form-field appearance="outline" class="form-field full-width"
+                                            color="accent">
+                                            <mat-label>Device-Class</mat-label>
+                                            <mtx-select [(ngModel)]="criteria.device_class_id" [items]="deviceClasses"
+                                                bindLabel="name" bindValue="id" appendTo=".ng-select-anchor">
+                                            </mtx-select>
+                                            <mat-error senergyError label="Device-Class"></mat-error>
+                                        </mat-form-field>
                                     </div>
                                 </div>
-                            </mat-expansion-panel>
-                        </mat-accordion>
-                        <div>
-                            <button mat-raised-button color="accent" (click)="addCriteria(input)">Add Criteria</button>
-                        </div>
-                    </ng-container>
+                                <div>
+                                    <button mat-raised-button color="accent" (click)="removeCriteria(input, i)">Remove
+                                        Criteria</button>
+                                </div>
+                            </div>
+                        </mat-expansion-panel>
+                    </mat-accordion>
+                    <div>
+                        <button mat-raised-button color="accent" (click)="addCriteria(input)">Add Criteria</button>
+                    </div>
+                </ng-container>
 
-                    <ng-container *ngIf="!input.iot_selectors">
-                        <div>
-                            <mat-form-field appearance="outline" class="full-width" color="accent">
-                                <mat-label>Type</mat-label>
-                                <mtx-select [(ngModel)]="input.type" appendTo="mat-dialog-container .root">
-                                    <mtx-option value="string">string</mtx-option>
-                                    <mtx-option value="long">number</mtx-option>
-                                    <mtx-option value="boolean">boolean</mtx-option>
-                                </mtx-select>
-                                <mat-error senergyError label="Type"></mat-error>
-                            </mat-form-field>
-                        </div>
+                <ng-container *ngIf="!input.iot_selectors">
+                    <div>
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
+                            <mat-label>Type</mat-label>
+                            <mtx-select [(ngModel)]="input.type" appendTo=".ng-select-anchor">
+                                <mtx-option value="string">string</mtx-option>
+                                <mtx-option value="long">number</mtx-option>
+                                <mtx-option value="boolean">boolean</mtx-option>
+                            </mtx-select>
+                            <mat-error senergyError label="Type"></mat-error>
+                        </mat-form-field>
+                    </div>
 
-                        <div *ngIf="input.type === 'string'">
-                            <mat-form-field appearance="outline" class="full-width" color="accent">
-                                <mat-label>Default Value</mat-label>
-                                <input matInput [(ngModel)]="input.default_value" type="text">
-                                <mat-error senergyError label="Default Value"></mat-error>
+                    <div *ngIf="input.type === 'string'">
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
+                            <mat-label>Default Value</mat-label>
+                            <input matInput [(ngModel)]="input.default_value" type="text">
+                            <mat-error senergyError label="Default Value"></mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div *ngIf="input.type === 'long'">
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
+                            <mat-label>Default Value</mat-label>
+                            <input matInput [(ngModel)]="input.default_value" type="number">
+                            <mat-error senergyError label="Default Value"></mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div *ngIf="input.type === 'boolean'">
+                        <mat-radio-group aria-label="Default Value" [(ngModel)]="input.default_value">
+                            <mat-radio-button [value]="true">True</mat-radio-button>
+                            <mat-radio-button [value]="false">False</mat-radio-button>
+                        </mat-radio-group>
+                    </div>
+
+                    <div>
+                        <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+                            <mat-label>Characteristic</mat-label>
+                            <mtx-select [(ngModel)]="input.characteristic_id" [items]="characteristics" bindLabel="name"
+                                bindValue="id" appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Characteristic"></mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <ng-container *ngIf="!input.characteristic_id">
+                        <mat-divider [inset]="true"></mat-divider>
+                        <h4 class="mat-h4">Options</h4>
+                        <div *ngFor="let option of input.options" class="full-width">
+                            <mat-form-field appearance="outline" color="accent">
+                                <mat-label>Name</mat-label>
+                                <input matInput [(ngModel)]="option.key">
+                                <mat-error senergyError label="Name"></mat-error>
                             </mat-form-field>
-                        </div>
-                        <div *ngIf="input.type === 'long'">
-                            <mat-form-field appearance="outline" class="full-width" color="accent">
-                                <mat-label>Default Value</mat-label>
-                                <input matInput [(ngModel)]="input.default_value" type="number">
-                                <mat-error senergyError label="Default Value"></mat-error>
+                            <mat-form-field appearance="outline" *ngIf="input.type === 'string'" color="accent">
+                                <mat-label>Value</mat-label>
+                                <input matInput [(ngModel)]="option.value" type="text">
+                                <mat-error senergyError label="Value"></mat-error>
                             </mat-form-field>
-                        </div>
-                        <div *ngIf="input.type === 'boolean'">
-                            <mat-radio-group aria-label="Default Value" [(ngModel)]="input.default_value">
+                            <mat-form-field appearance="outline" *ngIf="input.type === 'long'" color="accent">
+                                <mat-label>Value</mat-label>
+                                <input matInput [(ngModel)]="option.value" type="number">
+                                <mat-error senergyError label="Value"></mat-error>
+                            </mat-form-field>
+                            <mat-radio-group aria-label="Value" [(ngModel)]="option.value"
+                                *ngIf="input.type === 'boolean'">
                                 <mat-radio-button [value]="true">True</mat-radio-button>
                                 <mat-radio-button [value]="false">False</mat-radio-button>
                             </mat-radio-group>
+                            <button mat-icon-button matSuffix (click)="removeOption(input, option.key)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
                         </div>
-
                         <div>
-                            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                                <mat-label>Characteristic</mat-label>
-                                <mtx-select
-                                    [(ngModel)]="input.characteristic_id" [items]="characteristics"
-                                    bindLabel="name" bindValue="id" appendTo="mat-dialog-container .root">
-                                </mtx-select>
-                                <mat-error senergyError label="Characteristic"></mat-error>
-                            </mat-form-field>
+                            <button mat-raised-button color="accent" (click)="addOption(input)">Add Option</button>
                         </div>
-
-                        <ng-container *ngIf="!input.characteristic_id">
-                            <mat-divider [inset]="true"></mat-divider>
-                            <h4 class="mat-h4">Options</h4>
-                            <div *ngFor="let option of input.options" class="full-width">
-                                <mat-form-field appearance="outline" color="accent">
-                                    <mat-label>Name</mat-label>
-                                    <input matInput [(ngModel)]="option.key">
-                                    <mat-error senergyError label="Name"></mat-error>
-                                </mat-form-field>
-                                <mat-form-field appearance="outline" *ngIf="input.type === 'string'" color="accent">
-                                    <mat-label>Value</mat-label>
-                                    <input matInput [(ngModel)]="option.value" type="text">
-                                    <mat-error senergyError label="Value"></mat-error>
-                                </mat-form-field>
-                                <mat-form-field appearance="outline" *ngIf="input.type === 'long'" color="accent">
-                                    <mat-label>Value</mat-label>
-                                    <input matInput [(ngModel)]="option.value" type="number">
-                                    <mat-error senergyError label="Value"></mat-error>
-                                </mat-form-field>
-                                <mat-radio-group aria-label="Value" [(ngModel)]="option.value"
-                                    *ngIf="input.type === 'boolean'">
-                                    <mat-radio-button [value]="true">True</mat-radio-button>
-                                    <mat-radio-button [value]="false">False</mat-radio-button>
-                                </mat-radio-group>
-                                <button mat-icon-button matSuffix (click)="removeOption(input, option.key)">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </div>
-                            <div>
-                                <button mat-raised-button color="accent" (click)="addOption(input)">Add Option</button>
-                            </div>
-                        </ng-container>
                     </ng-container>
+                </ng-container>
 
-                    <div>
-                        <button mat-raised-button color="accent" (click)="removeInput(inputIndex)">Remove Input</button>
-                    </div>
+                <div>
+                    <button mat-raised-button color="accent" (click)="removeInput(inputIndex)">Remove Input</button>
                 </div>
-            </mat-expansion-panel>
-        </mat-accordion>
-        <div>
-            <button mat-raised-button color="accent" (click)="addInput()">Add Input</button>
-        </div>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
+    <div>
+        <button mat-raised-button color="accent" (click)="addInput()">Add Input</button>
     </div>
 </mat-dialog-content>
 

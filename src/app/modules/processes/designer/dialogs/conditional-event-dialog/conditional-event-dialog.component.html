@@ -19,41 +19,39 @@
 
 
 <mat-dialog-content>
-    <div class="root">
-        <form class="form">
-            <mat-form-field appearance="outline" class="form-field" color="accent">
-                <mat-label>Aspect</mat-label>
-                <mtx-select [formControl]="aspectFormControl" required [items]="aspects" bindLabel="name"
-                    bindValue="id" appendTo="mat-dialog-container .root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
-                    [compareWith]="compareAspectsWith">
-                </mtx-select>
-                <mat-error senergyError label="Aspect"></mat-error>
-            </mat-form-field>
+    <form class="form">
+        <mat-form-field appearance="outline" class="form-field" color="accent">
+            <mat-label>Aspect</mat-label>
+            <mtx-select [formControl]="aspectFormControl" required [items]="aspects" bindLabel="name" bindValue="id"
+                appendTo=".ng-select-anchor" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
+                [compareWith]="compareAspectsWith">
+            </mtx-select>
+            <mat-error senergyError label="Aspect"></mat-error>
+        </mat-form-field>
 
-            <mat-form-field appearance="outline" class="form-field" color="accent">
-                <mat-label>Function</mat-label>
-                <mtx-select [compareWith]="compare" [formControl]="functionFormControl" required [items]="functions"
-                    bindLabel="name" appendTo="mat-dialog-container .root">
-                </mtx-select>
-                <mat-error senergyError label="Function"></mat-error>
-            </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field" color="accent">
+            <mat-label>Function</mat-label>
+            <mtx-select [compareWith]="compare" [formControl]="functionFormControl" required [items]="functions"
+                bindLabel="name" appendTo=".ng-select-anchor">
+            </mtx-select>
+            <mat-error senergyError label="Function"></mat-error>
+        </mat-form-field>
 
-            <mat-form-field appearance="outline" class="form-field" color="accent">
-                <mat-label>Qos</mat-label>
-                <mtx-select [(ngModel)]="result.qos" [ngModelOptions]="{standalone: true}" appendTo="mat-dialog-container .root">
-                    <mtx-option value="0">0</mtx-option>
-                    <mtx-option value="1">1</mtx-option>
-                </mtx-select>
-                <mat-error senergyError label="Qos"></mat-error>
-            </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field" color="accent">
+            <mat-label>Qos</mat-label>
+            <mtx-select [(ngModel)]="result.qos" [ngModelOptions]="{standalone: true}" appendTo=".ng-select-anchor">
+                <mtx-option value="0">0</mtx-option>
+                <mtx-option value="1">1</mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="Qos"></mat-error>
+        </mat-form-field>
 
-            <mat-form-field appearance="outline" class="form-field" color="accent">
-                <mat-label>Script</mat-label>
-                <input matInput [(ngModel)]="result.script" [ngModelOptions]="{standalone: true}">
-                <mat-error senergyError label="Script"></mat-error>
-            </mat-form-field>
-        </form>
-    </div>
+        <mat-form-field appearance="outline" class="form-field" color="accent">
+            <mat-label>Script</mat-label>
+            <input matInput [(ngModel)]="result.script" [ngModelOptions]="{standalone: true}">
+            <mat-error senergyError label="Script"></mat-error>
+        </mat-form-field>
+    </form>
 </mat-dialog-content>
 
 

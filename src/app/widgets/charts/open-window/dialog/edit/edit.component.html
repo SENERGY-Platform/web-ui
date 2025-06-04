@@ -17,86 +17,82 @@
 <h2 mat-dialog-title>Edit Open Window</h2>
 
 <mat-dialog-content>
-    <div class="root">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready">
-            <form fxLayout="column" [formGroup]="form">
-                <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
-                    <mat-label>Widget Name</mat-label>
-                    <input type="text" matInput placeholder="Name" formControlName="name" required>
-                    <mat-error senergyError label="Widget Name"></mat-error>
-                </mat-form-field>
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    <div *ngIf="ready">
+        <form fxLayout="column" [formGroup]="form">
+            <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
+                <mat-label>Widget Name</mat-label>
+                <input type="text" matInput placeholder="Name" formControlName="name" required>
+                <mat-error senergyError label="Widget Name"></mat-error>
+            </mat-form-field>
 
-                <data-source-selector [dataSourceConfig]="dataSourceConfig" [enableAggretationConfig]="false"
-                    (updatedDataSourceConfig)="dataSourceConfigUpdated($event)" [enableFieldSelection]="false"
-                    [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="false"></data-source-selector>
+            <data-source-selector [dataSourceConfig]="dataSourceConfig" [enableAggretationConfig]="false"
+                (updatedDataSourceConfig)="dataSourceConfigUpdated($event)" [enableFieldSelection]="false"
+                [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="false"></data-source-selector>
 
-                <span formGroupName="properties">
-                    <h2>Configure Chart</h2>
-                    <div class="one-line-form-container">
-                        <div>
-                            <mat-form-field color="accent" appearance="outline" class="full-width">
-                                <mat-label>X-Axis-Label</mat-label>
-                                <input type="text" matInput formControlName="hAxisLabel">
-                                <mat-error senergyError label="X-Axis-Label"></mat-error>
-                            </mat-form-field>
-                        </div>
-                        <div>
-                            <mat-form-field appearance="outline" color="accent" class="full-width">
-                                <mat-label>Y-Axis-Label</mat-label>
-                                <input type="text" matInput formControlName="vAxisLabel">
-                                <mat-error senergyError label="Y-Axis-Label"></mat-error>
-                            </mat-form-field>
-                        </div>
-                    </div>
-                </span>
-            </form>
-
-            <table *ngIf="ready && userHasUpdatePropertiesAuthorization && vAxesDataSource.data.length > 0" mat-table
-                [dataSource]="vAxesDataSource">
-
-                <ng-container matColumnDef="exportName">
-                    <th mat-header-cell *matHeaderCellDef>Export</th>
-                    <td mat-cell *matCellDef="let element" matTooltip="{{element.exportName}}"
-                        matTooltipPosition="right">
-                        {{element.exportName}}
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="valueName">
-                    <th mat-header-cell *matHeaderCellDef>Field</th>
-                    <td mat-cell *matCellDef="let element" matTooltip="{{element.valueName}}"
-                        matTooltipPosition="right">
-                        {{element.valueName}}
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="valueAlias">
-                    <th mat-header-cell *matHeaderCellDef>Alias</th>
-                    <td mat-cell *matCellDef="let element">
-                        <mat-form-field appearance="outline" color="accent">
-                            <mat-label>Value Alias</mat-label>
-                            <input type="text" matInput [(ngModel)]="element.valueAlias">
-                            <mat-error senergyError label="Value Alias"></mat-error>
+            <span formGroupName="properties">
+                <h2>Configure Chart</h2>
+                <div class="one-line-form-container">
+                    <div>
+                        <mat-form-field color="accent" appearance="outline" class="full-width">
+                            <mat-label>X-Axis-Label</mat-label>
+                            <input type="text" matInput formControlName="hAxisLabel">
+                            <mat-error senergyError label="X-Axis-Label"></mat-error>
                         </mat-form-field>
-                    </td>
-                </ng-container>
+                    </div>
+                    <div>
+                        <mat-form-field appearance="outline" color="accent" class="full-width">
+                            <mat-label>Y-Axis-Label</mat-label>
+                            <input type="text" matInput formControlName="vAxisLabel">
+                            <mat-error senergyError label="Y-Axis-Label"></mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </span>
+        </form>
 
-                <ng-container matColumnDef="conversions">
-                    <th mat-header-cell *matHeaderCellDef>Rules</th>
-                    <td mat-cell *matCellDef="let element">
-                        <button mat-icon-button (click)="listRules(element)">
-                            <mat-icon color="accent">swap_horiz</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;">
-            </table>
-            <mat-error *ngIf="ruleConfigIsMissing">
-                Rules need to be configured!
-            </mat-error>
-        </div>
+        <table *ngIf="ready && userHasUpdatePropertiesAuthorization && vAxesDataSource.data.length > 0" mat-table
+            [dataSource]="vAxesDataSource">
+
+            <ng-container matColumnDef="exportName">
+                <th mat-header-cell *matHeaderCellDef>Export</th>
+                <td mat-cell *matCellDef="let element" matTooltip="{{element.exportName}}" matTooltipPosition="right">
+                    {{element.exportName}}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="valueName">
+                <th mat-header-cell *matHeaderCellDef>Field</th>
+                <td mat-cell *matCellDef="let element" matTooltip="{{element.valueName}}" matTooltipPosition="right">
+                    {{element.valueName}}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="valueAlias">
+                <th mat-header-cell *matHeaderCellDef>Alias</th>
+                <td mat-cell *matCellDef="let element">
+                    <mat-form-field appearance="outline" color="accent">
+                        <mat-label>Value Alias</mat-label>
+                        <input type="text" matInput [(ngModel)]="element.valueAlias">
+                        <mat-error senergyError label="Value Alias"></mat-error>
+                    </mat-form-field>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="conversions">
+                <th mat-header-cell *matHeaderCellDef>Rules</th>
+                <td mat-cell *matCellDef="let element">
+                    <button mat-icon-button (click)="listRules(element)">
+                        <mat-icon color="accent">swap_horiz</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;">
+        </table>
+        <mat-error *ngIf="ruleConfigIsMissing">
+            Rules need to be configured!
+        </mat-error>
     </div>
 </mat-dialog-content>
 

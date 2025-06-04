@@ -20,8 +20,7 @@
         <mat-icon>settings</mat-icon>
     </button>
 </h2>
-<mat-dialog-content fxFill>
-    <div class="content-root">
+<mat-dialog-content fxFill >
         <div *ngIf="notifications.length === 0 && mode === modes.NOTIFICATIONS">
             You don't have any notifications!
         </div>
@@ -66,28 +65,28 @@
                 <mat-form-field appearance="outline" color="accent">
                     <mat-label>Websocket</mat-label>
                     <mtx-select required multiple formControlName="websoket"
-                        [items]="allTopics" closeOnSelect="false" appendTo="mat-dialog-container .content-root">
+                        [items]="allTopics" closeOnSelect="false" appendTo=".ng-select-anchor">
                     </mtx-select>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" color="accent">
                     <mat-label>MQTT</mat-label>
                     <mtx-select required multiple formControlName="mqtt" [items]="allTopics"
-                        closeOnSelect="false" appendTo="mat-dialog-container .content-root">
+                        closeOnSelect="false" appendTo=".ng-select-anchor">
                     </mtx-select>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" color="accent">
                     <mat-label>Push</mat-label>
                     <mtx-select required multiple formControlName="push"
-                        [items]="allTopics" closeOnSelect="false" appendTo="mat-dialog-container .content-root">
+                        [items]="allTopics" closeOnSelect="false" appendTo=".ng-select-anchor">
                     </mtx-select>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" color="accent">
                     <mat-label>E-Mail</mat-label>
                     <mtx-select required multiple formControlName="email"
-                        [items]="allTopics" closeOnSelect="false" appendTo="mat-dialog-container .content-root">
+                        [items]="allTopics" closeOnSelect="false" appendTo=".ng-select-anchor">
                     </mtx-select>
                 </mat-form-field>
             </form>
@@ -207,7 +206,6 @@
                 </div>
             </form>
         </div>
-    </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

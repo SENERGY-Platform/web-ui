@@ -13,283 +13,278 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="root">
-    <div class="deployments-config-container">
-        <div class="layout-margin" fxLayout="column">
-            <div *ngIf="ready">
-                <mat-form-field appearance="outline" class="full-width" color="accent"
-                    *ngIf="hubList && hubList.length">
-                    <mat-label>Deployment Destination</mat-label>
-                    <mtx-select [formControl]="selectedHubForm" [items]="hubList" bindLabel="name" appendTo=".root">
-                    </mtx-select>
-                    <mat-error senergyError label="Deployment Destination"></mat-error>
-                </mat-form-field>
+<div class="deployments-config-container">
+    <div class="layout-margin" fxLayout="column">
+        <div *ngIf="ready">
+            <mat-form-field appearance="outline" class="full-width" color="accent" *ngIf="hubList && hubList.length">
+                <mat-label>Deployment Destination</mat-label>
+                <mtx-select [formControl]="selectedHubForm" [items]="hubList" bindLabel="name"
+                    appendTo=".ng-select-anchor">
+                </mtx-select>
+                <mat-error senergyError label="Deployment Destination"></mat-error>
+            </mat-form-field>
 
-                <form [formGroup]="deploymentFormGroup">
-                    <mat-card appearance="outlined" class="deployment-description">
-                        <mat-card-content>
+            <form [formGroup]="deploymentFormGroup">
+                <mat-card appearance="outlined" class="deployment-description">
+                    <mat-card-content>
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
+                            <mat-label>Process Name</mat-label>
+                            <input type="text" matInput formControlName="name">
+                            <mat-error senergyError label="Process Name"></mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="full-width" color="accent">
+                            <mat-label>Process Description</mat-label>
+                            <textarea type="text" matInput formControlName="description" cdkTextareaAutosize
+                                #autosize="cdkTextareaAutosize"></textarea>
+                            <mat-error senergyError label="Process Description"></mat-error>
+                        </mat-form-field>
+                    </mat-card-content>
+                </mat-card>
+
+
+                <mat-card appearance="outlined" class="incident-handling" formGroupName="incident_handling">
+                    <mat-card-header>
+                        <mat-card-title>On Incident</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div>
+                            <mat-checkbox formControlName="notify">
+                                Notify
+                            </mat-checkbox>
+                        </div>
+                        <div>
+                            <mat-checkbox formControlName="restart">
+                                Restart
+                            </mat-checkbox>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <mat-card appearance="outlined" class="start-parameter" formArrayName="start_parameter"
+                    *ngIf="start_parameter.length > 0">
+                    <mat-card-header>
+                        <mat-card-title>Defaults Start Parameter</mat-card-title>
+                        <mat-card-subtitle>will be used on automatic restarts and as preset for manual
+                            starts</mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div [formGroupName]="paramIndex"
+                            *ngFor="let param of start_parameter; let paramIndex = index; trackBy:trackByFn">
                             <mat-form-field appearance="outline" class="full-width" color="accent">
-                                <mat-label>Process Name</mat-label>
-                                <input type="text" matInput formControlName="name">
-                                <mat-error senergyError label="Process Name"></mat-error>
+                                <mat-label>{{param.label}}</mat-label>
+                                <input type="text" matInput formControlName="default">
+                                <mat-error senergyError label="{{param.label}}"></mat-error>
                             </mat-form-field>
-                            <mat-form-field appearance="outline" class="full-width" color="accent">
-                                <mat-label>Process Description</mat-label>
-                                <textarea type="text" matInput formControlName="description" cdkTextareaAutosize
-                                    #autosize="cdkTextareaAutosize"></textarea>
-                                <mat-error senergyError label="Process Description"></mat-error>
-                            </mat-form-field>
-                        </mat-card-content>
-                    </mat-card>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
 
+                <mat-card appearance="outlined" formArrayName="elements" *ngIf="elements.length > 0"
+                    class="deployment-elements">
+                    <mat-card-content>
+                        <div [formGroupName]="elementIndex"
+                            *ngFor="let element of elements; let elementIndex = index; trackBy:trackByFn">
+                            <div formGroupName="conditional_event" *ngIf="element.conditional_event !== null">
+                                <div formGroupName="selection">
+                                    <mat-form-field appearance="outline" class="full-width" color="accent">
+                                        <mat-label>{{element.name}}</mat-label>
+                                        <mtx-select required formControlName="selection_options_index"
+                                            (change)="changeConditionalEventSelectionOption(elementIndex, $event)"
+                                            groupBy="group" appendTo=".ng-select-anchor">
+                                            <mtx-option *ngFor="let option of optionGroups.get(elementIndex)"
+                                                [value]="getConditionalEventIndex(element)(option)">{{getViewValue(option)}}</mtx-option>
+                                        </mtx-select>
+                                        <mat-error senergyError label="{{element.name}}"></mat-error>
+                                    </mat-form-field>
 
-                    <mat-card appearance="outlined" class="incident-handling" formGroupName="incident_handling">
-                        <mat-card-header>
-                            <mat-card-title>On Incident</mat-card-title>
-                        </mat-card-header>
-                        <mat-card-content>
-                            <div>
-                                <mat-checkbox formControlName="notify">
-                                    Notify
-                                </mat-checkbox>
-                            </div>
-                            <div>
-                                <mat-checkbox formControlName="restart">
-                                    Restart
-                                </mat-checkbox>
-                            </div>
-                        </mat-card-content>
-                    </mat-card>
+                                    <mat-form-field appearance="outline" class="full-width" color="accent"
+                                        *ngIf="element.conditional_event.selection.show === true">
+                                        <mat-label>Service</mat-label>
 
-                    <mat-card appearance="outlined" class="start-parameter" formArrayName="start_parameter"
-                        *ngIf="start_parameter.length > 0">
-                        <mat-card-header>
-                            <mat-card-title>Defaults Start Parameter</mat-card-title>
-                            <mat-card-subtitle>will be used on automatic restarts and as preset for manual
-                                starts</mat-card-subtitle>
-                        </mat-card-header>
-                        <mat-card-content>
-                            <div [formGroupName]="paramIndex"
-                                *ngFor="let param of start_parameter; let paramIndex = index; trackBy:trackByFn">
-                                <mat-form-field appearance="outline" class="full-width" color="accent">
-                                    <mat-label>{{param.label}}</mat-label>
-                                    <input type="text" matInput formControlName="default">
-                                    <mat-error senergyError label="{{param.label}}"></mat-error>
-                                </mat-form-field>
-                            </div>
-                        </mat-card-content>
-                    </mat-card>
+                                        <mtx-select required formControlName="selected_service_id"
+                                            [items]="element.conditional_event.selection.selection_options[element.conditional_event.selection.selection_options_index || 0].services || []"
+                                            bindValue="id" bindLabel="name" appendTo=".ng-select-anchor">
+                                        </mtx-select>
+                                        <mat-error senergyError label="Service"></mat-error>
+                                    </mat-form-field>
 
-                    <mat-card appearance="outlined" formArrayName="elements" *ngIf="elements.length > 0"
-                        class="deployment-elements">
-                        <mat-card-content>
-                            <div [formGroupName]="elementIndex"
-                                *ngFor="let element of elements; let elementIndex = index; trackBy:trackByFn">
-                                <div formGroupName="conditional_event" *ngIf="element.conditional_event !== null">
-                                    <div formGroupName="selection">
+                                    <mat-form-field appearance="outline" class="full-width" color="accent"
+                                        [fxShow]="getPathOptions(elementIndex, 'conditional_event').length > 1">
+                                        <mat-label>Path</mat-label>
+                                        <mtx-select required
+                                            (change)="setSelectedPathOptionByElementIndex('conditional_event', elementIndex, $event)"
+                                            [items]="getPathOptions(elementIndex, 'conditional_event')"
+                                            appendTo=".ng-select-anchor" bindLabel="path">
+                                        </mtx-select>
+                                    </mat-form-field>
+                                </div>
+                                <div formGroupName="variables">
+                                    <td
+                                        *ngFor="let item of element.conditional_event.variables | keyvalue; trackBy:trackByFn">
                                         <mat-form-field appearance="outline" class="full-width" color="accent">
-                                            <mat-label>{{element.name}}</mat-label>
-                                            <mtx-select required formControlName="selection_options_index"
-                                                (change)="changeConditionalEventSelectionOption(elementIndex, $event)"
-                                                groupBy="group" appendTo=".root">
-                                                <mtx-option *ngFor="let option of optionGroups.get(elementIndex)"
-                                                    [value]="getConditionalEventIndex(element)(option)">{{getViewValue(option)}}</mtx-option>
-                                            </mtx-select>
-                                            <mat-error senergyError label="{{element.name}}"></mat-error>
+                                            <mat-label>{{item.key}}</mat-label>
+                                            <input type="text" matInput [formControlName]="'' + item.key">
+                                            <mat-error senergyError label="{{item.key}}"></mat-error>
                                         </mat-form-field>
+                                    </td>
+                                </div>
+                            </div>
+                            <div formGroupName="task" *ngIf="element.task !== null">
+                                <table class="full-width">
+                                    <tr>
+                                        <td formGroupName="selection">
 
-                                        <mat-form-field appearance="outline" class="full-width" color="accent"
-                                            *ngIf="element.conditional_event.selection.show === true">
-                                            <mat-label>Service</mat-label>
-
-                                            <mtx-select required formControlName="selected_service_id"
-                                                [items]="element.conditional_event.selection.selection_options[element.conditional_event.selection.selection_options_index || 0].services || []"
-                                                bindValue="id" bindLabel="name" appendTo=".root">
-                                            </mtx-select>
-                                            <mat-error senergyError label="Service"></mat-error>
-                                        </mat-form-field>
-
-                                        <mat-form-field appearance="outline" class="full-width" color="accent"
-                                            [fxShow]="getPathOptions(elementIndex, 'conditional_event').length > 1">
-                                            <mat-label>Path</mat-label>
-                                            <mtx-select required
-                                                (change)="setSelectedPathOptionByElementIndex('conditional_event', elementIndex, $event)"
-                                                [items]="getPathOptions(elementIndex, 'conditional_event')" appendTo=".root"
-                                                bindLabel="path">
-                                            </mtx-select>
-                                        </mat-form-field>
-                                    </div>
-                                    <div formGroupName="variables">
-                                        <td
-                                            *ngFor="let item of element.conditional_event.variables | keyvalue; trackBy:trackByFn">
                                             <mat-form-field appearance="outline" class="full-width" color="accent">
+                                                <mat-label>{{element.name}}</mat-label>
+                                                <mtx-select required formControlName="selection_options_index"
+                                                    (change)="changeTaskSelectionOption(elementIndex, $event)"
+                                                    appendTo=".ng-select-anchor">
+                                                    <mtx-option
+                                                        *ngFor="let option of optionGroups.get(elementIndex) || []"
+                                                        [value]="getTaskIndex(element)(option)">{{getViewValue(option)}}</mtx-option>
+                                                </mtx-select>
+                                                <mat-error senergyError label="{{element.name}}"></mat-error>
+                                            </mat-form-field>
+
+                                            <mat-form-field appearance="outline" class="full-width" color="accent"
+                                                *ngIf="element.task.selection.show === true">
+                                                <mat-label>Service</mat-label>
+                                                <mtx-select required formControlName="selected_service_id"
+                                                    [items]="element.task.selection.selection_options[element.task.selection.selection_options_index || 0].services || []"
+                                                    bindValue="id" bindLabel="name" appendTo=".ng-select-anchor">
+                                                </mtx-select>
+                                                <mat-error senergyError label="Service"></mat-error>
+                                            </mat-form-field>
+
+                                            <mat-form-field appearance="outline" class="full-width" color="accent"
+                                                [fxShow]="getPathOptions(elementIndex, 'task').length > 1">
+                                                <mat-label>Path</mat-label>
+                                                <mtx-select required
+                                                    (change)="setSelectedPathOptionByElementIndex('task', elementIndex, $event)"
+                                                    [items]="getPathOptions(elementIndex, 'task')" bindLabel="path"
+                                                    appendTo=".ng-select-anchor">
+                                                </mtx-select>
+                                            </mat-form-field>
+                                        </td>
+                                        <td formGroupName="parameter"
+                                            *ngFor="let item of element.task.parameter | keyvalue; trackBy:trackByFn">
+                                            <mat-form-field appearance="outline" class="full-width" color="accent"
+                                                *ngIf="displayParameter(item.value)">
                                                 <mat-label>{{item.key}}</mat-label>
                                                 <input type="text" matInput [formControlName]="'' + item.key">
                                                 <mat-error senergyError label="{{item.key}}"></mat-error>
                                             </mat-form-field>
                                         </td>
-                                    </div>
-                                </div>
-                                <div formGroupName="task" *ngIf="element.task !== null">
-                                    <table class="full-width">
-                                        <tr>
-                                            <td formGroupName="selection">
-
-                                                <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                    <mat-label>{{element.name}}</mat-label>
-                                                    <mtx-select required formControlName="selection_options_index"
-                                                        (change)="changeTaskSelectionOption(elementIndex, $event)"
-                                                        appendTo=".root">
-                                                        <mtx-option
-                                                            *ngFor="let option of optionGroups.get(elementIndex) || []"
-                                                            [value]="getTaskIndex(element)(option)">{{getViewValue(option)}}</mtx-option>
-                                                    </mtx-select>
-                                                    <mat-error senergyError label="{{element.name}}"></mat-error>
-                                                </mat-form-field>
-
-                                                <mat-form-field appearance="outline" class="full-width" color="accent"
-                                                    *ngIf="element.task.selection.show === true">
-                                                    <mat-label>Service</mat-label>
-                                                    <mtx-select required formControlName="selected_service_id"
-                                                        [items]="element.task.selection.selection_options[element.task.selection.selection_options_index || 0].services || []"
-                                                        bindValue="id" bindLabel="name" appendTo=".root">
-                                                    </mtx-select>
-                                                    <mat-error senergyError label="Service"></mat-error>
-                                                </mat-form-field>
-
-                                                <mat-form-field appearance="outline" class="full-width" color="accent"
-                                                    [fxShow]="getPathOptions(elementIndex, 'task').length > 1">
-                                                    <mat-label>Path</mat-label>
-                                                    <mtx-select required
-                                                        (change)="setSelectedPathOptionByElementIndex('task', elementIndex, $event)"
-                                                        [items]="getPathOptions(elementIndex, 'task')" bindLabel="path" appendTo=".root">
-                                                    </mtx-select>
-                                                </mat-form-field>
-                                            </td>
-                                            <td formGroupName="parameter"
-                                                *ngFor="let item of element.task.parameter | keyvalue; trackBy:trackByFn">
-                                                <mat-form-field appearance="outline" class="full-width" color="accent"
-                                                    *ngIf="displayParameter(item.value)">
-                                                    <mat-label>{{item.key}}</mat-label>
-                                                    <input type="text" matInput [formControlName]="'' + item.key">
-                                                    <mat-error senergyError label="{{item.key}}"></mat-error>
-                                                </mat-form-field>
-                                            </td>
-                                            <td formGroupName="selection"
-                                                *ngFor="let configurable of element.task.selection.selected_path?.configurables; let configurableIndex = index; trackBy:trackByFn">
-                                                <ng-container formGroupName="selected_path">
-                                                    <ng-container formGroupName="configurables">
-                                                        <div [formGroupName]="configurableIndex">
-                                                            <mat-form-field appearance="outline" class="full-width"
-                                                                color="accent"
-                                                                *ngIf="configurable.type==='https://schema.org/Text'">
-                                                                <mat-label>{{configurable.path}}</mat-label>
-                                                                <input type="text" matInput
-                                                                    placeholder="{{configurable.path}}"
-                                                                    formControlName="value">
-                                                                <mat-error senergyError></mat-error>
-                                                            </mat-form-field>
-                                                            <mat-form-field appearance="outline" class="full-width"
-                                                                color="accent"
-                                                                *ngIf="configurable.type==='https://schema.org/Integer' || configurable.type==='https://schema.org/Float'">
-                                                                <mat-label>{{configurable.path}}</mat-label>
-                                                                <input type="number" matInput
-                                                                    placeholder="{{configurable.path}}"
-                                                                    formControlName="value">
-                                                                <mat-error senergyError></mat-error>
-                                                            </mat-form-field>
-                                                            <mat-checkbox
-                                                                *ngIf="configurable.type==='https://schema.org/Boolean'"
+                                        <td formGroupName="selection"
+                                            *ngFor="let configurable of element.task.selection.selected_path?.configurables; let configurableIndex = index; trackBy:trackByFn">
+                                            <ng-container formGroupName="selected_path">
+                                                <ng-container formGroupName="configurables">
+                                                    <div [formGroupName]="configurableIndex">
+                                                        <mat-form-field appearance="outline" class="full-width"
+                                                            color="accent"
+                                                            *ngIf="configurable.type==='https://schema.org/Text'">
+                                                            <mat-label>{{configurable.path}}</mat-label>
+                                                            <input type="text" matInput
+                                                                placeholder="{{configurable.path}}"
                                                                 formControlName="value">
-                                                                {{configurable.path}}
-                                                            </mat-checkbox>
-                                                        </div>
-                                                    </ng-container>
+                                                            <mat-error senergyError></mat-error>
+                                                        </mat-form-field>
+                                                        <mat-form-field appearance="outline" class="full-width"
+                                                            color="accent"
+                                                            *ngIf="configurable.type==='https://schema.org/Integer' || configurable.type==='https://schema.org/Float'">
+                                                            <mat-label>{{configurable.path}}</mat-label>
+                                                            <input type="number" matInput
+                                                                placeholder="{{configurable.path}}"
+                                                                formControlName="value">
+                                                            <mat-error senergyError></mat-error>
+                                                        </mat-form-field>
+                                                        <mat-checkbox
+                                                            *ngIf="configurable.type==='https://schema.org/Boolean'"
+                                                            formControlName="value">
+                                                            {{configurable.path}}
+                                                        </mat-checkbox>
+                                                    </div>
                                                 </ng-container>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div formGroupName="message_event" *ngIf="element.message_event !== null">
-                                    <table class="full-width">
-                                        <tr>
-                                            <td formGroupName="selection">
-                                                <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                    <mat-label>{{element.name}}</mat-label>
-                                                    <mtx-select placeholder="{{element.name}}" required
-                                                        formControlName="selection_options_index"
-                                                        (change)="changeEventSelectionOption(elementIndex, $event.value)"
-                                                        groupBy="group" appendTo=".root">
-                                                        <mtx-option
-                                                            *ngFor="let option of optionGroups.get(elementIndex)"
-                                                            [value]="getMsgEventIndex(element)(option)">{{getViewValue(option)}}</mtx-option>
-                                                    </mtx-select>
-                                                    <mat-error senergyError label="{{element.name}}"></mat-error>
-                                                </mat-form-field>
-
-                                                <mat-form-field appearance="outline" class="full-width" color="accent"
-                                                    *ngIf="element.message_event.selection.show === true">
-                                                    <mat-label>Service</mat-label>
-                                                    <mtx-select
-                                                        required formControlName="selected_service_id"
-                                                        [items]="getServiceOptions(elementIndex)"
-                                                        bindLabel="name" bindValue="id" appendTo=".root">
-                                                    </mtx-select>
-                                                    <mat-error senergyError label="Service"></mat-error>
-                                                </mat-form-field>
-
-                                                <mat-form-field appearance="outline" class="full-width" color="accent"
-                                                    [fxShow]="getPathOptions(elementIndex, 'message_event').length > 1">
-                                                    <mat-label>Path</mat-label>
-                                                    <mtx-select required
-                                                        (change)="setSelectedPathOptionByElementIndex('message_event', elementIndex, $event)"
-                                                        [items]="getPathOptions(elementIndex, 'message_event')"
-                                                        bindLabel="path" appendTo=".root">
-                                                    </mtx-select>
-                                                </mat-form-field>
-                                            </td>
-                                            <td>
-                                                <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                    <mat-label>Handler</mat-label>
-                                                    <mtx-select
-                                                        required formControlName="flow_id"
-                                                        [items]="handlerList" bindValue="_id"
-                                                        bindLabel="name" appendTo=".root">
-                                                </mtx-select>
-                                                    <mat-error senergyError label="Handler"></mat-error>
-                                                </mat-form-field>
-                                            </td>
-                                            <td>
-                                                <mat-form-field appearance="outline" class="full-width" color="accent">
-                                                    <mat-label>Value
-                                                        {{characteristicNames.get(element.message_event.selection.filter_criteria.characteristic_id
-                                                        || '')}}</mat-label>
-                                                    <input type="text" matInput
-                                                        placeholder="Value {{characteristicNames.get(element.message_event.selection.filter_criteria.characteristic_id || '')}}"
-                                                        formControlName="value">
-                                                    <mat-error senergyError></mat-error>
-                                                </mat-form-field>
-                                            </td>
-                                            <td>
-                                                <mat-checkbox formControlName="use_marshaller" class="use_marshaller">
-                                                    Use Marshaller
-                                                </mat-checkbox>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div formGroupName="time_event" *ngIf="element.time_event !== null">
-                                    <div>{{element.name}}</div>
-                                    <senergy-process-deployments-config-time-event
-                                        [time_event]="elementsTimeEvent(elementIndex)"></senergy-process-deployments-config-time-event>
-                                </div>
+                                            </ng-container>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
-                        </mat-card-content>
-                    </mat-card>
-                </form>
-            </div>
-            <button mat-raised-button color="accent" class="button-save-margin" (click)="save()"
-                [disabled]="deploymentFormGroup.invalid">Save</button>
+                            <div formGroupName="message_event" *ngIf="element.message_event !== null">
+                                <table class="full-width">
+                                    <tr>
+                                        <td formGroupName="selection">
+                                            <mat-form-field appearance="outline" class="full-width" color="accent">
+                                                <mat-label>{{element.name}}</mat-label>
+                                                <mtx-select placeholder="{{element.name}}" required
+                                                    formControlName="selection_options_index"
+                                                    (change)="changeEventSelectionOption(elementIndex, $event.value)"
+                                                    groupBy="group" appendTo=".ng-select-anchor">
+                                                    <mtx-option *ngFor="let option of optionGroups.get(elementIndex)"
+                                                        [value]="getMsgEventIndex(element)(option)">{{getViewValue(option)}}</mtx-option>
+                                                </mtx-select>
+                                                <mat-error senergyError label="{{element.name}}"></mat-error>
+                                            </mat-form-field>
+
+                                            <mat-form-field appearance="outline" class="full-width" color="accent"
+                                                *ngIf="element.message_event.selection.show === true">
+                                                <mat-label>Service</mat-label>
+                                                <mtx-select required formControlName="selected_service_id"
+                                                    [items]="getServiceOptions(elementIndex)" bindLabel="name"
+                                                    bindValue="id" appendTo=".ng-select-anchor">
+                                                </mtx-select>
+                                                <mat-error senergyError label="Service"></mat-error>
+                                            </mat-form-field>
+
+                                            <mat-form-field appearance="outline" class="full-width" color="accent"
+                                                [fxShow]="getPathOptions(elementIndex, 'message_event').length > 1">
+                                                <mat-label>Path</mat-label>
+                                                <mtx-select required
+                                                    (change)="setSelectedPathOptionByElementIndex('message_event', elementIndex, $event)"
+                                                    [items]="getPathOptions(elementIndex, 'message_event')"
+                                                    bindLabel="path" appendTo=".ng-select-anchor">
+                                                </mtx-select>
+                                            </mat-form-field>
+                                        </td>
+                                        <td>
+                                            <mat-form-field appearance="outline" class="full-width" color="accent">
+                                                <mat-label>Handler</mat-label>
+                                                <mtx-select required formControlName="flow_id" [items]="handlerList"
+                                                    bindValue="_id" bindLabel="name" appendTo=".ng-select-anchor">
+                                                </mtx-select>
+                                                <mat-error senergyError label="Handler"></mat-error>
+                                            </mat-form-field>
+                                        </td>
+                                        <td>
+                                            <mat-form-field appearance="outline" class="full-width" color="accent">
+                                                <mat-label>Value
+                                                    {{characteristicNames.get(element.message_event.selection.filter_criteria.characteristic_id
+                                                    || '')}}</mat-label>
+                                                <input type="text" matInput
+                                                    placeholder="Value {{characteristicNames.get(element.message_event.selection.filter_criteria.characteristic_id || '')}}"
+                                                    formControlName="value">
+                                                <mat-error senergyError></mat-error>
+                                            </mat-form-field>
+                                        </td>
+                                        <td>
+                                            <mat-checkbox formControlName="use_marshaller" class="use_marshaller">
+                                                Use Marshaller
+                                            </mat-checkbox>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div formGroupName="time_event" *ngIf="element.time_event !== null">
+                                <div>{{element.name}}</div>
+                                <senergy-process-deployments-config-time-event
+                                    [time_event]="elementsTimeEvent(elementIndex)"></senergy-process-deployments-config-time-event>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </form>
         </div>
+        <button mat-raised-button color="accent" class="button-save-margin" (click)="save()"
+            [disabled]="deploymentFormGroup.invalid">Save</button>
     </div>
 </div>

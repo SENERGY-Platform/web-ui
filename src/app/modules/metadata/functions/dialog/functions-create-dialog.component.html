@@ -17,41 +17,39 @@
 <h2 mat-dialog-title>Create Function</h2>
 
 <mat-dialog-content>
-    <div class="root">
-        <mat-radio-group [formControl]="optionsFormControl">
-            <mat-radio-button class="radio-button" value="Controlling">Controlling</mat-radio-button>
-            <mat-radio-button class="radio-button" value="Measuring">Measuring</mat-radio-button>
-        </mat-radio-group>
-        <form class="form" [formGroup]="functionFormGroup">
-            <mat-form-field class="full-width" appearance="outline" color="accent">
-                <mat-label>ID</mat-label>
-                <input matInput formControlName="id">
-                <mat-error senergyError label="ID"></mat-error>
-            </mat-form-field>
-            <mat-form-field class="full-width" appearance="outline" color="accent">
-                <mat-label>Name</mat-label>
-                <input matInput formControlName="name">
-                <mat-error senergyError label="Name"></mat-error>
-            </mat-form-field>
-            <mat-form-field class="full-width" appearance="outline" color="accent">
-                <mat-label>Display Name</mat-label>
-                <input matInput formControlName="display_name">
-                <mat-error senergyError label="Display Name"></mat-error>
-            </mat-form-field>
-            <mat-form-field class="full-width" appearance="outline" color="accent">
-                <mat-label>Description</mat-label>
-                <input matInput formControlName="description">
-                <mat-error senergyError label="Description"></mat-error>
-            </mat-form-field>
-            <mat-form-field class="full-width" appearance="outline" color="accent">
-                <mat-label>Concept</mat-label>
-                <mtx-select formControlName="concept_id" [items]="concepts" bindLabel="name" bindValue="id"
-                    appendTo="mat-dialog-container .root" dropdownPosition="top">
-                </mtx-select>
-                <mat-error senergyError label="Concept"></mat-error>
-            </mat-form-field>
-        </form>
-    </div>
+    <mat-radio-group [formControl]="optionsFormControl">
+        <mat-radio-button class="radio-button" value="Controlling">Controlling</mat-radio-button>
+        <mat-radio-button class="radio-button" value="Measuring">Measuring</mat-radio-button>
+    </mat-radio-group>
+    <form class="form" [formGroup]="functionFormGroup">
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>ID</mat-label>
+            <input matInput formControlName="id">
+            <mat-error senergyError label="ID"></mat-error>
+        </mat-form-field>
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name">
+            <mat-error senergyError label="Name"></mat-error>
+        </mat-form-field>
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Display Name</mat-label>
+            <input matInput formControlName="display_name">
+            <mat-error senergyError label="Display Name"></mat-error>
+        </mat-form-field>
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Description</mat-label>
+            <input matInput formControlName="description">
+            <mat-error senergyError label="Description"></mat-error>
+        </mat-form-field>
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Concept</mat-label>
+            <mtx-select formControlName="concept_id" [items]="concepts" bindLabel="name" bindValue="id"
+                appendTo=".ng-select-anchor">
+            </mtx-select>
+            <mat-error senergyError label="Concept"></mat-error>
+        </mat-form-field>
+    </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

@@ -18,61 +18,57 @@
 <h2 mat-dialog-title>Task Configuration</h2>
 
 <mat-dialog-content>
-    <div class="root">
-        <mat-radio-group [formControl]="optionsFormControl">
-            <mat-radio-button class="radio-button" value="Controlling">Controlling</mat-radio-button>
-            <mat-radio-button class="radio-button" value="Measuring">Measuring</mat-radio-button>
-        </mat-radio-group>
+    <mat-radio-group [formControl]="optionsFormControl">
+        <mat-radio-button class="radio-button" value="Controlling">Controlling</mat-radio-button>
+        <mat-radio-button class="radio-button" value="Measuring">Measuring</mat-radio-button>
+    </mat-radio-group>
 
-        <form class="form">
-            <mat-form-field appearance="outline" class="form-field" color="accent"
-                *ngIf="optionsFormControl.value === 'Controlling'">
-                <mat-label>Device Class</mat-label>
-                <mtx-select [compareWith]="compare" [formControl]="deviceClassFormControl" required
-                    [items]="deviceClasses" bindLabel="name" appendTo="mat-dialog-container .root">
-                </mtx-select>
-                <mat-error senergyError label="Device Class"></mat-error>
-            </mat-form-field>
+    <form class="form">
+        <mat-form-field appearance="outline" class="form-field" color="accent"
+            *ngIf="optionsFormControl.value === 'Controlling'">
+            <mat-label>Device Class</mat-label>
+            <mtx-select [compareWith]="compare" [formControl]="deviceClassFormControl" required [items]="deviceClasses"
+                bindLabel="name" appendTo=".ng-select-anchor">
+            </mtx-select>
+            <mat-error senergyError label="Device Class"></mat-error>
+        </mat-form-field>
 
-            <mat-form-field appearance="outline" class="form-field" color="accent"
-                *ngIf="optionsFormControl.value === 'Measuring'">
-                <mat-label>Aspect</mat-label>
-                <mtx-select [formControl]="aspectFormControl" required [items]="aspects" bindLabel="name"
-                    appendTo="mat-dialog-container .root" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
-                    [compareWith]="compareAspectsWith">
-                </mtx-select>
-                <mat-error senergyError label="Aspect"></mat-error>
-            </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field" color="accent"
+            *ngIf="optionsFormControl.value === 'Measuring'">
+            <mat-label>Aspect</mat-label>
+            <mtx-select [formControl]="aspectFormControl" required [items]="aspects" bindLabel="name"
+                appendTo=".ng-select-anchor" groupBy="root_name" selectableGroup [groupValue]="getRootAspect()"
+                [compareWith]="compareAspectsWith">
+            </mtx-select>
+            <mat-error senergyError label="Aspect"></mat-error>
+        </mat-form-field>
 
-            <mat-form-field appearance="outline" class="form-field" color="accent"
-                *ngIf="optionsFormControl.value !== ''">
-                <mat-label>Function</mat-label>
-                <mtx-select  [compareWith]="compare"
-                    [formControl]="functionFormControl" required [items]="functions"
-                    bindLabel="name" appendTo="mat-dialog-container .root">
-        </mtx-select>
-                <mat-error senergyError label="Function"></mat-error>
-            </mat-form-field>
-        </form>
+        <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value !== ''">
+            <mat-label>Function</mat-label>
+            <mtx-select [compareWith]="compare" [formControl]="functionFormControl" required [items]="functions"
+                bindLabel="name" appendTo=".ng-select-anchor">
+            </mtx-select>
+            <mat-error senergyError label="Function"></mat-error>
+        </mat-form-field>
+    </form>
 
-        <mat-radio-group [formControl]="completionStrategyFormControl">
-            <mat-radio-button class="radio-button" value="optimistic">Optimistic</mat-radio-button>
-            <mat-radio-button class="radio-button" value="pessimistic">Pessimistic</mat-radio-button>
-        </mat-radio-group>
+    <mat-radio-group [formControl]="completionStrategyFormControl">
+        <mat-radio-button class="radio-button" value="optimistic">Optimistic</mat-radio-button>
+        <mat-radio-button class="radio-button" value="pessimistic">Pessimistic</mat-radio-button>
+    </mat-radio-group>
 
-        <form>
-            <mat-form-field appearance="outline" class="form-field" color="accent">
-                <mat-label>Retries</mat-label>
-                <input type="number" matInput [formControl]="retriesFormControl">
-                <mat-error senergyError label="Retries"></mat-error>
-            </mat-form-field>
-        </form>
+    <form>
+        <mat-form-field appearance="outline" class="form-field" color="accent">
+            <mat-label>Retries</mat-label>
+            <input type="number" matInput [formControl]="retriesFormControl">
+            <mat-error senergyError label="Retries"></mat-error>
+        </mat-form-field>
+    </form>
 
-        <mat-checkbox class="form-filed-checkbox" [formControl]="preferEventsFormControl"
-            matTooltip="check if you prefer stored event values before device requests"
-            matTooltipPosition="right">Prefer Events
-        </mat-checkbox>
-    </div>
+    <mat-checkbox class="form-filed-checkbox" [formControl]="preferEventsFormControl"
+        matTooltip="check if you prefer stored event values before device requests" matTooltipPosition="right">Prefer
+        Events
+    </mat-checkbox>
 </mat-dialog-content>
 
 

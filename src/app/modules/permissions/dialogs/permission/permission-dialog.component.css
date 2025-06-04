@@ -31,6 +31,3 @@ table {
     width: calc(100% - 64px);
 }
 
-.root {
-    position: relative;
-}

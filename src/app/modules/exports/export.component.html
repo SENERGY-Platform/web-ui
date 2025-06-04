@@ -14,195 +14,192 @@
   ~ limitations under the License.
   -->
 
-<div class="root">
-    <div class="layout-margin">
-        <div fxLayout="row" class="search-button-container">
-            <senergy-searchbar fxFlex [searchTextIn]="initSearchText"></senergy-searchbar>
-            <mat-form-field appearance="outline" color="accent" class="user-input" style="padding-left: 8px;">
-                <mat-label>Search Field</mat-label>
-                <mtx-select placeholder="Choose Search Field" [(ngModel)]="searchField"
-                    (ngModelChange)="searchFieldChanged()" appendTo=".root">
-                    <mtx-option *ngFor="let searchField of searchFields" [value]="searchField[1]">
-                        {{searchField[0]}}
-                    </mtx-option>
-                </mtx-select>
-                <mat-error senergyError label="Search Field"></mat-error>
-            </mat-form-field>
-            <button matTooltip="Show generated" mat-icon-button color="accent" (click)="showGeneratedChanged()"
-                *ngIf="!this.showGenerated" class="suffix">
-                <mat-icon>visibility</mat-icon>
-            </button>
-            <button matTooltip="Hide generated" mat-icon-button color="accent" (click)="showGeneratedChanged()"
-                *ngIf="this.showGenerated" class="suffix">
-                <mat-icon>visibility_off</mat-icon>
-            </button>
-        </div>
+<div class="layout-margin">
+    <div fxLayout="row" class="search-button-container">
+        <senergy-searchbar fxFlex [searchTextIn]="initSearchText"></senergy-searchbar>
+        <mat-form-field appearance="outline" color="accent" class="user-input" style="padding-left: 8px;">
+            <mat-label>Search Field</mat-label>
+            <mtx-select placeholder="Choose Search Field" [(ngModel)]="searchField"
+                (ngModelChange)="searchFieldChanged()" appendTo=".ng-select-anchor">
+                <mtx-option *ngFor="let searchField of searchFields" [value]="searchField[1]">
+                    {{searchField[0]}}
+                </mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="Search Field"></mat-error>
+        </mat-form-field>
+        <button matTooltip="Show generated" mat-icon-button color="accent" (click)="showGeneratedChanged()"
+            *ngIf="!this.showGenerated" class="suffix">
+            <mat-icon>visibility</mat-icon>
+        </button>
+        <button matTooltip="Hide generated" mat-icon-button color="accent" (click)="showGeneratedChanged()"
+            *ngIf="this.showGenerated" class="suffix">
+            <mat-icon>visibility_off</mat-icon>
+        </button>
+    </div>
 
-        <div [hidden]="!ready || (exports.length === 0 && ready)" class="mat-elevation-z1">
-            <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
-                <table #sort="matSort" mat-table [dataSource]="exportsDataSource" matSort matSortActive="created_at"
-                    matSortDirection="desc" matSortDisableClear>
+    <div [hidden]="!ready || (exports.length === 0 && ready)" class="mat-elevation-z1">
+        <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
+            <table #sort="matSort" mat-table [dataSource]="exportsDataSource" matSort matSortActive="created_at"
+                matSortDirection="desc" matSortDisableClear>
 
-                    <ng-container matColumnDef="select">
-                        <th mat-header-cell *matHeaderCellDef>
-                            <mat-checkbox (change)="$event ? masterToggle() : null"
-                                [checked]="selection.hasValue() && isAllSelected()"
-                                [indeterminate]="selection.hasValue() && !isAllSelected()">
-                            </mat-checkbox>
-                        </th>
-                        <td mat-cell *matCellDef="let row">
-                            <mat-checkbox (click)="$event.stopPropagation()"
-                                (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
-                                [disabled]="!userHasAdministratePermission(row.ID)">
-                            </mat-checkbox>
-                        </td>
-                    </ng-container>
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef>
+                        <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()">
+                        </mat-checkbox>
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                        <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
+                            [disabled]="!userHasAdministratePermission(row.ID)">
+                        </mat-checkbox>
+                    </td>
+                </ng-container>
 
-                    <ng-container matColumnDef="filter_type">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
-                        <td mat-cell *matCellDef="let element">
-                            <mat-icon *ngIf="element.FilterType === 'deviceId'" mat-list-icon matTooltip="Device"
-                                color="accent">
-                                sensors
-                            </mat-icon>
-                            <mat-icon *ngIf="element.FilterType === 'operatorId'" mat-list-icon matTooltip="Pipeline"
-                                color="accent">
-                                analytics
-                            </mat-icon>
-                            <mat-icon *ngIf="element.FilterType === 'import_id'" mat-list-icon matTooltip="Import"
-                                color="accent">
-                                double_arrow
-                            </mat-icon>
-                        </td>
-                    </ng-container>
+                <ng-container matColumnDef="filter_type">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+                    <td mat-cell *matCellDef="let element">
+                        <mat-icon *ngIf="element.FilterType === 'deviceId'" mat-list-icon matTooltip="Device"
+                            color="accent">
+                            sensors
+                        </mat-icon>
+                        <mat-icon *ngIf="element.FilterType === 'operatorId'" mat-list-icon matTooltip="Pipeline"
+                            color="accent">
+                            analytics
+                        </mat-icon>
+                        <mat-icon *ngIf="element.FilterType === 'import_id'" mat-list-icon matTooltip="Import"
+                            color="accent">
+                            double_arrow
+                        </mat-icon>
+                    </td>
+                </ng-container>
 
-                    <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-                        <td mat-cell *matCellDef="let element">
-                            <div fxLayout="row">
-                                <div>
-                                    {{element.Name}}
-                                </div>
-                                <div class="auto-generated">
-                                    <mat-icon *ngIf="element.Generated === true" matTooltip="Generated Export"
-                                        mat-list-icon>
-                                        auto_awesome
-                                    </mat-icon>
-                                </div>
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                    <td mat-cell *matCellDef="let element">
+                        <div fxLayout="row">
+                            <div>
+                                {{element.Name}}
                             </div>
-                        </td>
-                    </ng-container>
+                            <div class="auto-generated">
+                                <mat-icon *ngIf="element.Generated === true" matTooltip="Generated Export"
+                                    mat-list-icon>
+                                    auto_awesome
+                                </mat-icon>
+                            </div>
+                        </div>
+                    </td>
+                </ng-container>
 
-                    <ng-container matColumnDef="description">
-                        <th mat-header-cell *matHeaderCellDef>Description</th>
-                        <td mat-cell *matCellDef="let element"> {{element.Description}}</td>
-                    </ng-container>
+                <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef>Description</th>
+                    <td mat-cell *matCellDef="let element"> {{element.Description}}</td>
+                </ng-container>
 
-                    <ng-container matColumnDef="usage">
-                        <th mat-header-cell *matHeaderCellDef>Storage
-                        </th>
-                        <td mat-cell *matCellDef="let element" [matTooltip]="getUsageTooltip(element)">
-                            {{formatBytes(getUsage(element)?.bytes || -1)}}
-                        </td>
-                    </ng-container>
+                <ng-container matColumnDef="usage">
+                    <th mat-header-cell *matHeaderCellDef>Storage
+                    </th>
+                    <td mat-cell *matCellDef="let element" [matTooltip]="getUsageTooltip(element)">
+                        {{formatBytes(getUsage(element)?.bytes || -1)}}
+                    </td>
+                </ng-container>
 
-                    <ng-container matColumnDef="created_at">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+                <ng-container matColumnDef="created_at">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+                    <td mat-cell *matCellDef="let element">
+                        <span *ngIf="utilsService.dateIsToday(element.CreatedAt)">{{ element.CreatedAt |
+                            date:'HH:mm'}}</span>
+                        <span *ngIf="!utilsService.dateIsToday(element.CreatedAt)">{{ element.CreatedAt |
+                            date:'dd.MM.yyyy - HH:mm'}}</span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="updated_at">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated</th>
+                    <td mat-cell *matCellDef="let element">
+                        <span *ngIf="utilsService.dateIsToday(element.UpdatedAt)">{{ element.UpdatedAt |
+                            date:'HH:mm'}}</span>
+                        <span *ngIf="!utilsService.dateIsToday(element.UpdatedAt)">{{ element.UpdatedAt |
+                            date:'dd.MM.yyyy - HH:mm'}}</span>
+                    </td>
+                </ng-container>
+
+
+                <ng-container matColumnDef="info">
+                    <th mat-header-cell *matHeaderCellDef>Details</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button mat-icon-button color="accent" matTooltip="Details"
+                            routerLink="/exports/details/{{element.ID}}">
+                            <mat-icon>info</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="edit" *ngIf="userHasUpdateAuthorization">
+                    <th mat-header-cell *matHeaderCellDef>Edit</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button mat-icon-button color="accent" matTooltip="Edit"
+                            routerLink="/exports/edit/{{element.ID}}" [disabled]="!userHasWritePermission(element.ID)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="share">
+                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button mat-icon-button color="accent" matTooltip="Share" (click)="shareExport(element)"
+                            [disabled]="!userHasAdministratePermission(element.ID)">
+                            <mat-icon>share</mat-icon>
+
+                        </button>
+                    </td>
+                </ng-container>
+
+                <span *ngIf="userHasDeleteAuthorization">
+                    <ng-container matColumnDef="delete">
+                        <th mat-header-cell *matHeaderCellDef>Delete</th>
                         <td mat-cell *matCellDef="let element">
-                            <span *ngIf="utilsService.dateIsToday(element.CreatedAt)">{{ element.CreatedAt |
-                                date:'HH:mm'}}</span>
-                            <span *ngIf="!utilsService.dateIsToday(element.CreatedAt)">{{ element.CreatedAt |
-                                date:'dd.MM.yyyy - HH:mm'}}</span>
-                        </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="updated_at">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated</th>
-                        <td mat-cell *matCellDef="let element">
-                            <span *ngIf="utilsService.dateIsToday(element.UpdatedAt)">{{ element.UpdatedAt |
-                                date:'HH:mm'}}</span>
-                            <span *ngIf="!utilsService.dateIsToday(element.UpdatedAt)">{{ element.UpdatedAt |
-                                date:'dd.MM.yyyy - HH:mm'}}</span>
-                        </td>
-                    </ng-container>
-
-
-                    <ng-container matColumnDef="info">
-                        <th mat-header-cell *matHeaderCellDef>Details</th>
-                        <td mat-cell *matCellDef="let element">
-                            <button mat-icon-button color="accent" matTooltip="Details"
-                                routerLink="/exports/details/{{element.ID}}">
-                                <mat-icon>info</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="edit" *ngIf="userHasUpdateAuthorization">
-                        <th mat-header-cell *matHeaderCellDef>Edit</th>
-                        <td mat-cell *matCellDef="let element">
-                            <button mat-icon-button color="accent" matTooltip="Edit"
-                                routerLink="/exports/edit/{{element.ID}}"
-                                [disabled]="!userHasWritePermission(element.ID)">
-                                <mat-icon>edit</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="share">
-                        <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
-                        <td mat-cell *matCellDef="let element">
-                            <button mat-icon-button color="accent" matTooltip="Share" (click)="shareExport(element)"
+                            <button matTooltip="Delete" mat-icon-button color="warn" (click)="deleteExport(element)"
                                 [disabled]="!userHasAdministratePermission(element.ID)">
-                                <mat-icon>share</mat-icon>
-
+                                <mat-icon>delete</mat-icon>
                             </button>
                         </td>
                     </ng-container>
 
-                    <span *ngIf="userHasDeleteAuthorization">
-                        <ng-container matColumnDef="delete">
-                            <th mat-header-cell *matHeaderCellDef>Delete</th>
-                            <td mat-cell *matCellDef="let element">
-                                <button matTooltip="Delete" mat-icon-button color="warn" (click)="deleteExport(element)"
-                                    [disabled]="!userHasAdministratePermission(element.ID)">
+                    <ng-container matColumnDef="header-delete-all">
+                        <th mat-header-cell *matHeaderCellDef colspan="10">
+                            <div fxLayout="row">
+                                <div fxLayoutAlign="center center">You have
+                                    selected {{selection.selected.length}} items
+                                </div>
+                                <button matTooltip="Delete" mat-icon-button color="accent"
+                                    (click)="deleteMultipleItems()">
                                     <mat-icon>delete</mat-icon>
                                 </button>
-                            </td>
-                        </ng-container>
+                            </div>
+                        </th>
+                    </ng-container>
 
-                        <ng-container matColumnDef="header-delete-all">
-                            <th mat-header-cell *matHeaderCellDef colspan="10">
-                                <div fxLayout="row">
-                                    <div fxLayoutAlign="center center">You have
-                                        selected {{selection.selected.length}} items
-                                    </div>
-                                    <button matTooltip="Delete" mat-icon-button color="accent"
-                                        (click)="deleteMultipleItems()">
-                                        <mat-icon>delete</mat-icon>
-                                    </button>
-                                </div>
-                            </th>
-                        </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
+                        [hidden]="selection.selected.length === 0">
+                    </tr>
+                </span>
 
-                        <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
-                            [hidden]="selection.selected.length === 0">
-                        </tr>
-                    </span>
-
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                </table>
-            </div>
-            <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-                (page)="selectionClear($event)" showFirstLastButtons></mat-paginator>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
         </div>
-        <div *ngIf="exports.length === 0 && ready">No export instances found.</div>
-
-        <button *ngIf="userHasCreateAuthorization" mat-fab class="fab" routerLink="/exports/new"
-            matTooltip="Start new Export">
-            <mat-icon>add</mat-icon>
-        </button>
-        <senergy-spinner [show]="!ready"></senergy-spinner>
-
+        <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize"
+            [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)" showFirstLastButtons></mat-paginator>
     </div>
+    <div *ngIf="exports.length === 0 && ready">No export instances found.</div>
+
+    <button *ngIf="userHasCreateAuthorization" mat-fab class="fab" routerLink="/exports/new"
+        matTooltip="Start new Export">
+        <mat-icon>add</mat-icon>
+    </button>
+    <senergy-spinner [show]="!ready"></senergy-spinner>
+
 </div>

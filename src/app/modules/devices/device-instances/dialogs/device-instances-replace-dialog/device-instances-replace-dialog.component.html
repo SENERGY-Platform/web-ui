@@ -16,7 +16,6 @@
 <h2 mat-dialog-title>Replace Device</h2>
 
 <mat-dialog-content>
-    <div class="root">
         <form [formGroup]="form">
             <h4>Choose Replacement</h4>
             <div>
@@ -51,7 +50,7 @@
                     <mat-label>Device Type</mat-label>
                     <mtx-select
                         [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting"
-                        [items]="filteredDeviceTypes" bindLabel="name" bindValue="id" appendTo="mat-dialog-container .root"
+                        [items]="filteredDeviceTypes" bindLabel="name" bindValue="id" appendTo=".ng-select-anchor"
                         formControlName="deviceType"></mtx-select>
                     <mat-error senergyError label="Device Type"></mat-error>
                 </mat-form-field>
@@ -59,7 +58,7 @@
                     <mat-label>Device</mat-label>
                     <mtx-select
                         [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting"
-                        formControlName="device" appendTo="mat-dialog-container .root">
+                        formControlName="device" appendTo=".ng-select-anchor">
                         <mtx-option
                             *ngFor="let option of deviceInstancesByType.get(form.get('existing.deviceType')?.value || '') || []"
                             [value]="option">{{getDeviceName(option)}}</mtx-option>
@@ -68,7 +67,6 @@
                 </mat-form-field>
             </div>
         </form>
-    </div>
 </mat-dialog-content>
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>

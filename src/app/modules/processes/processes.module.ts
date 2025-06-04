@@ -77,6 +77,7 @@ import {ProcessIoVariableEditDialogComponent} from './process-io/dialogs/process
 import {ConditionalEventDialogComponent} from './designer/dialogs/conditional-event-dialog/conditional-event-dialog.component';
 import { IncidentDialogComponent } from './designer/dialogs/incident-dialog/incident-dialog.component';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 const processRepo: Route = {
     path: 'processes/repository',
@@ -164,6 +165,7 @@ const processIo: Route = {
         MatBadgeModule,
         MatExpansionModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ],
     declarations: [
         ProcessRepoComponent,

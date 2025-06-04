@@ -37,6 +37,3 @@ div[role="group"] mat-form-field + mat-form-field {
     margin-right: 20px;
 }
 
-.root {
-    position: relative;
-}

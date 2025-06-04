@@ -144,6 +144,4 @@ input[matinput][type=number] {
     -moz-appearance: textfield;
 }
 
-.root {
-    position: relative;
-}
+

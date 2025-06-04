@@ -53,6 +53,7 @@ import {
 } from './timescale-rules/timescale-rules-create-edit-template/timescale-rules-create-edit-template.component';
 import {MatExpansionModule} from '@angular/material/expansion';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
 const listRules: Route[] = [
     {
@@ -112,6 +113,7 @@ const listRules: Route[] = [
         FlexLayoutModule,
         MatExpansionModule,
         MtxSelectModule,
+        CloseMtxSelectOnScrollDirective,
     ]
 })
 export class AdminModule {
