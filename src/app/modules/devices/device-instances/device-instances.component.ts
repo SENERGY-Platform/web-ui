@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
-import {DeviceInstancesService} from './shared/device-instances.service';
+import { DeviceInstancesService } from './shared/device-instances.service';
 import {
     DeviceInstanceModel,
     DeviceInstancesRouterStateTabEnum,
     DeviceInstancesTotalModel,
-    FilterSelection} from './shared/device-instances.model';
-import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
-import {DialogsService} from '../../../core/services/dialogs.service';
+    FilterSelection
+} from './shared/device-instances.model';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {Navigation, Router} from '@angular/router';
-import {DeviceTypeModel} from '../../metadata/device-types-overview/shared/device-type.model';
-import {LocationModel} from '../locations/shared/locations.model';
-import {MatTableDataSource} from '@angular/material/table';
-import {DeviceInstancesDialogService} from './shared/device-instances-dialog.service';
-import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
-import {Sort, SortDirection} from '@angular/material/sort';
+import { Navigation, Router } from '@angular/router';
+import { DeviceTypeModel } from '../../metadata/device-types-overview/shared/device-type.model';
+import { LocationModel } from '../locations/shared/locations.model';
+import { MatTableDataSource } from '@angular/material/table';
+import { DeviceInstancesDialogService } from './shared/device-instances-dialog.service';
+import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
+import { Sort, SortDirection } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { forkJoin, Observable, map, Subscription, of } from 'rxjs';
@@ -39,17 +40,18 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 import { DeviceInstancesFilterDialogComponent } from './dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
-import {concatMap} from 'rxjs/operators';
-import {PermissionsService} from '../../permissions/shared/permissions.service';
+import { concatMap } from 'rxjs/operators';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { HubModel } from '../networks/shared/networks.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { DeviceInstancesDefaultAttributesDialogComponent } from './dialogs/device-instances-default-attributes-dialog.component';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
     value: any;
 }
 
- 
+
 export enum DeviceInstancesRouterStateTypesEnum {
     NETWORK,
     DEVICE_TYPE,
@@ -118,8 +120,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     userHasUpdateDisplayNameAuthorization = false;
     userHasUpdateAttributesAuthorization = false;
     userHasCreateAuthoriation = false;
+    userHasDefaultAttributesAuthoriation = false;
 
-    userIdToName: {[key: string]: string} = {};
+    userIdToName: { [key: string]: string } = {};
 
     ngOnInit(): void {
         this.initSearch(); // does automatically load data on first page load
@@ -167,6 +170,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         if (this.userHasUpdateDisplayNameAuthorization || this.userHasUpdateAttributesAuthorization) {
             this.displayedColumns.push('edit');
         }
+        this.userHasDefaultAttributesAuthoriation = this.deviceInstancesService.userHasDefaultAttributesPermissions();
     }
 
     private initSearch() {
@@ -189,7 +193,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     private loadDevicesByIds(): Observable<DeviceInstanceModel[]> {
         // Only called when beeing redirected from device group page
         if (this.routerDeviceIds) {
-            return this.deviceInstancesService.getDeviceInstances({deviceIds: this.routerDeviceIds, limit: this.pageSize, offset: this.offset}).pipe(
+            return this.deviceInstancesService.getDeviceInstances({ deviceIds: this.routerDeviceIds, limit: this.pageSize, offset: this.offset }).pipe(
                 map(result => {
                     this.setDevicesAndTotal(result);
                     return result.result;
@@ -230,21 +234,32 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         });
     }
 
+    openDefaultAttributesDialog() {
+        const dialogRef = this.dialog.open(DeviceInstancesDefaultAttributesDialogComponent, {
+            minWidth: '50vw',
+        });
+        dialogRef.afterClosed().subscribe(t => {
+            if (t) {
+                this.reload();
+            }
+        });
+    }
+
     private load(): Observable<any> {
         if (this.routerDeviceIds !== undefined) {
             return this.loadDevicesByIds();
         } else {
             return this.deviceInstancesService
                 .getDeviceInstances({
-                    limit:           this.pageSize,
-                    offset:  this.offset,
+                    limit: this.pageSize,
+                    offset: this.offset,
                     sortBy: this.sortBy,
                     sortDesc: this.sortDirection === 'desc',
                     searchText: this.searchText,
-                    locationId:     this.routerLocation,
+                    locationId: this.routerLocation,
                     hubId: this.routerNetwork,
                     deviceTypeIds: this.routerDeviceType,
-                    connectionState:  this.routerConnectionState
+                    connectionState: this.routerConnectionState
                 })
                 .pipe(
                     // if no result is found: try to interpret the search as shortDeviceId, convert it to a deviceId and load it
@@ -253,8 +268,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                             return of(deviceInstanceWithTotal);
                         }
                         // we may also search for normal ids
-                        if (this.searchText.trim().startsWith('urn:infai:ses:device:')){
-                            return this.deviceInstancesService.getDeviceInstances({deviceIds: [this.searchText.trim()], limit: 1, offset: 0});
+                        if (this.searchText.trim().startsWith('urn:infai:ses:device:')) {
+                            return this.deviceInstancesService.getDeviceInstances({ deviceIds: [this.searchText.trim()], limit: 1, offset: 0 });
                         }
                         // short ids are expected to be 22 chars long
                         if (this.searchText.trim().length !== 22) {
@@ -265,7 +280,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                                 if (id === '' || this.searchText === id) {
                                     return of(deviceInstanceWithTotal);
                                 }
-                                return this.deviceInstancesService.getDeviceInstances({deviceIds: [id], limit: 1, offset: 0});
+                                return this.deviceInstancesService.getDeviceInstances({ deviceIds: [id], limit: 1, offset: 0 });
                             })
                         );
                     }),
@@ -276,7 +291,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                         return deviceInstancesWithTotal;
                     }),
                     map(deviceInstancesWithTotal => {
-                        if(this.userHasReadDeviceUsageAuthorization && deviceInstancesWithTotal.result.length > 0) {
+                        if (this.userHasReadDeviceUsageAuthorization && deviceInstancesWithTotal.result.length > 0) {
                             this.exportDataService.getTimescaleDeviceUsage(deviceInstancesWithTotal.result.map(di => di.id)).subscribe(r => this.usage.push(...r));
                         }
                     })
@@ -284,16 +299,16 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         }
     }
 
-    private loadUserNames(elements: {owner_id: string; shared: boolean}[]) {
+    private loadUserNames(elements: { owner_id: string; shared: boolean }[]) {
         const missingCreators: string[] = [];
         elements?.forEach(element => {
-            if(element.shared && element.owner_id && !this.userIdToName[element.owner_id] && !missingCreators.includes(element.owner_id)) {
+            if (element.shared && element.owner_id && !this.userIdToName[element.owner_id] && !missingCreators.includes(element.owner_id)) {
                 missingCreators.push(element.owner_id);
             }
         });
         missingCreators.forEach(creator => {
             this.permissionsService.getUserById(creator).subscribe(value => {
-                if(value) {
+                if (value) {
                     this.userIdToName[value.id] = value.username;
                 }
             });
@@ -335,14 +350,14 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
             (spinnerState: boolean) => {
                 this.ready = !spinnerState;
             }).subscribe({
-            next: (newDevice) => {
-                if(newDevice != null) {
-                    const index = this.dataSource.data.findIndex(element => element.id === device.id);
-                    this.dataSource.data[index] = newDevice;
-                    this.dataSource.data = this.dataSource.data;
+                next: (newDevice) => {
+                    if (newDevice != null) {
+                        const index = this.dataSource.data.findIndex(element => element.id === device.id);
+                        this.dataSource.data[index] = newDevice;
+                        this.dataSource.data = this.dataSource.data;
+                    }
                 }
-            }
-        });
+            });
     }
 
     duplicateDevice(device: DeviceInstanceModel): void {
@@ -390,23 +405,23 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
             if (navigation.extras.state !== undefined) {
                 const state = navigation.extras.state as DeviceInstancesRouterState;
                 switch (state.type) {
-                case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
-                    this.routerDeviceType = [(state.value as DeviceTypeModel).id];
-                    this.routerDeviceTypeNames = [(state.value as DeviceTypeModel).name];
-                    break;
-                case DeviceInstancesRouterStateTypesEnum.NETWORK:
-                    this.routerNetwork = (state.value as HubModel).id;
-                    this.routerNetworkName = (state.value as HubModel).name;
-                    break;
-                case DeviceInstancesRouterStateTypesEnum.LOCATION:
-                    this.routerLocation = (state.value as LocationModel).id;
-                    this.routerLocationName = (state.value as LocationModel).name;
-                    break;
-                case DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP:
-                    this.routerDeviceIds = state.value as string[];
-                    break;
-                case DeviceInstancesRouterStateTypesEnum.CONNECTION_STATE:
-                    this.routerConnectionState = state.value;
+                    case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
+                        this.routerDeviceType = [(state.value as DeviceTypeModel).id];
+                        this.routerDeviceTypeNames = [(state.value as DeviceTypeModel).name];
+                        break;
+                    case DeviceInstancesRouterStateTypesEnum.NETWORK:
+                        this.routerNetwork = (state.value as HubModel).id;
+                        this.routerNetworkName = (state.value as HubModel).name;
+                        break;
+                    case DeviceInstancesRouterStateTypesEnum.LOCATION:
+                        this.routerLocation = (state.value as LocationModel).id;
+                        this.routerLocationName = (state.value as LocationModel).name;
+                        break;
+                    case DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP:
+                        this.routerDeviceIds = state.value as string[];
+                        break;
+                    case DeviceInstancesRouterStateTypesEnum.CONNECTION_STATE:
+                        this.routerConnectionState = state.value;
                 }
             }
         }
@@ -500,6 +515,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         if (this._chipDiv === undefined) {
             return '';
         }
-        return 'calc(100vh - ' + (this._chipDiv.nativeElement.clientHeight + 216)+ 'px - 1em)';
+        return 'calc(100vh - ' + (this._chipDiv.nativeElement.clientHeight + 216) + 'px - 1em)';
     }
 }

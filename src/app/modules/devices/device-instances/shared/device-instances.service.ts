@@ -48,8 +48,10 @@ export class DeviceInstancesService {
     nicknameAttributeKey = 'shared/nickname';
     authorizations: PermissionTestResponse;
     authorizationsDisplayName: PermissionTestResponse;
+    authorizationsDefaultAttributes: PermissionTestResponse;
     authorizationsAttributes: PermissionTestResponse;
     authorizationsConnectionLog: PermissionTestResponse;
+    defaultOrigin = 'default';
 
     constructor(
         private http: HttpClient,
@@ -61,6 +63,7 @@ export class DeviceInstancesService {
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices');
         this.authorizationsDisplayName = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices/id/display_name');
+        this.authorizationsDefaultAttributes = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/defaults/devices/attributes');
         this.authorizationsAttributes = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices/id/attributes');
         this.authorizationsConnectionLog = this.ladonService.getUserAuthorizationsForURI(environment.connectionLogUrl);
     }
@@ -480,5 +483,17 @@ export class DeviceInstancesService {
 
     userHasReadAuthorizationConnectionLog() {
         return this.authorizationsConnectionLog['GET'];
+    }
+
+    userHasDefaultAttributesPermissions() {
+        return this.authorizationsDefaultAttributes['GET'] && this.authorizationsDefaultAttributes['PUT'];
+    }
+
+    getDefaultAttributes(): Observable<Attribute[]> {
+        return this.http.get<Attribute[]>(environment.deviceRepoUrl + '/defaults/devices/attributes');
+    }
+
+    setDefaultAttributes(attributes: Attribute[]): Observable<unknown> {
+        return this.http.put(environment.deviceRepoUrl + '/defaults/devices/attributes', attributes);
     }
 }

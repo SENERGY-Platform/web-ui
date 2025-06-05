@@ -20,6 +20,9 @@
         <button mat-icon-button (click)="openFilterDialog()" matTooltip="Filter" color="accent" class="suffix-button">
             <mat-icon>filter_alt</mat-icon>
         </button>
+        <button *ngIf="userHasDefaultAttributesAuthoriation" mat-icon-button (click)="openDefaultAttributesDialog()" matTooltip="Default Attributes" color="accent" class="suffix-button">
+            <mat-icon>settings</mat-icon>
+        </button>
     </span>
     <div style="padding-bottom: 1em;" #chipDiv>
         <mat-chip-set>

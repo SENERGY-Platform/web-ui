@@ -70,6 +70,7 @@ import { DeviceInstancesReplaceDialogComponent } from './device-instances/dialog
 import { WidgetModule } from 'src/app/widgets/widget.module';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
+import { DeviceInstancesDefaultAttributesDialogComponent } from './device-instances/dialogs/device-instances-default-attributes-dialog.component';
 
 const networks: Route = { path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: { header: 'Networks' } };
 const deviceInstances: Route = {
@@ -170,7 +171,6 @@ const locationsEdit: Route = {
         MatSnackBarModule,
         WidgetModule,
         MtxSelectModule,
-CloseMtxSelectOnScrollDirective,
         CloseMtxSelectOnScrollDirective,
     ],
     declarations: [
@@ -193,9 +193,10 @@ CloseMtxSelectOnScrollDirective,
         WaitingRoomMultiWmbusKeyEditDialogComponent,
         DeviceInstancesFilterDialogComponent,
         DeviceInstancesReplaceDialogComponent,
+        DeviceInstancesDefaultAttributesDialogComponent,
     ],
     providers: [
         DatePipe,
     ]
 })
-export class DevicesModule {}
+export class DevicesModule { }

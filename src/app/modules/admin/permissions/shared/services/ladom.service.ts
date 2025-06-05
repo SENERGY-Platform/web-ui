@@ -125,6 +125,7 @@ export class LadonService {
             environment.deviceRepoUrl + '/functions',
             environment.deviceRepoUrl + '/device-types',
             environment.deviceRepoUrl + '/devices/id/display_name',
+            environment.deviceRepoUrl + '/defaults/devices/attributes',
             environment.deviceRepoUrl + '/devices/id/attributes',
             environment.deviceRepoUrl + '/devices',
             environment.deviceRepoUrl + '/device-groups',
