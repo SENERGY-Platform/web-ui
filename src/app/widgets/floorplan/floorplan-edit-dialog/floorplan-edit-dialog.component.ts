@@ -30,6 +30,7 @@ import { FunctionsService } from 'src/app/modules/metadata/functions/shared/func
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
 import { draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, image, migrateColoring } from '../shared/floorplan.model';
 import { materialIconNames } from 'src/app/core/model/icon.model';
+import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 
 @Component({
   selector: 'senergy-floorplan-edit-dialog',
@@ -53,6 +54,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
   step: number | undefined;
   materialIconNames = materialIconNames;
+  functionIdToType = new Map<string, string>();
 
   form = new FormGroup({
     image: new FormControl<string | null>(null),
@@ -73,6 +75,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     private deviceGroupsService: DeviceGroupsService,
     private functionService: FunctionsService,
     private deviceClassService: DeviceClassesService,
+    private conceptsService: ConceptsService,
     private cd: ChangeDetectorRef,
     private el: ElementRef,
     @Inject(MAT_DIALOG_DATA) data: {
@@ -268,6 +271,27 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
       colorLow: new FormControl<string>('#808080'),
       colorHigh: new FormControl<string>('#808080'),
     });
+    fg.controls.criteria.valueChanges.pipe(concatMap(c => {
+      if (c?.function_id === undefined) {
+        return of([]);
+      }
+      if (this.functionIdToType.has(c.function_id)) {
+        return of([]);
+      }
+      return this.deviceGroupsService.getFunctionListByIds([c.function_id]).pipe(
+        concatMap(functions => this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) }).pipe(map(concepts => ({ concepts, functions })))),
+        map((res) => res.functions.forEach(f => {
+          const concept = res.concepts.result.find(conc => f.concept_id === conc.id);
+          if (concept === undefined) {
+            return;
+          }
+          const t = concept.characteristics.find(characteristic => characteristic.id === concept.base_characteristic_id)?.type;
+          if (t === undefined) {
+            return;
+          }
+          this.functionIdToType.set(f.id, t);
+        })));
+    })).subscribe();
     if (value !== undefined) {
       fg.patchValue(value);
     }
@@ -283,13 +307,13 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   }
 
   newColoring(value?: {
-    value: number;
+    value: number|string;
     color: string;
     showValue: boolean;
     showValueWhenZoomed: boolean;
   }): FormGroup {
     const fg = this.fb.group({
-      value: new FormControl<number>(0),
+      value: new FormControl<number|string>(0),
       color: new FormControl(''),
       showValue: new FormControl(false),
       showValueWhenZoomed: new FormControl(false),
@@ -393,5 +417,13 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   private filterCriteria(d: DeviceGroupModel) {
     d.criteria?.forEach(c => c.interaction = '');
     d.criteria = d.criteria?.filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i);
+  }
+
+  criteriaIsNumeric(tab: FormGroup): boolean {
+    const t = this.functionIdToType.get(tab.controls.criteria.value.function_id);
+    if (t === 'https://schema.org/Integer' || t === 'https://schema.org/Float') {
+      return true;
+    }
+    return false;
   }
 }

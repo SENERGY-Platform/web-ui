@@ -33,7 +33,7 @@ export interface FloorplanWidgetCapabilityModel {
         y: number | null;
     },
     coloring: {
-        value: number;
+        value: number|string;
         color: string;
         showValue: boolean;
         showValueWhenZoomed: boolean;

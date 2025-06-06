@@ -118,19 +118,19 @@
                     <mat-icon matTooltip="Change color">{{tab.value.icon}}</mat-icon>
                   </button>
                   <span class="color-text"
-                    *ngIf="getColoringControls(tab).controls.length > 1 && colorIndex < getColoringControls(tab).controls.length - 1">until
-                    value reaches</span>
+                    *ngIf="getColoringControls(tab).controls.length > 1 && colorIndex < getColoringControls(tab).controls.length - 1">
+                    {{criteriaIsNumeric(tab) ? 'until value reaches' : 'if value matches'}}</span>
                   <span class="color-text" *ngIf="getColoringControls(tab).controls.length === 1">for all
                     values</span>
                   <mat-form-field appearance="outline" color="accent" class="value-form"
                     *ngIf="colorIndex !== getColoringControls(tab).controls.length - 1">
                     <mat-label>Value</mat-label>
-                    <input type="number" matInput formControlName="value">
+                    <input [type]="criteriaIsNumeric(tab) ? 'number' : 'text'" matInput formControlName="value">
                     <mat-error senergyError label="Value"></mat-error>
                   </mat-form-field>
                   <span class="color-text"
                     *ngIf="colorIndex === getColoringControls(tab).controls.length - 1 && getColoringControls(tab).controls.length > 1">for
-                    all higher values</span>
+                    all {{criteriaIsNumeric(tab) ? 'higher' : 'other'}} values</span>
                   <mat-checkbox formControlName="showValue">Display value</mat-checkbox>
                   <mat-checkbox formControlName="showValueWhenZoomed">Display value when maximized</mat-checkbox>
                 </div>

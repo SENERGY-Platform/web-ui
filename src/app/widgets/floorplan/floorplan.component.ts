@@ -325,14 +325,38 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       let color = 'grey';
       let zoom = false;
       let notZoom = false;
-      if (!isNaN(r.message) && this.widget.properties.floorplan.placements[i].coloring !== undefined && this.widget.properties.floorplan.placements[i].coloring.length > 0) {
-        color = this.widget.properties.floorplan.placements[i].coloring[0].color;
-        zoom = this.widget.properties.floorplan.placements[i].coloring[0].showValueWhenZoomed;
-        notZoom = this.widget.properties.floorplan.placements[i].coloring[0].showValue;
-        for (let j = 1; j < this.widget.properties.floorplan.placements[i].coloring.length && r.message > this.widget.properties.floorplan.placements[i].coloring[j - 1].value; j++) {
-          color = this.widget.properties.floorplan.placements[i].coloring[j].color;
-          zoom = this.widget.properties.floorplan.placements[i].coloring[j].showValueWhenZoomed;
-          notZoom = this.widget.properties.floorplan.placements[i].coloring[j].showValue;
+      if (this.widget.properties.floorplan.placements[i].coloring !== undefined && this.widget.properties.floorplan.placements[i].coloring.length > 0) {
+        if (Array.isArray(r.message)) {
+          if (r.message.length > 1) {
+            r.message = r.message.join(', ');
+          } else {
+            r.message = r.message[0];
+          }
+        }
+
+        if (typeof (r.message) === 'number' && !isNaN(r.message)) {
+          color = this.widget.properties.floorplan.placements[i].coloring[0].color;
+          zoom = this.widget.properties.floorplan.placements[i].coloring[0].showValueWhenZoomed;
+          notZoom = this.widget.properties.floorplan.placements[i].coloring[0].showValue;
+          for (let j = 1; j < this.widget.properties.floorplan.placements[i].coloring.length && r.message > (this.widget.properties.floorplan.placements[i].coloring[j - 1].value as number); j++) {
+            color = this.widget.properties.floorplan.placements[i].coloring[j].color;
+            zoom = this.widget.properties.floorplan.placements[i].coloring[j].showValueWhenZoomed;
+            notZoom = this.widget.properties.floorplan.placements[i].coloring[j].showValue;
+          }
+        } else {
+          const l = this.widget.properties.floorplan.placements[i].coloring.length;
+          color = this.widget.properties.floorplan.placements[i].coloring[l - 1].color;
+          zoom = this.widget.properties.floorplan.placements[i].coloring[l - 1].showValueWhenZoomed;
+          notZoom = this.widget.properties.floorplan.placements[i].coloring[l - 1].showValue;
+
+          for (let j = 0; j < l; j++) {
+            if (('' + r.message).match(new RegExp('' + this.widget.properties.floorplan.placements[i].coloring[j].value)) !== null) {
+              color = this.widget.properties.floorplan.placements[i].coloring[j].color;
+              zoom = this.widget.properties.floorplan.placements[i].coloring[j].showValueWhenZoomed;
+              notZoom = this.widget.properties.floorplan.placements[i].coloring[j].showValue;
+              break;
+            }
+          }
         }
       }
       let label = '' + r.message;
