@@ -257,23 +257,6 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     this.img = image(this.widget.properties);
     const obs: Observable<unknown>[] = [];
     obs.push(this.refresh());
-    const functionIds = this.widget.properties.floorplan?.placements.map(p => p.criteria.function_id);
-    if (functionIds !== undefined && functionIds?.length > 0) {
-      obs.push(this.deviceGroupsService.getFunctionListByIds(functionIds).pipe(
-        concatMap(functions => this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) }).pipe(map(concepts => ({ concepts, functions })))),
-        map((res) => res.functions.forEach(f => {
-          const concept = res.concepts.result.find(c => f.concept_id === c.id);
-          if (concept === undefined) {
-            return;
-          }
-          const displayUnit = concept.characteristics.find(c => c.id === concept.base_characteristic_id)?.display_unit;
-          if (displayUnit === undefined) {
-            return;
-          }
-          this.functionIdToUnit.set(f.id, displayUnit);
-        }),
-        )));
-    }
     forkJoin(obs).subscribe(_ => {
       this.draw();
       this.ready = true;
@@ -396,7 +379,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     }));
     let o: Observable<unknown> | undefined;
     if (commands.length > 0) {
-      o = this.deviceCommandService.runCommands(commands, true).pipe(map(res => this.values = res));
+      o = this.loadMissingFunctionInfo().pipe(concatMap(_ => this.deviceCommandService.runCommands(commands, true)), map(res => this.values = res));
     } else {
       o = of(null);
       this.draw();
@@ -455,5 +438,30 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get dotSize(): number {
     return Math.sqrt(this.el.nativeElement.clientHeight * this.el.nativeElement.clientWidth) * (this.widget.properties?.floorplan?.dotSize || 5) / 350;
+  }
+
+  loadMissingFunctionInfo(): Observable<null> {
+    const obs: Observable<any>[] = [of(null)];
+    const functionIds = this.widget.properties.floorplan?.placements.map(p => p.criteria.function_id).filter(fId => !this.functionIdToUnit.has(fId));
+    if (functionIds !== undefined && functionIds?.length > 0) {
+      obs.push(this.deviceGroupsService.getFunctionListByIds(functionIds).pipe(
+        concatMap(functions => this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) }).pipe(map(concepts => ({ concepts, functions })))),
+        map((res) => res.functions.forEach(f => {
+          const concept = res.concepts.result.find(c => f.concept_id === c.id);
+          if (concept === undefined) {
+            return;
+          }
+          const displayUnit = concept.characteristics.find(c => c.id === concept.base_characteristic_id)?.display_unit;
+          if (displayUnit === undefined) {
+            return;
+          }
+          this.functionIdToUnit.set(f.id, displayUnit);
+          return;
+        }),
+        )));
+    }
+    return forkJoin(obs).pipe(map(_ => {
+      return null;
+    }));
   }
 }
