@@ -88,3 +88,8 @@
   margin-top: 0.5em;
   line-height: 4em;
 }
+
+.inline {
+  display: inline;
+  padding-top: 0.9em;
+}

@@ -265,7 +265,6 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
         y: new FormControl<number>(0),
       }),
       coloring: new FormArray([].map(this.newColoring)),
-      icon: new FormControl<string>('circle'),
       valueLow: new FormControl<number | null>(null),
       valueHigh: new FormControl<number | null>(null),
       colorLow: new FormControl<string>('#808080'),
@@ -299,7 +298,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   }
 
   addNewColoring(arr: FormArray): void {
-    let val = { value: 100000, color: '#000000', showValue: false, showValueWhenZoomed: false };
+    let val = { value: 100000, color: '#000000', showValue: false, showValueWhenZoomed: false, icon: 'circle' };
     if (arr.length > 0) {
       val = arr.at(arr.length - 1).getRawValue();
     }
@@ -311,12 +310,14 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     color: string;
     showValue: boolean;
     showValueWhenZoomed: boolean;
+    icon: string;
   }): FormGroup {
     const fg = this.fb.group({
       value: new FormControl<number|string>(0),
       color: new FormControl(''),
       showValue: new FormControl(false),
       showValueWhenZoomed: new FormControl(false),
+      icon: new FormControl(''),
     });
     if (value !== undefined) {
       fg.patchValue(value);

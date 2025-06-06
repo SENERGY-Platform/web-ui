@@ -61,35 +61,25 @@
 
         <ng-template matExpansionPanelContent>
           <div style="display: flex; justify-content: end;">
-            <button mat-icon-button color="accent" (click)="placePlacement(i); false" matTooltip="Place on Map">
-              <mat-icon>point_scan</mat-icon>
-            </button>
-            <button mat-icon-button color="accent" (click)="copyPlacement(i); false">
-              <mat-icon>content_copy</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" (click)="removePlacement(i); false">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <mat-form-field appearance="outline" color="accent">
+            <mat-form-field appearance="outline" color="accent" style="flex-grow: 1;">
               <mat-label>Alias</mat-label>
               <input type="text" matInput formControlName="alias" required>
               <mat-error senergyError label="Alias"></mat-error>
             </mat-form-field>
-
-            <mat-form-field appearance="outline" color="accent">
-              <mat-label>Icon</mat-label>
-              <mtx-select formControlName="icon" required [items]="materialIconNames" appendTo=".ng-select-anchor"
-                virtualScroll>
-                <ng-template ng-label-tmp ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
-                  <mat-icon color="accent">{{item}}</mat-icon>
-                </ng-template>
-              </mtx-select>
-              <mat-error senergyError label="Icon"></mat-error>
-            </mat-form-field>
+            <div class="mat-form-field inline">
+              <div class="mat-form-field-wrapper">
+                <button mat-icon-button color="accent" (click)="placePlacement(i); false" matTooltip="Place on Map">
+                  <mat-icon>point_scan</mat-icon>
+                </button>
+                <button mat-icon-button color="accent" (click)="copyPlacement(i); false">
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="removePlacement(i); false">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
           </div>
-
 
           <mat-form-field appearance="outline" color="accent" style="display: flex;">
             <mat-label>Device Group</mat-label>
@@ -113,9 +103,19 @@
             <tr *ngFor="let c of getColoringControls(tab).controls; let colorIndex = index" [formGroup]="c">
               <td>
                 <div>
+                  <mat-form-field appearance="outline" color="accent" style="max-width: 6em;">
+                    <mat-label>Icon</mat-label>
+                    <mtx-select formControlName="icon" required [items]="materialIconNames" appendTo=".ng-select-anchor"
+                      virtualScroll>
+                      <ng-template ng-label-tmp ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
+                        <mat-icon [style.color]="c.value.color">{{item}}</mat-icon>
+                      </ng-template>
+                    </mtx-select>
+                    <mat-error senergyError label="Icon"></mat-error>
+                  </mat-form-field>
                   <button mat-icon-button [(colorPicker)]="c.value.color" cpAlphaChannel="disabled"
                     [style.color]="c.value.color" (colorPickerChange)="colorSelected($event, c.controls.color)">
-                    <mat-icon matTooltip="Change color">{{tab.value.icon}}</mat-icon>
+                    <mat-icon matTooltip="Change color">{{c.value.icon}}</mat-icon>
                   </button>
                   <span class="color-text"
                     *ngIf="getColoringControls(tab).controls.length > 1 && colorIndex < getColoringControls(tab).controls.length - 1">
@@ -132,7 +132,7 @@
                     *ngIf="colorIndex === getColoringControls(tab).controls.length - 1 && getColoringControls(tab).controls.length > 1">for
                     all {{criteriaIsNumeric(tab) ? 'higher' : 'other'}} values</span>
                   <mat-checkbox formControlName="showValue">Display value</mat-checkbox>
-                  <mat-checkbox formControlName="showValueWhenZoomed">Display value when maximized</mat-checkbox>
+                  <mat-checkbox formControlName="showValueWhenZoomed">When maximized</mat-checkbox>
                 </div>
               </td>
               <td>

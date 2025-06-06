@@ -33,11 +33,13 @@ export interface FloorplanWidgetCapabilityModel {
         y: number | null;
     },
     coloring: {
-        value: number|string;
+        value: number | string;
+        icon: string;
         color: string;
         showValue: boolean;
         showValueWhenZoomed: boolean;
     }[],
+    /**  @deprecated use @link coloring */
     icon?: string;
     /**  @deprecated use @link coloring */
     valueLow: number | null;
@@ -108,14 +110,18 @@ export function migrateColoring(properties: FloorplanWidgetPropertiesModel) {
             p.coloring = [];
         }
         if (p.colorLow && p.valueLow) {
-            p.coloring.push({ value: p.valueLow, color: p.colorLow, showValue: false, showValueWhenZoomed: false });
+            p.coloring.push({ value: p.valueLow, color: p.colorLow, showValue: false, showValueWhenZoomed: false, icon: p.icon || 'circle' });
             p.colorLow = null;
             p.valueLow = null;
         }
         if (p.colorHigh && p.valueHigh) {
-            p.coloring.push({ value: Math.max(p.valueHigh, 100000), color: p.colorHigh, showValue: false, showValueWhenZoomed: false });
+            p.coloring.push({ value: Math.max(p.valueHigh, 100000), color: p.colorHigh, showValue: false, showValueWhenZoomed: false, icon: p.icon || 'circle' });
             p.colorHigh = null;
             p.valueHigh = null;
+        }
+        if (p.icon !== undefined) {
+            p.coloring.forEach(c => c.icon = p.icon || 'circle');
+            p.icon = undefined;
         }
     });
 }

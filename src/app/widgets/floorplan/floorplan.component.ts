@@ -63,6 +63,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     plugins: Plugin<keyof ChartTypeRegistry, AnyObject>[];
     showValue: boolean[];
     showValueWhenZoomed: boolean[];
+    icons: string[];
   } = {
       options: {
         animation: false,
@@ -144,7 +145,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
               if (placement === undefined) {
                 return def;
               }
-              const icon = placement.icon;
+              const icon = this.chartjs.icons[dsIndex];
               if (icon === undefined) {
                 return def;
               }
@@ -240,6 +241,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       }],
       showValueWhenZoomed: [],
       showValue: [],
+      icons: [],
     };
 
   constructor(
@@ -299,6 +301,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     const datasets: ChartDataset[] = new Array(Math.max(this.values.length - 1, 0)).fill({});
     const showValue: boolean[] = [];
     const showValueWhenZoomed: boolean[] = [];
+    const icons: string[] = [];
     this.values.forEach((r, i) => {
       if (this.widget.properties.floorplan === undefined || this.widget.properties.floorplan.placements === null || this.img === undefined) {
         return;
@@ -308,6 +311,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       let color = 'grey';
       let zoom = false;
       let notZoom = false;
+      let icon = 'circle';
       if (this.widget.properties.floorplan.placements[i].coloring !== undefined && this.widget.properties.floorplan.placements[i].coloring.length > 0) {
         if (Array.isArray(r.message)) {
           if (r.message.length > 1) {
@@ -318,22 +322,26 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         if (typeof (r.message) === 'number' && !isNaN(r.message)) {
+          icon = this.widget.properties.floorplan.placements[i].coloring[0].icon;
           color = this.widget.properties.floorplan.placements[i].coloring[0].color;
           zoom = this.widget.properties.floorplan.placements[i].coloring[0].showValueWhenZoomed;
           notZoom = this.widget.properties.floorplan.placements[i].coloring[0].showValue;
           for (let j = 1; j < this.widget.properties.floorplan.placements[i].coloring.length && r.message > (this.widget.properties.floorplan.placements[i].coloring[j - 1].value as number); j++) {
+            icon = this.widget.properties.floorplan.placements[i].coloring[j].icon;
             color = this.widget.properties.floorplan.placements[i].coloring[j].color;
             zoom = this.widget.properties.floorplan.placements[i].coloring[j].showValueWhenZoomed;
             notZoom = this.widget.properties.floorplan.placements[i].coloring[j].showValue;
           }
         } else {
           const l = this.widget.properties.floorplan.placements[i].coloring.length;
+          icon = this.widget.properties.floorplan.placements[i].coloring[l - 1].icon;
           color = this.widget.properties.floorplan.placements[i].coloring[l - 1].color;
           zoom = this.widget.properties.floorplan.placements[i].coloring[l - 1].showValueWhenZoomed;
           notZoom = this.widget.properties.floorplan.placements[i].coloring[l - 1].showValue;
 
           for (let j = 0; j < l; j++) {
             if (('' + r.message).match(new RegExp('' + this.widget.properties.floorplan.placements[i].coloring[j].value)) !== null) {
+              icon = this.widget.properties.floorplan.placements[i].coloring[j].icon;
               color = this.widget.properties.floorplan.placements[i].coloring[j].color;
               zoom = this.widget.properties.floorplan.placements[i].coloring[j].showValueWhenZoomed;
               notZoom = this.widget.properties.floorplan.placements[i].coloring[j].showValue;
@@ -346,11 +354,13 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.functionIdToUnit.has(this.widget.properties.floorplan.placements[i].criteria.function_id)) {
         label += ' ' + this.functionIdToUnit.get(this.widget.properties.floorplan.placements[i].criteria.function_id);
       }
+      icons[i] = icon;
       showValueWhenZoomed[i] = zoom;
       showValue[i] = notZoom;
       datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color };
     });
     this.chartjs.data = { datasets };
+    this.chartjs.icons = icons;
     this.chartjs.showValueWhenZoomed = showValueWhenZoomed;
     this.chartjs.showValue = showValue;
     const chart = this.chartjsChart;
@@ -393,7 +403,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
 
   edit() {
     const dialogConfig = new MatDialogConfig();
-    dialogConfig.minWidth = '75vw';
+    dialogConfig.width = '75vw';
     dialogConfig.disableClose = false;
     dialogConfig.data = {
       widgetId: this.widget.id,
