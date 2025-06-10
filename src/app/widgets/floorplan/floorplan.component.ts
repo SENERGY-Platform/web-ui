@@ -29,6 +29,23 @@ import { ChartConfiguration, ChartData, ChartTypeRegistry, BubbleDataPoint, Char
 import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
+import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { DeviceTypeAspectNodeModel, DeviceTypeFunctionModel, DeviceTypeDeviceClassModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
+
+
+interface TooltipCriteria {
+  matchDsIndex: number;
+  values: {description: string, label: string}[];
+}
+
+interface DeviceGroupCriteriaWithValueModel extends DeviceGroupCriteriaModel {
+  value?: DeviceCommandResponseModel,
+}
+
+interface DeviceGroupWithValueModel extends DeviceGroupModel {
+  criteria?: DeviceGroupCriteriaWithValueModel[];
+}
 
 @Component({
   selector: 'senergy-floorplan',
@@ -53,6 +70,10 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   img: HTMLImageElement | undefined;
   draws = 0;
   functionIdToUnit = new Map<string, string>();
+  deviceGroups: DeviceGroupWithValueModel[] = [];
+  aspects: DeviceTypeAspectNodeModel[] = [];
+  functions: DeviceTypeFunctionModel[] = [];
+  deviceClasses: DeviceTypeDeviceClassModel[] = [];
 
   chartjs: {
     options: ChartConfiguration['options'];
@@ -64,6 +85,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     showValue: boolean[];
     showValueWhenZoomed: boolean[];
     icons: string[];
+    tooltipCriteria: TooltipCriteria[];
   } = {
       options: {
         animation: false,
@@ -84,6 +106,33 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
                     // @ts-expect-error x axis is always defined
                     drawToLeft: (x.raw as { x: number }).x > (this.chartjs.options.scales['x'].max || 0) / 2,
                   };
+                });
+                this.chartjs.tooltipCriteria = [];
+                this.chartjs.tooltipDatasets.forEach(x => {
+                  const tc: TooltipCriteria = { matchDsIndex: x.datasetIndex, values: [] };
+                  this.deviceGroups.find(dg => dg.id === this.widget.properties.floorplan?.placements[x.datasetIndex].deviceGroupId)?.criteria?.forEach(c => {
+                    if (this.compareCriteriaWithoutInteraction(this.widget.properties.floorplan?.placements[x.datasetIndex].criteria as DeviceGroupCriteriaModel, c)) {
+                      // This criteria is selected for the placement, do not show again in tooltip
+                      // TODO relevant for control?
+                      return;
+                    }
+                    if (c.value === undefined || c.value === null || c.value.status_code !== 200) {
+                      return;
+                    }
+                    if (Array.isArray(c.value.message)) {
+                      if (c.value.message.length > 1) {
+                        c.value.message = c.value.message.join(', ');
+                      } else {
+                        c.value.message = c.value.message[0];
+                      }
+                    }
+                    let label = '' + c.value.message;
+                    if (this.functionIdToUnit.has(c.function_id)) {
+                      label += ' ' + this.functionIdToUnit.get(c.function_id);
+                    }
+                    tc.values.push({label, description: this.describeCriteria(c)});
+                  });
+                  this.chartjs.tooltipCriteria.push(tc);
                 });
                 return [];
               }
@@ -242,6 +291,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       showValueWhenZoomed: [],
       showValue: [],
       icons: [],
+      tooltipCriteria: [],
     };
 
   constructor(
@@ -251,6 +301,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     private cd: ChangeDetectorRef,
     private deviceGroupsService: DeviceGroupsService,
     private conceptsService: ConceptsService,
+    private deviceClassService: DeviceClassesService,
     private el: ElementRef,
   ) { }
 
@@ -258,6 +309,8 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     migrateColoring(this.widget.properties);
     this.img = image(this.widget.properties);
     const obs: Observable<unknown>[] = [];
+    obs.push(this.deviceGroupsService.getAspectListByIds(undefined).pipe(map(a => this.aspects = a)));
+    obs.push(this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').pipe(map(c => this.deviceClasses = c.result)));
     obs.push(this.refresh());
     forkJoin(obs).subscribe(_ => {
       this.draw();
@@ -380,24 +433,51 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     this.refreshing = true;
     this.img = image(this.widget.properties);
     const commands: DeviceCommandModel[] = [];
-    this.widget.properties.floorplan.placements.forEach(p => commands.push({
-      group_id: p.deviceGroupId || undefined,
-      function_id: p.criteria.function_id,
-      aspect_id: p.criteria.aspect_id,
-      device_class_id: p.criteria.device_class_id,
-      // TODO add input if controlling & required
-    }));
-    let o: Observable<unknown> | undefined;
-    if (commands.length > 0) {
-      o = this.loadMissingFunctionInfo().pipe(concatMap(_ => this.deviceCommandService.runCommands(commands, true)), map(res => this.values = res));
-    } else {
-      o = of(null);
-      this.draw();
-      this.refreshing = false;
-    }
-    return o.pipe(map(_ => {
-      this.draw();
-      this.refreshing = false;
+
+    return this.loadMissingDeviceGroups().pipe(concatMap(_ => {
+      if (this.widget.properties.floorplan === undefined) {
+        return of(null);
+      }
+
+      this.deviceGroups.forEach(dg => {
+        if (dg.criteria === undefined) {
+          return;
+        }
+        dg.criteria?.filter(c => c.function_id.startsWith('urn:infai:ses:measuring-function')).forEach(c2 => {
+          commands.push({
+            group_id: dg.id || undefined,
+            function_id: c2.function_id,
+            aspect_id: c2.aspect_id,
+            device_class_id: c2.device_class_id,
+          });
+        });
+      });
+      this.values = [];
+      let o: Observable<unknown> | undefined;
+      if (commands.length > 0) {
+        o = this.loadMissingFunctionInfo().pipe(concatMap(_1 => this.deviceCommandService.runCommands(commands, true)), map(res => {
+          commands.forEach((com, i) => {
+            const criteria = this.deviceGroups.find(dg => dg.id === com.group_id)?.criteria?.find(crit => this.compareCriteriaWithoutInteraction(crit, com as DeviceGroupCriteriaModel));
+            if (criteria !== undefined) {
+              criteria.value = res[i];
+            }
+
+            this.widget.properties.floorplan?.placements.forEach((p, j) => {
+              if (p.deviceGroupId === com.group_id && this.compareCriteriaWithoutInteraction(p.criteria, com as DeviceGroupCriteriaModel)) {
+                this.values[j] = res[i];
+              }
+            });
+          });
+        }));
+      } else {
+        o = of(null);
+        this.draw();
+        this.refreshing = false;
+      }
+      return o.pipe(map(_1 => {
+        this.draw();
+        this.refreshing = false;
+      }));
     }));
   }
 
@@ -452,17 +532,29 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
 
   loadMissingFunctionInfo(): Observable<null> {
     const obs: Observable<any>[] = [of(null)];
-    const functionIds = this.widget.properties.floorplan?.placements.map(p => p.criteria.function_id).filter(fId => !this.functionIdToUnit.has(fId));
+    let functionIds = this.widget.properties.floorplan?.placements.map(p => p.criteria.function_id) || [];
+    this.deviceGroups.forEach(d => {
+      if (d.criteria === undefined) {
+        return;
+      }
+      functionIds.push(...d.criteria.map(c => c.function_id));
+    });
+    functionIds = functionIds.filter(fId => !this.functionIdToUnit.has(fId));
     if (functionIds !== undefined && functionIds?.length > 0) {
       obs.push(this.deviceGroupsService.getFunctionListByIds(functionIds).pipe(
-        concatMap(functions => this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) }).pipe(map(concepts => ({ concepts, functions })))),
+        concatMap(functions => {
+          this.functions.push(...functions);
+          return this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) }).pipe(map(concepts => ({ concepts, functions })));
+        }),
         map((res) => res.functions.forEach(f => {
           const concept = res.concepts.result.find(c => f.concept_id === c.id);
           if (concept === undefined) {
+            this.functionIdToUnit.set(f.id, '');
             return;
           }
           const displayUnit = concept.characteristics.find(c => c.id === concept.base_characteristic_id)?.display_unit;
           if (displayUnit === undefined) {
+            this.functionIdToUnit.set(f.id, '');
             return;
           }
           this.functionIdToUnit.set(f.id, displayUnit);
@@ -473,5 +565,37 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     return forkJoin(obs).pipe(map(_ => {
       return null;
     }));
+  }
+
+  loadMissingDeviceGroups(): Observable<null> {
+    const deviceGroupIds = this.widget.properties.floorplan?.placements.map(p => p.deviceGroupId).filter(dId => dId !== null).filter(dId => this.deviceGroups.find(dg => dg.id === dId) === undefined).filter((v, i, a) => a.indexOf(v) === i);
+    if (deviceGroupIds !== undefined && deviceGroupIds?.length > 0) {
+      // @ts-expect-error deviceGroupIds is string[], but compiler does not recognize
+      return this.deviceGroupsService.getDeviceGroupListByIds(deviceGroupIds, true).pipe(map(dgs => {
+        dgs.forEach(dg => dg.criteria = dg.criteria?.filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i));
+        this.deviceGroups.push(...(dgs as DeviceGroupWithValueModel[]));
+        return null;
+      }));
+    }
+    return of(null);
+  }
+
+  compareCriteria(a: DeviceGroupCriteriaModel, b: DeviceGroupCriteriaModel): boolean {
+    return this.compareCriteriaWithoutInteraction(a, b) &&
+      a.interaction === b.interaction;
+  }
+
+  compareCriteriaWithoutInteraction(a: DeviceGroupCriteriaModel, b: DeviceGroupCriteriaModel): boolean {
+    return a.function_id === b.function_id &&
+      a.device_class_id === b.device_class_id &&
+      a.aspect_id === b.aspect_id;
+  }
+
+
+  describeCriteria(criteria: DeviceGroupCriteriaModel | null): string {
+    if (criteria == null) {
+      return '';
+    }
+    return (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
   }
 }

@@ -20,30 +20,40 @@
     <div *ngIf="ready && widget.properties.floorplan === undefined" class="content">
       <div>Please configure widget!</div>
     </div>
-    <senergy-widget-spinner [show]="widget.properties.floorplan !== undefined && (!ready || draws < 2)"></senergy-widget-spinner>
+    <senergy-widget-spinner
+      [show]="widget.properties.floorplan !== undefined && (!ready || draws < 2)"></senergy-widget-spinner>
     <div [hidden]="!ready || !widget.properties.floorplan === undefined" class="content">
       <div class="image-wrapper" #imageWrapper>
         <canvas #canvas baseChart [data]="chartjs.data" [options]="chartjs.options" type="scatter"
-          id="chartjs-{{widget.id}}" 
-          [plugins]="chartjs.plugins" [ngClass]="{'hidden': draws < 2}"></canvas>
-        <div *ngIf="chartjs.tooltipContext !== undefined" id="chartjs-tooltip"
-          class="mat-elevation-z4" [ngStyle]="chartjsTooltipStyle">
+          id="chartjs-{{widget.id}}" [plugins]="chartjs.plugins" [ngClass]="{'hidden': draws < 2}"></canvas>
+        <div *ngIf="chartjs.tooltipContext !== undefined" id="chartjs-tooltip" class="mat-elevation-z4"
+          [ngStyle]="chartjsTooltipStyle">
           <table>
-            <thead>
-              <tr *ngFor="let title of chartjs.tooltipContext.tooltip.title">
-                <td>{{title}}</td>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let line of chartjs.tooltipContext.tooltip.body, let i = index" style="display: flex;">
-                <td>
-                  <span class="tooltip-colorbox"
-                    [ngStyle]="{'background': chartjs.tooltipContext.tooltip.labelColors[i].backgroundColor}"></span>
-                </td>
-                <td>{{this.chartjs.tooltipDatasets[i].label}}</td>
+            <ng-container *ngFor="let title of chartjs.tooltipContext.tooltip.title; let i = index">
+              <thead>
+                <tr>
+                  <td>{{title}}</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <span class="tooltip-colorbox"
+                      [ngStyle]="{'background': chartjs.tooltipContext.tooltip.labelColors[i].backgroundColor}"></span>
+                  </td>
+                  <td>{{this.chartjs.tooltipDatasets[i].label}}</td>
+                </tr>
+                <ng-container *ngFor="let line of chartjs.tooltipCriteria">
+                  <ng-container *ngIf="line.matchDsIndex === this.chartjs.tooltipDatasets[i].datasetIndex">
+                    <tr *ngFor="let c of line.values">
+                      <td>{{c.description}}</td>
+                      <td>{{c.label}}</td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
+              </tbody>
+            </ng-container>
 
-              </tr>
-            </tbody>
           </table>
         </div>
       </div>

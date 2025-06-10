@@ -417,7 +417,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
 
   private filterCriteria(d: DeviceGroupModel) {
     d.criteria?.forEach(c => c.interaction = '');
-    d.criteria = d.criteria?.filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i);
+    d.criteria = d.criteria?.filter(c => c.function_id.startsWith('urn:infai:ses:measuring-function')).filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i);
   }
 
   criteriaIsNumeric(tab: FormGroup): boolean {
