@@ -21,43 +21,20 @@ import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
 import { map, Observable, Subscription, of, forkJoin, concatMap, delay } from 'rxjs';
-import { image, migrateColoring } from './shared/floorplan.model';
-import { DeviceCommandModel, DeviceCommandResponseModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
+import { CriteriaAndBaseCharacteristicModel, DeviceGroupWithValueModel, image, migrateColoring, TooltipCriteria } from './shared/floorplan.model';
+import { DeviceCommandModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
 import { Point } from '@angular/cdk/drag-drop';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
 import { ChartConfiguration, ChartData, ChartTypeRegistry, BubbleDataPoint, Chart, TooltipModel, Plugin, ChartDataset } from 'chart.js';
 import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
-import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { DeviceTypeAspectNodeModel, DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeCharacteristicsModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
 import { environment } from '../../../environments/environment';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 
-interface TooltipCriteria {
-  matchDsIndex: number;
-  values: {
-    description: string,
-    label: string,
-    control?: CriteriaAndBaseCharacteristicModel,
-  }[];
-}
-
-interface CriteriaAndBaseCharacteristicModel {
-  characteristic?: DeviceTypeCharacteristicsModel,
-  criteria: DeviceGroupCriteriaModel,
-}
-
-interface DeviceGroupCriteriaWithValueModel extends DeviceGroupCriteriaModel {
-  value?: DeviceCommandResponseModel,
-}
-
-interface DeviceGroupWithValueModel extends DeviceGroupModel {
-  criteria?: DeviceGroupCriteriaWithValueModel[];
-}
-
-// TODO handle toggles for service groups separately
 @Component({
   selector: 'senergy-floorplan',
   templateUrl: './floorplan.component.html',
@@ -76,7 +53,6 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   ready = true;
   refreshing = false;
   destroy: Subscription | undefined;
-  values: DeviceCommandResponseModel[] = [];
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
   img: HTMLImageElement | undefined;
   draws = 0;
@@ -125,8 +101,9 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.chartjs.tooltipDatasets.forEach(x => {
                   const tc: TooltipCriteria = { matchDsIndex: x.datasetIndex, values: [] };
                   const deviceGroup = this.deviceGroups.find(dg => dg.id === this.widget.properties.floorplan?.placements[x.datasetIndex].deviceGroupId);
-                  deviceGroup?.criteria?.forEach(c => {
-                    if (this.compareCriteriaWithoutInteraction(this.widget.properties.floorplan?.placements[x.datasetIndex].criteria as DeviceGroupCriteriaModel, c)) {
+                  const placement = this.widget.properties.floorplan?.placements[x.datasetIndex];
+                  placement?.tooltipCriteria?.forEach(c => {
+                    if (this.compareCriteriaWithoutInteraction(placement.criteria, c)) {
                       // This criteria is selected for the placement, do not show again in tooltip
                       return;
                     }
@@ -145,7 +122,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
                       label += ' ' + this.functionIdToUnit.get(c.function_id);
                     }
 
-                    const relatedControllingCriteria = this.filterRelatedControllingCriteria(c, deviceGroup.criteria || [], c.value.message);
+                    const relatedControllingCriteria = this.filterRelatedControllingCriteria(c, deviceGroup?.criteria || [], c.value.message);
                     let control: {
                       characteristic?: DeviceTypeCharacteristicsModel,
                       criteria: DeviceGroupCriteriaModel,
@@ -412,11 +389,11 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       this.chartjs.options.elements.point.radius = this.dotSize;
       this.chartjs.options.elements.point.hoverRadius = this.dotSize;
     }
-    const datasets: ChartDataset[] = new Array(Math.max(this.values.length - 1, 0)).fill({});
+    const datasets: ChartDataset[] = new Array(Math.max((this.widget.properties.floorplan?.placements || []).length - 1, 0)).fill({});
     const showValue: boolean[] = [];
     const showValueWhenZoomed: boolean[] = [];
     const icons: string[] = [];
-    this.values.forEach((r, i) => {
+    this.widget.properties.floorplan?.placements.forEach((p, i) => {
       if (this.widget.properties.floorplan === undefined || this.widget.properties.floorplan.placements === null || this.img === undefined) {
         return;
       }
@@ -426,7 +403,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       let zoom = false;
       let notZoom = false;
       let icon = 'circle';
-      let value = r.message;
+      let value = p.criteria.value?.message;
       if (this.widget.properties.floorplan.placements[i].coloring !== undefined && this.widget.properties.floorplan.placements[i].coloring.length > 0) {
         if (Array.isArray(value)) {
           if (value.length > 1) {
@@ -501,20 +478,22 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
         return of(null);
       }
 
-      this.deviceGroups.forEach(dg => {
-        if (dg.criteria === undefined) {
-          return;
-        }
-        dg.criteria?.filter(c => c.function_id.startsWith('urn:infai:ses:measuring-function')).forEach(c2 => {
+      this.widget.properties.floorplan.placements.forEach(p => {
+        p.tooltipCriteria?.forEach(c2 => {
           commands.push({
-            group_id: dg.id || undefined,
+            group_id: p.deviceGroupId || undefined,
             function_id: c2.function_id,
             aspect_id: c2.aspect_id,
             device_class_id: c2.device_class_id,
           });
         });
+        commands.push({
+          group_id: p.deviceGroupId || undefined,
+          function_id: p.criteria.function_id,
+          aspect_id: p.criteria.aspect_id,
+          device_class_id: p.criteria.device_class_id,
+        });
       });
-      this.values = [];
       let o: Observable<unknown> | undefined;
       if (commands.length > 0) {
         o = this.loadMissingFunctionInfo().pipe(concatMap(_1 => this.deviceCommandService.runCommands(commands, true)), map(res => {
@@ -524,9 +503,19 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
               criteria.value = res[i];
             }
 
-            this.widget.properties.floorplan?.placements.forEach((p, j) => {
-              if (p.deviceGroupId === com.group_id && this.compareCriteriaWithoutInteraction(p.criteria, com as DeviceGroupCriteriaModel)) {
-                this.values[j] = res[i];
+            this.widget.properties.floorplan?.placements.forEach(p => {
+              if (p.deviceGroupId !== com.group_id) {
+                return;
+              }
+
+              p.tooltipCriteria?.forEach(c => {
+                if (this.compareCriteriaWithoutInteraction(c, com as DeviceGroupCriteriaModel)) {
+                  c.value = res[i];
+                }
+              });
+
+              if (this.compareCriteriaWithoutInteraction(p.criteria, com as DeviceGroupCriteriaModel)) {
+                p.criteria.value = res[i];
               }
             });
           });
@@ -684,7 +673,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       return { criteriaAndCharacteristic: [], deviceGroupId: '' };
     }
 
-    const relatedControllingCriteria = this.filterRelatedControllingCriteria(placement.criteria, deviceGroup.criteria || [], this.values[datasetIndex]?.message);
+    const relatedControllingCriteria = this.filterRelatedControllingCriteria(placement.criteria, deviceGroup.criteria || [], placement.criteria.value?.message);
     const criteriaAndCharacteristic = relatedControllingCriteria.map(criteria => {
       const conceptId = this.functions.find(f => f.id === relatedControllingCriteria[0].function_id)?.concept_id;
       const concept = this.concepts.find(concept2 => concept2.id === conceptId);
@@ -719,7 +708,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
           if (c2.aspect_id !== c.aspect_id) {
             return false;
           }
-          const f = this.functions.find(f => f.id === c2.function_id);
+          const f = this.functions.find(f2 => f2.id === c2.function_id);
           return f?.concept_id === conceptId;
         });
     }

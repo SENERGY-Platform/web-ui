@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { DeviceCommandResponseModel } from 'src/app/core/services/device-command.service';
+import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { DeviceTypeCharacteristicsModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 
 export interface FloorplanWidgetPropertiesModel {
     floorplan?: {
@@ -25,7 +27,8 @@ export interface FloorplanWidgetPropertiesModel {
 }
 
 export interface FloorplanWidgetCapabilityModel {
-    criteria: DeviceGroupCriteriaModel;
+    criteria: DeviceGroupCriteriaWithValueModel;
+    tooltipCriteria?: DeviceGroupCriteriaWithValueModel[] | null;
     alias: string;
     deviceGroupId: string | null;
     position: {
@@ -49,6 +52,28 @@ export interface FloorplanWidgetCapabilityModel {
     colorLow: string | null;
     /**  @deprecated use @link coloring */
     colorHigh: string | null;
+}
+
+export interface TooltipCriteria {
+    matchDsIndex: number;
+    values: {
+        description: string,
+        label: string,
+        control?: CriteriaAndBaseCharacteristicModel,
+    }[];
+}
+
+export interface CriteriaAndBaseCharacteristicModel {
+    characteristic?: DeviceTypeCharacteristicsModel,
+    criteria: DeviceGroupCriteriaModel,
+}
+
+export interface DeviceGroupCriteriaWithValueModel extends DeviceGroupCriteriaModel {
+    value?: DeviceCommandResponseModel,
+}
+
+export interface DeviceGroupWithValueModel extends DeviceGroupModel {
+    criteria?: DeviceGroupCriteriaWithValueModel[];
 }
 
 export const dotSize = 10;

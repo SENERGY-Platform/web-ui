@@ -49,7 +49,7 @@
                   <ng-container *ngIf="line.matchDsIndex === this.chartjs.tooltipDatasets[i].datasetIndex">
                     <tr *ngFor="let c of line.values">
                       <td>{{c.description}}</td>
-                      <td>{{c.label}}</td>
+                      <td [colSpan]="c.control && c.control.characteristic === undefined ? 1 : 2">{{c.label}}</td>
                       <td *ngIf="c.control && c.control.characteristic === undefined">
                         <button mat-icon-button color="accent" class="small-icon-button"
                           (click)="performAction(widget.properties.floorplan!.placements[line.matchDsIndex].deviceGroupId, c.control.criteria)"

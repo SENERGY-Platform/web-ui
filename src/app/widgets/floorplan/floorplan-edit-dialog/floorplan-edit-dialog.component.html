@@ -99,6 +99,16 @@
             </mtx-select>
           </mat-form-field>
 
+           <mat-form-field appearance="outline" color="accent" style="display: flex;">
+            <mat-label>Tooltip Criteria</mat-label>
+            <mtx-select formControlName="tooltipCriteria" [hideSelected]="false" virtualScroll="true"
+              placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria"
+              appendTo=".ng-select-anchor" multiple closeOnSelect="false">
+              <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
+                [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
+            </mtx-select>
+          </mat-form-field>
+
           <table style="width: 100%;">
             <tr *ngFor="let c of getColoringControls(tab).controls; let colorIndex = index" [formGroup]="c">
               <td>

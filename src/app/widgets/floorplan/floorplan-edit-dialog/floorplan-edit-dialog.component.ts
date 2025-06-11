@@ -258,6 +258,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   newPlacement(value?: FloorplanWidgetCapabilityModel): FormGroup {
     const fg = this.fb.group({
       criteria: new FormControl<DeviceGroupCriteriaModel | null>(null),
+      tooltipCriteria: new FormControl<DeviceGroupCriteriaModel[] | null>(null),
       deviceGroupId: new FormControl<string>(''),
       alias: new FormControl<string>(''),
       position: new FormGroup({
