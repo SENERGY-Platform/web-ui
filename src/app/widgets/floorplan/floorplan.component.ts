@@ -563,10 +563,18 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-
+  @ViewChild('chartjsTooltip') chartjsTooltipElement: ElementRef | undefined;
   get chartjsTooltipStyle(): any {
+    let top = (this.chartjs.tooltipContext?.chart.canvas?.offsetTop || 0) + (this.chartjs.tooltipContext?.tooltip.caretY || 0);
+    if (this.chartjsTooltipElement !== undefined) {
+      const oversize = top + this.chartjsTooltipElement?.nativeElement.offsetHeight - (this.chartjs.tooltipContext?.chart.canvas?.offsetHeight || 0) + 12; // 12px as extra margin
+      if (oversize > 0) {
+        top -= oversize;
+      }
+
+    }
     const o: any = {
-      'top.px': (this.chartjs.tooltipContext?.chart.canvas?.offsetTop || 0) + (this.chartjs.tooltipContext?.tooltip.caretY || 0),
+      'top.px': top,
       'display': this.chartjs.tooltipDisplay,
     };
     const offsetPx = 10;
