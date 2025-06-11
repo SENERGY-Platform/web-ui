@@ -133,14 +133,14 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
                     if (c.value === undefined || c.value === null || c.value.status_code !== 200) {
                       return;
                     }
+                    let label = '' + c.value.message;
                     if (Array.isArray(c.value.message)) {
                       if (c.value.message.length > 1) {
-                        c.value.message = c.value.message.join(', ');
+                        label = c.value.message.join(', ');
                       } else {
-                        c.value.message = c.value.message[0];
+                        label = c.value.message[0];
                       }
                     }
-                    let label = '' + c.value.message;
                     if (this.functionIdToUnit.has(c.function_id)) {
                       label += ' ' + this.functionIdToUnit.get(c.function_id);
                     }
@@ -289,10 +289,12 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
           }
           let ok = elements !== undefined && elements.length === 1;
-          const datasetIndex = elements[0].datasetIndex;
-          const info = this.findRelatedControllingCriteria(datasetIndex);
-          ok &&= info.criteriaAndCharacteristic.length === 1;
-          ok &&= info.criteriaAndCharacteristic[0].characteristic === undefined;
+          if (ok) {
+            const datasetIndex = elements[0].datasetIndex;
+            const info = this.findRelatedControllingCriteria(datasetIndex);
+            ok &&= info.criteriaAndCharacteristic.length === 1;
+            ok &&= info.criteriaAndCharacteristic[0].characteristic === undefined;
+          }
           if (ok) {
             style.cursor = 'pointer';
           } else {
@@ -424,21 +426,22 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       let zoom = false;
       let notZoom = false;
       let icon = 'circle';
+      let value = r.message;
       if (this.widget.properties.floorplan.placements[i].coloring !== undefined && this.widget.properties.floorplan.placements[i].coloring.length > 0) {
-        if (Array.isArray(r.message)) {
-          if (r.message.length > 1) {
-            r.message = r.message.join(', ');
+        if (Array.isArray(value)) {
+          if (value.length > 1) {
+            value = value.join(', ');
           } else {
-            r.message = r.message[0];
+            value = value[0];
           }
         }
 
-        if (typeof (r.message) === 'number' && !isNaN(r.message)) {
+        if (typeof (value) === 'number' && !isNaN(value)) {
           icon = this.widget.properties.floorplan.placements[i].coloring[0].icon;
           color = this.widget.properties.floorplan.placements[i].coloring[0].color;
           zoom = this.widget.properties.floorplan.placements[i].coloring[0].showValueWhenZoomed;
           notZoom = this.widget.properties.floorplan.placements[i].coloring[0].showValue;
-          for (let j = 1; j < this.widget.properties.floorplan.placements[i].coloring.length && r.message > (this.widget.properties.floorplan.placements[i].coloring[j - 1].value as number); j++) {
+          for (let j = 1; j < this.widget.properties.floorplan.placements[i].coloring.length && value > (this.widget.properties.floorplan.placements[i].coloring[j - 1].value as number); j++) {
             icon = this.widget.properties.floorplan.placements[i].coloring[j].icon;
             color = this.widget.properties.floorplan.placements[i].coloring[j].color;
             zoom = this.widget.properties.floorplan.placements[i].coloring[j].showValueWhenZoomed;
@@ -452,7 +455,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
           notZoom = this.widget.properties.floorplan.placements[i].coloring[l - 1].showValue;
 
           for (let j = 0; j < l; j++) {
-            if (('' + r.message).match(new RegExp('' + this.widget.properties.floorplan.placements[i].coloring[j].value)) !== null) {
+            if (('' + value).match(new RegExp('' + this.widget.properties.floorplan.placements[i].coloring[j].value)) !== null) {
               icon = this.widget.properties.floorplan.placements[i].coloring[j].icon;
               color = this.widget.properties.floorplan.placements[i].coloring[j].color;
               zoom = this.widget.properties.floorplan.placements[i].coloring[j].showValueWhenZoomed;
@@ -462,7 +465,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         }
       }
-      let label = '' + r.message;
+      let label = '' + value;
       if (this.functionIdToUnit.has(this.widget.properties.floorplan.placements[i].criteria.function_id)) {
         label += ' ' + this.functionIdToUnit.get(this.widget.properties.floorplan.placements[i].criteria.function_id);
       }
@@ -686,7 +689,11 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     switch (c.function_id) {
       case environment.getOnOffFunctionId:
         let functionId;
-        if (value) {
+        let t = value;
+        if (Array.isArray(value)) {
+          value.forEach(v => t &&= v);
+        }
+        if (t) {
           functionId = environment.setOffFunctionId;
         } else {
           functionId = environment.setOnFunctionId;
