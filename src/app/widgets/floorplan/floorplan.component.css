@@ -47,16 +47,16 @@
     display: inline-block;
     position: absolute;
     line-height: 1.5;
-  }
+}
 
-  .image-wrapper {
+.image-wrapper {
     height: 100%;
     width: 100%;
     position: relative;
     line-height: 0;
-  }
+}
 
-  #chartjs-tooltip {
+#chartjs-tooltip {
     text-align: left;
     background: white;
     position: absolute;
@@ -74,15 +74,40 @@
     display: inline-block;
 }
 
-#chartjs-tooltip > table > thead {
+#chartjs-tooltip>table>thead {
     font-weight: bold;
 }
 
 td {
     padding: 0;
-   /* width: min-content;*/
+    /* width: min-content;*/
 }
 
 .hidden {
     opacity: 0;
+}
+
+.small-icon-button {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+
+    &>*[role=img] {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+    }
+
+    .mat-mdc-button-touch-target {
+        width: 24px !important;
+        height: 24px !important;
+    }
 }

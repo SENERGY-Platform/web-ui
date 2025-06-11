@@ -20,7 +20,7 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
 import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-edit-dialog.component';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
-import { map, Observable, Subscription, of, forkJoin, concatMap } from 'rxjs';
+import { map, Observable, Subscription, of, forkJoin, concatMap, delay } from 'rxjs';
 import { image, migrateColoring } from './shared/floorplan.model';
 import { DeviceCommandModel, DeviceCommandResponseModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
 import { Point } from '@angular/cdk/drag-drop';
@@ -30,13 +30,23 @@ import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
-import { DeviceTypeAspectNodeModel, DeviceTypeFunctionModel, DeviceTypeDeviceClassModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeAspectNodeModel, DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeCharacteristicsModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
-
+import { environment } from '../../../environments/environment';
+import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 
 interface TooltipCriteria {
   matchDsIndex: number;
-  values: {description: string, label: string}[];
+  values: {
+    description: string,
+    label: string,
+    control?: CriteriaAndBaseCharacteristicModel,
+  }[];
+}
+
+interface CriteriaAndBaseCharacteristicModel {
+  characteristic?: DeviceTypeCharacteristicsModel,
+  criteria: DeviceGroupCriteriaModel,
 }
 
 interface DeviceGroupCriteriaWithValueModel extends DeviceGroupCriteriaModel {
@@ -47,6 +57,7 @@ interface DeviceGroupWithValueModel extends DeviceGroupModel {
   criteria?: DeviceGroupCriteriaWithValueModel[];
 }
 
+// TODO handle toggles for service groups separately
 @Component({
   selector: 'senergy-floorplan',
   templateUrl: './floorplan.component.html',
@@ -74,6 +85,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   aspects: DeviceTypeAspectNodeModel[] = [];
   functions: DeviceTypeFunctionModel[] = [];
   deviceClasses: DeviceTypeDeviceClassModel[] = [];
+  concepts: ConceptsCharacteristicsModel[] = [];
 
   chartjs: {
     options: ChartConfiguration['options'];
@@ -86,6 +98,8 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     showValueWhenZoomed: boolean[];
     icons: string[];
     tooltipCriteria: TooltipCriteria[];
+    tooltipDisplay: string;
+    tooltipAllowed: boolean;
   } = {
       options: {
         animation: false,
@@ -110,10 +124,10 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.chartjs.tooltipCriteria = [];
                 this.chartjs.tooltipDatasets.forEach(x => {
                   const tc: TooltipCriteria = { matchDsIndex: x.datasetIndex, values: [] };
-                  this.deviceGroups.find(dg => dg.id === this.widget.properties.floorplan?.placements[x.datasetIndex].deviceGroupId)?.criteria?.forEach(c => {
+                  const deviceGroup = this.deviceGroups.find(dg => dg.id === this.widget.properties.floorplan?.placements[x.datasetIndex].deviceGroupId);
+                  deviceGroup?.criteria?.forEach(c => {
                     if (this.compareCriteriaWithoutInteraction(this.widget.properties.floorplan?.placements[x.datasetIndex].criteria as DeviceGroupCriteriaModel, c)) {
                       // This criteria is selected for the placement, do not show again in tooltip
-                      // TODO relevant for control?
                       return;
                     }
                     if (c.value === undefined || c.value === null || c.value.status_code !== 200) {
@@ -130,7 +144,23 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
                     if (this.functionIdToUnit.has(c.function_id)) {
                       label += ' ' + this.functionIdToUnit.get(c.function_id);
                     }
-                    tc.values.push({label, description: this.describeCriteria(c)});
+
+                    const relatedControllingCriteria = this.filterRelatedControllingCriteria(c, deviceGroup.criteria || [], c.value.message);
+                    let control: {
+                      characteristic?: DeviceTypeCharacteristicsModel,
+                      criteria: DeviceGroupCriteriaModel,
+                    } | undefined;
+                    if (relatedControllingCriteria.length === 1) {
+                      const conceptId = this.functions.find(f => f.id === relatedControllingCriteria[0].function_id)?.concept_id;
+                      const concept = this.concepts.find(concept2 => concept2.id === conceptId);
+                      control = {
+                        characteristic: concept?.characteristics.find(char => char.id === concept.base_characteristic_id),
+                        criteria: relatedControllingCriteria[0],
+                      };
+                    } else if (relatedControllingCriteria.length > 1) {
+                      console.warn('Floorplan: Found multiple controlling criteria, please check device type');
+                    }
+                    tc.values.push({ label, description: this.describeCriteria(c), control });
                   });
                   this.chartjs.tooltipCriteria.push(tc);
                 });
@@ -142,6 +172,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
                 context.tooltip.title = context.tooltip.dataPoints.map(x => this.widget.properties.floorplan?.placements[x.datasetIndex].alias || '');
               }
               this.chartjs.tooltipContext = context;
+              this.chartjs.tooltipDisplay = 'initial';
               this.cd.detectChanges();
             },
           },
@@ -251,6 +282,32 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
             },
           },
         },
+        events: ['click', 'mousemove'],
+        onHover: (_, elements, chart) => {
+          const style = (chart.canvas?.parentNode as any)?.style;
+          if (style === null) {
+            return;
+          }
+          let ok = elements !== undefined && elements.length === 1;
+          const datasetIndex = elements[0].datasetIndex;
+          const info = this.findRelatedControllingCriteria(datasetIndex);
+          ok &&= info.criteriaAndCharacteristic.length === 1;
+          ok &&= info.criteriaAndCharacteristic[0].characteristic === undefined;
+          if (ok) {
+            style.cursor = 'pointer';
+          } else {
+            style.cursor = 'default';
+          }
+        },
+        onClick: (_, elements) => {
+          if (elements !== undefined && elements.length === 1) {
+            const datasetIndex = elements[0].datasetIndex;
+            const info = this.findRelatedControllingCriteria(datasetIndex);
+            if (info.criteriaAndCharacteristic.length === 1 && info.criteriaAndCharacteristic[0].characteristic === undefined) {
+              this.performAction(info.deviceGroupId, info.criteriaAndCharacteristic[0].criteria);
+            }
+          }
+        }
       },
       data: undefined,
       tooltipContext: undefined,
@@ -292,6 +349,8 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       showValue: [],
       icons: [],
       tooltipCriteria: [],
+      tooltipDisplay: 'none',
+      tooltipAllowed: false,
     };
 
   constructor(
@@ -477,6 +536,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       return o.pipe(map(_1 => {
         this.draw();
         this.refreshing = false;
+        this.cd.detectChanges();
       }));
     }));
   }
@@ -504,12 +564,13 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   get chartjsTooltipStyle(): any {
     const o: any = {
       'top.px': (this.chartjs.tooltipContext?.chart.canvas?.offsetTop || 0) + (this.chartjs.tooltipContext?.tooltip.caretY || 0),
-      'opacity': this.chartjs.tooltipContext?.tooltip.opacity || '0',
+      'display': this.chartjs.tooltipDisplay,
     };
+    const offsetPx = 10;
     if (this.chartjs.tooltipDatasets.find(x => x.drawToLeft) !== undefined) {
-      o['right.px'] = (this.chartjs.tooltipContext?.chart.width || 0) - ((this.chartjs.tooltipContext?.chart.canvas?.offsetLeft || 0) + (this.chartjs.tooltipContext?.tooltip.caretX || 0));
+      o['right.px'] = (this.chartjs.tooltipContext?.chart.width || 0) - ((this.chartjs.tooltipContext?.chart.canvas?.offsetLeft || 0) + (this.chartjs.tooltipContext?.tooltip.caretX || 0)) + offsetPx;
     } else {
-      o['left.px'] = (this.chartjs.tooltipContext?.chart.canvas?.offsetLeft || 0) + (this.chartjs.tooltipContext?.tooltip.caretX || 0);
+      o['left.px'] = (this.chartjs.tooltipContext?.chart.canvas?.offsetLeft || 0) + (this.chartjs.tooltipContext?.tooltip.caretX || 0) + offsetPx;
     }
     return o;
   }
@@ -544,7 +605,10 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       obs.push(this.deviceGroupsService.getFunctionListByIds(functionIds).pipe(
         concatMap(functions => {
           this.functions.push(...functions);
-          return this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) }).pipe(map(concepts => ({ concepts, functions })));
+          return this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) }).pipe(map(concepts => {
+            this.concepts.push(...(concepts.result));
+            return { concepts, functions };
+          }));
         }),
         map((res) => res.functions.forEach(f => {
           const concept = res.concepts.result.find(c => f.concept_id === c.id);
@@ -597,5 +661,79 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       return '';
     }
     return (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
+  }
+
+  findRelatedControllingCriteria(datasetIndex: number): { criteriaAndCharacteristic: CriteriaAndBaseCharacteristicModel[]; deviceGroupId: string } {
+    const placement = this.widget.properties.floorplan?.placements[datasetIndex];
+    if (placement === undefined) {
+      return { criteriaAndCharacteristic: [], deviceGroupId: '' };
+    }
+    const deviceGroup = this.deviceGroups.find(dg => dg.id === placement.deviceGroupId);
+    if (deviceGroup === undefined) {
+      return { criteriaAndCharacteristic: [], deviceGroupId: '' };
+    }
+
+    const relatedControllingCriteria = this.filterRelatedControllingCriteria(placement.criteria, deviceGroup.criteria || [], this.values[datasetIndex]?.message);
+    const criteriaAndCharacteristic = relatedControllingCriteria.map(criteria => {
+      const conceptId = this.functions.find(f => f.id === relatedControllingCriteria[0].function_id)?.concept_id;
+      const concept = this.concepts.find(concept2 => concept2.id === conceptId);
+      return { criteria, baseCharacteristic: concept?.characteristics.find(char => char.id === concept.base_characteristic_id) === undefined };
+    });
+    return { criteriaAndCharacteristic, deviceGroupId: deviceGroup.id };
+  }
+
+  filterRelatedControllingCriteria(c: DeviceGroupCriteriaModel, l: DeviceGroupCriteriaModel[], value?: any): DeviceGroupCriteriaModel[] {
+    switch (c.function_id) {
+      case environment.getOnOffFunctionId:
+        let functionId;
+        if (value) {
+          functionId = environment.setOffFunctionId;
+        } else {
+          functionId = environment.setOnFunctionId;
+        }
+        return l.filter(c2 => c2.function_id === functionId);
+      default:
+        const conceptId = this.functions.find(f => f.id === c.function_id)?.concept_id;
+        if (conceptId === undefined) {
+          return [];
+        }
+        return l.filter(c2 => {
+          if (!c2.function_id.startsWith('urn:infai:ses:controlling-function')) {
+            return false;
+          }
+          if (c2.aspect_id !== c.aspect_id) {
+            return false;
+          }
+          const f = this.functions.find(f => f.id === c2.function_id);
+          return f?.concept_id === conceptId;
+        });
+    }
+  }
+
+  performAction(deviceGroupId: string | null, criteria: DeviceGroupCriteriaModel, value?: any) {
+    if (deviceGroupId === null) {
+      return;
+    }
+    const command: DeviceCommandModel = {
+      function_id: criteria.function_id,
+      group_id: deviceGroupId,
+      device_class_id: criteria.device_class_id,
+      aspect_id: criteria.aspect_id,
+      input: value,
+    };
+    this.deviceCommandService.runCommands([command]).pipe(delay(750), concatMap(_ => this.refresh())).subscribe();
+  }
+
+  closeChartjsTooltip() {
+    this.chartjs.tooltipDisplay = 'none';
+    this.cd.detectChanges();
+  }
+
+  forbidChartjsTooltip() {
+    this.chartjs.tooltipAllowed = false;
+    this.closeChartjsTooltip();
+  }
+  allowChartjsTooltip() {
+    this.chartjs.tooltipAllowed = true;
   }
 }
