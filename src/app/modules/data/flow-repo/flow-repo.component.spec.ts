@@ -92,13 +92,14 @@ describe('FlowRepoComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    xit('should hide delete button when not authorized', () => {
+    it('should disable delete button when not authorized', () => {
         fixture = TestBed.createComponent(FlowRepoComponent);
         flowRepoServiceSpy.userHasDeleteAuthorization.and.returnValue(false);
         component = fixture.componentInstance;
         component.getFlows(true);
         fixture.detectChanges();
-        expect(fixture.debugElement.query(By.css('.delete-button'))).toBeNull();
+        const btn = fixture.debugElement.query(By.css('.delete-button'));
+        expect(btn.attributes['disabled']!).toBeDefined();
     });
 
     it('should show delete button when authorized', () => {
