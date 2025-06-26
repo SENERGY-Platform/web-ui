@@ -50,6 +50,7 @@ import { ProcessIoService } from 'src/app/modules/processes/process-io/shared/pr
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { CostService } from 'src/app/modules/cost/shared/cost.service';
 import { LadonService } from '../../../../modules/admin/permissions/shared/services/ladom.service';
+import { CertificatesService } from 'src/app/modules/credentials/certificates/shared/certificates.service';
 
 @Injectable({
     providedIn: 'root',
@@ -92,7 +93,8 @@ export class SidenavService implements OnDestroy {
         private processIOService: ProcessIoService,
         private dashboardService: DashboardService,
         private costService: CostService,
-        private ladonService: LadonService
+        private ladonService: LadonService,
+        private certificatesService: CertificatesService,
     ) { }
 
     ngOnDestroy() {
@@ -283,6 +285,14 @@ export class SidenavService implements OnDestroy {
         return new SidenavSectionModel('Reporting', 'toggle', 'summarize', '/reporting', pages);
     }
 
+    setupCredentials(): SidenavSectionModel {
+        const sections = this.checkAuthorizationForSections([
+            [this.certificatesService.userHasListAuthorization, new SidenavPageModel('Certificates', 'link', 'license', '/credentials/certificates'), this.certificatesService],
+        ]);
+
+        return new SidenavSectionModel('Credentials', 'toggle', 'passkey', '/credentials', sections);
+    }
+
     loadSections(): SidenavSectionModel[] {
         let sections: SidenavSectionModel[] = [
             this.setupAnalyticsSection(),
@@ -295,7 +305,8 @@ export class SidenavService implements OnDestroy {
             this.setupMetadataSection(),
             this.setupSmartServiceSection(),
             this.setupCostSection(),
-            this.setupReportsSection()
+            this.setupReportsSection(),
+            this.setupCredentials(),
         ];
 
         if (this.dashboardService.userHasReadDashboardAuthorization()) {
@@ -305,7 +316,7 @@ export class SidenavService implements OnDestroy {
         // Just keep Main sections that have at least one subsection
         sections = sections.filter(section => section.pages.length > 0 || section.name === 'Dashboard');
 
-        const sortedSectionTitles = ['Dashboard', 'Reporting', 'Smart Services', 'Processes', 'Exports', 'Analytics', 'Device Management', 'Imports', 'Cost', 'Metadata', 'Admin', 'Developer'];
+        const sortedSectionTitles = ['Dashboard', 'Reporting', 'Smart Services', 'Processes', 'Exports', 'Analytics', 'Device Management', 'Imports', 'Cost', 'Metadata', 'Credentials', 'Admin', 'Developer'];
         sections.sort(function (section1, section2) {
             return sortedSectionTitles.indexOf(section1.name) - sortedSectionTitles.indexOf(section2.name);
         });

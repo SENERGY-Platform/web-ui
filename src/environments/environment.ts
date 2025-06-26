@@ -120,6 +120,7 @@ export const environment = {
     reportEngineUrl: 'http://localhost',
     permissionV2Url: 'http://localhost',
     connectionLogUrl: 'http://localhost',
+    certAuthorityUrl: 'http://localhost',
 };
 
 /*

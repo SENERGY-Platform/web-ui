@@ -151,6 +151,9 @@ export class LadonService {
             environment.reportEngineUrl + '/report',
             environment.reportEngineUrl + '/report/file',
             environment.connectionLogUrl,
+
+            environment.certAuthorityUrl + '/list',
+            environment.certAuthorityUrl + '/revoke',
         ];
 
         serviceEndpoints.forEach(endpointURL => {

@@ -87,6 +87,7 @@ export const environment = {
   equivalentProtocolSegments: '${process.env.EQUIVALENT_PROTOCOL_SEGMENTS}'
   costApiUrl: '${process.env.COST_API_URL}'
   connectionLogUrl: '${process.env.CONNECTION_LOG_URL}'
+  certAuthorityUrl: '${process.env.CERT_AUTHORITY_URL}'
 };
 `;
 

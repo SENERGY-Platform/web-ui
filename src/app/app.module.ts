@@ -43,11 +43,15 @@ import { AuthorizationService } from './core/services/authorization.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 import { CostModule } from './modules/cost/cost.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
+import { CredentialsModule } from './modules/credentials/credentials.module';
 
 registerLocaleData(localeDe);
 
-@NgModule({ declarations: [AppComponent],
-    bootstrap: [AppComponent], imports: [BrowserModule,
+@NgModule({
+    declarations: [AppComponent],
+    bootstrap: [AppComponent],
+    imports: [
+        BrowserModule,
         CoreModule,
         AppRoutingModule,
         DashboardModule,
@@ -66,7 +70,9 @@ registerLocaleData(localeDe);
         SettingsModule,
         ClipboardModule,
         CostModule,
-        ReportingModule], providers: [
+        ReportingModule,
+        CredentialsModule,
+    ], providers: [
         {
             provide: APP_INITIALIZER,
             useFactory: initializerService,
@@ -83,5 +89,6 @@ registerLocaleData(localeDe);
             multi: true,
         },
         provideHttpClient(withInterceptorsFromDi()),
-    ] })
-export class AppModule {}
+    ]
+})
+export class AppModule { }
