@@ -100,6 +100,12 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
 
 
     public addNode(operator: OperatorModel) {
+        if (operator.inputs == null) {
+            operator.inputs = [] as IOModel[];
+        }
+        if (operator.outputs == null) {
+            operator.outputs = [] as IOModel[];
+        }
         if (
             operator.name !== undefined &&
             operator.inputs !== undefined &&
