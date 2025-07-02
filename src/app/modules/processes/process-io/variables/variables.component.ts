@@ -118,7 +118,6 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
     reload(){
         this.selectionClear();
         this.offset = 0;
-        this.pageSize = 20;
         this.updateTotal();
         this.loadVariables();
     }

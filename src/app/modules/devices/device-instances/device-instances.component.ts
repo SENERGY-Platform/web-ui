@@ -84,7 +84,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         this.getRouterParams();
     }
     displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'info', 'share'];
-    pageSize = 20;
+    pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<DeviceInstanceModel>();
     selection = new SelectionModel<DeviceInstanceModel>(true, []);
     totalCount = 200;

@@ -40,7 +40,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
 })
 export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'show'];
-    pageSize = 20;
+    pageSize = this.preferencesService.pageSize;
     ready = false;
     instances = [];
     totalCount = 200;

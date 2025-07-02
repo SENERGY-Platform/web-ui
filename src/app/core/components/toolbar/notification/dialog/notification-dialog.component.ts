@@ -46,7 +46,7 @@ export class NotificationDialogComponent implements OnInit {
     mode = Modes.NOTIFICATIONS;
     notifications: NotificationModel[] = [];
     notificationService: NotificationService;
-    defaultPageSize = 25;
+    defaultPageSize = this.preferencesService.pageSize;
     lastNotificationPageEvent: PageEvent | undefined;
     lastBrokerPageEvent: PageEvent = { pageIndex: 0, pageSize: this.defaultPageSize } as PageEvent;
     brokers = new MatTableDataSource<NotificationBrokerModel>();
