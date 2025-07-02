@@ -31,7 +31,7 @@
                 <div *ngIf="zoomedWidgetIndex === null" fxLayout="row" fxLayoutAlign="end center">
                     <button *ngIf="userHasUpdateDashboardAuthorization" mat-icon-button [matMenuTriggerFor]="refresh"
                         color="accent" matTooltip="set widget refresh time">
-                        <mat-icon>refresh</mat-icon>
+                        <mat-icon>history</mat-icon>
                     </button>
                     <mat-menu #refresh="matMenu" [overlapTrigger]="false" xPosition="before">
                         <button mat-menu-item (click)="refreshTime(5)">

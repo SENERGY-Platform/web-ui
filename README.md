@@ -5,6 +5,15 @@
 npm run start_dev
 ```
 
+if you get errors like
+```
+Error: The /workspace/ts/web-ui/src/environments/environment.dev.ts path in file replacements does not exist.
+```
+you can use the following command to create the missing file
+```
+cp src/environments/environment.ts src/environments/environment.dev.ts
+```
+
 ## Use Local Properties Panel
 ```
 change package.json
