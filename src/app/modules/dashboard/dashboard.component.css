@@ -16,6 +16,7 @@
 
 gridstack {
   overflow-y: auto;
+  /*overflow-x: hidden;*/
 }
 
 .gridstack-with-button {
@@ -75,15 +76,20 @@ gridster-item.gridster-item-moving {
   margin: 1px;
 }
 
+.grid-stack-item ::ng-deep {
+  overflow: hidden;
+}
+
 .grid-stack-item ::ng-deep .ui-resizable-se {
   width: 0;
-  height: 0;
+  height: 0; 
   border-left: 12px solid transparent;
   border-right: 12px solid transparent;
   border-bottom: 12px solid rgba(0, 0, 0, 0.12);
   rotate: 180deg;
   right: -2px;
   bottom: 4px;
+  background-image: none;
 }
 
 .grid-stack ::ng-deep .ui-draggable-dragging {
