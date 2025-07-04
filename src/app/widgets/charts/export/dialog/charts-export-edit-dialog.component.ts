@@ -233,9 +233,9 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 stacked: widget.properties.stacked,
             }),
         });
-        this.groupTypeIsDifference = widget.properties.group?.type?.startsWith('difference') || false;
+        this.groupTypeIsDifference = widget.properties.group?.type?.startsWith ? (widget.properties.group?.type?.startsWith('difference') || false) : false;
         this.formGroupController.get('properties.group.type')?.valueChanges.subscribe((val) => {
-            this.groupTypeIsDifference = val.startsWith('difference');
+            this.groupTypeIsDifference = val.startsWith ? val.startsWith('difference') : false;
             if (this.groupTypeIsDifference) {
                 this.dataSource.data.forEach((element) => (element.math = ''));
             }
