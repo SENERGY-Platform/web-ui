@@ -120,7 +120,7 @@ function createHelperGroup(element, bpmnjs, eventBus, bpmnFactory, replace, sele
         entries: [],
         enabled: isTask
     };
-    email(helperGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    //email(helperGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
     notification(helperGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
     return helperGroup;
 }
