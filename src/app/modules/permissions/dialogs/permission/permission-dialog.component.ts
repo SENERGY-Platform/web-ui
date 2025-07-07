@@ -55,6 +55,10 @@ export class PermissionDialogComponent implements OnInit {
     isAdmin: boolean = false;
     permissionTypes = PermissionTypes;
 
+    adddableUsers: PermissionsUserModel[] = [];
+    adddableGroups: string[] = [];
+    adddableRoles: string[] = [];
+
     descriptions = {
         read: 'read resource information',
         write: 'write resource information',
@@ -97,18 +101,22 @@ export class PermissionDialogComponent implements OnInit {
         if (this.isAdmin) {
             this.authorizationService.loadAllGroups().subscribe(groups => {
                 this.groups = groups.map((g: { path: any; }) => g.path);
+                this.calcAdddableGroups();
                 setTimeout(() => this.groupTable?.render(), 0);
             });
             this.authorizationService.loadAllUsers().subscribe(users => {
                 this.users = users;
+                this.calcCdddableUsers();
                 setTimeout(() => this.userTable?.render(), 0);
             });
             this.authorizationService.loadAllRoles().subscribe(roles => {
                 this.roles = roles.map((r: any) => r.name);
+                this.calcAdddableRoles();
                 setTimeout(() => this.roleTable?.render(), 0);
             });
         } else {
             this.groups = this.authorizationService.getUsersGroups();
+            this.calcAdddableGroups();
             setTimeout(() => this.groupTable?.render(), 0);
 
             this.permissionsService.getSharableUsers().subscribe(res => {
@@ -119,6 +127,7 @@ export class PermissionDialogComponent implements OnInit {
                         username: username,
 
                     });
+                    this.calcCdddableUsers();
                     setTimeout(() => this.userTable?.render(), 0);
                 });
             });
@@ -137,7 +146,7 @@ export class PermissionDialogComponent implements OnInit {
         this.userId = this.authorizationService.getUserId() as string;
     }
 
-    get adddableUsers(): PermissionsUserModel[] {
+    calcCdddableUsers() {
         const keys = Object.keys(this.permissions.user_permissions);
         const u = this.users.filter(u2 => keys.findIndex(k => k === u2.id) === -1);
         if (u.length === 0) {
@@ -145,10 +154,10 @@ export class PermissionDialogComponent implements OnInit {
         } else {
             this.userFormControl.enable();
         }
-        return u;
+        this.adddableUsers = u;
     }
 
-    get adddableGroups(): string[] {
+    calcAdddableGroups() {
         const keys = Object.keys(this.permissions.group_permissions);
         const u = this.groups.filter(u2 => keys.findIndex(k => k === u2) === -1);
         if (u.length === 0) {
@@ -156,10 +165,10 @@ export class PermissionDialogComponent implements OnInit {
         } else {
             this.groupFormControl.enable();
         }
-        return u;
+        this.adddableGroups = u;
     }
 
-    get adddableRoles(): string[] {
+    calcAdddableRoles() {
         const keys = Object.keys(this.permissions.role_permissions);
         const u = this.roles.filter(u2 => keys.findIndex(k => k === u2) === -1);
         if (u.length === 0) {
@@ -167,7 +176,7 @@ export class PermissionDialogComponent implements OnInit {
         } else {
             this.roleFormControl.enable();
         }
-        return u;
+        this.adddableRoles = u;
     }
 
     addUser() {
@@ -183,6 +192,7 @@ export class PermissionDialogComponent implements OnInit {
         };
         this.userFormControl.setValue('');
         this.userFormControl.updateValueAndValidity();
+        this.calcCdddableUsers();
         this.userTable?.render();
     }
 
@@ -198,6 +208,7 @@ export class PermissionDialogComponent implements OnInit {
         };
         this.groupFormControl.setValue('');
         this.groupFormControl.updateValueAndValidity();
+        this.calcAdddableGroups();
         this.groupTable?.render();
     }
 
@@ -213,6 +224,7 @@ export class PermissionDialogComponent implements OnInit {
         };
         this.roleFormControl.setValue('');
         this.roleFormControl.updateValueAndValidity();
+        this.calcAdddableRoles();
         this.roleTable?.render();
     }
 
