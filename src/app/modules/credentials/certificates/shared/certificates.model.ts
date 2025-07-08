@@ -17,7 +17,7 @@
 export interface CertificateInfo {
     serial_number: string;
     authority_key_identifier: string;
-    sans: string[];
+    metadata: any;
     issued_at: string; // Date
     not_before: string; // Date
     expiry: string; // Date

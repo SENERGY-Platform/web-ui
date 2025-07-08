@@ -15,7 +15,7 @@
  */
 
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, KeyValuePipe } from '@angular/common';
 import { CertificatesComponent } from './certificates/certificates.component';
 import { Route, RouterModule } from '@angular/router';
 import { CoreModule } from '../../core/core.module';
@@ -59,6 +59,7 @@ const routes: Route[] = [
     MtxSelectModule,
     FormsModule,
     MatButtonModule,
+    KeyValuePipe,
   ]
 })
 export class CredentialsModule { }

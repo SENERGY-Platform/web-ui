@@ -34,7 +34,7 @@ import { CertificateRevokeDialogComponent } from './certificate-revoke-dialog/ce
 export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   dataReady = false;
-  displayedColumns = ['serial_number', 'sans', 'issued_at', 'not_before', 'expiry', 'revoked_at', 'reason'];
+  displayedColumns = ['serial_number', 'metadata', 'issued_at', 'not_before', 'expiry', 'revoked_at', 'reason'];
   pageSize = this.preferencesService.pageSize;
   dataSource = new MatTableDataSource<CertificateInfo>();
   @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -100,11 +100,15 @@ export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
         if (c.serial_number.indexOf(searchText) !== -1) {
           return true;
         }
-        if (c.sans.filter(san => san.indexOf(searchText) !== -1).length > 0) {
+        if (this.stringifyMetadata(c).indexOf(searchText) !== -1) {
           return true;
         }
         return false;
       });
     });
+  }
+
+  stringifyMetadata(a: any): string {
+    return JSON.stringify(a);
   }
 }
