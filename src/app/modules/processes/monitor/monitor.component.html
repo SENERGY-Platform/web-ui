@@ -81,6 +81,7 @@
                                 <ng-container matColumnDef="action">
                                     <th mat-header-cell *matHeaderCellDef>Action</th>
                                     <td mat-cell *matCellDef="let element">
+                                        <mat-icon *ngIf="element.is_placeholder || element.marked_for_delete" color="warn" class="icon-spin" matTooltip="waiting for sync with hub">sync</mat-icon>
                                         <button matTooltip="Stop" mat-icon-button color="accent"
                                             (click)="stop(element)">
                                             <mat-icon>stop</mat-icon>
