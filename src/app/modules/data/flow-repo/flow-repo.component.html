@@ -28,6 +28,9 @@
                     <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of flows; let i = index">
                         <div fxFill>
                             <div fxFill>
+                                <mat-icon class="share-icon" *ngIf="item.userId !== userId" matTooltip="shared by {{item.userName || item.userId}}">
+                                    share
+                                </mat-icon>
                                 <div class="widget-image" [innerHtml]="item.image"></div>
                             </div>
                         </div>
@@ -35,9 +38,6 @@
                             <div fxLayout="column" fxFill>
                                 <div class="truncate footer-item-header">
                                     <p matTooltip="{{item.description === undefined ? '' : item.description}}">{{ item.name }}</p>
-                                    <mat-icon class="share-icon" *ngIf="item.userId !== userId" matTooltip="{{item.userName || item.userId}}">
-                                        share
-                                    </mat-icon>
                                 </div>
                                 <div class="truncate footer-item-subtitle" fxLayout="column">
                                     <div *ngIf="costService.userMayGetFlowCostEstimations() && flowEstimations.length>0">

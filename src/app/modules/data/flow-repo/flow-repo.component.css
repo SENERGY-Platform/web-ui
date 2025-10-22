@@ -84,7 +84,11 @@ mat-grid-list {
 .link-tools .tool-remove { display: none }
 
 .share-icon {
-    font-size: 18px !important;
+    margin-top: 5px;
+    margin-right: 5px;
+    padding-left: 90%;
+    color: grey;
+    font-size: 20px !important;
 }
 
 .multiline-tooltip{
