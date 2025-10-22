@@ -78,8 +78,6 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
-
-
         this.userHasUpdateAuthorization = this.operatorRepoService.userHasUpdateAuthorization();
         if (this.userHasUpdateAuthorization) {
             this.displayedColumns.push('edit');
@@ -143,9 +141,6 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
             .subscribe((resp: { operators: OperatorModel[]; totalCount: number }) => {
                 if (resp.operators.length > 0) {
                     this.operators = resp.operators;
-                    console.log(this.userId);
-                    console.log(resp.operators);
-                    this.operators.forEach((operator) => (operator.editable = operator.userId === this.userId));
                     this.operatorsDataSource.data = this.operators;
 
                     this.totalCount = resp.totalCount;
@@ -184,9 +179,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
             this.selectionClear();
         } else {
             this.operatorsDataSource.connect().value.forEach((row) => {
-                if (row.editable) {
-                    this.selection.select(row);
-                }
+                this.selection.select(row);
             });
         }
     }

@@ -49,7 +49,6 @@ export class OperatorComponent implements OnInit {
             this.operatorService.getOperator(id).subscribe((resp: OperatorModel | null) => {
                 if (resp !== null) {
                     this.operator = resp;
-                    this.operator.editable = resp.userId === this.userId;
                     if (this.operator.userId !== undefined && this.userId !== this.operator.userId) {
                         this.permission.getUserById(this.operator.userId).subscribe((response: PermissionsUserModel) => {
                             this.shareUser = response.username;
@@ -57,8 +56,6 @@ export class OperatorComponent implements OnInit {
                     }
                 }
             });
-        } else {
-            this.operator.editable = true;
         }
     }
 

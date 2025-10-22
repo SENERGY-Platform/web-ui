@@ -19,13 +19,11 @@ export interface OperatorModel {
     name: string | undefined;
     image: string | undefined;
     description: string | undefined;
-    pub: boolean | undefined;
     deploymentType: string | undefined;
     userId: string | undefined;
     inputs: IOModel[] | undefined;
     outputs: IOModel[] | undefined;
     config_values: IOModel[] | undefined;
-    editable: boolean | undefined;
     cost?: number;
 }
 
