@@ -30,8 +30,7 @@ import { MatSort } from '@angular/material/sort';
 import { startWith, switchMap } from 'rxjs/operators';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
-import {PermissionsV2RightsAndIdModel} from "../../permissions/shared/permissions-resource.model";
-import {FlowModel} from "../flow-repo/shared/flow.model";
+import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
 
 @Component({
     selector: 'senergy-operator-repo',
