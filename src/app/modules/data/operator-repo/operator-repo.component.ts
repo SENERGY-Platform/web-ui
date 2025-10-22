@@ -29,6 +29,9 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { startWith, switchMap } from 'rxjs/operators';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
+import {PermissionsV2RightsAndIdModel} from "../../permissions/shared/permissions-resource.model";
+import {FlowModel} from "../flow-repo/shared/flow.model";
 
 @Component({
     selector: 'senergy-operator-repo',
@@ -40,7 +43,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
     selection = new SelectionModel<OperatorModel>(true, []);
-    displayedColumns: string[] = ['select', 'pub', 'name', 'image', 'details'];
+    displayedColumns: string[] = ['select', 'pub', 'name', 'image', 'details', 'share'];
     totalCount = 0;
 
     operators = [] as OperatorModel[];
@@ -58,6 +61,8 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private operatorSub: Subscription = new Subscription();
 
+    permissionsPerOperator: PermissionsV2RightsAndIdModel[] = [];
+
     constructor(
         private operatorRepoService: OperatorRepoService,
         protected auth: AuthorizationService,
@@ -66,6 +71,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         private dialogsService: DialogsService,
         protected permission: PermissionsService,
         public preferencesService: PreferencesService,
+        private permissionsDialogService: PermissionsDialogService,
     ) { }
 
     ngOnInit() {
@@ -74,13 +80,14 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         this.userId = this.auth.getUserId();
         this.initSearchAndGetOperators();
 
-        this.userHasDeleteAuthorization = this.operatorRepoService.userHasDeleteAuthorization();
-        if (this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
         this.userHasUpdateAuthorization = this.operatorRepoService.userHasUpdateAuthorization();
         if (this.userHasUpdateAuthorization) {
             this.displayedColumns.push('edit');
+        }
+
+        this.userHasDeleteAuthorization = this.operatorRepoService.userHasDeleteAuthorization();
+        if (this.userHasDeleteAuthorization) {
+            this.displayedColumns.push('delete');
         }
     }
 
@@ -145,6 +152,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
 
                     this.totalCount = resp.totalCount;
                 }
+                this.loadOperatorPermissions();
                 this.ready = true;
             });
     }
@@ -206,5 +214,34 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
                     });
                 }
             });
+    }
+
+    loadOperatorPermissions() {
+        this.permission.getComputedResourcePermissionsV2('analytics-operators', this.operators.map(e => e._id || '')).subscribe(
+            perms => (this.permissionsPerOperator = perms)
+        );
+    }
+
+    shareOperator(operator: OperatorModel){
+        if (operator._id == null) {
+            return;
+        }
+        this.permissionsDialogService.openPermissionV2Dialog('analytics-operators', operator._id, operator.name || '');
+    }
+
+    userHasReadPermission(id: string): boolean {
+        return this.permissionsPerOperator.find(e => e.id === id)?.read || false;
+    }
+
+    userHasWritePermission(id: string): boolean {
+        return this.permissionsPerOperator.find(e => e.id === id)?.write || false;
+    }
+
+    userHasExecutePermission(id: string): boolean {
+        return this.permissionsPerOperator.find(e => e.id === id)?.execute || false;
+    }
+
+    userHasAdministratePermission(id: string): boolean {
+        return this.permissionsPerOperator.find(e => e.id === id)?.administrate || false;
     }
 }

@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
@@ -76,17 +76,17 @@ export class OperatorRepoService {
         );
     }
 
-    saveOperator(operator: OperatorModel): Observable<unknown> {
+    saveOperator(operator: OperatorModel): Observable<HttpResponse<string> | null> {
         if (operator._id === undefined) {
             return this.http
-                .put<unknown>(environment.operatorRepoUrl + '/operator/', operator)
-                .pipe(catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'putOperator: Error', {})));
+                .put<string>(environment.operatorRepoUrl + '/operator/', operator, {observe: 'response'})
+                .pipe(catchError(this.errorHandlerService.handleErrorWithSnackBar('Error saving operator',OperatorRepoService.name, 'saveOperator()', null )));
         } else {
             const id = operator._id;
             delete operator._id;
             return this.http
-                .post<unknown>(environment.operatorRepoUrl + '/operator/' + id + '/', operator)
-                .pipe(catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'postOperator: Error', {})));
+                .post<string>(environment.operatorRepoUrl + '/operator/' + id + '/', operator, {observe: 'response'})
+                .pipe(catchError(this.errorHandlerService.handleErrorWithSnackBar('Error saving operator',OperatorRepoService.name, 'saveOperator()', null )));
         }
     }
 

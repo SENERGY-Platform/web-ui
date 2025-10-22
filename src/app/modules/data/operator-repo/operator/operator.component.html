@@ -24,29 +24,29 @@
         </div>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Name</mat-label>
-            <input matInput [(ngModel)]="operator.name">
+            <input matInput [(ngModel)]="operator.name" [disabled]="!userHasWritePermission()">
             <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Image</mat-label>
-            <input matInput [(ngModel)]="operator.image">
+            <input matInput [(ngModel)]="operator.image" [disabled]="!userHasWritePermission()">
             <mat-error senergyError label="Image"></mat-error>
         </mat-form-field>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Description</mat-label>
-            <input matInput [(ngModel)]="operator.description">
+            <input matInput [(ngModel)]="operator.description" [disabled]="!userHasWritePermission()">
             <mat-error senergyError label="Description"></mat-error>
         </mat-form-field>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Cost</mat-label>
             <input matInput [(ngModel)]="operator.cost" placeholder="0" type="number"
-                [min]="0">
+                [min]="0" [disabled]="!userHasWritePermission()">
             <mat-error senergyError label="Cost"></mat-error>
         </mat-form-field>
         <mat-form-field fxFlex color="accent" appearance="outline">
             <mat-label>Deployment Type</mat-label>
             <mtx-select [(ngModel)]="operator.deploymentType"
-                appendTo=".ng-select-anchor">
+                appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
                 <mtx-option value="cloud">cloud</mtx-option>
                 <mtx-option value="local">local</mtx-option>
                 <mtx-option value="both">both</mtx-option>
@@ -54,82 +54,82 @@
             <mat-error senergyError label="Deployment Type"></mat-error>
         </mat-form-field>
         <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">
-            <button mat-raised-button color="accent" (click)="addInput()">Add
+            <button mat-raised-button color="accent" (click)="addInput()" [disabled]="!userHasWritePermission()">Add
                 Input</button>
         </div>
         <div *ngFor="let item of operator.inputs" fxLayout="row" class="layout-margin" fxLayoutAlign="center center">
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name">
+                <input matInput [(ngModel)]="item.name" [disabled]="!userHasWritePermission()">
                 <mat-error senergyError label="Name"></mat-error>
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Type</mat-label>
-                <mtx-select [(ngModel)]="item.type" appendTo=".ng-select-anchor">
+                <mtx-select [(ngModel)]="item.type" appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
                     <mtx-option *ngFor="let option of dropdown" [value]="option">
                         {{option}}
                     </mtx-option>
                 </mtx-select>
                 <mat-error senergyError label="Type"></mat-error>
             </mat-form-field>
-            <button mat-icon-button (click)="deleteInput(item)">
+            <button mat-icon-button (click)="deleteInput(item)" [hidden]="!userHasWritePermission()">
                 <mat-icon color="warn">
                     delete
                 </mat-icon>
             </button>
         </div>
         <div fxLayout="row" fxLayoutAlign="center center">
-            <button mat-raised-button color="accent" (click)="addOutput()">Add
+            <button mat-raised-button color="accent" (click)="addOutput()" [disabled]="!userHasWritePermission()">Add
                 Output</button>
         </div>
         <div *ngFor="let item of operator.outputs" fxLayout="row" class="layout-margin" fxLayoutAlign="center center">
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name" >
+                <input matInput [(ngModel)]="item.name" [disabled]="!userHasWritePermission()">
                 <mat-error senergyError label="Name"></mat-error>
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Type</mat-label>
-                <mtx-select [(ngModel)]="item.type"  appendTo=".ng-select-anchor">
+                <mtx-select [(ngModel)]="item.type"  appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
                     <mtx-option *ngFor="let option of dropdown" [value]="option">
                         {{option}}
                     </mtx-option>
                 </mtx-select>
                 <mat-error senergyError label="Type"></mat-error>
             </mat-form-field>
-            <button mat-icon-button (click)="deleteOutput(item)">
+            <button mat-icon-button (click)="deleteOutput(item)" [hidden]="!userHasWritePermission()">
                 <mat-icon color="warn">
                     delete
                 </mat-icon>
             </button>
         </div>
         <div fxLayout="row" fxLayoutAlign="center center">
-            <button mat-raised-button color="accent" (click)="addConfig()">Add Config
+            <button mat-raised-button color="accent" (click)="addConfig()" [disabled]="!userHasWritePermission()">Add Config
                 Value</button>
         </div>
         <div *ngFor="let item of operator.config_values" fxLayout="row" class="layout-margin"
             fxLayoutAlign="center center">
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name">
+                <input matInput [(ngModel)]="item.name" [disabled]="!userHasWritePermission()">
                 <mat-error senergyError label="Name"></mat-error>
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Type</mat-label>
-                <mtx-select [(ngModel)]="item.type" appendTo=".ng-select-anchor">
+                <mtx-select [(ngModel)]="item.type" appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
                     <mtx-option *ngFor="let option of dropdown" [value]="option">
                         {{option}}
                     </mtx-option>
                 </mtx-select>
                 <mat-error senergyError label="Type"></mat-error>
             </mat-form-field>
-            <button mat-icon-button (click)="deleteConfig(item)">
+            <button mat-icon-button (click)="deleteConfig(item)" [hidden]="!userHasWritePermission()" >
                 <mat-icon color="warn">
                     delete
                 </mat-icon>
             </button>
         </div>
-        <button mat-fab class="fab" (click)="saveOperator()" matTooltip="Save">
+        <button mat-fab class="fab" (click)="saveOperator()" [hidden]="!userHasWritePermission()"  matTooltip="Save">
             <mat-icon>save</mat-icon>
         </button>
     </div>

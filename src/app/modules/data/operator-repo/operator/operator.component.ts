@@ -22,6 +22,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
 import { PermissionsService } from '../../../permissions/shared/permissions.service';
 import { PermissionsUserModel } from '../../../permissions/shared/permissions-user.model';
+import {PermissionsV2RightsAndIdModel} from '../../../permissions/shared/permissions-resource.model';
 
 @Component({
     selector: 'senergy-operator',
@@ -33,6 +34,8 @@ export class OperatorComponent implements OnInit {
     userId: string | Error = '';
     dropdown = ['float', 'string', 'int', 'bool'];
     shareUser: string | undefined = undefined;
+
+    permissionsPerOperator: PermissionsV2RightsAndIdModel[] = [];
 
     constructor(
         private route: ActivatedRoute,
@@ -54,6 +57,7 @@ export class OperatorComponent implements OnInit {
                             this.shareUser = response.username;
                         });
                     }
+                    this.loadOperatorPermissions();
                 }
             });
         }
@@ -115,10 +119,26 @@ export class OperatorComponent implements OnInit {
 
     saveOperator() {
         const op = Object.assign({}, this.operator);
-        this.operatorService.saveOperator(op).subscribe();
-        this.snackBar.open('Operator saved', undefined, {
-            duration: 2000,
+        this.operatorService.saveOperator(op).subscribe((resp) => {
+            if (resp) {
+                    this.snackBar.open('Operator saved', undefined, {
+                        duration: 2000,
+                    });
+            }
         });
+    }
+
+    loadOperatorPermissions() {
+        const id = this.operator._id;
+        if (id != undefined){
+            this.permission.getComputedResourcePermissionsV2('analytics-operators', [id]).subscribe(
+                perms => (this.permissionsPerOperator = perms)
+            );
+        }
+    }
+
+    userHasWritePermission(): boolean {
+        return this.permissionsPerOperator[0]?.write || false;
     }
 
     protected readonly undefined = undefined;
