@@ -341,14 +341,26 @@ export class DiagramEditorComponent implements AfterViewInit {
         return node;
     }
 
-    public newCloudNode(name: string, image: string, inputs: string[], outputs: string[], config: IOModel[], operatorId: string, position: Position | undefined = undefined): any {
+    public newCloudNode(name: string,
+                        image: string,
+                        inputs: string[],
+                        outputs: string[],
+                        config: IOModel[],
+                        operatorId: string,
+                        position: Position | undefined = undefined): any {
         const node = this.prepareCloudNode(undefined, name, image, inputs, outputs, config, operatorId, position);
         this.graph.addCells([node]);
         this.graph.maxZIndex();
         return node;
     }
 
-    public newLocalNode(name: string, image: string, inputs: string[], outputs: string[], config: any[], operatorId: string, position: Position | undefined = undefined): any {
+    public newLocalNode(name: string,
+                        image: string,
+                        inputs: string[],
+                        outputs: string[],
+                        config: IOModel[],
+                        operatorId: string,
+                        position: Position | undefined = undefined): any {
         const node = this.prepareLocalNode(undefined, name, image, inputs, outputs, config, operatorId, position);
         this.graph.addCells([node]);
         this.graph.maxZIndex();

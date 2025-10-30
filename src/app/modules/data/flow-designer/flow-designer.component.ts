@@ -106,12 +106,12 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         if (operator.outputs == null) {
             operator.outputs = [] as IOModel[];
         }
+        if (operator.config_values == null) {
+            operator.config_values = [] as IOModel[];
+        }
         if (
             operator.name !== undefined &&
-            operator.inputs !== undefined &&
-            operator.outputs !== undefined &&
             operator.image !== undefined &&
-            operator.config_values !== undefined &&
             operator._id !== undefined
         ) {
             switch (operator.deploymentType) {
@@ -136,6 +136,10 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                 );
                 break;
             }
+        } else {
+            this.snackBar.open('Could not add operator', undefined, {
+                duration: 2000,
+            });
         }
     }
 
