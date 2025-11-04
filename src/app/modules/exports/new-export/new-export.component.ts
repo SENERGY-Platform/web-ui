@@ -41,7 +41,15 @@ import { ImportInstancesModel } from '../../imports/import-instances/shared/impo
 import { ImportTypeContentVariableModel, ImportTypeModel } from '../../imports/import-types/shared/import-types.model';
 import { ImportTypesService } from '../../imports/import-types/shared/import-types.service';
 import { map } from 'rxjs/operators';
-import { AbstractControl, FormArray, FormControl, UntypedFormBuilder, Validators } from '@angular/forms';
+import {
+    AbstractControl,
+    FormArray,
+    FormControl,
+    UntypedFormBuilder,
+    ValidationErrors,
+    ValidatorFn,
+    Validators
+} from '@angular/forms';
 import * as _ from 'lodash';
 import { BrokerExportService } from '../shared/broker-export.service';
 import { PageEvent } from '@angular/material/paginator';
@@ -87,7 +95,7 @@ export class NewExportComponent implements OnInit {
         operator: [{value: null, disabled: true}, Validators.required],
         pipeline: [{value: null, disabled: true}, Validators.required],
         exportDatabaseId: [{value: environment.exportDatabaseIdInternalTimescaleDb}, Validators.required],
-        timestampFormat: ['', Validators.required],
+        timestampFormat: [''],
         exportValues: this.fb.array([] as ExportValueModel[]),
     });
 
@@ -162,7 +170,6 @@ export class NewExportComponent implements OnInit {
         forkJoin(array).subscribe((response) => {
             this.devices = response[0] as DeviceInstanceModel[];
             this.pipelines = response[1] as PipelineModel[];
-            console.log(this.pipelines);
             this.imports = response[2] as ImportInstancesModel[];
             this.exportDatabases = response[3] as ExportDatabaseModel[];
             this.exportForm.patchValue({exportDatabaseId: environment.exportDatabaseIdInternalTimescaleDb});

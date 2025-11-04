@@ -218,10 +218,10 @@
         </mat-card>
         <senergy-spinner [show]="!ready"></senergy-spinner>
     </div>
-    <button *ngIf="id === null" mat-fab class="fab" type="submit" matTooltip="Start Export">
+    <button *ngIf="id === null" mat-fab class="fab" [disabled]="!exportForm.valid" type="submit" matTooltip="Start Export">
         <mat-icon>play_arrow</mat-icon>
     </button>
-    <button *ngIf="id !== null" mat-fab class="fab" type="submit" matTooltip="Edit Export">
+    <button *ngIf="id !== null" mat-fab class="fab" [disabled]="!exportForm.valid" type="submit" matTooltip="Edit Export">
         <mat-icon>play_arrow</mat-icon>
     </button>
 </form>
