@@ -435,6 +435,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             console.error('Invalid index ' + toIndex + '. Widget already on this dashboard.');
             return of(null);
         }
+        if (id.startsWith('gridstack-item-')) {
+            id = id.substring('gridstack-item-'.length);
+        }
         const index = this.dashboards[this.activeTabIndex].widgets.findIndex((widget) => widget.id === id);
         if (index === -1) {
             console.error('Can\'t find widget with id ' + id + ' on current dashboard');
