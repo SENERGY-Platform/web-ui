@@ -35,7 +35,7 @@ export class OperatorComponent implements OnInit {
     dropdown = ['float', 'string', 'int', 'bool'];
     shareUser: string | undefined = undefined;
 
-    permissionsPerOperator: PermissionsV2RightsAndIdModel[] = [];
+    permissionsPerOperator?: PermissionsV2RightsAndIdModel[];
 
     constructor(
         private route: ActivatedRoute,
@@ -49,6 +49,7 @@ export class OperatorComponent implements OnInit {
         this.userId = this.auth.getUserId();
         const id = this.route.snapshot.paramMap.get('id');
         if (id !== null) {
+            this.permissionsPerOperator = [];
             this.operatorService.getOperator(id).subscribe((resp: OperatorModel | null) => {
                 if (resp !== null) {
                     this.operator = resp;
@@ -138,6 +139,10 @@ export class OperatorComponent implements OnInit {
     }
 
     userHasWritePermission(): boolean {
+        if (this.permissionsPerOperator === undefined) {
+            // user is creating operator
+            return true;
+        }
         return this.permissionsPerOperator[0]?.write || false;
     }
 
