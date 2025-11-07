@@ -121,6 +121,7 @@ export const environment = {
     permissionV2Url: 'http://localhost',
     connectionLogUrl: 'http://localhost',
     certAuthorityUrl: 'http://localhost',
+    mockPermissionsV2: false,
 };
 
 /*

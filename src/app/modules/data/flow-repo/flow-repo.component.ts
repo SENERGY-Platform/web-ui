@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { FlowModel } from './shared/flow.model';
-import { FlowRepoService } from './shared/flow-repo.service';
-import { DialogsService } from '../../../core/services/dialogs.service';
-import { DomSanitizer } from '@angular/platform-browser';
-import { ResponsiveService } from '../../../core/services/responsive.service';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {FlowModel} from './shared/flow.model';
+import {FlowRepoService} from './shared/flow-repo.service';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {DomSanitizer} from '@angular/platform-browser';
+import {ResponsiveService} from '../../../core/services/responsive.service';
+import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {concat, Observable, Subscription} from 'rxjs';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { AuthorizationService } from '../../../core/services/authorization.service';
-import { FlowEngineService } from './shared/flow-engine.service';
-import { CostEstimationModel } from '../../cost/shared/cost.model';
-import { CostService } from '../../cost/shared/cost.service';
+import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
+import {AuthorizationService} from '../../../core/services/authorization.service';
+import {FlowEngineService} from './shared/flow-engine.service';
+import {CostEstimationModel} from '../../cost/shared/cost.model';
+import {CostService} from '../../cost/shared/cost.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
 import {PermissionsService} from '../../permissions/shared/permissions.service';
+import {environment} from '../../../../environments/environment';
+import {PermissionsMockService} from '../../permissions/shared/permissions.service.mock';
 
 const GRIDS = new Map([
     ['xs', 1],
@@ -44,6 +46,10 @@ const GRIDS = new Map([
     selector: 'senergy-operator-repo',
     templateUrl: './flow-repo.component.html',
     styleUrls: ['./flow-repo.component.css'],
+    providers: [
+        {
+            provide: PermissionsService, useClass: environment.mockPermissionsV2 ? PermissionsMockService : PermissionsService
+        }]
 })
 export class FlowRepoComponent implements OnInit, OnDestroy {
     flows: FlowModel[] = [];
@@ -82,7 +88,8 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         public costService: CostService,
         private permissionsDialogService: PermissionsDialogService,
         private permissionsService: PermissionsService,
-    ) {}
+    ) {
+    }
 
     ngOnInit() {
         this.initGridCols();
@@ -149,7 +156,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
                         if (typeof flow.image === 'string') {
                             flow.image = this.sanitizer.bypassSecurityTrustHtml(flow.image);
                         }
-                        if (this.userId !== flow.userId){
+                        if (this.userId !== flow.userId) {
                             idReqs.push(this.getUserNameById(flow.userId));
                         }
                         this.flows.push(flow);
@@ -182,7 +189,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         );
     }
 
-    shareFlow(flow: FlowModel){
+    shareFlow(flow: FlowModel) {
         if (flow._id == null) {
             return;
         }
