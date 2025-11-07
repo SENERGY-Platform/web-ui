@@ -122,6 +122,7 @@ export const environment = {
     connectionLogUrl: 'http://localhost',
     certAuthorityUrl: 'http://localhost',
     mockPermissionsV2: false,
+    mockCostService: false,
 };
 
 /*

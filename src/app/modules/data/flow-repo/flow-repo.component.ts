@@ -33,6 +33,7 @@ import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permission
 import {PermissionsService} from '../../permissions/shared/permissions.service';
 import {environment} from '../../../../environments/environment';
 import {PermissionsMockService} from '../../permissions/shared/permissions.service.mock';
+import {CostMockService} from '../../cost/shared/cost.service.mock';
 
 const GRIDS = new Map([
     ['xs', 1],
@@ -49,6 +50,8 @@ const GRIDS = new Map([
     providers: [
         {
             provide: PermissionsService, useClass: environment.mockPermissionsV2 ? PermissionsMockService : PermissionsService
+        },{
+            provide: CostService, useClass: environment.mockCostService ? CostMockService : CostService
         }]
 })
 export class FlowRepoComponent implements OnInit, OnDestroy {
