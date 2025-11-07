@@ -421,7 +421,13 @@ export class DiagramEditorComponent implements AfterViewInit {
         return  {x: box.x + box.width + 100, y: 200} as Position;
     }
 
-    calculateNodeSize(inPorts: any[], outPorts: any[]) {
+    calculateNodeSize(inPorts: string[] | undefined, outPorts: string[] | undefined) {
+        if (outPorts === undefined) {
+            outPorts = [];
+        }
+        if (inPorts === undefined) {
+            inPorts = [];
+        }
         const outCircleradius = 20;
         const heightBasedOnOut = outCircleradius * outPorts.length + 30;
         const heightBasedOnIn = outCircleradius * inPorts.length + 30;
