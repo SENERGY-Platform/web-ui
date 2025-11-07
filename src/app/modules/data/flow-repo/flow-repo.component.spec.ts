@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { FlowRepoComponent } from './flow-repo.component';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialogModule } from '@angular/material/dialog';
-import { AuthorizationService } from '../../../core/services/authorization.service';
-import { DialogsService } from '../../../core/services/dialogs.service';
-import { AuthorizationServiceMock } from '../../../core/services/authorization.service.mock';
-import { CoreModule } from '../../../core/core.module';
-import { InfiniteScrollModule } from 'ngx-infinite-scroll';
-import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
-import { FlowRepoService } from './shared/flow-repo.service';
-import { FlowEngineService } from './shared/flow-engine.service';
-import { By } from '@angular/platform-browser';
-import { FlowModel } from './shared/flow.model';
-import { of } from 'rxjs';
-import { CostService } from '../../cost/shared/cost.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {FlowRepoComponent} from './flow-repo.component';
+import {provideHttpClientTesting} from '@angular/common/http/testing';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatDialogModule} from '@angular/material/dialog';
+import {AuthorizationService} from '../../../core/services/authorization.service';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {AuthorizationServiceMock} from '../../../core/services/authorization.service.mock';
+import {CoreModule} from '../../../core/core.module';
+import {InfiniteScrollModule} from 'ngx-infinite-scroll';
+import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
+import {FlowRepoService} from './shared/flow-repo.service';
+import {FlowEngineService} from './shared/flow-engine.service';
+import {By} from '@angular/platform-browser';
+import {FlowModel} from './shared/flow.model';
+import {of} from 'rxjs';
+import {CostService} from '../../cost/shared/cost.service';
+import {provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 
 describe('FlowRepoComponent', () => {
     let component: FlowRepoComponent;
@@ -66,23 +66,29 @@ describe('FlowRepoComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [FlowRepoComponent],
-    imports: [MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule],
-    providers: [
-        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-        { provide: FlowRepoService, useValue: flowRepoServiceSpy },
-        { provide: FlowEngineService, useValue: flowEngineServiceSpy },
-        { provide: CostService, useValue: costServiceSpy },
-        DialogsService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-}).compileComponents();
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                declarations: [FlowRepoComponent],
+                imports: [MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule],
+                providers: [
+                    {provide: AuthorizationService, useClass: AuthorizationServiceMock},
+                    {provide: FlowRepoService, useValue: flowRepoServiceSpy},
+                    {provide: FlowEngineService, useValue: flowEngineServiceSpy},
+                    {provide: CostService, useValue: costServiceSpy},
+                    DialogsService,
+                    provideHttpClient(withInterceptorsFromDi()),
+                    provideHttpClientTesting()
+                ]
+            }).compileComponents();
         }),
     );
 
     beforeEach(() => {
+        TestBed.overrideComponent(FlowRepoComponent, {
+            set: {
+                providers: [{provide: CostService, useValue: costServiceSpy}]
+            }
+        });
         fixture = TestBed.createComponent(FlowRepoComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
