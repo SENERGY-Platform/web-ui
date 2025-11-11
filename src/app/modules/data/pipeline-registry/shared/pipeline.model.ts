@@ -42,6 +42,7 @@ export interface PipelineModel {
     windowTime?: number;
     mergeStrategy?: string;
     metrics?: boolean;
+    userId: string;
     status?: PipelineStatus;
 }
 

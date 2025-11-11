@@ -80,6 +80,18 @@
                     </td>
                 </ng-container>
 
+                <ng-container matColumnDef="share">
+                    <th mat-header-cell *matHeaderCellDef class="button-column">Share</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button *ngIf="element.id !== undefined" mat-icon-button color="accent"
+                                matTooltip="Share" (click)="sharePipeline(element)"
+                                [disabled]="!userHasAdministratePermission(element.id)">
+                            <mat-icon>share</mat-icon>
+
+                        </button>
+                    </td>
+                </ng-container>
+
                 <ng-container matColumnDef="edit" *ngIf="userHasUpdateAuthorization">
                     <th mat-header-cell *matHeaderCellDef class="button-column">Edit</th>
                     <td mat-cell *matCellDef="let element;"
@@ -102,6 +114,21 @@
                         </span>
                     </td>
                   </ng-container>
+
+                <ng-container matColumnDef="access">
+                    <th mat-header-cell *matHeaderCellDef class="button-column">Access</th>
+                    <td mat-cell *matCellDef="let element">
+                        <mat-icon color="accent" (mouseover)="getPipelineUser(element.userId)"
+                                  *ngIf="userId !== element.userId"
+                                  matTooltip="Shared by {{shareUser}}">
+                            share
+                        </mat-icon>
+                        <mat-icon color="accent" *ngIf="userId === element.userId"
+                                  matTooltip="Owner">
+                            person
+                        </mat-icon>
+                    </td>
+                </ng-container>
 
                 <span *ngIf="userHasDeleteAuthorization">
                     <ng-container matColumnDef="delete">

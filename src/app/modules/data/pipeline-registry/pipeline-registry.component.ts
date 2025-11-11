@@ -28,6 +28,10 @@ import { forkJoin, Observable, Subscription, concatMap, of, map } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
+import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
+import {PermissionsService} from '../../permissions/shared/permissions.service';
+import {AuthorizationService} from '../../../core/services/authorization.service';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -39,7 +43,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     offset = 0;
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
     ready = false;
-    displayedColumns: string[] = ['select', 'status', 'id', 'name', 'createdat', 'updatedat', 'info'];
+    displayedColumns: string[] = ['select', 'status','access', 'id', 'name', 'createdat', 'updatedat', 'info'];
     selection = new SelectionModel<PipelineModel>(true, []);
     totalCount = 0;
     searchSub: Subscription = new Subscription();
@@ -47,8 +51,14 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     sortDirection: SortDirection = 'desc';
     search: string | undefined = undefined;
 
+    userId: string | Error = '';
+
+    shareUser = '';
+
     userHasDeleteAuthorization = false;
     userHasUpdateAuthorization = false;
+
+    permissionsPerPipeline: PermissionsV2RightsAndIdModel[] = [];
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
@@ -60,17 +70,23 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         private dialogsService: DialogsService,
         public utilsService: UtilService,
         public preferencesService: PreferencesService,
+        private permissionsDialogService: PermissionsDialogService,
+        protected permission: PermissionsService,
+        protected auth: AuthorizationService,
     ) {}
 
     ngOnInit() {
+        this.userId = this.auth.getUserId();
+        this.userHasUpdateAuthorization = this.flowEngineService.userHasUpdateAuthorization();
+        if(this.userHasUpdateAuthorization) {
+            this.displayedColumns.push('share');
+            this.displayedColumns.push('edit');
+
+        }
+
         this.userHasDeleteAuthorization = this.flowEngineService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
-        }
-
-        this.userHasUpdateAuthorization = this.flowEngineService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
         }
 
         this.initSearch();
@@ -138,6 +154,9 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
 
     setPipelines(pipelines: PipelineModel[]) {
         this.dataSource.data = pipelines;
+        this.permission.getComputedResourcePermissionsV2('analytics-pipelines', pipelines.map(e => e.id || '')).subscribe(
+            perms => (this.permissionsPerPipeline = perms)
+        );
         this.ready = true;
     }
 
@@ -200,6 +219,21 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         this.selection.clear();
     }
 
+    sharePipeline(pipeline: PipelineModel){
+        if (pipeline.id == null) {
+            return;
+        }
+        this.permissionsDialogService.openPermissionV2Dialog('analytics-pipelines', pipeline.id, pipeline.name || '');
+    }
+
+    getPipelineUser(id: string | undefined) {
+        if (id !== undefined) {
+            this.permission.getUserById(id).subscribe((item) => {
+                this.shareUser = item.username;
+            });
+        }
+    }
+
     deleteMultipleItems() {
         const deletionJobs: Observable<any>[] = [];
         const text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' pipelines' : ' pipeline');
@@ -227,5 +261,9 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
                         }
                     });
             });
+    }
+
+    userHasAdministratePermission(id: string): boolean {
+        return this.permissionsPerPipeline.find(e => e.id === id)?.administrate || false;
     }
 }
