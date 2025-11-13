@@ -33,3 +33,11 @@
     padding-left: 8px;
     padding-right: 8px;
 }
+
+.linkbutton {
+    background: none!important;
+    border: none;
+    padding: 0!important;
+    cursor: pointer;
+    font-size: larger;
+}

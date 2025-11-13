@@ -31,7 +31,9 @@ import { startWith, switchMap } from 'rxjs/operators';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
-
+import {PipelineRegistryService} from '../pipeline-registry/shared/pipeline-registry.service';
+import {OperatorUsage} from '../pipeline-registry/shared/pipeline.model';
+import {Router} from '@angular/router';
 @Component({
     selector: 'senergy-operator-repo',
     templateUrl: './operator-repo.component.html',
@@ -42,7 +44,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
     selection = new SelectionModel<OperatorModel>(true, []);
-    displayedColumns: string[] = ['select', 'pub', 'name', 'image', 'details', 'share'];
+    displayedColumns: string[] = ['select', 'pub', 'name', 'image'];
     totalCount = 0;
 
     operators = [] as OperatorModel[];
@@ -61,6 +63,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     private operatorSub: Subscription = new Subscription();
 
     permissionsPerOperator: PermissionsV2RightsAndIdModel[] = [];
+    operatorUsagePerOperator: OperatorUsage[] = [];
 
     constructor(
         private operatorRepoService: OperatorRepoService,
@@ -71,6 +74,8 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         protected permission: PermissionsService,
         public preferencesService: PreferencesService,
         private permissionsDialogService: PermissionsDialogService,
+        private pipeService: PipelineRegistryService,
+        private router: Router,
     ) { }
 
     ngOnInit() {
@@ -78,9 +83,14 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
 
         this.userId = this.auth.getUserId();
         this.initSearchAndGetOperators();
-
+        if (this.auth.userIsAdmin()){
+            this.loadOperatorUsage();
+            this.displayedColumns.push('usage');
+        }
+        this.displayedColumns.push('details');
         this.userHasUpdateAuthorization = this.operatorRepoService.userHasUpdateAuthorization();
         if (this.userHasUpdateAuthorization) {
+            this.displayedColumns.push('share');
             this.displayedColumns.push('edit');
         }
 
@@ -221,11 +231,25 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         );
     }
 
+    loadOperatorUsage() {
+        this.pipeService.getOperatorUsage().subscribe(
+            stats => (this.operatorUsagePerOperator = stats)
+        );
+    }
+
+    getUsageCount(id: string): number|undefined{
+        return this.operatorUsagePerOperator.find(item => item.operatorId === id)?.count;
+    }
+
     shareOperator(operator: OperatorModel){
         if (operator._id == null) {
             return;
         }
         this.permissionsDialogService.openPermissionV2Dialog('analytics-operators', operator._id, operator.name || '');
+    }
+
+    showPipelines(id: string, name: string){
+        this.router.navigate(['data/pipelines'], {queryParams: {operator: id, operatorName: name}});
     }
 
     userHasReadPermission(id: string): boolean {

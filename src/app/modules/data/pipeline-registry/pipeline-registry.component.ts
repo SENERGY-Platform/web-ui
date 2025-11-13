@@ -34,6 +34,7 @@ import {PermissionsService} from '../../permissions/shared/permissions.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {MatDialog} from '@angular/material/dialog';
 import {PipelineFilterDialogComponent} from './pipeline-filter-dialog/pipeline-filter-dialog.component';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -81,6 +82,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         protected auth: AuthorizationService,
         private dialog: MatDialog,
         private cd: ChangeDetectorRef,
+        private activatedRoute: ActivatedRoute,
+        private router: Router
     ) {}
 
     ngOnInit() {
@@ -96,6 +99,14 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         if(this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
+        this.activatedRoute.queryParamMap.subscribe(value => {
+           if (value.has('operator')){
+               this.routerOperator = value.getAll('operator');
+           }
+            if (value.has('operatorName')){
+                this.routerOperatorNames = value.getAll('operatorName');
+            }
+        });
 
         this.initSearch();
     }
@@ -291,11 +302,34 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
                 if (filterSelectionInner != null) {
                     this.routerOperator = filterSelectionInner.operators;
                     this.routerOperatorNames = filterSelectionInner.operatorNames;
+                    const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames};
+                    this.router.navigate(
+                        [],
+                        {
+                            relativeTo: this.activatedRoute,
+                            queryParams
+                        },
+                    );
                     this.cd.detectChanges();
+
                 }
                 this.reload();
             }
         });
+    }
+
+    removeChip(i: number){
+        this.routerOperator!.splice(i, 1);
+        this.routerOperatorNames!.splice(i, 1);
+        const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames};
+        this.router.navigate(
+            [],
+            {
+                relativeTo: this.activatedRoute,
+                queryParams
+            },
+        );
+        this.reload();
     }
 
     userHasAdministratePermission(id: string): boolean {

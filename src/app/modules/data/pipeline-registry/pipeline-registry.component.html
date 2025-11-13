@@ -27,7 +27,7 @@
             <mat-chip *ngFor="let op of routerOperator; let i = index">
                 <mat-icon matChipAvatar>code</mat-icon>
                 {{routerOperatorNames![i]}}
-                <button matChipRemove (click)="this.routerOperator!.splice(i, 1); this.routerOperatorNames!.splice(i, 1) ; reload()">
+                <button matChipRemove (click)="removeChip(i)">
                     <mat-icon>cancel</mat-icon>
                 </button>
             </mat-chip>
