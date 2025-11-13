@@ -25,17 +25,6 @@ mat-grid-list {
     margin-bottom: 100px;
 }
 
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.background {
-    background-image: url('/src/img/background_deviceTypes.png');
-    background-size: contain;
-}
-
 .device-icon {
     top: 40px;
     max-height: 100px;

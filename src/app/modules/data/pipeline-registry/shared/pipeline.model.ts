@@ -16,6 +16,7 @@
 
 import { SafeHtml } from '@angular/platform-browser';
 import { PipelineInputSelectionModel } from '../../flow-repo/deploy-flow/shared/pipeline-request.model';
+import {DeviceInstancesRouterStateTabEnum} from "../../../devices/device-instances/shared/device-instances.model";
 
 export interface PipelineStatus {
     running: boolean;
@@ -69,4 +70,15 @@ export interface OperatorInputTopic {
 export interface InputTopicsMapping {
     dest: string;
     source: string;
+}
+
+export interface OperatorUsage {
+    operatorId: string;
+    count: number;
+    pipelineIds: string[];
+}
+
+export interface FilterSelection {
+    operators?: string[];
+    operatorNames: string[];
 }

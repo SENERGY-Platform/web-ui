@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { PipelineModel } from './shared/pipeline.model';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {FilterSelection, PipelineModel} from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
@@ -32,6 +32,8 @@ import {PermissionsDialogService} from '../../permissions/shared/permissions-dia
 import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
 import {PermissionsService} from '../../permissions/shared/permissions.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
+import {MatDialog} from '@angular/material/dialog';
+import {PipelineFilterDialogComponent} from './pipeline-filter-dialog/pipeline-filter-dialog.component';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -53,6 +55,10 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
 
     userId: string | Error = '';
 
+
+    routerOperator: string[] | undefined = undefined;
+    routerOperatorNames: string[] | undefined = undefined;
+
     shareUser = '';
 
     userHasDeleteAuthorization = false;
@@ -73,6 +79,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         private permissionsDialogService: PermissionsDialogService,
         protected permission: PermissionsService,
         protected auth: AuthorizationService,
+        private dialog: MatDialog,
+        private cd: ChangeDetectorRef,
     ) {}
 
     ngOnInit() {
@@ -134,7 +142,12 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     loadPipelines(): Observable<PipelineModel[]> {
         this.ready = false;
         const order = this.sortBy + ':' + this.sortDirection;
-        return this.pipelineRegistryService.getPipelinesNew(order, this.pageSize, this.offset, this.search).pipe(
+
+        let filter = undefined;
+        if (this.routerOperator != null && this.routerOperator.length > 0){
+            filter = 'operator:'+this.routerOperator!.toString();
+        }
+        return this.pipelineRegistryService.getPipelinesNew(order, this.pageSize, this.offset, this.search, undefined, filter).pipe(
             concatMap((pipelines) => {
                 this.totalCount = pipelines!.total;
                 if(pipelines!.data.length === 0) {
@@ -263,7 +276,42 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
             });
     }
 
+    openFilterDialog() {
+        const filterSelection: FilterSelection = {
+            operators: this.routerOperator,
+            operatorNames: []
+        };
+        const dialogRef = this.dialog.open(PipelineFilterDialogComponent, {
+            data: filterSelection,
+            minWidth: '50vw',
+        });
+
+        dialogRef.afterClosed().subscribe({
+            next: (filterSelectionInner: FilterSelection) => {
+                if (filterSelectionInner != null) {
+                    this.routerOperator = filterSelectionInner.operators;
+                    this.routerOperatorNames = filterSelectionInner.operatorNames;
+                    this.cd.detectChanges();
+                }
+                this.reload();
+            }
+        });
+    }
+
     userHasAdministratePermission(id: string): boolean {
         return this.permissionsPerPipeline.find(e => e.id === id)?.administrate || false;
+    }
+
+    private _chipDiv?: ElementRef;
+    @ViewChild('chipDiv')
+    set chipDivSetter(ref: ElementRef | undefined) {
+        this._chipDiv = ref;
+        this.cd.detectChanges();
+    }
+    calcTableMaxHeight(): string {
+        if (this._chipDiv === undefined) {
+            return '';
+        }
+        return 'calc(100vh - ' + (this._chipDiv.nativeElement.clientHeight + 216) + 'px - 1em)';
     }
 }

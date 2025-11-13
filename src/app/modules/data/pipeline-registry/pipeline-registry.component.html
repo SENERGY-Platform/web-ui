@@ -15,15 +15,30 @@
   -->
 
 <div class="layout-margin">
-    <span class="search-button-container">
+    <span fxLayout="row" class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
+        <button mat-icon-button (click)="openFilterDialog()" matTooltip="Filter" color="accent" class="suffix-button">
+            <mat-icon>filter_alt</mat-icon>
+        </button>
     </span>
+
+    <div style="padding-bottom: 1em;" #chipDiv>
+        <mat-chip-set>
+            <mat-chip *ngFor="let op of routerOperator; let i = index">
+                <mat-icon matChipAvatar>code</mat-icon>
+                {{routerOperatorNames![i]}}
+                <button matChipRemove (click)="this.routerOperator!.splice(i, 1); this.routerOperatorNames!.splice(i, 1) ; reload()">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip>
+        </mat-chip-set>
+    </div>
 
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
     <div *ngIf="dataSource.data.length === 0 && ready">No pipelines found.</div>
 
     <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
-        <div class="table-container">
+        <div class="table-container" [style.max-height]="calcTableMaxHeight()">
             <table mat-table [dataSource]="dataSource" [matSortActive]="sortBy" matSort matSortDisableClear
                 [matSortDirection]="sortDirection" (matSortChange)="matSortChange($event)">
 

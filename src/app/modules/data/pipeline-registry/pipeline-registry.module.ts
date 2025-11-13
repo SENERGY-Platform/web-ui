@@ -26,8 +26,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { FormsModule } from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { DeployFlowComponent } from '../flow-repo/deploy-flow/deploy-flow.component';
+import {PipelineFilterDialogComponent} from "./pipeline-filter-dialog/pipeline-filter-dialog.component";
+import {CloseMtxSelectOnScrollDirective} from "../../../core/directives/close-mtx-select-on-scroll.directive";
+import {FlexModule} from "@ngbracket/ngx-layout";
+import {MatDialogActions, MatDialogContent, MatDialogTitle} from "@angular/material/dialog";
+import {MatError, MatFormField, MatLabel, MatPrefix} from "@angular/material/form-field";
+import {MtxSelect} from "@ng-matero/extensions/select";
 
 const details: Route = {
     path: 'data/pipelines/details/:id',
@@ -49,7 +55,18 @@ const edit: Route = { path: 'data/pipelines/edit/:id', pathMatch: 'full', compon
         MatListModule,
         MatCheckboxModule,
         FormsModule,
+        CloseMtxSelectOnScrollDirective,
+        FlexModule,
+        MatDialogActions,
+        MatDialogContent,
+        MatDialogTitle,
+        MatError,
+        MatFormField,
+        MatLabel,
+        MatPrefix,
+        MtxSelect,
+        ReactiveFormsModule,
     ],
-    declarations: [PipelineDetailsComponent],
+    declarations: [PipelineDetailsComponent, PipelineFilterDialogComponent],
 })
 export class PipelineRegistryModule {}

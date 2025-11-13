@@ -19,8 +19,8 @@ import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import {PipelineModel, PipelineResponse} from './pipeline.model';
+import {Observable, of} from 'rxjs';
+import {OperatorUsage, PipelineModel, PipelineResponse} from './pipeline.model';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
@@ -44,7 +44,8 @@ export class PipelineRegistryService {
                     limit: number | undefined = undefined,
                     offset: number | undefined = undefined,
                     search: string | undefined = undefined,
-                    userId: string | undefined = undefined):
+                    userId: string | undefined = undefined,
+                    filter: string |undefined = undefined):
         Observable<PipelineResponse | null> {
         let url = environment.pipelineRegistryUrl + '/pipeline?order=' + order;
         if (limit !== undefined){
@@ -58,6 +59,9 @@ export class PipelineRegistryService {
         }
         if (userId !== undefined) {
             url += '&for_user=' + userId;
+        }
+        if (filter !== undefined) {
+            url += '&filter=' + filter;
         }
         return this.http.get<PipelineResponse>(url).pipe(
             map((resp) => {
@@ -94,6 +98,18 @@ export class PipelineRegistryService {
                 return resp;
             }),
             catchError(this.errorHandlerService.handleError(PipelineRegistryService.name, 'getPipeline: Error', null)),
+        );
+    }
+
+    getOperatorUsage(): Observable<OperatorUsage[]> {
+        return this.http.get<OperatorUsage[]>(environment.pipelineRegistryUrl + '/admin/pipeline/statistics/operatorusage').pipe(
+            map((resp) => {
+                if (!resp) {
+                    return [];
+                }
+                return resp;
+            }),
+            catchError(this.errorHandlerService.handleError(PipelineRegistryService.name, 'getOperatorUsage: Error', [])),
         );
     }
 
