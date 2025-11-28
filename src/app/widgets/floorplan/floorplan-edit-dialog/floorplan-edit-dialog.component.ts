@@ -28,7 +28,7 @@ import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devi
 import { DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeAspectNodeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
-import { draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, image, migrateColoring } from '../shared/floorplan.model';
+import { draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, fpCriteriaConnectionStatus, image, migrateColoring } from '../shared/floorplan.model';
 import { materialIconNames } from 'src/app/core/model/icon.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 
@@ -62,6 +62,10 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     dotSize: new FormControl<number>(25, { validators: [Validators.required, Validators.min(1)] }),
   });
   name = new FormControl<string>('', Validators.required);
+
+  defaultCriteria: DeviceGroupCriteriaModel[] = [
+    {aspect_id: '', device_class_id: '', interaction:'', function_id: fpCriteriaConnectionStatus},
+  ];
 
   @ViewChild('fileInput', { static: true }) public fileInput!: ElementRef;
   @ViewChild('canvas', { static: false }) canvas: ElementRef<HTMLCanvasElement> | undefined;
@@ -398,7 +402,10 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     if (criteria == null) {
       return '';
     }
-    return (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
+    switch (criteria.function_id) {
+      case fpCriteriaConnectionStatus: return 'Connection Status';
+      default: return (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
+    }
   }
 
   compareCriteria(a: DeviceGroupCriteriaModel, b: DeviceGroupCriteriaModel): boolean {

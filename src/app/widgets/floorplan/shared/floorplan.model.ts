@@ -150,3 +150,5 @@ export function migrateColoring(properties: FloorplanWidgetPropertiesModel) {
         }
     });
 }
+
+export const fpCriteriaConnectionStatus = 'fpCriteriaConnectionStatus';

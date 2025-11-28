@@ -96,6 +96,7 @@
               appendTo=".ng-select-anchor">
               <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
                 [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
+                <mtx-option *ngFor="let criteria of defaultCriteria" [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
             </mtx-select>
           </mat-form-field>
 
@@ -104,6 +105,7 @@
             <mtx-select formControlName="tooltipCriteria" [hideSelected]="false" virtualScroll="true"
               placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria"
               appendTo=".ng-select-anchor" multiple closeOnSelect="false">
+              <mtx-option *ngFor="let criteria of defaultCriteria" [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
               <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
                 [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
             </mtx-select>

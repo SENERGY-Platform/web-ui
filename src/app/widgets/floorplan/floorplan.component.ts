@@ -21,7 +21,7 @@ import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
 import { map, Observable, Subscription, of, forkJoin, concatMap, delay } from 'rxjs';
-import { CriteriaAndBaseCharacteristicModel, DeviceGroupWithValueModel, image, migrateColoring, TooltipCriteria } from './shared/floorplan.model';
+import { CriteriaAndBaseCharacteristicModel, DeviceGroupWithValueModel, fpCriteriaConnectionStatus, image, migrateColoring, TooltipCriteria } from './shared/floorplan.model';
 import { DeviceCommandModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
 import { Point } from '@angular/cdk/drag-drop';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
@@ -34,6 +34,7 @@ import { DeviceTypeAspectNodeModel, DeviceTypeFunctionModel, DeviceTypeDeviceCla
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
 import { environment } from '../../../environments/environment';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
+import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 
 @Component({
   selector: 'senergy-floorplan',
@@ -340,6 +341,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     private deviceGroupsService: DeviceGroupsService,
     private conceptsService: ConceptsService,
     private deviceClassService: DeviceClassesService,
+    private deviceInstancesService: DeviceInstancesService,
     private el: ElementRef,
   ) { }
 
@@ -472,6 +474,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     this.refreshing = true;
     this.img = image(this.widget.properties);
     const commands: DeviceCommandModel[] = [];
+    const idsToCheckOnline: string[] = [];
 
     return this.loadMissingDeviceGroups().pipe(concatMap(_ => {
       if (this.widget.properties.floorplan === undefined) {
@@ -480,23 +483,31 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
 
       this.widget.properties.floorplan.placements.forEach(p => {
         p.tooltipCriteria?.forEach(c2 => {
+          if (c2.function_id === fpCriteriaConnectionStatus) {
+              idsToCheckOnline.push(p.deviceGroupId || '');
+          } else {
           commands.push({
             group_id: p.deviceGroupId || undefined,
             function_id: c2.function_id,
             aspect_id: c2.aspect_id,
             device_class_id: c2.device_class_id,
           });
+        }
         });
+        if (p.criteria.function_id === fpCriteriaConnectionStatus) {
+          idsToCheckOnline.push(p.deviceGroupId || '');
+        } else {
         commands.push({
           group_id: p.deviceGroupId || undefined,
           function_id: p.criteria.function_id,
           aspect_id: p.criteria.aspect_id,
           device_class_id: p.criteria.device_class_id,
         });
+      }
       });
-      let o: Observable<unknown> | undefined;
+      const o: Observable<unknown>[] = [];
       if (commands.length > 0) {
-        o = this.loadMissingFunctionInfo().pipe(concatMap(_1 => this.deviceCommandService.runCommands(commands, true)), map(res => {
+        o?.push(this.loadMissingFunctionInfo().pipe(concatMap(_1 => this.deviceCommandService.runCommands(commands, true)), map(res => {
           commands.forEach((com, i) => {
             const criteria = this.deviceGroups.find(dg => dg.id === com.group_id)?.criteria?.find(crit => this.compareCriteriaWithoutInteraction(crit, com as DeviceGroupCriteriaModel));
             if (criteria !== undefined) {
@@ -519,13 +530,38 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
               }
             });
           });
-        }));
+        })));
       } else {
-        o = of(null);
+        o.push(of(null));
         this.draw();
         this.refreshing = false;
       }
-      return o.pipe(map(_1 => {
+      if (idsToCheckOnline.length > 0) {
+        o.push(this.deviceInstancesService.getCurrentDeviceConnectionStatusMap(idsToCheckOnline, []).pipe(map(statusMap => {
+          this.widget.properties.floorplan?.placements.forEach(p => {
+              if (!statusMap.has(p.deviceGroupId || '')) {
+                return;
+              }
+
+              p.tooltipCriteria?.forEach(c => {
+                if (c.function_id === fpCriteriaConnectionStatus) {
+                  c.value = {
+                    status_code: 200,
+                    message: statusMap.get(p.deviceGroupId!),
+                  };
+                }
+              });
+
+              if (p.criteria.function_id === fpCriteriaConnectionStatus) {
+                  p.criteria.value = {
+                    status_code: 200,
+                    message: statusMap.get(p.deviceGroupId!),
+                  };
+              }
+            });
+        })));
+      }
+      return forkJoin(o).pipe(map(_1 => {
         this.draw();
         this.refreshing = false;
         this.cd.detectChanges();

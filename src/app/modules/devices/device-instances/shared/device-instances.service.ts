@@ -435,6 +435,23 @@ export class DeviceInstancesService {
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistoryV2', null)));
     }
 
+    /**
+     * 
+     * @param ids devices, devices-groups, locations
+     * @param deviceAttributeBlacklist attribute value and origin will only be checked if set, otherwise all values or origins will be blacklisted
+     */
+    getCurrentDeviceConnectionStatusMap(ids: string[], deviceAttributeBlacklist: Attribute[]): Observable<Map<string, boolean[]>> {
+        return this.http.post<any>(environment.connectionLogUrl + '/current/query/map-original', {ids, device_attribute_blacklist: deviceAttributeBlacklist}).pipe(
+            map(obj => {
+                const m = new Map();
+                for (const key of Object.keys(obj)) {
+                    m.set(key, obj[key]);
+                }
+                return m;
+            })
+        );
+    }
+
     convertToShortId(id: string | undefined): string {
         if (id === undefined || id === '') {
             return '';
