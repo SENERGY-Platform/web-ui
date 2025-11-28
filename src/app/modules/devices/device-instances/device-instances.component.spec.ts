@@ -26,7 +26,7 @@ import { CoreModule } from '../../../core/core.module';
 import { MatTabsModule } from '@angular/material/tabs';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { DevicesModule } from '../devices.module';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { DeviceInstancesService } from './shared/device-instances.service';
 import { of } from 'rxjs';
@@ -63,6 +63,7 @@ describe('DeviceInstancesComponent', () => {
     providers: [
         { provide: KeycloakService, useClass: MockKeycloakService },
         { provide: Router, useClass: RouterStub },
+        { provide: ActivatedRoute, useClass: ActivatedRouteStub },
         { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
         { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
         { provide: ExportDataService, useValue: exportDataServiceSpy },
@@ -96,3 +97,8 @@ class RouterStub {
         };
     }
 }
+
+class ActivatedRouteStub {
+    queryParamMap = of(undefined);
+}
+
