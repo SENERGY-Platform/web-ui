@@ -452,6 +452,19 @@ export class DeviceInstancesService {
         );
     }
 
+    getHistory(query: { ids: string[], range?: string, since?: Date; until?: Date; }): Observable<Map<string, ResourceHistoricalConnectionStatesModelV2[]>> {
+        return this.http.post<any>(environment.connectionLogUrl + '/historical//query/map-original', query).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getHistory', null))).pipe(
+            map(obj => {
+                const m = new Map();
+                for (const key of Object.keys(obj)) {
+                    m.set(key, obj[key]);
+                }
+                return m;
+            })
+        );
+    }
+
     convertToShortId(id: string | undefined): string {
         if (id === undefined || id === '') {
             return '';

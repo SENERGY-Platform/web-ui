@@ -35,6 +35,7 @@ import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/sh
 import { environment } from '../../../environments/environment';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
+import { ConnectionHistoryDialogComponent } from '../shared/connection-history-dialog/connection-history-dialog.component';
 
 @Component({
   selector: 'senergy-floorplan',
@@ -670,8 +671,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   loadMissingDeviceGroups(): Observable<null> {
     const deviceGroupIds = this.widget.properties.floorplan?.placements.map(p => p.deviceGroupId).filter(dId => dId !== null).filter(dId => this.deviceGroups.find(dg => dg.id === dId) === undefined).filter((v, i, a) => a.indexOf(v) === i);
     if (deviceGroupIds !== undefined && deviceGroupIds?.length > 0) {
-      // @ts-expect-error deviceGroupIds is string[], but compiler does not recognize
-      return this.deviceGroupsService.getDeviceGroupListByIds(deviceGroupIds, true).pipe(map(dgs => {
+      return this.deviceGroupsService.getDeviceGroupListByIds(deviceGroupIds as string[], true).pipe(map(dgs => {
         dgs.forEach(dg => dg.criteria = dg.criteria?.filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i));
         this.deviceGroups.push(...(dgs as DeviceGroupWithValueModel[]));
         return null;
@@ -720,6 +720,13 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
 
   filterRelatedControllingCriteria(c: DeviceGroupCriteriaModel, l: DeviceGroupCriteriaModel[], value?: any): DeviceGroupCriteriaModel[] {
     switch (c.function_id) {
+      case fpCriteriaConnectionStatus:
+        return [{
+          function_id: fpCriteriaConnectionStatus,
+          interaction: '',
+          aspect_id: '',
+          device_class_id: '',
+        }];
       case environment.getOnOffFunctionId:
         let functionId;
         let t = value;
@@ -752,6 +759,16 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
 
   performAction(deviceGroupId: string | null, criteria: DeviceGroupCriteriaModel, value?: any) {
     if (deviceGroupId === null) {
+      return;
+    }
+    if (criteria.function_id === fpCriteriaConnectionStatus) {
+      const dialogConfig = new MatDialogConfig();
+      dialogConfig.width = '75vw';
+      dialogConfig.disableClose = false;
+      dialogConfig.data = {
+        id: deviceGroupId,
+      };
+      this.dialog.open(ConnectionHistoryDialogComponent, dialogConfig);
       return;
     }
     const command: DeviceCommandModel = {
