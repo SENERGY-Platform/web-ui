@@ -26,9 +26,7 @@ import {
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Navigation, Router } from '@angular/router';
-import { DeviceTypeModel } from '../../metadata/device-types-overview/shared/device-type.model';
-import { LocationModel } from '../locations/shared/locations.model';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { DeviceInstancesDialogService } from './shared/device-instances-dialog.service';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
@@ -42,7 +40,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 import { concatMap } from 'rxjs/operators';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
-import { HubModel } from '../networks/shared/networks.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { DeviceInstancesDefaultAttributesDialogComponent } from './dialogs/device-instances-default-attributes-dialog.component';
 
@@ -80,8 +77,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         private permissionsService: PermissionsService,
         public preferencesService: PreferencesService,
         private cd: ChangeDetectorRef,
+        private activatedRoute: ActivatedRoute,
     ) {
-        this.getRouterParams();
     }
     displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'info', 'share'];
     pageSize = this.preferencesService.pageSize;
@@ -125,11 +122,12 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     userIdToName: { [key: string]: string } = {};
 
     ngOnInit(): void {
-        this.initSearch(); // does automatically load data on first page load
         this.checkAuthorization();
     }
 
     ngAfterViewInit(): void {
+        this.getRouterParams();
+        this.initSearch(); // does automatically load data on first page load
         this.paginator.page.subscribe((e) => {
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
@@ -227,6 +225,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                     this.routerNetworkName = filterSelectionInner.networkName;
                     this.routerLocation = filterSelectionInner.location;
                     this.routerLocationName = filterSelectionInner.locationName;
+                    this.updateQueryParams();
                     this.cd.detectChanges();
                 }
                 this.reload();
@@ -400,31 +399,26 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     private getRouterParams(): void {
-        const navigation: Navigation | null = this.router.getCurrentNavigation();
-        if (navigation !== null) {
-            if (navigation.extras.state !== undefined) {
-                const state = navigation.extras.state as DeviceInstancesRouterState;
-                switch (state.type) {
-                    case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
-                        this.routerDeviceType = [(state.value as DeviceTypeModel).id];
-                        this.routerDeviceTypeNames = [(state.value as DeviceTypeModel).name];
-                        break;
-                    case DeviceInstancesRouterStateTypesEnum.NETWORK:
-                        this.routerNetwork = (state.value as HubModel).id;
-                        this.routerNetworkName = (state.value as HubModel).name;
-                        break;
-                    case DeviceInstancesRouterStateTypesEnum.LOCATION:
-                        this.routerLocation = (state.value as LocationModel).id;
-                        this.routerLocationName = (state.value as LocationModel).name;
-                        break;
-                    case DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP:
-                        this.routerDeviceIds = state.value as string[];
-                        break;
-                    case DeviceInstancesRouterStateTypesEnum.CONNECTION_STATE:
-                        this.routerConnectionState = state.value;
+        this.activatedRoute.queryParamMap.subscribe(params => {
+            if (params !== undefined && params !== null) {
+                if (params.has('device-type-id')) {
+                    this.routerDeviceType = params.getAll('device-type-id');
+                }
+                if (params.has('device-type-name')) {
+                    this.routerDeviceTypeNames = params.getAll('device-type-name');
+                }
+                this.routerNetwork = params.get('network-id') || undefined;
+                this.routerNetworkName = params.get('network-name') || undefined;
+                this.routerLocation = params.get('location-id') || undefined;
+                this.routerLocationName = params.get('location-name') || undefined;
+                if (params.has('device-id')) {
+                    this.routerDeviceIds = params.getAll('device-id');
+                }
+                if (params.has('connection-state')) {
+                    this.routerConnectionState = parseInt(params.get('connection-state') || '0') as DeviceInstancesRouterStateTabEnum || undefined;
                 }
             }
-        }
+        });
     }
 
     isAllSelected() {
@@ -516,5 +510,37 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
             return '';
         }
         return 'calc(100vh - ' + (this._chipDiv.nativeElement.clientHeight + 216) + 'px - 1em)';
+    }
+
+    updateQueryParams() {
+        const queryParams: any = {};
+        if (this.routerConnectionState) {
+            queryParams['connection-state'] = this.routerConnectionState;
+        }
+        if (this.routerDeviceType) {
+            queryParams['device-type-id'] = this.routerDeviceType;
+            if (this.routerDeviceTypeNames) {
+                queryParams['device-type-name'] = this.routerDeviceTypeNames;
+            }
+        }
+        if (this.routerNetwork) {
+            queryParams['network-id'] = this.routerNetwork;
+            if (this.routerNetworkName) {
+               queryParams['network-name'] = this.routerNetworkName;
+            }
+        }
+        if (this.routerLocation) {
+            queryParams['location-id'] = this.routerLocation;
+            if (this.routerLocationName) {
+               queryParams['location-name'] = this.routerLocationName;
+            }
+        }
+        this.router.navigate(
+            [],
+            {
+                relativeTo: this.activatedRoute,
+                queryParams,
+            },
+        );
     }
 }

@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {forkJoin, Observable, Subscription, map} from 'rxjs';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Router} from '@angular/router';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {LocationModel} from './shared/locations.model';
-import {LocationsService} from './shared/locations.service';
-import {
-    DeviceInstancesRouterState,
-    DeviceInstancesRouterStateTypesEnum
-} from '../device-instances/device-instances.component';
-import {MatTableDataSource} from '@angular/material/table';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { forkJoin, Observable, Subscription, map } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { LocationModel } from './shared/locations.model';
+import { LocationsService } from './shared/locations.service';
+import { MatTableDataSource } from '@angular/material/table';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
@@ -105,7 +101,10 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     showDevices(location: LocationModel) {
         this.router.navigate(['devices/deviceinstances'], {
-            state: { type: DeviceInstancesRouterStateTypesEnum.LOCATION, value: location } as DeviceInstancesRouterState,
+            queryParams: {
+                'location-id': location.id,
+                'location-name': location.name,
+            },
         });
         return false;
     }

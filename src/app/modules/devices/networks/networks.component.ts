@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
-import {NetworksService} from './shared/networks.service';
-import {ExtendedHubTotalModel, HubModel} from './shared/networks.model';
-import {forkJoin, Observable, Subscription, map} from 'rxjs';
-import {Router} from '@angular/router';
-import {
-    DeviceInstancesRouterState,
-    DeviceInstancesRouterStateTypesEnum
-} from '../device-instances/device-instances.component';
-import {MatDialog} from '@angular/material/dialog';
-import {NetworksDeleteDialogComponent} from './dialogs/networks-delete-dialog.component';
-import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
-import {MatTableDataSource} from '@angular/material/table';
-import {Sort, SortDirection} from '@angular/material/sort';
-import {SelectionModel} from '@angular/cdk/collections';
-import {MatPaginator} from '@angular/material/paginator';
-import {DialogsService} from 'src/app/core/services/dialogs.service';
-import {SearchbarService} from 'src/app/core/components/searchbar/shared/searchbar.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
-import {AuthorizationService} from '../../../core/services/authorization.service';
-import {PermissionsService} from '../../permissions/shared/permissions.service';
+import { NetworksService } from './shared/networks.service';
+import { ExtendedHubTotalModel, HubModel } from './shared/networks.model';
+import { forkJoin, Observable, Subscription, map } from 'rxjs';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { NetworksDeleteDialogComponent } from './dialogs/networks-delete-dialog.component';
+import { DeviceInstancesService } from '../device-instances/shared/device-instances.service';
+import { MatTableDataSource } from '@angular/material/table';
+import { Sort, SortDirection } from '@angular/material/sort';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatPaginator } from '@angular/material/paginator';
+import { DialogsService } from 'src/app/core/services/dialogs.service';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { AuthorizationService } from '../../../core/services/authorization.service';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({
@@ -143,8 +139,11 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     showDevices(network: HubModel) {
-        this.router.navigateByUrl('/devices/deviceinstances', {
-            state: { type: DeviceInstancesRouterStateTypesEnum.NETWORK, value: network } as DeviceInstancesRouterState,
+        this.router.navigate(['/devices/deviceinstances'], {
+            queryParams: {
+                'network-id': network.id,
+                'network-name': network.name,
+            },
         });
     }
 

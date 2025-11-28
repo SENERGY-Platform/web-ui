@@ -25,7 +25,6 @@ import { Sort, SortDirection } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../device-instances/device-instances.component';
 import { DeviceGroupModel } from './shared/device-groups.model';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
@@ -232,10 +231,9 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
             }
 
             this.router.navigate(['devices/deviceinstances'], {
-                state: {
-                    type: DeviceInstancesRouterStateTypesEnum.DEVICE_GROUP,
-                    value: deviceGroup?.device_ids
-                } as DeviceInstancesRouterState,
+                queryParams: {
+                    'device-id': deviceGroup?.device_ids,
+                },
             });
         });
     }

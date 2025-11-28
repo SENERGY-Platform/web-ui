@@ -21,7 +21,6 @@ import { DevicesStateModel } from './shared/devices-state.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
-import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from 'src/app/modules/devices/device-instances/device-instances.component';
 import { DeviceInstancesRouterStateTabEnum } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 
 @Component({
@@ -74,21 +73,27 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
 
     showOnlineDevices() {
         this.router.navigate(['devices/deviceinstances'], {
-            state: { type: DeviceInstancesRouterStateTypesEnum.CONNECTION_STATE, value: DeviceInstancesRouterStateTabEnum.ONLINE } as DeviceInstancesRouterState,
+            queryParams: {
+                'connection-state': DeviceInstancesRouterStateTabEnum.ONLINE,
+            },
         });
         return false;
     }
 
     showOfflineDevices() {
         this.router.navigate(['devices/deviceinstances'], {
-            state: { type: DeviceInstancesRouterStateTypesEnum.CONNECTION_STATE, value: DeviceInstancesRouterStateTabEnum.OFFLINE } as DeviceInstancesRouterState,
+            queryParams: {
+                'connection-state': DeviceInstancesRouterStateTabEnum.OFFLINE,
+            },
         });
         return false;
     }
 
     showUnknownDevices() {
         this.router.navigate(['devices/deviceinstances'], {
-            state: { type: DeviceInstancesRouterStateTypesEnum.CONNECTION_STATE, value: DeviceInstancesRouterStateTabEnum.UNKNOWN } as DeviceInstancesRouterState,
+            queryParams: {
+                'connection-state': DeviceInstancesRouterStateTabEnum.UNKNOWN,
+            },
         });
         return false;
     }

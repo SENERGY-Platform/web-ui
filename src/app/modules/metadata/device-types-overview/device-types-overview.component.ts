@@ -21,7 +21,6 @@ import { DeviceTypeService } from './shared/device-type.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { Router } from '@angular/router';
-import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../../devices/device-instances/device-instances.component';
 import { DeviceInstancesDialogService } from '../../devices/device-instances/shared/device-instances-dialog.service';
 import { DeviceTypeDeviceClassModel, DeviceTypeModel } from './shared/device-type.model';
 import { MatTableDataSource } from '@angular/material/table';
@@ -154,7 +153,10 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
 
     showDevices(deviceType: DeviceTypeModel) {
         this.router.navigate(['devices/deviceinstances'], {
-            state: { type: DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE, value: deviceType } as DeviceInstancesRouterState,
+            queryParams: {
+                'device-type-id': deviceType.id,
+                'device-type-name': deviceType.name,
+            },
         });
     }
 

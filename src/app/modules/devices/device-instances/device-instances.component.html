@@ -32,35 +32,35 @@
                 <span *ngIf="routerConnectionState === DeviceInstancesRouterStateTabEnum.OFFLINE">Offline</span>
                 <span *ngIf="routerConnectionState === DeviceInstancesRouterStateTabEnum.ONLINE">Online</span>
                 <span *ngIf="routerConnectionState === DeviceInstancesRouterStateTabEnum.UNKNOWN">Unknown</span>
-                <button matChipRemove (click)="this.routerConnectionState = undefined; reload()">
+                <button matChipRemove (click)="this.routerConnectionState = undefined; updateQueryParams(); reload()">
                     <mat-icon>cancel</mat-icon>
                 </button>
             </mat-chip>
             <mat-chip *ngIf="routerNetwork !== undefined && routerNetwork !== null && routerNetwork !== ''">
                 <mat-icon matChipAvatar>device_hub</mat-icon>
                 {{routerNetworkName}}
-                <button matChipRemove (click)="this.routerNetwork = undefined; reload()">
+                <button matChipRemove (click)="this.routerNetwork = undefined; updateQueryParams(); reload()">
                     <mat-icon>cancel</mat-icon>
                 </button>
             </mat-chip>
             <mat-chip *ngIf="routerLocation !== undefined && routerLocation !== null && routerLocation !== ''">
                 <mat-icon matChipAvatar>place</mat-icon>
                 {{routerLocationName}}
-                <button matChipRemove (click)="this.routerLocation = undefined; reload()">
+                <button matChipRemove (click)="this.routerLocation = undefined; updateQueryParams(); reload()">
                     <mat-icon>cancel</mat-icon>
                 </button>
             </mat-chip>
             <mat-chip *ngFor="let dt of routerDeviceType; let i = index">
                 <mat-icon matChipAvatar>important_devices</mat-icon>
                 {{routerDeviceTypeNames[i]}}
-                <button matChipRemove (click)="this.routerDeviceType!.splice(i, 1); this.routerDeviceTypeNames.splice(i, 1) ; reload()">
+                <button matChipRemove (click)="this.routerDeviceType!.splice(i, 1); this.routerDeviceTypeNames.splice(i, 1); updateQueryParams(); reload()">
                     <mat-icon>cancel</mat-icon>
                 </button>
             </mat-chip>
             <mat-chip *ngIf="routerDeviceIds !== undefined">
                 <mat-icon matChipAvatar>devices</mat-icon>
                 {{routerDeviceIds.length}} Device Ids
-                <button matChipRemove (click)="this.routerDeviceIds = undefined; reload()">
+                <button matChipRemove (click)="this.routerDeviceIds = undefined; updateQueryParams(); reload()">
                     <mat-icon>cancel</mat-icon>
                 </button>
             </mat-chip>
