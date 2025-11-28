@@ -37,7 +37,7 @@
                         <mat-grid-tile-footer>
                             <div fxLayout="column" fxFill>
                                 <div class="truncate footer-item-header">
-                                    <p matTooltip="{{item.description === undefined ? '' : item.description}}">{{ item.name }}</p>
+                                    <p matTooltip="{{item.name === undefined ? '' : item.name}}">{{ item.name }}</p>
                                 </div>
                                 <div class="truncate footer-item-subtitle" fxLayout="column">
                                     <div *ngIf="costService.userMayGetFlowCostEstimations() && flowEstimations.length>0">
@@ -55,6 +55,11 @@
                                     <div matTooltip="last updated">{{ item.dateUpdated| date:"medium" }}</div>
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="end center" class="footer-buttons">
+                                    <button *ngIf="item.description !== undefined" mat-icon-button matTooltip="{{item.description}}">
+                                        <mat-icon color="accent">
+                                            info
+                                        </mat-icon>
+                                    </button>
                                     <button
                                             *ngIf="item._id !== undefined"
                                             [disabled]="!userHasExecutePermission(item._id)"

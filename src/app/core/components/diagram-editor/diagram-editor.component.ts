@@ -20,6 +20,8 @@ import $ from 'jquery';
 import { DiagramModel, LinkIOModel } from './shared/diagram.model';
 import { IOModel } from '../../../modules/data/operator-repo/shared/operator.model';
 import uuid = util.uuid;
+import {MatSnackBar} from '@angular/material/snack-bar';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
     selector: 'senergy-diagram-editor',
@@ -33,8 +35,9 @@ export class DiagramEditorComponent implements AfterViewInit {
 
     idGenerated = uuid();
 
-    NodeElement: any = dia.Element.define(
-        'senergy.NodeElement',
+
+
+    NodeElement: any = dia.Element.define('senergy.NodeElement',
         {
             inPorts: [],
             outPorts: [],
@@ -84,10 +87,25 @@ export class DiagramEditorComponent implements AfterViewInit {
                     refX: '-25%',
                     refY: '-25%',
                 },
+                button2: {
+                    cursor: 'pointer',
+                    ref: 'buttonLabel2',
+                    refWidth: '150%',
+                    refHeight: '150%',
+                    refX: '-25%',
+                    refY: '-25%',
+                },
                 buttonLabel: {
                     pointerEvents: 'none',
                     refX: '100%',
-                    refY: 0,
+                    refY: '-5%',
+                    textAnchor: 'middle',
+                    textVerticalAnchor: 'middle',
+                },
+                buttonLabel2: {
+                    pointerEvents: 'none',
+                    refX: '85%',
+                    refY: '-5%',
                     textAnchor: 'middle',
                     textVerticalAnchor: 'middle',
                 },
@@ -171,6 +189,14 @@ export class DiagramEditorComponent implements AfterViewInit {
                     tagName: 'text',
                     selector: 'buttonLabel',
                 },
+                {
+                    tagName: 'rect',
+                    selector: 'button2',
+                },
+                {
+                    tagName: 'text',
+                    selector: 'buttonLabel2',
+                },
             ],
             portMarkup: [
                 {
@@ -231,8 +257,10 @@ export class DiagramEditorComponent implements AfterViewInit {
 
     public dragStartPosition: {x: number; y: number }  | null = null;
 
-    constructor() {
-    }
+    constructor(
+        public snackBar: MatSnackBar,
+        private clipboard: Clipboard
+    ) {}
 
     ngAfterViewInit() {
         this.setPaperWidth(this.getPaperWidthFromWrap());
@@ -302,6 +330,14 @@ export class DiagramEditorComponent implements AfterViewInit {
             evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
             const model = elementView.model;
             model.remove();
+        });
+        this.paper.on('element:button2:pointerdown', (elementView: any, evt: any) => {
+            evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
+            const model = elementView.model;
+            this.clipboard.copy(model.id);
+            this.snackBar.open('Copied to clipboard', undefined, {
+                duration: 2000,
+            });
         });
     }
 
@@ -394,7 +430,7 @@ export class DiagramEditorComponent implements AfterViewInit {
                 text: name,
             },
             headerlabel: {
-                text: operatorId,
+                text: node.id,
             },
             body: {
                 cursor: 'default',
@@ -406,10 +442,22 @@ export class DiagramEditorComponent implements AfterViewInit {
                 stroke: 'black',
                 strokeWidth: 2,
             },
+            button2: {
+                event: 'element:button2:pointerdown',
+                fill: 'grey',
+                stroke: 'black',
+                strokeWidth: 2,
+            },
             buttonLabel: {
-                text: 'X', // fullwidth underscore
+                text: ' X ', // fullwidth underscore
                 fill: 'black',
-                fontSize: 8,
+                fontSize: 9,
+                fontWeight: 'bold',
+            },
+            buttonLabel2: {
+                text: 'Copy Id', // fullwidth underscore
+                fill: 'black',
+                fontSize: 9,
                 fontWeight: 'bold',
             },
         });
@@ -433,7 +481,7 @@ export class DiagramEditorComponent implements AfterViewInit {
         const heightBasedOnIn = outCircleradius * inPorts.length + 30;
         let height = heightBasedOnIn > heightBasedOnOut ? heightBasedOnIn : heightBasedOnOut;
         height = height > 100 ? height : 100;
-        const size = {height, width: 150};
+        const size = {height, width: 250};
         return size;
     }
 
