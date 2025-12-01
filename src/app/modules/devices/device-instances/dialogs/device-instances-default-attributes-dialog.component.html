@@ -21,10 +21,12 @@
         Attributes
         <mat-divider></mat-divider>
         <div *ngFor="let attr of attributes; let i = index" class="attribute">
-            <mat-form-field appearance="outline" class="third-width" color="accent">
+            <mat-form-field appearance="outline" class="third-width" color="accent" [matTooltip]="tooltip(attr.key)">
                 <mat-label>Key</mat-label>
-                <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" [items]="knownAttributes"
-                    appendTo=".ng-select-anchor" [addTag]="addAttribute()"></mtx-select>
+                <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
+                    appendTo=".ng-select-anchor" [addTag]="addAttribute()" [disabled]="isDisabled(attr.key)">
+                <mtx-option *ngFor="let a of knownAttributes" [value]="a.key" [disabled]="isDisabled(a.key)">{{a.label || a.key}}</mtx-option>
+                </mtx-select>
                 <mat-error senergyError label="Key"></mat-error>
             </mat-form-field>
             =
@@ -33,9 +35,10 @@
                 <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}">
                 <mat-error senergyError label="Value"></mat-error>
             </mat-form-field>
-            <button mat-icon-button color="warn" (click)="removeAttr(i)">
+            <button mat-icon-button color="warn" (click)="removeAttr(i)" *ngIf="!isDisabled(attr.key)">
                 <mat-icon>delete</mat-icon>
             </button>
+            <span style="width: 48px" *ngIf="isDisabled(attr.key)"></span>
         </div>
         <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
     </form>
