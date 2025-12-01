@@ -29,6 +29,7 @@ import {
     DeviceInstancesWithDeviceTypeTotalModel,
     DeviceSelectablesFullModel,
     DeviceSelectablesModel,
+    OfflineSinceModel,
 } from './device-instances.model';
 import { forkJoin, Observable, of } from 'rxjs';
 import { DeviceInstancesHistoryModel, ResourceHistoricalConnectionStatesModelV2, DeviceInstancesHistoryModelWithId } from './device-instances-history.model';
@@ -461,6 +462,15 @@ export class DeviceInstancesService {
             })
         );
     }
+
+    getDeviceOfflineSince(ids?: string[], deviceAttributeBlacklist?: Attribute[]): Observable<OfflineSinceModel[]> {
+        return this.http.post<OfflineSinceModel[]>(environment.connectionLogUrl + '/offline-since/devices?include-names=true', {ids, device_attribute_blacklist: deviceAttributeBlacklist}).pipe(
+            map(resp => resp || []),
+            map(resp => resp.map(r => ({id: r.id, offline_since: new Date(r.offline_since), name: r.name}))),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceOfflineSince', []),
+        ));
+    }
+    
 
     convertToShortId(id: string | undefined): string {
         if (id === undefined || id === '') {

@@ -17,10 +17,12 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DeviceDowntimeListService } from './shared/device-downtime-list.service';
-import { DeviceDowntimeListModel } from './shared/device-downtime-list.model';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import moment from 'moment';
+import { OfflineSinceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { ConnectionHistoryDialogComponent } from '../shared/connection-history-dialog/connection-history-dialog.component';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 @Component({
     selector: 'senergy-device-downtime-list',
@@ -28,7 +30,7 @@ import moment from 'moment';
     styleUrls: ['./device-downtime-list.component.css'],
 })
 export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
-    devices: DeviceDowntimeListModel[] = [];
+    offlineSinceList: OfflineSinceModel[] = [];
     ready = false;
     refreshing = false;
     destroy = new Subscription();
@@ -41,29 +43,17 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateNameAuthorization = false;
 
     constructor(
-        private eventListService: DeviceDowntimeListService,
-        private processModelListService: DeviceDowntimeListService,
+        private deviceDowntimeListService: DeviceDowntimeListService,
         private dashboardService: DashboardService,
+        private dialog: MatDialog,
     ) {}
 
     ngOnInit() {
-        this.getProcesses();
-    }
-
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
-    }
-
-    edit() {
-        this.processModelListService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
-    }
-
-    private getProcesses() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refreshing = true;
-                this.processModelListService.getDevicesDowntime().subscribe((devices: DeviceDowntimeListModel[]) => {
-                    this.devices = devices;
+                this.deviceDowntimeListService.getDevicesDowntime(this.widget.properties).subscribe((devices: OfflineSinceModel[]) => {
+                    this.offlineSinceList = devices;
                     this.ready = true;
                     this.refreshing = false;
                 }, () => {}, () => this.ready = true);
@@ -71,7 +61,38 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
         });
     }
 
-    humanizeDuration(durationInMin: any) {
+    ngOnDestroy() {
+        this.destroy.unsubscribe();
+    }
+
+    edit() {
+        this.deviceDowntimeListService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
+    }
+
+    humanizeDuration(d: Date): string {
+        const durationInMin = moment.duration(moment(new Date()).diff(moment(d))).asMinutes();
         return moment.duration(durationInMin, 'minutes').humanize();
+    }
+
+    format(d: Date): {icon: string; color: string} {
+        const durationInMin = moment.duration(moment(new Date()).diff(moment(d))).asMinutes();
+        if (durationInMin < (this.widget.properties?.deviceDowntimeList?.minutes_green || 60)) {
+            return { icon: 'sentiment_very_satisfied', color: 'green' };
+        } else if (durationInMin < (this.widget.properties?.deviceDowntimeList?.minutes_yellow || 240)) {
+            return { icon: 'sentiment_neutral', color: 'yellow' };
+        } else {
+            return { icon: 'sentiment_very_dissatisfied', color: 'red' };
+        }
+    }
+
+    showConnectionHistoryChart(id: string) {
+        const dialogConfig = new MatDialogConfig();
+              dialogConfig.width = '75vw';
+              dialogConfig.disableClose = false;
+              dialogConfig.data = {
+                id,
+              };
+              this.dialog.open(ConnectionHistoryDialogComponent, dialogConfig);
+              return;
     }
 }

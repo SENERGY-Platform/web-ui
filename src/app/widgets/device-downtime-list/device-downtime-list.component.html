@@ -18,17 +18,21 @@
     <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
     <mat-card-content class="mat-card-image content-size drag-handler">
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready && devices.length !== 0" fxLayout="column" fxFill>
-            <mat-list fxFlex>
-                <mat-list-item *ngFor="let device of devices; let i = index">
-                    <div matListItemIcon><mat-icon [ngClass]="device.color">{{device.icon}}</mat-icon></div>
-                    <div matListItemTitle [matTooltip]="device.name">{{i + 1 + '. ' + device.name}}</div>
-                    <div matListItemLine>{{humanizeDuration(device.timeDisconnectedInMin)}} / {{device.failureRate}} time(s)</div>
+        <div *ngIf="ready && offlineSinceList.length !== 0" fxLayout="column" fxFill>
+            <mat-list dense fxFlex>
+                <mat-list-item *ngFor="let item of offlineSinceList" (click)="showConnectionHistoryChart(item.id)">
+                    <span matListItemIcon><mat-icon 
+                            [ngClass]="format(item.offline_since).color">{{format(item.offline_since).icon}}</mat-icon>
+                    </span>
+                    <div matListItemTitle [matTooltip]="item.name">{{item.name}}</div>
+                    <div matListItemLine [matTooltip]="item.offline_since | date: 'dd.MM.yy HH:mm'">{{humanizeDuration(item.offline_since)}}</div>
                 </mat-list-item>
             </mat-list>
         </div>
-        <senergy-no-data [showIf]="ready && devices.length === 0"></senergy-no-data>
+        <senergy-no-data [showIf]="ready && offlineSinceList.length === 0" message="Everything online!"></senergy-no-data>
     </mat-card-content>
-    <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+    <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
+        [userHasDeleteAuthorization]="userHasDeleteAuthorization"
+        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
+        [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
-

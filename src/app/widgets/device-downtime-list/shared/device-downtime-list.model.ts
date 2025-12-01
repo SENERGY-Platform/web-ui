@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-export class DeviceDowntimeListModel {
-    constructor(
-        public timeConnectedInMs: number,
-        public timeConnectedInS: number,
-        public timeDisconnectedInMs: number,
-        public timeDisconnectedInMin: number,
-        public failureRate: number,
-        public failureRatio: number,
-        public name: string,
-        public color: string,
-        public icon: string,
-    ) {}
+import { LocationModel } from 'src/app/modules/devices/locations/shared/locations.model';
+
+export interface DevicesDowntimeListPropertiesModel {
+    deviceDowntimeList?: {
+        location?: Partial<LocationModel>;
+        filter_inactive: boolean;
+        minutes_green: number;
+        minutes_yellow: number;
+    }
 }

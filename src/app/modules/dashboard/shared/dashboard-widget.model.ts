@@ -36,6 +36,7 @@ import { ConsumptionProfilePropertiesModel } from 'src/app/widgets/consumption-p
 import { VentilationWidgetPropertiesModel } from 'src/app/widgets/bad-ventilation/shared/model';
 import { FloorplanWidgetPropertiesModel } from 'src/app/widgets/floorplan/shared/floorplan.model';
 import { DevicesStatePropertiesModel } from 'src/app/widgets/devices-state/shared/devices-state.model';
+import { DevicesDowntimeListPropertiesModel } from 'src/app/widgets/device-downtime-list/shared/device-downtime-list.model';
 
 export interface WidgetModel {
     id: string;
@@ -80,5 +81,6 @@ export interface WidgetPropertiesModels
     VentilationWidgetPropertiesModel,
     FloorplanWidgetPropertiesModel,
     DeviceStatusPropertiesModel,
-    DevicesStatePropertiesModel
+    DevicesStatePropertiesModel,
+    DevicesDowntimeListPropertiesModel
      { }

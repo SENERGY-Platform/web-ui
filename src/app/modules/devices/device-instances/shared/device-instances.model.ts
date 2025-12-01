@@ -109,3 +109,9 @@ export enum DeviceInstancesRouterStateTabEnum {
     OFFLINE,
     UNKNOWN,
 }
+
+export interface OfflineSinceModel {
+    id: string;
+    offline_since: Date;
+    name: string;
+}

@@ -16,11 +16,12 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { LocationModel } from 'src/app/modules/devices/locations/shared/locations.model';
+import { LocationsService } from 'src/app/modules/devices/locations/shared/locations.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
     templateUrl: './device-downtime-list-edit-dialog.component.html',
@@ -33,12 +34,13 @@ export class DeviceDowntimeListEditDialogComponent implements OnInit {
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
     formGroup: FormGroup;
+     locations: LocationModel[] = [];
 
     constructor(
         private fb: FormBuilder,
         private dialogRef: MatDialogRef<DeviceDowntimeListEditDialogComponent>,
-        private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
+        private locationService: LocationsService,
         @Inject(MAT_DIALOG_DATA) data: {
             dashboardId: string;
             widgetId: string;
@@ -52,17 +54,32 @@ export class DeviceDowntimeListEditDialogComponent implements OnInit {
         this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
         this.formGroup = this.fb.group({
             name: [this.widget.name, Validators.required],
+            location: [''],
+            filter_inactive: [false],
+            minutes_green: [60, Validators.required],
+            minutes_yellow: [240, Validators.required],
         });
     }
 
     ngOnInit() {
         this.getWidgetData();
         this.onChanges();
+         this.locationService.getLocations({limit: -1}).subscribe(locationsTotal => {
+            this.locations = locationsTotal.result;
+        });
     }
 
     onChanges(): void {
         this.formGroup.controls['name'].valueChanges.subscribe(val => {
             this.widget.name = val;
+        });
+         this.formGroup.controls.location.valueChanges.subscribe(val => {
+            if (val !== null && val !== undefined) {
+                this.formGroup.controls.location.setValue({
+                    name: val.name,
+                    id: val.id,
+                }, {emitEvent: false});
+            }           
         });
     }
 
@@ -71,6 +88,10 @@ export class DeviceDowntimeListEditDialogComponent implements OnInit {
             this.widget = widget;
             this.formGroup.patchValue({
                 name: this.widget.name,
+                location: this.widget.properties.deviceDowntimeList?.location,
+                filter_inactive: this.widget.properties.deviceDowntimeList?.filter_inactive,
+                minutes_green: this.widget.properties.deviceDowntimeList?.minutes_green,
+                minutes_yellow: this.widget.properties.deviceDowntimeList?.minutes_yellow,
             });
         });
     }
@@ -80,14 +101,24 @@ export class DeviceDowntimeListEditDialogComponent implements OnInit {
     }
 
     save(): void {
-        if(!this.userHasUpdateNameAuthorization) {
-            return;
+        const obs = [];
+        if (this.userHasUpdateNameAuthorization) {
+                obs.push( this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, this.widget.name));
         }
 
-        this.dashboardService.updateWidgetName(this.dashboardId, this.widgetId, this.widget.name).subscribe((resp: DashboardResponseMessageModel) => {
-            if (resp.message === 'OK') {
+        if (this.userHasUpdatePropertiesAuthorization) {
+            obs.push( this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], {deviceDowntimeList: this.formGroup.getRawValue()}));
+
+        }
+        forkJoin(obs).subscribe(responses => {
+                const errorOccured = responses.find((response) => response.message !== 'OK');
+                if (!errorOccured) {
+                if (this.widget) {
+                    this.widget.name = this.formGroup.controls.name.value || '';
+                    this.widget.properties.deviceDowntimeList = this.formGroup.getRawValue() as any;
+                }
                 this.dialogRef.close(this.widget);
-            }
-        });
+                }
+            });
     }
 }

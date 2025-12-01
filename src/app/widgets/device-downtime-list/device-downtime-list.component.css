@@ -37,3 +37,8 @@
 .green {
     color: #36ab00;
 }
+
+.mat-mdc-list-item.mdc-list-item--with-leading-icon.mdc-list-item--with-two-lines {
+    height: 52px;
+    cursor: pointer;
+}

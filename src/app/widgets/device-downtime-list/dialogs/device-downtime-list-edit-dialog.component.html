@@ -23,6 +23,29 @@
             <input matInput formControlName="name" required>
 		   	<mat-error senergyError label="Widget Name"></mat-error>
         </mat-form-field>
+        @if (userHasUpdatePropertiesAuthorization) {
+        <mat-form-field color="accent" appearance="outline">
+            <mat-label>Location</mat-label>
+            <mtx-select formControlName="location" [items]="locations" bindLabel="name"></mtx-select>
+            <mat-error senergyError label="Location"></mat-error>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="filter_inactive" color="accent">
+            Filter Inactive Devices
+        </mat-checkbox>
+
+        <mat-form-field color="accent" appearance="outline">
+            <mat-label>Minutes Green</mat-label>
+            <input matInput formControlName="minutes_green" required>
+            <mat-error senergyError label="Minutes Green"></mat-error>
+        </mat-form-field>
+
+        <mat-form-field color="accent" appearance="outline">
+            <mat-label>Minutes Yellow</mat-label>
+            <input matInput formControlName="minutes_yellow" required>
+            <mat-error senergyError label="Minutes Yellow"></mat-error>
+        </mat-form-field>
+        }
     </form>
 </mat-dialog-content>
 

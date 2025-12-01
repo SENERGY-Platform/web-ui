@@ -14,29 +14,16 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {DeviceDowntimeListEditDialogComponent} from '../dialogs/device-downtime-list-edit-dialog.component';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {Observable} from 'rxjs';
-import { HttpClient } from '@angular/common/http';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {DeviceDowntimeListModel} from './device-downtime-list.model';
-import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
-import {
-    DeviceInstancesHistoryModel
-} from '../../../modules/devices/device-instances/shared/device-instances-history.model';
-import {map} from 'rxjs/operators';
-
-const stateConnected = 'connected';
-const stateDisconnected = 'disconnected';
-const stateTrue = true;
-const stateFalse = false;
-const dayInMs = 86400000;
-const failureTimeInMs = dayInMs * 7;
-const today = new Date();
+import { Injectable } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { DeviceDowntimeListEditDialogComponent } from '../dialogs/device-downtime-list-edit-dialog.component';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { Observable } from 'rxjs';
+import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
+import { Attribute, OfflineSinceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { DevicesDowntimeListPropertiesModel } from './device-downtime-list.model';
 
 @Injectable({
     providedIn: 'root',
@@ -45,8 +32,6 @@ export class DeviceDowntimeListService {
     constructor(
         private dialog: MatDialog,
         private dashboardService: DashboardService,
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
         private deviceInstancesService: DeviceInstancesService,
     ) {
     }
@@ -69,107 +54,15 @@ export class DeviceDowntimeListService {
         });
     }
 
-    getDevicesDowntime(): Observable<DeviceDowntimeListModel[]> {
-        return this.deviceInstancesService.getDeviceHistory7d().pipe(
-            map(d => d || []),
-            map(devices => devices.filter((device) => {
-                let active = true;
-                if(device.attributes) {
-                    device.attributes.forEach(attribute => {
-                        if(attribute.key == 'inactive' && attribute.value == 'true') {
-                            active = false;
-                        }
-                    });
-                }
-                return active;
-            })),
-            map((devices: DeviceInstancesHistoryModel[]) => this.calcDevicesConnectionTime(devices))
-        );
-    }
-
-    private calcDevicesConnectionTime(devices: DeviceInstancesHistoryModel[]): DeviceDowntimeListModel[] {
-        const deviceArray: DeviceDowntimeListModel[] = [];
-        if (devices !== null) {
-            devices.forEach((device) => {
-                deviceArray.push(this.calcDisconnectedTime(device));
-            });
-            deviceArray.sort((a, b) => b.timeDisconnectedInMs - (a.timeDisconnectedInMs || b.failureRate - a.failureRate));
+    getDevicesDowntime(properties: DevicesDowntimeListPropertiesModel): Observable<OfflineSinceModel[]> {
+        let ids = undefined;
+        if (properties?.deviceDowntimeList?.location?.id !== undefined) {
+            ids = [properties.deviceDowntimeList.location.id];
         }
-        return deviceArray.slice(0, 50);
-    }
-
-    private calcDisconnectedTime(item: DeviceInstancesHistoryModel): DeviceDowntimeListModel {
-        const itemStatus = new DeviceDowntimeListModel(0, 0, 0, 0, 0, 0, item.display_name || item.name, '', '');
-        if (item.log_history.values === null) {
-            switch (item.log_state) {
-            case stateConnected: {
-                addTimeConnected(failureTimeInMs);
-                break;
-            }
-            case stateDisconnected: {
-                addTimeDisconnected(failureTimeInMs);
-                break;
-            }
-            }
-        } else {
-            /** calculate delta from last index time till now */
-            const lastIndex: number = item.log_history.values.length - 1;
-            const diffToday = today.getTime() - new Date(item.log_history.values[lastIndex]['0'] * 1000).getTime();
-            addTimeToConnectionStatus(item.log_history.values[lastIndex]['1'], diffToday);
-
-            for (let x = lastIndex; x >= 1; x--) {
-                const diff = (item.log_history.values[x]['0'] - item.log_history.values[x - 1]['0']) * 1000;
-                addTimeToConnectionStatus(item.log_history.values[x - 1]['1'], diff);
-            }
-
-            /** check if input object existed before first index of log history */
-            if (item.log_edge !== null) {
-                const timeDiff = failureTimeInMs - itemStatus.timeDisconnectedInMs - itemStatus.timeConnectedInMs;
-                addTimeToConnectionStatus(item.log_edge[1] === true, timeDiff);
-            }
+         let filter: Attribute[] | undefined = undefined;
+        if (properties?.deviceDowntimeList?.filter_inactive === true) {
+            filter = [{ key: 'inactive', value: 'true', origin: 'web-ui' }];
         }
-        itemStatus.timeConnectedInS = Math.round(itemStatus.timeConnectedInMs / 60000);
-        itemStatus.timeDisconnectedInMin = Math.round(itemStatus.timeDisconnectedInMs / 60000);
-        itemStatus.failureRatio = itemStatus.timeDisconnectedInMs / (itemStatus.timeDisconnectedInMs + itemStatus.timeConnectedInMs);
-
-        if (itemStatus.timeDisconnectedInMin >= 2880) {
-            itemStatus.color = 'red';
-            itemStatus.icon = 'sentiment_very_dissatisfied';
-        } else {
-            if (itemStatus.timeDisconnectedInMin < 60) {
-                itemStatus.color = 'green';
-                itemStatus.icon = 'sentiment_very_satisfied';
-            } else {
-                itemStatus.color = 'yellow';
-                itemStatus.icon = 'sentiment_neutral';
-            }
-        }
-
-        return itemStatus;
-
-        function addTimeConnected(time: number) {
-            itemStatus.timeConnectedInMs += time;
-        }
-
-        function addTimeDisconnected(time: number) {
-            itemStatus.timeDisconnectedInMs += time;
-            itemStatus.failureRate++;
-        }
-
-        function addTimeToConnectionStatus(status: boolean, time: number) {
-            switch (status) {
-            case stateTrue: {
-                addTimeConnected(time);
-                break;
-            }
-            case stateFalse: {
-                addTimeDisconnected(time);
-                break;
-            }
-            default: {
-                throw new Error('Unknown state.');
-            }
-            }
-        }
+        return this.deviceInstancesService.getDeviceOfflineSince(ids, filter);
     }
 }

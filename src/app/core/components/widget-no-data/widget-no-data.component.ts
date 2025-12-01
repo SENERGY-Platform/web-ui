@@ -23,6 +23,7 @@ import { Component, Input } from '@angular/core';
 })
 export class WidgetNoDataComponent {
     @Input() showIf = false;
+    @Input() message = 'No data';
 
     constructor() {}
 }
