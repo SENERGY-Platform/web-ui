@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ * Unless required by applicable law or agreed to in writing, softwareb
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -17,14 +17,14 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
-import { DeviceInstancesHistoryModel } from '../../../modules/devices/device-instances/shared/device-instances-history.model';
-import { DevicesStateModel } from './devices-state.model';
+import { DevicesStateModel, DevicesStatePropertiesModel } from './devices-state.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { DevicesStateEditDialogComponent } from '../dialog/devices-state-edit-dialog.component';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {map} from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+import { Attribute } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 
 @Injectable({
     providedIn: 'root',
@@ -36,13 +36,14 @@ export class DevicesStateService {
         private deviceInstancesService: DeviceInstancesService,
     ) {}
 
-    openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
+    openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             widgetId,
             dashboardId,
-            userHasUpdateNameAuthorization
+            userHasUpdateNameAuthorization,
+            userHasUpdatePropertiesAuthorization,
         };
         const editDialogRef = this.dialog.open(DevicesStateEditDialogComponent, dialogConfig);
 
@@ -53,43 +54,34 @@ export class DevicesStateService {
         });
     }
 
-    getDevicesStatus(): Observable<DevicesStateModel> {
-        return this.deviceInstancesService.getDeviceHistory1h().pipe(
-            map(devices => devices || []),
-            map(devices => devices.filter((device) => {
-                let active = true;
-                if(device.attributes) {
-                    device.attributes.forEach(attribute => {
-                        if(attribute.key == 'inactive' && attribute.value == 'true') {
-                            active = false;
+    getDevicesStatus(properties?: DevicesStatePropertiesModel): Observable<DevicesStateModel> {
+        let ids = undefined;
+        if (properties?.deviceState?.location?.id !== undefined) {
+            ids = [properties.deviceState.location.id];
+        }
+        let filter: Attribute[] | undefined = undefined;
+        if (properties?.deviceState?.filter_inactive) {
+            filter = [{ key: 'inactive', value: 'true', origin: 'web-ui' }];
+        }
+        return this.deviceInstancesService.getCurrentDeviceConnectionStatusMap(ids, filter).pipe(
+            map(history => {
+                 const devicesStatus: DevicesStateModel = { connected: 0, count: 0, disconnected: 0, unknown: 0 };
+                 history.forEach((logStates) => { 
+                    logStates.forEach(state => {
+                        if (state) { 
+                            devicesStatus.connected++; 
+                        } else {
+                            devicesStatus.disconnected++;
                         }
-                    });
-                }
-                return active;
-            })),
-            map((devices: DeviceInstancesHistoryModel[]) => this.sumDevicesStatus(devices))
+                        devicesStatus.count++;
+                 });
+                 if (logStates.length === 0) {
+                     devicesStatus.unknown++;
+                     devicesStatus.count++;
+                 }
+                 });
+                 return devicesStatus;
+            }),
         );
-    }
-
-    private sumDevicesStatus(devices: DeviceInstancesHistoryModel[]): DevicesStateModel {
-        const devicesStatus: DevicesStateModel = { connected: 0, count: 0, disconnected: 0, unknown: 0 };
-        devices.forEach((device) => {
-            switch (device.log_state) {
-            case 'connected': {
-                devicesStatus.connected++;
-                break;
-            }
-            case 'disconnected': {
-                devicesStatus.disconnected++;
-                break;
-            }
-            default: {
-                devicesStatus.unknown++;
-                break;
-            }
-            }
-            devicesStatus.count++;
-        });
-        return devicesStatus;
     }
 }

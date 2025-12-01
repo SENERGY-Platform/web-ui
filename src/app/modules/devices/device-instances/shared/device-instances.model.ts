@@ -99,6 +99,7 @@ export interface FilterSelection {
     locationName?: string;
     network?: string;
     networkName?: string;
+    deviceAttributeBlacklist?: Attribute[];
 }
 
  

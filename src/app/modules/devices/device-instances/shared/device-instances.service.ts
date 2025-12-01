@@ -172,6 +172,7 @@ export class DeviceInstancesService {
         deviceIds?: string[];
         hubId?: string;
         locationId?: string;
+        deviceAttributeBlacklist?: Attribute[];
     }): Observable<DeviceInstancesTotalModel> {
         return this._getDeviceInstances(options);
     }
@@ -187,6 +188,7 @@ export class DeviceInstancesService {
         deviceIds?: string[];
         hubId?: string;
         locationId?: string;
+        deviceAttributeBlacklist?: Attribute[];
     }): Observable<DeviceInstancesWithDeviceTypeTotalModel> {
         const opt = options as {
             limit: number;
@@ -200,6 +202,7 @@ export class DeviceInstancesService {
             hubId?: string;
             locationId?: string;
             fulldt?: boolean;
+            deviceAttributeBlacklist?: Attribute[];
         };
         opt.fulldt = true;
         return this._getDeviceInstances(options) as Observable<DeviceInstancesWithDeviceTypeTotalModel>;
@@ -217,6 +220,7 @@ export class DeviceInstancesService {
         hubId?: string;
         locationId?: string;
         fulldt?: boolean;
+        deviceAttributeBlacklist?: Attribute[];
     }): Observable<DeviceInstancesTotalModel | DeviceInstancesWithDeviceTypeTotalModel> {
         if (options.hubId || options.locationId) {
             return this.getDeviceIds(options.hubId, options.locationId).pipe(
@@ -275,6 +279,9 @@ export class DeviceInstancesService {
         }
         if (options.fulldt === true) {
             params = params.set('fulldt', 'true');
+        }
+        if (options.deviceAttributeBlacklist !== undefined) {
+            params = params.set('device-attribute-blacklist', encodeURIComponent(JSON.stringify(options.deviceAttributeBlacklist)));
         }
         return this.http.get<DeviceInstanceModel[]>(environment.deviceRepoUrl + '/extended-devices', { observe: 'response', params }).pipe(
             map((resp) => {
@@ -410,16 +417,6 @@ export class DeviceInstancesService {
         return this.getDeviceHistoryObservable7d;
     }
 
-    /**
-     * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link getDeviceHistoryV2} instead.
-     */
-    getDeviceHistory1h(): Observable<DeviceInstancesHistoryModel[] | null> {
-        if (this.getDeviceHistoryObservable1h === null) {
-            this.getDeviceHistoryObservable1h = this.getDeviceHistoryAll(1000, '1h').pipe(reduce((acc, value) => acc.concat(value)));
-        }
-        return this.getDeviceHistoryObservable1h;
-    }
-
     getDeviceHistoryV2(options: { id: string, range?: string, since?: string; until?: string; }): Observable<ResourceHistoricalConnectionStatesModelV2 | null> {
         let params = new HttpParams();
         if (options.range !== undefined) {
@@ -440,7 +437,7 @@ export class DeviceInstancesService {
      * @param ids devices, devices-groups, locations
      * @param deviceAttributeBlacklist attribute value and origin will only be checked if set, otherwise all values or origins will be blacklisted
      */
-    getCurrentDeviceConnectionStatusMap(ids: string[], deviceAttributeBlacklist: Attribute[]): Observable<Map<string, boolean[]>> {
+    getCurrentDeviceConnectionStatusMap(ids?: string[], deviceAttributeBlacklist?: Attribute[]): Observable<Map<string, boolean[]>> {
         return this.http.post<any>(environment.connectionLogUrl + '/current/query/map-original', {ids, device_attribute_blacklist: deviceAttributeBlacklist}).pipe(
             map(obj => {
                 const m = new Map();

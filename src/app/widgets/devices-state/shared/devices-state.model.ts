@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
+import { LocationModel } from 'src/app/modules/devices/locations/shared/locations.model';
+
 export interface DevicesStateModel {
     connected: number;
     disconnected: number;
     unknown: number;
     count: number;
+}
+
+export interface DevicesStatePropertiesModel {
+    deviceState?: {
+        location?: Partial<LocationModel>;
+        filter_inactive: boolean;
+    }
 }

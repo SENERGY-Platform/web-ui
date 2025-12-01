@@ -64,6 +64,15 @@
                     <mat-icon>cancel</mat-icon>
                 </button>
             </mat-chip>
+            @for (attribute of this.routerDeviceAttributeBlacklist; track attribute) {
+                <mat-chip>
+                <mat-icon matChipAvatar>sell</mat-icon>
+                {{routerDeviceAttributeBlacklist?.length}} Attribute{{(routerDeviceAttributeBlacklist || []).length > 1 ? 's' : ''}}
+                <button matChipRemove (click)="this.routerDeviceAttributeBlacklist = undefined; updateQueryParams(); reload()">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip>
+            }
         </mat-chip-set>
     </div>
 

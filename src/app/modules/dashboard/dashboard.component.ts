@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { DashboardService } from './shared/dashboard.service';
 import { DashboardModel } from './shared/dashboard.model';
 import { WidgetModel, WidgetUpdatePosition } from './shared/dashboard-widget.model';
@@ -35,6 +35,7 @@ import { ChartsService } from '../../widgets/charts/shared/charts.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { elementCB, GridstackComponent } from 'gridstack/dist/angular';
 import { GridStack } from 'gridstack';
+import { WidgetComponent } from 'src/app/widgets/widget.component';
 
 @Component({
     selector: 'senergy-dashboard',
@@ -78,6 +79,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     resizable = resizable;
     dashboardTypesEnumFromString = dashboardTypesEnumFromString;
+
+    @ViewChildren(WidgetComponent) senergyWidgetQuery!: QueryList<WidgetComponent>;
 
     constructor(
         private dashboardService: DashboardService,

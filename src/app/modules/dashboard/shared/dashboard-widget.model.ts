@@ -35,6 +35,7 @@ import { LeakageDetectionWidgetPropertiesModel } from 'src/app/widgets/leakage-d
 import { ConsumptionProfilePropertiesModel } from 'src/app/widgets/consumption-profile/shared/consumption-profile.model';
 import { VentilationWidgetPropertiesModel } from 'src/app/widgets/bad-ventilation/shared/model';
 import { FloorplanWidgetPropertiesModel } from 'src/app/widgets/floorplan/shared/floorplan.model';
+import { DevicesStatePropertiesModel } from 'src/app/widgets/devices-state/shared/devices-state.model';
 
 export interface WidgetModel {
     id: string;
@@ -78,4 +79,6 @@ export interface WidgetPropertiesModels
     ConsumptionProfilePropertiesModel,
     VentilationWidgetPropertiesModel,
     FloorplanWidgetPropertiesModel,
-    DeviceStatusPropertiesModel { }
+    DeviceStatusPropertiesModel,
+    DevicesStatePropertiesModel
+     { }

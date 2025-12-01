@@ -18,11 +18,22 @@
 
 <mat-dialog-content>
     <form fxLayout="column" [formGroup]="formGroup">
-       <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
+        <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
             <mat-label>Widget Name</mat-label>
             <input matInput formControlName="name">
-		   	<mat-error senergyError label="Widget Name"></mat-error>
+            <mat-error senergyError label="Widget Name"></mat-error>
         </mat-form-field>
+        @if (userHasUpdatePropertiesAuthorization) {
+        <mat-form-field color="accent" appearance="outline">
+            <mat-label>Location</mat-label>
+            <mtx-select formControlName="location" [items]="locations" bindLabel="name"></mtx-select>
+            <mat-error senergyError label="Location"></mat-error>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="filter_inactive" color="accent">
+            Filter Inactive Devices
+        </mat-checkbox>
+        }
     </form>
 </mat-dialog-content>
 
@@ -30,4 +41,3 @@
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="save()">Save</button>
 </mat-dialog-actions>
-

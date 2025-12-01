@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormControl, FormGroup, UntypedFormBuilder } from '@angular/forms';
+import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SortDirection } from '@angular/material/sort';
 import { forkJoin, Observable, map, concatMap } from 'rxjs';
@@ -49,6 +49,7 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
         network: new FormControl<string|undefined>(undefined),
         deviceTypes: new FormControl<string[]>([]),
         connectionState: new FormControl<DeviceInstancesRouterStateTabEnum|undefined>(DeviceInstancesRouterStateTabEnum.ALL),
+        filter_inactive: new FormControl<boolean>(false),
     });
 
     savedFilterSelection!: FilterSelection | undefined;
@@ -61,6 +62,7 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
     private networksService: NetworksService,
     private deviceTypesService: DeviceTypeService,
     private deviceInstancesService: DeviceInstancesService,
+    private cd: ChangeDetectorRef,
     ) {
         this.savedFilterSelection = data;
     }
@@ -125,6 +127,11 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
         if(this.savedFilterSelection.network != null) {
             this.form.controls.network.patchValue(this.savedFilterSelection.network);
         }
+
+        if(this.savedFilterSelection.deviceAttributeBlacklist?.find(attr => attr.key === 'inactive' && attr.value === 'true', origin === 'web-ui')) {
+            this.form.controls.filter_inactive.patchValue(true);
+            this.cd.markForCheck(); 
+        }
     }
 
     resetConnectionFilter() {
@@ -155,6 +162,9 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
         filterSelection.deviceTypes?.forEach(dt => {
             filterSelection.deviceTypesNames?.push(this.deviceTypeOptions.find(d => d.id === dt)?.name || '');
         });        
+        if(this.form.controls.filter_inactive.value) {
+            filterSelection.deviceAttributeBlacklist =  [{key: 'inactive', value: 'true', origin: 'web-ui'}];
+        }
         this.dialogRef.close(filterSelection);
     }
 }

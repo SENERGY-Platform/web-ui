@@ -52,14 +52,14 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.devicesStateService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization);
+        this.devicesStateService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     private setDeviceStatus() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refreshing = true;
-                this.devicesStateService.getDevicesStatus().subscribe((devicesStatus: DevicesStateModel) => {
+                this.devicesStateService.getDevicesStatus(this.widget.properties).subscribe((devicesStatus: DevicesStateModel) => {
                     this.devicesStatus = devicesStatus;
                     this.ready = true;
                     this.refreshing = false;
@@ -72,29 +72,28 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
     }
 
     showOnlineDevices() {
-        this.router.navigate(['devices/deviceinstances'], {
-            queryParams: {
-                'connection-state': DeviceInstancesRouterStateTabEnum.ONLINE,
-            },
-        });
-        return false;
+        this.navigateToDeviceInstances(DeviceInstancesRouterStateTabEnum.ONLINE);
+
     }
 
     showOfflineDevices() {
-        this.router.navigate(['devices/deviceinstances'], {
-            queryParams: {
-                'connection-state': DeviceInstancesRouterStateTabEnum.OFFLINE,
-            },
-        });
-        return false;
+        this.navigateToDeviceInstances(DeviceInstancesRouterStateTabEnum.OFFLINE);
     }
 
     showUnknownDevices() {
-        this.router.navigate(['devices/deviceinstances'], {
-            queryParams: {
-                'connection-state': DeviceInstancesRouterStateTabEnum.UNKNOWN,
-            },
-        });
-        return false;
+       this.navigateToDeviceInstances(DeviceInstancesRouterStateTabEnum.UNKNOWN);
+    }
+
+    private navigateToDeviceInstances(state: DeviceInstancesRouterStateTabEnum) {
+        const queryParams: any = {};
+        queryParams['connection-state'] = state;
+        if (this.widget.properties.deviceState?.location?.id !== undefined) {
+            queryParams['location-id'] = this.widget.properties.deviceState.location.id;
+            queryParams['location-name'] = this.widget.properties.deviceState.location.name;
+        }
+        if (this.widget.properties?.deviceState?.filter_inactive) {
+            queryParams['device-attribute-blacklist'] = encodeURIComponent(JSON.stringify([{ key: 'inactive', value: 'true', origin: 'web-ui' }]));
+        }
+        this.router.navigate(['devices/deviceinstances'], { queryParams });
     }
 }

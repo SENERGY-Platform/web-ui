@@ -18,6 +18,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnI
 
 import { DeviceInstancesService } from './shared/device-instances.service';
 import {
+    Attribute,
     DeviceInstanceModel,
     DeviceInstancesRouterStateTabEnum,
     DeviceInstancesTotalModel,
@@ -87,6 +88,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     totalCount = 200;
     offset = 0;
     ready = false;
+    init = false;
     searchText = '';
     usage: {
         deviceId: string;
@@ -105,6 +107,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     routerLocationName: string | undefined = undefined;
     routerDeviceIds: string[] | undefined = undefined;
     routerConnectionState: DeviceInstancesRouterStateTabEnum | undefined = undefined;
+    routerDeviceAttributeBlacklist?: Attribute[];
     DeviceInstancesRouterStateTabEnum = DeviceInstancesRouterStateTabEnum;
 
     private searchSub: Subscription = new Subscription();
@@ -209,6 +212,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
             deviceTypes: this.routerDeviceType,
             location: this.routerLocation,
             deviceTypesNames: [],
+            deviceAttributeBlacklist: this.routerDeviceAttributeBlacklist,
         };
 
         const editDialogRef = this.dialog.open(DeviceInstancesFilterDialogComponent, {
@@ -225,6 +229,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                     this.routerNetworkName = filterSelectionInner.networkName;
                     this.routerLocation = filterSelectionInner.location;
                     this.routerLocationName = filterSelectionInner.locationName;
+                    this.routerDeviceAttributeBlacklist = filterSelectionInner.deviceAttributeBlacklist;
                     this.updateQueryParams();
                     this.cd.detectChanges();
                 }
@@ -258,7 +263,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                     locationId: this.routerLocation,
                     hubId: this.routerNetwork,
                     deviceTypeIds: this.routerDeviceType,
-                    connectionState: this.routerConnectionState
+                    connectionState: this.routerConnectionState,
+                    deviceAttributeBlacklist: this.routerDeviceAttributeBlacklist,
                 })
                 .pipe(
                     // if no result is found: try to interpret the search as shortDeviceId, convert it to a deviceId and load it
@@ -320,6 +326,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     reload() {
+        if (this.init && !this.ready) {
+            return;
+        }
+        this.init = true;
+        
         this.offset = 0;
         this.ready = false;
         this.selectionClear();
@@ -403,9 +414,13 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
             if (params !== undefined && params !== null) {
                 if (params.has('device-type-id')) {
                     this.routerDeviceType = params.getAll('device-type-id');
+                } else {
+                    this.routerDeviceType = undefined;
                 }
                 if (params.has('device-type-name')) {
                     this.routerDeviceTypeNames = params.getAll('device-type-name');
+                } else {
+                    this.routerDeviceTypeNames = [];
                 }
                 this.routerNetwork = params.get('network-id') || undefined;
                 this.routerNetworkName = params.get('network-name') || undefined;
@@ -413,11 +428,26 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                 this.routerLocationName = params.get('location-name') || undefined;
                 if (params.has('device-id')) {
                     this.routerDeviceIds = params.getAll('device-id');
+                } else {
+                    this.routerDeviceIds = undefined;
                 }
                 if (params.has('connection-state')) {
                     this.routerConnectionState = parseInt(params.get('connection-state') || '0') as DeviceInstancesRouterStateTabEnum || undefined;
+                } else {
+                    this.routerConnectionState = undefined;
+                }
+                if (params.has('device-attribute-blacklist')) {
+                    const rawAttributes = params.getAll('device-attribute-blacklist');
+                    this.routerDeviceAttributeBlacklist = [];
+                    rawAttributes.forEach(attr => {
+                       this.routerDeviceAttributeBlacklist!.push(...(JSON.parse(decodeURIComponent(attr)) as Attribute[]));
+                    });
+                } else {
+                    this.routerDeviceAttributeBlacklist = undefined;
                 }
             }
+            this.cd.detectChanges();
+            this.reload();
         });
     }
 
@@ -534,6 +564,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
             if (this.routerLocationName) {
                queryParams['location-name'] = this.routerLocationName;
             }
+        }
+        if (this.routerDeviceAttributeBlacklist && this.routerDeviceAttributeBlacklist.length > 0) {
+            queryParams['device-attribute-blacklist'] = encodeURIComponent(JSON.stringify(this.routerDeviceAttributeBlacklist));
         }
         this.router.navigate(
             [],
