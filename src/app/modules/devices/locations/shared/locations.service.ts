@@ -29,6 +29,7 @@ import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared
 })
 export class LocationsService {
     authorizations: PermissionTestResponse;
+    shareAuthorizations: PermissionTestResponse;
 
     constructor(
         private http: HttpClient,
@@ -36,6 +37,7 @@ export class LocationsService {
         private ladonService: LadonService
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/locations');
+        this.shareAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.permissionV2Url + '/manage/locations');
     }
 
     getLocations(options?: {limit?: number; offset?: number; search?: string; sortBy?: string; sortDirection?: string; ids?: string[]; permission?: string}): Observable<LocationTotalModel> {
@@ -59,7 +61,7 @@ export class LocationsService {
             params = params.set('p', options.permission);
         }
 
-        return this.http.get<LocationModel[]>(environment.deviceRepoUrl + '/locations', {observe: 'response', params}).pipe(
+        return this.http.get<LocationModel[]>(environment.deviceRepoUrl + '/extended-locations', {observe: 'response', params}).pipe(
             map((resp) => {
                 const totalStr = resp.headers.get('X-Total-Count') || '0';
                 return {
@@ -110,5 +112,9 @@ export class LocationsService {
 
     userHasReadAuthorization(): boolean {
         return this.authorizations['GET'];
+    }
+
+    userHasShareAuthorization(): boolean {
+        return this.shareAuthorizations['GET'] &&  this.shareAuthorizations['PUT'];;
     }
 }

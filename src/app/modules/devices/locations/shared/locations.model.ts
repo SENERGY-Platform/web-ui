@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { PermissionsRightsModel } from 'src/app/modules/permissions/shared/permissions-rights.model';
+
 export interface LocationModel {
     id: string;
     name: string;
@@ -23,11 +25,15 @@ export interface LocationModel {
     device_group_ids: string[];
 }
 
+export interface ExtendedLocationModel extends LocationModel {
+    permissions: PermissionsRightsModel;
+}
+
 export interface LocationDisplayModel extends LocationModel {
     display_name?: string;
 }
 
 export interface LocationTotalModel {
-    result: LocationModel[];
+    result: ExtendedLocationModel[];
     total: number;
 }

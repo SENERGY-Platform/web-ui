@@ -132,6 +132,8 @@ export class LadonService {
             environment.deviceRepoUrl + '/hubs',
             environment.deviceRepoUrl + '/locations',
             environment.permissionV2Url + '/manage/devices',
+            environment.permissionV2Url + '/manage/hubs',
+            environment.permissionV2Url + '/manage/locations',
 
 
             environment.processIoUrl,

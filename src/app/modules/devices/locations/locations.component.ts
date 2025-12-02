@@ -19,7 +19,7 @@ import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { LocationModel } from './shared/locations.model';
+import { ExtendedLocationModel, LocationModel } from './shared/locations.model';
 import { LocationsService } from './shared/locations.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { Sort, SortDirection } from '@angular/material/sort';
@@ -27,6 +27,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 
 
 @Component({
@@ -41,8 +42,8 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     instances = [];
     totalCount = 200;
     offset = 0;
-    dataSource = new MatTableDataSource<LocationModel>();
-    selection = new SelectionModel<LocationModel>(true, []);
+    dataSource = new MatTableDataSource<ExtendedLocationModel>();
+    selection = new SelectionModel<ExtendedLocationModel>(true, []);
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     private searchSub: Subscription = new Subscription();
     searchText = '';
@@ -51,6 +52,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
+    userHasShareAuthorization = false;
 
     constructor(
         private locationsService: LocationsService,
@@ -59,6 +61,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         private router: Router,
         private dialogsService: DialogsService,
         public preferencesService: PreferencesService,
+        private permissionsDialogService: PermissionsDialogService,
     ) {}
 
     ngOnInit() {
@@ -81,6 +84,11 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     checkAuthorization() {
         this.userHasCreateAuthorization = this.locationsService.userHasCreateAuthorization();
+
+        this.userHasShareAuthorization = this.locationsService.userHasShareAuthorization();
+        if(this.userHasShareAuthorization) {
+            this.displayedColumns.push('share');
+        }
 
         this.userHasUpdateAuthorization = this.locationsService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
@@ -146,7 +154,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         return false;
     }
 
-    private getLocations(): Observable<LocationModel[]> {
+    private getLocations(): Observable<ExtendedLocationModel[]> {
         return this.locationsService
             .getLocations({search: this.searchText, limit: this.pageSize, offset: this.offset, sortBy: this.sortBy, sortDirection: this.sortDirection})
             .pipe(
@@ -216,5 +224,9 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.reload();
                 });
             });
+    }
+
+    shareLocation(location: ExtendedLocationModel): void {
+        this.permissionsDialogService.openPermissionV2Dialog('locations', location.id, location.name);
     }
 }

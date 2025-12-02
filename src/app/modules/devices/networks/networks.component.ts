@@ -54,6 +54,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
+    userHasShareAuthorization = false;
 
     userIdToName: {[key: string]: string} = {};
 
@@ -83,6 +84,11 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     checkAuthorization() {
+        this.userHasShareAuthorization = this.networksService.userHasShareAuthorization();
+        if (this.userHasShareAuthorization) {
+            this.displayedColumns.push('share');
+        }
+        
         this.userHasUpdateAuthorization = this.networksService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
             this.displayedColumns.push('edit');
@@ -91,10 +97,6 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
         this.userHasDeleteAuthorization = this.networksService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
-        }
-
-        if (this.authService.userIsAdmin()) {
-            this.displayedColumns.push('share');
         }
     }
 

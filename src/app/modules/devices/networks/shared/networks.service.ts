@@ -41,6 +41,7 @@ import {
 })
 export class NetworksService {
     authorizations: PermissionTestResponse;
+    shareAuthorizations: PermissionTestResponse;
 
     constructor(
         private http: HttpClient,
@@ -50,6 +51,7 @@ export class NetworksService {
         public snackBar: MatSnackBar,
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/hubs');
+        this.shareAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.permissionV2Url + '/manage/hubs');
     }
 
     listSyncNetworks(): Observable<HubModel[]> {
@@ -204,5 +206,9 @@ export class NetworksService {
 
     userHasReadAuthorization(): boolean {
         return this.authorizations['GET'];
+    }
+
+    userHasShareAuthorization(): boolean {
+        return this.shareAuthorizations['GET'] && this.shareAuthorizations['PUT'];
     }
 }

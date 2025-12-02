@@ -55,6 +55,17 @@
                     </td>
                 </ng-container>
 
+                 <ng-container matColumnDef="share">
+                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
+                    <td mat-cell *matCellDef="let location">
+                        <button mat-icon-button color="accent" matTooltip="Share" (click)="shareLocation(location)"
+                            [disabled]="!location.permissions.administrate">
+                            <mat-icon>share</mat-icon>
+
+                        </button>
+                    </td>
+                </ng-container>
+
                 <ng-container matColumnDef="edit" *ngIf="userHasUpdateAuthorization">
                     <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
                     <td mat-cell *matCellDef="let location">
