@@ -56,6 +56,7 @@ export interface DecodedToken {
     preferred_username: string;
     given_name: string;
     family_name: string;
+    groups?: string[];
 }
 
 export interface RealmAccess {
@@ -213,8 +214,8 @@ export class KeycloakConfidentialService implements OnDestroy {
         return p.resolve(this.userInfo || {});
     }
 
-    getKeycloakInstance(): ({subject?: string}) { // this is a stub, implementing only what is required by AuthorizationService
-        return {subject: this.userInfo?.id};
+    getKeycloakInstance(): ({subject?: string, tokenParsed: {groups?: string[]}}) { // this is a stub, implementing only what is required by AuthorizationService
+        return {subject: this.userInfo?.id, tokenParsed: {groups: this.decodeToken()?.groups}};
     }
 
     isTokenExpired(minValidity?: number): boolean {
@@ -243,6 +244,7 @@ export class KeycloakConfidentialService implements OnDestroy {
                     this.timeout = setTimeout(() => this.getFreshTokenExchanged(userId).subscribe(), (resp.expires_in - 10) * 1000);
                 }
                 this.isUserToken = true;
+                localStorage.setItem('sub', userId || '');
             } else {
                 this.isUserToken = false;
             }

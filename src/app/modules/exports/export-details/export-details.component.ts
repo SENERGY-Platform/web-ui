@@ -70,7 +70,7 @@ export class ExportDetailsComponent implements OnInit {
             if (this.brokerMode) {
                 this.hasLastValues = true;
                 this.displayedColumns = ['Name', 'Path', 'CopyClipboard'];
-                this.authorizationService.getUserName().then((name) => (this.userName = name));
+                this.userName = this.authorizationService.getUserName();
                 this.userId = localStorage.getItem('sub');
                 this.baseTopic = 'export/' + this.userId + '/' + this.id;
             }

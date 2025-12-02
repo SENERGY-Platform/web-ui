@@ -121,15 +121,12 @@ export class PermissionDialogComponent implements OnInit {
 
             this.permissionsService.getSharableUsers().subscribe(res => {
                 this.users = res || [];
-                this.authorizationService.getUserName().then(username => {
-                    this.users.push({
-                        id: this.userId || '',
-                        username: username,
-
-                    });
-                    this.calcCdddableUsers();
-                    setTimeout(() => this.userTable?.render(), 0);
+                this.users.push({
+                    id: this.userId || '',
+                    username: this.authorizationService.getUserName(),
                 });
+                this.calcCdddableUsers();
+                setTimeout(() => this.userTable?.render(), 0);
             });
         }
     }

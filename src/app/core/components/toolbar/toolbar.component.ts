@@ -86,7 +86,7 @@ export class ToolbarComponent implements OnInit {
     }
 
     private initUser() {
-        this.authorizationService.getUserName().then((userName) => (this.userName = userName));
+       this.userName = this.authorizationService.getUserName();
     }
 
     private setHeader() {
