@@ -52,6 +52,7 @@ export class DeviceInstancesService {
     authorizationsDefaultAttributes: PermissionTestResponse;
     authorizationsAttributes: PermissionTestResponse;
     authorizationsConnectionLog: PermissionTestResponse;
+    authorizationsShare: PermissionTestResponse;
     defaultOrigin = 'default';
 
     constructor(
@@ -67,6 +68,7 @@ export class DeviceInstancesService {
         this.authorizationsDefaultAttributes = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/defaults/devices/attributes');
         this.authorizationsAttributes = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices/id/attributes');
         this.authorizationsConnectionLog = this.ladonService.getUserAuthorizationsForURI(environment.connectionLogUrl);
+        this.authorizationsShare = this.ladonService.getUserAuthorizationsForURI(environment.permissionV2Url + '/manage/devices');
     }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
@@ -524,6 +526,10 @@ export class DeviceInstancesService {
 
     userHasDefaultAttributesPermissions() {
         return this.authorizationsDefaultAttributes['GET'] && this.authorizationsDefaultAttributes['PUT'];
+    }
+
+    userHasShareAuthorization() {
+        return this.authorizationsShare['GET'] && this.authorizationsShare['PUT'];
     }
 
     getDefaultAttributes(): Observable<Attribute[]> {

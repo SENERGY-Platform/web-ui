@@ -81,7 +81,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         private activatedRoute: ActivatedRoute,
     ) {
     }
-    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'info', 'share'];
+    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'info'];
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<DeviceInstanceModel>();
     selection = new SelectionModel<DeviceInstanceModel>(true, []);
@@ -121,6 +121,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     userHasUpdateAttributesAuthorization = false;
     userHasCreateAuthoriation = false;
     userHasDefaultAttributesAuthoriation = false;
+    userHasShareAuthoriation = false;
 
     userIdToName: { [key: string]: string } = {};
 
@@ -144,6 +145,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     checkAuthorization() {
+        this.userHasShareAuthoriation =  this.deviceInstancesService.userHasDeleteAuthorization();
+        if (this.userHasShareAuthoriation) {
+            this.displayedColumns.push('share');
+        }
         this.userHasReadDeviceUsageAuthorization = this.exportDataService.userHasUsageAuthroization();
         if (this.userHasReadDeviceUsageAuthorization) {
             this.displayedColumns.splice(4, 0, 'usage');
