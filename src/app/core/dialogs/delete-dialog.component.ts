@@ -17,22 +17,48 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
+export interface DeleteDialogOptions {
+    checkboxText?: string;
+}
+
+export interface DeleteDialogResponse {
+    confirmed: boolean;
+    checkboxChecked?: boolean;
+}
+
 @Component({
     templateUrl: './delete-dialog.component.html',
     styleUrls: ['./delete-dialog.component.css'],
 })
 export class DeleteDialogComponent {
     text: string;
+    options: DeleteDialogOptions | undefined;
+    checked = false;
 
-    constructor(private dialogRef: MatDialogRef<DeleteDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { text: string }) {
+    constructor(private dialogRef: MatDialogRef<DeleteDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { text: string, options?: DeleteDialogOptions }) {
         this.text = data.text;
+        this.options = data.options;
     }
 
     cancel(): void {
-        this.dialogRef.close(false);
+        if (this.options !== undefined) {
+            this.dialogRef.close(false); // legacy return value
+        }
+        const resp: DeleteDialogResponse = { confirmed: false };
+        if (this.options?.checkboxText !== undefined) {
+            resp.checkboxChecked = this.checked;
+        }
+        this.dialogRef.close(resp);
     }
 
     delete(): void {
-        this.dialogRef.close(true);
+        if (this.options !== undefined) {
+            this.dialogRef.close(true);  // legacy return value
+        }
+        const resp: DeleteDialogResponse = { confirmed: true };
+        if (this.options?.checkboxText !== undefined) {
+            resp.checkboxChecked = this.checked;
+        }
+        this.dialogRef.close(resp);
     }
 }

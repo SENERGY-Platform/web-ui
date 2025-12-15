@@ -16,9 +16,19 @@
 
 <h2 mat-dialog-title>Delete</h2>
 
-<mat-dialog-content>Should the {{text}} be deleted?</mat-dialog-content>
+<mat-dialog-content>
+  <div>
+    Should the {{text}} be deleted?
+  </div>
+  @if (options?.checkboxText) {
+  <div>
+    <mat-checkbox [(ngModel)]="checked">{{options?.checkboxText}}</mat-checkbox>
+  </div>
+  }
+
+</mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="delete()">Delete</button>
+  <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="delete()">Delete</button>
 </mat-dialog-actions>

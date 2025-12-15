@@ -28,6 +28,7 @@ import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';
 import {SmartServiceReleasesService} from './shared/release.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
+import { DeleteDialogResponse } from 'src/app/core/dialogs/delete-dialog.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -226,11 +227,11 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
 
     deleteRelease(release: SmartServiceReleaseModel): void {
         this.dialogsService
-            .openDeleteDialog('release')
+            .openDeleteDialog('release', {checkboxText: 'Delete all previous releases'})
             .afterClosed()
-            .subscribe((deleteProcess: boolean) => {
-                if (deleteProcess) {
-                    this.releasesService.deleteRelease(release.id).subscribe((resp: { status: number }) => {
+            .subscribe((deleteResponse: DeleteDialogResponse) => {
+                if (deleteResponse.confirmed) {
+                    this.releasesService.deleteRelease(release.id, deleteResponse.checkboxChecked).subscribe((resp: { status: number }) => {
                         if (resp.status === 200) {
                             this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => release.id === item._id));
                         } else {

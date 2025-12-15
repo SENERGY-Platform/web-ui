@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
-import { DeleteDialogComponent } from '../dialogs/delete-dialog.component';
+import { DeleteDialogComponent, DeleteDialogOptions } from '../dialogs/delete-dialog.component';
 import { ConfirmDialogComponent } from '../dialogs/confirm-dialog.component';
 import {InputDialogComponent} from '../dialogs/input-dialog.component';
 
@@ -26,11 +26,12 @@ import {InputDialogComponent} from '../dialogs/input-dialog.component';
 export class DialogsService {
     constructor(private dialog: MatDialog) {}
 
-    openDeleteDialog(text: string): MatDialogRef<DeleteDialogComponent> {
+    openDeleteDialog(text: string, options?: DeleteDialogOptions): MatDialogRef<DeleteDialogComponent> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             text,
+            options,
         };
 
         return this.dialog.open(DeleteDialogComponent, dialogConfig);

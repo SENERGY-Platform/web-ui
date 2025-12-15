@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponseBase } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponseBase } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
@@ -80,8 +80,12 @@ export class SmartServiceReleasesService {
             .pipe(catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'getExtendedRelease()', null)));
     }
 
-    deleteRelease(id: string): Observable<{ status: number }> {
-        return this.http.delete<HttpResponseBase>(environment.smartServiceRepoUrl + '/releases/' + id, { observe: 'response' }).pipe(
+    deleteRelease(id: string, deletePreviousReleases?: boolean): Observable<{ status: number }> {
+        let params = new HttpParams();
+        if (deletePreviousReleases) {
+            params = params.set('delete_previous_releases', 'true');
+        }
+        return this.http.delete<HttpResponseBase>(environment.smartServiceRepoUrl + '/releases/' + id, { observe: 'response', params }).pipe(
             map((resp) => ({ status: resp.status })),
             catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'deleteProcess', { status: 500 })),
         );
