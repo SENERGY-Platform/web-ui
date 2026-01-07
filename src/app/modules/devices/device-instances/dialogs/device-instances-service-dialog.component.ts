@@ -34,6 +34,7 @@ import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import { ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
 import { MatExpansionPanel } from '@angular/material/expansion';
+import { detectAndMergeFlapping } from '../shared/flapping.function';
 
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',
@@ -77,7 +78,8 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
             valueAlias: 'Period',
             conversions: [
                 { from: true, to: true, alias: 'Online', color: '#097969' },
-                { from: false, to: false, alias: 'Offline', color: '#C41E3A' }
+                { from: false, to: false, alias: 'Offline', color: '#C41E3A' },
+                { from: 'flapping', to: 'flapping', alias: 'Flapping', color: '#FFA500' },
             ],
 
         }
@@ -157,7 +159,8 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
                 if (this.connectionHistory[0][0].length > 0) {
                     // continue last state to current
                     this.connectionHistory[0][0].push([new Date().toISOString(), this.connectionHistory[0][0][this.connectionHistory[0][0].length - 1][1]]);
-                }
+                } 
+                this.connectionHistory[0][0] = detectAndMergeFlapping(this.connectionHistory[0][0], 3, 300);
                 this.connectionHistory[0][0].reverse();
             });
         }

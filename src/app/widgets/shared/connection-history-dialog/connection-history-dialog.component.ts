@@ -19,6 +19,7 @@ import { ChartsExportVAxesModel } from '../../charts/export/shared/charts-export
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { concatMap, map } from 'rxjs';
+import { detectAndMergeFlapping } from 'src/app/modules/devices/device-instances/shared/flapping.function';
 
 @Component({
   selector: 'senergy-connection-history-dialog',
@@ -33,7 +34,8 @@ export class ConnectionHistoryDialogComponent implements AfterViewInit {
             valueAlias: 'Period',
             conversions: [
                 { from: true, to: true, alias: 'Online', color: '#097969' },
-                { from: false, to: false, alias: 'Offline', color: '#C41E3A' }
+                { from: false, to: false, alias: 'Offline', color: '#C41E3A' },
+                { from: 'flapping', to: 'flapping', alias: 'Flapping', color: '#FFA500' },
             ],
 
         };
@@ -74,8 +76,9 @@ export class ConnectionHistoryDialogComponent implements AfterViewInit {
                     }
                     if (this.connectionHistory[i+j][0].length > 0) {
                         // continue last state to current
-                        this.connectionHistory[i+j][0].push([new Date().toISOString(), this.connectionHistory[0][0][this.connectionHistory[0][0].length - 1][1]]);
+                        this.connectionHistory[i+j][0].push([new Date().toISOString(), this.connectionHistory[i+j][0][this.connectionHistory[i+j][0].length - 1][1]]);
                     }
+                    this.connectionHistory[i+j][0] = detectAndMergeFlapping(this.connectionHistory[i+j][0], 3, 300);
                     this.connectionHistory[i+j][0].reverse();
                 });
             });
