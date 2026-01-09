@@ -147,10 +147,10 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
                 'r',
                 this.latest
             )
-            .subscribe((repoItems: SmartServiceExtendedReleaseModel[]) => {
+            .subscribe((repoItems) => {
                 this.animationDone = true;
-                this.addToFormArray(repoItems);
-                if (repoItems.length !== this.limit) {
+                this.addToFormArray(repoItems.releases);
+                if (repoItems.releases.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.ready = true;

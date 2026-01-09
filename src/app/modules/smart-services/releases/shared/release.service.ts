@@ -34,7 +34,7 @@ export class SmartServiceReleasesService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.smartServiceRepoUrl);
     }
 
-    getExtendedReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean): Observable<SmartServiceExtendedReleaseModel[]> {
+    getExtendedReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean): Observable<{ releases: SmartServiceExtendedReleaseModel[], total: number }> {
         const params = ['limit=' + limit, 'offset=' + offset, 'rights='+rights];
         if (search !== '') {
             params.push('search=' + encodeURIComponent(search));
@@ -44,14 +44,14 @@ export class SmartServiceReleasesService {
         }
         const paramsStr = params.join('&');
         return this.http
-            .get<SmartServiceExtendedReleaseModel[]>(environment.smartServiceRepoUrl + '/extended-releases?'+paramsStr)
+            .get<SmartServiceExtendedReleaseModel[]>(environment.smartServiceRepoUrl + '/extended-releases?'+paramsStr, { observe: 'response' })
             .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'getExtendedReleaseList()', []))
+                map((resp) => ({ releases: resp.body || [], total: parseInt(resp.headers.get('X-Total-Count') || '0', 10) })),
+                catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'getExtendedReleaseList()', { releases: [], total: 0 }))
             );
     }
 
-    getReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean): Observable<SmartServiceReleaseModel[]> {
+    getReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean): Observable<{ releases: SmartServiceReleaseModel[], total: number }> {
         const params = ['limit=' + limit, 'offset=' + offset, 'rights='+rights];
         if (search !== '') {
             params.push('search=' + encodeURIComponent(search));
@@ -61,10 +61,10 @@ export class SmartServiceReleasesService {
         }
         const paramsStr = params.join('&');
         return this.http
-            .get<SmartServiceExtendedReleaseModel[]>(environment.smartServiceRepoUrl + '/releases?'+paramsStr)
+            .get<SmartServiceExtendedReleaseModel[]>(environment.smartServiceRepoUrl + '/releases?'+paramsStr, { observe: 'response' })
             .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'getReleaseList()', []))
+                map((resp) => ({ releases: resp.body || [], total: parseInt(resp.headers.get('X-Total-Count') || '0', 10) })),
+                catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'getReleaseList()', { releases: [], total: 0 }))
             );
     }
 

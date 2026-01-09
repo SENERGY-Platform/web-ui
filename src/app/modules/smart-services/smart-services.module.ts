@@ -64,6 +64,7 @@ import {
 import {CriteriaListComponent} from './designer/dialog/edit-smart-service-task-dialog/criteria-list.component';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
+import { SmartServiceInstancesComponent } from './instances/instances.component';
 
 const designs: Route = {
     path: 'smart-services/designs',
@@ -77,6 +78,13 @@ const releases: Route = {
     pathMatch: 'full',
     component: SmartServiceReleasesComponent,
     data: { header: 'Repository' },
+};
+
+const instances: Route = {
+    path: 'smart-services/instances',
+    pathMatch: 'full',
+    component: SmartServiceInstancesComponent,
+    data: { header: 'Instances' },
 };
 
 const designerReleaseExport: Route = {
@@ -103,6 +111,7 @@ const designer: Route = {
         RouterModule.forChild([
             designs,
             releases,
+            instances,
             designer,
             designerEdit,
             designerReleaseExport
@@ -148,6 +157,7 @@ const designer: Route = {
         EditSmartServiceTaskDialogComponent,
         EditSmartServiceInputDialogComponent,
         EditSmartServiceJsonExtractionDialogComponent,
+        SmartServiceInstancesComponent,
         CheckboxValueDirective,
         CriteriaListComponent
     ],

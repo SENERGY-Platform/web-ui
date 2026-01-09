@@ -183,7 +183,8 @@ export class SidenavService implements OnDestroy {
     setupSmartServiceSection(): SidenavSectionModel {
         const sections = this.checkAuthorizationForSections([
             [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Designs', 'link', 'create', '/smart-services/designs'), this.smartServiceDesignService],
-            [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Releases', 'link', 'storage', '/smart-services/releases'), this.smartServiceDesignService]
+            [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Releases', 'link', 'storage', '/smart-services/releases'), this.smartServiceDesignService],
+            [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Instances', 'link', 'table', '/smart-services/instances'), this.smartServiceDesignService],
         ]);
 
         return new SidenavSectionModel('Smart Services', 'toggle', 'design_services', '/smart-services', sections);

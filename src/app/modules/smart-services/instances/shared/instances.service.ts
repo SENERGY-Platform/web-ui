@@ -20,15 +20,24 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class SmartServiceInstanceService {
-    constructor(private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService) { }
 
-    getInstances(options: { limit?: number; offset?: number; sort?: string; }): Observable<SmartServiceInstanceModel[]> {
+    authorizations: PermissionTestResponse;
+
+    constructor(private http: HttpClient,
+        private errorHandlerService: ErrorHandlerService,
+        private ladonService: LadonService,
+    ) { 
+        this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices');
+    }
+
+    getInstances(options: { limit?: number; offset?: number; sort?: string; }): Observable<{ instances: SmartServiceInstanceModel[], total: number }> {
         let params = new HttpParams();
         if (options.limit) {
             params = params.set('limit', options.limit);
@@ -39,9 +48,9 @@ export class SmartServiceInstanceService {
         if (options.sort) {
             params = params.set('sort', options.sort);
         }
-        return this.http.get<SmartServiceInstanceModel[] | null>(environment.smartServiceRepoUrl+'/instances', {params}).pipe(
-            map(r => r || []),
-            catchError(this.errorHandlerService.handleError(SmartServiceInstanceService.name, 'getInstances()', []))
+        return this.http.get<SmartServiceInstanceModel[] | null>(environment.smartServiceRepoUrl+'/instances', {params, observe: 'response'}).pipe(
+           map((resp) => ({ instances: resp.body || [], total: parseInt(resp.headers.get('X-Total-Count') || '0', 10) })),
+            catchError(this.errorHandlerService.handleError(SmartServiceInstanceService.name, 'getInstances()', { instances: [], total: 0 }))
         );
     }
 
@@ -52,18 +61,40 @@ export class SmartServiceInstanceService {
             const limit = 9999;
             const f = () => {
                 this.getInstances({limit, offset}).subscribe(r => {
-                    instances.push(...r);
-                    if (r.length < limit) {
+                    instances.push(...r.instances);
+                    if (r.instances.length < r.total) {
                         o.next(instances);
                         o.complete();
                         return;
                     }
-                    offset += r.length;
+                    offset += r.instances.length;
                     f();
                 });
             };
             f();
         });
+    }
+
+    deleteInstance(id: string, ignoreModuleDeleteErrors: boolean = false): Observable<void> {
+        return this.http.delete<void>(environment.smartServiceRepoUrl+'/instances/' + id + '?ignore_module_delete_errors=' + ignoreModuleDeleteErrors).pipe(
+            catchError(this.errorHandlerService.handleError(SmartServiceInstanceService.name, 'deleteInstance()', undefined))
+        );
+    }
+
+    userHasDeleteAuthorization(): boolean {
+        return this.authorizations['DELETE'];
+    }
+
+    userHasUpdateAuthorization(): boolean {
+        return this.authorizations['PUT'];
+    }
+
+    userHasCreateAuthorization(): boolean {
+        return this.authorizations['POST'];
+    }
+
+    userHasReadAuthorization(): boolean {
+        return this.authorizations['GET'];
     }
 
 }
