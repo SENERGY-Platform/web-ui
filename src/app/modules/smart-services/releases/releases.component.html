@@ -59,10 +59,7 @@
                                     <mat-icon matTooltip="Release is shared" *ngIf="item.value.shared"
                                         class="color-sidenav info-icon">share
                                     </mat-icon>
-                                    <mat-icon matTooltip="{{item.value.created_at * 1000 | date:'medium'}}"
-                                        class="info-icon-color info-icon">
-                                        calendar_month
-                                    </mat-icon>
+                                    {{item.value.created_at * 1000 | date:'dd.MM.yy, HH:mm'}}
                                     <mat-icon *ngIf="item.value.error" matTooltip="{{item.value.error}}" color="warn">
                                         warning
                                     </mat-icon>
