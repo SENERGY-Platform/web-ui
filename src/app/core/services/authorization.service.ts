@@ -63,7 +63,12 @@ export class AuthorizationService implements HttpInterceptor {
 
     init(options?: KeycloakOptions): Promise<boolean> {
         this.options = options;
-        return this.keycloakService.init(options);
+        return this.keycloakService.init(options).then((initialized) => {
+            if (initialized) {
+                this.keycloakService.loadUserProfile();
+            }
+            return initialized;
+        });
     }
 
     getUserId(): string | Error {
