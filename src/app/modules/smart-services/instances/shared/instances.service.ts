@@ -37,7 +37,7 @@ export class SmartServiceInstanceService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices');
     }
 
-    getInstances(options: { limit?: number; offset?: number; sort?: string; }): Observable<{ instances: SmartServiceInstanceModel[], total: number }> {
+    getInstances(options: { limit?: number; offset?: number; sort?: string; releaseId?: string}): Observable<{ instances: SmartServiceInstanceModel[], total: number }> {
         let params = new HttpParams();
         if (options.limit) {
             params = params.set('limit', options.limit);
@@ -47,6 +47,9 @@ export class SmartServiceInstanceService {
         }
         if (options.sort) {
             params = params.set('sort', options.sort);
+        }
+        if (options.releaseId) {
+            params = params.set('release-id', options.releaseId);
         }
         return this.http.get<SmartServiceInstanceModel[] | null>(environment.smartServiceRepoUrl+'/instances', {params, observe: 'response'}).pipe(
            map((resp) => ({ instances: resp.body || [], total: parseInt(resp.headers.get('X-Total-Count') || '0', 10) })),

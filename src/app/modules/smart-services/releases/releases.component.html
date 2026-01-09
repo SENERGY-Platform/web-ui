@@ -17,25 +17,33 @@
     <div fxLayout="column">
         <div class="search-button-container">
             <senergy-searchbar></senergy-searchbar>
-            <button matTooltip="show old deployments" mat-icon-button color="accent" (click)="toggleLatest()" *ngIf="this.latest" class="suffix">
+            <button matTooltip="show old deployments" mat-icon-button color="accent" (click)="toggleLatest()"
+                *ngIf="this.latest" class="suffix">
                 <mat-icon>visibility</mat-icon>
             </button>
-            <button matTooltip="hide old deployments" mat-icon-button color="accent" (click)="toggleLatest()" *ngIf="!this.latest" class="suffix">
+            <button matTooltip="hide old deployments" mat-icon-button color="accent" (click)="toggleLatest()"
+                *ngIf="!this.latest" class="suffix">
                 <mat-icon>visibility_off</mat-icon>
             </button>
         </div>
-        <div class="main-panel"
-             infiniteScroll
-             [infiniteScrollDistance]="1"
-             [infiniteScrollThrottle]="50"
-             [scrollWindow]="false"
-             (scrolled)="onScroll()"
-             #mainPanel>
+        <div style="padding-bottom: 1em;" #chipDiv>
+            <mat-chip-set>
+                <mat-chip *ngIf="id !== undefined">
+                    <mat-icon matChipAvatar>cloud</mat-icon>
+                    <span>Filter by ID</span>
+                    <button matChipRemove (click)="this.id = undefined; updateQueryParams(); getRepoItems(true)">
+                        <mat-icon>cancel</mat-icon>
+                    </button>
+                </mat-chip>
+            </mat-chip-set>
+        </div>
+        <div class="main-panel" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
+            [scrollWindow]="false" (scrolled)="onScroll()" #mainPanel>
             <div fxLayout="column" *ngIf="animationDone" [formGroup]="formGroup">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px" formArrayName="repoItems"
-                               *ngIf="repoItems.length > 0">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
+                    formArrayName="repoItems" *ngIf="repoItems.length > 0">
                     <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems.controls, let i = index"
-                                   [formGroupName]="i">
+                        [formGroupName]="i">
                         <div fxFill>
                             <img class="widget-image" [src]="item.value.image">
                         </div>
@@ -44,39 +52,39 @@
                                 <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
                                     {{item.value.name}}
                                 </div>
-                                <div class="truncate footer-item-subtitle"
-                                     matTooltip="{{item.value.description}}">
+                                <div class="truncate footer-item-subtitle" matTooltip="{{item.value.description}}">
                                     {{item.value.description}}
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
                                     <mat-icon matTooltip="Release is shared" *ngIf="item.value.shared"
-                                              class="color-sidenav info-icon">share
+                                        class="color-sidenav info-icon">share
                                     </mat-icon>
-                                    <mat-icon matTooltip="{{item.value.created_at * 1000 | date:'medium'}}" class="info-icon-color info-icon">
+                                    <mat-icon matTooltip="{{item.value.created_at * 1000 | date:'medium'}}"
+                                        class="info-icon-color info-icon">
                                         calendar_month
                                     </mat-icon>
                                     <mat-icon *ngIf="item.value.error" matTooltip="{{item.value.error}}" color="warn">
                                         warning
                                     </mat-icon>
                                     <div fxFlex></div>
-                                    <button *ngIf="userHasDeleteAuthorization" mat-icon-button matTooltip="Delete" color="accent"
-                                            (click)="deleteRelease(item.value)"
-                                            [disabled]="item.value.permissions.a === false">
+                                    <button *ngIf="userHasDeleteAuthorization" mat-icon-button matTooltip="Delete"
+                                        color="accent" (click)="deleteRelease(item.value)"
+                                        [disabled]="item.value.permissions.a === false">
                                         <mat-icon>delete</mat-icon>
                                     </button>
 
-                                    <button mat-icon-button [matMenuTriggerFor]="subMenu"
-                                            color="accent"
-                                            matTooltip="More">
+                                    <button mat-icon-button [matMenuTriggerFor]="subMenu" color="accent"
+                                        matTooltip="More">
                                         <mat-icon>more_vert</mat-icon>
                                     </button>
                                     <mat-menu #subMenu="matMenu" [overlapTrigger]="false">
                                         <button mat-menu-item (click)="permission(item.value)"
-                                                [disabled]="item.value.permissions.a === false">
+                                            [disabled]="item.value.permissions.a === false">
                                             <mat-icon>share</mat-icon>
                                             <span>Share</span>
                                         </button>
-                                        <button mat-menu-item routerLink="/smart-services/releases/designer/{{item.value.id}}">
+                                        <button mat-menu-item
+                                            routerLink="/smart-services/releases/designer/{{item.value.id}}">
                                             <mat-icon>edit</mat-icon>
                                             <span>Export to Designer</span>
                                         </button>
@@ -87,6 +95,10 @@
                                         <button mat-menu-item (click)="downloadSvg(item.value)">
                                             <mat-icon>insert_photo</mat-icon>
                                             <span>Download SVG</span>
+                                        </button>
+                                        <button mat-menu-item (click)="showInstances(item.value.id)">
+                                            <mat-icon>input_circle</mat-icon>
+                                            <span>Show Instances</span>
                                         </button>
                                     </mat-menu>
                                 </div>

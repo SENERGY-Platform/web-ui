@@ -34,13 +34,16 @@ export class SmartServiceReleasesService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.smartServiceRepoUrl);
     }
 
-    getExtendedReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean): Observable<{ releases: SmartServiceExtendedReleaseModel[], total: number }> {
+    getExtendedReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean, ids?: string[]): Observable<{ releases: SmartServiceExtendedReleaseModel[], total: number }> {
         const params = ['limit=' + limit, 'offset=' + offset, 'rights='+rights];
         if (search !== '') {
             params.push('search=' + encodeURIComponent(search));
         }
         if(latest) {
             params.push('latest=true');
+        }
+        if(ids && ids.length > 0) {
+            params.push('ids=' + ids.join(','));
         }
         const paramsStr = params.join('&');
         return this.http

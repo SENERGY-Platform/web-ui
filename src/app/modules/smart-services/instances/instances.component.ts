@@ -24,6 +24,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { DialogsService } from 'src/app/core/services/dialogs.service';
 import { MatPaginator } from '@angular/material/paginator';
+import { ActivatedRoute, Router } from '@angular/router';
 
 
 @Component({
@@ -37,7 +38,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     userHasDeleteAuthorization = false;
     ready = false;
 
-    displayedColumns = ['name', 'description', 'created_at', 'updated_at'];
+    displayedColumns = ['name', 'description', 'created_at', 'updated_at', 'release'];
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<SmartServiceInstanceModel>();
     selection = new SelectionModel<SmartServiceInstanceModel>(true, []);
@@ -45,6 +46,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     offset = 0;
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
+    releaseId?: string;;
 
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -53,14 +55,21 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         private instancesService: SmartServiceInstanceService,
         public preferencesService: PreferencesService,
         private dialogsService: DialogsService,
-
+        private router: Router,
+        private activatedRoute: ActivatedRoute,
     ) {}
     ngOnInit(): void {
-        this.loadInstances();
         this.userHasDeleteAuthorization = this.instancesService.userHasDeleteAuthorization();
         if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete', 'force-delete');
         }
+        this.activatedRoute.queryParamMap.subscribe((params) => {
+            const releaseId = params.get('release_id');
+            if (releaseId) {
+                this.releaseId = releaseId;
+            }
+        });
+         this.loadInstances();
     }
 
     ngAfterViewInit(): void {
@@ -72,8 +81,8 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         });
     }
 
-    private loadInstances(): void {
-        this.instancesService.getInstances({limit: this.pageSize, offset: this.offset, sort: this.sortBy + '.' + this.sortDirection}).subscribe((instances) => {
+    loadInstances(): void {
+        this.instancesService.getInstances({limit: this.pageSize, offset: this.offset, sort: this.sortBy + '.' + this.sortDirection, releaseId: this.releaseId}).subscribe((instances) => {
             this.dataSource.data = instances.instances;
             this.totalCount = instances.total;
             this.ready = true;
@@ -97,6 +106,32 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         this.sortBy = $event.active;
         this.sortDirection = $event.direction;
         this.loadInstances();
+    }
+
+    goToRelease(id: string) {
+        this.router.navigate(['smart-services/releases'], { queryParams: { id: id } });
+    }
+
+    updateQueryParams() {
+        const queryParams: any = {};
+        if (this.releaseId !== undefined) {
+            queryParams['release_id'] = this.releaseId;
+        }
+
+        this.router.navigate(
+            [],
+            {
+                relativeTo: this.activatedRoute,
+                queryParams,
+            },
+        );
+    }
+
+    calcMaxHeight(): string {
+        if (this.releaseId) {
+            return 'calc(100vh - 199px)';
+        }
+        return 'calc(100vh - 145px)';
     }
 
 }

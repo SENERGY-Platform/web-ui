@@ -29,6 +29,7 @@ import {UtilService} from '../../../core/services/util.service';
 import {SmartServiceReleasesService} from './shared/release.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import { DeleteDialogResponse } from 'src/app/core/dialogs/delete-dialog.component';
+import { ActivatedRoute, Router } from '@angular/router';
 
 const grids = new Map([
     ['xs', 1],
@@ -54,6 +55,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     selectedItems: ProcessModel[] = [];
     rowHeight = 282;
     latest = true;
+    id ?: string;
 
     userHasDeleteAuthorization = false;
 
@@ -77,6 +79,8 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
         private sanitizer: DomSanitizer,
         private utilService: UtilService,
         private _formBuilder: FormBuilder,
+        private activatedRoute: ActivatedRoute,
+        private router: Router,
     ) {
 
     }
@@ -84,6 +88,12 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     ngOnInit() {
         this.userHasDeleteAuthorization = this.releasesService.userHasDeleteAuthorization();
         this.initGridCols();
+        this.activatedRoute.queryParamMap.subscribe((params) => {
+            const id = params.get('id');
+            if (id) {
+                this.id = id;
+            }
+        });
     }
 
     ngAfterViewInit() {
@@ -133,7 +143,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
         });
     }
 
-    private getRepoItems(reset: boolean) {
+    getRepoItems(reset: boolean) {
         if (reset) {
             this.setRepoItemsParams(this.limitInit);
             this.reset();
@@ -145,7 +155,8 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
                 this.offset,
                 this.searchText,
                 'r',
-                this.latest
+                this.latest,
+                this.id ? [this.id] : undefined
             )
             .subscribe((repoItems) => {
                 this.animationDone = true;
@@ -248,5 +259,24 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
 
     permission(release: SmartServiceReleaseModel): void {
         this.permissionsDialogService.openPermissionV2Dialog('smart_service_releases', release.id, release.name);
+    }
+
+    updateQueryParams() {
+         const queryParams: any = {};
+        if (this.id !== undefined) {
+            queryParams['id'] = this.id;
+        }
+
+        this.router.navigate(
+            [],
+            {
+                relativeTo: this.activatedRoute,
+                queryParams,
+            },
+        );
+    }
+
+    showInstances(id: string): void {
+        this.router.navigate(['smart-services/instances'], { queryParams: { release_id: id } });
     }
 }
