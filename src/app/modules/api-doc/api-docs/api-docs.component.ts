@@ -48,12 +48,14 @@ export class ApiDocsComponent implements OnInit {
 
         if (this.swaggerService.authorizationsSwagger['GET']) {
             obs.push(this.swaggerService.getSwagger().pipe(map(swaggerList => {
+                swaggerList.sort((a, b) => a.title.localeCompare(b.title));
                 this.swaggerList = swaggerList;
                 this.swaggerListShown = swaggerList;
             })));
         }
         if (this.swaggerService.authorizationsAsyncAPI['GET']) {
             obs.push(this.swaggerService.getAsync().pipe(map(asyncList => {
+                asyncList.sort((a, b) => a.title.localeCompare(b.title));
                 this.asyncList = asyncList;
                 this.asyncListShown = asyncList;
             })));
