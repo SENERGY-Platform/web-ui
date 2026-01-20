@@ -25,6 +25,15 @@ export interface SmartServiceInstanceModel {
     ready: boolean;
     created_at: number; // unix timestamp
     updated_at: number; // unix timestamp
+    permissions_info: {
+        shared: boolean;
+        permissions: {
+            administrate: boolean;
+            execute: boolean;
+            read: boolean;
+            write: boolean;
+        };
+    };
 }
 
 export interface SmartServiceParameterModel {

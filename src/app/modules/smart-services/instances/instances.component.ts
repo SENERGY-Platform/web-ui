@@ -25,6 +25,8 @@ import { Sort, SortDirection } from '@angular/material/sort';
 import { DialogsService } from 'src/app/core/services/dialogs.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 
 
 @Component({
@@ -38,7 +40,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     userHasDeleteAuthorization = false;
     ready = false;
 
-    displayedColumns = ['name', 'description', 'created_at', 'updated_at', 'release'];
+    displayedColumns = ['pub', 'name', 'description', 'created_at', 'updated_at', 'release', 'share'];
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<SmartServiceInstanceModel>();
     selection = new SelectionModel<SmartServiceInstanceModel>(true, []);
@@ -47,6 +49,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
     releaseId?: string;;
+    userIdToName = new Map<string, string>();
 
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -57,6 +60,8 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         private dialogsService: DialogsService,
         private router: Router,
         private activatedRoute: ActivatedRoute,
+        private permission: PermissionsService,
+        private permissionsDialogService: PermissionsDialogService,
     ) {}
     ngOnInit(): void {
         this.userHasDeleteAuthorization = this.instancesService.userHasDeleteAuthorization();
@@ -69,7 +74,8 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
                 this.releaseId = releaseId;
             }
         });
-         this.loadInstances();
+        this.loadInstances();
+        this.permission.getSharableUsers().subscribe(users => users?.forEach(u => this.userIdToName.set(u.id, u.username)));
     }
 
     ngAfterViewInit(): void {
@@ -134,4 +140,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         return 'calc(100vh - 145px)';
     }
 
+    shareInstance(instance: SmartServiceInstanceModel) {
+         this.permissionsDialogService.openPermissionV2Dialog('smart_service_instances', instance.id, instance.name);
+    }
 }

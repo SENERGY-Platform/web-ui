@@ -36,6 +36,19 @@
       <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)"
         [matSortActive]="sortBy" [matSortDirection]="sortDirection">
 
+        <ng-container matColumnDef="pub">
+          <th mat-header-cell *matHeaderCellDef class="button-column">Access</th>
+          <td mat-cell *matCellDef="let instance">
+            <mat-icon color="accent" *ngIf="instance.permissions_info.shared"
+              matTooltip="Shared by {{userIdToName.get(instance.user_id) || ''}}">
+              share
+            </mat-icon>
+            <mat-icon color="accent" *ngIf="!instance.permissions_info.shared" matTooltip="Owner">
+              person
+            </mat-icon>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="name">
           <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
           <td mat-cell *matCellDef="let instance">
@@ -74,10 +87,21 @@
           </td>
         </ng-container>
 
+
+        <ng-container matColumnDef="share">
+          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
+          <td mat-cell *matCellDef="let instance">
+            <button mat-icon-button color="accent" matTooltip="Share"
+              [disabled]="instance.permissions_info.permissions.administrate === false" (click)="shareInstance(instance)">
+              <mat-icon>share</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="delete">
           <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
           <td mat-cell *matCellDef="let instance">
-            <button mat-icon-button color="accent" matTooltip="Delete" (click)="deleteInstance(instance, false)">
+            <button mat-icon-button color="accent" matTooltip="Delete" (click)="deleteInstance(instance, false)"  [disabled]="instance.permissions_info.permissions.administrate === false">
               <mat-icon>delete</mat-icon>
             </button>
           </td>
@@ -86,7 +110,7 @@
         <ng-container matColumnDef="force-delete">
           <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Force Delete</th>
           <td mat-cell *matCellDef="let instance">
-            <button mat-icon-button color="warn" matTooltip="Force Delete (ignore module errors)"
+            <button mat-icon-button color="warn" matTooltip="Force Delete (ignore module errors)"  [disabled]="instance.permissions_info.permissions.administrate === false"
               (click)="deleteInstance(instance, true)">
               <mat-icon>delete</mat-icon>
             </button>
