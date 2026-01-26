@@ -15,7 +15,6 @@
   -->
 
 
-
 <div class="layout-margin">
     <span fxLayout="row" class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
@@ -29,9 +28,9 @@
         </button>
     </span>
 
-    <div *ngIf="ready && devices.length === 0">No devices waiting.</div>
+    <div *ngIf="ready && devicesDataSource.data.length === 0">No devices waiting.</div>
 
-    <div class="mat-elevation-z1" [hidden]="!ready || (devices.length === 0 && ready)">
+    <div class="mat-elevation-z1" [hidden]="!ready || (devicesDataSource.data.length === 0 && ready)">
         <div class="table-container">
             <table #sort="matSort" mat-table [dataSource]="devicesDataSource" matSort matSortActive="created_at"
                 matSortDirection="desc" matSortDisableClear>
@@ -143,12 +142,12 @@
                 <tr mat-header-row *matHeaderRowDef="['header-multiple']" [hidden]="selection.selected.length === 0">
                 </tr>
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" [@rowAnimation]="{value: animate, params: animationParams }"></tr>
             </table>
         </div>
         <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
             (page)="selectionClear($event)" showFirstLastButtons></mat-paginator>
-        <div *ngIf="devices.length === 0 && ready">No devices found.</div>
+        <div *ngIf="devicesDataSource.data.length === 0 && ready">No devices found.</div>
     </div>
     <senergy-spinner [show]="!ready"></senergy-spinner>
 </div>

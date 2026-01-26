@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {
@@ -26,8 +26,8 @@ import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatTableDataSource} from '@angular/material/table';
-import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeSet} from './shared/waiting-room.model';
-import {debounceTime, startWith, switchMap} from 'rxjs/operators';
+import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeDelete, WaitingRoomEventTypeSet, WaitingRoomEventTypeUse} from './shared/waiting-room.model';
+import {startWith, switchMap} from 'rxjs/operators';
 import {WaitingRoomService} from './shared/waiting-room.service';
 import {DeviceInstanceModel} from '../device-instances/shared/device-instances.model';
 import {WaitingRoomDeviceEditDialogComponent} from './dialogs/waiting-room-device-edit-dialog.component';
@@ -37,13 +37,15 @@ import {
 } from './dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
 import {ClosableSnackBarComponent} from '../../../core/components/closable-snack-bar/closable-snack-bar.component';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { TableRowAnimations } from 'src/app/core/animations/table-animation';
 
 @Component({
     selector: 'senergy-waiting-room',
     templateUrl: './waiting-room.component.html',
     styleUrls: ['./waiting-room.component.css'],
+    animations: [TableRowAnimations.getRowAnimation()],
 })
-export class WaitingRoomComponent implements OnInit, OnDestroy {
+export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     static wmbusKeyAttributeKey = 'wmbus/key';
     public wmbusKeyAttributeKey = WaitingRoomComponent.wmbusKeyAttributeKey;
 
@@ -54,16 +56,15 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     displayedColumns: string[] = ['select', 'name', 'created_at', 'updated_at', 'edit', 'use', 'toggle_hide', 'delete'];
     totalCount = 0;
 
-    devices: WaitingDeviceModel[] = [] as WaitingDeviceModel[];
+    // devices: WaitingDeviceModel[] = [] as WaitingDeviceModel[];
     devicesDataSource = new MatTableDataSource<WaitingDeviceModel>();
     showHidden = localStorage.getItem('devices.waiting-room.showHidden') === 'true';
     ready = false;
+    animate = false;
+    animationParams = {};
 
     private searchSub: Subscription = new Subscription();
     public searchText = '';
-    private devicesSub: Subscription = new Subscription();
-    private eventsCloser?: () => void;
-    private idSet = new Set();
     private snackBarInstance?: MatSnackBarRef<ClosableSnackBarComponent>;
 
     constructor(
@@ -73,6 +74,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
         public preferencesService: PreferencesService,
+        private cd: ChangeDetectorRef,
     ) {}
 
     ngOnInit() {
@@ -82,12 +84,21 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
-        if (this.eventsCloser) {
-            this.eventsCloser();
-        }
         if (this.snackBarInstance) {
             this.snackBarInstance.dismiss();
         }
+    }
+
+    ngAfterViewInit() {
+        const applyOpacity = (rgbColor: string, alpha: number): string => {
+            const match = rgbColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+            if (!match) return rgbColor; // fallback
+            const [, r, g, b] = match;
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        };
+        setTimeout(() => {
+            this.animationParams = {highlightColor: applyOpacity( TableRowAnimations.getColorFromClass(), 0.3)};
+        }, 200);
     }
 
     showHiddenChanged() {
@@ -98,7 +109,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
 
     private reset() {
         this.paginator.pageIndex = 0;
-        this.devices = [];
+        this.devicesDataSource.data = [];
         this.ready = false;
     }
 
@@ -118,11 +129,12 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
             this.paginator.pageIndex = 0;
             this.selectionClear();
         });
-        this.devicesSub = merge(this.sort.sortChange, this.paginator.page)
+        merge(this.sort.sortChange, this.paginator.page)
             .pipe(
                 startWith({}),
                 switchMap(() => {
                     this.ready = false;
+                    this.animate = false;
                     return this.waitingRoomService.searchDevices(
                         this.searchText,
                         this.paginator.pageSize,
@@ -135,16 +147,15 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
             )
             .subscribe((resp: WaitingDeviceListModel | null) => {
                 if (resp !== null) {
-                    this.devices = resp.result;
-                    if (this.devices === undefined) {
-                        this.devices = [];
+                    if (resp.result === undefined) {
+                        this.devicesDataSource.data = [];
                     }
-                    this.idSet.clear();
-                    this.devices.map(value => value.local_id).forEach(value => this.idSet.add(value));
                     this.totalCount = resp.total;
-                    this.devicesDataSource.data = this.devices;
+                    this.devicesDataSource.data = resp.result;
                 }
                 this.ready = true;
+                this.cd.detectChanges();
+                this.animate = true;
             });
     }
 
@@ -199,19 +210,16 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
             .afterClosed()
             .subscribe((deleteDevice: boolean) => {
                 if (deleteDevice) {
-                    this.ready = false;
                     this.waitingRoomService.deleteDevice(localId).subscribe((response) => {
                         if (response.status < 300) {
                             this.snackBar.open('Device deleted', undefined, {
                                 duration: 2000,
                             });
-                            this.getDevices(true);
                         } else {
                             this.snackBar.open('Device could not be deleted', undefined, {
                                 duration: 2000,
                             });
                         }
-                        this.ready = true;
                     });
                 }
             });
@@ -229,20 +237,16 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
 
         editDialogRef.afterClosed().subscribe((deviceOut: WaitingDeviceModel) => {
             if (deviceOut !== undefined) {
-                this.ready = false;
                 this.waitingRoomService.updateDevice(deviceOut).subscribe((deviceResp: WaitingDeviceModel | null) => {
                     if (deviceResp === null) {
-                        this.ready = true;
                         this.snackBar.open('Error while updating the device!', 'close', { panelClass: 'snack-bar-error' });
                     } else {
                         Object.assign(device, deviceOut);
                         this.waitingRoomService.useDevice(device.local_id).subscribe((response) => {
-                            this.ready = true;
                             if (response.status < 300) {
                                 this.snackBar.open('Device used', undefined, {
                                     duration: 2000,
                                 });
-                                this.getDevices(true);
                             } else {
                                 this.snackBar.open('Device could not be used', 'close', { panelClass: 'snack-bar-error' });
                             }
@@ -492,28 +496,28 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     }
 
     private initEventNotification() {
-        this.waitingRoomService.events(closer => {
-            this.eventsCloser = closer;
-        })
-            .pipe(debounceTime(1000))
+        this.waitingRoomService.events()
             .subscribe((msg) => {
-                if (msg.type === WaitingRoomEventTypeSet && !this.idSet.has(msg.payload) && !this.snackBarInstance) {
-                    const temp = this.snackBar.openFromComponent(ClosableSnackBarComponent, {
-                        data: {
-                            message: 'New devices found.',
-                            action: 'Reload'
-                        },
-                    });
-                    temp.onAction().subscribe(_ => {
-                        this.getDevices(false);
-                    });
-                    temp.afterDismissed().subscribe(_ => {
-                        if (this && this.snackBarInstance) {
-                            this.snackBarInstance = undefined;
+                switch (msg.type) {
+                    case WaitingRoomEventTypeSet:
+                        const setDevice = msg.payload as WaitingDeviceModel;
+                        const i = this.devicesDataSource.data.findIndex(d => d.local_id === setDevice.local_id);
+                        if (i === -1) {
+                            this.devicesDataSource.data.push(setDevice);
+                        } else {
+                            this.devicesDataSource.data[i] = setDevice;
                         }
-                    });
-                    this.snackBarInstance = temp;
+                        break;
+                    case WaitingRoomEventTypeDelete:
+                    case WaitingRoomEventTypeUse:
+                        const j = this.devicesDataSource.data.findIndex(d => d.local_id === msg.payload);
+                         if (j === -1) {
+                            break;
+                        }
+                        this.devicesDataSource.data.splice(j, 1);
+
                 }
+                this.devicesDataSource.data = [...this.devicesDataSource.data];
             });
     }
 }

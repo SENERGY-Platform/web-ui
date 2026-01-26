@@ -40,7 +40,7 @@ export class WaitingRoomDeviceEditDialogComponent {
     ) {
         this.device = data.device;
         this.useDialog = data.useDialog;
-        if (this.device.attributes === undefined) {
+        if (this.device.attributes === undefined || this.device.attributes === null) {
             this.device.attributes = [];
         }
         this.device.attributes.push({origin: 'web-ui', key: 'last_message_max_age', value: '24h' });

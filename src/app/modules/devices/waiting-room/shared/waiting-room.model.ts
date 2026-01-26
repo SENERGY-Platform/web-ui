@@ -35,7 +35,7 @@ export interface WaitingDeviceListModel {
 
 export interface WaitingRoomEvent {
     type: string;
-    payload: string | null | undefined;
+    payload: string | null | undefined | WaitingDeviceModel;
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention

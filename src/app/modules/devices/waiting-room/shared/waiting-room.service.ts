@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { EventEmitter, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import {
@@ -42,6 +42,7 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
 })
 export class WaitingRoomService {
     authorizations: PermissionTestResponse;
+    waitingRoomEventRS: ReplaySubject<WaitingRoomEvent> | undefined;
 
     constructor(
         private http: HttpClient,
@@ -169,14 +170,17 @@ export class WaitingRoomService {
             );
     }
 
-    events(closerSetter: (closer: () => void) => void, fallback?: () => void): Observable<WaitingRoomEvent> {
-        const events: EventEmitter<WaitingRoomEvent> = new EventEmitter();
+    events(closerSetter?: (closer: () => void) => void, fallback?: () => void): Observable<WaitingRoomEvent> {
+        if (this.waitingRoomEventRS !== undefined) {
+            return this.waitingRoomEventRS.asObservable();
+        }
+        this.waitingRoomEventRS = new ReplaySubject(1);
 
         if (environment.waitingRoomWsUrl === '') {
             if (fallback) {
                 fallback();
             }
-            return events;
+            return this.waitingRoomEventRS.asObservable();
         }
 
         let fallbackUsed = false;
@@ -200,11 +204,13 @@ export class WaitingRoomService {
             subscription = null;
             ws?.complete();
             ws = webSocket<WaitingRoomEvent>(environment.waitingRoomWsUrl);
-            closerSetter(() => {
-                subscription?.unsubscribe();
-                subscription = null;
-                ws?.complete();
-            });
+            if (closerSetter !== undefined) {
+                closerSetter(() => {
+                    subscription?.unsubscribe();
+                    subscription = null;
+                    ws?.complete();
+                });
+            }
             subscription = ws.subscribe(
                 (msg: WaitingRoomEvent) => {
                     switch (msg.type) {
@@ -212,14 +218,14 @@ export class WaitingRoomService {
                         auth();
                         break;
                     case WaitingRoomEventTypeAuthOk:
-                        events.emit(msg);
+                        this.waitingRoomEventRS?.next(msg);
                         break;
                     case WaitingRoomEventTypeError:
                         console.error('ERROR:', msg);
                         useFallback();
                         break;
                     default:
-                        events.emit(msg);
+                        this.waitingRoomEventRS?.next(msg);
                     }
                 },
                 (err: any) => {
@@ -234,7 +240,7 @@ export class WaitingRoomService {
             auth();
         };
         init();
-        return events;
+        return this.waitingRoomEventRS.asObservable();
     }
 
     eventIsUpdate(msg: WaitingRoomEvent) {
