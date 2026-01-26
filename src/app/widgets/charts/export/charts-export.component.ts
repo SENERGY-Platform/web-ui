@@ -226,14 +226,18 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.widget.properties.exports) {
             if (this.widget.properties.exports.length < 1) {
                 this.configureWidget = true;
+                return;
             }
         } else {
             this.configureWidget = true;
+            return;
         }
 
         if (this.widget.properties.time === undefined) {
             this.configureWidget = true;
+            return;
         }
+        this.configureWidget = false;
     }
 
 

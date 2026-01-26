@@ -41,8 +41,7 @@
                     <div *ngIf="configureWidget === true" class="maximized">Please configure widget!</div>
                     <div
                         *ngIf="widget.properties.chartType !== 'Timeline' && widget.properties.chartType !== 'ColumnChart'" class="maximized">
-                        <google-chart
-                            *ngIf="configureWidget === false && chartExportData.dataTable !== undefined && chartExportData.dataTable[0].length !== 0"
+                        <google-chart [hidden]="configureWidget && chartExportData.dataTable !== undefined && chartExportData.dataTable[0].length !== 0"
                             #chartExport [data]="chartExportData"></google-chart>
                         <senergy-no-data
                             [showIf]="configureWidget === false && (chartExportData.dataTable === undefined || chartExportData.dataTable[0].length === 0)"></senergy-no-data>
