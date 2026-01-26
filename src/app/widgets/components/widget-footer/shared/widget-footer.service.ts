@@ -31,8 +31,8 @@ export class WidgetFooterService {
         this.dialogsService
             .openDeleteDialog('widget')
             .afterClosed()
-            .subscribe((deleteWidget: boolean) => {
-                if (deleteWidget === true) {
+            .subscribe((deleteWidget: {confirmed: boolean}) => {
+                if (deleteWidget.confirmed === true) {
                     this.dashboardService.deleteWidget(dashboardId, widgetId).subscribe(() => {
                         this.dashboardService.manipulateWidget(DashboardManipulationEnum.Delete, widgetId, null);
                     });
