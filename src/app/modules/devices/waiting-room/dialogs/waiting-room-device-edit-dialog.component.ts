@@ -40,6 +40,10 @@ export class WaitingRoomDeviceEditDialogComponent {
     ) {
         this.device = data.device;
         this.useDialog = data.useDialog;
+        if (this.device.attributes === undefined) {
+            this.device.attributes = [];
+        }
+        this.device.attributes.push({origin: 'web-ui', key: 'last_message_max_age', value: '24h' });
         this.initAttrFormGroup();
         deviceTypeService.getDeviceType(data.device.device_type_id).subscribe((dt) => {
             if (dt) {
