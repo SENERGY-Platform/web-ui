@@ -1,10 +1,24 @@
 import { Injectable } from '@angular/core';
 import { trigger, transition, style, animate, AnimationTriggerMetadata } from '@angular/animations';
+import { delay, map, Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class TableRowAnimations {
 
-  /** Returns the animation trigger to use in a table row */
+  /* Usage Note:
+      In your component:
+      - use getAnimationParams in AfterViewInit hook:
+          animationParams = {};
+          ngAfterViewInit() {
+              TableRowAnimations.getAnimationParams().subscribe(p => this.animationParams = p);
+          }
+      - control animation with a boolean:
+          animate = false; // false disables animation, true enables them. set to true after inistial data display
+      In your template:
+      - Add the animation toggle and params to your tr:
+          <tr mat-row *matRowDef="..." [@rowAnimation]="{value: animate, params: animationParams }"></tr>
+  */
+
   static getRowAnimation(): AnimationTriggerMetadata {
     return trigger('rowAnimation', [
       // Insert animation
@@ -21,13 +35,17 @@ export class TableRowAnimations {
     ]);
   }
 
-  static getAnimationParams(cssClass: string = 'color-sidenav') {
-    const color = TableRowAnimations.getColorFromClass(cssClass);
-    return { highlightColor: color };
+  static getAnimationParams(cssClass: string = 'color-sidenav', alpha = 0.3): Observable<object> {
+    return of(null).pipe(delay(200), map(_ => {
+      let color = TableRowAnimations.getColorFromClass(cssClass);
+      if (alpha != 1) {
+        color = this.applyOpacity(color, alpha);
+      }
+      return { highlightColor: color };
+    }));
   }
 
-  /** Helper: read the computed color of a CSS class */
-  static getColorFromClass(className: string = 'color-sidenav' ): string {
+  static getColorFromClass(className: string = 'color-sidenav'): string {
     const el = document.createElement('span');
     el.className = className;
     el.style.display = 'none';
@@ -36,5 +54,12 @@ export class TableRowAnimations {
     const color = getComputedStyle(el).color;
     document.body.removeChild(el);
     return color;
+  }
+
+  static applyOpacity(rgbColor: string, alpha: number): string {
+    const match = rgbColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    if (!match) return rgbColor; // fallback
+    const [, r, g, b] = match;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 }

@@ -90,15 +90,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        const applyOpacity = (rgbColor: string, alpha: number): string => {
-            const match = rgbColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-            if (!match) return rgbColor; // fallback
-            const [, r, g, b] = match;
-            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-        };
-        setTimeout(() => {
-            this.animationParams = {highlightColor: applyOpacity( TableRowAnimations.getColorFromClass(), 0.3)};
-        }, 200);
+        TableRowAnimations.getAnimationParams().subscribe(p => this.animationParams = p);
     }
 
     showHiddenChanged() {
@@ -493,6 +485,10 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
             return element.attributes.some((value) => value.key === WaitingRoomComponent.wmbusKeyAttributeKey && !value.value);
         }
         return false;
+    }
+
+    trackDevice(_: number, d: WaitingDeviceModel): string {
+        return d.local_id;
     }
 
     private initEventNotification() {
