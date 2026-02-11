@@ -611,8 +611,6 @@ export class ChartsExportService {
                 } else if (groupInterval.endsWith('months')) {
                     breakInterval = 'y';
                 }
-                // TODO returns only 2 months for last 2y, groupby 1months
-
                 const res = this.splitTableOnDate(dataTable.data, colors, breakInterval as 'h' | 'd' | 'm' | 'y' | 'months');
                 dataTable.data = res.table;
                 return { table: dataTable, colors: res.colors };
@@ -851,6 +849,28 @@ export class ChartsExportService {
 
         }
         dat.push(...addedRows);
-        return { table: dat, colors };
+        return this.sortColumnsByFirstRow(dat, colors);
+    }
+
+    private sortColumnsByFirstRow(table: any[][], colors: string[]): { table: any[][], colors: string[] } {
+        if (!table.length || table[0].length <= 1) return { table, colors };
+
+        // Create array of column indices (excluding first column)
+        const columnIndices = table[0]
+            .map((_, i) => i)
+            .slice(1)
+            .sort((b, a) => {
+                const valA = table[0][a];
+                const valB = table[0][b];
+                return valA > valB ? 1 : valA < valB ? -1 : 0;
+            });
+
+        // Rebuild table with sorted columns
+        return {
+            table: table.map(row => [
+                row[0], // keep first column fixed
+                ...columnIndices.map(i => row[i])
+            ]), colors: columnIndices.map(i => colors[i - 1])
+        };
     }
 }
