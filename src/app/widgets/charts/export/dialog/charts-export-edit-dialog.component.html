@@ -15,7 +15,7 @@
   -->
 
 <h2 mat-dialog-title>Edit Chart Export</h2>
-<mat-dialog-content class="form" >
+<mat-dialog-content class="form">
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
 
     <div *ngIf="ready" fxLayout="column" [formGroup]="formGroupController">
@@ -54,6 +54,8 @@
                     </td>
                     <td *ngIf="chartType.value === 'ColumnChart'">
                         <mat-slide-toggle formControlName="stacked"> Stacked?
+                        </mat-slide-toggle>
+                        <mat-slide-toggle formControlName="break"> Break?
                         </mat-slide-toggle>
                     </td>
                 </tr>

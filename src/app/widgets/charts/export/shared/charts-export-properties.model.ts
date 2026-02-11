@@ -51,6 +51,7 @@ export interface ChartsExportPropertiesModel {
     breakInterval?: string;
     zoomTimeFactor?: number;
     stacked?: boolean;
+    break?: boolean;
 }
 
 export interface ChartsExportMeasurementModel {

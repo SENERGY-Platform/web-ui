@@ -47,6 +47,7 @@ import { environment } from '../../../../../environments/environment';
 import { DeviceInstancesWithDeviceTypeTotalModel, DeviceInstanceWithDeviceTypeModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { digestMessage } from 'src/app/core/services/util.service';
+import Color from 'color';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -327,7 +328,7 @@ export class ChartsExportService {
     }
 
 
-    getChartData(widget: WidgetModel, _from?: string, to?: string, groupInterval?: string, hAxisFormat?: string, lastOverride?: string, chooseColors = false): Observable<ChartsModel | ErrorModel> {
+    getChartData(widget: WidgetModel, _from?: string, to?: string, groupInterval?: string, hAxisFormat?: string, lastOverride?: string, chooseColors = false, disableBreaking = false): Observable<ChartsModel | ErrorModel> {
         return this.getData(widget.properties, _from, to, groupInterval, lastOverride).pipe(concatMap(r => {
             let obs: Observable<DeviceInstancesWithDeviceTypeTotalModel> = of({ result: [], total: 0 });
             const deviceIds: string[] = [];
@@ -358,12 +359,11 @@ export class ChartsExportService {
                 return of(resp as ErrorModel);
             } else {
                 const obs: Observable<any>[] = [of(null)]; // needs at leat one Obserfable for forkJoin
-                const tableData = this.setData(resp, widget.properties, r.metadata);
+                const tableData = this.setData(resp, widget.properties, r.metadata, groupInterval, disableBreaking);
                 if (chooseColors) {
                     tableData.colors = Array(tableData.table.data[0].length - 1);
                     obs.push(...tableData.table.data[0].slice(1).map((title, i) =>
                         // i just created it...
-                         
                         from(digestMessage(title as string, 'SHA-1')).pipe(map(digest => tableData.colors![i - 1] = '#' + digest.slice(0, 6)))));
                 }
                 return forkJoin(obs).pipe(map(_ => this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors, hAxisFormat)));
@@ -371,7 +371,8 @@ export class ChartsExportService {
         }));
     }
 
-    private setData(data: any[][][][], properties: WidgetPropertiesModels, metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][]): {
+    private setData(data: any[][][][], properties: WidgetPropertiesModels, metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][], groupInterval?: string, disableBreaking = false
+    ): {
         table: ChartDataTableModel;
         colors?: string[];
     } {
@@ -598,6 +599,24 @@ export class ChartsExportService {
             const res = this.transformTableForTimeline(dataTable.data, properties.vAxes || [], breakInterval, breakValue, breakUnit);
             dataTable.data = res.table;
             return { table: dataTable, colors: res.colors };
+        } else if (properties.chartType === 'ColumnChart' && properties.break === true && !disableBreaking) {
+            let breakInterval = 'm';
+            if (groupInterval !== undefined && !groupInterval.endsWith('y')) {
+                if (groupInterval.endsWith('m')) {
+                    breakInterval = 'h';
+                } else if (groupInterval.endsWith('h')) {
+                    breakInterval = 'd';
+                } else if (groupInterval.endsWith('d')) {
+                    breakInterval = 'months';
+                } else if (groupInterval.endsWith('months')) {
+                    breakInterval = 'y';
+                }
+                // TODO returns only 2 months for last 2y, groupby 1months
+
+                const res = this.splitTableOnDate(dataTable.data, colors, breakInterval as 'h' | 'd' | 'm' | 'y' | 'months');
+                dataTable.data = res.table;
+                return { table: dataTable, colors: res.colors };
+            }
         }
         return { table: dataTable, colors };
     }
@@ -673,9 +692,9 @@ export class ChartsExportService {
         if (chartModel.options?.vAxes !== undefined && secondAxisSeries.length > 0) {
             chartModel.options.vAxes['1'] = { title: widget.properties.secondVAxisLabel };
             chartModel.options.series = {};
-             
+
             firstAxesSeries.forEach((i) => (chartModel.options!.series[i] = { targetAxisIndex: 0 }));
-             
+
             secondAxisSeries.forEach((i) => (chartModel.options!.series[i] = { targetAxisIndex: 1 }));
         }
         return chartModel;
@@ -749,5 +768,89 @@ export class ChartsExportService {
         const table = [['', '', '', '']];
         allSlices.forEach(s => table.push(...s));
         return { table, colors };
+    }
+
+    private splitTableOnDate(dat: any[][], colors: string[], breakUnit: 'h' | 'd' | 'm' | 'y' | 'months'): {
+        table: any[][];
+        colors: string[];
+    } {
+        if (dat.length === 0) {
+            return { table: dat, colors: colors };
+        }
+        const initialHeaderLength = dat[0].length;
+        const addedRows: any[] = [];
+        const diffToIdx = new Map<number, number>();
+        let addedColumns = 0;
+        let end = new Date();
+        if (dat.length > 1) {
+            end = new Date(dat[1][0] as string);
+        }
+        for (let i = dat.length - 1; i > 1; i--) {
+            let diff = 0;
+            const diffTs = end.valueOf() - (new Date(dat[i][0] as string)).valueOf();
+            switch (breakUnit) {
+                case 'm':
+                    diff = Math.floor(diffTs / (1000 * 60));
+                    break;
+                case 'h':
+                    diff = Math.floor(diffTs / (1000 * 60 * 60));
+                    break;
+                case 'd':
+                    diff = Math.floor(diffTs / (1000 * 60 * 60 * 24));
+                    break;
+                case 'months':
+                    diff = end.getMonth() - (new Date(dat[i][0] as string)).getMonth() + (12 * (end.getFullYear() - (new Date(dat[i][0] as string)).getFullYear()));
+                    break;
+                case 'y':
+                    diff = end.getFullYear() - (new Date(dat[i][0] as string)).getFullYear();
+                    break;
+            }
+
+            if (diff > 0) {
+                let idx = addedColumns;
+                if (diffToIdx.has(diff)) {
+                    idx = diffToIdx.get(diff)!;
+                } else {
+                    diffToIdx.set(diff, idx);
+                    const addedHeaders: string[] = [];
+                    dat[0].slice(1, initialHeaderLength).forEach((head, j) => {
+                        let color = Color(colors[j] || customColor);
+                        for (let k = 0; k < diff; k++) {
+                            color = color.fade(0.5);
+                        }
+                        colors.push(color.hexa());
+                        addedHeaders.push(head + ' -' + diff + breakUnit);
+                        addedColumns++;
+                    });
+                    dat[0].push(...addedHeaders);
+                }
+                const d = new Date(dat[i][0] as string);
+                switch (breakUnit) {
+                    case 'm':
+                        d.setMinutes(end.getMinutes());
+                    // intentional fall-through
+                    case 'h':
+                        d.setHours(end.getHours());
+                    // intentional fall-through
+                    case 'd':
+                        d.setDate(end.getDate());
+                    // intentional fall-through
+                    case 'months':
+                        d.setMonth(end.getMonth());
+                    // intentional fall-through
+                    case 'y':
+                        d.setFullYear(end.getFullYear());
+                        break;
+                }
+                const newRow: any[] = [d];
+                newRow.push(...new Array(dat[0].length - initialHeaderLength).fill(null));
+                newRow.push(...dat[i].slice(1));
+                dat.splice(i, 1);
+                addedRows.push(newRow);
+            }
+
+        }
+        dat.push(...addedRows);
+        return { table: dat, colors };
     }
 }

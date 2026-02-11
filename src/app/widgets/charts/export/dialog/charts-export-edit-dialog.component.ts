@@ -80,6 +80,29 @@ export class ChartsExportEditDialogComponent implements OnInit {
         'duplicate-delete',
     ];
 
+    breakIntervals = [
+        {
+            name: 'Minutes',
+            value: 'm'
+        },
+        {
+            name: 'Hours',
+            value: 'h'
+        },
+        {
+            name: 'Days',
+            value: 'd'
+        },
+        {
+            name: 'Months',
+            value: 'months'
+        },
+        {
+            name: 'Years',
+            value: 'y'
+        }
+    ];
+
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
     vAxesOptions: Map<string, ChartsExportVAxesModel[]> = new Map();
     exportTags: Map<string, Map<string, { value: string; parent: string }[]>> = new Map();
@@ -212,6 +235,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 curvedFunction: this._formBuilder.control(widget.properties.curvedFunction),
                 calculateIntervals: this._formBuilder.control(widget.properties.calculateIntervals),
                 breakInterval: this._formBuilder.control(widget.properties.breakInterval),
+                break: this._formBuilder.control(widget.properties.break),
                 exports: this._formBuilder.control(widget.properties.exports),
                 timeRangeType: widget.properties.timeRangeType,
                 time: this._formBuilder.group({

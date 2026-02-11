@@ -60,6 +60,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     timelineHeight = 0;
     ready = false;
     refreshing = false;
+    disableBreaking = false;
     destroy = new Subscription();
     configureWidget = false;
     errorHasOccured = false;
@@ -470,7 +471,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
             const chooseColors = this.chooseColors || (widget.properties.vAxes?.length === 1 && (widget.properties.vAxes[0].deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Separate || widget.properties.vAxes[0].deviceGroupMergingStrategy === undefined) && (widget.properties.vAxes[0].deviceGroupId !== undefined || widget.properties.vAxes[0].locationId !== undefined));
 
-            this.chartsExportService.getChartData(widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride, chooseColors).subscribe((resp: ChartsModel | ErrorModel) => {
+            this.chartsExportService.getChartData(widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride, chooseColors, this.disableBreaking).subscribe((resp: ChartsModel | ErrorModel) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     this.errorHasOccured = true;
                     this.errorMessage = 'No data';
@@ -760,6 +761,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         this.modifiedVaxes = newAxes;
         this.drillStackPush(axes, this.stacked);
         this.stacked = true;
+        this.disableBreaking = true;
         this.ready = false;
         this.chartjs.tooltipDisplay = 'none';
         this.cd.detectChanges();
@@ -773,6 +775,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         } else {
             this.chooseColors = null;
             this.modifiedVaxes = null;
+            this.disableBreaking = false;
         }
         this.ready = false;
         this.chartjs.tooltipDisplay = 'none';
