@@ -200,11 +200,11 @@ export class ChartsExportEditDialogComponent implements OnInit {
         if (timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute) {
             const start = updatedDataSourceConfig.timeRange?.start;
             if (start != null && start !== '') {
-                this.formGroupController.get('properties.time.start')?.patchValue(start + timeRangeLevel);
+                this.formGroupController.get('properties.time.start')?.patchValue(start);
             }
             const end = updatedDataSourceConfig.timeRange?.end;
             if (end != null && end !== '') {
-                this.formGroupController.get('properties.time.end')?.patchValue(end + timeRangeLevel);
+                this.formGroupController.get('properties.time.end')?.patchValue(end);
             }
         } else if (timeRangeType === ChartsExportRangeTimeTypeEnum.Relative) {
             const last = updatedDataSourceConfig.timeRange?.time;

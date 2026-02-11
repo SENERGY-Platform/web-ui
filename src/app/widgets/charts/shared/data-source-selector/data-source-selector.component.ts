@@ -278,9 +278,30 @@ export class DataSourceSelectorComponent implements OnInit {
                 if (!this.ready) {
                     return;
                 }
-                const newDataSourceConfig: DataSourceConfig = this.form.value;
+                const newDataSourceConfig: DataSourceConfig = this.form.getRawValue();
                 this.updatedDataSourceConfig.emit(newDataSourceConfig);
             }
+        });
+        const timeRangTypeChanges = (value: any) => {
+            if (value === this.timeRangeEnum.Absolute) {
+                this.form.get('group.level')?.enable();
+            } else {
+                this.form.get('group.level')?.disable();
+            }
+        };
+        timeRangTypeChanges(this.form.get('timeRange.type')?.value);
+        this.form.get('timeRange.type')?.valueChanges.subscribe(value => {
+            timeRangTypeChanges(value);
+        });
+
+        const timeRangeLevelChanges = (value: any) => {
+            if (this.form.get('group.level')?.disabled) {
+                this.form.get('group.level')?.patchValue(value);
+            }
+        };
+        timeRangeLevelChanges(this.form.get('timeRange.level')?.value);
+        this.form.get('timeRange.level')?.valueChanges.subscribe(value => {
+            timeRangeLevelChanges(value);
         });
     }
 

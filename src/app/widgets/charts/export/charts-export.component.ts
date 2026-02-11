@@ -95,7 +95,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     const [found, labelInfo] = findLabel(getLabelHitBoxes(chart.scales.x), evt);
                     const currentDetailLevel = this.detailLevel(this.groupTime);
                     switch (evt.type) {
-                        case 'click':
+                        case 'click': // zoom in
                             if (found && currentDetailLevel < DetailLevel.ms) {
                                 const newDetailLevel = currentDetailLevel + 1;
                                 this.groupTime = this.groupTimeFromDetailLevel(newDetailLevel);
