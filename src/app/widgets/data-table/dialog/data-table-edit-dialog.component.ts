@@ -533,8 +533,17 @@ export class DataTableEditDialogComponent implements OnInit {
         return '';
     }
 
-    compareStrings(a: any, b: any): boolean {
-        return a !== undefined && b !== undefined && a === b;
+    compareIds(a: { id: string } | string, b: { id: string } | string): boolean {
+        if (typeof a === 'string' && typeof b === 'string') {
+            return a === b;
+        } else if (typeof a === 'object' && typeof b === 'object') {
+            return a.id === b.id;
+        } else if (typeof a === 'string' && typeof b === 'object') {
+            return a === b.id;
+        } else if (typeof a === 'object' && typeof b === 'string') {
+            return a.id === b;
+        }
+        return false;
     }
 
     removeTab(index: number) {
@@ -632,6 +641,19 @@ export class DataTableEditDialogComponent implements OnInit {
         return selectables;
     }
 
+    compareSelectableDevices(a: DeviceSelectablesModel | string, b: DeviceSelectablesModel | string): boolean {
+        if (typeof a === 'string' && typeof b === 'string') {
+            return a === b;
+        } else if (typeof a === 'object' && typeof b === 'object') {
+            return a.device.id === b.device.id;
+        } else if (typeof a === 'string' && typeof b === 'object') {
+            return a === b.device.id;
+        } else if (typeof a === 'object' && typeof b === 'string') {
+            return a.device.id === b;
+        }
+        return false;
+    }
+
     getServices(element: AbstractControl): DeviceTypeServiceModel[] {
         if (!this.ready) {
             return [];
@@ -676,6 +698,19 @@ export class DataTableEditDialogComponent implements OnInit {
         }
 
         return values;
+    }
+
+    compareExportValueCharacteristicModel(a: ExportValueCharacteristicModel | string, b: ExportValueCharacteristicModel | string): boolean {
+        if (typeof a === 'string' && typeof b === 'string') {
+            return a === b;
+        } else if (typeof a === 'object' && typeof b === 'object') {
+            return a.Path === b.Path;
+        } else if (typeof a === 'string' && typeof b === 'object') {
+            return a === b.Path;
+        } else if (typeof a === 'object' && typeof b === 'string') {
+            return a.Path === b;
+        }
+        return false;
     }
 
     getExports(element: AbstractControl): ExportModel[] {

@@ -32,7 +32,7 @@
                 <td *ngIf="userHasUpdatePropertiesAuthorization">
                     <mat-form-field appearance="outline" color="accent" class="order-select">
                         <mat-label>Default Order</mat-label>
-                        <mtx-select formControlName="order" placeholder="Order by" [compareWith]="compareStrings"
+                        <mtx-select formControlName="order" placeholder="Order by" [compareWith]="compareIds"
                             required appendTo=".ng-select-anchor">
                             <mtx-option [value]="orderValues.Default">As listed</mtx-option>
                             <mtx-option [value]="orderValues.AlphabeticallyAsc">Name</mtx-option>
@@ -171,8 +171,8 @@
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Function</mat-label>
                                         <mtx-select formControlName="functionId" required placeholder="Choose Function"
-                                            [compareWith]="compareStrings" [items]="getFunctions(tab)" bindValue="id"
-                                            bindLabel="name" appendTo=".ng-select-anchor">
+                                            [items]="getFunctions(tab)" bindValue="id"
+                                            bindLabel="name" appendTo=".ng-select-anchor" [compareWith]="compareIds">
                                         </mtx-select>
                                         <mat-error senergyError label="Function"></mat-error>
                                     </mat-form-field>
@@ -180,7 +180,7 @@
                                 <td formGroupName="device">
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Device</mat-label>
-                                        <mtx-select [compareWith]="compareStrings" formControlName="deviceId"
+                                        <mtx-select [compareWith]="compareSelectableDevices" formControlName="deviceId"
                                             placeholder="Choose Device" required [items]="getSelectables(tab)"
                                             bindLabel="device.display_name" bindValue="device.id"
                                             appendTo=".ng-select-anchor">
@@ -194,7 +194,7 @@
                                     <mat-form-field appearance="outline" color="accent" formGroupName="device">
                                         <mat-label>Service</mat-label>
                                         <mtx-select formControlName="serviceId" required placeholder="Choose Service"
-                                            [compareWith]="compareStrings" [items]="getServices(tab)" bindValue="id"
+                                            [compareWith]="compareIds" [items]="getServices(tab)" bindValue="id"
                                             bindLabel="name" appendTo=".ng-select-anchor">
                                         </mtx-select>
                                         <mat-error senergyError label="Service"></mat-error>
@@ -204,7 +204,7 @@
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Value</mat-label>
                                         <mtx-select formControlName="exportValuePath" required
-                                            placeholder="Choose Value" [compareWith]="compareStrings"
+                                            placeholder="Choose Value" [compareWith]="compareExportValueCharacteristicModel"
                                             [items]="getServiceValues(tab)" bindLabel="Name" bindValue="Path"
                                             appendTo=".ng-select-anchor">
                                         </mtx-select>
@@ -217,7 +217,7 @@
                                     <mat-form-field appearance="outline" color="accent" formGroupName="pipeline">
                                         <mat-label>Pipeline</mat-label>
                                         <mtx-select formControlName="pipelineId" required placeholder="Choose Pipeline"
-                                            [compareWith]="compareStrings"
+                                            [compareWith]="compareIds"
                                             [items]="dataTableHelperService.getPipelines()" bindValue="id"
                                             bindLabel="name" appendTo=".ng-select-anchor">
                                         </mtx-select>
@@ -228,7 +228,7 @@
                                     <mat-form-field appearance="outline" color="accent" formGroupName="pipeline">
                                         <mat-label>Operator</mat-label>
                                         <mtx-select formControlName="operatorId" required placeholder="Choose Operator"
-                                            [compareWith]="compareStrings" appendTo=".ng-select-anchor">
+                                            [compareWith]="compareIds" appendTo=".ng-select-anchor">
                                             <mtx-option *ngFor="let option of getOperators(tab)"
                                                 [value]="option.id">{{getOperatorViewValue(option)}}</mtx-option>
                                         </mtx-select>
@@ -239,7 +239,7 @@
                                     <mat-form-field appearance="outline" color="accent">
                                         <mat-label>Value</mat-label>
                                         <mtx-select formControlName="exportValuePath" required
-                                            placeholder="Choose Value" [compareWith]="compareStrings"
+                                            placeholder="Choose Value" [compareWith]="compareExportValueCharacteristicModel"
                                             [items]="getOperatorValues(tab)" bindValue="Path" bindLabel="Name"
                                             appendTo=".ng-select-anchor">
                                         </mtx-select>
