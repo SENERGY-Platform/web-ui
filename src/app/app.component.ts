@@ -32,24 +32,19 @@ export class AppComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.storeSubject();
-        this.ensureCorrectSessionStorage();
+        this.setupLocalAndSessionStorage();
         this.themingService.applyTheme();
     }
 
-    storeSubject() {
-        const sub = this.authorizationService.getUserId();
-        if (typeof sub === 'string') {
-            localStorage.setItem('sub', sub as string);
-        }
-    }
-
-    ensureCorrectSessionStorage() {
+    setupLocalAndSessionStorage() {
         const sub = this.authorizationService.getUserId();
         const existingSub = sessionStorage.getItem('sub');
         if (existingSub !== null && sub !== existingSub) {
             sessionStorage.clear();
         }
-        sessionStorage.setItem('sub', sub as string);
+        if (typeof sub === 'string') {
+            sessionStorage.setItem('sub', sub as string);
+            localStorage.setItem('sub', sub as string);
+        }
     }
 }
