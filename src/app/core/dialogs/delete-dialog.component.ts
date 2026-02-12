@@ -41,8 +41,9 @@ export class DeleteDialogComponent {
     }
 
     cancel(): void {
-        if (this.options !== undefined) {
+        if (this.options === undefined) {
             this.dialogRef.close(false); // legacy return value
+            return;
         }
         const resp: DeleteDialogResponse = { confirmed: false };
         if (this.options?.checkboxText !== undefined) {
@@ -52,8 +53,9 @@ export class DeleteDialogComponent {
     }
 
     delete(): void {
-        if (this.options !== undefined) {
+        if (this.options === undefined) {
             this.dialogRef.close(true);  // legacy return value
+            return;
         }
         const resp: DeleteDialogResponse = { confirmed: true };
         if (this.options?.checkboxText !== undefined) {
