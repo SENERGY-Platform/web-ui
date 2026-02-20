@@ -34,6 +34,7 @@ export interface SmartServiceInstanceModel {
             write: boolean;
         };
     };
+    error?: string | null;
 }
 
 export interface SmartServiceParameterModel {

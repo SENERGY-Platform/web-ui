@@ -63,6 +63,13 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="error">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>Error</th>
+          <td mat-cell *matCellDef="let instance" class="color-warn">
+            {{instance.error || ''}}
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="created_at">
           <th mat-header-cell mat-sort-header *matHeaderCellDef>Created At</th>
           <td mat-cell *matCellDef="let instance">

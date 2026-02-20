@@ -40,7 +40,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     userHasDeleteAuthorization = false;
     ready = false;
 
-    displayedColumns = ['pub', 'name', 'description', 'created_at', 'updated_at', 'release', 'share'];
+    displayedColumns = ['pub', 'name', 'description', 'error', 'created_at', 'updated_at', 'release', 'share'];
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<SmartServiceInstanceModel>();
     selection = new SelectionModel<SmartServiceInstanceModel>(true, []);
