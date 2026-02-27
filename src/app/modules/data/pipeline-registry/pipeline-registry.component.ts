@@ -59,6 +59,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
 
     routerOperator: string[] | undefined = undefined;
     routerOperatorNames: string[] | undefined = undefined;
+    routerFlow: string[] | undefined = undefined;
+    routerFlowNames: string[] | undefined = undefined;
 
     shareUser = '';
 
@@ -105,6 +107,12 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
            }
             if (value.has('operatorName')){
                 this.routerOperatorNames = value.getAll('operatorName');
+            }
+            if (value.has('flow')){
+                this.routerFlow = value.getAll('flow');
+            }
+            if (value.has('flowName')){
+                this.routerFlowNames = value.getAll('flowName');
             }
         });
 
@@ -157,6 +165,13 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         let filter = undefined;
         if (this.routerOperator != null && this.routerOperator.length > 0){
             filter = 'operator:'+this.routerOperator!.toString();
+        }
+        if (this.routerFlow != null && this.routerFlow.length > 0){
+            if (filter !== undefined){
+                filter += '|flow:'+this.routerFlow!.toString();
+            } else {
+                filter = 'flow:'+this.routerFlow!.toString();
+            }
         }
         return this.pipelineRegistryService.getPipelinesNew(order, this.pageSize, this.offset, this.search, undefined, filter).pipe(
             concatMap((pipelines) => {
@@ -290,7 +305,9 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     openFilterDialog() {
         const filterSelection: FilterSelection = {
             operators: this.routerOperator,
-            operatorNames: []
+            operatorNames: [],
+            flows: this.routerFlow,
+            flowNames: []
         };
         const dialogRef = this.dialog.open(PipelineFilterDialogComponent, {
             data: filterSelection,
@@ -302,7 +319,10 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
                 if (filterSelectionInner != null) {
                     this.routerOperator = filterSelectionInner.operators;
                     this.routerOperatorNames = filterSelectionInner.operatorNames;
-                    const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames};
+                    this.routerFlow = filterSelectionInner.flows;
+                    this.routerFlowNames = filterSelectionInner.flowNames;
+                    const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames,
+                        flow: this.routerFlow, flowName: this.routerFlowNames};
                     this.router.navigate(
                         [],
                         {
@@ -318,10 +338,17 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         });
     }
 
-    removeChip(i: number){
-        this.routerOperator!.splice(i, 1);
-        this.routerOperatorNames!.splice(i, 1);
-        const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames};
+    removeChip(i: number, type: string){
+        if (type === 'operator'){
+            this.routerOperator!.splice(i, 1);
+            this.routerOperatorNames!.splice(i, 1);
+        }
+        if (type === 'flow'){
+            this.routerFlow!.splice(i, 1);
+            this.routerFlowNames!.splice(i, 1);
+        }
+        const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames,
+            flow: this.routerFlow, flowName: this.routerFlowNames};
         this.router.navigate(
             [],
             {

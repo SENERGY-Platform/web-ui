@@ -20,7 +20,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import {Observable, of} from 'rxjs';
-import {OperatorUsage, PipelineModel, PipelineResponse} from './pipeline.model';
+import {FlowUsage, OperatorUsage, PipelineModel, PipelineResponse} from './pipeline.model';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
@@ -110,6 +110,18 @@ export class PipelineRegistryService {
                 return resp;
             }),
             catchError(this.errorHandlerService.handleError(PipelineRegistryService.name, 'getOperatorUsage: Error', [])),
+        );
+    }
+
+    getFlowUsage(): Observable<FlowUsage[]> {
+        return this.http.get<FlowUsage[]>(environment.pipelineRegistryUrl + '/admin/pipeline/statistics/flowusage').pipe(
+            map((resp) => {
+                if (!resp) {
+                    return [];
+                }
+                return resp;
+            }),
+            catchError(this.errorHandlerService.handleError(PipelineRegistryService.name, 'getFlowUsage: Error', [])),
         );
     }
 

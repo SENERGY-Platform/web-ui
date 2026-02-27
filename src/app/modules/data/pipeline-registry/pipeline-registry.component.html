@@ -25,9 +25,16 @@
     <div style="padding-bottom: 1em;" #chipDiv>
         <mat-chip-set>
             <mat-chip *ngFor="let op of routerOperator; let i = index">
-                <mat-icon matChipAvatar>code</mat-icon>
+                <mat-icon matChipAvatar>settings</mat-icon>
                 {{routerOperatorNames![i]}}
-                <button matChipRemove (click)="removeChip(i)">
+                <button matChipRemove (click)="removeChip(i, 'operator')">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip>
+            <mat-chip *ngFor="let op of routerFlow; let i = index">
+                <mat-icon matChipAvatar>loop</mat-icon>
+                {{routerFlowNames![i]}}
+                <button matChipRemove (click)="removeChip(i, 'flow')">
                     <mat-icon>cancel</mat-icon>
                 </button>
             </mat-chip>

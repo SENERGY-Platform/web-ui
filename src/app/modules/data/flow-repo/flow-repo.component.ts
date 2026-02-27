@@ -34,6 +34,9 @@ import {PermissionsService} from '../../permissions/shared/permissions.service';
 import {environment} from '../../../../environments/environment';
 import {PermissionsMockService} from '../../permissions/shared/permissions.service.mock';
 import {CostMockService} from '../../cost/shared/cost.service.mock';
+import {PipelineRegistryService} from '../pipeline-registry/shared/pipeline-registry.service';
+import {FlowUsage, } from '../pipeline-registry/shared/pipeline.model';
+import {Router} from '@angular/router';
 
 const GRIDS = new Map([
     ['xs', 1],
@@ -64,6 +67,8 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
     userHasUpdateAuthorization = false;
     userHasPipelineCreateAuthorization = false;
 
+    flowUsagePerFlow: FlowUsage[] = [];
+
     private searchText = '';
     private limitInit = 54;
     private limit = this.limitInit;
@@ -85,12 +90,14 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         private responsiveService: ResponsiveService,
         private dialogsService: DialogsService,
         private sanitizer: DomSanitizer,
-        private authService: AuthorizationService,
+        public authService: AuthorizationService,
         private searchbarService: SearchbarService,
         private flowEngineService: FlowEngineService,
         public costService: CostService,
         private permissionsDialogService: PermissionsDialogService,
         private permissionsService: PermissionsService,
+        private pipeService: PipelineRegistryService,
+        private router: Router,
     ) {
     }
 
@@ -98,6 +105,9 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         this.initGridCols();
         this.initSearchAndGetFlows();
         this.userId = this.authService.getUserId();
+        if (this.authService.userIsAdmin()){
+            this.loadFlowUsage();
+        }
         this.userHasDeleteAuthorization = this.flowRepoService.userHasDeleteAuthorization();
         this.userHasUpdateAuthorization = this.flowRepoService.userHasUpdateAuthorization();
         this.userHasPipelineCreateAuthorization = this.flowEngineService.userHasCreateAuthorization();
@@ -240,6 +250,20 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
                 obs.complete();
             }
         });
+    }
+
+    loadFlowUsage() {
+        this.pipeService.getFlowUsage().subscribe(
+            stats => (this.flowUsagePerFlow = stats)
+        );
+    }
+
+    getFlowUsageCount(id: string): number|undefined{
+        return this.flowUsagePerFlow.find(item => item.flowId === id)?.count;
+    }
+
+    showPipelines(id: string, name: string){
+        this.router.navigate(['data/pipelines'], {queryParams: {flow: id, flowName: name}});
     }
 
     userHasReadPermission(id: string): boolean {

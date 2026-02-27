@@ -46,6 +46,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { CostModule } from '../cost/cost.module';
 import {MatChip, MatChipAvatar, MatChipRemove, MatChipSet} from "@angular/material/chips";
+import {MatBadge} from "@angular/material/badge";
 
 const operatorRepo: Route = { path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Operators' } };
 const designer: Route = { path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
@@ -84,6 +85,7 @@ const pipelineRegistry: Route = { path: 'data/pipelines', pathMatch: 'full', com
         MatChipAvatar,
         MatChipRemove,
         MatChipSet,
+        MatBadge,
     ],
     declarations: [OperatorRepoComponent, FlowDesignerComponent, FlowRepoComponent, PipelineRegistryComponent],
 })

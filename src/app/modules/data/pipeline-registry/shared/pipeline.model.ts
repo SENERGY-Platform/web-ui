@@ -78,7 +78,15 @@ export interface OperatorUsage {
     pipelineIds: string[];
 }
 
+export interface FlowUsage {
+    flowId: string;
+    count: number;
+    pipelineIds: string[];
+}
+
 export interface FilterSelection {
     operators?: string[];
     operatorNames: string[];
+    flows?: string[];
+    flowNames: string[];
 }
