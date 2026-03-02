@@ -14,151 +14,157 @@
   ~ limitations under the License.
   -->
 
-<div class="flow-repo-container layout-margin">
-    <div fxLayout="row" class="search-button-container">
-        <senergy-searchbar fxFlex></senergy-searchbar>
-        <senergy-sort
-                [sortAttributes]="sortAttributes"
-                class="suffix-sort"
-                (messageEvent)="receiveSortingAttribute($event)">
-        </senergy-sort>
-    </div>
-
-    <div class="flow-repo-scroll">
-        <div
-                infiniteScroll
-                [infiniteScrollDistance]="1"
-                [infiniteScrollThrottle]="50"
-                [infiniteScrollContainer]="'.flow-repo-scroll'"
-                [fromRoot]="true"
-                (scrolled)="onScroll()">
-
-            <div fxLayout="column">
-
-                <mat-grid-list
-                        cols="{{ gridCols }}"
-                        rowHeight="302px"
-                        gutterSize="16px"
-                        *ngIf="flows.length > 0">
-
-                    <mat-grid-tile
-                            class="mat-elevation-z1 flow-tile"
-                            *ngFor="let item of flows; let i = index">
-
-                        <div class="tile-content">
-
-                            <div class="tile-actions">
-                                <div class="left-action">
-                                    @if (this.authService.userIsAdmin()){
-                                        @if (getFlowUsageCount(item._id!) || 0 > 0){
-                                        <button
-                                                mat-icon-button
-                                                color="accent"
-                                                class="pipeline-count-button"
-                                                (click)="showPipelines(item._id!, item.name)"
-                                                matTooltip="Uses of flow in pipelines">
-                                            {{ getFlowUsageCount(item._id!) || 0 }}
-                                        </button>
-                                        }
-                                    }
-                                </div>
-
-                                <div class="right-action">
-                                    <mat-icon
-                                            class="share-icon"
-                                            *ngIf="item.userId !== userId"
-                                            matTooltip="shared by {{ item.userName || item.userId }}">
-                                        share
-                                    </mat-icon>
-                                </div>
-                            </div>
-
-                            <div class="widget-image" [innerHtml]="item.image"></div>
-                            <div class="tile-footer">
-                                <div fxLayout="column" fxFill>
-
-                                    <div class="truncate footer-item-header">
-                                        <p matTooltip="{{ item.name || '' }}">
-                                            {{ item.name }}
-                                        </p>
-                                    </div>
-
-                                    <div class="truncate footer-item-subtitle" fxLayout="column">
-                                        <div *ngIf="costService.userMayGetFlowCostEstimations() && flowEstimations.length > 0">
-                                            <div *ngIf="flowEstimations[i] && flowEstimations[i].max > 0"
-                                                    matTooltipClass="multiline-tooltip"
-                                                    matTooltip="Median: {{flowEstimations[i].median | currency:'EUR'}}; Mean: {{flowEstimations[i].mean | currency:'EUR'}}">
-                                                {{ flowEstimations[i].min | currency:'EUR' }}
-                                                –
-                                                {{ flowEstimations[i].max | currency:'EUR' }}
-                                            </div>
-                                            <div *ngIf="flowEstimations[i] && flowEstimations[i].max === 0">
-                                                Unknown cost
-                                            </div>
-                                        </div>
-
-                                        <div matTooltip="last updated">
-                                            {{ item.dateUpdated | date:'medium' }}
-                                        </div>
-                                    </div>
-
-                                    <div fxLayout="row" fxLayoutAlign="end center" class="footer-buttons">
-                                        <button
-                                                *ngIf="item.description"
-                                                mat-icon-button
-                                                matTooltip="{{ item.description }}">
-                                            <mat-icon color="accent">info</mat-icon>
-                                        </button>
-
-                                        <button
-                                                *ngIf="item._id"
-                                                [disabled]="!userHasExecutePermission(item._id)"
-                                                mat-icon-button
-                                                routerLink="/data/flow-repo/deploy/{{item._id}}">
-                                            <mat-icon color="accent">start</mat-icon>
-                                        </button>
-
-                                        <button
-                                                *ngIf="item._id"
-                                                [disabled]="!userHasWritePermission(item._id)"
-                                                mat-icon-button
-                                                routerLink="/data/designer/{{item._id}}">
-                                            <mat-icon color="accent">edit</mat-icon>
-                                        </button>
-
-                                        <button
-                                                *ngIf="item._id"
-                                                class="delete-button"
-                                                [disabled]="!userHasAdministratePermission(item._id)"
-                                                mat-icon-button
-                                                (click)="deleteFlow(item)">
-                                            <mat-icon
-                                                    [color]="userHasAdministratePermission(item._id) ? 'warn' : undefined">
-                                                delete
-                                            </mat-icon>
-                                        </button>
-
-                                        <button
-                                                *ngIf="item._id"
-                                                mat-icon-button
-                                                color="accent"
-                                                matTooltip="Share"
-                                                (click)="shareFlow(item)"
-                                                [disabled]="!userHasAdministratePermission(item._id)">
-                                            <mat-icon>share</mat-icon>
-                                        </button>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </mat-grid-tile>
-                </mat-grid-list>
-
-                <div *ngIf="flows.length === 0 && ready">No flows found.</div>
-                <senergy-spinner [elementCount]="flows.length" [show]="!ready"></senergy-spinner>
-
-            </div>
-        </div>
-    </div>
+<div fxLayout="column" class="search">
+    <senergy-searchbar fxFlex></senergy-searchbar>
 </div>
+    <div class="layout-margin">
+        <div class="mat-elevation-z1" [hidden]="!ready || (flows.length === 0 && ready)">
+            <div class="table-container" [ngClass]="{'table-container-with-button': userHasWritePermission}">
+                <table #sort="matSort" mat-table [dataSource]="flowsDataSource" matSort
+                       matSortActive="name"
+                       matSortDirection="asc" matSortDisableClear>
+
+                    <ng-container matColumnDef="select">
+                        <th mat-header-cell *matHeaderCellDef class="button-column">
+                            <mat-checkbox (change)="$event ? masterToggle() : null"
+                                          [checked]="selection.hasValue() && isAllSelected()"
+                                          [indeterminate]="selection.hasValue() && !isAllSelected()">
+                            </mat-checkbox>
+                        </th>
+                        <td mat-cell *matCellDef="let row">
+                            <mat-checkbox (click)="$event.stopPropagation()"
+                                          (change)="$event ? selection.toggle(row) : null"
+                                          [checked]="selection.isSelected(row)">
+                            </mat-checkbox>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="pub">
+                        <th mat-header-cell *matHeaderCellDef class="button-column">Access</th>
+                        <td mat-cell *matCellDef="let element">
+                            <mat-icon color="accent" (mouseover)="getFlowUser(element.userId)"
+                                      *ngIf="userId !== element.userId"
+                                      matTooltip="Shared by {{shareUser}}">
+                                share
+                            </mat-icon>
+                            <mat-icon color="accent" *ngIf="userId === element.userId"
+                                      matTooltip="Owner">
+                                person
+                            </mat-icon>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                        <td mat-cell *matCellDef="let element">
+                            <div>
+                                {{element.name}}
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="description">
+                        <th mat-header-cell *matHeaderCellDef>Description</th>
+                        <td mat-cell *matCellDef="let element" class="truncate-cell" matTooltip="{{element.description}}">
+                            {{element.description}}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="cost">
+                        <th mat-header-cell *matHeaderCellDef>Cost Est.</th>
+                        <td mat-cell *matCellDef="let element; let i = index" class="truncate-cell">
+                            <div *ngIf="costService.userMayGetFlowCostEstimations() && flowEstimations.length > 0">
+                                <div *ngIf="flowEstimations[i] && flowEstimations[i].max > 0"
+                                     matTooltipClass="multiline-tooltip"
+                                     matTooltip="Median: {{flowEstimations[i].median | currency:'EUR'}}; Mean: {{flowEstimations[i].mean | currency:'EUR'}}">
+                                    {{ flowEstimations[i].min | currency:'EUR' }}
+                                    –
+                                    {{ flowEstimations[i].max | currency:'EUR' }}
+                                </div>
+                                <div *ngIf="flowEstimations[i] && flowEstimations[i].max === 0">
+                                    Unknown cost
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="updatedAt">
+                        <th mat-header-cell *matHeaderCellDef>Updated at</th>
+                        <td mat-cell *matCellDef="let element" class="truncate-cell" matTooltip="{{element.dateUpdated}}">
+                            {{element.dateUpdated | date:'medium'}}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="deploy">
+                        <th mat-header-cell *matHeaderCellDef class="button-column">Deploy</th>
+                        <td mat-cell *matCellDef="let element">
+                            <button mat-icon-button color="accent" routerLink="/data/flow-repo/deploy/{{element._id}}"
+                                    matTooltip="Deploy the flow"
+                                    [disabled]="!userHasExecutePermission(element._id)">
+                                <mat-icon>start</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="usage">
+                        <th mat-header-cell *matHeaderCellDef>Pipelines#</th>
+                        <td mat-cell *matCellDef="let element" class="truncate-cell">
+                            @if (getFlowUsageCount(element._id)) {
+                                <button  (click)="showPipelines(element._id, element.name)" class="linkbutton color-accent"  matTooltip="uses of operator in pipelines">
+                                    {{getFlowUsageCount(element._id) || 0 }}
+                                </button>
+                            } @else {
+                                0
+                            }
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="share">
+                        <th mat-header-cell *matHeaderCellDef class="button-column">Share</th>
+                        <td mat-cell *matCellDef="let element">
+                            <button *ngIf="element._id !== undefined" mat-icon-button color="accent"
+                                    matTooltip="Share" (click)="shareFlow(element)"
+                                    [disabled]="!userHasAdministratePermission(element._id)">
+                                <mat-icon>share</mat-icon>
+
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="edit" *ngIf="userHasUpdateAuthorization">
+                        <th mat-header-cell *matHeaderCellDef class="button-column">Edit</th>
+                        <td mat-cell *matCellDef="let element">
+                            <button mat-icon-button color="accent" routerLink="/data/designer/{{element._id}}" matTooltip="Edit"
+                                    [disabled]="!userHasWritePermission(element._id)">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <span *ngIf="userHasDeleteAuthorization">
+                    <ng-container matColumnDef="delete" >
+                        <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
+                        <td mat-cell *matCellDef="let element">
+                            <button mat-icon-button color="accent"
+                                    (click)="deleteFlow(element)" matTooltip="Delete"
+                                    [disabled]="!userHasAdministratePermission(element._id)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+                </span>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </div>
+            <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize"
+                           [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)"
+                           showFirstLastButtons></mat-paginator>
+        </div>
+        <div *ngIf="flows.length === 0 && ready">No flow instances found.</div>
+    </div>
+    <button *ngIf="userHasWritePermission" mat-fab class="fab" routerLink="op" matTooltip="Register new Operator">
+        <mat-icon>add</mat-icon>
+    </button>
+    <senergy-spinner [show]="!ready"></senergy-spinner>

@@ -33,7 +33,7 @@ export class CostMockService {
         return true;
     }
     getFlowCostEstimations(_: string[]): Observable<CostEstimationModel[]> {
-        return of([] as CostEstimationModel[])
+        return of([] as CostEstimationModel[]);
     }
 
 }

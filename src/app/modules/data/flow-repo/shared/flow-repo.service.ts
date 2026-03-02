@@ -38,9 +38,9 @@ export class FlowRepoService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.flowRepoUrl);
     }
 
-    getFlows(search: string, limit: number, offset: number, feature: string, order: string, shared?: boolean): Observable<{ flows: FlowModel[] }> {
+    getFlows(search: string, limit: number, offset: number, feature: string, order: string): Observable<{ flows: FlowModel[], total: number }> {
         return this.http
-            .get<{ flows: FlowModel[] }>(
+            .get<{ flows: FlowModel[], total: number }>(
                 environment.flowRepoUrl +
                     '/flow?limit=' +
                     limit +
@@ -50,12 +50,11 @@ export class FlowRepoService {
                     feature +
                     ':' +
                     order +
-                    (search ? '&search=' + search : '')+
-                    (shared !== undefined ? '&shared=' + shared?.valueOf() : ''),
+                    (search ? '&search=' + search : ''),
             )
             .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'getFlows: Error', { flows: [] })),
+                map((resp) => resp || {flows: [], total: 0}),
+                catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'getFlows: Error', { flows: [], total: 0 })),
             );
     }
 
