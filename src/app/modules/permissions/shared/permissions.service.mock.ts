@@ -25,10 +25,12 @@ import { PermissionsUserModel } from './permissions-user.model';
 export class PermissionsMockService {
     constructor() {}
     getResourcePermissionsV2(_: string, __: string): Observable<PermissionsV2ResourceModel> {
+        console.log('Using mock permission class');
         return of({} as PermissionsV2ResourceModel);
     }
 
     getComputedResourcePermissionsV2(_: string, ressourceIds: string[]): Observable<PermissionsV2RightsAndIdModel[]> {
+        console.log('Using mock permission class');
         const permissions = [] as PermissionsV2RightsAndIdModel[];
         ressourceIds.forEach(id => {
            permissions.push({id: id, administrate: true, execute: true, read:true, write:true} as PermissionsV2RightsAndIdModel);
@@ -40,6 +42,7 @@ export class PermissionsMockService {
     }
 
     getUserById(_: string): Observable<PermissionsUserModel> {
+        console.log('Using mock permission class');
         return new Observable<PermissionsUserModel>(observer => {
             observer.next({} as PermissionsUserModel);
             observer.complete();

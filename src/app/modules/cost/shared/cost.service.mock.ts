@@ -30,9 +30,11 @@ import { CostEstimationModel, CostModel } from './cost.model';
 export class CostMockService {
 
     userMayGetFlowCostEstimations(): boolean {
+        console.log('Using mock cost class');
         return true;
     }
     getFlowCostEstimations(_: string[]): Observable<CostEstimationModel[]> {
+        console.log('Using mock cost class');
         return of([] as CostEstimationModel[]);
     }
 
