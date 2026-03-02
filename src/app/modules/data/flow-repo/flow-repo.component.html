@@ -88,12 +88,36 @@
                         </td>
                     </ng-container>
 
-                    <ng-container matColumnDef="updatedAt">
-                        <th mat-header-cell *matHeaderCellDef>Updated at</th>
+                    <ng-container matColumnDef="dateUpdated">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated at</th>
                         <td mat-cell *matCellDef="let element" class="truncate-cell" matTooltip="{{element.dateUpdated}}">
                             {{element.dateUpdated | date:'medium'}}
                         </td>
                     </ng-container>
+
+                    <ng-container matColumnDef="image">
+                        <th mat-header-cell *matHeaderCellDef class="button-column">Image</th>
+                        <td mat-cell *matCellDef="let element">
+                            <button mat-icon-button color="accent"
+                                    #trigger="cdkOverlayOrigin"
+                                    cdkOverlayOrigin
+                                    (mouseenter)="openOverlay(trigger, element)"
+                                    (mouseleave)="closeOverlay()"
+                                    [disabled]="!userHasReadPermission(element._id)">
+                                <mat-icon>image</mat-icon>
+                            </button>
+
+                        </td>
+                    </ng-container>
+
+                    <ng-template #overlayTpl let-element="element">
+                        <div class="svg-wrapper">
+                            <div
+                                    class="svg-container"
+                                    [innerHTML]="getSafeSvgCached(element._id, element.image)"
+                            ></div>
+                        </div>
+                    </ng-template>
 
                     <ng-container matColumnDef="deploy">
                         <th mat-header-cell *matHeaderCellDef class="button-column">Deploy</th>

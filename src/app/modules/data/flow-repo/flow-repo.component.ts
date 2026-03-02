@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FlowModel} from './shared/flow.model';
 import {FlowRepoService} from './shared/flow-repo.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {DomSanitizer} from '@angular/platform-browser';
-import {concat, merge, Observable, Subscription} from 'rxjs';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {merge, Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {FlowEngineService} from './shared/flow-engine.service';
@@ -41,6 +41,8 @@ import {PreferencesService} from '../../../core/services/preferences.service';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatSort} from '@angular/material/sort';
 import {startWith, switchMap} from 'rxjs/operators';
+import {FlexibleConnectedPositionStrategy, Overlay, OverlayRef} from '@angular/cdk/overlay';
+import {TemplatePortal} from '@angular/cdk/portal';
 
 
 @Component({
@@ -58,6 +60,7 @@ import {startWith, switchMap} from 'rxjs/operators';
 export class FlowRepoComponent implements OnInit, OnDestroy {
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
     @ViewChild('sort', {static: false}) sort!: MatSort;
+    @ViewChild('overlayTpl') overlayTpl!: TemplateRef<any>;
     flows: FlowModel[] = [];
 
     flowsDataSource = new MatTableDataSource<FlowModel>();
@@ -68,7 +71,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
     userHasUpdateAuthorization = false;
     userHasPipelineCreateAuthorization = false;
 
-    displayedColumns: string[] = ['select', 'pub', 'name', 'description','cost', 'updatedAt'];
+    displayedColumns: string[] = ['select', 'pub', 'name', 'description','cost', 'dateUpdated'];
     totalCount = 0;
 
     shareUser = '';
@@ -82,6 +85,10 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
     permissionsPerFlows: PermissionsV2RightsAndIdModel[] = [];
 
     userId = {} as string | Error;
+
+    private overlayRef?: OverlayRef;
+
+    private svgCache = new Map<string, SafeHtml>();
 
     constructor(
         private flowRepoService: FlowRepoService,
@@ -97,6 +104,8 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         private pipeService: PipelineRegistryService,
         private router: Router,
         public preferencesService: PreferencesService,
+        private overlay: Overlay,
+        private vcr: ViewContainerRef
     ) {
     }
 
@@ -107,7 +116,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
             this.loadFlowUsage();
             this.displayedColumns.push('usage');
         }
-
+        this.displayedColumns.push('image');
         this.displayedColumns.push('deploy');
         this.userHasUpdateAuthorization = this.flowRepoService.userHasUpdateAuthorization();
         if (this.userHasUpdateAuthorization) {
@@ -173,13 +182,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
             )
             .subscribe((resp: { flows: FlowModel[], total: number }) => {
                 if (resp.flows.length > 0) {
-                    this.flows=[];
-                    resp.flows.forEach((flow: FlowModel) => {
-                        if (typeof flow.image === 'string') {
-                            flow.image = this.sanitizer.bypassSecurityTrustHtml(flow.image);
-                        }
-                        this.flows.push(flow);
-                    });
+                    this.flows= resp.flows;
                     this.totalCount = resp.total;
                     this.flowsDataSource.data = this.flows;
                     this.loadFlowsPermissions();
@@ -226,6 +229,43 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         this.ready = false;
     }
 
+    openOverlay(origin: any, element: any) {
+        if (this.overlayRef) {
+            return;
+        }
+
+        const positionStrategy: FlexibleConnectedPositionStrategy =
+            this.overlay.position()
+                .flexibleConnectedTo(origin.elementRef)
+                .withPositions([
+                    {
+                        originX: 'start',
+                        originY: 'center',
+                        overlayX: 'end',
+                        overlayY: 'center',
+                        offsetY: -8,
+                    },
+                ]);
+
+        this.overlayRef = this.overlay.create({
+            positionStrategy,
+            scrollStrategy: this.overlay.scrollStrategies.reposition(),
+            hasBackdrop: false,
+        });
+
+        const portal = new TemplatePortal(
+            this.overlayTpl,
+            this.vcr,
+            { element }
+        );
+
+        this.overlayRef.attach(portal);
+    }
+
+    closeOverlay() {
+        this.overlayRef?.detach();
+        this.overlayRef = undefined;
+    }
 
     loadFlowUsage() {
         this.pipeService.getFlowUsage().subscribe(
@@ -266,6 +306,13 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
             this.preferencesService.pageSize = $event.pageSize;
         }
         this.selection.clear();
+    }
+
+    getSafeSvgCached(id: string, svg: string): SafeHtml {
+        if (!this.svgCache.has(id)) {
+            this.svgCache.set(id, this.sanitizer.bypassSecurityTrustHtml(svg));
+        }
+        return this.svgCache.get(id)!;
     }
 
     showPipelines(id: string, name: string) {
