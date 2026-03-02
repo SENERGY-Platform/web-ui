@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FlowModel} from './shared/flow.model';
 import {FlowRepoService} from './shared/flow-repo.service';
@@ -57,7 +57,7 @@ import {TemplatePortal} from '@angular/cdk/portal';
             provide: CostService, useClass: environment.mockCostService ? CostMockService : CostService
         }]
 })
-export class FlowRepoComponent implements OnInit, OnDestroy {
+export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
     @ViewChild('sort', {static: false}) sort!: MatSort;
     @ViewChild('overlayTpl') overlayTpl!: TemplateRef<any>;
@@ -110,7 +110,6 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.initSearchAndGetFlows();
         this.userId = this.authService.getUserId();
         if (this.authService.userIsAdmin()) {
             this.loadFlowUsage();
@@ -129,6 +128,17 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
             this.displayedColumns.push('delete');
         }
         this.userHasPipelineCreateAuthorization = this.flowEngineService.userHasCreateAuthorization();
+
+    }
+
+    ngAfterViewInit() {
+        this.flowsDataSource.sort = this.sort;
+        setTimeout(() => {
+            this.sort.active = 'dateUpdated';
+            this.sort.direction = 'desc';
+            this.sort.sortChange.emit();
+        });
+        this.initSearchAndGetFlows();
     }
 
     ngOnDestroy() {
@@ -162,7 +172,6 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         if (reset) {
             this.reset();
         }
-        this.flowsDataSource.sort = this.sort;
         this.sort.sortChange.subscribe(() => {
             this.paginator.pageIndex = 0;
             this.selectionClear();
