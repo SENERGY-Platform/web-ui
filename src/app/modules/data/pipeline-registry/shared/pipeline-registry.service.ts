@@ -19,8 +19,8 @@ import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import {Observable, of} from 'rxjs';
-import {FlowUsage, OperatorUsage, PipelineModel, PipelineResponse} from './pipeline.model';
+import {Observable} from 'rxjs';
+import {FlowUsage, PipelineOperatorUsage, PipelineModel, PipelineResponse} from './pipeline.model';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
@@ -101,8 +101,8 @@ export class PipelineRegistryService {
         );
     }
 
-    getOperatorUsage(): Observable<OperatorUsage[]> {
-        return this.http.get<OperatorUsage[]>(environment.pipelineRegistryUrl + '/admin/pipeline/statistics/operatorusage').pipe(
+    getOperatorUsage(): Observable<PipelineOperatorUsage[]> {
+        return this.http.get<PipelineOperatorUsage[]>(environment.pipelineRegistryUrl + '/admin/pipeline/statistics/operatorusage').pipe(
             map((resp) => {
                 if (!resp) {
                     return [];

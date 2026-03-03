@@ -28,3 +28,14 @@ export interface FlowModel {
     dateCreated: number;
     dateUpdated: number;
 }
+
+export interface FlowOperatorUsage {
+    OperatorID: string;
+    Flows: OperatorUsageFlowStats[];
+}
+
+export interface OperatorUsageFlowStats {
+    FlowID: string;
+    Count: number;
+}
+

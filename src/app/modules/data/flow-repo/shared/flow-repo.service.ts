@@ -20,7 +20,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { FlowModel } from './flow.model';
+import {FlowModel, FlowOperatorUsage} from './flow.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
@@ -83,6 +83,18 @@ export class FlowRepoService {
         return this.http
             .delete(environment.flowRepoUrl + '/flow/' + flow._id + '/')
             .pipe(catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'deleteFlow: Error', {})));
+    }
+
+    getOperatorUsage(): Observable<FlowOperatorUsage[]> {
+        return this.http.get<FlowOperatorUsage[]>(environment.flowRepoUrl + '/admin/statistics/operator-usage').pipe(
+            map((resp) => {
+                if (!resp) {
+                    return [];
+                }
+                return resp;
+            }),
+            catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'getOperatorUsage: Error', [])),
+        );
     }
 
     userHasDeleteAuthorization(): boolean {

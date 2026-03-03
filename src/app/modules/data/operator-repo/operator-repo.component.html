@@ -82,12 +82,25 @@
                     </td>
                 </ng-container>
 
-                <ng-container matColumnDef="usage">
+                <ng-container matColumnDef="pipeUsage">
                     <th mat-header-cell *matHeaderCellDef>Pipelines#</th>
                     <td mat-cell *matCellDef="let element" class="truncate-cell">
-                        @if (getUsageCount(element._id)) {
+                        @if (getPipeUsageCount(element._id)) {
                             <button  (click)="showPipelines(element._id, element.name)" class="linkbutton color-accent"  matTooltip="uses of operator in pipelines">
-                                {{getUsageCount(element._id) || 0 }}
+                                {{getPipeUsageCount(element._id) || 0 }}
+                            </button>
+                        } @else {
+                            0
+                        }
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="flowUsage">
+                    <th mat-header-cell *matHeaderCellDef>Flows#</th>
+                    <td mat-cell *matCellDef="let element" class="truncate-cell">
+                        @if (getFlowUsageCount(element._id)) {
+                            <button  (click)="showFlows(element._id, element.name)" class="linkbutton color-accent"  matTooltip="uses of operator in flows">
+                                {{getFlowUsageCount(element._id) || 0 }}
                             </button>
                         } @else {
                             0

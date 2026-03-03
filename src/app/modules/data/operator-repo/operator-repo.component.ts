@@ -32,8 +32,10 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
 import {PipelineRegistryService} from '../pipeline-registry/shared/pipeline-registry.service';
-import {OperatorUsage} from '../pipeline-registry/shared/pipeline.model';
+import {PipelineOperatorUsage} from '../pipeline-registry/shared/pipeline.model';
 import {Router} from '@angular/router';
+import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
+import {FlowOperatorUsage} from '../flow-repo/shared/flow.model';
 @Component({
     selector: 'senergy-operator-repo',
     templateUrl: './operator-repo.component.html',
@@ -63,7 +65,8 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     private operatorSub: Subscription = new Subscription();
 
     permissionsPerOperator: PermissionsV2RightsAndIdModel[] = [];
-    operatorUsagePerOperator: OperatorUsage[] = [];
+    pipeOperatorUsagePerOperator: PipelineOperatorUsage[] = [];
+    flowOperatorUsagePerOperator: FlowOperatorUsage[] = [];
 
     constructor(
         private operatorRepoService: OperatorRepoService,
@@ -75,6 +78,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         public preferencesService: PreferencesService,
         private permissionsDialogService: PermissionsDialogService,
         private pipeService: PipelineRegistryService,
+        private flowService: FlowRepoService,
         private router: Router,
     ) { }
 
@@ -84,8 +88,10 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         this.userId = this.auth.getUserId();
         this.initSearchAndGetOperators();
         if (this.auth.userIsAdmin()){
-            this.loadOperatorUsage();
-            this.displayedColumns.push('usage');
+            this.loadOperatorPipelineUsage();
+            this.displayedColumns.push('pipeUsage');
+            this.loadOperatorFlowUsage();
+            this.displayedColumns.push('flowUsage');
         }
         this.displayedColumns.push('details');
         this.userHasUpdateAuthorization = this.operatorRepoService.userHasUpdateAuthorization();
@@ -231,14 +237,24 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         );
     }
 
-    loadOperatorUsage() {
+    loadOperatorPipelineUsage() {
         this.pipeService.getOperatorUsage().subscribe(
-            stats => (this.operatorUsagePerOperator = stats)
+            stats => (this.pipeOperatorUsagePerOperator = stats)
         );
     }
 
-    getUsageCount(id: string): number|undefined{
-        return this.operatorUsagePerOperator.find(item => item.operatorId === id)?.count;
+    loadOperatorFlowUsage() {
+        this.flowService.getOperatorUsage().subscribe(
+            stats => (this.flowOperatorUsagePerOperator = stats)
+        );
+    }
+
+    getPipeUsageCount(id: string): number|undefined{
+        return this.pipeOperatorUsagePerOperator.find(item => item.operatorId === id)?.count;
+    }
+
+    getFlowUsageCount(id: string): number|undefined{
+        return this.flowOperatorUsagePerOperator.find(item => item.OperatorID === id)?.Flows.length;
     }
 
     shareOperator(operator: OperatorModel){
@@ -250,6 +266,10 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
 
     showPipelines(id: string, name: string){
         this.router.navigate(['data/pipelines'], {queryParams: {operator: id, operatorName: name}});
+    }
+
+    showFlows(id: string, name: string){
+        this.router.navigate(['data/flow-repo'], {queryParams: {operator: id, operatorName: name}});
     }
 
     userHasReadPermission(id: string): boolean {

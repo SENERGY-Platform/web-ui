@@ -72,7 +72,7 @@ export interface InputTopicsMapping {
     source: string;
 }
 
-export interface OperatorUsage {
+export interface PipelineOperatorUsage {
     operatorId: string;
     count: number;
     pipelineIds: string[];
