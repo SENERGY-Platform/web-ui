@@ -76,6 +76,12 @@
                     </td>
                 </ng-container>
 
+                <ng-container matColumnDef="smartServiceInstanceId">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Smart Service</th>
+                    <td mat-cell *matCellDef="let element"> {{element.smartServiceInstanceId}}
+                    </td>
+                </ng-container>
+
                 <ng-container matColumnDef="createdat">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Created at</th>
                     <td mat-cell *matCellDef="let element">

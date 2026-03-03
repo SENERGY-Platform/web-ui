@@ -24,7 +24,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { forkJoin, Observable, Subscription, concatMap, of, map } from 'rxjs';
+import {forkJoin, Observable, Subscription, concatMap, of, map, finalize} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -35,6 +35,8 @@ import {AuthorizationService} from '../../../core/services/authorization.service
 import {MatDialog} from '@angular/material/dialog';
 import {PipelineFilterDialogComponent} from './pipeline-filter-dialog/pipeline-filter-dialog.component';
 import {ActivatedRoute, Params, Router} from '@angular/router';
+import {SmartServiceModuleService} from '../../smart-services/instances/shared/modules.service';
+import {switchMap} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -46,7 +48,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     offset = 0;
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
     ready = false;
-    displayedColumns: string[] = ['select', 'status','access', 'id', 'name', 'createdat', 'updatedat', 'info'];
+    displayedColumns: string[] = ['select', 'status','access', 'id', 'name','smartServiceInstanceId', 'createdat', 'updatedat', 'info'];
     selection = new SelectionModel<PipelineModel>(true, []);
     totalCount = 0;
     searchSub: Subscription = new Subscription();
@@ -85,7 +87,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         private dialog: MatDialog,
         private cd: ChangeDetectorRef,
         private activatedRoute: ActivatedRoute,
-        private router: Router
+        private router: Router,
+        private smartServiceModuleService: SmartServiceModuleService
     ) {}
 
     ngOnInit() {
@@ -96,7 +99,6 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
             this.displayedColumns.push('edit');
 
         }
-
         this.userHasDeleteAuthorization = this.flowEngineService.userHasDeleteAuthorization();
         if(this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
@@ -173,22 +175,32 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
                 filter = 'flow:'+this.routerFlow!.toString();
             }
         }
-        return this.pipelineRegistryService.getPipelinesNew(order, this.pageSize, this.offset, this.search, undefined, filter).pipe(
-            concatMap((pipelines) => {
+        return this.pipelineRegistryService.getPipelinesNew(order, this.pageSize, this.offset, this.search, undefined, filter)
+            .pipe(
+                switchMap((pipelines) => {
                 this.totalCount = pipelines!.total;
                 if(pipelines!.data.length === 0) {
                     return of([]);
                 }
-                return this.flowEngineService.getPipelinesStatus().pipe(
-                    map((response) => {
-                        pipelines?.data.forEach(pipeline => {
-                            pipeline.status = response.find(status => status.name === pipeline.id);
-                        });
-                        return pipelines!.data;
+                return forkJoin({
+                    status: this.flowEngineService.getPipelinesStatus(),
+                    modules: this.smartServiceModuleService.getModules({type:'analytics'})
+                }).pipe(
+                    map(({ status, modules }) => {
+                        const statusMap = new Map(status.map(s => [s.name, s]));
+                        const instanceMap = new Map(
+                            modules.map(i => [i.module_data.pipeline_id, i.instance_id])
+                        );
+                        return pipelines!.data.map(pipeline => ({
+                            ...pipeline,
+                            status: statusMap.get(pipeline.id),
+                            smartServiceInstanceId: instanceMap.get(pipeline.id)
+                        }));
                     })
                 );
-            })
-        );
+                }),
+                finalize(() => (this.ready = true))
+            );
     }
 
     setPipelines(pipelines: PipelineModel[]) {

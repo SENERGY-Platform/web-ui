@@ -45,6 +45,7 @@ export interface PipelineModel {
     metrics?: boolean;
     userId: string;
     status?: PipelineStatus;
+    smartServiceInstanceId?: string;
 }
 
 export interface PipelineOperatorModel {
