@@ -38,7 +38,12 @@ export class FlowRepoService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.flowRepoUrl);
     }
 
-    getFlows(search: string, limit: number, offset: number, feature: string, order: string): Observable<{ flows: FlowModel[], total: number }> {
+    getFlows(search: string,
+             limit: number,
+             offset: number,
+             feature: string,
+             order: string |undefined = undefined,
+             filter: string |undefined = undefined): Observable<{ flows: FlowModel[], total: number }> {
         return this.http
             .get<{ flows: FlowModel[], total: number }>(
                 environment.flowRepoUrl +
@@ -50,7 +55,8 @@ export class FlowRepoService {
                     feature +
                     ':' +
                     order +
-                    (search ? '&search=' + search : ''),
+                    (search ? '&search=' + search : '')+
+                    (filter ? '&filter=' + filter : ''),
             )
             .pipe(
                 map((resp) => resp || {flows: [], total: 0}),

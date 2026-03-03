@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef} from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    ViewContainerRef
+} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {FlowModel} from './shared/flow.model';
+import {FilterSelection, FlowModel} from './shared/flow.model';
 import {FlowRepoService} from './shared/flow-repo.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
@@ -34,7 +43,7 @@ import {PermissionsMockService} from '../../permissions/shared/permissions.servi
 import {CostMockService} from '../../cost/shared/cost.service.mock';
 import {PipelineRegistryService} from '../pipeline-registry/shared/pipeline-registry.service';
 import {FlowUsage,} from '../pipeline-registry/shared/pipeline.model';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {PreferencesService} from '../../../core/services/preferences.service';
@@ -43,6 +52,8 @@ import {MatSort} from '@angular/material/sort';
 import {startWith, switchMap} from 'rxjs/operators';
 import {FlexibleConnectedPositionStrategy, Overlay, OverlayRef} from '@angular/cdk/overlay';
 import {TemplatePortal} from '@angular/cdk/portal';
+import {FlowFilterDialogComponent} from './flow-filter-dialog/flow-filter-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
 
 
 @Component({
@@ -90,6 +101,9 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private svgCache = new Map<string, SafeHtml>();
 
+    routerOperator: string[] | undefined = undefined;
+    routerOperatorNames: string[] | undefined = undefined;
+
     constructor(
         private flowRepoService: FlowRepoService,
         public snackBar: MatSnackBar,
@@ -105,7 +119,10 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
         private router: Router,
         public preferencesService: PreferencesService,
         private overlay: Overlay,
-        private vcr: ViewContainerRef
+        private vcr: ViewContainerRef,
+        private dialog: MatDialog,
+        private activatedRoute: ActivatedRoute,
+        private cd: ChangeDetectorRef,
     ) {
     }
 
@@ -129,6 +146,14 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
         }
         this.userHasPipelineCreateAuthorization = this.flowEngineService.userHasCreateAuthorization();
 
+        this.activatedRoute.queryParamMap.subscribe(value => {
+            if (value.has('operator')){
+                this.routerOperator = value.getAll('operator');
+            }
+            if (value.has('operatorName')){
+                this.routerOperatorNames = value.getAll('operatorName');
+            }
+        });
     }
 
     ngAfterViewInit() {
@@ -177,6 +202,10 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
             this.selectionClear();
         });
 
+        let filter = undefined;
+        if (this.routerOperator != null && this.routerOperator.length > 0){
+            filter = 'operator:'+this.routerOperator!.toString();
+        }
         this.flowSub = merge(this.sort.sortChange, this.paginator.page)
             .pipe(
                 startWith({}),
@@ -186,7 +215,8 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
                         .getFlows(this.searchText, this.paginator.pageSize,
                             this.paginator.pageSize * this.paginator.pageIndex,
                             this.sort.active,
-                            this.sort.direction);
+                            this.sort.direction,
+                            filter);
                 }),
             )
             .subscribe((resp: { flows: FlowModel[], total: number }) => {
@@ -322,6 +352,53 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
             this.svgCache.set(id, this.sanitizer.bypassSecurityTrustHtml(svg));
         }
         return this.svgCache.get(id)!;
+    }
+
+    openFilterDialog() {
+        const filterSelection: FilterSelection = {
+            operators: this.routerOperator,
+            operatorNames: [],
+        };
+        const dialogRef = this.dialog.open(FlowFilterDialogComponent, {
+            data: filterSelection,
+            minWidth: '50vw',
+        });
+
+        dialogRef.afterClosed().subscribe({
+            next: (filterSelectionInner: FilterSelection) => {
+                if (filterSelectionInner != null) {
+                    this.routerOperator = filterSelectionInner.operators;
+                    this.routerOperatorNames = filterSelectionInner.operatorNames;
+                    const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames};
+                    this.router.navigate(
+                        [],
+                        {
+                            relativeTo: this.activatedRoute,
+                            queryParams
+                        },
+                    );
+                    this.cd.detectChanges();
+
+                }
+                this.getFlows(true);
+            }
+        });
+    }
+
+    removeChip(i: number, type: string){
+        if (type === 'operator'){
+            this.routerOperator!.splice(i, 1);
+            this.routerOperatorNames!.splice(i, 1);
+        }
+        const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames};
+        this.router.navigate(
+            [],
+            {
+                relativeTo: this.activatedRoute,
+                queryParams
+            },
+        );
+        this.getFlows(true);
     }
 
     showPipelines(id: string, name: string) {

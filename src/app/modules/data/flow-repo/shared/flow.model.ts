@@ -39,3 +39,8 @@ export interface OperatorUsageFlowStats {
     Count: number;
 }
 
+export interface FilterSelection {
+    operators?: string[];
+    operatorNames: string[];
+}
+

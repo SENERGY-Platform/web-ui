@@ -37,6 +37,7 @@ import { MatCardModule } from '@angular/material/card';
 import { DeployFlowClassicComponent } from './deploy-flow/classic/deploy-flow-component-classic.component';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
+import {FlowFilterDialogComponent} from './flow-filter-dialog/flow-filter-dialog.component';
 
 const deploy: Route = { path: 'data/flow-repo/deploy/:id', pathMatch: 'full', component: DeployFlowComponent, data: { header: 'Analytics' } };
 const deployClassic: Route = {
@@ -69,6 +70,6 @@ const deployClassic: Route = {
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
     ],
-    declarations: [DeployFlowComponent, DeployFlowClassicComponent],
+    declarations: [DeployFlowComponent, DeployFlowClassicComponent, FlowFilterDialogComponent],
 })
 export class FlowRepoModule {}
