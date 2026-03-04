@@ -17,6 +17,8 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { HubModel } from '../shared/networks.model';
+import { Attribute } from '../../device-instances/shared/device-instances.model';
+import { AddTagFn } from '@ng-matero/extensions/select';
 
 @Component({
     templateUrl: './networks-edit-dialog.component.html',
@@ -24,16 +26,58 @@ import { HubModel } from '../shared/networks.model';
 })
 export class NetworksEditDialogComponent {
     network: HubModel;
+    knownAttributes = ['last_message_max_age', 'senergy/lora/eui'];
 
-    constructor(private dialogRef: MatDialogRef<NetworksEditDialogComponent>, @Inject(MAT_DIALOG_DATA) network: HubModel) {
-        this.network = network;
+    constructor(private dialogRef: MatDialogRef<NetworksEditDialogComponent>, @Inject(MAT_DIALOG_DATA) network?: HubModel) {
+        this.network = network || {
+            id: '',
+            name: '',
+            hash: '',
+            owner_id: '',
+            device_local_ids: null,
+            device_ids: null,
+        };
+        this.network.attributes?.forEach(value => {
+            if (this.knownAttributes.indexOf(value.key) === -1) {
+                this.addAttribute()(value.key);
+            }
+        });
     }
 
     close(): void {
         this.dialogRef.close();
     }
 
-    save(name: string): void {
-        this.dialogRef.close(name);
+    save(): void {
+        this.dialogRef.close(this.network);
+    }
+
+    removeAttr(i: number) {
+        if (!this.network.attributes) {
+            this.network.attributes = [];
+        }
+        this.network.attributes.splice(i, 1);
+    }
+
+    addAttribute(): AddTagFn {
+        const that = this;
+        return (text: string) => {
+            that.knownAttributes.push(text);
+            const tmp = [...that.knownAttributes];
+            tmp.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+            that.knownAttributes = [];
+            that.knownAttributes = tmp;
+        };
+    }
+
+    addAttr() {
+        if (!this.network.attributes) {
+            this.network.attributes = [];
+        }
+        this.network.attributes.push({ key: '', value: '', origin: 'web-ui' });
+    }
+
+    editableAttribute(attr: Attribute) {
+        return !attr.origin || attr.origin === '' || attr.origin === 'web-ui';
     }
 }

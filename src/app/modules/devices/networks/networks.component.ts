@@ -55,6 +55,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasShareAuthorization = false;
+    userHasCreateAuthorization = false;
 
     userIdToName: {[key: string]: string} = {};
 
@@ -98,6 +99,8 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
         if(this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
+
+        this.userHasCreateAuthorization = this.networksService.userHasCreateAuthorization();
     }
 
     private initSearch() {
@@ -136,7 +139,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
-    edit(network: HubModel) {
+    edit(network?: HubModel) {
         this.networksService.openNetworkEditDialog(network);
     }
 

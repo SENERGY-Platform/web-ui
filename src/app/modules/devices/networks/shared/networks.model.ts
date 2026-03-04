@@ -15,6 +15,7 @@
  */
 
 import { PermissionsRightsModel } from 'src/app/modules/permissions/shared/permissions-rights.model';
+import { Attribute } from '../../device-instances/shared/device-instances.model';
 
 export interface HubModel {
     id: string;
@@ -23,6 +24,7 @@ export interface HubModel {
     owner_id: string;
     device_local_ids: string[] | null;
     device_ids: string[] | null;
+    attributes?: Attribute[];
 }
 
 export interface ExtendedHubTotalModel {

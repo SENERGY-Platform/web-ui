@@ -33,7 +33,7 @@ export class DeviceInstancesEditDialogComponent {
     nicknameAttributeOrigin = 'shared';
     action = 'Edit';
     localIdIsEditable = false;
-    knownAttributes = ['anomaly-detector', 'timezone', 'inactive', 'last_message_max_age', 'monitor_connection_state', 'platform/mute-format-error', 'senergy/snowflake-canary-device', 'senergy/canary-device'];
+    knownAttributes = ['anomaly-detector', 'timezone', 'inactive', 'last_message_max_age', 'monitor_connection_state', 'platform/mute-format-error', 'senergy/snowflake-canary-device', 'senergy/canary-device','senergy/lora/dev-addr','senergy/lora/app-key','senergy/lora/gen-app-key','senergy/lora/nwk-key','senergy/lora/app-s-key','senergy/lora/nwk-s-enc-key','senergy/lora/s-nwk-s-int-key','senergy/lora/f-nwk-s-int-key','senergy/lora/join-eui','senergy/lora/duplicate'];
 
     protocolConstraints: string[] = [];
     userHasUpdateDisplayNameAuthorization = false;
@@ -159,7 +159,7 @@ export class DeviceInstancesEditDialogComponent {
         return (text: string) => {
             that.knownAttributes.push(text);
             const tmp = [...that.knownAttributes];
-            tmp.sort((a, b)  =>  a.toLowerCase().localeCompare(b.toLowerCase()));
+            tmp.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
             that.knownAttributes = [];
             that.knownAttributes = tmp;
         };

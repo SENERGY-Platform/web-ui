@@ -18,8 +18,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
-import {Observable} from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import {
     ExtendedHubModel,
     ExtendedHubTotalModel,
@@ -78,8 +78,14 @@ export class NetworksService {
 
     update(hub: HubModel): Observable<HubModel | null> {
         return this.http
-            .put<HubModel>(environment.deviceRepoUrl + '/hubs/' + encodeURIComponent(hub.id), hub)
+            .put<HubModel>(environment.deviceRepoUrl + '/hubs/' + encodeURIComponent(hub.id || ''), hub)
             .pipe(catchError(this.errorHandlerService.handleError(NetworksService.name, 'update', null)));
+    }
+
+    create(hub: HubModel): Observable<HubModel | null> {
+        return this.http
+            .post<HubModel>(environment.deviceRepoUrl + '/hubs', hub)
+            .pipe(catchError(this.errorHandlerService.handleError(NetworksService.name, 'create', null)));
     }
 
     getNetworksHistory(duration: string): Observable<NetworksHistoryModel[]> {
@@ -89,19 +95,20 @@ export class NetworksService {
         );
     }
 
-    openNetworkEditDialog(network: HubModel): void {
+    openNetworkEditDialog(network?: HubModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = network;
+        dialogConfig.width = '80vw';
         const editDialogRef = this.dialog.open(NetworksEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((networkName: string) => {
-            if (networkName !== undefined) {
-                this.changeName(network.id, networkName).subscribe((resp: HubModel | null) => {
-                    if (resp) {
-                        network.name = networkName;
-                    }
-                });
+        editDialogRef.afterClosed().subscribe((newNetwork: HubModel) => {
+            if (newNetwork !== undefined) {
+                if (network === undefined) {
+                    this.create(newNetwork).subscribe();
+                    return;
+                }
+                this.update(newNetwork).subscribe();
             }
         });
     }
@@ -166,18 +173,18 @@ export class NetworksService {
         }
         if(options.connectionState!==null && options.connectionState!==undefined) {
             switch (options.connectionState){
-            case DeviceInstancesRouterStateTabEnum.ONLINE: {
-                params = params.set('connection-state', 'online');
-                break;
-            }
-            case DeviceInstancesRouterStateTabEnum.OFFLINE: {
-                params = params.set('connection-state', 'offline');
-                break;
-            }
-            case DeviceInstancesRouterStateTabEnum.UNKNOWN: {
-                params = params.set('connection-state', '');
-                break;
-            }
+                case DeviceInstancesRouterStateTabEnum.ONLINE: {
+                    params = params.set('connection-state', 'online');
+                    break;
+                }
+                case DeviceInstancesRouterStateTabEnum.OFFLINE: {
+                    params = params.set('connection-state', 'offline');
+                    break;
+                }
+                case DeviceInstancesRouterStateTabEnum.UNKNOWN: {
+                    params = params.set('connection-state', '');
+                    break;
+                }
             }
         }
         return this.http.get<ExtendedHubModel[]>(environment.deviceRepoUrl + '/extended-hubs', { observe: 'response', params: params }).pipe(

@@ -141,6 +141,7 @@
         <mat-paginator #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
             showFirstLastButtons></mat-paginator>
     </div>
-
-
 </div>
+<button *ngIf="userHasCreateAuthorization" mat-fab class="fab" matTooltip="Add new Network" (click)="edit(undefined)">
+    <mat-icon>add</mat-icon>
+</button>

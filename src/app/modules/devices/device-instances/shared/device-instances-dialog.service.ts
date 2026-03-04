@@ -125,7 +125,7 @@ export class DeviceInstancesDialogService {
 
     openDeviceEditDialog(device: DeviceInstanceModel, userHasUpdateAuthorization: boolean, userHasUpdateDisplayNameAuthorization: boolean, userHasUpdateAttributesAuthorization: boolean, setSpinnerState?: (state: boolean) => void) {
         const dialogConfig = new MatDialogConfig();
-        dialogConfig.minWidth = '50vw';
+        dialogConfig.minWidth = '80vw';
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             device: JSON.parse(JSON.stringify(device)), // create copy of object
@@ -182,6 +182,7 @@ export class DeviceInstancesDialogService {
     openDeviceCreateDialog(deviceType?: DeviceTypeModel, device?: DeviceInstanceModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
+        dialogConfig.minWidth = '80vw';
         if (device === undefined) {
             device = {device_type: JSON.parse(JSON.stringify(deviceType))} as DeviceInstanceWithDeviceTypeModel;
         } else {
@@ -200,7 +201,7 @@ export class DeviceInstancesDialogService {
 
         editDialogRef.afterClosed().subscribe((deviceOut: DeviceInstanceWithDeviceTypeModel) => {
             if (deviceOut !== undefined) {
-                deviceOut.device_type_id = deviceType?.id || '';
+                deviceOut.device_type_id = deviceType?.id || device.device_type_id;
                 this.deviceInstancesService
                     .saveDeviceInstance(deviceOut)
                     .subscribe((deviceResp: DeviceInstanceModel | null) => {

@@ -23,3 +23,22 @@
 .full-width {
     width: 100%;
 }
+
+.third-width {
+    width: 33%;
+}
+
+.attributes {
+    margin-bottom: 5px;
+}
+
+.attribute {
+    justify-content: space-between;
+    display: flex;
+    align-items: baseline;
+}
+
+.divider {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
