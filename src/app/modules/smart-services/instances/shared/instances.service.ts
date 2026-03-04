@@ -22,6 +22,7 @@ import { ErrorHandlerService } from 'src/app/core/services/error-handler.service
 import { environment } from '../../../../../environments/environment';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import {FlowModel} from "../../../data/flow-repo/shared/flow.model";
 
 @Injectable({
     providedIn: 'root',
@@ -76,6 +77,13 @@ export class SmartServiceInstanceService {
             };
             f();
         });
+    }
+
+    getInstance(id: string): Observable<SmartServiceInstanceModel | null> {
+        return this.http.get<SmartServiceInstanceModel | null>(environment.smartServiceRepoUrl+'/instances/'+ id).pipe(
+            map((resp) => resp),
+            catchError(this.errorHandlerService.handleError(SmartServiceInstanceService.name, 'getInstance()', null))
+        );
     }
 
     deleteInstance(id: string, ignoreModuleDeleteErrors: boolean = false): Observable<void> {

@@ -135,3 +135,12 @@
       [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
   </div>
 </div>
+<div class="center-button" *ngIf="this.instanceId">
+    <button
+            mat-raised-button
+            color="accent"
+            (click)="clearQueryParams()"
+    >
+        Reset
+    </button>
+</div>

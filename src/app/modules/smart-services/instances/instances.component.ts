@@ -27,6 +27,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import {Observable} from "rxjs";
 
 
 @Component({
@@ -48,7 +49,8 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     offset = 0;
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
-    releaseId?: string;;
+    releaseId?: string;
+    instanceId?: string;
     userIdToName = new Map<string, string>();
 
 
@@ -73,8 +75,16 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
             if (releaseId) {
                 this.releaseId = releaseId;
             }
+            const instanceId = params.get('instance_id');
+            if (instanceId) {
+                this.instanceId = instanceId;
+            }
         });
-        this.loadInstances();
+        if (this.instanceId){
+            this.loadSingleInstance(this.instanceId);
+        }else {
+            this.loadInstances();
+        }
         this.permission.getSharableUsers().subscribe(users => users?.forEach(u => this.userIdToName.set(u.id, u.username)));
     }
 
@@ -91,6 +101,18 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         this.instancesService.getInstances({limit: this.pageSize, offset: this.offset, sort: this.sortBy + '.' + this.sortDirection, releaseId: this.releaseId}).subscribe((instances) => {
             this.dataSource.data = instances.instances;
             this.totalCount = instances.total;
+            this.ready = true;
+        });
+    }
+
+    loadSingleInstance(id: string): void {
+        this.instancesService.getInstance(id).subscribe((instance) => {
+            const data = [];
+            if (instance !== undefined && instance !== null) {
+                data.push(instance);
+            }
+            this.dataSource.data = data;
+            this.totalCount = 1;
             this.ready = true;
         });
     }
@@ -142,5 +164,15 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
 
     shareInstance(instance: SmartServiceInstanceModel) {
          this.permissionsDialogService.openPermissionV2Dialog('smart_service_instances', instance.id, instance.name);
+    }
+
+    clearQueryParams(): void {
+        this.router.navigate([], {
+            relativeTo: this.activatedRoute,
+            queryParams: {},
+            queryParamsHandling: ''
+        });
+        this.instanceId = undefined;
+        this.loadInstances();
     }
 }

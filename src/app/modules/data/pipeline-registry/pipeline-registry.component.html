@@ -78,7 +78,15 @@
 
                 <ng-container matColumnDef="smartServiceInstanceId">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Smart Service</th>
-                    <td mat-cell *matCellDef="let element"> {{element.smartServiceInstanceId}}
+                    <td mat-cell *matCellDef="let element">
+                        <a
+                                [routerLink]="['/smart-services/instances']"
+                                [queryParams]="{ instance_id: element.smartServiceInstanceId}"
+                                class="linkbutton color-accent"
+                                matTooltip="smart service instance"
+                        >
+                            {{ element.smartServiceInstanceId }}
+                        </a>
                     </td>
                 </ng-container>
 
