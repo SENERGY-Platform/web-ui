@@ -16,7 +16,7 @@
 
 <h2 mat-dialog-title>Edit</h2>
 
-<mat-dialog-content>
+<mat-dialog-content #content>
     <mat-form-field appearance="outline" class="full-width" color="accent">
         <mat-label>ID</mat-label>
         <input matInput disabled value="{{network.id}}">
@@ -32,6 +32,7 @@
             <mat-divider></mat-divider>
         </div>
         <div *ngFor="let attr of network.attributes; let i = index" class="attribute">
+            @if(!hiddenAttributes.includes(attr.key)) {
             <mat-form-field appearance="outline" class="third-width" color="accent">
                 <mat-label>Key</mat-label>
                 <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
@@ -52,8 +53,23 @@
                     <mat-icon *ngIf="editableAttribute(attr)">delete</mat-icon>
                 </button>
             </div>
+            }
         </div>
         <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+    </div>
+    <div class="divider">
+        <div style="display: flex; justify-content: space-between;">
+            <div>Geo Location</div>
+            <div>© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.</div>
+        </div>
+        <mat-divider></mat-divider>
+    </div>
+    <div #mapBody>
+        <div *ngIf="mapCalcHeight() !== undefined" [style]="'height: ' + mapCalcHeight()+'px'">
+            <div id="ol-map" class="full-width full-height">
+                <app-map [map]="map"></app-map>
+            </div>
+        </div>
     </div>
 </mat-dialog-content>
 
