@@ -335,7 +335,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     getLoraCertsDisabled(network: ExtendedHubModel): boolean {
-        if (!network.permissions.administrate) {
+        if (!network.permissions.write || !network.permissions.administrate) {
             return true;
         }
         let hasEUI = false;
