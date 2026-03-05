@@ -135,3 +135,6 @@ td.mat-mdc-footer-cell {
     padding-bottom: 10px;
 }
 
+.mat-mdc-card-content>:last-child:not(.mat-mdc-card-footer) {
+    margin-bottom: 64px;
+}

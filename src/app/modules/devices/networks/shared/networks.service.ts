@@ -55,7 +55,7 @@ export class NetworksService {
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/hubs');
         this.shareAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.permissionV2Url + '/manage/hubs');
-        this.loraCertAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.lorawanConnectorUrl + '/gateways/_/cert');
+        this.loraCertAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.lorawanConnectorUrl + '/gateways');
     }
 
     listSyncNetworks(): Observable<HubModel[]> {
