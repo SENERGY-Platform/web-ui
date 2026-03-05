@@ -72,6 +72,7 @@ import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 import { DeviceInstancesDefaultAttributesDialogComponent } from './device-instances/dialogs/device-instances-default-attributes-dialog.component';
 import { MapComponent } from 'src/app/core/components/map/map.component';
+import { NetworksLoraCertsDialogComponent } from './networks/dialogs/networks-loracerts-dialog.component';
 
 const networks: Route = { path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: { header: 'Networks' } };
 const deviceInstances: Route = {
@@ -174,6 +175,7 @@ const locationsEdit: Route = {
     MtxSelectModule,
     CloseMtxSelectOnScrollDirective,
     MapComponent,
+    DatePipe,
 ],
     declarations: [
         NetworksComponent,
@@ -196,6 +198,7 @@ const locationsEdit: Route = {
         DeviceInstancesFilterDialogComponent,
         DeviceInstancesReplaceDialogComponent,
         DeviceInstancesDefaultAttributesDialogComponent,
+        NetworksLoraCertsDialogComponent,
     ],
     providers: [
         DatePipe,

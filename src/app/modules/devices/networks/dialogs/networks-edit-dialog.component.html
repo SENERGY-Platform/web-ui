@@ -43,8 +43,15 @@
             =
             <mat-form-field appearance="outline" class="third-width" color="accent">
                 <mat-label>Value</mat-label>
+                @switch(attr.key) {
+                    @case('senergy/lora/certs-expiration') {
+                        <input matInput disabled value="{{attr.value | date: 'medium'}}">
+                    }
+                @default {
                 <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
                     [disabled]="!editableAttribute(attr)">
+                }
+                }
                 <mat-error senergyError label="Value"></mat-error>
             </mat-form-field>
             <div [matTooltip]="editableAttribute(attr) ? '' : attr.origin">

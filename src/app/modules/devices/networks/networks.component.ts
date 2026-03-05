@@ -17,7 +17,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 import { NetworksService } from './shared/networks.service';
-import { ExtendedHubTotalModel, HubModel } from './shared/networks.model';
+import { ExtendedHubModel, ExtendedHubTotalModel, HubModel } from './shared/networks.model';
 import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -31,7 +31,6 @@ import { DialogsService } from 'src/app/core/services/dialogs.service';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
-import { AuthorizationService } from '../../../core/services/authorization.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 
@@ -57,7 +56,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     userHasShareAuthorization = false;
     userHasCreateAuthorization = false;
 
-    userIdToName: {[key: string]: string} = {};
+    userIdToName: { [key: string]: string } = {};
 
     private searchSub: Subscription = new Subscription();
 
@@ -70,10 +69,9 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
         private dialogsService: DialogsService,
         private snackBar: MatSnackBar,
         private permissionsDialogService: PermissionsDialogService,
-        private authService: AuthorizationService,
         private permissionsService: PermissionsService,
         private preferencesService: PreferencesService,
-    ) {}
+    ) { }
 
     ngOnInit() {
         this.initSearch();
@@ -89,14 +87,18 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.userHasShareAuthorization) {
             this.displayedColumns.push('share');
         }
-        
+
+        if (this.networksService.userHasLoraCertAuthorization()) {
+            this.displayedColumns.push('certs');
+        }
+
         this.userHasUpdateAuthorization = this.networksService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
+        if (this.userHasUpdateAuthorization) {
             this.displayedColumns.push('edit');
         }
 
         this.userHasDeleteAuthorization = this.networksService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
+        if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
 
@@ -124,7 +126,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e)=>{
+        this.paginator.page.subscribe((e) => {
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
@@ -157,7 +159,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     delete(network: HubModel) {
-        this.deviceInstancesService.getDeviceInstances({limit: 9999, offset: 0, sortBy: this.sortBy, sortDesc: this.sortDirection === 'desc', hubId: network.id}).subscribe((devices) => {
+        this.deviceInstancesService.getDeviceInstances({ limit: 9999, offset: 0, sortBy: this.sortBy, sortDesc: this.sortDirection === 'desc', hubId: network.id }).subscribe((devices) => {
             this.dialog
                 .open(NetworksDeleteDialogComponent, { data: { networkId: network.id, devices }, minWidth: '300px' })
                 .afterClosed()
@@ -180,27 +182,27 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private getNetworks(): Observable<HubModel[]> {
         return this.networksService
-            .listExtendedHubs({limit: this.pageSize, offset: this.offset, sortBy: this.sortBy, sortDesc: this.sortDirection !== 'asc', searchText: this.searchText})
+            .listExtendedHubs({ limit: this.pageSize, offset: this.offset, sortBy: this.sortBy, sortDesc: this.sortDirection !== 'asc', searchText: this.searchText })
             .pipe(
                 map((networks: ExtendedHubTotalModel) => {
                     this.totalCount = networks.total;
-                    this.loadUserNames(networks.result.map(n => ({creator: n.owner_id, shared: n.shared})));
+                    this.loadUserNames(networks.result.map(n => ({ creator: n.owner_id, shared: n.shared })));
                     this.dataSource.data = networks.result;
                     return networks.result;
                 })
             );
     }
 
-    private loadUserNames(elements: {creator: string; shared: boolean}[]) {
+    private loadUserNames(elements: { creator: string; shared: boolean }[]) {
         const missingCreators: string[] = [];
         elements?.forEach(element => {
-            if(element.shared && element.creator && !this.userIdToName[element.creator] && !missingCreators.includes(element.creator)) {
+            if (element.shared && element.creator && !this.userIdToName[element.creator] && !missingCreators.includes(element.creator)) {
                 missingCreators.push(element.creator);
             }
         });
         missingCreators.forEach(creator => {
             this.permissionsService.getUserById(creator).subscribe(value => {
-                if(value) {
+                if (value) {
                     this.userIdToName[value.id] = value.username;
                 }
             });
@@ -252,11 +254,11 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
                 const deletionJobs: Observable<any>[] = [];
                 const getDevicesJobs: Observable<any>[] = [];
                 let allDeviceIds: string[] = [];
-                const allNetworkIDs =  this.selection.selected.map((network) => network.id);
+                const allNetworkIDs = this.selection.selected.map((network) => network.id);
 
                 allNetworkIDs.forEach((networkID) => {
                     getDevicesJobs.push(
-                        this.deviceInstancesService.getDeviceInstances({limit: 9999, offset: 0, sortBy: this.sortBy, sortDesc: this.sortDirection === 'desc', hubId: networkID}).pipe(
+                        this.deviceInstancesService.getDeviceInstances({ limit: 9999, offset: 0, sortBy: this.sortBy, sortDesc: this.sortDirection === 'desc', hubId: networkID }).pipe(
                             map((devices) => {
                                 const deviceIds = devices.result.map((p) => p.id);
                                 allDeviceIds = allDeviceIds.concat(deviceIds);
@@ -297,14 +299,51 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     private removeNetworksClientSide(allNetworkIDs: string[]) {
         for (const networkID of allNetworkIDs) {
             const foundIndex = this.dataSource.data.findIndex((network) => network.id === networkID);
-            if(foundIndex === -1) {
+            if (foundIndex === -1) {
                 continue;
             }
-            this.dataSource.data.splice(foundIndex,1);
+            this.dataSource.data.splice(foundIndex, 1);
         };
     }
 
     shareNetwork(network: HubModel): void {
-        this.permissionsDialogService.openPermissionV2Dialog('hubs', network.id, network.name );
+        this.permissionsDialogService.openPermissionV2Dialog('hubs', network.id, network.name);
+    }
+
+    getLoraCerts(network: HubModel): void {
+        let expires = '';
+        network.attributes?.forEach(attribute => {
+            if (attribute.key === 'senergy/lora/certs-expiration' && attribute.value) {
+                expires = attribute.value;
+            }
+        });
+        const showDialog = () => {
+            this.networksService.getLoraCerts(network).subscribe(certs => {
+                this.networksService.openLoraCertsDialog(network, certs);
+            }
+            );
+        };
+        if (new Date(expires).valueOf() - new Date().valueOf() > 30 * 24 * 3600 * 1000) {
+            this.dialogsService.openConfirmDialog('LoRaWAN Certificates', 'The current certificates will NOT expire soon. If you\'ve lost access to the current certificates, it is recommended to first change the EUI of the gateway and then retrieve new certs. Do you still want to generate new certificates?').afterClosed().subscribe((generate: boolean) => {
+                if (generate) {
+                    showDialog();
+                }
+            });
+        } else {
+            showDialog();
+        }
+    }
+
+    getLoraCertsDisabled(network: ExtendedHubModel): boolean {
+        if (!network.permissions.administrate) {
+            return true;
+        }
+        let hasEUI = false;
+        network.attributes?.forEach(attribute => {
+            if (attribute.key === 'senergy/lora/eui' && attribute.value) {
+                hasEUI = true;
+            }
+        });
+        return !hasEUI;
     }
 }

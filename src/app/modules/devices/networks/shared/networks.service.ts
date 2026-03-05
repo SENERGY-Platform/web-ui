@@ -24,6 +24,7 @@ import {
     ExtendedHubModel,
     ExtendedHubTotalModel,
     HubModel,
+    LoraCertsModel,
 } from './networks.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { NetworksEditDialogComponent } from '../dialogs/networks-edit-dialog.component';
@@ -35,6 +36,7 @@ import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared
 import {
     DeviceInstancesRouterStateTabEnum
 } from '../../device-instances/shared/device-instances.model';
+import { NetworksLoraCertsDialogComponent } from '../dialogs/networks-loracerts-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -42,6 +44,7 @@ import {
 export class NetworksService {
     authorizations: PermissionTestResponse;
     shareAuthorizations: PermissionTestResponse;
+    loraCertAuthorizations: PermissionTestResponse;
 
     constructor(
         private http: HttpClient,
@@ -52,6 +55,7 @@ export class NetworksService {
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/hubs');
         this.shareAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.permissionV2Url + '/manage/hubs');
+        this.loraCertAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.lorawanConnectorUrl + '/gateways/_/cert');
     }
 
     listSyncNetworks(): Observable<HubModel[]> {
@@ -131,6 +135,18 @@ export class NetworksService {
                 );
             }
         });
+    }
+
+    openLoraCertsDialog(network: HubModel, certs: LoraCertsModel): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = { network, certs };
+        dialogConfig.width = '80vw';
+        this.dialog.open(NetworksLoraCertsDialogComponent, dialogConfig);
+    }
+
+    getLoraCerts(network: HubModel): Observable<LoraCertsModel> {
+        return this.http.post<LoraCertsModel>(environment.lorawanConnectorUrl + '/gateways/' + network.id + '/cert', {});
     }
 
     getExtendedHub(id: string): Observable<ExtendedHubModel|null> {
@@ -217,5 +233,9 @@ export class NetworksService {
 
     userHasShareAuthorization(): boolean {
         return this.shareAuthorizations['GET'] && this.shareAuthorizations['PUT'];
+    }
+
+    userHasLoraCertAuthorization(): boolean {
+        return this.loraCertAuthorizations['POST'];
     }
 }

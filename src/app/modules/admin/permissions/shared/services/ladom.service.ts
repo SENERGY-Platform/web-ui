@@ -157,6 +157,8 @@ export class LadonService {
 
             environment.certAuthorityUrl + '/list',
             environment.certAuthorityUrl + '/revoke',
+
+            environment.lorawanConnectorUrl + '/gateways/_/cert',
         ];
 
         serviceEndpoints.forEach(endpointURL => {

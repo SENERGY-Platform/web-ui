@@ -37,3 +37,10 @@ export interface ExtendedHubModel extends HubModel {
     shared: boolean;
     permissions: PermissionsRightsModel;
 }
+
+
+export interface LoraCertsModel {
+    certificate: string;
+    key: string;
+    expires_at: string;
+}
