@@ -43,3 +43,27 @@
     margin-bottom: 20px;
 }
 
+.qr-scan {
+    margin-bottom: 16px;
+}
+
+.qr-scan-actions {
+    margin-bottom: 8px;
+}
+
+.qr-video {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 480px;
+    border-radius: 4px;
+    object-fit: contain;
+    margin: 0 auto 8px auto;
+    background: transparent;
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
+

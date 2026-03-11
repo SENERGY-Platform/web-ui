@@ -18,10 +18,23 @@
 
 <mat-dialog-content>
     <form class="form">
+        <div class="qr-scan" *ngIf="userHasUpdateAttributesAuthorization && userHasUpdateDisplayNameAuthorization && localIdIsEditable && deviceTypeSupportsQR">
+            <div class="qr-scan-actions">
+                <button mat-stroked-button color="accent" *ngIf="!qrScanInProgress" (click)="startQrScan()" [disabled]="!qrScanSupported">
+                    <mat-icon>photo_camera</mat-icon>
+                    Scan QR Code
+                </button>
+                <button mat-stroked-button color="warn" *ngIf="qrScanInProgress" (click)="stopQrScan()">
+                    Stop Scan
+                </button>
+            </div>
+            <video #qrVideo class="qr-video" [class.hidden]="!qrScanInProgress"></video>
+        </div>
+
         <div *ngIf="userHasUpdateDisplayNameAuthorization">
             <mat-form-field appearance="outline" class="full-width" color="accent">
                 <mat-label>Display Name</mat-label>
-                <input matInput [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}">
+                <input cdkFocusInitial matInput [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}">
                 <mat-error senergyError label="Display Name"></mat-error>
             </mat-form-field>
         </div>
