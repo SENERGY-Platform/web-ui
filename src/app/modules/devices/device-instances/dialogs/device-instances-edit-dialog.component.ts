@@ -16,7 +16,7 @@
 
 import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Attribute, DeviceInstanceModel } from '../shared/device-instances.model';
+import { Attribute, DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel } from '../shared/device-instances.model';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { senergyConnectorLocalIdConstraint } from '../../../metadata/device-types-overview/shared/device-type.model';
@@ -27,13 +27,13 @@ import { AddTagFn } from '@ng-matero/extensions/select';
     styleUrls: ['./device-instances-edit-dialog.component.css'],
 })
 export class DeviceInstancesEditDialogComponent {
-    device: DeviceInstanceModel;
+    device: DeviceInstanceModel | DeviceInstanceWithDeviceTypeModel;
     displayname = '';
     nicknameAttributeKey = 'shared/nickname';
     nicknameAttributeOrigin = 'shared';
     action = 'Edit';
     localIdIsEditable = false;
-    knownAttributes = ['anomaly-detector', 'timezone', 'inactive', 'last_message_max_age', 'monitor_connection_state', 'platform/mute-format-error', 'senergy/snowflake-canary-device', 'senergy/canary-device','senergy/lora/dev-addr','senergy/lora/app-key','senergy/lora/gen-app-key','senergy/lora/nwk-key','senergy/lora/app-s-key','senergy/lora/nwk-s-enc-key','senergy/lora/s-nwk-s-int-key','senergy/lora/f-nwk-s-int-key','senergy/lora/join-eui','senergy/lora/duplicate'];
+    knownAttributes = ['anomaly-detector', 'timezone', 'inactive', 'last_message_max_age', 'monitor_connection_state', 'platform/mute-format-error', 'senergy/snowflake-canary-device', 'senergy/canary-device', 'senergy/lora/dev-addr', 'senergy/lora/app-key', 'senergy/lora/gen-app-key', 'senergy/lora/nwk-key', 'senergy/lora/app-s-key', 'senergy/lora/nwk-s-enc-key', 'senergy/lora/s-nwk-s-int-key', 'senergy/lora/f-nwk-s-int-key', 'senergy/lora/join-eui', 'senergy/lora/duplicate'];
 
     protocolConstraints: string[] = [];
     userHasUpdateDisplayNameAuthorization = false;
@@ -45,7 +45,7 @@ export class DeviceInstancesEditDialogComponent {
         private cd: ChangeDetectorRef,
 
         @Inject(MAT_DIALOG_DATA) private data: {
-            device: DeviceInstanceModel;
+            device: DeviceInstanceModel | DeviceInstanceWithDeviceTypeModel;
             userHasUpdateDisplayNameAuthorization: boolean;
             userHasUpdateAttributesAuthorization: boolean;
             action?: string;
@@ -55,13 +55,27 @@ export class DeviceInstancesEditDialogComponent {
         this.userHasUpdateDisplayNameAuthorization = data.userHasUpdateDisplayNameAuthorization;
         this.userHasUpdateAttributesAuthorization = data.userHasUpdateAttributesAuthorization;
         this.device = data.device;
+        let supportsOTAA = false;
+        (this.device as DeviceInstanceWithDeviceTypeModel).device_type?.attributes?.forEach(attr => {
+            if (attr.key === 'senergy/lora/supports-otaa' && attr.value === 'true') {
+                supportsOTAA = true;
+            }
+        });
+        let hasOTAA = false;
         this.device.attributes?.forEach(value => {
+            if (value.key === 'senergy/lora/nwk-key') {
+                hasOTAA = true;
+            }
             if (value.key === this.nicknameAttributeKey) {
                 this.displayname = value.value;
             } else if (this.knownAttributes.indexOf(value.key) === -1) {
                 this.addAttribute()(value.key);
             }
         });
+        if (supportsOTAA && !hasOTAA) {
+            this.addAttr();
+            this.device.attributes![this.device.attributes!.length - 1].key = 'senergy/lora/nwk-key'; // ensure by addAttr()
+        }
 
         const protocolsToConstraints: Map<string, string[]> = new Map<string, string[]>();
         this.deviceTypeService.getProtocols(9999, 0, 'name', 'asc').subscribe(protocols => {
