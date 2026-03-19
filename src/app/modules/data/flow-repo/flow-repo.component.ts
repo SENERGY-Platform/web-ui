@@ -225,13 +225,13 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.totalCount = resp.total;
                     this.flowsDataSource.data = this.flows;
                     this.loadFlowsPermissions();
+                    this.ready = true;
                 }
                 if (this.costService.userMayGetFlowCostEstimations()) {
                     if (resp.flows !== null && resp.flows.length > 0) {
                         this.flowEstimations=[];
                         this.costService.getFlowCostEstimations(this.flows.map(f => f._id || '')).subscribe(estimations => {
                             this.flowEstimations.push(...estimations);
-                            this.ready = true;
                         });
                     } else {
                         this.ready = true;
