@@ -206,7 +206,7 @@
     </div>
     <div *ngIf="flows.length === 0 && ready">No flow instances found.</div>
 </div>
-<button *ngIf="userHasWritePermission" mat-fab class="fab" routerLink="op" matTooltip="Register new Operator">
+<button *ngIf="userHasWritePermission" mat-fab class="fab" routerLink="/data/designer" matTooltip="Design new Flow">
     <mat-icon>add</mat-icon>
 </button>
 <senergy-spinner [show]="!ready"></senergy-spinner>
