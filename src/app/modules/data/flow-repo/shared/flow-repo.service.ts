@@ -19,7 +19,7 @@ import {HttpClient, HttpResponse} from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import {Observable, throwError} from 'rxjs';
 import {FlowModel, FlowOperatorUsage} from './flow.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
@@ -85,10 +85,22 @@ export class FlowRepoService {
         }
     }
 
-    deleteFlow(flow: FlowModel): Observable<unknown> {
+    deleteFlow(flow: FlowModel): Observable<HttpResponse<null>> {
         return this.http
-            .delete(environment.flowRepoUrl + '/flow/' + flow._id + '/')
-            .pipe(catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'deleteFlow: Error', {})));
+            .delete<null>(
+                `${environment.flowRepoUrl}/flow/${flow._id}/`,
+                { observe: 'response' }
+            )
+            .pipe(
+                catchError(err => {
+                    this.errorHandlerService.handleError(
+                        FlowRepoService.name,
+                        'deleteFlow: Error',
+                        err
+                    );
+                    return throwError(() => err);
+                })
+            );
     }
 
     getOperatorUsage(): Observable<FlowOperatorUsage[]> {

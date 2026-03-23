@@ -182,12 +182,19 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
                         this.flows.splice(index, 1);
                         this.flowEstimations.slice(index, 1);
                     }
-                    this.flowRepoService.deleteFlow(flow).subscribe(() => {
-                        this.snackBar.open('Flow deleted', undefined, {
-                            duration: 2000,
-                        });
-                        this.getFlows(true);
+                    this.flowRepoService.deleteFlow(flow).subscribe({
+                        next: _ => {
+                            this.snackBar.open('Flow deleted', undefined, {
+                                duration: 2000,
+                            });
+                        },
+                            error: err => {
+                                this.snackBar.open('Flow could not be deleted', err.status, {
+                                    duration: 2000,
+                                });
+                        }
                     });
+                    this.getFlows(true);
                 }
             });
     }
