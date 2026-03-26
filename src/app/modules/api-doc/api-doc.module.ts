@@ -27,14 +27,28 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterModule, Routes } from '@angular/router';
-import { CoreModule } from '../../core/core.module';
 import { ApiDocsComponent } from './api-docs/api-docs.component';
 import { SingleServiceDocComponent } from './single-service-doc/single-service-doc.component';
+import { ApiPlaygroundComponent } from './api-playground/api-playground.component';
 
 
 const routes: Routes = [
     {
-        path: 'dev/api',
+        path: 'api/playground',
+        data: { header: 'API Playground' },
+        children: [
+            {
+                path: '',
+                component: ApiPlaygroundComponent,
+            },
+            {
+                path: '**',
+                component: ApiPlaygroundComponent,
+            },
+        ]
+    },
+    {
+        path: 'api/docs',
         data: { header: 'API Documentation' },
         component: ApiDocsComponent,
     },
@@ -42,7 +56,7 @@ const routes: Routes = [
         path: 'dev/api/:type/:id',
         data: { header: 'API Documentation' },
         component: SingleServiceDocComponent,
-    }
+    },
 ];
 
 @NgModule({
@@ -54,13 +68,13 @@ const routes: Routes = [
         MatFormFieldModule,
         MatInputModule,
         MatProgressSpinnerModule,
-        CoreModule,
         FlexLayoutModule,
         MatIconModule,
     ],
     declarations: [
         SingleServiceDocComponent,
         ApiDocsComponent,
+        ApiPlaygroundComponent,
     ],
     schemas: [
         CUSTOM_ELEMENTS_SCHEMA,

@@ -37,7 +37,6 @@ import { ImportsModule } from './modules/imports/imports.module';
 import { MetadataModule } from './modules/metadata/metadata.module';
 import { SmartServicesModule } from './modules/smart-services/smart-services.module';
 import { AdminModule } from './modules/admin/admin.module';
-import { ApiDocModule } from './modules/api-doc/api-doc.module';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthorizationService } from './core/services/authorization.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
@@ -56,7 +55,6 @@ registerLocaleData(localeDe);
         AppRoutingModule,
         DashboardModule,
         DevicesModule,
-        ApiDocModule,
         KeycloakAngularModule,
         AdminModule,
         DataModule,

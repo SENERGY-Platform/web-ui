@@ -55,3 +55,5 @@ set-env.js
 
 /src/assets/env.init.js
 .eslintcache
+
+stats.html

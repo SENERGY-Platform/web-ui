@@ -78,6 +78,11 @@
                 "inject": false
               },
               {
+                "input": "node_modules/@scalar/api-client/dist/style.css",
+                "bundleName": "scalar-client",
+                "inject": false
+              },
+              {
                 "input": "node_modules/@asyncapi/web-component/node_modules/@asyncapi/react-component/styles/default.min.css",
                 "bundleName": "asyncapi",
                 "inject": false
@@ -86,7 +91,9 @@
             "scripts": [
               "node_modules/@webcomponents/custom-elements/src/native-shim.js"
             ],
-            "allowedCommonJsDependencies": ["*"],
+            "allowedCommonJsDependencies": [
+              "*"
+            ],
             "browser": "src/main.ts"
           },
           "configurations": {

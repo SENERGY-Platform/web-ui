@@ -145,7 +145,8 @@ export class SidenavService implements OnDestroy {
     setupDevSection(): SidenavSectionModel {
         const sections: SidenavPageModel[] = [];
         if (this.swaggerService.userHasReadAuthorization()) {
-            sections.push(new SidenavPageModel('API', 'link', 'api', '/dev/api'));
+            sections.push(new SidenavPageModel('API Docs', 'link', 'api', '/dev/api/docs'));
+            sections.push(new SidenavPageModel('API Playground', 'link', 'sync_alt', '/dev/api/playground'));
         }
 
         return new SidenavSectionModel('Developer', 'toggle', 'engineering', '/dev', sections);

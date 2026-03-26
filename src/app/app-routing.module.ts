@@ -22,8 +22,14 @@ import { DashboardComponent } from './modules/dashboard/dashboard.component';
 const init: Route = { path: '', redirectTo: 'dashboard/', pathMatch: 'full' };
 const dashboardWithoutId: Route = { path: 'dashboard', redirectTo: 'dashboard/', pathMatch: 'full' };
 const dashboard: Route = { path: 'dashboard/:id', component: DashboardComponent, data: { header: 'Dashboard' } };
+const devModule = {
+  path: 'dev',
+  loadChildren: () =>
+    import('./modules/api-doc/api-doc.module')
+      .then(m => m.ApiDocModule)
+};
 
 @NgModule({
-    imports: [RouterModule.forRoot([init, dashboard, dashboardWithoutId], {})],
+    imports: [RouterModule.forRoot([init, dashboard, dashboardWithoutId, devModule], {})],
 })
 export class AppRoutingModule {}

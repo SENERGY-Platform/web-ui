@@ -27,6 +27,7 @@
     "@asyncapi/web-component": "^2.6.3",
     "@ng-matero/extensions": "^18.5.0",
     "@ngbracket/ngx-layout": "^17.0.1",
+    "@scalar/api-client": "^2.39.1",
     "@types/backbone": "^1.4.1",
     "@types/jquery": "^3.3.31",
     "@types/lodash": "^4.14.149",
