@@ -18,7 +18,7 @@
 
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SwaggerService } from '../shared/swagger/swagger.service';
-import { forkJoin, map, of, switchMap } from 'rxjs';
+import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { markRaw } from 'vue';
 
 import { createApiClientApp } from '@scalar/api-client';
@@ -55,16 +55,20 @@ export class ApiPlaygroundComponent implements OnInit, OnDestroy {
                 }
                 return forkJoin(list.map(item =>
                     this.swaggerService.getSingleSwagger(item.id).pipe(
-                        map(spec => ({
+                        catchError(err => {
+                            console.error(`Failed to load spec for document ${item.title} (id: ${item.id}):`, err);
+                            return of(undefined);
+                        }),
+                        map(spec => spec === undefined ? undefined : {
                             id: item.id,
                             title: item.title,
                             content: spec,
-                        }))
+                        })
                     )
                 ));
             })
         ).subscribe(async documents => {
-            this.documents = documents.sort((a, b) => a.title.localeCompare(b.title));
+            this.documents = documents.filter(d => d !== undefined).sort((a, b) => a!.title.localeCompare(b!.title)) as  OpenapiDocument[];
             if (this.documents.length === 0) {
                 this.ready = true;
                 return;

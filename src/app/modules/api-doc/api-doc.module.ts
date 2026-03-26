@@ -53,7 +53,7 @@ const routes: Routes = [
         component: ApiDocsComponent,
     },
     {
-        path: 'dev/api/:type/:id',
+        path: 'api/:type/:id',
         data: { header: 'API Documentation' },
         component: SingleServiceDocComponent,
     },
