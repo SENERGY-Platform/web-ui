@@ -18,7 +18,7 @@ import { AfterViewInit, Component } from '@angular/core';
 import { dia, shapes, util, Vectorizer } from 'jointjs';
 import $ from 'jquery';
 import { DiagramModel, LinkIOModel } from './shared/diagram.model';
-import { IOModel } from '../../../modules/data/operator-repo/shared/operator.model';
+import { IOModel } from '../operator-repo/shared/operator.model';
 import uuid = util.uuid;
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { Clipboard } from '@angular/cdk/clipboard';

@@ -86,6 +86,11 @@
                 "input": "node_modules/@asyncapi/web-component/node_modules/@asyncapi/react-component/styles/default.min.css",
                 "bundleName": "asyncapi",
                 "inject": false
+              },
+              {
+                "input": "node_modules/jointjs/dist/joint.min.css",
+                "bundleName": "joint",
+                "inject": false
               }
             ],
             "scripts": [
@@ -104,7 +109,10 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": true,
+              "extractLicenses": true,
+              "namedChunks": false
             },
             "dev": {
               "fileReplacements": [

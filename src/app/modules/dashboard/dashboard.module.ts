@@ -39,9 +39,16 @@ import { CoreModule } from '../../core/core.module';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { GridstackModule } from 'gridstack/dist/angular';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
+import { Route, RouterModule } from '@angular/router';
+
+const routes: Route[] = [
+    { path: 'dashboard', pathMatch: 'full', component: DashboardComponent, data: { header: 'Dashboard' } },
+    { path: 'dashboard/:id', component: DashboardComponent, data: { header: 'Dashboard' } },
+];
 
 @NgModule({
     imports: [
+        RouterModule.forChild(routes),
         MatTabsModule,
         MatIconModule,
         MatButtonModule,

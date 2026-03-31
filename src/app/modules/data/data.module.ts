@@ -22,7 +22,6 @@ import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../core/core.module';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { OperatorRepoModule } from './operator-repo/operator-repo.module';
-import { ExportModule } from '../exports/export.module';
 import { FlowDesignerComponent } from './flow-designer/flow-designer.component';
 import { FormsModule } from '@angular/forms';
 import { FlowRepoComponent } from './flow-repo/flow-repo.component';
@@ -44,10 +43,10 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatOptionModule } from '@angular/material/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { CostModule } from '../cost/cost.module';
-import {MatChip, MatChipAvatar, MatChipRemove, MatChipSet} from "@angular/material/chips";
-import {MatBadge} from "@angular/material/badge";
-import {CdkOverlayOrigin} from "@angular/cdk/overlay";
+import { MatChip, MatChipAvatar, MatChipRemove, MatChipSet } from '@angular/material/chips';
+import { MatBadge } from '@angular/material/badge';
+import { CdkOverlayOrigin } from '@angular/cdk/overlay';
+import { DiagramEditorComponent } from './diagram-editor/diagram-editor.component';
 
 const operatorRepo: Route = { path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Operators' } };
 const designer: Route = { path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
@@ -61,7 +60,6 @@ const pipelineRegistry: Route = { path: 'data/pipelines', pathMatch: 'full', com
         CoreModule,
         OperatorRepoModule,
         FlowRepoModule,
-        ExportModule,
         PipelineRegistryModule,
         CommonModule,
         MatGridListModule,
@@ -81,7 +79,6 @@ const pipelineRegistry: Route = { path: 'data/pipelines', pathMatch: 'full', com
         InfiniteScrollModule,
         MatCheckboxModule,
         MatOptionModule,
-        CostModule,
         MatChip,
         MatChipAvatar,
         MatChipRemove,
@@ -89,6 +86,6 @@ const pipelineRegistry: Route = { path: 'data/pipelines', pathMatch: 'full', com
         MatBadge,
         CdkOverlayOrigin,
     ],
-    declarations: [OperatorRepoComponent, FlowDesignerComponent, FlowRepoComponent, PipelineRegistryComponent],
+    declarations: [OperatorRepoComponent, FlowDesignerComponent, FlowRepoComponent, PipelineRegistryComponent, DiagramEditorComponent],
 })
 export class DataModule {}

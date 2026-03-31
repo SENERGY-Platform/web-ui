@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import { InjectionToken, NgModule, Optional, SkipSelf } from '@angular/core';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { throwIfAlreadyLoaded } from './module-import-guard';
+import { CommonModule } from '@angular/common';
+import { InjectionToken, NgModule } from '@angular/core';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { RouterModule } from '@angular/router';
 import { SearchbarComponent } from './components/searchbar/searchbar.component';
 import { SpinnerComponent } from './components/spinner/spinner.component';
-import { SortComponent } from './components/sort/sort.component';
-import { StateIconComponent } from './components/state-icon/state-icon.component';
-import { DiagramEditorComponent } from './components/diagram-editor/diagram-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TagValuePipe } from './pipe/tag-value.pipe';
 import { DeleteDialogComponent } from './dialogs/delete-dialog.component';
@@ -49,7 +45,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from './dialogs/confirm-dialog.component';
-import { ClosableSnackBarComponent } from './components/closable-snack-bar/closable-snack-bar.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableModule } from '@angular/material/table';
@@ -69,7 +64,7 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
 
 @NgModule({
     imports: [
-        BrowserAnimationsModule,
+        CommonModule,
         MatSidenavModule,
         MatIconModule,
         MatButtonModule,
@@ -100,9 +95,6 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         ToolbarComponent,
         SearchbarComponent,
         SpinnerComponent,
-        SortComponent,
-        StateIconComponent,
-        DiagramEditorComponent,
         TagValuePipe,
         ShortOutputVariableNamePipe,
         ShortInputVariableNamePipe,
@@ -112,7 +104,6 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         InputDialogComponent,
         WidgetNoDataComponent,
         NotificationDialogComponent,
-        ClosableSnackBarComponent,
         IsJsonValidatorDirective,
         GenericValidator,
         FitTextComponent,
@@ -123,15 +114,11 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         ToolbarComponent,
         SearchbarComponent,
         SpinnerComponent,
-        SortComponent,
-        StateIconComponent,
-        DiagramEditorComponent,
         TagValuePipe,
         ShortOutputVariableNamePipe,
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
         WidgetNoDataComponent,
-        ClosableSnackBarComponent,
         IsJsonValidatorDirective,
         GenericValidator,
         FitTextComponent,
@@ -151,7 +138,4 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
     ]
 })
 export class CoreModule {
-    constructor(@Optional() @SkipSelf() parentModule: CoreModule) {
-        throwIfAlreadyLoaded(parentModule, 'CoreModule');
-    }
 }

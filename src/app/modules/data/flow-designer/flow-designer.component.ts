@@ -20,7 +20,7 @@ import { FlowRepoService } from '../flow-repo/shared/flow-repo.service';
 import { ActivatedRoute } from '@angular/router';
 import { OperatorRepoService } from '../operator-repo/shared/operator-repo.service';
 import { FlowModel } from '../flow-repo/shared/flow.model';
-import { DiagramEditorComponent } from '../../../core/components/diagram-editor/diagram-editor.component';
+import { DiagramEditorComponent } from '../diagram-editor/diagram-editor.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import MouseMoveEvent = JQuery.MouseMoveEvent;
 

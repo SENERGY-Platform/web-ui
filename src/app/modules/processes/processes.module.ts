@@ -78,6 +78,7 @@ import {ConditionalEventDialogComponent} from './designer/dialogs/conditional-ev
 import { IncidentDialogComponent } from './designer/dialogs/incident-dialog/incident-dialog.component';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
+import { SortComponent } from 'src/app/core/components/sort/sort.component';
 
 const processRepo: Route = {
     path: 'processes/repository',
@@ -196,6 +197,7 @@ const processIo: Route = {
         ShortKeyPipe,
         ProcessIoVariableEditDialogComponent,
         IncidentDialogComponent,
+        SortComponent,
     ],
 })
 export class ProcessesModule {}

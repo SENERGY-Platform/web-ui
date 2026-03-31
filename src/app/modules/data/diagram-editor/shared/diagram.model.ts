@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {IOModel} from '../../../../modules/data/operator-repo/shared/operator.model';
+import {IOModel} from '../../operator-repo/shared/operator.model';
 import {Position} from '../diagram-editor.component';
 
 export interface DiagramModel {

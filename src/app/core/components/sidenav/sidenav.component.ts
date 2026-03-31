@@ -16,8 +16,8 @@
 
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { filter, map, mergeMap } from 'rxjs/operators';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter, map } from 'rxjs/operators';
 
 import { SidenavService } from './shared/sidenav.service';
 import { SidenavSectionModel } from './shared/sidenav-section.model';
@@ -50,7 +50,6 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     }
 
     constructor(
-        private activatedRoute: ActivatedRoute,
         private router: Router,
         private sidenavService: SidenavService,
         private responsiveService: ResponsiveService,
@@ -132,9 +131,11 @@ export class SidenavComponent implements OnInit, AfterViewInit {
         this.router.events
             .pipe(
                 filter((event) => event instanceof NavigationEnd),
-                map(() => this.activatedRoute.firstChild),
-                mergeMap((activatedRoute: any) => activatedRoute.url),
+                map(() => this.router.url.split('?')[0].split('#')[0]),
             )
-            .subscribe((activeRoute: any) => (this.openSection = '/' + activeRoute[0].path));
+            .subscribe((url: string) => {
+                const activeSection = url.split('/').filter((segment) => segment.length > 0)[0];
+                this.openSection = activeSection ? '/' + activeSection : null;
+            });
     }
 }

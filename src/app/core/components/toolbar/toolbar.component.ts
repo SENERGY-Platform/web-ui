@@ -16,8 +16,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { SidenavService } from '../sidenav/shared/sidenav.service';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { filter, map, mergeMap } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { AuthorizationService } from '../../services/authorization.service';
 import { SettingsDialogService } from '../../../modules/settings/shared/settings-dialog.service';
 import { NotificationService } from './notification/shared/notification.service';
@@ -40,7 +39,6 @@ export class ToolbarComponent implements OnInit {
     constructor(
         private sidenavService: SidenavService,
         private router: Router,
-        private activatedRoute: ActivatedRoute,
         private authorizationService: AuthorizationService,
         private settingsDialogService: SettingsDialogService,
         private themingService: ThemingService,
@@ -49,7 +47,6 @@ export class ToolbarComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.setHeader();
         this.initUser();
         this.notificationService.notificationEmitter.subscribe((n) => {
             this.unreadCounter = 0;
@@ -87,19 +84,6 @@ export class ToolbarComponent implements OnInit {
 
     private initUser() {
        this.userName = this.authorizationService.getUserName();
-    }
-
-    private setHeader() {
-        this.router.events
-            .pipe(
-                filter((event) => event instanceof NavigationEnd),
-                map(() => {
-                    const route = this.activatedRoute.firstChild;
-                    return route;
-                }),
-                mergeMap((route: any) => route.data),
-            )
-            .subscribe();
     }
 
     openNotificationsDialog() {

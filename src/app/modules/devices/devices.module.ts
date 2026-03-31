@@ -71,8 +71,10 @@ import { WidgetModule } from 'src/app/widgets/widget.module';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 import { DeviceInstancesDefaultAttributesDialogComponent } from './device-instances/dialogs/device-instances-default-attributes-dialog.component';
-import { MapComponent } from 'src/app/core/components/map/map.component';
+import { MapComponent } from 'src/app/modules/devices/map/map.component';
 import { NetworksLoraCertsDialogComponent } from './networks/dialogs/networks-loracerts-dialog.component';
+import { StateIconComponent } from 'src/app/core/components/state-icon/state-icon.component';
+import { ClosableSnackBarComponent } from 'src/app/core/components/closable-snack-bar/closable-snack-bar.component';
 
 const networks: Route = { path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: { header: 'Networks' } };
 const deviceInstances: Route = {
@@ -174,7 +176,6 @@ const locationsEdit: Route = {
     WidgetModule,
     MtxSelectModule,
     CloseMtxSelectOnScrollDirective,
-    MapComponent,
     DatePipe,
 ],
     declarations: [
@@ -199,6 +200,9 @@ const locationsEdit: Route = {
         DeviceInstancesReplaceDialogComponent,
         DeviceInstancesDefaultAttributesDialogComponent,
         NetworksLoraCertsDialogComponent,
+        MapComponent,
+        StateIconComponent,
+        ClosableSnackBarComponent,
     ],
     providers: [
         DatePipe,

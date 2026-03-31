@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DiagramModel } from '../../../../core/components/diagram-editor/shared/diagram.model';
+import { DiagramModel } from '../../diagram-editor/shared/diagram.model';
 import { SafeHtml } from '@angular/platform-browser';
 
 export interface FlowModel {
