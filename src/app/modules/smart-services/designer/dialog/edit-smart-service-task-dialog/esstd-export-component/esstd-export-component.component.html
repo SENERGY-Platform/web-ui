@@ -1,0 +1,189 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<div class="smart-service-task-tab">
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Task Name</mat-label>
+            <input matInput [(ngModel)]="result.name">
+            <mat-error senergyError label="Task Name"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="exportRequest.Name" type="text" required>
+            <mat-error senergyError label="Name"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Description</mat-label>
+            <input matInput [(ngModel)]="exportRequest.Description" type="text">
+            <mat-error senergyError label="Description"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Filter Type</mat-label>
+            <mtx-select [(ngModel)]="exportRequest.FilterType" required appendTo=".ng-select-anchor">
+                <mtx-option value="deviceId">deviceId</mtx-option>
+                <mtx-option value="operatorId">operatorId</mtx-option>
+                <mtx-option value="import_id">import_id</mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="Filter Type"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Filter</mat-label>
+            <input matInput [(ngModel)]="exportRequest.Filter" type="text" #filterInput required>
+            <button mat-icon-button matSuffix [matMenuTriggerFor]="menuFilter">
+                <mat-icon>data_object</mat-icon>
+            </button>
+            <mat-menu #menuFilter="matMenu">
+                <ng-container *ngIf="exportRequest.FilterType === 'operatorId'">
+                    <button mat-menu-item *ngFor="let param of availableProcessVariables.get('flow_selection')"
+                            (click)="exportRequest.Filter = param.name; exportRequest.Topic = param.value"
+                            [matTooltip]="param.name">
+                        {{ param.label || param.name }}
+                    </button>
+                </ng-container>
+                <ng-container *ngIf="exportRequest.FilterType === 'import_id'">
+                    <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')"
+                            (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
+                        {{ param.label || param.name }}
+                    </button>
+                </ng-container>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')"
+                        (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
+                    {{ param.label || param.name }}
+                </button>
+            </mat-menu>
+            <mat-error senergyError label="Filter"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Entity Name</mat-label>
+            <input matInput [(ngModel)]="exportRequest.EntityName" type="text" required>
+            <mat-error senergyError label="Entity Name"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Topic</mat-label>
+            <input matInput [(ngModel)]="exportRequest.Topic" type="text" required>
+            <mat-error senergyError label="Topic"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Export Database ID</mat-label>
+            <mtx-select [(ngModel)]="exportRequest.ExportDatabaseID" [items]="exportDatabaseList || []"
+                        bindLabel="Name" bindValue="ID" appendTo=".ng-select-anchor">
+            </mtx-select>
+            <mat-error senergyError label="Export Database ID"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Time Path</mat-label>
+            <input matInput [(ngModel)]="exportRequest.TimePath" type="text" required>
+            <mat-error senergyError label="Time Path"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Timestamp Format</mat-label>
+            <input matInput [(ngModel)]="exportRequest.TimestampFormat" type="text">
+            <mat-error senergyError label="Timestamp Format"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Time Precision</mat-label>
+            <input matInput [(ngModel)]="exportRequest.TimePrecision" type="text">
+            <mat-error senergyError label="Time Precision"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Service Name</mat-label>
+            <input matInput [(ngModel)]="exportRequest.ServiceName" type="text" required>
+            <mat-error senergyError label="Service Name"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Offset</mat-label>
+            <mtx-select [(ngModel)]="exportRequest.Offset" required appendTo=".ng-select-anchor">
+                <mtx-option value="largest">largest</mtx-option>
+                <mtx-option value="smallest">smallest</mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="Offset"></mat-error>
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-checkbox class="checkbox-margin" [(ngModel)]="exportRequest.generated">Generated</mat-checkbox>
+    </div>
+    <mat-accordion>
+        <mat-expansion-panel *ngFor="let value of exportRequest.Values; let i = index">
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    {{ value.Name }}
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+                <div>
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>Name</mat-label>
+                        <input matInput [(ngModel)]="value.Name" type="text" required>
+                        <mat-error senergyError label="Name"></mat-error>
+                    </mat-form-field>
+                </div>
+                <div>
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>Path</mat-label>
+                        <input matInput [(ngModel)]="value.Path" type="text" required>
+                        <mat-error senergyError label="Path"></mat-error>
+                    </mat-form-field>
+                </div>
+                <div>
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>Type</mat-label>
+                        <mtx-select [(ngModel)]="value.Type" required appendTo=".ng-select-anchor">
+                            <mtx-option value="string">string</mtx-option>
+                            <mtx-option value="float">float</mtx-option>
+                            <mtx-option value="bool">bool</mtx-option>
+                            <mtx-option value="string_json">string_json</mtx-option>
+                        </mtx-select>
+                        <mat-error senergyError label="Type"></mat-error>
+                    </mat-form-field>
+                </div>
+                <div>
+                    <mat-checkbox class="checkbox-margin" [(ngModel)]="value.Tag">Tag</mat-checkbox>
+                </div>
+                <div>
+                    <button mat-raised-button color="accent" (click)="removeExportValue(i)">Remove Value</button>
+                </div>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
+    <div>
+        <button mat-raised-button color="accent" (click)="addExportValue()">Add Value</button>
+    </div>
+</div>
