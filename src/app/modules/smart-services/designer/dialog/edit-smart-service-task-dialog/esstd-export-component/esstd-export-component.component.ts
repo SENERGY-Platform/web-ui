@@ -16,9 +16,13 @@
 
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ServingRequest, SmartServiceTaskDescription} from '../../../shared/designer.model';
-import {BpmnParameterWithLabel} from '../../../../../processes/designer/shared/designer.model';
+import {BpmnElement, BpmnParameterWithLabel} from '../../../../../processes/designer/shared/designer.model';
 import {ExportDatabaseModel} from '../../../../../exports/shared/export.model';
 import {ExportService} from '../../../../../exports/shared/export.service';
+import {AddTagFn} from '@ng-matero/extensions/select';
+import {FlowRepoService} from '../../../../../data/flow-repo/shared/flow-repo.service';
+import {OperatorRepoService} from '../../../../../data/operator-repo/shared/operator-repo.service';
+import {OperatorModel, typeStructure} from '../../../../../data/operator-repo/shared/operator.model';
 
 @Component({
   selector: 'esstd-export-component',
@@ -34,13 +38,24 @@ export class EsstdExportComponentComponent implements OnInit {
     @Output() exportRequestChange = new EventEmitter<ServingRequest>();
 
     @Input() availableProcessVariables!: Map<string, BpmnParameterWithLabel[]>;
+    @Input() smartServiceBpmnElement!: BpmnElement;
 
     exportDatabaseList: ExportDatabaseModel[] = [];
 
-    constructor(private exportService: ExportService) {
+    timestamp_formats: string[] = [];
+
+    paths = new Map<string, string | undefined>();
+
+    constructor(private exportService: ExportService,
+                private flowRepoService: FlowRepoService,
+                private operatorRepoService: OperatorRepoService,) {
     }
     ngOnInit() {
         this.ensureExportDatabaseList();
+        this.timestamp_formats = this.exportService.getTimestampFormats();
+        if (this.exportRequest.Name === undefined) {
+            this.exportRequest.Name = 'Smart_Service_' + this.smartServiceBpmnElement.id;
+        }
     }
     removeExportValue(index: number) {
         this.exportRequest?.Values?.splice(index, 1);
@@ -63,4 +78,28 @@ export class EsstdExportComponentComponent implements OnInit {
             });
         }
     }
+
+    getOperatorInfo(flowId: string, operatorId: string) {
+        this.flowRepoService.getFlow(flowId).subscribe(flow => {
+           flow?.model.cells.forEach(cell => {
+              if (cell.id === operatorId) {
+                  this.operatorRepoService
+                      .getOperator(cell.operatorId)
+                      .subscribe((resp: OperatorModel | null) => {
+                          this.paths = this.operatorRepoService.setPaths(resp);
+                          this.paths.set('time', 'string');
+                          this.paths.set('analytics', typeStructure);
+                      });
+              }
+           });
+        });
+    }
+
+    addTimestampFormat(): AddTagFn {
+        return (text: string) => {
+            this.timestamp_formats.push(text);
+        };
+    }
+
+    protected readonly Array = Array;
 }

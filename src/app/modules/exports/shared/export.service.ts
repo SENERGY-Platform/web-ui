@@ -324,4 +324,8 @@ export class ExportService {
             })
         );
     }
+
+    getTimestampFormats(): string[]{
+        return ['%Y-%m-%dT%H:%M:%S.%fZ'];
+    }
 }

@@ -19,7 +19,7 @@ import {HttpClient, HttpResponse} from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { OperatorModel } from './operator.model';
+import {IOModel, OperatorModel} from './operator.model';
 import { Observable } from 'rxjs';
 import { ExportService } from '../../../exports/shared/export.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
@@ -108,6 +108,16 @@ export class OperatorRepoService {
                 catchError(this.errorHandlerService.handleError(ExportService.name, 'deleteOperators: Error', { status: 404 })),
             );
     }
+
+    setPaths(om: OperatorModel | null): Map<string, string | undefined> {
+        const paths = new Map<string, string | undefined>();
+        if (om !== null && om.outputs !== undefined) {
+            om.outputs.forEach((out: IOModel) => {
+                paths.set('analytics.' + out.name, out.type);
+            });
+        }
+        return paths;
+    };
 
     userHasDeleteAuthorization(): boolean {
         return this.authorizations['DELETE'];

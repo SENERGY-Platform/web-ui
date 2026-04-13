@@ -24,7 +24,7 @@
     </div>
     <div>
         <mat-form-field appearance="outline" color="accent" class="full-width">
-            <mat-label>Name</mat-label>
+            <mat-label>Export Name</mat-label>
             <input matInput [(ngModel)]="exportRequest.Name" type="text" required>
             <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
@@ -50,33 +50,34 @@
     <div>
         <mat-form-field appearance="outline" color="accent" class="full-width">
             <mat-label>Filter</mat-label>
-            <input matInput [(ngModel)]="exportRequest.Filter" type="text" #filterInput required>
+            <input matInput [(ngModel)]="exportRequest.Filter" [disabled]="exportRequest.FilterType === undefined || exportRequest.Filter===''" type="text" #filterInput required>
             <button mat-icon-button matSuffix [matMenuTriggerFor]="menuFilter">
                 <mat-icon>data_object</mat-icon>
             </button>
             <mat-menu #menuFilter="matMenu">
                 <ng-container *ngIf="exportRequest.FilterType === 'operatorId'">
                     <button mat-menu-item *ngFor="let param of availableProcessVariables.get('flow_selection')"
-                            (click)="exportRequest.Filter = param.name; exportRequest.Topic = param.value"
+                            (click)="exportRequest.Filter = param.name; exportRequest.Topic = param.value;
+                            getOperatorInfo(availableProcessVariables.get('flow_selection_raw')![0].value, param.name.split(':')[1])"
                             [matTooltip]="param.name">
                         {{ param.label || param.name }}
                     </button>
                 </ng-container>
                 <ng-container *ngIf="exportRequest.FilterType === 'import_id'">
                     <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')"
-                            (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
+                            (click)="exportRequest.Filter = '${' + param.name+'}'; exportRequest.Topic = '${' + param.name+'}'" [matTooltip]="param.name">
                         {{ param.label || param.name }}
                     </button>
                 </ng-container>
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')"
-                        (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
-                    {{ param.label || param.name }}
-                </button>
+                    <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')"
+                            (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
+                        {{ param.label || param.name }}
+                    </button>
             </mat-menu>
             <mat-error senergyError label="Filter"></mat-error>
         </mat-form-field>
     </div>
-    <div>
+    <div *ngIf="exportRequest.FilterType === 'deviceId'">
         <mat-form-field appearance="outline" color="accent" class="full-width">
             <mat-label>Entity Name</mat-label>
             <input matInput [(ngModel)]="exportRequest.EntityName" type="text" required>
@@ -86,8 +87,15 @@
     <div>
         <mat-form-field appearance="outline" color="accent" class="full-width">
             <mat-label>Topic</mat-label>
-            <input matInput [(ngModel)]="exportRequest.Topic" type="text" required>
+            <input matInput [(ngModel)]="exportRequest.Topic" [disabled]="exportRequest.FilterType === undefined || exportRequest.Filter===''" type="text" required>
             <mat-error senergyError label="Topic"></mat-error>
+        </mat-form-field>
+    </div>
+    <div *ngIf="exportRequest.FilterType === 'deviceId'">
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Service Name</mat-label>
+            <input matInput [(ngModel)]="exportRequest.ServiceName" type="text" required>
+            <mat-error senergyError label="Service Name"></mat-error>
         </mat-form-field>
     </div>
     <div>
@@ -102,29 +110,27 @@
     <div>
         <mat-form-field appearance="outline" color="accent" class="full-width">
             <mat-label>Time Path</mat-label>
-            <input matInput [(ngModel)]="exportRequest.TimePath" type="text" required>
+            <mtx-select [(ngModel)]="exportRequest.TimePath" [items]="Array.from(this.paths.keys())" appendTo=".ng-select-anchor">
+            </mtx-select>
             <mat-error senergyError label="Time Path"></mat-error>
         </mat-form-field>
     </div>
     <div>
         <mat-form-field appearance="outline" color="accent" class="full-width">
             <mat-label>Timestamp Format</mat-label>
-            <input matInput [(ngModel)]="exportRequest.TimestampFormat" type="text">
+            <mtx-select [(ngModel)]="exportRequest.TimestampFormat"  placeholder="Choose or write yourself"
+                        [addTag]="addTimestampFormat()" [items]="timestamp_formats"
+                        appendTo=".ng-select-anchor">
+            </mtx-select>
             <mat-error senergyError label="Timestamp Format"></mat-error>
         </mat-form-field>
     </div>
+
     <div>
         <mat-form-field appearance="outline" color="accent" class="full-width">
             <mat-label>Time Precision</mat-label>
             <input matInput [(ngModel)]="exportRequest.TimePrecision" type="text">
             <mat-error senergyError label="Time Precision"></mat-error>
-        </mat-form-field>
-    </div>
-    <div>
-        <mat-form-field appearance="outline" color="accent" class="full-width">
-            <mat-label>Service Name</mat-label>
-            <input matInput [(ngModel)]="exportRequest.ServiceName" type="text" required>
-            <mat-error senergyError label="Service Name"></mat-error>
         </mat-form-field>
     </div>
     <div>
@@ -140,6 +146,7 @@
     <div>
         <mat-checkbox class="checkbox-margin" [(ngModel)]="exportRequest.generated">Generated</mat-checkbox>
     </div>
+
     <mat-accordion>
         <mat-expansion-panel *ngFor="let value of exportRequest.Values; let i = index">
             <mat-expansion-panel-header>

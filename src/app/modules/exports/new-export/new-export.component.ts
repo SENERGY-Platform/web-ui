@@ -31,7 +31,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineModel, PipelineOperatorModel } from '../../data/pipeline-registry/shared/pipeline.model';
 import { PipelineRegistryService } from '../../data/pipeline-registry/shared/pipeline-registry.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IOModel, OperatorModel } from '../../data/operator-repo/shared/operator.model';
+import {IOModel, OperatorModel, typeBoolean, typeFloat, typeList, typeInteger, typeString, typeStructure} from '../../data/operator-repo/shared/operator.model';
 import { OperatorRepoService } from '../../data/operator-repo/shared/operator-repo.service';
 import { environment } from '../../../../environments/environment';
 import { forkJoin, Observable, of } from 'rxjs';
@@ -46,8 +46,6 @@ import {
     FormArray,
     FormControl,
     UntypedFormBuilder,
-    ValidationErrors,
-    ValidatorFn,
     Validators
 } from '@angular/forms';
 import * as _ from 'lodash';
@@ -69,7 +67,7 @@ export class NewExportComponent implements OnInit {
     lastPageEvent: PageEvent | undefined;
 
     formatControl = new FormControl('');
-    timestamp_formats: string[] = ['%Y-%m-%dT%H:%M:%S.%fZ'];
+    timestamp_formats: string[] = [];
 
     exportForm = this.fb.group({
         selector: ['', Validators.required],
@@ -115,12 +113,12 @@ export class NewExportComponent implements OnInit {
 
     dropdown = ['float', 'string', 'int', 'bool', 'string_json'];
 
-    typeString = 'https://schema.org/Text';
-    typeInteger = 'https://schema.org/Integer';
-    typeFloat = 'https://schema.org/Float';
-    typeBoolean = 'https://schema.org/Boolean';
-    typeList = 'https://schema.org/ItemList';
-    typeStructure = 'https://schema.org/StructuredValue';
+    typeString = typeString;
+    typeInteger = typeInteger;
+    typeFloat = typeFloat;
+    typeBoolean = typeBoolean;
+    typeList = typeList;
+    typeStructure = typeStructure;
 
     id: string | null = null;
 
@@ -148,7 +146,7 @@ export class NewExportComponent implements OnInit {
         if (this.id) {
             this.ready = false;
         }
-
+        this.timestamp_formats = this.exportService.getTimestampFormats();
         this.exportForm.patchValue({selector: 'device'});
     }
 
@@ -221,7 +219,8 @@ export class NewExportComponent implements OnInit {
                                         }
                                     });
                                 });
-                            } else if (exp.FilterType === 'operatorId') {
+                            }
+                            else if (exp.FilterType === 'operatorId') {
                                 this.exportForm.patchValue({selector: 'pipe'});
                                 this.pipelines.forEach((pipeline) => {
                                     if (pipeline.id === exp.Filter.split(':')[0]) {
@@ -233,11 +232,7 @@ export class NewExportComponent implements OnInit {
                                                 this.operatorRepoService
                                                     .getOperator(operator.operatorId)
                                                     .subscribe((resp: OperatorModel | null) => {
-                                                        if (resp !== null && resp.outputs !== undefined) {
-                                                            resp.outputs.forEach((out: IOModel) => {
-                                                                this.paths.set('analytics.' + out.name, out.type);
-                                                            });
-                                                        }
+                                                        this.paths = this.operatorRepoService.setPaths(resp);
                                                         this.paths.set('time', 'string');
                                                         this.paths.set('analytics', this.typeStructure);
                                                     });
@@ -245,7 +240,8 @@ export class NewExportComponent implements OnInit {
                                         });
                                     }
                                 });
-                            } else if (exp.FilterType === 'pipeId') {
+                            }
+                            else if (exp.FilterType === 'pipeId') {
                                 this.snackBar.open('Outdated export version - Please reconfigure and redeploy the export', 'close', {
                                     duration: 5000,
                                     verticalPosition: 'top',
@@ -260,18 +256,15 @@ export class NewExportComponent implements OnInit {
                                             this.operatorRepoService
                                                 .getOperator(this.operator.operatorId)
                                                 .subscribe((resp: OperatorModel | null) => {
-                                                    if (resp !== null && resp.outputs !== undefined) {
-                                                        resp.outputs.forEach((out: IOModel) => {
-                                                            this.paths.set('analytics.' + out.name, out.type);
-                                                        });
-                                                    }
+                                                    this.paths = this.operatorRepoService.setPaths(resp);
                                                     this.paths.set('time', 'string');
                                                     this.paths.set('analytics', this.typeStructure);
                                                 });
                                         }
                                     }
                                 });
-                            } else if (exp.FilterType === 'import_id') {
+                            }
+                            else if (exp.FilterType === 'import_id') {
                                 this.exportForm.patchValue({selector: 'import'});
                                 const importInstance: ImportInstancesModel =
                                     this.imports.find((i) => i.id === exp.Filter) || ({} as ImportInstancesModel);

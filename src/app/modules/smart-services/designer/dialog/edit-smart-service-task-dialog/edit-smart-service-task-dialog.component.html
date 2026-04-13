@@ -448,7 +448,12 @@
         </div>
       </mat-tab>
       <mat-tab label="Export">
-          <esstd-export-component [(result)]="result"  [(exportRequest)]="exportRequest" [availableProcessVariables]="availableProcessVariables" />
+          <esstd-export-component
+                  [(result)]="result"
+                  [(exportRequest)]="exportRequest"
+                  [availableProcessVariables]="availableProcessVariables"
+                  [smartServiceBpmnElement]="smartServiceBpmnElement"
+          />
       </mat-tab>
       <mat-tab label="Import">
         <div class="smart-service-task-tab">

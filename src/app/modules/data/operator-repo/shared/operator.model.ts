@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+export const typeString = 'https://schema.org/Text';
+export const typeInteger = 'https://schema.org/Integer';
+export const typeFloat = 'https://schema.org/Float';
+export const typeBoolean = 'https://schema.org/Boolean';
+export const typeList = 'https://schema.org/ItemList';
+export const typeStructure = 'https://schema.org/StructuredValue';
+
 export interface OperatorModel {
     _id: string | undefined;
     name: string | undefined;

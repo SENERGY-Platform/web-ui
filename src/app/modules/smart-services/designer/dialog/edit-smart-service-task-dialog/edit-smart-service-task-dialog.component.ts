@@ -1547,7 +1547,7 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
                 if (!this.exportRequest.Name) {
                     return true;
                 }
-                if (!this.exportRequest.EntityName) {
+                if (this.exportRequest.FilterType === 'deviceId' && !this.exportRequest.EntityName) {
                     return true;
                 }
                 if (!this.exportRequest.FilterType) {
@@ -1565,7 +1565,7 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
                 if (!this.exportRequest.TimePath) {
                     return true;
                 }
-                if (!this.exportRequest.ServiceName) {
+                if (this.exportRequest.FilterType === 'deviceId' && !this.exportRequest.ServiceName) {
                     return true;
                 }
                 if (!this.exportRequest.Offset) {
