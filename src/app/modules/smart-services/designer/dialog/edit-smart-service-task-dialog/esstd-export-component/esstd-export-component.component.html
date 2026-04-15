@@ -41,8 +41,8 @@
             <mat-label>Filter Type</mat-label>
             <mtx-select [(ngModel)]="exportRequest.FilterType" required appendTo=".ng-select-anchor">
                 <mtx-option value="deviceId">deviceId</mtx-option>
-                <mtx-option value="operatorId">operatorId</mtx-option>
-                <mtx-option value="import_id">import_id</mtx-option>
+                <mtx-option value="{{OPERATOR_ID}}">{{ OPERATOR_ID }}</mtx-option>
+                <mtx-option value="{{IMPORT_ID}}">{{IMPORT_ID}}</mtx-option>
             </mtx-select>
             <mat-error senergyError label="Filter Type"></mat-error>
         </mat-form-field>
@@ -50,22 +50,27 @@
     <div>
         <mat-form-field appearance="outline" color="accent" class="full-width">
             <mat-label>Filter</mat-label>
-            <input matInput [(ngModel)]="exportRequest.Filter" [disabled]="exportRequest.FilterType === undefined || exportRequest.Filter===''" type="text" #filterInput required>
+            <input matInput [(ngModel)]="exportRequest.Filter"
+                   [disabled]="exportRequest.FilterType === undefined || exportRequest.Filter===''"
+                   type="text" #filterInput required>
             <button mat-icon-button matSuffix [matMenuTriggerFor]="menuFilter">
                 <mat-icon>data_object</mat-icon>
             </button>
             <mat-menu #menuFilter="matMenu">
-                <ng-container *ngIf="exportRequest.FilterType === 'operatorId'">
+                <ng-container *ngIf="exportRequest.FilterType === OPERATOR_ID">
                     <button mat-menu-item *ngFor="let param of availableProcessVariables.get('flow_selection')"
                             (click)="exportRequest.Filter = param.name; exportRequest.Topic = param.value;
-                            getOperatorInfo(availableProcessVariables.get('flow_selection_raw')![0].value, param.name.split(':')[1])"
+                            getOperatorPaths(availableProcessVariables.get('flow_selection_raw')![0].value, param.name.split(':')[1]);"
                             [matTooltip]="param.name">
                         {{ param.label || param.name }}
                     </button>
                 </ng-container>
-                <ng-container *ngIf="exportRequest.FilterType === 'import_id'">
+                <ng-container *ngIf="exportRequest.FilterType === IMPORT_ID">
                     <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')"
-                            (click)="exportRequest.Filter = '${' + param.name+'}'; exportRequest.Topic = '${' + param.name+'}'" [matTooltip]="param.name">
+                            (click)="exportRequest.Filter = '${' + param.name+'}';
+                            exportRequest.Topic = '${' + param.name+'}';
+                            getImportPaths(availableProcessVariables.get('import_selection_raw')![0].value)"
+                            [matTooltip]="param.name">
                         {{ param.label || param.name }}
                     </button>
                 </ng-container>
@@ -146,7 +151,9 @@
     <div>
         <mat-checkbox class="checkbox-margin" [(ngModel)]="exportRequest.generated">Generated</mat-checkbox>
     </div>
-
+    <div>
+        <button mat-raised-button color="accent" (click)="autofillValues()">Autofill</button>
+    </div>
     <mat-accordion>
         <mat-expansion-panel *ngFor="let value of exportRequest.Values; let i = index">
             <mat-expansion-panel-header>

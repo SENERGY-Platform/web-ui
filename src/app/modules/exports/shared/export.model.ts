@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+export const OPERATOR_ID = 'operatorId';
+export const IMPORT_ID = 'import_id';
+
 export interface ExportResponseModel {
     count?: number;
     instances?: ExportModel[];
