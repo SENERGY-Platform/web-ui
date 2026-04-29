@@ -45,6 +45,7 @@
     "core-js": "^3.17.3",
     "cronstrue": "^1.96.0",
     "dotenv": "^8.2.0",
+    "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "gridstack": "^12.1.2",
     "jointjs": "^3.7.7",

@@ -30,13 +30,14 @@ import {
 import { DeviceStatusConfigConvertRuleModel } from '../device-status/shared/device-status-properties.model';
 import { ExportDataService } from '../shared/export-data.service';
 import { DataTableAggregations, DataTableOrderEnum, DataTableTimeValuePairModel, ExportValueTypes } from './shared/data-table.model';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { DashboardManipulationEnum } from '../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { concatMap, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
+import { Workbook } from 'exceljs';
 
 interface DataTableComponentItem {
     name: string;
@@ -75,6 +76,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
         private dialog: MatDialog,
         private exportDataService: ExportDataService,
         private decimalPipe: DecimalPipe,
+        private datePipe: DatePipe,
         private deviceInstancesServcie: DeviceInstancesService,
     ) {
     }
@@ -167,6 +169,57 @@ export class DataTableComponent implements OnInit, OnDestroy {
         }
         this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties).subscribe();
         this.orderItems();
+    }
+
+    async downloadExcel() {
+        if (!this.dataReady || this.items.length === 0) {
+            return;
+        }
+        const workbook = new Workbook();
+        const worksheet = workbook.addWorksheet('Data Table');
+        const valueTitle = this.widget.properties.dataTable?.valueAlias || 'Value';
+        worksheet.columns = [
+            { header: 'Name', key: 'name', width: 36 },
+            { header: valueTitle, key: 'value', width: 28 },
+            { header: 'Time', key: 'time', width: 30 },
+        ];
+        worksheet.getRow(1).font = { bold: true };
+
+        this.items.forEach((item) => {
+            const row = worksheet.addRow({
+                name: item.name,
+                value: item.status == null ? '' : '' + item.status,
+                time: item.time && item.time !== 'null' ? (this.datePipe.transform(item.time, 'short') ?? '') : '',
+            });
+
+            let argbColor: string | undefined;
+            if (item.color) {
+                const hex = item.color.replace('#', '');
+                argbColor = hex.length === 6 ? 'FF' + hex.toUpperCase() : undefined;
+            } else if (item.class === 'color-warn') {
+                argbColor = 'FFCE612E'; // theme warn palette 500
+            }
+            if (argbColor) {
+                row.getCell('value').font = { color: { argb: argbColor } };
+            }
+        });
+
+        const rowCount = Math.max(this.items.length + 1, 2);
+        worksheet.autoFilter = 'A1:C' + rowCount;
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const widgetName = (this.widget.name || 'data-table').replace(/\s/g, '_');
+        link.download = widgetName + '-' + timestamp + '.xlsx';
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
     }
 
     private update() {
@@ -267,7 +320,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                     if (deviceIds.length === 0) {
                                         return of(values);
                                     }
-                                    return this.deviceInstancesServcie.getDeviceInstances({limit: 0, offset: 0, deviceIds: deviceIds}).pipe(map(devices => {
+                                    return this.deviceInstancesServcie.getDeviceInstances({ limit: 0, offset: 0, deviceIds: deviceIds }).pipe(map(devices => {
                                         devices.result.forEach(d => this.devices.set(d.id, d));
                                         return values;
                                     }));
@@ -289,7 +342,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                             res[values[elementIndex].requestIndex].push({ time: '', value: null, index: values[elementIndex].requestIndex });
                                         } else {
                                             dataRows.forEach((dataRow) => {
-                                                dataRow.forEach(row => res[values[elementIndex].requestIndex].push({ time: '' + row[0], value: row[1], name: values[elementIndex].deviceId !== undefined ? (this.devices.get(values[elementIndex].deviceId ||'')?.display_name || this.devices.get(values[elementIndex].deviceId||'')?.name) : undefined, index: values[elementIndex].requestIndex }));
+                                                dataRow.forEach(row => res[values[elementIndex].requestIndex].push({ time: '' + row[0], value: row[1], name: values[elementIndex].deviceId !== undefined ? (this.devices.get(values[elementIndex].deviceId || '')?.display_name || this.devices.get(values[elementIndex].deviceId || '')?.name) : undefined, index: values[elementIndex].requestIndex }));
                                             });
                                         }
                                     });
@@ -339,7 +392,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                     class: '',
                                     time: '' + pair.time,
                                 };
-                                if (v !== null && item.icon === '') {
+                                if (v !== null) {
                                     if (
                                         (elements[elementIndex].valueType === ExportValueTypes.INTEGER ||
                                             elements[elementIndex].valueType === ExportValueTypes.FLOAT) &&
