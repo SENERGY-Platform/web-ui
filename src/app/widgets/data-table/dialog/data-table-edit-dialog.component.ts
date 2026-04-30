@@ -471,6 +471,7 @@ export class DataTableEditDialogComponent implements OnInit {
 
     updateName(): Observable<DashboardResponseMessageModel> {
         const newName = this.formGroup.get('name')?.value;
+        this.widget.name = newName;
         return this.dashboardService.updateWidgetName(this.dashboardId, this.widgetId, newName);
     }
 
