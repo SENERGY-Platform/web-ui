@@ -32,6 +32,7 @@ export interface OperatorModel {
     outputs: IOModel[] | undefined;
     config_values: IOModel[] | undefined;
     cost?: number;
+    version?: number;
 }
 
 export interface IOModel {

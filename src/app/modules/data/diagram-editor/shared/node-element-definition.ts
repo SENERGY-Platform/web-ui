@@ -28,6 +28,7 @@ export const NodeElementDefinition = dia.Element.define(
         name: '',
         image: '',
         operatorId: '',
+        version: 0,
         attrs: {
             '.': {
                 magnet: false,

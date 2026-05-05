@@ -22,6 +22,9 @@
                 <h3>Shared by {{shareUser}}</h3>
             </div>
         </div>
+        <div  fxLayout="row" fxLayoutAlign="end center" style="margin-bottom: 10px;">
+            <mat-icon>difference</mat-icon>{{operator.version}}
+        </div>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Name</mat-label>
             <input matInput [(ngModel)]="operator.name" [disabled]="!userHasWritePermission()">

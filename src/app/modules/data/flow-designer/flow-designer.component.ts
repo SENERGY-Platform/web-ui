@@ -72,6 +72,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                                         cell.outPorts,
                                         cell.config,
                                         cell.operatorId,
+                                        cell.version,
                                         cell.position,
                                         cell.id
                                     ));
@@ -84,6 +85,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                                         cell.outPorts,
                                         cell.config,
                                         cell.operatorId,
+                                        cell.version,
                                         cell.position,
                                         cell.id
                                     ));
@@ -124,7 +126,8 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                     this.getPortNames(operator.inputs),
                     this.getPortNames(operator.outputs),
                     operator.config_values,
-                    operator._id
+                    operator._id,
+                    operator.version
                 );
                 break;
             default:
@@ -136,6 +139,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                     this.getPortNames(operator.outputs),
                     operator.config_values,
                     operator._id,
+                    operator.version
                 );
                 break;
             }

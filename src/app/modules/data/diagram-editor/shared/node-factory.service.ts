@@ -28,6 +28,7 @@ export interface NodeConfig {
     outputs: string[];
     config: IOModel[];
     operatorId: string;
+    version?: number;
     position: NodePosition;
     deploymentType: 'cloud' | 'local' | '';
 }
@@ -73,6 +74,7 @@ export class NodeFactory {
             image: config.image,
             config: config.config,
             operatorId: config.operatorId,
+            version: config.version,
         });
 
         if (config.id) {

@@ -123,14 +123,15 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     }
 
     createNode(type:'cloud' | 'local' | '',
-            name: string,
-            image: string,
-            inputs: string[],
-            outputs: string[],
-            config: IOModel[],
-            operatorId: string,
-            position: NodePosition | undefined = undefined,
-            id: string | undefined = undefined
+               name: string,
+               image: string,
+               inputs: string[],
+               outputs: string[],
+               config: IOModel[],
+               operatorId: string,
+               version: number | undefined = undefined,
+               position: NodePosition | undefined = undefined,
+               id: string | undefined = undefined
     ){
         if (position === undefined){
             position = this.calculateNodePosition();
@@ -145,6 +146,7 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
             operatorId: operatorId,
             position: position,
             deploymentType: type,
+            version: version,
         });
         return node;
     }
@@ -156,10 +158,11 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
             outputs: string[],
             config: IOModel[],
             operatorId: string,
+            version: number | undefined = undefined,
             position: NodePosition | undefined = undefined,
             id: string | undefined = undefined
     ){
-        const node = this.createNode(type, name, image, inputs, outputs, config, operatorId, position, id);
+        const node = this.createNode(type, name, image, inputs, outputs, config, operatorId,version, position, id);
         this.graph.addCells([node]);
         this.graph.maxZIndex();
     }

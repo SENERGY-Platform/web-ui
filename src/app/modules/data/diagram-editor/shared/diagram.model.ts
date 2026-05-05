@@ -33,6 +33,7 @@ export interface CellModel {
     type: string;
     source: LinkIOModel;
     target: LinkIOModel;
+    version?: number;
     deploymentType: string;
 }
 export interface LinkIOModel {
