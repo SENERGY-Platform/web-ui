@@ -15,7 +15,7 @@
  */
 
 import {IOModel} from '../../operator-repo/shared/operator.model';
-import {Position} from '../diagram-editor.component';
+import {NodePosition} from './node-factory.service';
 
 export interface DiagramModel {
     cells: CellModel[];
@@ -28,7 +28,7 @@ export interface CellModel {
     inPorts: string[];
     outPorts: string[];
     config: IOModel[];
-    position: Position;
+    position: NodePosition;
     name: string;
     type: string;
     source: LinkIOModel;

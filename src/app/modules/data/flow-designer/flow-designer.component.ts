@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {OnInit, Component, AfterViewInit, ViewChild, HostListener} from '@angular/core';
+import {OnInit, Component, AfterViewInit, ViewChild} from '@angular/core';
 import {IOModel, OperatorModel} from '../operator-repo/shared/operator.model';
 import { FlowRepoService } from '../flow-repo/shared/flow-repo.service';
 import { ActivatedRoute } from '@angular/router';
 import { OperatorRepoService } from '../operator-repo/shared/operator-repo.service';
 import { FlowModel } from '../flow-repo/shared/flow.model';
-import { DiagramEditorComponent } from '../diagram-editor/diagram-editor.component';
+import {DiagramEditorComponent} from '../diagram-editor/diagram-editor.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import MouseMoveEvent = JQuery.MouseMoveEvent;
 
 @Component({
     selector: 'senergy-flow-designer',
@@ -65,26 +64,28 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                                 elements.push(this.diagram.prepareLink(cell.source, cell.target));
                             } else if (cell.type === 'senergy.NodeElement'){
                                 if (cell.deploymentType === 'local') {
-                                    elements.push(this.diagram.prepareLocalNode(
-                                        cell.id,
+                                    elements.push(this.diagram.createNode(
+                                        'local',
                                         cell.name,
                                         cell.image,
                                         cell.inPorts,
                                         cell.outPorts,
                                         cell.config,
                                         cell.operatorId,
-                                        cell.position
+                                        cell.position,
+                                        cell.id
                                     ));
                                 } else {
-                                    elements.push(this.diagram.prepareCloudNode(
-                                        cell.id,
+                                    elements.push(this.diagram.createNode(
+                                        'cloud',
                                         cell.name,
                                         cell.image,
                                         cell.inPorts,
                                         cell.outPorts,
                                         cell.config,
                                         cell.operatorId,
-                                        cell.position
+                                        cell.position,
+                                        cell.id
                                     ));
                                 }
                             }
@@ -116,17 +117,19 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         ) {
             switch (operator.deploymentType) {
             case 'local':
-                this.diagram.newLocalNode(
+                this.diagram.addNode(
+                    'local',
                     operator.name,
                     operator.image,
                     this.getPortNames(operator.inputs),
                     this.getPortNames(operator.outputs),
                     operator.config_values,
-                    operator._id,
+                    operator._id
                 );
                 break;
             default:
-                this.diagram.newCloudNode(
+                this.diagram.addNode(
+                    'cloud',
                     operator.name,
                     operator.image,
                     this.getPortNames(operator.inputs),
@@ -156,7 +159,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     }
 
     public saveModel() {
-        const svg = this.diagram.paper.svg.cloneNode(true) as SVGElement;
+        const svg = this.diagram.paperService.getPaper().svg.cloneNode(true) as SVGElement;
         this.flow.image = this.createSVGFromModel(svg);
         this.flow.model = this.diagram.getGraph();
         const flow = Object.assign({}, this.flow);
@@ -227,29 +230,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     }
 
     scaleContentToFit(){
-        this.diagram.paper.scaleContentToFit();
-    }
-
-    @HostListener('wheel', ['$event'])
-    Wheel(event: WheelEvent) {
-        if((event.target as HTMLInputElement).nodeName === 'svg'){
-            event.preventDefault();
-            if (event.deltaY > 0) {
-                this.diagram.zoomOut();
-            }
-            if (event.deltaY < 0) {
-                this.diagram.zoomIn();
-            }
-        }
-    }
-
-    @HostListener('document:mousemove', ['$event'])
-    onMouseMove(e: MouseMoveEvent) {
-        if (this.diagram.dragStartPosition != null) {
-            this.diagram.paper.translate(
-                e.offsetX - this.diagram.dragStartPosition.x,
-                e.offsetY - this.diagram.dragStartPosition.y);
-        }
+        this.diagram.paperService.getPaper().transformToFitContent();
     }
 
     private removeSVGNodesByClassNames(svg: SVGElement, tags: string[], classes: string[]) {

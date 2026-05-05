@@ -14,240 +14,31 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component } from '@angular/core';
+import {AfterViewInit, Component, HostListener, OnDestroy} from '@angular/core';
 import { dia, shapes, util, Vectorizer } from 'jointjs';
-import $ from 'jquery';
 import { DiagramModel, LinkIOModel } from './shared/diagram.model';
 import { IOModel } from '../operator-repo/shared/operator.model';
 import uuid = util.uuid;
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { Clipboard } from '@angular/cdk/clipboard';
+import {NodeElementDefinition} from './shared/node-element-definition';
+import {PaperService} from './shared/paper.service';
+import {NodeFactory, NodePosition} from './shared/node-factory.service';
+import MouseMoveEvent = JQuery.MouseMoveEvent;
 
 @Component({
     selector: 'senergy-diagram-editor',
     templateUrl: './diagram-editor.component.html',
     styleUrls: ['./diagram-editor.component.css'],
+    providers: [PaperService]
 })
-export class DiagramEditorComponent implements AfterViewInit {
+export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     private graph: any;
-
     private graphScale: Vectorizer.Scale = {sx: 1,sy: 1};
-
     idGenerated = uuid();
-
-
-
-    NodeElement: any = dia.Element.define('senergy.NodeElement',
-        {
-            inPorts: [],
-            outPorts: [],
-            name: '',
-            image: '',
-            operatorId: '',
-            attrs: {
-                '.': {
-                    magnet: false,
-                },
-                header: {
-                    refWidth: '100%',
-                    refHeight: '20%',
-                    strokeWidth: 2,
-                    stroke: 'black',
-                    fill: 'white',
-                },
-                body: {
-                    refY: '20%',
-                    refWidth: '100%',
-                    refHeight: '80%',
-                    strokeWidth: 2,
-                    stroke: 'black',
-                    fill: 'white',
-                },
-                headerlabel: {
-                    textVerticalAnchor: 'middle',
-                    textAnchor: 'middle',
-                    refX: '50%',
-                    refY: '10%',
-                    fontSize: 10,
-                    fill: 'black',
-                },
-                label: {
-                    textVerticalAnchor: 'middle',
-                    textAnchor: 'middle',
-                    refX: '50%',
-                    refY: '50%',
-                    fontSize: 14,
-                    fill: 'black',
-                },
-                button: {
-                    cursor: 'pointer',
-                    ref: 'buttonLabel',
-                    refWidth: '150%',
-                    refHeight: '150%',
-                    refX: '-25%',
-                    refY: '-25%',
-                },
-                button2: {
-                    cursor: 'pointer',
-                    ref: 'buttonLabel2',
-                    refWidth: '150%',
-                    refHeight: '150%',
-                    refX: '-25%',
-                    refY: '-25%',
-                },
-                buttonLabel: {
-                    pointerEvents: 'none',
-                    refX: '100%',
-                    refY: '-5%',
-                    textAnchor: 'middle',
-                    textVerticalAnchor: 'middle',
-                },
-                buttonLabel2: {
-                    pointerEvents: 'none',
-                    refX: '85%',
-                    refY: '-5%',
-                    textAnchor: 'middle',
-                    textVerticalAnchor: 'middle',
-                },
-            },
-            ports: {
-                groups: {
-                    in: {
-                        position: {
-                            name: 'left',
-                        },
-                        attrs: {
-                            portLabel: {
-                                fill: '#000',
-                            },
-                            portBody: {
-                                fill: '#fff',
-                                stroke: '#000',
-                                r: 10,
-                                magnet: true,
-                            },
-                        },
-                        label: {
-                            position: {
-                                name: 'left',
-                                args: {
-                                    y: 10,
-                                },
-                            },
-                        },
-                    },
-                    out: {
-                        position: {
-                            name: 'right',
-                        },
-                        attrs: {
-                            portLabel: {
-                                fill: '#000',
-                            },
-                            portBody: {
-                                fill: '#fff',
-                                stroke: '#000',
-                                r: 10,
-                                magnet: true,
-                            },
-                        },
-                        label: {
-                            position: {
-                                name: 'right',
-                                args: {
-                                    y: 10,
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        },
-        {
-            markup: [
-                {
-                    tagName: 'rect',
-                    selector: 'header',
-                },
-                {
-                    tagName: 'rect',
-                    selector: 'body',
-                },
-                {
-                    tagName: 'text',
-                    selector: 'headerlabel',
-                },
-                {
-                    tagName: 'text',
-                    selector: 'label',
-                },
-                {
-                    tagName: 'rect',
-                    selector: 'button',
-                },
-                {
-                    tagName: 'text',
-                    selector: 'buttonLabel',
-                },
-                {
-                    tagName: 'rect',
-                    selector: 'button2',
-                },
-                {
-                    tagName: 'text',
-                    selector: 'buttonLabel2',
-                },
-            ],
-            portMarkup: [
-                {
-                    tagName: 'circle',
-                    selector: 'portBody',
-                },
-            ],
-            portLabelMarkup: [
-                {
-                    tagName: 'text',
-                    selector: 'portLabel',
-                },
-            ],
-
-            initialize() {
-                // eslint-disable-next-line prefer-rest-params
-                shapes.basic.Generic.prototype.initialize.apply(this, arguments as any);
-                this.updatePortItems();
-            },
-
-            // model,changed
-            updatePortItems() {
-                // Make sure all ports are unique.
-                const inPorts = util.uniq(this.get('inPorts'));
-                const outPorts = util.uniq(this.get('outPorts'));
-
-                const inPortItems = this.createPortItems('in', inPorts);
-                const outPortItems = this.createPortItems('out', outPorts);
-
-                this.prop('ports/items', inPortItems.concat(outPortItems));
-            },
-
-            createPortItem: (group: any, port: any) => ({
-                id: group + '-' + port,
-                group,
-                attrs: {
-                    portLabel: {
-                        text: port
-                    }
-                }
-            }),
-
-            createPortItems(group: any, ports: any) {
-                return util.toArray(ports).map(this.createPortItem.bind(this, group));
-            },
-        },
-    );
-
+    NodeElement: any = NodeElementDefinition;
     paperWidth = 500;
     paperHeight = 600;
-    paper!: any;
 
     private linkAttrs = {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}};
 
@@ -259,7 +50,9 @@ export class DiagramEditorComponent implements AfterViewInit {
 
     constructor(
         public snackBar: MatSnackBar,
-        private clipboard: Clipboard
+        private clipboard: Clipboard,
+        public paperService: PaperService,
+        public nodeFactory: NodeFactory
     ) {}
 
     ngAfterViewInit() {
@@ -269,7 +62,7 @@ export class DiagramEditorComponent implements AfterViewInit {
 
     onResize() {
         this.paperWidth = this.getPaperWidthFromWrap();
-        this.paper.setDimensions(this.paperWidth, this.paperHeight);
+        this.paperService.setDimensions(this.paperWidth, this.paperHeight);
     }
 
     setPaperWidth(paperWidth: number) {
@@ -296,42 +89,20 @@ export class DiagramEditorComponent implements AfterViewInit {
                 },
             },
         );
-        this.paper = new dia.Paper({
-            el: $('#' + this.idGenerated),
-            model: this.graph,
-            defaultLink: this.defaultLink,
-            width: this.paperWidth,
-            height: this.paperHeight,
-            gridSize: 20,
-            linkPinning: true,
-            snapLinks: true,
-            drawGrid: {name: 'mesh'},
-            embeddingMode: false,
-            validateConnection(sourceView, sourceMagnet, targetView, targetMagnet) {
-                // Prevent linking from input ports.
-                if (sourceMagnet && sourceMagnet.getAttribute('port-group') === 'in') {
-                    return false;
-                }
-                if (sourceView === targetView) {
-                    return false;
-                }
-                return targetMagnet && targetMagnet.getAttribute('port-group') === 'in';
-            },
-            markAvailable: true,
+        this.paperService.initialize(this.idGenerated, this.paperWidth, this.paperHeight, this.graph);
 
-        });
-        this.paper.on('blank:pointerdown', (_: any, x: number, y: number) => {
+        this.paperService.getPaper().on('blank:pointerdown', (_: any, x: number, y: number) => {
             this.dragStartPosition = { x: x* this.graphScale.sx, y: y* this.graphScale.sy};
         });
-        this.paper.on('cell:pointerup blank:pointerup', () => {
+        this.paperService.getPaper().on('cell:pointerup blank:pointerup', () => {
             this.dragStartPosition = null;
         });
-        this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
+        this.paperService.getPaper().on('element:button:pointerdown', (elementView: any, evt: any) => {
             evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
             const model = elementView.model;
             model.remove();
         });
-        this.paper.on('element:button2:pointerdown', (elementView: any, evt: any) => {
+        this.paperService.getPaper().on('element:button2:pointerdown', (elementView: any, evt: any) => {
             evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
             const model = elementView.model;
             this.clipboard.copy(model.id);
@@ -355,138 +126,55 @@ export class DiagramEditorComponent implements AfterViewInit {
         this.graph.maxZIndex();
     }
 
-    prepareCloudNode(id: string | undefined = undefined, name: string, image: string, inputs: string[], outputs: string[], config: IOModel[], operatorId: string, position: Position | undefined = undefined){
-        const node = this.newNode(id, name, image, inputs, outputs, config, operatorId, position);
-        node.attributes.deploymentType = 'cloud';
-        node.attr({
-            body: {
-                fill: '#4484ce',
-            }
-        });
-        return node;
-    }
-
-    prepareLocalNode(id: string | undefined = undefined, name: string, image: string, inputs: string[], outputs: string[], config: IOModel[], operatorId: string, position: Position | undefined = undefined){
-        const node = this.newNode(id, name, image, inputs, outputs, config, operatorId, position);
-        node.attributes.deploymentType = 'local';
-        node.attr({
-            body: {
-                fill: '#ddd',
-            }
-        });
-        return node;
-    }
-
-    public newCloudNode(name: string,
-                        image: string,
-                        inputs: string[],
-                        outputs: string[],
-                        config: IOModel[],
-                        operatorId: string,
-                        position: Position | undefined = undefined): any {
-        const node = this.prepareCloudNode(undefined, name, image, inputs, outputs, config, operatorId, position);
-        this.graph.addCells([node]);
-        this.graph.maxZIndex();
-        return node;
-    }
-
-    public newLocalNode(name: string,
-                        image: string,
-                        inputs: string[],
-                        outputs: string[],
-                        config: IOModel[],
-                        operatorId: string,
-                        position: Position | undefined = undefined): any {
-        const node = this.prepareLocalNode(undefined, name, image, inputs, outputs, config, operatorId, position);
-        this.graph.addCells([node]);
-        this.graph.maxZIndex();
-        return node;
-    }
-
-    public newNode(id: string | undefined = undefined, name: string, image: string, inPorts: string[], outPorts: string[], config: any[], operatorId: string, position: Position | undefined = undefined): any {
-
-        const size = this.calculateNodeSize(inPorts, outPorts);
-
-        const node = new this.NodeElement({
-            type: 'senergy.NodeElement',
-            inPorts,
-            outPorts,
-            size,
-            name,
-            image,
-            config,
-            operatorId,
-        });
-        if (id !== undefined ){
-            node.prop('id', id, { rewrite: true });
-        }
+    createNode(type:'cloud' | 'local' | '',
+            name: string,
+            image: string,
+            inputs: string[],
+            outputs: string[],
+            config: IOModel[],
+            operatorId: string,
+            position: NodePosition | undefined = undefined,
+            id: string | undefined = undefined
+    ){
         if (position === undefined){
             position = this.calculateNodePosition();
         }
-        node.position(position.x, position.y);
-        node.attr({
-            label: {
-                visibility: 'visible',
-                text: name,
-            },
-            headerlabel: {
-                text: node.id,
-            },
-            body: {
-                cursor: 'default',
-                visibility: 'visible',
-            },
-            button: {
-                event: 'element:button:pointerdown',
-                fill: 'orange',
-                stroke: 'black',
-                strokeWidth: 2,
-            },
-            button2: {
-                event: 'element:button2:pointerdown',
-                fill: 'grey',
-                stroke: 'black',
-                strokeWidth: 2,
-            },
-            buttonLabel: {
-                text: ' X ', // fullwidth underscore
-                fill: 'black',
-                fontSize: 9,
-                fontWeight: 'bold',
-            },
-            buttonLabel2: {
-                text: 'Copy Id', // fullwidth underscore
-                fill: 'black',
-                fontSize: 9,
-                fontWeight: 'bold',
-            },
+        const node = this.nodeFactory.createNode({
+            id: id,
+            name: name,
+            image: image,
+            inputs: inputs,
+            outputs: outputs,
+            config: config,
+            operatorId: operatorId,
+            position: position,
+            deploymentType: type,
         });
         return node;
     }
 
-    calculateNodePosition(): Position {
-        const box = (document.getElementsByClassName('joint-layers')[0] as any).getBBox();
-        return  {x: box.x + box.width + 100, y: 200} as Position;
+    addNode(type:'cloud' | 'local' | '',
+            name: string,
+            image: string,
+            inputs: string[],
+            outputs: string[],
+            config: IOModel[],
+            operatorId: string,
+            position: NodePosition | undefined = undefined,
+            id: string | undefined = undefined
+    ){
+        const node = this.createNode(type, name, image, inputs, outputs, config, operatorId, position, id);
+        this.graph.addCells([node]);
+        this.graph.maxZIndex();
     }
 
-    calculateNodeSize(inPorts: string[] | undefined, outPorts: string[] | undefined) {
-        if (outPorts === undefined) {
-            outPorts = [];
-        }
-        if (inPorts === undefined) {
-            inPorts = [];
-        }
-        const outCircleradius = 20;
-        const heightBasedOnOut = outCircleradius * outPorts.length + 30;
-        const heightBasedOnIn = outCircleradius * inPorts.length + 30;
-        let height = heightBasedOnIn > heightBasedOnOut ? heightBasedOnIn : heightBasedOnOut;
-        height = height > 100 ? height : 100;
-        const size = {height, width: 250};
-        return size;
+    calculateNodePosition(): NodePosition {
+        const box = (document.getElementsByClassName('joint-layers')[0] as any).getBBox();
+        return  {x: box.x + box.width + 100, y: 200} as NodePosition;
     }
 
     private paperScale(sx: number, sy: number){
-        this.paper.scale(sx,sy);
+        this.paperService.scale(sx,sy);
     }
 
     public getGraph(): DiagramModel {
@@ -510,9 +198,30 @@ export class DiagramEditorComponent implements AfterViewInit {
         this.graphScale.sy = 1;
         this.paperScale(this.graphScale.sx, this.graphScale.sy);
     }
-}
 
-export interface Position {
-    x: number;
-    y: number;
+    ngOnDestroy(): void {
+        this.paperService.destroy();
+    }
+
+    @HostListener('wheel', ['$event'])
+    Wheel(event: WheelEvent) {
+        if((event.target as HTMLInputElement).nodeName === 'svg'){
+            event.preventDefault();
+            if (event.deltaY > 0) {
+                this.zoomOut();
+            }
+            if (event.deltaY < 0) {
+                this.zoomIn();
+            }
+        }
+    }
+
+    @HostListener('document:mousemove', ['$event'])
+    onMouseMove(e: MouseMoveEvent) {
+        if (this.dragStartPosition != null) {
+            this.paperService.getPaper().translate(
+                e.offsetX - this.dragStartPosition.x,
+                e.offsetY - this.dragStartPosition.y);
+        }
+    }
 }
