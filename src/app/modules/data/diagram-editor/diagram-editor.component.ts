@@ -42,10 +42,6 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
 
     private linkAttrs = {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}};
 
-    private defaultLink = new dia.Link({
-        attrs: this.linkAttrs,
-    });
-
     public dragStartPosition: {x: number; y: number }  | null = null;
 
     constructor(
