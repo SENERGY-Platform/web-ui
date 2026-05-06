@@ -22,7 +22,6 @@ import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../core/core.module';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { OperatorRepoModule } from './operator-repo/operator-repo.module';
-import { FlowDesignerComponent } from './flow-designer/flow-designer.component';
 import { FormsModule } from '@angular/forms';
 import { FlowRepoComponent } from './flow-repo/flow-repo.component';
 import { FlowRepoModule } from './flow-repo/flow-repo.module';
@@ -46,19 +45,18 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatChip, MatChipAvatar, MatChipRemove, MatChipSet } from '@angular/material/chips';
 import { MatBadge } from '@angular/material/badge';
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
-import { DiagramEditorComponent } from './diagram-editor/diagram-editor.component';
+import {FlowDesignerModule} from './flow-designer/flow-designer.module';
 
 const operatorRepo: Route = { path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Operators' } };
-const designer: Route = { path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
-const designerEdit: Route = { path: 'data/designer/:id', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
 const flowRepo: Route = { path: 'data/flow-repo', pathMatch: 'full', component: FlowRepoComponent, data: { header: 'Flows' } };
 const pipelineRegistry: Route = { path: 'data/pipelines', pathMatch: 'full', component: PipelineRegistryComponent, data: { header: 'Pipelines' } };
 
 @NgModule({
     imports: [
-        RouterModule.forChild([operatorRepo, designer, designerEdit, flowRepo, pipelineRegistry]),
+        RouterModule.forChild([operatorRepo, flowRepo, pipelineRegistry]),
         CoreModule,
         OperatorRepoModule,
+        FlowDesignerModule,
         FlowRepoModule,
         PipelineRegistryModule,
         CommonModule,
@@ -86,6 +84,6 @@ const pipelineRegistry: Route = { path: 'data/pipelines', pathMatch: 'full', com
         MatBadge,
         CdkOverlayOrigin,
     ],
-    declarations: [OperatorRepoComponent, FlowDesignerComponent, FlowRepoComponent, PipelineRegistryComponent, DiagramEditorComponent],
+    declarations: [OperatorRepoComponent, FlowRepoComponent, PipelineRegistryComponent],
 })
 export class DataModule {}

@@ -27,7 +27,7 @@ export interface CellModel {
     operatorId: string;
     inPorts: string[];
     outPorts: string[];
-    config: IOModel[];
+    config: IOModel[] |undefined;
     position: NodePosition;
     name: string;
     type: string;

@@ -1,0 +1,135 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+
+<h1 mat-dialog-title>Attention: {{ data.oldOperator.id }} changed</h1>
+<div mat-dialog-content>
+    <div class="comparison-container">
+        <!-- Left Column: Old Operator -->
+        <div class="cell-model-column">
+            <h3>Old Operator</h3>
+            <div *ngIf="data.oldOperator">
+                <p>
+                    <strong>Name:</strong>
+                    <span [style.color]="!areEqual('name') ? 'red' : 'inherit'">
+                        {{ data.oldOperator.name }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Image:</strong>
+                    <span [style.color]="!areEqual('image') ? 'red' : 'inherit'">
+                        {{ data.oldOperator.image }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Operator ID:</strong>
+                    <span [style.color]="!areEqual('operatorId') ? 'red' : 'inherit'">
+                        {{ data.oldOperator.operatorId }}
+                    </span>
+                </p>
+                <p>
+                    <strong>In Ports:</strong>
+                    <span [style.color]="!areEqual('inPorts') ? 'red' : 'inherit'">
+                        {{ data.oldOperator.inPorts?.join(', ') }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Out Ports:</strong>
+                    <span [style.color]="!areEqual('outPorts') ? 'red' : 'inherit'">
+                        {{ data.oldOperator.outPorts?.join(', ') }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Config:</strong>
+                    <span [style.color]="!areEqual('config') ? 'red' : 'inherit'">
+                        {{ data.oldOperator.config | json }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Deployment Type:</strong>
+                    <span [style.color]="!areEqual('deploymentType') ? 'red' : 'inherit'">
+                        {{ data.oldOperator.deploymentType }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Version:</strong>
+                    <span [style.color]="!areEqual('version') ? 'red' : 'inherit'">
+                        {{ data.oldOperator.version }}
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Column: New Operator -->
+        <div class="cell-model-column">
+            <h3>New Operator</h3>
+            <div *ngIf="data.newOperator">
+                <p>
+                    <strong>Name:</strong>
+                    <span [style.color]="!areEqual('name') ? 'green' : 'inherit'">
+                        {{ data.newOperator.name }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Image:</strong>
+                    <span [style.color]="!areEqual('image') ? 'green' : 'inherit'">
+                        {{ data.newOperator.image }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Operator ID:</strong>
+                    <span [style.color]="!areEqual('operatorId') ? 'green' : 'inherit'">
+                        {{ data.newOperator.operatorId }}
+                    </span>
+                </p>
+                <p>
+                    <strong>In Ports:</strong>
+                    <span [style.color]="!areEqual('inPorts') ? 'green' : 'inherit'">
+                        {{ data.newOperator.inPorts?.join(', ') }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Out Ports:</strong>
+                    <span [style.color]="!areEqual('outPorts') ? 'green' : 'inherit'">
+                        {{ data.newOperator.outPorts?.join(', ') }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Config:</strong>
+                    <span [style.color]="!areEqual('config') ? 'green' : 'inherit'">
+                        {{ data.newOperator.config | json }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Deployment Type:</strong>
+                    <span [style.color]="!areEqual('deploymentType') ? 'green' : 'inherit'">
+                        {{ data.newOperator.deploymentType }}
+                    </span>
+                </p>
+                <p>
+                    <strong>Version:</strong>
+                    <span [style.color]="!areEqual('version') ? 'green' : 'inherit'">
+                        {{ data.newOperator.version }}
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onClick()">OK</button>
+</div>
+

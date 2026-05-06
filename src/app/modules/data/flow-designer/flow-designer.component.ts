@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-import {OnInit, Component, AfterViewInit, ViewChild} from '@angular/core';
+import {Component, AfterViewInit, ViewChild} from '@angular/core';
 import {IOModel, OperatorModel} from '../operator-repo/shared/operator.model';
-import { FlowRepoService } from '../flow-repo/shared/flow-repo.service';
-import { ActivatedRoute } from '@angular/router';
-import { OperatorRepoService } from '../operator-repo/shared/operator-repo.service';
-import { FlowModel } from '../flow-repo/shared/flow.model';
+import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
+import {ActivatedRoute} from '@angular/router';
+import {OperatorRepoService} from '../operator-repo/shared/operator-repo.service';
+import {FlowModel} from '../flow-repo/shared/flow.model';
 import {DiagramEditorComponent} from '../diagram-editor/diagram-editor.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {DialogData, FlowUpdateDialogComponent} from './update-dialog/flow-update-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
+import {CellModel} from '../diagram-editor/shared/diagram.model';
 
 @Component({
     selector: 'senergy-flow-designer',
     templateUrl: './flow-designer.component.html',
     styleUrls: ['./flow-designer.component.css'],
 })
-export class FlowDesignerComponent implements OnInit, AfterViewInit {
+export class FlowDesignerComponent implements AfterViewInit {
 
-    @ViewChild(DiagramEditorComponent, { static: false }) diagram!: DiagramEditorComponent;
+    @ViewChild(DiagramEditorComponent, {static: false}) diagram!: DiagramEditorComponent;
 
     operators: OperatorModel[] = [];
     ready = false;
@@ -41,66 +44,85 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         private route: ActivatedRoute,
         private operatorRepoService: OperatorRepoService,
         private flowRepoService: FlowRepoService,
-        public snackBar: MatSnackBar
-    ) {}
-
-
-    ngOnInit() {
-        this.operatorRepoService.getOperators('', 9999, 0, 'name', 'asc').subscribe((resp: { operators: OperatorModel[] }) => {
-            this.operators = resp.operators;
-        });
+        public snackBar: MatSnackBar,
+        public dialog: MatDialog
+    ) {
     }
 
     ngAfterViewInit() {
-        setTimeout(() => {
+        this.operatorRepoService.getOperators('', 9999, 0, 'name', 'asc').subscribe((ops: {
+            operators: OperatorModel[]
+        }) => {
+            this.operators = ops.operators;
             const id = this.route.snapshot.paramMap.get('id');
             if (id !== null) {
                 this.flowRepoService.getFlow(id).subscribe((resp: FlowModel | null) => {
                     if (resp !== null) {
                         this.flow = resp;
-                        const elements = [];
+                        const elements = [] as any [];
+                        const dialogPromises: Promise<any>[] = [];
                         for (const cell of this.flow.model.cells) {
                             if (cell.type === 'link') {
                                 elements.push(this.diagram.prepareLink(cell.source, cell.target));
-                            } else if (cell.type === 'senergy.NodeElement'){
-                                if (cell.deploymentType === 'local') {
-                                    elements.push(this.diagram.createNode(
-                                        'local',
-                                        cell.name,
-                                        cell.image,
-                                        cell.inPorts,
-                                        cell.outPorts,
-                                        cell.config,
-                                        cell.operatorId,
-                                        cell.version,
-                                        cell.position,
-                                        cell.id
-                                    ));
+                            } else if (cell.type === 'senergy.NodeElement') {
+                                const operator = this.getOperator(cell.operatorId);
+                                if (!operator) {
+                                    console.error(`Operator mit ID ${cell.operatorId} nicht gefunden.`);
+                                    continue;
+                                }
+                                if (cell.version !== operator?.version) {
+                                    const operatorsUpdated = {} as DialogData;
+                                    console.log('operator version changed:' + cell.version + '!==' + operator?.version);
+                                    operatorsUpdated.oldOperator = cell;
+                                    operatorsUpdated.newOperator = {
+                                        type: 'senergy.NodeElement',
+                                        inPorts: this.getPortNames(operator!.inputs),
+                                        outPorts: this.getPortNames(operator!.outputs),
+                                        config: operator!.config_values,
+                                        name: operator!.name,
+                                        image: operator!.image,
+                                        operatorId: operator!._id,
+                                        deploymentType: operator!.deploymentType,
+                                        version: operator!.version,
+                                    } as CellModel;
+                                    const dialogPromise = new Promise<void>((resolve) => {
+                                        const dialogRef = this.dialog.open(FlowUpdateDialogComponent, {
+                                            data: operatorsUpdated
+                                        });
+
+                                        dialogRef.afterClosed().subscribe(_ => {
+                                            cell.inPorts = this.getPortNames(operator.inputs);
+                                            cell.outPorts = this.getPortNames(operator.outputs);
+                                            cell.config = operator.config_values;
+                                            cell.version = operator.version;
+                                            this.addNodeToElements(cell, elements);
+                                            resolve();
+                                        });
+                                    });
+                                    dialogPromises.push(dialogPromise);
                                 } else {
-                                    elements.push(this.diagram.createNode(
-                                        'cloud',
-                                        cell.name,
-                                        cell.image,
-                                        cell.inPorts,
-                                        cell.outPorts,
-                                        cell.config,
-                                        cell.operatorId,
-                                        cell.version,
-                                        cell.position,
-                                        cell.id
-                                    ));
+                                    this.addNodeToElements(cell, elements);
                                 }
                             }
                         }
-                        this.diagram.addElementsToGraph(elements);
+                        Promise.all(dialogPromises).then(() => {
+                            this.diagram.addElementsToGraph(elements);
+                        });
                     }
                 });
             }
             this.ready = true;
-        }, 500);
+        });
         this.listHeight = this.diagram.paperHeight;
     }
 
+    private addNodeToElements(cell: any, elements: any[]) {
+        if (cell.deploymentType === 'local') {
+            elements.push(this.createNode('local', cell));
+        } else {
+            elements.push(this.createNode('cloud', cell));
+        }
+    }
 
     public addNode(operator: OperatorModel) {
         if (operator.inputs == null) {
@@ -118,30 +140,30 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
             operator._id !== undefined
         ) {
             switch (operator.deploymentType) {
-            case 'local':
-                this.diagram.addNode(
-                    'local',
-                    operator.name,
-                    operator.image,
-                    this.getPortNames(operator.inputs),
-                    this.getPortNames(operator.outputs),
-                    operator.config_values,
-                    operator._id,
-                    operator.version
-                );
-                break;
-            default:
-                this.diagram.addNode(
-                    'cloud',
-                    operator.name,
-                    operator.image,
-                    this.getPortNames(operator.inputs),
-                    this.getPortNames(operator.outputs),
-                    operator.config_values,
-                    operator._id,
-                    operator.version
-                );
-                break;
+                case 'local':
+                    this.diagram.addNode(
+                        'local',
+                        operator.name,
+                        operator.image,
+                        this.getPortNames(operator.inputs),
+                        this.getPortNames(operator.outputs),
+                        operator.config_values,
+                        operator._id,
+                        operator.version
+                    );
+                    break;
+                default:
+                    this.diagram.addNode(
+                        'cloud',
+                        operator.name,
+                        operator.image,
+                        this.getPortNames(operator.inputs),
+                        this.getPortNames(operator.outputs),
+                        operator.config_values,
+                        operator._id,
+                        operator.version
+                    );
+                    break;
             }
         } else {
             this.snackBar.open('Could not add operator', undefined, {
@@ -150,7 +172,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         }
     }
 
-    private getPortNames(inputs: IOModel[]): string[]{
+    private getPortNames(inputs: IOModel[] | undefined): string[] {
         const ports = [];
         if (inputs !== undefined) {
             for (const input of inputs) {
@@ -162,6 +184,21 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         return ports;
     }
 
+    private createNode(type: 'local' | 'cloud' | '', cell: CellModel) {
+        return this.diagram.createNode(
+            type,
+            cell.name,
+            cell.image,
+            cell.inPorts,
+            cell.outPorts,
+            cell.config,
+            cell.operatorId,
+            cell.version,
+            cell.position,
+            cell.id
+        );
+    }
+
     public saveModel() {
         const svg = this.diagram.paperService.getPaper().svg.cloneNode(true) as SVGElement;
         this.flow.image = this.createSVGFromModel(svg);
@@ -169,7 +206,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         const flow = Object.assign({}, this.flow);
         this.flowRepoService.saveFlow(flow).subscribe(resp => {
             if (resp != null) {
-                if (resp.status == 200){
+                if (resp.status == 200) {
                     this.snackBar.open('Flow saved', undefined, {
                         duration: 2000,
                     });
@@ -184,7 +221,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
 
         // Get minimal coordinates to include everything + some space at the sides
         const box = (document.getElementsByClassName('joint-layers')[0] as any).getBBox();
-        const viewbox = [box.x -10, box.y, box.width + 20, box.height];
+        const viewbox = [box.x - 10, box.y, box.width + 20, box.height];
 
         const tags = ['text', 'g', 'circle', 'rect', 'tspan', 'path'];
         const classes = [
@@ -202,27 +239,27 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
             source = source.replace(
                 /^<svg/,
                 '<svg xmlns="http://www.w3.org/2000/svg" viewbox="' +
-                    viewbox[0] +
-                    ' ' +
-                    viewbox[1] +
-                    ' ' +
-                    viewbox[2] +
-                    ' ' +
-                    viewbox[3] +
-                    '"',
+                viewbox[0] +
+                ' ' +
+                viewbox[1] +
+                ' ' +
+                viewbox[2] +
+                ' ' +
+                viewbox[3] +
+                '"',
             );
         } else {
             source = source.replace(
                 /^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/,
                 '<svg xmlns="http://www.w3.org/2000/svg" viewbox="' +
-                    viewbox[0] +
-                    ' ' +
-                    viewbox[1] +
-                    ' ' +
-                    viewbox[2] +
-                    ' ' +
-                    viewbox[3] +
-                    '"',
+                viewbox[0] +
+                ' ' +
+                viewbox[1] +
+                ' ' +
+                viewbox[2] +
+                ' ' +
+                viewbox[3] +
+                '"',
             );
         }
 
@@ -233,7 +270,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         return source;
     }
 
-    scaleContentToFit(){
+    scaleContentToFit() {
         this.diagram.paperService.getPaper().transformToFitContent();
     }
 
@@ -263,5 +300,9 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                 element.removeAttribute('joint-selector');
             }
         });
+    }
+
+    private getOperator(id: string): OperatorModel | null {
+        return this.operators.find(op => op._id === id) ?? null;
     }
 }

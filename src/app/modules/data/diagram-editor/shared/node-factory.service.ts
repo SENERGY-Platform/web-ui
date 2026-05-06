@@ -15,8 +15,8 @@
  */
 
 import { Injectable } from '@angular/core';
-import { dia, util } from 'jointjs';
-import { LinkIOModel } from '../shared/diagram.model';
+import { dia } from 'jointjs';
+import { LinkIOModel } from './diagram.model';
 import { IOModel } from '../../operator-repo/shared/operator.model';
 import { NodeElementDefinition } from './node-element-definition';
 
@@ -26,7 +26,7 @@ export interface NodeConfig {
     image: string;
     inputs: string[];
     outputs: string[];
-    config: IOModel[];
+    config: IOModel[] |undefined;
     operatorId: string;
     version?: number;
     position: NodePosition;
