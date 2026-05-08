@@ -849,7 +849,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                     this.widget.properties.ubaInfo.exportId = exp.ID;
                     this.widget.properties.ubaInfo.exportDatabaseId = exp.ExportDatabaseID;
                     this.fillMeasurementsUbaInfo(exp);
-                    obs.next();
+                    obs.next(null);
                     obs.complete();
                 }
             }
@@ -877,7 +877,7 @@ export class AirQualityEditDialogComponent implements OnInit {
             this.widget.properties.ubaInfo.exportGenerated = true;
             this.widget.properties.ubaInfo.exportDatabaseId = exp.ExportDatabaseID;
             this.fillMeasurementsUbaInfo(exp);
-            obs.next();
+            obs.next(null);
             obs.complete();
         });
     }
@@ -1006,7 +1006,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                         }
                         this.widget.properties.dwdPollenInfo.exportId = exp.ID;
                         this.widget.properties.dwdPollenInfo.exportDatabaseId = exp.ExportDatabaseID;
-                        obs.next();
+                        obs.next(null);
                         obs.complete();
                     }
                 }
@@ -1058,7 +1058,7 @@ export class AirQualityEditDialogComponent implements OnInit {
             this.widget.properties.dwdPollenInfo.exportId = exp.ID;
             this.widget.properties.dwdPollenInfo.exportGenerated = true;
             this.widget.properties.dwdPollenInfo.exportDatabaseId = exp.ExportDatabaseID;
-            obs.next();
+            obs.next(null);
             obs.complete();
         });
     }
@@ -1182,7 +1182,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                     this.widget.properties.yrInfo.exportId = exp.ID;
                     this.widget.properties.yrInfo.exportDatabaseId = exp.ExportDatabaseID;
                     this.fillMeasurementsYrInfo(exp);
-                    obs.next();
+                    obs.next(null);
                     obs.complete();
                 }
             }
@@ -1210,7 +1210,7 @@ export class AirQualityEditDialogComponent implements OnInit {
             this.widget.properties.yrInfo.exportDatabaseId = exp.ExportDatabaseID;
             this.widget.properties.yrInfo.exportGenerated = true;
             this.fillMeasurementsYrInfo(exp);
-            obs.next();
+            obs.next(null);
             obs.complete();
         });
     }

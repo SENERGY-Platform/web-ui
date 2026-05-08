@@ -67,7 +67,6 @@ export class TimelineComponent implements OnInit, OnChanges {
             },
             events: {},
             zoom: {
-                // @ts-expect-error allowMouseWheelZoom is unknown to ng2-apexcharts but works as expected
                 allowMouseWheelZoom: false,
             }
         },

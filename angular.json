@@ -83,7 +83,7 @@
                 "inject": false
               },
               {
-                "input": "node_modules/@asyncapi/web-component/node_modules/@asyncapi/react-component/styles/default.min.css",
+                "input": "node_modules/@asyncapi/react-component/styles/default.min.css",
                 "bundleName": "asyncapi",
                 "inject": false
               },

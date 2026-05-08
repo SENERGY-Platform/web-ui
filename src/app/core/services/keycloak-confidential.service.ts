@@ -16,7 +16,7 @@
 
 import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
 import {lastValueFrom, mergeMap, Observable} from 'rxjs';
-import {KeycloakConfig, KeycloakProfile} from 'keycloak-js';
+import {KeycloakConfig, KeycloakProfile, KeycloakServerConfig} from 'keycloak-js';
 import {environment} from '../../../environments/environment';
 import {Injectable, OnDestroy} from '@angular/core';
 import {catchError, map} from 'rxjs/operators';
@@ -115,7 +115,7 @@ export class KeycloakConfidentialService implements OnDestroy {
     }
 
     private get tokenUrl(): string {
-        return ((this.options?.config as KeycloakConfig).url || '') + '/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token';
+        return ((this.options?.config as KeycloakServerConfig).url || '') + '/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token';
     }
 
     shouldAddToken: (request: HttpRequest<unknown>) => boolean = (request) => !request.url.startsWith(environment.keycloakUrl + '/auth/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token');
@@ -253,7 +253,7 @@ export class KeycloakConfidentialService implements OnDestroy {
     }
 
     private getUserInfo(username: string): Promise<KeycloakProfile> {
-        const url = ((this.options?.config as KeycloakConfig).url || '') + '/admin/realms/' + environment.keyCloakRealm + '/users?exact=true&username=' + username;
+        const url = ((this.options?.config as KeycloakServerConfig).url || '') + '/admin/realms/' + environment.keyCloakRealm + '/users?exact=true&username=' + username;
         return lastValueFrom(this.httpClient.get<KeycloakProfile[]>(url).pipe(map(arr => arr[0])));
     }
 
