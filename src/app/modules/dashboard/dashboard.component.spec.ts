@@ -38,6 +38,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
@@ -75,6 +76,7 @@ describe('DashboardComponent', () => {
         MatTabsModule,
         MatDividerModule,
         GridsterModule,
+        NoopAnimationsModule,
         MatButtonModule],
     providers: [
         provideRouter([]),

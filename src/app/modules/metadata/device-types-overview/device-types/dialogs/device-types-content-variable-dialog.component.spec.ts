@@ -31,6 +31,7 @@ import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-ch
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('DeviceTypesContentVariableDialog', () => {
     let component: DeviceTypesContentVariableDialogComponent;
@@ -40,7 +41,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         createSpyFromClass<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
     function init(contentVariable: DeviceTypeContentVariableModel, concepts: ConceptsCharacteristicsModel[], functions: DeviceTypeFunctionModel[], aspects: DeviceTypeAspectModel[]) {
         TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-            imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule, MtxSelectModule],
+            imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule, MtxSelectModule, NoopAnimationsModule],
             declarations: [DeviceTypesContentVariableDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: matDialogRefSpy },

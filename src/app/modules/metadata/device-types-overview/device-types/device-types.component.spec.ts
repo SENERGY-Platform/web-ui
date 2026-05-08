@@ -38,6 +38,7 @@ import {v4 as uuid} from 'uuid';
 import {MatTreeModule} from '@angular/material/tree';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('DeviceTypesComponent', () => {
     let component: DeviceTypesComponent;
@@ -160,6 +161,7 @@ describe('DeviceTypesComponent', () => {
         MatTabsModule,
         MatTooltipModule,
         FlexLayoutModule,
+        NoopAnimationsModule,
         MatTreeModule],
     providers: [
         {

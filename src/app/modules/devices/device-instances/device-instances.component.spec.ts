@@ -34,6 +34,7 @@ import { DeviceTypeService } from '../../metadata/device-types-overview/shared/d
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('DeviceInstancesComponent', () => {
     let component: DeviceInstancesComponent;
@@ -59,6 +60,7 @@ describe('DeviceInstancesComponent', () => {
         CoreModule,
         MatTabsModule,
         InfiniteScrollModule,
+        NoopAnimationsModule,
         DevicesModule],
     providers: [
         { provide: KeycloakService, useClass: MockKeycloakService },

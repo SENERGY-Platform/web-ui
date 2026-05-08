@@ -37,6 +37,7 @@ import { MatInputModule } from '@angular/material/input';
 import { ProcessesModule } from '../../processes.module';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 const nullPath = { path: '', characteristicId: '', aspectNode: Object({  }), functionId: '', isVoid: false, value: null, type: '', configurables: [  ] };
 
@@ -60,6 +61,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
         ReactiveFormsModule,
         FlexLayoutModule,
         MatInputModule,
+        NoopAnimationsModule,
         ProcessesModule],
     providers: [
         { provide: KeycloakService, useClass: MockKeycloakService },

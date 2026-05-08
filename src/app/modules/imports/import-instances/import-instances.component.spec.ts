@@ -44,6 +44,7 @@ import { PermissionsService } from '../../permissions/shared/permissions.service
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('ImportInstancesComponent', () => {
     let component: ImportInstancesComponent;
@@ -103,6 +104,7 @@ describe('ImportInstancesComponent', () => {
         MatSnackBarModule,
         MatPaginatorModule,
         MatCheckboxModule,
+        NoopAnimationsModule,
         FlexModule,
         MatTooltipModule,
         MatButtonModule,

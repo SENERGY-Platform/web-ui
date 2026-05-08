@@ -31,6 +31,7 @@ import { DeviceTypeCharacteristicsModel } from '../../../metadata/device-types-o
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('ContentVariableDialogComponent', () => {
     let component: ContentVariableDialogComponent;
@@ -70,6 +71,7 @@ describe('ContentVariableDialogComponent', () => {
                 MatInputModule,
                 MatDialogModule,
                 MtxSelectModule,
+                NoopAnimationsModule,
                 CloseMtxSelectOnScrollDirective,
             ],
             providers: [

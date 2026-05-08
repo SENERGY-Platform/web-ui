@@ -44,6 +44,7 @@ import { CostService } from '../../cost/shared/cost.service';
 import { ImportTypeModel } from './shared/import-types.model';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('ImportTypesComponent', () => {
     let component: ImportTypesComponent;
@@ -106,6 +107,7 @@ describe('ImportTypesComponent', () => {
         MatDialogModule,
         MatTreeModule,
         WidgetModule,
+        NoopAnimationsModule,
         ReactiveFormsModule,
         MatTableModule],
     providers: [

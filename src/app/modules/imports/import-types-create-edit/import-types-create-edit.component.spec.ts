@@ -44,6 +44,7 @@ import { DeviceTypeService } from '../../metadata/device-types-overview/shared/d
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('ImportTypesCreateEditComponent', () => {
 
@@ -176,6 +177,7 @@ describe('ImportTypesCreateEditComponent', () => {
         MatTreeModule,
         WidgetModule,
         MtxSelectModule,
+        NoopAnimationsModule,
         CloseMtxSelectOnScrollDirective,
     ],
     providers: [

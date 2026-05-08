@@ -50,6 +50,7 @@ import { SingleValueAggregations } from '../../single-value/shared/single-value.
 import {provideRouter} from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('DataTableEditDialogComponent', () => {
     let component: DataTableEditDialogComponent;
@@ -208,6 +209,7 @@ describe('DataTableEditDialogComponent', () => {
         MatExpansionModule,
         MatInputModule,
         ReactiveFormsModule,
+        NoopAnimationsModule,
         WidgetModule],
     providers: [
         provideRouter([]),

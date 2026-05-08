@@ -29,7 +29,7 @@ import { LadonService } from './modules/admin/permissions/shared/services/ladom.
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('AppComponent', () => {
     let component: AppComponent;
@@ -51,7 +51,7 @@ describe('AppComponent', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [AppComponent],
-    imports: [CoreModule, MatSnackBarModule],
+    imports: [CoreModule, MatSnackBarModule, NoopAnimationsModule],
     providers: [
         provideRouter([]),
         { provide: KeycloakService, useClass: MockKeycloakService },

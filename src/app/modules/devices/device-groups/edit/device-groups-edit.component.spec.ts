@@ -40,6 +40,7 @@ import { DeviceInstancesService } from '../../device-instances/shared/device-ins
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import {FlexLayoutModule} from '@ngbracket/ngx-layout';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('DeviceGroupsEditComponent', () => {
     let component: DeviceGroupsEditComponent;
@@ -516,6 +517,7 @@ describe('DeviceGroupsEditComponent', () => {
     declarations: [DeviceGroupsEditComponent],
     imports: [CoreModule,
         RouterTestingModule.withRoutes([deviceGroupsEdit]),
+        NoopAnimationsModule,
         MatSnackBarModule,
         MatFormFieldModule,
         MatIconModule,
