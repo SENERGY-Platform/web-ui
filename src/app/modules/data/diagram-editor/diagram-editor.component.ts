@@ -15,16 +15,15 @@
  */
 
 import {AfterViewInit, Component, HostListener, OnDestroy} from '@angular/core';
-import { dia, shapes, util, Vectorizer } from 'jointjs';
-import { DiagramModel, LinkIOModel } from './shared/diagram.model';
-import { IOModel } from '../operator-repo/shared/operator.model';
+import {dia, shapes, util, Vectorizer} from 'jointjs';
+import {DiagramModel, LinkIOModel} from './shared/diagram.model';
+import {IOModel} from '../operator-repo/shared/operator.model';
 import uuid = util.uuid;
 import {MatSnackBar} from '@angular/material/snack-bar';
-import { Clipboard } from '@angular/cdk/clipboard';
+import {Clipboard} from '@angular/cdk/clipboard';
 import {NodeElementDefinition} from './shared/node-element-definition';
 import {PaperService} from './shared/paper.service';
 import {NodeFactory, NodePosition} from './shared/node-factory.service';
-import MouseMoveEvent = JQuery.MouseMoveEvent;
 
 @Component({
     selector: 'senergy-diagram-editor',
@@ -34,7 +33,7 @@ import MouseMoveEvent = JQuery.MouseMoveEvent;
 })
 export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     private graph: any;
-    private graphScale: Vectorizer.Scale = {sx: 1,sy: 1};
+    private graphScale: Vectorizer.Scale = {sx: 1, sy: 1};
     idGenerated = uuid();
     NodeElement: any = NodeElementDefinition;
     paperWidth = 500;
@@ -42,14 +41,15 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
 
     private linkAttrs = {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}};
 
-    public dragStartPosition: {x: number; y: number }  | null = null;
+    public dragStartPosition: { x: number; y: number } | null = null;
 
     constructor(
         public snackBar: MatSnackBar,
         private clipboard: Clipboard,
         public paperService: PaperService,
         public nodeFactory: NodeFactory
-    ) {}
+    ) {
+    }
 
     ngAfterViewInit() {
         this.setPaperWidth(this.getPaperWidthFromWrap());
@@ -65,7 +65,7 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
         this.paperWidth = paperWidth;
     }
 
-    private getPaperWidthFromWrap(){
+    private getPaperWidthFromWrap() {
         const paperWrap = document.getElementById('paper-wrap');
         if (paperWrap !== null) {
             return paperWrap.offsetWidth;
@@ -88,7 +88,7 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
         this.paperService.initialize(this.idGenerated, this.paperWidth, this.paperHeight, this.graph);
 
         this.paperService.getPaper().on('blank:pointerdown', (_: any, x: number, y: number) => {
-            this.dragStartPosition = { x: x* this.graphScale.sx, y: y* this.graphScale.sy};
+            this.dragStartPosition = {x: x * this.graphScale.sx, y: y * this.graphScale.sy};
         });
         this.paperService.getPaper().on('cell:pointerup blank:pointerup', () => {
             this.dragStartPosition = null;
@@ -108,7 +108,7 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
         });
     }
 
-    public prepareLink(source: LinkIOModel, target: LinkIOModel){
+    public prepareLink(source: LinkIOModel, target: LinkIOModel) {
         const link = new dia.Link({
             attrs: this.linkAttrs,
         });
@@ -117,23 +117,23 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
         return link;
     }
 
-    public addElementsToGraph(elements: any[]){
+    public addElementsToGraph(elements: any[]) {
         this.graph.addCells(elements);
         this.graph.maxZIndex();
     }
 
-    createNode(type:'cloud' | 'local' | '',
+    createNode(type: 'cloud' | 'local' | '',
                name: string,
                image: string,
                inputs: string[],
                outputs: string[],
-               config: IOModel[] |undefined,
+               config: IOModel[] | undefined,
                operatorId: string,
                version: number | undefined = undefined,
                position: NodePosition | undefined = undefined,
                id: string | undefined = undefined
-    ){
-        if (position === undefined){
+    ) {
+        if (position === undefined) {
             position = this.calculateNodePosition();
         }
         const node = this.nodeFactory.createNode({
@@ -151,29 +151,29 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
         return node;
     }
 
-    addNode(type:'cloud' | 'local' | '',
+    addNode(type: 'cloud' | 'local' | '',
             name: string,
             image: string,
             inputs: string[],
             outputs: string[],
-            config: IOModel[] |undefined,
+            config: IOModel[] | undefined,
             operatorId: string,
             version: number | undefined = undefined,
             position: NodePosition | undefined = undefined,
             id: string | undefined = undefined
-    ){
-        const node = this.createNode(type, name, image, inputs, outputs, config, operatorId,version, position, id);
+    ) {
+        const node = this.createNode(type, name, image, inputs, outputs, config, operatorId, version, position, id);
         this.graph.addCells([node]);
         this.graph.maxZIndex();
     }
 
     calculateNodePosition(): NodePosition {
         const box = (document.getElementsByClassName('joint-layers')[0] as any).getBBox();
-        return  {x: box.x + box.width + 100, y: 200} as NodePosition;
+        return {x: box.x + box.width + 100, y: 200} as NodePosition;
     }
 
-    private paperScale(sx: number, sy: number){
-        this.paperService.scale(sx,sy);
+    private paperScale(sx: number, sy: number) {
+        this.paperService.scale(sx, sy);
     }
 
     public getGraph(): DiagramModel {
@@ -204,19 +204,17 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
 
     @HostListener('wheel', ['$event'])
     Wheel(event: WheelEvent) {
-        if((event.target as HTMLInputElement).nodeName === 'svg'){
-            event.preventDefault();
-            if (event.deltaY > 0) {
-                this.zoomOut();
-            }
-            if (event.deltaY < 0) {
-                this.zoomIn();
-            }
+        event.preventDefault();
+        if (event.deltaY > 0) {
+            this.zoomOut();
+        }
+        if (event.deltaY < 0) {
+            this.zoomIn();
         }
     }
 
     @HostListener('document:mousemove', ['$event'])
-    onMouseMove(e: MouseMoveEvent) {
+    onMouseMove(e: MouseEvent) {
         if (this.dragStartPosition != null) {
             this.paperService.getPaper().translate(
                 e.offsetX - this.dragStartPosition.x,
