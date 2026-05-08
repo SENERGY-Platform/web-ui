@@ -16,7 +16,7 @@
 
 import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
 import {lastValueFrom, mergeMap, Observable} from 'rxjs';
-import {KeycloakConfig, KeycloakProfile, KeycloakServerConfig} from 'keycloak-js';
+import {KeycloakProfile, KeycloakServerConfig} from 'keycloak-js';
 import {environment} from '../../../environments/environment';
 import {Injectable, OnDestroy} from '@angular/core';
 import {catchError, map} from 'rxjs/operators';
