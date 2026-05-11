@@ -30,6 +30,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import { of } from 'rxjs';
 
 describe('AppComponent', () => {
     let component: AppComponent;
@@ -44,10 +45,8 @@ describe('AppComponent', () => {
         HEAD: true,
     });
 
-    const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService, {
-        observablePropsToSpyOn: ['notificationEmitter']
-    });
-
+    const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService, {    });
+    notificationServiceSpy.getNotifications.and.returnValue(of([]));
     beforeEach(() => {
         TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [AppComponent],
