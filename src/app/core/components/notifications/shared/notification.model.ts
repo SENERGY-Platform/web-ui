@@ -21,6 +21,7 @@ export interface NotificationModel {
     _id: string;
     isRead: boolean;
     created_at: Date | null;
+    topic?: NotificationTopic;
 }
 
 export interface NotificationUpdateModel {

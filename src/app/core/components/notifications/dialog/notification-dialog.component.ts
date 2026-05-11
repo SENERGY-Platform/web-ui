@@ -26,14 +26,13 @@ import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/for
 import { forkJoin, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
-import { environment } from '../../../../../../environments/environment';
-import { AuthorizationService } from '../../../../services/authorization.service';
+import { environment } from '../../../../../environments/environment';
+import { AuthorizationService } from '../../../services/authorization.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 
- 
+
 export enum Modes {
-    NOTIFICATIONS = 1,
-    SETTINGS,
+    SETTINGS = 1,
     BROKER_EDIT
 }
 
@@ -43,7 +42,7 @@ export enum Modes {
 })
 export class NotificationDialogComponent implements OnInit {
     modes = Modes;
-    mode = Modes.NOTIFICATIONS;
+    mode = Modes.SETTINGS;
     notifications: NotificationModel[] = [];
     notificationService: NotificationService;
     defaultPageSize = this.preferencesService.pageSize;
@@ -97,10 +96,11 @@ export class NotificationDialogComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.gotoSettings();
         this.channelTopicConfigForm.valueChanges.subscribe(s => {
             if (this.mode === Modes.SETTINGS && this.settingsLoaded) {
                 this.settingsLoaded = false;
-                this.notificationService.updateSettings({channel_topic_config: s}).subscribe(saved => {
+                this.notificationService.updateSettings({ channel_topic_config: s }).subscribe(saved => {
                     this.channelTopicConfigForm.setValue(saved.channel_topic_config);
                     setTimeout(() => this.settingsLoaded = true);
                 });
@@ -165,17 +165,12 @@ export class NotificationDialogComponent implements OnInit {
         });
     }
 
-    toggleSettings() {
-        if (this.mode !== Modes.SETTINGS) {
-            this.mode = Modes.SETTINGS;
-            this.notificationService.getSettings().subscribe(s => {
-                this.channelTopicConfigForm.setValue(s.channel_topic_config);
-                setTimeout(() => this.settingsLoaded = true);
-            });
-        } else {
-            this.mode = Modes.NOTIFICATIONS;
-            this.settingsLoaded = false;
-        }
+    gotoSettings() {
+        this.mode = Modes.SETTINGS;
+        this.notificationService.getSettings().subscribe(s => {
+            this.channelTopicConfigForm.setValue(s.channel_topic_config);
+            setTimeout(() => this.settingsLoaded = true);
+        });
     }
 
     private registerChanges() {
@@ -210,12 +205,12 @@ export class NotificationDialogComponent implements OnInit {
         const broker = this.brokerEditGroup.value as NotificationBrokerModel;
         if (broker.id === '') {
             this.notificationService.createBroker(broker).subscribe(() => {
-                this.toggleSettings();
+                this.gotoSettings();
                 this.moveBrokerPage(this.lastBrokerPageEvent);
             });
         } else {
             this.notificationService.updateBroker(broker).subscribe(() => {
-                this.toggleSettings();
+                this.gotoSettings();
                 this.moveBrokerPage(this.lastBrokerPageEvent);
             });
         }

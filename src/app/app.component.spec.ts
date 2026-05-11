@@ -24,7 +24,7 @@ import { MockKeycloakService } from './core/services/keycloak.mock';
 import { AuthorizationServiceMock } from './core/services/authorization.service.mock';
 import { AuthorizationService } from './core/services/authorization.service';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
-import { NotificationService } from './core/components/toolbar/notification/shared/notification.service';
+import { NotificationService } from './core/components/notifications/shared/notification.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';

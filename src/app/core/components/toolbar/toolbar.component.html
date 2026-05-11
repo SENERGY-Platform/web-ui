@@ -23,7 +23,7 @@
              src="{{getLogoUrl()}}">
     </a>
     <span class="fill-remaining-space"></span>
-    <button *ngIf="userHasNotificationsReadAuthorization" mat-icon-button color="accent" (click)="openNotificationsDialog()">
+    <button *ngIf="userHasNotificationsReadAuthorization" mat-icon-button color="accent" routerLink="/notifications">
         <mat-icon *ngIf="unreadCounter < 1">notifications_none</mat-icon>
         <mat-icon *ngIf="unreadCounter > 0" matBadge="{{unreadCounter}}" matBadgeColor="warn">notifications</mat-icon>
     </button>

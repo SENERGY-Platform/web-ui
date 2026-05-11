@@ -1,0 +1,100 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.container {
+    height: calc(100% - 84px);
+    overflow-y: auto;
+}
+
+.search {
+	display: flex;
+	width: 100%;
+	margin-bottom: 8px;
+}
+
+.search > senergy-searchbar {
+	flex: 1 1 auto;
+	width: 100%;
+}
+
+.bulk-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+	padding: 8px 12px;
+	border-radius: 8px;
+	background: rgba(0, 0, 0, 0.04);
+}
+
+.table-wrapper {
+	border-radius: 8px;
+}
+
+.notifications-table-container {
+	overflow-x: auto;
+}
+
+mat-paginator {
+	border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.notification-table {
+	width: 100%;
+	min-width: 900px;
+}
+
+.title-cell {
+	font-weight: 500;
+}
+
+.title-content {
+	position: relative;
+	display: inline-block;
+	padding-right: 16px;
+}
+
+.unread-badge {
+	position: absolute;
+	top: -2px;
+	right: 0;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #ff1744;
+	box-shadow: 0 0 0 2px rgba(255, 23, 68, 0.28), 0 0 8px rgba(255, 23, 68, 0.9);
+}
+
+.message-cell {
+	white-space: pre-wrap;
+	word-break: break-word;
+	line-height: 1.35;
+}
+
+.actions-cell {
+	white-space: nowrap;
+}
+
+.empty-state {
+	padding: 24px;
+	text-align: center;
+	border-radius: 8px;
+	background: rgba(0, 0, 0, 0.03);
+}
+
+.sb-button {
+    margin-top: .5em;
+}

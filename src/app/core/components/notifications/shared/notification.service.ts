@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { EventEmitter, Injectable, OnDestroy, Output } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import { Observable, ReplaySubject } from 'rxjs';
 import {
     NotificationBrokerListModel,
     NotificationBrokerModel,
@@ -24,12 +24,12 @@ import {
     NotificationSettingsModel,
     NotificationUpdateModel
 } from './notification.model';
-import { environment } from '../../../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { ErrorHandlerService } from '../../../../services/error-handler.service';
+import { ErrorHandlerService } from '../../../services/error-handler.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { NotificationDialogComponent } from '../dialog/notification-dialog.component';
-import { AuthorizationService } from '../../../../services/authorization.service';
+import { AuthorizationService } from '../../../services/authorization.service';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
@@ -38,7 +38,7 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class NotificationService implements OnDestroy {
-    @Output() notificationEmitter: EventEmitter<NotificationModel[]> = new EventEmitter();
+    private notificationEmitter: ReplaySubject<NotificationModel[]> = new ReplaySubject(1);
 
     private webSocketSubject: WebSocketSubject<any> | undefined;
     private notifications: NotificationModel[] = [];
@@ -69,6 +69,16 @@ export class NotificationService implements OnDestroy {
         dialogConfig.width = '80vw';
         const dialogRef = this.dialog.open(NotificationDialogComponent, dialogConfig);
         return dialogRef.afterClosed();
+    }
+
+    /**
+     * Returns an observable that continuously emits the complete notifications array
+     * whenever notification data changes.
+     *
+     * @returns Observable stream of the full notification list.
+     */
+    getNotifications(): Observable<NotificationModel[]> {
+        return this.notificationEmitter.asObservable();
     }
 
     deleteNotification(notification: NotificationModel): Observable<unknown> {
@@ -148,7 +158,7 @@ export class NotificationService implements OnDestroy {
                     break;
                 case 'notification list':
                     this.notifications = (msg.payload as NotificationModel[]).reverse();
-                    this.notificationEmitter.emit(this.notifications);
+                    this.notificationEmitter.next(this.notifications);
                     break;
                 case 'put notification':
                     const n = msg.payload as NotificationModel;
@@ -159,7 +169,7 @@ export class NotificationService implements OnDestroy {
                     } else {
                         this.notifications[idx] = n;
                     }
-                    this.notificationEmitter.emit(this.notifications);
+                    this.notificationEmitter.next(this.notifications);
                     break;
                 case 'delete notification':
                     const id = msg.payload as string;
@@ -167,7 +177,7 @@ export class NotificationService implements OnDestroy {
                     if (indx !== -1) {
                         this.notifications.splice(indx, 1);
                     }
-                    this.notificationEmitter.emit(this.notifications);
+                    this.notificationEmitter.next(this.notifications);
                     break;
                 default:
                     console.log('received unknown message from notification websocket', msg);

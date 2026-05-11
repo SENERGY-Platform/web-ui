@@ -19,8 +19,8 @@ import { SidenavService } from '../sidenav/shared/sidenav.service';
 import { Router } from '@angular/router';
 import { AuthorizationService } from '../../services/authorization.service';
 import { SettingsDialogService } from '../../../modules/settings/shared/settings-dialog.service';
-import { NotificationService } from './notification/shared/notification.service';
-import { NotificationModel } from './notification/shared/notification.model';
+import { NotificationService } from '../notifications/shared/notification.service';
+import { NotificationModel } from '../notifications/shared/notification.model';
 import { ThemingService } from '../../services/theming.service';
 import { InfoService } from 'src/app/modules/info/shared/info.service';
 
@@ -48,7 +48,7 @@ export class ToolbarComponent implements OnInit {
 
     ngOnInit() {
         this.initUser();
-        this.notificationService.notificationEmitter.subscribe((n) => {
+        this.notificationService.getNotifications().subscribe((n) => {
             this.unreadCounter = 0;
             this.notifications = n;
             this.notifications.forEach((no) => (!no.isRead ? this.unreadCounter++ : null));

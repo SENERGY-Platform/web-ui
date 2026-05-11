@@ -16,50 +16,8 @@
 
 <h2 mat-dialog-title>
     <span fxFlex>Notifications</span>
-    <button mat-icon-button color="accent" *ngIf="mode === modes.NOTIFICATIONS" (click)="toggleSettings()">
-        <mat-icon>settings</mat-icon>
-    </button>
 </h2>
 <mat-dialog-content fxFill >
-        <div *ngIf="notifications.length === 0 && mode === modes.NOTIFICATIONS">
-            You don't have any notifications!
-        </div>
-
-        <div class="container" [fxShow]="mode === modes.NOTIFICATIONS">
-            <mat-accordion multi="true">
-                <mat-expansion-panel
-                    *ngFor="let n of getNotificationPage(); let index = index; trackBy: trackNotificationById"
-                    (opened)="setRead(index, true)">
-                    <mat-expansion-panel-header class="right-aligned-header">
-                        <mat-panel-title>
-                            {{n.title}}
-                        </mat-panel-title>
-                        <mat-panel-description>
-                            <span *ngIf="n.created_at !== null" class="date">{{n.created_at | date:'dd.MM.yy HH:mm'}}</span>
-                            <mat-icon *ngIf="!n.isRead">new_releases</mat-icon>
-                            <span *ngIf="n.isRead" class="icon-spacer"></span>
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <ng-template matExpansionPanelContent>
-                        <div class="notification-content">{{n.message}}</div>
-                        <div>
-                            <button mat-icon-button style="float: right" (click)="deleteMessage(index)">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                            <button mat-icon-button style="float: right" disabled="{{!n.isRead}}"
-                                (click)="setRead(index, false)">
-                                <mat-icon>new_releases</mat-icon>
-                            </button>
-                        </div>
-                    </ng-template>
-                </mat-expansion-panel>
-            </mat-accordion>
-            <mat-paginator [fxShow]="notifications.length > 0" [length]="notifications.length"
-                [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]" (page)="moveNotificationPage($event)"
-                showFirstLastButtons aria-label="Select page">
-            </mat-paginator>
-
-        </div>
         <div [fxShow]="mode === modes.SETTINGS">
             <form [formGroup]="channelTopicConfigForm" class="channelTopicConfigForm">
                 <mat-form-field appearance="outline" color="accent">
@@ -209,12 +167,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button *ngIf="mode === modes.SETTINGS || mode === modes.BROKER_EDIT" color="accent"
-        (click)="toggleSettings()">Back
-    </button>
-    <button mat-raised-button *ngIf="mode === modes.NOTIFICATIONS" color="warn" (click)="deleteAllMessages()">Delete
-        all</button>
-    <button mat-raised-button *ngIf="mode === modes.NOTIFICATIONS" color="accent" (click)="setAllRead()">Mark all read
+    <button mat-raised-button *ngIf="mode === modes.BROKER_EDIT" color="accent"
+        (click)="gotoSettings()">Back
     </button>
     <button mat-raised-button color="primary" (click)="close()">Close</button>
 </mat-dialog-actions>

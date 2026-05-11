@@ -24,6 +24,7 @@ import {
   UrlSegment,
   UrlMatchResult,
 } from '@angular/router';
+import { CoreModule } from 'keycloak-angular';
 
 type Prefix = string;
 
@@ -44,6 +45,11 @@ export class SelectiveChunkPreloadStrategy implements PreloadingStrategy {
 }
 
 const init: Route = { path: '', redirectTo: 'dashboard', pathMatch: 'full', data: { preload: false } };
+const coreModule: Route = {
+  matcher: startsWithMatcher('.'),
+  loadChildren: () => import('./core/core.module').then((m) => m.CoreModule),
+  data: { preload: true },
+};
 const dashboardModule: Route = {
   matcher: startsWithMatcher('dashboard'),
   loadChildren: () => import('./modules/dashboard/dashboard.module').then((m) => m.DashboardModule),
@@ -115,6 +121,7 @@ const devModule: Route = {
     RouterModule.forRoot(
       [
         init,
+        coreModule,
         dashboardModule,
         devicesModule,
         dataModule,

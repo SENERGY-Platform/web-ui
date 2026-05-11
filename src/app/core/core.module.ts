@@ -30,7 +30,7 @@ import { ShortOutputVariableNamePipe } from './pipe/short-output-variable-name.p
 import { ShortInputVariableValuePipe } from './pipe/short-input-variable-value.pipe';
 import { WidgetNoDataComponent } from './components/widget-no-data/widget-no-data.component';
 import { MatBadgeModule } from '@angular/material/badge';
-import { NotificationDialogComponent } from './components/toolbar/notification/dialog/notification-dialog.component';
+import { NotificationDialogComponent } from './components/notifications/dialog/notification-dialog.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
@@ -58,12 +58,18 @@ import { KeycloakConfidentialService } from './services/keycloak-confidential.se
 import { MatErrorMessagesDirective } from './directives/matError.directive';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from './directives/close-mtx-select-on-scroll.directive';
+import { NotificationsComponent } from './components/notifications/notifications.component';
 
 export const keycloakServiceToken = new InjectionToken<KeycloakService>('KeycloakService');
 
 
 @NgModule({
     imports: [
+        RouterModule.forChild([{
+            path: 'notifications',
+            component: NotificationsComponent,
+            data: { header: 'Notifications' },
+        }]),
         CommonModule,
         MatSidenavModule,
         MatIconModule,
@@ -108,6 +114,7 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         GenericValidator,
         FitTextComponent,
         MatErrorMessagesDirective,
+        NotificationsComponent,
     ],
     exports: [
         SidenavComponent,
