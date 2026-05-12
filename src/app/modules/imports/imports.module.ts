@@ -39,6 +39,7 @@ import { MatTreeModule } from '@angular/material/tree';
 import { ImportDeployEditDialogComponent } from './import-deploy-edit-dialog/import-deploy-edit-dialog.component';
 import { ImportInstanceExportDialogComponent } from './import-instances/import-instance-export-dialog/import-instance-export-dialog.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatChipsModule } from '@angular/material/chips';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 
@@ -102,6 +103,7 @@ const instances: Route = {
         MatDividerModule,
         MatDialogModule,
         MatTreeModule,
+        MatChipsModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
     ],

@@ -23,7 +23,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin, Observable, Subscription, map, concatMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
@@ -52,6 +52,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
         private snackBar: MatSnackBar,
         private deleteDialog: DialogsService,
         private router: Router,
+        private route: ActivatedRoute,
         private searchbarService: SearchbarService,
         public utilsService: UtilService,
         private permissionsDialogService: PermissionsDialogService,
@@ -75,10 +76,14 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
     permissionsPerInstance: PermissionsV2RightsAndIdModel[] = [];
     userID = '';
     userRoles: string[] = [];
+    instanceId: string | null = null;
 
     ngOnInit(): void {
-        this.initSearch();
-        this.getTotalNumberOfTypes();
+        this.route.queryParamMap.subscribe(params => {
+            this.instanceId = params.get('id');
+            this.initSearch();
+            this.getTotalNumberOfTypes();
+        });
         const userIDResp = this.userService.getUserId();
         if(typeof(userIDResp) == 'string') {
             this.userID = userIDResp;
@@ -91,6 +96,13 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     getTotalNumberOfTypes(): Observable<number> {
+        if (this.instanceId) {
+            this.totalCount = 1;
+            return new Observable(observer => {
+                observer.next(1);
+                observer.complete();
+            });
+        }
         return this.importInstancesService.getTotalCountOfInstances(this.searchText, this.excludeGenerated).pipe(
             map((totalCount: number) => {
                 this.totalCount = totalCount;
@@ -174,8 +186,9 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
 
     load(): Observable<any> {
         this.dataReady = false;
+        const ids = this.instanceId ? [this.instanceId] : undefined;
         return this.importInstancesService
-            .listImportInstances(this.searchText, this.pageSize, this.offset, this.sort, this.excludeGenerated)
+            .listImportInstances(this.searchText, this.pageSize, this.offset, this.sort, this.excludeGenerated, ids)
             .pipe(
                 map((inst: ImportInstancesModel[]) => {
                     this.dataSource.data = inst;
@@ -219,6 +232,14 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
         this.excludeGenerated = !this.excludeGenerated;
         localStorage.setItem('import.instances.excludeGenerated', '' + this.excludeGenerated);
         this.reload();
+    }
+
+    clearInstanceFilter() {
+        this.router.navigate([], { 
+            relativeTo: this.route,
+            queryParams: { id: null },
+            queryParamsHandling: 'merge'
+        });
     }
 
     isAllSelected() {

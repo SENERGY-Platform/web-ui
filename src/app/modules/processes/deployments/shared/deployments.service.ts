@@ -48,6 +48,10 @@ export class DeploymentsService {
     }
 
     getAll(query: string, limit: number, offset: number, feature: string, order: string, source: string): Observable<DeploymentsModel[]> {
+        return this.list(query, limit, offset, feature, order, source);
+    }
+
+    list(query: string, limit: number, offset: number, feature: string, order: string, source: string, id?: string): Observable<DeploymentsModel[]> {
         let url =
             environment.apiAggregatorUrl +
             '/processes?sortBy=' +
@@ -63,6 +67,9 @@ export class DeploymentsService {
         }
         if (source) {
             url += '&source=' + encodeURIComponent(source);
+        }
+        if (id) {
+            url += '&id=' + encodeURIComponent(id);
         }
         return this.http.get<DeploymentsModel[]>(url).pipe(
             map((resp) => resp || []),
@@ -104,6 +111,13 @@ export class DeploymentsService {
         return this.http.get<DeploymentsModel>(environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deploymentId)).pipe(
             map((resp) => (resp && resp.name) || ''),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeploymentName', '')),
+        );
+    }
+
+    getDeployment(deploymentId: string): Observable<DeploymentsModel | null> {
+        return this.list('', 1, 0, 'deploymentTime', 'desc', '', deploymentId).pipe(
+            map((deployments) => (deployments.length > 0 ? deployments[0] : null)),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeployment', null)),
         );
     }
 

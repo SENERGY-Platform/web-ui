@@ -20,6 +20,14 @@
             <mat-icon>{{excludeGenerated ? 'visibility_off' : 'visibility'}}</mat-icon>
         </button>
     </span>
+    <div *ngIf="instanceId" class="filter-chip-container">
+        <mat-chip-set aria-label="Instance filter">
+            <mat-chip selected (removed)="clearInstanceFilter()">
+                Instance: {{instanceId}}
+                <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+        </mat-chip-set>
+    </div>
     <senergy-spinner [show]="!dataReady"></senergy-spinner>
     <div *ngIf="dataReady && dataSource.data.length === 0">No imports found.</div>
 

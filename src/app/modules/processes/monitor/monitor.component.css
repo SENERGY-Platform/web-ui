@@ -36,3 +36,7 @@ table {
 .hub-selected {
     background: rgba(0,0,0,.06);
 }
+
+.filter-chip-row {
+    margin-top: 4px;
+}

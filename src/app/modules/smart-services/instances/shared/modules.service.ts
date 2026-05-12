@@ -37,7 +37,7 @@ export class SmartServiceModuleService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices');
     }
 
-    getModules(options: { limit?: number; offset?: number; type?: string}): Observable<SmartServiceModuleModel[]> {
+    getModules(options: { limit?: number; offset?: number; type?: string; instance_id?: string }): Observable<SmartServiceModuleModel[]> {
         let params = new HttpParams();
         if (options.limit) {
             params = params.set('limit', options.limit);
@@ -47,6 +47,9 @@ export class SmartServiceModuleService {
         }
         if (options.type) {
             params = params.set('module_type', options.type);
+        }
+        if (options.instance_id) {
+            params = params.set('instance_id', options.instance_id);
         }
         return this.http.get<SmartServiceModuleModel[] | null>(environment.smartServiceRepoUrl+'/modules', {params, observe: 'response'}).pipe(
            map((resp) => (resp.body || [] )),

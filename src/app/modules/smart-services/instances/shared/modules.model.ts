@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import { ExportModel } from 'src/app/modules/exports/shared/export.model';
+import { ImportInstancesModel } from 'src/app/modules/imports/import-instances/shared/import-instances.model';
+
 export interface SmartServiceModuleModel {
     id: string;
     user_id: string;
@@ -22,10 +25,18 @@ export interface SmartServiceModuleModel {
     instance_id: string;
     module_type: string;
     module_data: {
-        pipeline_id: string;
-        pipeline: {
+        pipeline_id?: string;
+        pipeline?: {
             id: string;
             name: string;
-        }
+        };
+        process_deployment_name?: string;
+        process_deployment_id?: string;
+        fog_hub?: string;
+        is_fog_deployment?: boolean;
+        business_key?: string;
+        device_group_id?: string;
+        import?: ImportInstancesModel;
+        export?: ExportModel;
     };
 }

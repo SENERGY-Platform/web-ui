@@ -53,3 +53,8 @@ th.mat-mdc-header-cell {
 .table-search-container .search-refresh > div {
     margin-top: -20px;
 }
+
+.filter-chip-container {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}

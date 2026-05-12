@@ -37,6 +37,14 @@
                         </mat-chip-option>
                     </mat-chip-listbox>
                 </div>
+                <div class="filter-chip-row" *ngIf="businessKeyFilter">
+                    <mat-chip-set aria-label="Business key filter">
+                        <mat-chip-row [removable]="true" (removed)="removeBusinessKeyChip()">
+                            Business key: {{businessKeyFilter}}
+                            <mat-icon matChipRemove>cancel</mat-icon>
+                        </mat-chip-row>
+                    </mat-chip-set>
+                </div>
 
                 <div>
                     <div class="mat-elevation-z1"
@@ -134,6 +142,14 @@
                             <mat-icon matChipRemove>cancel</mat-icon>
                         </mat-chip-option>
                     </mat-chip-listbox>
+                </div>
+                <div class="filter-chip-row" *ngIf="businessKeyFilter">
+                    <mat-chip-set aria-label="Business key filter">
+                        <mat-chip-row [removable]="true" (removed)="removeBusinessKeyChip()">
+                            Business key: {{businessKeyFilter}}
+                            <mat-icon matChipRemove>cancel</mat-icon>
+                        </mat-chip-row>
+                    </mat-chip-set>
                 </div>
 
                 <div>

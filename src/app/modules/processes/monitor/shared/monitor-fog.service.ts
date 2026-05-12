@@ -53,6 +53,7 @@ export class MonitorFogService {
         offset: number,
         feature: string,
         order: string,
+        businessKey?: string,
     ): Observable<MonitorProcessTotalModel> {
         let url =
             environment.processSyncUrl +
@@ -69,6 +70,9 @@ export class MonitorFogService {
             '&with_total=true' +
             '&state=' +
             encodeURIComponent(filter);
+        if (businessKey) {
+            url = url + '&business_key=' + encodeURIComponent(businessKey);
+        }
         if (searchtype === 'processDefinitionId') {
             url = url + '&processDefinitionId=' + encodeURIComponent(searchvalue);
         } else {

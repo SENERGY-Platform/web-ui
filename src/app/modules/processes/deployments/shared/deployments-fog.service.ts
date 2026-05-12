@@ -46,6 +46,13 @@ export class DeploymentsFogService {
         private networksService: NetworksService,
     ) {}
 
+    getDeployment(deploymentId: string): Observable<DeploymentsModel | null> {
+        return this.list('', 1, 0, 'deploymentTime', 'desc', deploymentId).pipe(
+            map((deployments) => (deployments.length > 0 ? deployments[0] : null)),
+            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getDeployment', null)),
+        );
+    }
+
     getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null> {
         const url =
             environment.processFogDeploymentUrl +
@@ -121,6 +128,10 @@ export class DeploymentsFogService {
     // lists
 
     getAll(query: string, limit: number, offset: number, feature: string, order: string, _: string): Observable<DeploymentsModel[]> {
+        return this.list(query, limit, offset, feature, order);
+    }
+
+    list(query: string, limit: number, offset: number, feature: string, order: string, id?: string): Observable<DeploymentsModel[]> {
         let url =
             environment.processSyncUrl +
             '/deployments?sort=' +
@@ -138,8 +149,11 @@ export class DeploymentsFogService {
         if (query) {
             url += '&search=' + encodeURIComponent(query);
         }
+        if (id) {
+            url += '&id=' + encodeURIComponent(id);
+        }
 
-        return this.networksService.listExtendedHubs({limit:1000, offset: 0, sortBy: 'name'}).pipe(
+        return this.networksService.listExtendedHubs({limit:1000, offset: 0, sortBy: 'name', ids: [this.hubId]}).pipe(
             map((resp) => resp ? resp.result : [] as ExtendedHubModel[]),
             mergeMap((networks) => {
                 const networkState = new Map<string, ExtendedHubModel>();

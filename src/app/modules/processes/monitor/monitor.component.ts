@@ -24,7 +24,7 @@ import { MonitorProcessModel } from './shared/monitor-process.model';
 import { SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { MonitorProcessTotalModel } from './shared/monitor-process-total.model';
-import { Navigation, Router } from '@angular/router';
+import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { DeploymentsModel } from '../deployments/shared/deployments.model';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
@@ -64,8 +64,14 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     private searchSub: Subscription = new Subscription();
     private finishedSub: Subscription = new Subscription();
     private runningSub: Subscription = new Subscription();
+    private routeSub: Subscription = new Subscription();
     private reloadFinishedSub: EventEmitter<boolean> = new EventEmitter();
     private reloadRunningSub: EventEmitter<boolean> = new EventEmitter();
+    private requestedHubId: string | null = null;
+    businessKeyFilter: string | null = null;
+    private viewInitialized = false;
+    private hubSelectionResolved = false;
+    private tablesInitialized = false;
 
     hubList: HubModel[] = [];
     hub: HubModel | undefined | null;
@@ -83,6 +89,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             offset: number,
             value: string,
             order: string,
+            businessKey?: string,
         ): Observable<MonitorProcessTotalModel>;
         openDetailsDialog(id: string): void;
     };
@@ -92,6 +99,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         private plattformMonitorService: MonitorService,
         private dialogsService: DialogsService,
         private router: Router,
+        private route: ActivatedRoute,
         private hubsService: NetworksService,
         private fogMonitorFactory: MonitorFogFactory,
         public utilsService: UtilService,
@@ -102,34 +110,73 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     ngOnInit() {
+        this.requestedHubId = this.route.snapshot.queryParamMap.get('hubId');
+        this.businessKeyFilter = this.route.snapshot.queryParamMap.get('businessKey') || this.route.snapshot.queryParamMap.get('businesskey');
+        this.routeSub = this.route.queryParamMap.subscribe((params) => {
+            const hubId = params.get('hubId');
+            const businessKey = params.get('businessKey') || params.get('businesskey');
+            const hubChanged = hubId !== this.requestedHubId;
+            const businessKeyChanged = businessKey !== this.businessKeyFilter;
+
+            if (!hubChanged && !businessKeyChanged) {
+                return;
+            }
+
+            this.requestedHubId = hubId;
+            this.businessKeyFilter = businessKey;
+
+            if (hubChanged) {
+                this.applyHubSelectionFromQueryParam();
+            }
+
+            if (this.tablesInitialized) {
+                this.reload();
+            }
+        });
+
         this.hubsService.listSyncNetworks().subscribe((result) => {
             this.hubList = result;
+            this.applyHubSelectionFromQueryParam();
+            this.hubSelectionResolved = true;
+            this.tryInitializeTables();
         });
         this.initSearch();
     }
 
     ngAfterViewInit(): void {
-        this.initRunning();
-        this.initFinished();
+        this.viewInitialized = true;
+        this.tryInitializeTables();
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
         this.finishedSub.unsubscribe();
         this.runningSub.unsubscribe();
+        this.routeSub.unsubscribe();
     }
 
-    selectHub(hub: HubModel | null) {
+    selectHub(hub: HubModel | null, updateQueryParam = false) {
         this.hub = hub;
         if (hub) {
             this.monitorService = this.fogMonitorFactory.withHubId(hub.id);
         } else {
             this.monitorService = this.plattformMonitorService;
         }
+
+        if (updateQueryParam) {
+            this.requestedHubId = hub?.id || null;
+            this.businessKeyFilter = null;
+            this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: { hubId: this.requestedHubId, businessKey: null, businesskey: null },
+                queryParamsHandling: 'merge',
+                replaceUrl: true,
+            });
+        }
     }
 
     selectHubWithReload(hub: HubModel | null) {
-        this.selectHub(hub);
+        this.selectHub(hub, true);
         this.reload();
     }
 
@@ -256,6 +303,15 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         this.reload();
     }
 
+    removeBusinessKeyChip(): void {
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { businessKey: null, businesskey: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    }
+
     paginatorRunningPage($event: PageEvent) {
         this.preferencesService.pageSize = $event.pageSize;
     }
@@ -279,6 +335,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                         this.paginatorRunning.pageSize * this.paginatorRunning.pageIndex,
                         this.sortRunning.active,
                         this.sortRunning.direction,
+                        this.businessKeyFilter || undefined,
                     );
                 }),
                 map((resp: MonitorProcessTotalModel) => {
@@ -313,6 +370,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                         this.paginatorFinished.pageSize * this.paginatorFinished.pageIndex,
                         this.sortFinished.active,
                         this.sortFinished.direction,
+                        this.businessKeyFilter || undefined,
                     );
                 }),
                 map((resp: MonitorProcessTotalModel) => {
@@ -355,13 +413,60 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         const navigation: Navigation | null = this.router.getCurrentNavigation();
         if (navigation !== null) {
             if (navigation.extras.state !== undefined) {
-                const params = navigation.extras.state as { deployment: DeploymentsModel; activeTab: number; hub?: HubModel };
+                const params = navigation.extras.state as {
+                    deployment: DeploymentsModel;
+                    activeTab: number;
+                    hub?: HubModel;
+                    businesskey?: string;
+                };
                 this.selectedDeployment = params.deployment;
                 this.activeIndex = params.activeTab;
                 if (params.hub) {
-                    this.selectHub(params.hub);
+                    this.selectHub(params.hub, true);
+                }
+                if (params.businesskey) {
+                    this.businessKeyFilter = params.businesskey;
+                    this.router.navigate([], {
+                        relativeTo: this.route,
+                        queryParams: { businessKey: params.businesskey, businesskey: null },
+                        queryParamsHandling: 'merge',
+                        replaceUrl: true,
+                    });
                 }
             }
+        }
+    }
+
+    private tryInitializeTables(): void {
+        if (!this.viewInitialized || !this.hubSelectionResolved || this.tablesInitialized) {
+            return;
+        }
+
+        this.tablesInitialized = true;
+        this.initRunning();
+        this.initFinished();
+    }
+
+    private applyHubSelectionFromQueryParam(): void {
+        if (!this.hubList.length) {
+            return;
+        }
+
+        if (!this.requestedHubId) {
+            if (this.hub !== null) {
+                this.selectHub(null, false);
+            }
+            return;
+        }
+
+        const selectedHub = this.hubList.find((hub) => hub.id === this.requestedHubId) || null;
+        if (!selectedHub) {
+            this.selectHub(null, true);
+            return;
+        }
+
+        if (this.hub?.id !== selectedHub.id) {
+            this.selectHub(selectedHub, false);
         }
     }
 

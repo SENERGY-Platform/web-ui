@@ -23,6 +23,7 @@ import { DeviceTypeService } from '../../../metadata/device-types-overview/share
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceInstanceModel} from '../../../devices/device-instances/shared/device-instances.model';
+import {Location} from '@angular/common';
 
 @Component({
     selector: 'senergy-pipeline-details',
@@ -41,6 +42,7 @@ export class PipelineDetailsComponent implements OnInit {
         private sanitizer: DomSanitizer,
         private deviceTypeService: DeviceTypeService,
         private deviceInstanceService: DeviceInstancesService,
+        private location: Location,
     ) {}
 
     ngOnInit() {
@@ -110,5 +112,9 @@ export class PipelineDetailsComponent implements OnInit {
             return filterValue;
         }
         return 'Pipeline: ' + splitted[1] + ', Operator: ' + splitted[0];
+    }
+
+    back(): void {
+        this.location.back();
     }
 }

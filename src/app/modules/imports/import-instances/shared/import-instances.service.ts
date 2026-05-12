@@ -41,6 +41,7 @@ export class ImportInstancesService {
         offset: number | undefined,
         sort: string,
         excludeGenerated: boolean = false,
+        ids?: string[],
     ): Observable<ImportInstancesModel[]> {
         let url = environment.importDeployUrl + '/instances?';
         if (search.length > 0) {
@@ -57,6 +58,9 @@ export class ImportInstancesService {
         }
         if (excludeGenerated) {
             url += '&exclude_generated=true';
+        }
+        if (ids && ids.length > 0) {
+            url += '&ids=' + ids.map((id) => encodeURIComponent(id)).join(',');
         }
         return this.http.get<ImportInstancesModel[]>(url).pipe(map((types) => types || []));
     }

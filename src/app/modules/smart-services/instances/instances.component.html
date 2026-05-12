@@ -32,8 +32,8 @@
 
   <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
 
-    <div class="table-container" [style.max-height]="calcMaxHeight()">
-      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)"
+    <div class="table-container" #tableContainer [style.max-height]="calcMaxHeight()" (scroll)="onTableScroll($event)">
+      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)" multiTemplateDataRows
         [matSortActive]="sortBy" [matSortDirection]="sortDirection">
 
         <ng-container matColumnDef="pub">
@@ -88,7 +88,7 @@
           <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Release</th>
           <td mat-cell *matCellDef="let instance">
             <button mat-icon-button color="accent" matTooltip="Go to Release"
-              (click)="goToRelease(instance.release_id)">
+              (click)="$event.stopPropagation(); goToRelease(instance.release_id)">
               <mat-icon>input_circle</mat-icon>
             </button>
           </td>
@@ -99,7 +99,8 @@
           <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
           <td mat-cell *matCellDef="let instance">
             <button mat-icon-button color="accent" matTooltip="Share"
-              [disabled]="instance.permissions_info.permissions.administrate === false" (click)="shareInstance(instance)">
+              [disabled]="instance.permissions_info.permissions.administrate === false"
+              (click)="$event.stopPropagation(); shareInstance(instance)">
               <mat-icon>share</mat-icon>
             </button>
           </td>
@@ -108,7 +109,9 @@
         <ng-container matColumnDef="delete">
           <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
           <td mat-cell *matCellDef="let instance">
-            <button mat-icon-button color="accent" matTooltip="Delete" (click)="deleteInstance(instance, false)"  [disabled]="instance.permissions_info.permissions.administrate === false">
+            <button mat-icon-button color="accent" matTooltip="Delete"
+              (click)="$event.stopPropagation(); deleteInstance(instance, false)"
+              [disabled]="instance.permissions_info.permissions.administrate === false">
               <mat-icon>delete</mat-icon>
             </button>
           </td>
@@ -117,30 +120,114 @@
         <ng-container matColumnDef="force-delete">
           <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Force Delete</th>
           <td mat-cell *matCellDef="let instance">
-            <button mat-icon-button color="warn" matTooltip="Force Delete (ignore module errors)"  [disabled]="instance.permissions_info.permissions.administrate === false"
-              (click)="deleteInstance(instance, true)">
+            <button mat-icon-button color="warn" matTooltip="Force Delete (ignore module errors)"
+              [disabled]="instance.permissions_info.permissions.administrate === false"
+              (click)="$event.stopPropagation(); deleteInstance(instance, true)">
               <mat-icon>delete</mat-icon>
             </button>
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="expandedDetail">
+          <td mat-cell *matCellDef="let instance" [attr.colspan]="displayedColumns.length">
+            <div class="instance-detail"
+              [@detailExpand]="expandedInstance?.id === instance.id ? 'expanded' : 'collapsed'">
+              <div *ngIf="expandedInstance?.id === instance.id" class="instance-detail-content">
+                <div *ngIf="isLoadingModules(instance.id)">Loading modules...</div>
+
+                <div
+                  *ngIf="!isLoadingModules(instance.id) && hasLoadedModules(instance.id) && getModulesByInstanceId(instance.id).length === 0">
+                  No modules found for this instance.
+                </div>
+
+                <div *ngIf="!isLoadingModules(instance.id) && getModulesByInstanceId(instance.id).length > 0">
+                  <table class="module-table">
+                    <tr *ngFor="let module of getModulesByInstanceId(instance.id)">
+                      @switch(module.module_type) {
+                      @case ('process_deployment') {
+                      <td>Process Deployment</td>
+                      <td>
+                        <button mat-icon-button color="accent" (click)="openDeployment(module)"
+                          [disabled]="!canOpenDeployment(module)">
+                          <mat-icon>arrow_circle_right</mat-icon>
+                        </button>
+                      </td>
+                      }
+                      @case ('process_deployment_start') {
+                      <td>Process Instance {{module.module_data.process_deployment_name}}</td>
+                      <td>
+                        <button mat-icon-button color="accent" (click)="openProcessInstance(module)"
+                          [disabled]="!canOpenProcessInstance(module)">
+                          <mat-icon>arrow_circle_right</mat-icon>
+                        </button>
+                      </td>
+                      }
+                      @case ('widget') {
+                      <td>Widget</td>
+                      }
+                      @case ('device_repository_create_device_group') {
+                      <td>Device Group</td>
+                      <td>
+                        <button mat-icon-button color="accent" (click)="openDeviceGroup(module)"
+                          [disabled]="!canOpenDeviceGroup(module)">
+                          <mat-icon>arrow_circle_right</mat-icon>
+                        </button>
+                      </td>
+                      }
+                      @case ('import') {
+                      <td>Import {{module.module_data.import?.name}}</td>
+                      <td>
+                        <button mat-icon-button color="accent" (click)="openImport(module)">
+                          <mat-icon>arrow_circle_right</mat-icon>
+                        </button>
+                      </td>
+                      }
+                      @case ('analytics') {
+                      <td>Analytics Pipeline {{module.module_data.pipeline?.name}}</td>
+                      <td>
+                        <button mat-icon-button color="accent" (click)="openPipeline(module)">
+                          <mat-icon>arrow_circle_right</mat-icon>
+                        </button>
+                      </td>
+                      }
+                      @case ('export') {
+                      <td>Export {{module.module_data.export?.Name}}</td>
+                      <td>
+                        <button mat-icon-button color="accent" (click)="openExport(module)">
+                          <mat-icon>arrow_circle_right</mat-icon>
+                        </button>
+                      </td>
+                      }
+                      @default {
+                      <td>{{module.module_type}}</td>
+                      <td>{{module.module_data | json}}</td>
+                      }
+                      }
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true">
         </tr>
-        <tr mat-row *matRowDef="let m; columns: displayedColumns;">
+        <tr mat-row *matRowDef="let m; columns: displayedColumns;" class="instance-row"
+          [class.instance-row-expanded]="expandedInstance?.id === m.id" (click)="toggleExpandedRow(m)">
+        </tr>
+        <tr mat-row *matRowDef="let row; columns: ['expandedDetail'];" class="instance-detail-row"
+          [class.instance-detail-row-expanded]="expandedInstance?.id === row.id">
         </tr>
       </table>
     </div>
 
-    <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize"
+    <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageIndex]="pageIndex"
       [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
   </div>
 </div>
 <div class="center-button" *ngIf="this.instanceId">
-    <button
-            mat-raised-button
-            color="accent"
-            (click)="clearQueryParams()"
-    >
-        Reset
-    </button>
+  <button mat-raised-button color="accent" (click)="clearQueryParams()">
+    Reset
+  </button>
 </div>

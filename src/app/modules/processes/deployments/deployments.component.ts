@@ -26,7 +26,7 @@ import { DeploymentsModel, DeploymentsOfflineReasonsModel } from './shared/deplo
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ClipboardService } from 'ngx-clipboard';
 import { environment } from '../../../../environments/environment';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeploymentsMissingDependenciesDialogComponent } from './dialogs/deployments-missing-dependencies-dialog.component';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
@@ -65,10 +65,16 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private getAllSub = new Subscription();
+    private routeSub: Subscription = new Subscription();
     private allDataLoaded = false;
     private source = 'sepl';
     private gridColChangeTimeout: number | undefined;
     private knownMainPanelOffsetHeight = 0;
+    private requestedHubId: string | null = null;
+    deploymentIdFilter: string | null = null;
+    private viewInitialized = false;
+    private searchInitialized = false;
+    private hubSelectionResolved = false;
     showGenerated = false;
     selectedItems: DeploymentsModel[] = [];
     rowHeight = 282;
@@ -76,6 +82,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     hub: HubModel | undefined | null;
 
     deploymentsService: {
+        getDeployment(deploymentId: string): Observable<DeploymentsModel | null>;
         getAll(
             query: string,
             limit: number,
@@ -103,6 +110,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         private snackBar: MatSnackBar,
         private clipboardService: ClipboardService,
         private router: Router,
+        private route: ActivatedRoute,
         private dialogsService: DialogsService,
         private dialog: MatDialog,
         private fogDeploymentsFactory: DeploymentsFogFactory,
@@ -115,22 +123,51 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     ngOnInit() {
         this.userHasDeleteAuthorization = this.platformDeploymentsService.userHasDeleteAuthorization();
 
+        this.requestedHubId = this.route.snapshot.queryParamMap.get('hubId');
+        this.deploymentIdFilter = this.route.snapshot.queryParamMap.get('deploymentId');
+        this.routeSub = this.route.queryParamMap.subscribe((params) => {
+            const hubId = params.get('hubId');
+            const deploymentId = params.get('deploymentId');
+            const hubChanged = hubId !== this.requestedHubId;
+            const deploymentChanged = deploymentId !== this.deploymentIdFilter;
+
+            if (!hubChanged && !deploymentChanged) {
+                return;
+            }
+
+            this.requestedHubId = hubId;
+            this.deploymentIdFilter = deploymentId;
+
+            if (hubChanged) {
+                this.applyHubSelectionFromQueryParam();
+            }
+
+            if (deploymentChanged && !hubChanged && this.searchInitialized) {
+                this.getRepoItems(true);
+            }
+        });
+
         this.hubsService.listSyncNetworks().subscribe((result) => {
             this.hubList = result;
+            this.applyHubSelectionFromQueryParam();
+            this.hubSelectionResolved = true;
+            this.tryInitializeSearchAndLoad();
         });
         this.initGridCols();
     }
 
     ngAfterViewInit() {
+        this.viewInitialized = true;
         this.knownMainPanelOffsetHeight = this.mainPanel.nativeElement.offsetHeight;
         this.limitInit = this.maxItemsDisplayed;
         this.limit = this.limitInit;
-        this.initSearchAndGetDevices();
+        this.tryInitializeSearchAndLoad();
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
         this.getAllSub.unsubscribe();
+        this.routeSub.unsubscribe();
     }
 
     onScroll() {
@@ -145,7 +182,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.getRepoItems(true);
     }
 
-    selectHub(hub: HubModel | null) {
+    selectHub(hub: HubModel | null, updateQueryParam = true) {
         this.hub = hub;
         if (hub) {
             const service = this.fogDeploymentsFactory.withHubId(hub.id);
@@ -155,7 +192,21 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
             this.deploymentsService = this.platformDeploymentsService;
             this.refreshSyncF = null;
         }
-        this.getRepoItems(true);
+
+        if (updateQueryParam) {
+            this.requestedHubId = hub?.id || null;
+            this.deploymentIdFilter = null;
+            this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: { hubId: this.requestedHubId, deploymentId: null },
+                queryParamsHandling: 'merge',
+                replaceUrl: true,
+            });
+        }
+
+        if (this.searchInitialized) {
+            this.getRepoItems(true);
+        }
     }
 
     run(deploymentId: string): void {
@@ -247,6 +298,15 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.router.navigateByUrl('/processes/deployments/config?deploymentId=' + deploymentId);
     }
 
+    removeDeploymentIdFilter(): void {
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { deploymentId: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    }
+
     countCheckboxes(): void {
         this.selectedItems = this.repoItems.value.filter((item: DeploymentsModel) => item.selected === true);
     }
@@ -316,6 +376,38 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         });
     }
 
+    private tryInitializeSearchAndLoad(): void {
+        if (!this.viewInitialized || !this.hubSelectionResolved || this.searchInitialized) {
+            return;
+        }
+
+        this.searchInitialized = true;
+        this.initSearchAndGetDevices();
+    }
+
+    private applyHubSelectionFromQueryParam(): void {
+        if (!this.hubList.length) {
+            return;
+        }
+
+        if (!this.requestedHubId) {
+            if (this.hub !== null) {
+                this.selectHub(null, false);
+            }
+            return;
+        }
+
+        const selectedHub = this.hubList.find((hub) => hub.id === this.requestedHubId) || null;
+        if (!selectedHub) {
+            this.selectHub(null);
+            return;
+        }
+
+        if (this.hub?.id !== selectedHub.id) {
+            this.selectHub(selectedHub, false);
+        }
+    }
+
     private getRepoItems(reset: boolean) {
         if (reset) {
             this.setRepoItemsParams(this.limitInit);
@@ -323,6 +415,18 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         }
 
         this.getAllSub.unsubscribe(); // only one request at a time
+
+        if (this.deploymentIdFilter) {
+            this.getAllSub = this.deploymentsService.getDeployment(this.deploymentIdFilter).subscribe((deployment) => {
+                if (deployment) {
+                    this.addToFormArray([deployment]);
+                }
+                this.allDataLoaded = true;
+                this.ready = true;
+            });
+            return;
+        }
+
         this.getAllSub = this.deploymentsService
             .getAll(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, this.source)
             .subscribe((repoItems: DeploymentsModel[]) => {

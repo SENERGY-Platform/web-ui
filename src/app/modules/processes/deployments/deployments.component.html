@@ -45,7 +45,15 @@
             <mat-icon>refresh</mat-icon>
         </button>
     </div>
-    <div class="deployments-scroll" #mainPanel>
+    <div class="deployment-filter-row" *ngIf="deploymentIdFilter">
+        <mat-chip-set aria-label="Deployment filter">
+            <mat-chip-row [removable]="true" (removed)="removeDeploymentIdFilter()">
+                Deployment ID: {{deploymentIdFilter}}
+                <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip-row>
+        </mat-chip-set>
+    </div>
+    <div class="deployments-scroll" #mainPanel [ngClass]="{'with-filter': deploymentIdFilter}">
         <div infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
             [infiniteScrollContainer]="'.deployments-scroll'" [fromRoot]="true" (scrolled)="onScroll()">
             <div fxLayout="column" [formGroup]="formGroup">

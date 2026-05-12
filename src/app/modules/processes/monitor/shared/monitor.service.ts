@@ -67,6 +67,7 @@ export class MonitorService {
         offset: number,
         value: string,
         order: string,
+        businessKey?: string
     ): Observable<MonitorProcessTotalModel> {
         let url = environment.processServiceUrl + '/v2/history/process-instances?'+
             filter+'=true' +
@@ -75,6 +76,9 @@ export class MonitorService {
             '&firstResult=' + offset +
             '&sortBy=' + value +
             '&sortOrder=' + order;
+        if (businessKey) {
+            url = url + '&processInstanceBusinessKey=' + encodeURIComponent(businessKey);
+        }
         if (searchtype === 'processDefinitionNameLike') {
             url = url + '&processDefinitionNameLike='+encodeURIComponent('%'+searchvalue+'%');
         } else {
