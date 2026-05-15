@@ -39,10 +39,15 @@
         <p>Upload Image</p>
       </div>
       <div *ngIf="form.value.image !== null && form.value.image !== undefined" class="delete-wrapper">
+        <button *ngIf="!cropping" mat-icon-button color="accent" (click)="startCropping()"><mat-icon>crop</mat-icon></button>
+        <button *ngIf="cropping" mat-icon-button color="accent" (click)="stopCropping(true)"><mat-icon>check</mat-icon></button>
+        <button *ngIf="cropping" mat-icon-button color="warn" (click)="stopCropping(false)"><mat-icon>close</mat-icon></button>
         <button mat-icon-button color="warn" (click)="removeImage()"><mat-icon>delete</mat-icon></button>
       </div>
+      <image-cropper *ngIf="cropping" [imageBase64]="form.value.image || undefined" [aspectRatio]="aspectRatio" [containWithinAspectRatio]="true" [maintainAspectRatio]="true" 
+        (imageCropped)="imageCropped($event)"></image-cropper>
       <div *ngIf="form.value.image !== null && form.value.image !== undefined"
-        [hidden]="form.value.image === null && form.value.image === undefined" class="image-wrapper" #imageWrapper>
+        [hidden]="(form.value.image === null && form.value.image === undefined) || cropping" class="image-wrapper" #imageWrapper>
         <canvas #canvas [ngClass]="{'placing': placing !== undefined}" (click)="placeSelected($event)"> </canvas>
       </div>
     </div>
@@ -68,7 +73,7 @@
             </mat-form-field>
             <div class="mat-form-field inline">
               <div class="mat-form-field-wrapper">
-                <button mat-icon-button color="accent" (click)="placePlacement(i); false" matTooltip="Place on Map">
+                <button mat-icon-button color="accent" [disabled]="cropping" (click)="placePlacement(i); false" matTooltip="Place on Map">
                   <mat-icon>point_scan</mat-icon>
                 </button>
                 <button mat-icon-button color="accent" (click)="copyPlacement(i); false">
@@ -96,16 +101,18 @@
               appendTo=".ng-select-anchor">
               <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
                 [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
-                <mtx-option *ngFor="let criteria of defaultCriteria" [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
+              <mtx-option *ngFor="let criteria of defaultCriteria"
+                [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
             </mtx-select>
           </mat-form-field>
 
-           <mat-form-field appearance="outline" color="accent" style="display: flex;">
+          <mat-form-field appearance="outline" color="accent" style="display: flex;">
             <mat-label>Tooltip Criteria</mat-label>
             <mtx-select formControlName="tooltipCriteria" [hideSelected]="false" virtualScroll="true"
-              placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria"
-              appendTo=".ng-select-anchor" multiple closeOnSelect="false">
-              <mtx-option *ngFor="let criteria of defaultCriteria" [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
+              placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria" appendTo=".ng-select-anchor"
+              multiple closeOnSelect="false">
+              <mtx-option *ngFor="let criteria of defaultCriteria"
+                [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
               <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
                 [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
             </mtx-select>

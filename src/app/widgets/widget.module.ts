@@ -135,6 +135,7 @@ import { FloorplanEditDialogComponent } from './floorplan/floorplan-edit-dialog/
 import { ColorPickerComponent, ColorPickerDirective } from 'ngx-color-picker';
 import { CloseMtxSelectOnScrollDirective } from '../core/directives/close-mtx-select-on-scroll.directive';
 import { ConnectionHistoryDialogComponent } from './shared/connection-history-dialog/connection-history-dialog.component';
+import { ImageCropperComponent } from 'ngx-image-cropper';
 
 registerLocaleData(localeDe, 'de');
 
@@ -179,7 +180,8 @@ registerLocaleData(localeDe, 'de');
         CloseMtxSelectOnScrollDirective,
         BaseChartDirective,
         ColorPickerComponent,
-        ColorPickerDirective, 
+        ColorPickerDirective,
+        ImageCropperComponent, 
     ],
     declarations: [
         RangeSliderComponent,

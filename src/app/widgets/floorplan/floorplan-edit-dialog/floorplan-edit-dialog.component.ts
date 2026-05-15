@@ -31,6 +31,7 @@ import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/sh
 import { draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, fpCriteriaConnectionStatus, image, migrateColoring } from '../shared/floorplan.model';
 import { materialIconNames } from 'src/app/core/model/icon.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
+import { ImageCroppedEvent } from 'ngx-image-cropper';
 
 @Component({
   selector: 'senergy-floorplan-edit-dialog',
@@ -64,8 +65,12 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   name = new FormControl<string>('', Validators.required);
 
   defaultCriteria: DeviceGroupCriteriaModel[] = [
-    {aspect_id: '', device_class_id: '', interaction:'', function_id: fpCriteriaConnectionStatus},
+    { aspect_id: '', device_class_id: '', interaction: '', function_id: fpCriteriaConnectionStatus },
   ];
+
+  aspectRatio = 1;
+  cropping = false;
+  croppedImage?: string;
 
   @ViewChild('fileInput', { static: true }) public fileInput!: ElementRef;
   @ViewChild('canvas', { static: false }) canvas: ElementRef<HTMLCanvasElement> | undefined;
@@ -87,12 +92,14 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
       widgetId: string;
       userHasUpdateNameAuthorization: boolean;
       userHasUpdatePropertiesAuthorization: boolean;
+      aspectRatio: number;
     },
   ) {
     this.dashboardId = data.dashboardId;
     this.widgetId = data.widgetId;
     this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
     this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
+    this.aspectRatio = data.aspectRatio;
   }
 
   ngOnInit(): void {
@@ -156,7 +163,6 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
       clearTimeout(this.resizeTimeout);
       this.resizeTimeout = setTimeout(() => {
         this.draw();
-        this.cd.detectChanges();
       }, 30);
     }));
     ro.observe(this.el.nativeElement);
@@ -167,6 +173,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
       this.drawShift = draw(this.canvas.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel, this.form.value.placements?.map((_2, i) => {
         return { text: '' + i };
       }));
+      this.cd.markForCheck();
     } else {
       setTimeout(() => this.draw(), 100);
     }
@@ -311,14 +318,14 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   }
 
   newColoring(value?: {
-    value: number|string;
+    value: number | string;
     color: string;
     showValue: boolean;
     showValueWhenZoomed: boolean;
     icon: string;
   }): FormGroup {
     const fg = this.fb.group({
-      value: new FormControl<number|string>(0),
+      value: new FormControl<number | string>(0),
       color: new FormControl(''),
       showValue: new FormControl(false),
       showValueWhenZoomed: new FormControl(false),
@@ -434,5 +441,45 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
       return true;
     }
     return false;
+  }
+
+  startCropping() {
+    this.cropping = true;
+  }
+
+  stopCropping(save: boolean) {
+    this.cropping = false;
+    if (save) {
+      this.form.patchValue({ image: this.croppedImage || null });
+    }
+    this.croppedImage = undefined;
+    setTimeout(() => {
+      this.draw();
+    }, 30);
+  }
+
+  async imageCropped(event: ImageCroppedEvent) {
+    if (event.base64) {
+      this.croppedImage = event.base64;
+    } else if (event.objectUrl) {
+      this.croppedImage = await this.objectUrlToBase64(event.objectUrl);
+    }
+  }
+
+  private objectUrlToBase64(url: string): Promise<string> {
+    return fetch(url)
+      .then(response => response.blob())
+      .then(blob => new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === 'string') {
+            resolve(reader.result);
+            return;
+          }
+          reject(new Error('Failed to convert object URL to base64'));
+        };
+        reader.onerror = () => reject(new Error('Failed to read cropped image blob'));
+        reader.readAsDataURL(blob);
+      }));
   }
 }

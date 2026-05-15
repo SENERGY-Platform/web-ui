@@ -579,6 +579,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       dashboardId: this.dashboardId,
       userHasUpdateNameAuthorization: this.userHasUpdateNameAuthorization,
       userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization,
+      aspectRatio: this.imageWrapper.nativeElement.offsetWidth / this.imageWrapper.nativeElement.offsetHeight,
     };
     const editDialogRef = this.dialog.open(FloorplanEditDialogComponent, dialogConfig);
 
