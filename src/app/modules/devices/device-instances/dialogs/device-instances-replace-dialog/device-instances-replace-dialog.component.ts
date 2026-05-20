@@ -39,7 +39,8 @@ import { PipelineModel } from 'src/app/modules/data/pipeline-registry/shared/pip
 @Component({
   selector: 'app-device-instances-replace-dialog',
   templateUrl: './device-instances-replace-dialog.component.html',
-  styleUrls: ['./device-instances-replace-dialog.component.css']
+  styleUrls: ['./device-instances-replace-dialog.component.css'],
+  providers: [DatePipe]
 })
 export class DeviceInstancesReplaceDialogComponent implements OnInit {
   DeviceInstancesReplaceDialogComponent = DeviceInstancesReplaceDialogComponent;
