@@ -32,6 +32,7 @@ import { ClipboardModule } from 'ngx-clipboard';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthorizationService } from './core/services/authorization.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
+import {MatNativeDateModule} from '@angular/material/core';
 
 registerLocaleData(localeDe);
 
@@ -48,6 +49,7 @@ registerLocaleData(localeDe);
         PermissionsModule,
         SettingsModule,
         ClipboardModule,
+        MatNativeDateModule
     ], providers: [
         {
             provide: APP_INITIALIZER,
