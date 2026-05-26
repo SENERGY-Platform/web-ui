@@ -24,7 +24,6 @@ import {
   UrlSegment,
   UrlMatchResult,
 } from '@angular/router';
-import { CoreModule } from 'keycloak-angular';
 
 type Prefix = string;
 

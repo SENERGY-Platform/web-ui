@@ -76,14 +76,14 @@ export class FlowDesignerComponent implements AfterViewInit {
                                     operatorsUpdated.oldOperator = cell;
                                     operatorsUpdated.newOperator = {
                                         type: 'senergy.NodeElement',
-                                        inPorts: this.getPortNames(operator!.inputs),
-                                        outPorts: this.getPortNames(operator!.outputs),
-                                        config: operator!.config_values,
-                                        name: operator!.name,
-                                        image: operator!.image,
-                                        operatorId: operator!._id,
-                                        deploymentType: operator!.deploymentType,
-                                        version: operator!.version,
+                                        inPorts: this.getPortNames(operator.inputs),
+                                        outPorts: this.getPortNames(operator.outputs),
+                                        config: operator.config_values,
+                                        name: operator.name,
+                                        image: operator.image,
+                                        operatorId: operator._id,
+                                        deploymentType: operator.deploymentType,
+                                        version: operator.version,
                                     } as CellModel;
                                     const dialogPromise = new Promise<void>((resolve) => {
                                         const dialogRef = this.dialog.open(FlowUpdateDialogComponent, {

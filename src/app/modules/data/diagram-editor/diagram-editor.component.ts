@@ -45,7 +45,7 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
 
     constructor(
         public snackBar: MatSnackBar,
-        private clipboard: Clipboard,
+        private readonly clipboard: Clipboard,
         public paperService: PaperService,
         public nodeFactory: NodeFactory
     ) {
@@ -169,7 +169,7 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
 
     calculateNodePosition(): NodePosition {
         const box = (document.getElementsByClassName('joint-layers')[0] as any).getBBox();
-        return {x: box.x + box.width + 100, y: 200} as NodePosition;
+        return {x: box.x + box.width + 100, y: 200};
     }
 
     private paperScale(sx: number, sy: number) {
