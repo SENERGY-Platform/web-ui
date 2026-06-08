@@ -159,7 +159,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
                 if (this.connectionHistory[0][0].length > 0) {
                     // continue last state to current
                     this.connectionHistory[0][0].push([new Date().toISOString(), this.connectionHistory[0][0][this.connectionHistory[0][0].length - 1][1]]);
-                } 
+                }
                 this.connectionHistory[0][0] = detectAndMergeFlapping(this.connectionHistory[0][0], 3, 300);
                 this.connectionHistory[0][0].reverse();
             });
@@ -177,16 +177,23 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         this.lastValueArray[i].forEach(c => columns.push({ name: c.request.columnName, groupType: this.availabilityControl.value?.groupType }));
 
         const token = await this.authorizationService.getToken();
-        const f = await fetch(environment.timescaleAPIURL + '/prepare-download?query=' + JSON.stringify({
-            serviceId: this.services[i].id,
-            deviceId: this.device.id,
-            columns,
-            time: {
-                start: fromIso,
-                end: toIso,
+        const f = await fetch(environment.timescaleAPIURL + '/prepare-download', {
+            headers: {
+                Authorization: token,
+                'Content-Type': 'application/json',
             },
-            groupTime: this.availabilityControl.value?.groupTime,
-        }), { headers: { Authorization: token } });
+            method: 'POST',
+            body: JSON.stringify({
+                serviceId: this.services[i].id,
+                deviceId: this.device.id,
+                columns,
+                time: {
+                    start: fromIso,
+                    end: toIso,
+                },
+                groupTime: this.availabilityControl.value?.groupTime,
+            })
+        });
         if (!f.ok) {
             throw f.statusText;
         }

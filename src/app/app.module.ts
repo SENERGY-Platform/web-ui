@@ -33,6 +33,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthorizationService } from './core/services/authorization.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 import {MatNativeDateModule} from '@angular/material/core';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 registerLocaleData(localeDe);
 
@@ -67,6 +68,7 @@ registerLocaleData(localeDe);
             multi: true,
         },
         provideHttpClient(withInterceptorsFromDi()),
+        provideNativeDateAdapter(),
     ]
 })
 export class AppModule { }
