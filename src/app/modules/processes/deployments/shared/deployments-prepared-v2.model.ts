@@ -132,7 +132,7 @@ export interface V2DeploymentsPreparedSelectionOptionModel {
     device_group: V2DeploymentsPreparedGroupModel | null;
     import: ImportInstancesModel | null;
     importType: ImportTypeModel | null;
-    path_options: Map<string, DeploymentsSelectionPathOptionModel[]> | null;
+    path_options: {[key: string]: DeploymentsSelectionPathOptionModel[]} | null;
 }
 
 export interface DeploymentsSelectionPathOptionModel {
