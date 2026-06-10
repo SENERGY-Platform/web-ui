@@ -184,3 +184,48 @@ $my-app-theme: mat.m2-define-light-theme($my-app-primary, $my-app-accent, $my-ap
 .color-sidenav {
   color: mat.m2-get-color-from-palette($my-app-sidenav) !important;
 }
+
+.color-accent-50 { color: mat.m2-get-color-from-palette($my-app-accent, 50) !important; }
+.color-accent-100 { color: mat.m2-get-color-from-palette($my-app-accent, 100) !important; }
+.color-accent-200 { color: mat.m2-get-color-from-palette($my-app-accent, 200) !important; }
+.color-accent-300 { color: mat.m2-get-color-from-palette($my-app-accent, 300) !important; }
+.color-accent-400 { color: mat.m2-get-color-from-palette($my-app-accent, 400) !important; }
+.color-accent-500 { color: mat.m2-get-color-from-palette($my-app-accent, 500) !important; }
+.color-accent-600 { color: mat.m2-get-color-from-palette($my-app-accent, 600) !important; }
+.color-accent-700 { color: mat.m2-get-color-from-palette($my-app-accent, 700) !important; }
+.color-accent-800 { color: mat.m2-get-color-from-palette($my-app-accent, 800) !important; }
+.color-accent-900 { color: mat.m2-get-color-from-palette($my-app-accent, 900) !important; }
+.color-accent-A100 { color: mat.m2-get-color-from-palette($my-app-accent, A100) !important; }
+.color-accent-A200 { color: mat.m2-get-color-from-palette($my-app-accent, A200) !important; }
+.color-accent-A400 { color: mat.m2-get-color-from-palette($my-app-accent, A400) !important; }
+.color-accent-A700 { color: mat.m2-get-color-from-palette($my-app-accent, A700) !important; }
+
+.color-warn-50 { color: mat.m2-get-color-from-palette($my-app-warn, 50) !important; }
+.color-warn-100 { color: mat.m2-get-color-from-palette($my-app-warn, 100) !important; }
+.color-warn-200 { color: mat.m2-get-color-from-palette($my-app-warn, 200) !important; }
+.color-warn-300 { color: mat.m2-get-color-from-palette($my-app-warn, 300) !important; }
+.color-warn-400 { color: mat.m2-get-color-from-palette($my-app-warn, 400) !important; }
+.color-warn-500 { color: mat.m2-get-color-from-palette($my-app-warn, 500) !important; }
+.color-warn-600 { color: mat.m2-get-color-from-palette($my-app-warn, 600) !important; }
+.color-warn-700 { color: mat.m2-get-color-from-palette($my-app-warn, 700) !important; }
+.color-warn-800 { color: mat.m2-get-color-from-palette($my-app-warn, 800) !important; }
+.color-warn-900 { color: mat.m2-get-color-from-palette($my-app-warn, 900) !important; }
+.color-warn-A100 { color: mat.m2-get-color-from-palette($my-app-warn, A100) !important; }
+.color-warn-A200 { color: mat.m2-get-color-from-palette($my-app-warn, A200) !important; }
+.color-warn-A400 { color: mat.m2-get-color-from-palette($my-app-warn, A400) !important; }
+.color-warn-A700 { color: mat.m2-get-color-from-palette($my-app-warn, A700) !important; }
+
+.color-sidenav-50 { color: mat.m2-get-color-from-palette($my-app-sidenav, 50) !important; }
+.color-sidenav-100 { color: mat.m2-get-color-from-palette($my-app-sidenav, 100) !important; }
+.color-sidenav-200 { color: mat.m2-get-color-from-palette($my-app-sidenav, 200) !important; }
+.color-sidenav-300 { color: mat.m2-get-color-from-palette($my-app-sidenav, 300) !important; }
+.color-sidenav-400 { color: mat.m2-get-color-from-palette($my-app-sidenav, 400) !important; }
+.color-sidenav-500 { color: mat.m2-get-color-from-palette($my-app-sidenav, 500) !important; }
+.color-sidenav-600 { color: mat.m2-get-color-from-palette($my-app-sidenav, 600) !important; }
+.color-sidenav-700 { color: mat.m2-get-color-from-palette($my-app-sidenav, 700) !important; }
+.color-sidenav-800 { color: mat.m2-get-color-from-palette($my-app-sidenav, 800) !important; }
+.color-sidenav-900 { color: mat.m2-get-color-from-palette($my-app-sidenav, 900) !important; }
+.color-sidenav-A100 { color: mat.m2-get-color-from-palette($my-app-sidenav, A100) !important; }
+.color-sidenav-A200 { color: mat.m2-get-color-from-palette($my-app-sidenav, A200) !important; }
+.color-sidenav-A400 { color: mat.m2-get-color-from-palette($my-app-sidenav, A400) !important; }
+.color-sidenav-A700 { color: mat.m2-get-color-from-palette($my-app-sidenav, A700) !important; }
