@@ -37,9 +37,9 @@ import { MatInputModule } from '@angular/material/input';
 import { ProcessesModule } from '../../processes.module';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-const nullPath = { path: '', characteristicId: '', aspectNode: Object({  }), functionId: '', isVoid: false, value: null, type: '', configurables: [  ] };
+const nullPath = { path: '', characteristicId: '', aspectNode: Object({}), functionId: '', isVoid: false, value: null, type: '', configurables: [] };
 
 describe('ProcessDeploymentsConfigComponent', () => {
     let component: ProcessDeploymentsConfigComponent;
@@ -49,38 +49,39 @@ describe('ProcessDeploymentsConfigComponent', () => {
     const deploymentsServiceSpy: Spy<DeploymentsService> = createSpyFromClass<DeploymentsService>(DeploymentsService);
 
     function initSpies(): void {
-        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [ProcessDeploymentsConfigComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule,
-        CoreModule,
-        MatTabsModule,
-        InfiniteScrollModule,
-        DevicesModule,
-        MatFormFieldModule,
-        ReactiveFormsModule,
-        FlexLayoutModule,
-        MatInputModule,
-        NoopAnimationsModule,
-        ProcessesModule],
-    providers: [
-        { provide: KeycloakService, useClass: MockKeycloakService },
-        { provide: Router, useValue: routerSpy },
-        { provide: DeploymentsService, useValue: deploymentsServiceSpy },
-        {
-            provide: ActivatedRoute,
-            useValue: {
-                snapshot: {
-                    queryParams: {
-                        processId: '4711',
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            declarations: [ProcessDeploymentsConfigComponent],
+            imports: [MatDialogModule,
+                MatSnackBarModule,
+                CoreModule,
+                MatTabsModule,
+                InfiniteScrollModule,
+                DevicesModule,
+                MatFormFieldModule,
+                ReactiveFormsModule,
+                FlexLayoutModule,
+                MatInputModule,
+                NoopAnimationsModule,
+                ProcessesModule],
+            providers: [
+                { provide: KeycloakService, useClass: MockKeycloakService },
+                { provide: Router, useValue: routerSpy },
+                { provide: DeploymentsService, useValue: deploymentsServiceSpy },
+                {
+                    provide: ActivatedRoute,
+                    useValue: {
+                        snapshot: {
+                            queryParams: {
+                                processId: '4711',
+                            },
+                        },
                     },
                 },
-            },
-        },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-}).compileComponents();
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ]
+        }).compileComponents();
         fixture = TestBed.createComponent(ProcessDeploymentsConfigComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -221,7 +222,16 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_device_group_id: null,
                             selected_import_id: null,
 
-                            selected_path: nullPath,
+                            selected_path: {
+                                path: 'value.root.value',
+                                characteristicId: 'testCharacteristic',
+                                aspectNode: Object({}),
+                                functionId: '',
+                                isVoid: false,
+                                value: null,
+                                type: '',
+                                configurables: [],
+                            },
                             selected_path_option: undefined,
                             show: false,
                             selection_options_index: 0,
