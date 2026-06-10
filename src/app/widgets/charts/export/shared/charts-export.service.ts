@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { forkJoin, Observable, of, from } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { ChartsModel } from '../../shared/charts.model';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
@@ -46,7 +46,6 @@ import { catchError, concatMap, map, mergeMap } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
 import { DeviceInstancesWithDeviceTypeTotalModel, DeviceInstanceWithDeviceTypeModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
-import { digestMessage } from 'src/app/core/services/util.service';
 import Color from 'color';
 
 const customColor = '#4484ce'; // /* cc */
@@ -361,14 +360,144 @@ export class ChartsExportService {
                 const obs: Observable<any>[] = [of(null)]; // needs at leat one Obserfable for forkJoin
                 const tableData = this.setData(resp, widget.properties, r.metadata, groupInterval, disableBreaking);
                 if (chooseColors) {
-                    tableData.colors = Array(tableData.table.data[0].length - 1);
-                    obs.push(...tableData.table.data[0].slice(1).map((title, i) =>
-                        // i just created it...
-                        from(digestMessage(title as string, 'SHA-1')).pipe(map(digest => tableData.colors![i - 1] = '#' + digest.slice(0, 6)))));
+                    const titles = tableData.table.data[0].slice(1).map(title => String(title || ''));
+                    tableData.colors = this.getThemeColorsForTitles(titles);
                 }
                 return forkJoin(obs).pipe(map(_ => this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors, hAxisFormat)));
             }
         }));
+    }
+
+    private getThemeColorsForTitles(titles: string[]): string[] {
+        const themePalette = this.getRuntimeThemePalette();
+        return titles.map(title => {
+            const hash = this.getStableStringHash(title);
+            const baseColor = themePalette[hash % themePalette.length];
+            const variationLevel = Math.floor(hash / themePalette.length);
+            return this.createThemeColorVariation(baseColor, variationLevel);
+        });
+    }
+
+    private getRuntimeThemePalette(): string[] {
+        const hues = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', 'A100', 'A200', 'A400', 'A700'];
+        const entries: { className: string; property: 'color' | 'backgroundColor' }[] = [
+            { className: 'color-accent', property: 'color' },
+            { className: 'color-warn', property: 'color' },
+            { className: 'color-sidenav', property: 'color' },
+            { className: 'background-color-accent', property: 'backgroundColor' },
+            { className: 'background-color-sidenav', property: 'backgroundColor' },
+        ];
+
+        ['accent', 'warn', 'sidenav'].forEach(prefix => {
+            hues.forEach(hue => entries.push({ className: `color-${prefix}-${hue}`, property: 'color' }));
+        });
+
+        const colors = entries
+            .map(entry => this.getComputedThemeColor(entry.className, entry.property))
+            .filter((value): value is string => value !== undefined);
+
+        const excludedColors = new Set<string>();
+        if (typeof document !== 'undefined') {
+            const candidates = [
+                document.body ? getComputedStyle(document.body).color : undefined,
+                document.body ? getComputedStyle(document.body).backgroundColor : undefined,
+                document.documentElement ? getComputedStyle(document.documentElement).color : undefined,
+                document.documentElement ? getComputedStyle(document.documentElement).backgroundColor : undefined,
+                '#ffffff', // transparent page backgrounds render on white canvas
+            ];
+            candidates.forEach(value => {
+                if (!value || value === 'transparent') {
+                    return;
+                }
+                try {
+                    const normalized = Color(value);
+                    if (normalized.alpha() > 0) {
+                        excludedColors.add(normalized.hex());
+                    }
+                } catch (_) {
+                    // ignore unparsable values
+                }
+            });
+        }
+
+        const filteredColors = colors.filter(color => {
+            try {
+                const c = Color(color);
+                for (const excluded of excludedColors) {
+                    const e = Color(excluded);
+                    if (c.hex() === e.hex() || this.getRgbDistance(c, e) < 3) {
+                        return false;
+                    }
+                }
+            } catch (_) {
+                return true;
+            }
+            return true;
+        });
+
+        const unique = [...new Set(filteredColors)];
+        return unique.length > 0 ? unique : [customColor];
+    }
+
+    private getRgbDistance(a: any, b: any): number {
+        const [ar, ag, ab] = a.rgb().array();
+        const [br, bg, bb] = b.rgb().array();
+        const dr = ar - br;
+        const dg = ag - bg;
+        const db = ab - bb;
+        return Math.sqrt((dr * dr) + (dg * dg) + (db * db));
+    }
+
+    private createThemeColorVariation(color: string, variationLevel: number): string {
+        if (variationLevel <= 0) {
+            return color;
+        }
+        const step = Math.floor((variationLevel - 1) / 2) + 1;
+        const amount = Math.min(0.08 * step, 0.36);
+        try {
+            const varied = variationLevel % 2 === 1
+                ? Color(color).lighten(amount)
+                : Color(color).darken(amount);
+
+            const nearExtreme = (c: any) => this.getRgbDistance(c, Color('#ffffff')) < 24 || this.getRgbDistance(c, Color('#000000')) < 24;
+            if (!nearExtreme(varied)) {
+                return varied.hex();
+            }
+
+            // Pull extreme variants back toward the base theme color.
+            const corrected = varied.mix(Color(color), 0.7);
+            return nearExtreme(corrected) ? color : corrected.hex();
+        } catch (_) {
+            return color;
+        }
+    }
+
+    private getComputedThemeColor(className: string, property: 'color' | 'backgroundColor'): string | undefined {
+        if (typeof document === 'undefined' || !document.body) {
+            return undefined;
+        }
+        const element = document.createElement('span');
+        element.className = className;
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        const cssValue = getComputedStyle(element)[property];
+        document.body.removeChild(element);
+        if (!cssValue || cssValue === 'transparent') {
+            return undefined;
+        }
+        try {
+            return Color(cssValue).hex();
+        } catch (_) {
+            return undefined;
+        }
+    }
+
+    private getStableStringHash(value: string): number {
+        let hash = 0;
+        for (let i = 0; i < value.length; i++) {
+            hash = ((hash << 5) - hash + value.charCodeAt(i)) | 0;
+        }
+        return Math.abs(hash);
     }
 
     private setData(data: any[][][][], properties: WidgetPropertiesModels, metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][], groupInterval?: string, disableBreaking = false

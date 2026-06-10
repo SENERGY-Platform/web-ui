@@ -26,7 +26,7 @@ import { ErrorModel } from '../../../core/model/error.model';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { ChartsService } from '../shared/charts.service';
 import { ChartsExportDeviceGroupMergingStrategy, ChartsExportVAxesModel } from './shared/charts-export-properties.model';
-import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartDataset, ChartTypeRegistry, Point, TooltipModel, Plugin } from 'chart.js';
+import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartDataset, ChartTypeRegistry, Point, TooltipModel, Plugin, LegendElement, LegendItem, ChartEvent } from 'chart.js';
 import { DatePipe } from '@angular/common';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import annotationPlugin, { AnnotationOptions } from 'chartjs-plugin-annotation';
@@ -80,6 +80,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         annotations?: AnnotationOptions[];
         plugins: Plugin<keyof ChartTypeRegistry, AnyObject>[];
         cursorLocked: boolean;
+        datasetColors: string[];
     } = {
             options: {},
             data: undefined,
@@ -87,6 +88,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             tooltipAllowed: false,
             tooltipDisplay: 'none',
             tooltipDatasets: [],
+            datasetColors: [],
             plugins: [{
                 id: 'chartClickXLabel',
                 events: ['click'],
@@ -134,6 +136,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private resizeTimeout: any;
     private timeRgx = /(\d+)(ms|s|months|m|h|d|w|y)/;
+    private hoveredDatasetIndex: number | null = null;
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -241,6 +244,28 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         this.configureWidget = false;
     }
 
+    doubleClickTimeout: any;
+    private onLegendClick() {
+        const that = this;
+        return (e: ChartEvent, legendItem: LegendItem, legend: LegendElement<any>) => {
+            if (that.doubleClickTimeout === undefined) {
+                that.doubleClickTimeout = setTimeout(() => {
+                    that.doubleClickTimeout = undefined;
+                    const defaultOnClick = Chart.defaults.plugins.legend.onClick;
+                    if (defaultOnClick !== undefined) {
+                        defaultOnClick.call(legend, e, legendItem, legend);
+                    }
+                }, 150) as unknown as number;
+            } else {
+                clearTimeout(that.doubleClickTimeout);
+                that.doubleClickTimeout = undefined;
+                that.chartjs.data?.datasets.forEach((_, i) => {
+                    legend.chart.getDatasetMeta(i).hidden = legendItem.datasetIndex !== i;
+                });
+                legend.chart.update();
+            }
+        };
+    }
 
     private resizeChart() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
@@ -305,6 +330,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 maintainAspectRatio: false,
                 events: ['click', 'mousemove'],
                 onHover: (_, elements, chart) => {
+                    const hoveredIndex = elements !== undefined && elements.length > 0 ? elements[0].datasetIndex : null;
+                    this.updateDatasetHoverStyle(hoveredIndex, chart);
                     const style = (chart.canvas?.parentNode as any)?.style;
                     if (style === null) {
                         return;
@@ -325,6 +352,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 plugins: {
                     legend: {
                         display: this.zoom,
+                        onClick: this.onLegendClick(),
                     },
                     tooltip: {
                         enabled: false,
@@ -493,11 +521,15 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 if (this.widget.properties.chartType === 'ColumnChart') {
                     if (this.chartExportData?.dataTable.length < 2) {
                         this.chartjs.data = undefined;
+                        this.chartjs.datasetColors = [];
+                        this.hoveredDatasetIndex = null;
                         this.ready = true;
                         this.refreshing = false;
                         return;
                     }
                     const datasets: ChartDataset[] = new Array(this.chartExportData?.dataTable[0].length - 1).fill({});
+                    this.chartjs.datasetColors = [];
+                    this.hoveredDatasetIndex = null;
                     const axes = this.modifiedVaxes || this.widget.properties.vAxes;
                     this.chartExportData?.dataTable[0].slice(1).forEach((label, i) => {
                         const axis = axes === undefined ? undefined : axes[i];
@@ -507,6 +539,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         } else {
                             datasets[i].backgroundColor = window.getComputedStyle(document.getElementsByClassName('color-lookup-accent')[0], null).getPropertyValue('color');
                         }
+                        this.chartjs.datasetColors[i] = '' + datasets[i].backgroundColor;
                     });
                     let dateFormat = this.hAxisFormat || undefined;
                     if (dateFormat !== undefined && dateFormat !== null && dateFormat.length === 0) {
@@ -1024,6 +1057,58 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             default:
                 return '';
         }
+    }
+
+    private updateDatasetHoverStyle(hoveredIndex: number | null, chart: Chart): void {
+        if (this.hoveredDatasetIndex === hoveredIndex) {
+            return;
+        }
+
+        const datasets = this.chartjs.data?.datasets;
+        if (datasets === undefined) {
+            return;
+        }
+
+        this.hoveredDatasetIndex = hoveredIndex;
+        datasets.forEach((dataset, i) => {
+            if (hoveredIndex === null || hoveredIndex === i) {
+                dataset.backgroundColor = this.chartjs.datasetColors[i];
+            } else {
+                dataset.backgroundColor = this.withOpacityPercent(this.chartjs.datasetColors[i], 25);
+            }
+        });
+        chart.update();
+    }
+
+    private withOpacityPercent(color: string, opacityPercent: number): string {
+        const alpha = Math.max(0, Math.min(100, opacityPercent)) / 100;
+        const trimmed = color.trim();
+
+        if (trimmed.startsWith('#')) {
+            const hex = trimmed.slice(1);
+            if (hex.length === 3) {
+                const r = parseInt(hex[0] + hex[0], 16);
+                const g = parseInt(hex[1] + hex[1], 16);
+                const b = parseInt(hex[2] + hex[2], 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+            if (hex.length === 6) {
+                const r = parseInt(hex.slice(0, 2), 16);
+                const g = parseInt(hex.slice(2, 4), 16);
+                const b = parseInt(hex.slice(4, 6), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+        }
+
+        const rgbMatch = trimmed.match(/^rgba?\(([^)]+)\)$/i);
+        if (rgbMatch !== null) {
+            const parts = rgbMatch[1].split(',').map(p => p.trim());
+            if (parts.length >= 3) {
+                return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+            }
+        }
+
+        return color;
     }
 
     private drillStackPush(axes: ChartsExportVAxesModel[], stacked: boolean): void {
