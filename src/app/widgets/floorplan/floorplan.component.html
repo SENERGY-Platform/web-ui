@@ -64,6 +64,19 @@
 
           </table>
         </div>
+        <table class="unplaced-table mat-elevation-z4" *ngIf="unplacedRows.length > 0">
+          <tr *ngFor="let row of unplacedRows">
+            <td><mat-icon [style.color]="row.color" class="unplaced-icon">{{row.icon}}</mat-icon></td>
+            <td class="unplaced-alias">{{row.alias}}</td>
+            <td class="unplaced-value">{{row.value}}</td>
+            <td class="unplaced-action">
+              <button *ngIf="hasAction(row.index)" mat-mini-fab color="accent"
+                (click)="performRowAction(row.index)" matTooltip="Toggle">
+                <mat-icon>mode_off_on</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
   </mat-card-content>

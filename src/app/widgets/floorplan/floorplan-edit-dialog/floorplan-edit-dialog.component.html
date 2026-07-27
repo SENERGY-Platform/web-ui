@@ -31,6 +31,10 @@
       <mat-error senergyError label="Point Size"></mat-error>
     </mat-form-field>
 
+    <div *ngIf="userHasUpdatePropertiesAuthorization" [formGroup]="form" class="unplaced-checkbox">
+      <mat-checkbox formControlName="showUnplacedTable">Show elements without position in a table</mat-checkbox>
+    </div>
+
     <div *ngIf="userHasUpdatePropertiesAuthorization" class="file-upload-wrapper" (drop)="onFileDrop($event)"
       (dragover)="onDragOver($event)">
       <input type="file" accept="image/*" (change)="onFileChange($event)" hidden #fileInput />
@@ -61,7 +65,10 @@
           <mat-panel-title>
             <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.value.alias}} </span>
           </mat-panel-title>
-          <mat-panel-description>{{i}}</mat-panel-description>
+          <mat-panel-description>
+            <span *ngIf="!isPlaced(tab)" class="not-placed-hint">not placed</span>
+            {{isPlaced(tab) ? i : ''}}
+          </mat-panel-description>
         </mat-expansion-panel-header>
 
         <ng-template matExpansionPanelContent>
@@ -77,6 +84,10 @@
                 <mat-checkbox formControlName="showAliasWhenZoomed">When maximized</mat-checkbox>
                 <button mat-icon-button color="accent" [disabled]="cropping" (click)="placePlacement(i); false" matTooltip="Place on Map">
                   <mat-icon>point_scan</mat-icon>
+                </button>
+                <button mat-icon-button color="accent" *ngIf="isPlaced(tab)" (click)="removePosition(i); false"
+                  matTooltip="Remove from Map">
+                  <mat-icon>location_off</mat-icon>
                 </button>
                 <button mat-icon-button color="accent" (click)="copyPlacement(i); false">
                   <mat-icon>content_copy</mat-icon>

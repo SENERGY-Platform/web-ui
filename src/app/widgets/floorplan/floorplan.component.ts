@@ -21,7 +21,7 @@ import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
 import { map, Observable, Subscription, of, forkJoin, concatMap, delay } from 'rxjs';
-import { CriteriaAndBaseCharacteristicModel, DeviceGroupWithValueModel, fpCriteriaConnectionStatus, image, migrateColoring, TooltipCriteria } from './shared/floorplan.model';
+import { CriteriaAndBaseCharacteristicModel, DeviceGroupWithValueModel, fpCriteriaConnectionStatus, image, isPlaced, migrateColoring, TooltipCriteria } from './shared/floorplan.model';
 import { DeviceCommandModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
 import { Point } from '@angular/cdk/drag-drop';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
@@ -64,6 +64,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   functions: DeviceTypeFunctionModel[] = [];
   deviceClasses: DeviceTypeDeviceClassModel[] = [];
   concepts: ConceptsCharacteristicsModel[] = [];
+  unplacedRows: { index: number; alias: string; icon: string; color: string; value: string }[] = [];
 
   chartjs: {
     options: ChartConfiguration['options'];
@@ -189,9 +190,13 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
             hoverRadius: this.dotSize,
             pointStyle: (ctx) => {
               const def = 'circle';
+              if (ctx.parsed === undefined) {
+                // chart.js resolves the options of datasets without data points against a dataset context, which has no parsed values
+                return def;
+              }
               const dsIndex = this.chartjs.data?.datasets.findIndex(d => {
-                const data = d.data[0] as { x: number, y: number };
-                return data.x === ctx.parsed.x && data.y === ctx.parsed.y;
+                const data = d.data[0] as { x: number, y: number } | undefined; // unplaced placements have no data
+                return data?.x === ctx.parsed.x && data?.y === ctx.parsed.y;
               });
               if (dsIndex === undefined) {
                 return def;
@@ -278,10 +283,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
           }
           let ok = elements !== undefined && elements.length === 1;
           if (ok) {
-            const datasetIndex = elements[0].datasetIndex;
-            const info = this.findRelatedControllingCriteria(datasetIndex);
-            ok &&= info.criteriaAndCharacteristic.length === 1;
-            ok &&= info.criteriaAndCharacteristic[0].characteristic === undefined;
+            ok = this.hasAction(elements[0].datasetIndex);
           }
           if (ok) {
             style.cursor = 'pointer';
@@ -291,11 +293,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
         },
         onClick: (_, elements) => {
           if (elements !== undefined && elements.length === 1) {
-            const datasetIndex = elements[0].datasetIndex;
-            const info = this.findRelatedControllingCriteria(datasetIndex);
-            if (info.criteriaAndCharacteristic.length === 1 && info.criteriaAndCharacteristic[0].characteristic === undefined) {
-              this.performAction(info.deviceGroupId, info.criteriaAndCharacteristic[0].criteria);
-            }
+            this.performRowAction(elements[0].datasetIndex);
           }
         }
       },
@@ -405,6 +403,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     const showValue: boolean[] = [];
     const showValueWhenZoomed: boolean[] = [];
     const icons: string[] = [];
+    const unplacedRows: { index: number; alias: string; icon: string; color: string; value: string }[] = [];
     this.widget.properties.floorplan?.placements.forEach((p, i) => {
       if (this.widget.properties.floorplan === undefined || this.widget.properties.floorplan.placements === null || this.img === undefined) {
         return;
@@ -454,15 +453,24 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         }
       }
-      let label = '' + value;
-      if (this.functionIdToUnit.has(this.widget.properties.floorplan.placements[i].criteria.function_id)) {
+      let label = value === undefined || value === null ? '' : '' + value;
+      if (label.length > 0 && this.functionIdToUnit.has(this.widget.properties.floorplan.placements[i].criteria.function_id)) {
         label += ' ' + this.functionIdToUnit.get(this.widget.properties.floorplan.placements[i].criteria.function_id);
       }
       icons[i] = icon;
       showValueWhenZoomed[i] = zoom;
       showValue[i] = notZoom;
+      if (!isPlaced(p)) {
+        // keep the dataset to preserve index alignment with the placements, but draw nothing
+        datasets[i] = { data: [], label, backgroundColor: color };
+        if (this.widget.properties.floorplan.showUnplacedTable) {
+          unplacedRows.push({ index: i, alias: p.alias, icon, color, value: label });
+        }
+        return;
+      }
       datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color };
     });
+    this.unplacedRows = unplacedRows;
     this.chartjs.data = { datasets };
     this.chartjs.icons = icons;
     this.chartjs.showValueWhenZoomed = showValueWhenZoomed;
@@ -726,6 +734,20 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       return { criteria, baseCharacteristic: concept?.characteristics.find(char => char.id === concept.base_characteristic_id) === undefined };
     });
     return { criteriaAndCharacteristic, deviceGroupId: deviceGroup.id };
+  }
+
+  /** Whether the placement can be controlled directly, i.e. by clicking its dot or its button in the table */
+  hasAction(datasetIndex: number): boolean {
+    const info = this.findRelatedControllingCriteria(datasetIndex);
+    return info.criteriaAndCharacteristic.length === 1 && info.criteriaAndCharacteristic[0].characteristic === undefined;
+  }
+
+  performRowAction(datasetIndex: number) {
+    if (!this.hasAction(datasetIndex)) {
+      return;
+    }
+    const info = this.findRelatedControllingCriteria(datasetIndex);
+    this.performAction(info.deviceGroupId, info.criteriaAndCharacteristic[0].criteria);
   }
 
   filterRelatedControllingCriteria(c: DeviceGroupCriteriaModel, l: DeviceGroupCriteriaModel[], value?: any): DeviceGroupCriteriaModel[] {

@@ -23,7 +23,13 @@ export interface FloorplanWidgetPropertiesModel {
         image: string | null;
         placements: FloorplanWidgetCapabilityModel[];
         dotSize: number;
+        showUnplacedTable?: boolean;
     }
+}
+
+/** A placement without a position is not drawn on the map, but may be listed in the table */
+export function isPlaced(p: FloorplanWidgetCapabilityModel): boolean {
+    return p.position?.x !== null && p.position?.x !== undefined && p.position?.y !== null && p.position?.y !== undefined;
 }
 
 export interface FloorplanWidgetCapabilityModel {
@@ -111,6 +117,9 @@ export function draw(canvas: HTMLCanvasElement, properties: FloorplanWidgetPrope
     ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
 
     properties.floorplan?.placements.forEach((p, i) => {
+        if (!isPlaced(p)) {
+            return;
+        }
         ctx.beginPath();
         const x = (p.position.x || 0) * img.width * ratio + centerShiftX;
         const y = (p.position.y || 0) * img.height * ratio + centerShiftY;

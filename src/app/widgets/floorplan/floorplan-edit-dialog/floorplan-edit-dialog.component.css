@@ -93,3 +93,12 @@
   display: inline;
   padding-top: 0.9em;
 }
+
+.unplaced-checkbox {
+  margin-bottom: 1rem;
+}
+
+.not-placed-hint {
+  margin-right: 0.5em;
+  font-style: italic;
+}

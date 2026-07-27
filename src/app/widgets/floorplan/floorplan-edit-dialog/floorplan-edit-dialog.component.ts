@@ -28,7 +28,7 @@ import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devi
 import { DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeAspectNodeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
-import { draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, fpCriteriaConnectionStatus, image, migrateColoring } from '../shared/floorplan.model';
+import { draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, fpCriteriaConnectionStatus, image, isPlaced, migrateColoring } from '../shared/floorplan.model';
 import { materialIconNames } from 'src/app/core/model/icon.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
@@ -61,6 +61,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     image: new FormControl<string | null>(null),
     placements: new FormArray([].map(this.newPlacement)),
     dotSize: new FormControl<number>(25, { validators: [Validators.required, Validators.min(1)] }),
+    showUnplacedTable: new FormControl<boolean>(false),
   });
   name = new FormControl<string>('', Validators.required);
 
@@ -274,9 +275,9 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
       alias: new FormControl<string>(''),
       showAlias: new FormControl<boolean>(false),
       showAliasWhenZoomed: new FormControl<boolean>(false),
-      position: new FormGroup({
-        x: new FormControl<number>(0),
-        y: new FormControl<number>(0),
+      position: new FormGroup({ // null until placed on the map
+        x: new FormControl<number | null>(null),
+        y: new FormControl<number | null>(null),
       }),
       coloring: new FormArray([].map(this.newColoring)),
       valueLow: new FormControl<number | null>(null),
@@ -430,6 +431,16 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
 
   getColoringControls(tab: FormGroup<any>): FormArray<FormGroup> {
     return tab.controls.coloring as FormArray;
+  }
+
+  isPlaced(tab: FormGroup<any>): boolean {
+    return isPlaced(tab.getRawValue() as FloorplanWidgetCapabilityModel);
+  }
+
+  removePosition(i: number) {
+    this.placing = undefined;
+    this.form.controls.placements.at(i).patchValue({ position: { x: null, y: null } });
+    this.draw();
   }
 
   private filterCriteria(d: DeviceGroupModel) {
