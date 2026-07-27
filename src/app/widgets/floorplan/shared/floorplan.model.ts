@@ -30,6 +30,8 @@ export interface FloorplanWidgetCapabilityModel {
     criteria: DeviceGroupCriteriaWithValueModel;
     tooltipCriteria?: DeviceGroupCriteriaWithValueModel[] | null;
     alias: string;
+    showAlias?: boolean;
+    showAliasWhenZoomed?: boolean;
     deviceGroupId: string | null;
     position: {
         x: number | null;

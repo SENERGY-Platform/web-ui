@@ -73,6 +73,8 @@
             </mat-form-field>
             <div class="mat-form-field inline">
               <div class="mat-form-field-wrapper">
+                <mat-checkbox formControlName="showAlias">Display alias</mat-checkbox>
+                <mat-checkbox formControlName="showAliasWhenZoomed">When maximized</mat-checkbox>
                 <button mat-icon-button color="accent" [disabled]="cropping" (click)="placePlacement(i); false" matTooltip="Place on Map">
                   <mat-icon>point_scan</mat-icon>
                 </button>

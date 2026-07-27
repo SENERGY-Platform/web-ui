@@ -223,11 +223,20 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
               canvasCtx.fillStyle = ds.backgroundColor as string;
 
 
+              const texts: string[] = [];
+              if ((this.zoom && placement.showAliasWhenZoomed) || (!this.zoom && placement.showAlias)) {
+                texts.push(placement.alias);
+              }
               if ((this.zoom && this.chartjs.showValueWhenZoomed[dsIndex]) || (!this.zoom && this.chartjs.showValue[dsIndex])) {
+                texts.push(ds.label || '');
+              }
+              const text = texts.join(': ');
+
+              if (text.length > 0) {
                 const originWidth = canvas.width;
                 const iconWidth = canvasCtx.measureText(icon).width;
                 canvasCtx.font = fontSize + ' Arial';
-                const right = iconWidth + canvasCtx.measureText(ds.label || '').width;
+                const right = iconWidth + canvasCtx.measureText(text).width;
                 canvas.width += right;
 
                 canvasCtx.beginPath();
@@ -246,7 +255,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
 
                 canvasCtx.font = fontSize + ' Roboto, sans-serif';
                 canvasCtx.textAlign = 'left';
-                canvasCtx.fillText(ds.label || '', originWidth / 2 + iconWidth, originWidth / 2 + originWidth / size);
+                canvasCtx.fillText(text, originWidth / 2 + iconWidth, originWidth / 2 + originWidth / size);
 
               } else {
                 canvasCtx.beginPath();

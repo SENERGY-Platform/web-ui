@@ -272,6 +272,8 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
       tooltipCriteria: new FormControl<DeviceGroupCriteriaModel[] | null>(null),
       deviceGroupId: new FormControl<string>(''),
       alias: new FormControl<string>(''),
+      showAlias: new FormControl<boolean>(false),
+      showAliasWhenZoomed: new FormControl<boolean>(false),
       position: new FormGroup({
         x: new FormControl<number>(0),
         y: new FormControl<number>(0),
