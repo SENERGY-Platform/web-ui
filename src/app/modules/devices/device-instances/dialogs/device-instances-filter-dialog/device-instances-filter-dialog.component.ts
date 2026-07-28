@@ -43,12 +43,16 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
         {name: 'Offline', value: DeviceInstancesRouterStateTabEnum.OFFLINE},
         {name: 'Unknown', value: DeviceInstancesRouterStateTabEnum.UNKNOWN}
     ];
+    attributeKeyOptions: string[] = [];
+    attributeValueOptions: string[] = [];
 
     form = new FormGroup({
         location: new FormControl<string|undefined>(undefined),
         network: new FormControl<string|undefined>(undefined),
         deviceTypes: new FormControl<string[]>([]),
         connectionState: new FormControl<DeviceInstancesRouterStateTabEnum|undefined>(DeviceInstancesRouterStateTabEnum.ALL),
+        attributeKeys: new FormControl<string[]>([]),
+        attributeValues: new FormControl<string[]>([]),
         filter_inactive: new FormControl<boolean>(false),
     });
 
@@ -87,8 +91,12 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
         );
 
         optionLoadObs.push(
-            this.deviceInstancesService.listUsedDeviceTypeIds().pipe(
-                concatMap((deviceTypeIds) => this.deviceTypesService.getDeviceTypeListByIds(deviceTypeIds)),
+            this.deviceInstancesService.listUsedFilterOptions().pipe(
+                concatMap((usedOptions) => {
+                    this.attributeKeyOptions = usedOptions.attributeKeys;
+                    this.attributeValueOptions = usedOptions.attributeValues;
+                    return this.deviceTypesService.getDeviceTypeListByIds(usedOptions.deviceTypeIds);
+                }),
                 map((deviceTypes) => {
                     this.deviceTypeOptions = deviceTypes;
                 })
@@ -128,6 +136,16 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
             this.form.controls.network.patchValue(this.savedFilterSelection.network);
         }
 
+        if(this.savedFilterSelection.attributeKeys != null) {
+            this.savedFilterSelection.attributeKeys.forEach(key => this.addAttributeKeyOption(key));
+            this.form.controls.attributeKeys.patchValue(this.savedFilterSelection.attributeKeys);
+        }
+
+        if(this.savedFilterSelection.attributeValues != null) {
+            this.savedFilterSelection.attributeValues.forEach(value => this.addAttributeValueOption(value));
+            this.form.controls.attributeValues.patchValue(this.savedFilterSelection.attributeValues);
+        }
+
         if(this.savedFilterSelection.deviceAttributeBlacklist?.find(attr => attr.key === 'inactive' && attr.value === 'true', origin === 'web-ui')) {
             this.form.controls.filter_inactive.patchValue(true);
             this.cd.markForCheck(); 
@@ -148,6 +166,32 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
 
     resetDeviceTypeFilter() {
         this.form.controls.deviceTypes.patchValue([]);
+    }
+
+    resetAttributeKeyFilter() {
+        this.form.controls.attributeKeys.patchValue([]);
+    }
+
+    resetAttributeValueFilter() {
+        this.form.controls.attributeValues.patchValue([]);
+    }
+
+    // allows filtering for attributes that no currently listed device uses
+    addAttributeKeyOption = (text: string): string => {
+        this.attributeKeyOptions = this.addOption(this.attributeKeyOptions, text);
+        return text;
+    };
+
+    addAttributeValueOption = (text: string): string => {
+        this.attributeValueOptions = this.addOption(this.attributeValueOptions, text);
+        return text;
+    };
+
+    private addOption(options: string[], text: string): string[] {
+        if (options.includes(text)) {
+            return options;
+        }
+        return [...options, text].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
     }
 
     close(): void {

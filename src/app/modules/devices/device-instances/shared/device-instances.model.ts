@@ -100,6 +100,8 @@ export interface FilterSelection {
     network?: string;
     networkName?: string;
     deviceAttributeBlacklist?: Attribute[];
+    attributeKeys?: string[];
+    attributeValues?: string[];
 }
 
  

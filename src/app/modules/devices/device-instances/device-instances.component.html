@@ -64,6 +64,20 @@
                     <mat-icon>cancel</mat-icon>
                 </button>
             </mat-chip>
+            <mat-chip *ngFor="let key of routerAttributeKeys; let i = index">
+                <mat-icon matChipAvatar>sell</mat-icon>
+                {{key}}
+                <button matChipRemove (click)="this.routerAttributeKeys.splice(i, 1); updateQueryParams(); reload()">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip>
+            <mat-chip *ngFor="let value of routerAttributeValues; let i = index">
+                <mat-icon matChipAvatar>label</mat-icon>
+                {{value}}
+                <button matChipRemove (click)="this.routerAttributeValues.splice(i, 1); updateQueryParams(); reload()">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip>
             @for (attribute of this.routerDeviceAttributeBlacklist; track attribute) {
                 <mat-chip>
                 <mat-icon matChipAvatar>sell</mat-icon>
@@ -137,6 +151,28 @@
                             *ngIf="device.shared" class="color-sidenav info-icon">
                             share
                         </mat-icon>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="attributes">
+                    <th mat-header-cell *matHeaderCellDef>Attributes</th>
+                    <td mat-cell *matCellDef="let device">
+                        <div class="attribute-chips">
+                            <button type="button" class="attribute-chip"
+                                *ngFor="let attr of shownAttributes(device)"
+                                [class.filtered]="isAttributeFiltered(attr)"
+                                [matTooltip]="attributeChipTooltip(attr)"
+                                (click)="toggleAttributeFilter(attr)">
+                                {{attr.key}}
+                            </button>
+                            <button type="button" class="attribute-chip"
+                                *ngIf="hiddenAttributes(device).length > 0"
+                                [class.filtered]="hasFilteredHiddenAttribute(device)"
+                                [matMenuTriggerFor]="attributeMenu" [matMenuTriggerData]="{device: device}"
+                                matTooltip="Show all attributes">
+                                +{{hiddenAttributes(device).length}}
+                            </button>
+                        </div>
                     </td>
                 </ng-container>
 
@@ -226,6 +262,17 @@
                 <tr mat-row *matRowDef="let m; columns: displayedColumns;" [ngClass]="{'inactive': m.active === false}">
                 </tr>
             </table>
+
+            <mat-menu #attributeMenu="matMenu" [overlapTrigger]="false">
+                <ng-template matMenuContent let-device="device">
+                    <button mat-menu-item *ngFor="let attr of attributes(device)"
+                        [matTooltip]="attributeChipTooltip(attr)" (click)="toggleAttributeFilter(attr)">
+                        <mat-icon [class.invisible]="!isAttributeFiltered(attr)" class="color-accent">check</mat-icon>
+                        <span [ngClass]="{'color-accent': isAttributeFiltered(attr)}">{{attr.key}} =
+                            {{attr.value}}</span>
+                    </button>
+                </ng-template>
+            </mat-menu>
         </div>
 
         <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize"

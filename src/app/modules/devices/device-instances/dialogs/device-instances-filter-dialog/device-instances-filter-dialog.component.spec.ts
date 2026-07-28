@@ -30,7 +30,7 @@ describe('DeviceInstancesFilterDialogComponent', () => {
     let component: DeviceInstancesFilterDialogComponent;
     let fixture: ComponentFixture<DeviceInstancesFilterDialogComponent>;
     const deviceInstanceServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass(DeviceInstancesService);
-    deviceInstanceServiceSpy.listUsedDeviceTypeIds.and.returnValue(of(['id']));
+    deviceInstanceServiceSpy.listUsedFilterOptions.and.returnValue(of({ deviceTypeIds: ['id'], attributeKeys: ['inactive'], attributeValues: ['true'] }));
     const matDialogRefSpy: Spy<MatDialogRef<DeviceInstancesFilterDialogComponent>> =
   createSpyFromClass<MatDialogRef<DeviceInstancesFilterDialogComponent>>(MatDialogRef);
 

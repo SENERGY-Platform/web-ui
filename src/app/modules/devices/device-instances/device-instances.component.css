@@ -39,6 +39,46 @@ a {
     color: #4484ce;
 }
 
+.attribute-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 0;
+}
+
+.attribute-chip {
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
+    border: none;
+    border-radius: 8px;
+    color: inherit;
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 16px;
+    max-width: 12em;
+    overflow: hidden;
+    padding: 0 6px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+button.attribute-chip {
+    cursor: pointer;
+}
+
+button.attribute-chip:hover {
+    background-color: color-mix(in srgb, currentColor 24%, transparent);
+}
+
+/* keeps the menu item labels aligned for attributes that are not filtered */
+.invisible {
+    visibility: hidden;
+}
+
+.attribute-chip.filtered {
+    background-color: color-mix(in srgb, currentColor 24%, transparent);
+    font-weight: 500;
+}
+
 .inactive {
     background-color: rgb(237, 237, 237);
 }

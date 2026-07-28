@@ -81,7 +81,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         private activatedRoute: ActivatedRoute,
     ) {
     }
-    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'info'];
+    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'attributes', 'info'];
+    maxShownAttributes = 3;
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<DeviceInstanceModel>();
     selection = new SelectionModel<DeviceInstanceModel>(true, []);
@@ -108,6 +109,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     routerDeviceIds: string[] | undefined = undefined;
     routerConnectionState: DeviceInstancesRouterStateTabEnum | undefined = undefined;
     routerDeviceAttributeBlacklist?: Attribute[];
+    routerAttributeKeys: string[] = [];
+    routerAttributeValues: string[] = [];
     DeviceInstancesRouterStateTabEnum = DeviceInstancesRouterStateTabEnum;
 
     private searchSub: Subscription = new Subscription();
@@ -218,6 +221,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
             location: this.routerLocation,
             deviceTypesNames: [],
             deviceAttributeBlacklist: this.routerDeviceAttributeBlacklist,
+            attributeKeys: this.routerAttributeKeys,
+            attributeValues: this.routerAttributeValues,
         };
 
         const editDialogRef = this.dialog.open(DeviceInstancesFilterDialogComponent, {
@@ -235,6 +240,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                     this.routerLocation = filterSelectionInner.location;
                     this.routerLocationName = filterSelectionInner.locationName;
                     this.routerDeviceAttributeBlacklist = filterSelectionInner.deviceAttributeBlacklist;
+                    this.routerAttributeKeys = filterSelectionInner.attributeKeys || [];
+                    this.routerAttributeValues = filterSelectionInner.attributeValues || [];
                     this.updateQueryParams();
                     this.cd.detectChanges();
                 }
@@ -270,6 +277,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                     deviceTypeIds: this.routerDeviceType,
                     connectionState: this.routerConnectionState,
                     deviceAttributeBlacklist: this.routerDeviceAttributeBlacklist,
+                    attributeKeys: this.routerAttributeKeys,
+                    attributeValues: this.routerAttributeValues,
                 })
                 .pipe(
                     // if no result is found: try to interpret the search as shortDeviceId, convert it to a deviceId and load it
@@ -441,6 +450,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                 } else {
                     this.routerConnectionState = undefined;
                 }
+                this.routerAttributeKeys = params.has('attribute-key') ? params.getAll('attribute-key') : [];
+                this.routerAttributeValues = params.has('attribute-value') ? params.getAll('attribute-value') : [];
                 if (params.has('device-attribute-blacklist')) {
                     const rawAttributes = params.getAll('device-attribute-blacklist');
                     this.routerDeviceAttributeBlacklist = [];
@@ -530,6 +541,47 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
 
+    attributes(device: DeviceInstanceModel): Attribute[] {
+        const attributes = device.attributes?.filter(a => a.key !== this.deviceInstancesService.nicknameAttributeKey) || [];
+        // keeps filtered attributes visible on devices that have more attributes than the table shows
+        return attributes.sort((a, b) => Number(this.isAttributeFiltered(b)) - Number(this.isAttributeFiltered(a)));
+    }
+
+    shownAttributes(device: DeviceInstanceModel): Attribute[] {
+        return this.attributes(device).slice(0, this.maxShownAttributes);
+    }
+
+    hiddenAttributes(device: DeviceInstanceModel): Attribute[] {
+        return this.attributes(device).slice(this.maxShownAttributes);
+    }
+
+    attributeTooltip(attr: Attribute): string {
+        return attr.key + ' = ' + attr.value + (attr.origin ? ' (' + attr.origin + ')' : '');
+    }
+
+    attributeChipTooltip(attr: Attribute): string {
+        return this.attributeTooltip(attr) + (this.isAttributeFiltered(attr) ? ' - click to remove filter' : ' - click to filter');
+    }
+
+    isAttributeFiltered(attr: Attribute): boolean {
+        return this.routerAttributeKeys.includes(attr.key);
+    }
+
+    toggleAttributeFilter(attr: Attribute) {
+        const index = this.routerAttributeKeys.indexOf(attr.key);
+        if (index === -1) {
+            this.routerAttributeKeys.push(attr.key);
+        } else {
+            this.routerAttributeKeys.splice(index, 1);
+        }
+        this.updateQueryParams();
+        this.reload();
+    }
+
+    hasFilteredHiddenAttribute(device: DeviceInstanceModel): boolean {
+        return this.hiddenAttributes(device).some(a => this.isAttributeFiltered(a));
+    }
+
     isActive(device: DeviceInstanceModel): boolean {
         return device.attributes?.find(a => a.key === 'inactive' && a.value === 'true') === undefined;
     }
@@ -569,6 +621,12 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
             if (this.routerLocationName) {
                queryParams['location-name'] = this.routerLocationName;
             }
+        }
+        if (this.routerAttributeKeys.length > 0) {
+            queryParams['attribute-key'] = this.routerAttributeKeys;
+        }
+        if (this.routerAttributeValues.length > 0) {
+            queryParams['attribute-value'] = this.routerAttributeValues;
         }
         if (this.routerDeviceAttributeBlacklist && this.routerDeviceAttributeBlacklist.length > 0) {
             queryParams['device-attribute-blacklist'] = encodeURIComponent(JSON.stringify(this.routerDeviceAttributeBlacklist));

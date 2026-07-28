@@ -72,7 +72,23 @@ export class DeviceInstancesService {
     }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
-        return this.getDeviceInstances({ limit: 9999, offset: 0 }).pipe(map(d => d.result.map(dd => dd.device_type_id).filter((v, i, a) => a.indexOf(v) === i))); // unique
+        return this.listUsedFilterOptions().pipe(map(o => o.deviceTypeIds));
+    }
+
+    /**
+     * Collects the device types and attributes that are actually in use, to be offered as filter options.
+     */
+    listUsedFilterOptions(): Observable<{ deviceTypeIds: string[]; attributeKeys: string[]; attributeValues: string[] }> {
+        const unique = (v: string, i: number, a: string[]) => a.indexOf(v) === i;
+        const sortIgnoreCase = (a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase());
+        return this.getDeviceInstances({ limit: 9999, offset: 0 }).pipe(map(d => {
+            const attributes = d.result.flatMap(device => device.attributes || []).filter(attr => attr.key !== this.nicknameAttributeKey);
+            return {
+                deviceTypeIds: d.result.map(device => device.device_type_id).filter(unique),
+                attributeKeys: attributes.map(attr => attr.key).filter(unique).sort(sortIgnoreCase),
+                attributeValues: attributes.map(attr => attr.value).filter(v => v !== '').filter(unique).sort(sortIgnoreCase),
+            };
+        }));
     }
 
     getDeviceListByIds(ids: string[]): Observable<DeviceInstanceModel[]> {
@@ -176,6 +192,8 @@ export class DeviceInstancesService {
         hubId?: string;
         locationId?: string;
         deviceAttributeBlacklist?: Attribute[];
+        attributeKeys?: string[];
+        attributeValues?: string[];
     }): Observable<DeviceInstancesTotalModel> {
         return this._getDeviceInstances(options);
     }
@@ -192,6 +210,8 @@ export class DeviceInstancesService {
         hubId?: string;
         locationId?: string;
         deviceAttributeBlacklist?: Attribute[];
+        attributeKeys?: string[];
+        attributeValues?: string[];
     }): Observable<DeviceInstancesWithDeviceTypeTotalModel> {
         const opt = options as {
             limit: number;
@@ -206,6 +226,8 @@ export class DeviceInstancesService {
             locationId?: string;
             fulldt?: boolean;
             deviceAttributeBlacklist?: Attribute[];
+            attributeKeys?: string[];
+            attributeValues?: string[];
         };
         opt.fulldt = true;
         return this._getDeviceInstances(options) as Observable<DeviceInstancesWithDeviceTypeTotalModel>;
@@ -224,6 +246,8 @@ export class DeviceInstancesService {
         locationId?: string;
         fulldt?: boolean;
         deviceAttributeBlacklist?: Attribute[];
+        attributeKeys?: string[];
+        attributeValues?: string[];
     }): Observable<DeviceInstancesTotalModel | DeviceInstancesWithDeviceTypeTotalModel> {
         if (options.hubId || options.locationId) {
             return this.getDeviceIds(options.hubId, options.locationId).pipe(
@@ -285,6 +309,13 @@ export class DeviceInstancesService {
         }
         if (options.deviceAttributeBlacklist !== undefined) {
             params = params.set('device-attribute-blacklist', encodeURIComponent(JSON.stringify(options.deviceAttributeBlacklist)));
+        }
+        // attribute keys and values are matched independently of each other by the device-repository
+        if (options.attributeKeys !== undefined && options.attributeKeys.length > 0) {
+            params = params.set('attr-keys', options.attributeKeys.join(','));
+        }
+        if (options.attributeValues !== undefined && options.attributeValues.length > 0) {
+            params = params.set('attr-values', options.attributeValues.join(','));
         }
         return this.http.get<DeviceInstanceModel[]>(environment.deviceRepoUrl + '/extended-devices', { observe: 'response', params }).pipe(
             map((resp) => {
