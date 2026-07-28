@@ -3,7 +3,8 @@ import { FlowFilterDialogComponent } from './flow-filter-dialog.component';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {of} from 'rxjs';
-import {provideHttpClient, withInterceptorsFromDi} from "@angular/common/http";
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 
 describe('FlowFilterDialogComponent', () => {
   let component: FlowFilterDialogComponent;
@@ -14,6 +15,7 @@ describe('FlowFilterDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
         imports: [MatDialogModule],
         declarations: [FlowFilterDialogComponent],
         providers: [

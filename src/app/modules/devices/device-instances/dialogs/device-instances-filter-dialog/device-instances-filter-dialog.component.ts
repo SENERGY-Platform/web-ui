@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SortDirection } from '@angular/material/sort';
-import { forkJoin, Observable, map, concatMap } from 'rxjs';
-import { DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { concatMap, map, shareReplay } from 'rxjs';
+import { FilterDialogConfigModel, FilterDialogResultModel } from 'src/app/core/components/filter-dialog/shared/filter-dialog.model';
 import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
-import { LocationModel } from '../../../locations/shared/locations.model';
 import { LocationsService } from '../../../locations/shared/locations.service';
-import { ExtendedHubModel, HubModel } from '../../../networks/shared/networks.model';
+import { ExtendedHubModel } from '../../../networks/shared/networks.model';
 import { NetworksService } from '../../../networks/shared/networks.service';
 import { DeviceConnectionState, DeviceInstancesRouterStateTabEnum, FilterSelection } from '../../shared/device-instances.model';
 import { DeviceInstancesService } from '../../shared/device-instances.service';
@@ -31,33 +29,17 @@ import { DeviceInstancesService } from '../../shared/device-instances.service';
 @Component({
     selector: 'app-device-instances-filter-dialog',
     templateUrl: './device-instances-filter-dialog.component.html',
-    styleUrls: ['./device-instances-filter-dialog.component.css']
 })
 export class DeviceInstancesFilterDialogComponent implements OnInit {
     sortDirection: SortDirection = 'asc';
-    locationOptions: LocationModel[] = [];
-    networkOptions: HubModel[] = [];
-    deviceTypeOptions: DeviceTypeModel[] = [];
     connectionOptions: DeviceConnectionState[] = [
         {name: 'Online', value: DeviceInstancesRouterStateTabEnum.ONLINE},
         {name: 'Offline', value: DeviceInstancesRouterStateTabEnum.OFFLINE},
         {name: 'Unknown', value: DeviceInstancesRouterStateTabEnum.UNKNOWN}
     ];
-    attributeKeyOptions: string[] = [];
-    attributeValueOptions: string[] = [];
-
-    form = new FormGroup({
-        location: new FormControl<string|undefined>(undefined),
-        network: new FormControl<string|undefined>(undefined),
-        deviceTypes: new FormControl<string[]>([]),
-        connectionState: new FormControl<DeviceInstancesRouterStateTabEnum|undefined>(DeviceInstancesRouterStateTabEnum.ALL),
-        attributeKeys: new FormControl<string[]>([]),
-        attributeValues: new FormControl<string[]>([]),
-        filter_inactive: new FormControl<boolean>(false),
-    });
+    config: FilterDialogConfigModel = { fields: [] };
 
     savedFilterSelection!: FilterSelection | undefined;
-    ready = false;
 
     constructor(
     private dialogRef: MatDialogRef<DeviceInstancesFilterDialogComponent>,
@@ -66,149 +48,82 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
     private networksService: NetworksService,
     private deviceTypesService: DeviceTypeService,
     private deviceInstancesService: DeviceInstancesService,
-    private cd: ChangeDetectorRef,
     ) {
         this.savedFilterSelection = data;
     }
 
     ngOnInit(): void {
-        const optionLoadObs: Observable<any>[] = [];
-
-        optionLoadObs.push(
-            this.locationsService.getLocations({sortBy: 'name', sortDirection: this.sortDirection}).pipe(map((value) => {
-                this.locationOptions = value.result;
-            }))
-        );
-
-        optionLoadObs.push(
-            // 100, 0, 'name', this.sortDirection
-            this.networksService.listExtendedHubs({limit:100, offset:0, sortBy:'name', sortDesc: this.sortDirection !== 'asc'}).pipe(
-                map((resp) => resp ? resp.result : [] as ExtendedHubModel[]),
-                map((value) => {
-                    this.networkOptions = value;
-                })
-            )
-        );
-
-        optionLoadObs.push(
-            this.deviceInstancesService.listUsedFilterOptions().pipe(
-                concatMap((usedOptions) => {
-                    this.attributeKeyOptions = usedOptions.attributeKeys;
-                    this.attributeValueOptions = usedOptions.attributeValues;
-                    return this.deviceTypesService.getDeviceTypeListByIds(usedOptions.deviceTypeIds);
-                }),
-                map((deviceTypes) => {
-                    this.deviceTypeOptions = deviceTypes;
-                })
-            )
-        );
-
-        forkJoin(optionLoadObs).subscribe({
-            next: (_) => {
-                this.preselectFormValues();
-                this.ready = true;
-            },
-            error: (err) => {
-                console.log(err);
-                this.ready = true;
-            }
-        });
+        // all attribute and device type options come from the same request
+        const usedOptions = this.deviceInstancesService.listUsedFilterOptions().pipe(shareReplay(1));
+        const selection = this.savedFilterSelection;
+        this.config = {
+            fields: [
+                {
+                    key: 'location', label: 'Location', type: 'select', icon: 'place', section: 'Device',
+                    items$: this.locationsService.getLocations({sortBy: 'name', sortDirection: this.sortDirection}).pipe(map(value => value.result)),
+                    bindLabel: 'name', bindValue: 'id', value: selection?.location,
+                },
+                {
+                    key: 'network', label: 'Network', type: 'select', icon: 'device_hub', section: 'Device',
+                    items$: this.networksService.listExtendedHubs({limit: 100, offset: 0, sortBy: 'name', sortDesc: this.sortDirection !== 'asc'}).pipe(
+                        map((resp) => resp ? resp.result : [] as ExtendedHubModel[])
+                    ),
+                    bindLabel: 'name', bindValue: 'id', value: selection?.network,
+                },
+                {
+                    key: 'deviceTypes', label: 'Device Type', type: 'multiselect', icon: 'important_devices', section: 'Device',
+                    items$: usedOptions.pipe(concatMap((used) => this.deviceTypesService.getDeviceTypeListByIds(used.deviceTypeIds))),
+                    bindLabel: 'name', bindValue: 'id', value: selection?.deviceTypes,
+                },
+                {
+                    key: 'connectionState', label: 'Connection State', type: 'select', icon: 'cloud', section: 'State',
+                    items: this.connectionOptions, bindLabel: 'name', bindValue: 'value',
+                    value: selection?.connectionState, emptyValue: DeviceInstancesRouterStateTabEnum.ALL,
+                },
+                {
+                    key: 'filter_inactive', label: 'Filter Inactive Devices', type: 'checkbox', section: 'State',
+                    value: this.inactiveIsFiltered(),
+                },
+                {
+                    key: 'attributeKeys', label: 'Attribute Key', type: 'multiselect', icon: 'sell', section: 'Attributes',
+                    hint: 'Lists devices that have at least one of these attributes',
+                    items$: usedOptions.pipe(map((used) => used.attributeKeys)),
+                    allowNewValues: true, value: selection?.attributeKeys,
+                },
+                {
+                    key: 'attributeValues', label: 'Attribute Value', type: 'multiselect', icon: 'label', section: 'Attributes',
+                    hint: 'Matched independently of the attribute key',
+                    items$: usedOptions.pipe(map((used) => used.attributeValues)),
+                    allowNewValues: true, value: selection?.attributeValues,
+                },
+            ]
+        } as FilterDialogConfigModel;
     }
 
-    preselectFormValues() {
-        if(!this.savedFilterSelection) {
-            return;
+    filter(result: FilterDialogResultModel): void {
+        const filterSelection: FilterSelection = {
+            location: result.values['location'] || undefined,
+            locationName: result.labels['location'][0],
+            network: result.values['network'] || undefined,
+            networkName: result.labels['network'][0],
+            deviceTypes: result.values['deviceTypes'] || [],
+            deviceTypesNames: result.labels['deviceTypes'],
+            connectionState: result.values['connectionState'],
+            attributeKeys: result.values['attributeKeys'] || [],
+            attributeValues: result.values['attributeValues'] || [],
+        };
+        if (result.values['filter_inactive']) {
+            filterSelection.deviceAttributeBlacklist = [{key: 'inactive', value: 'true', origin: 'web-ui'}];
         }
-
-        if(this.savedFilterSelection.connectionState != null) {
-            this.form.controls.connectionState.patchValue(this.savedFilterSelection.connectionState);
-        }
-
-        if(this.savedFilterSelection.deviceTypes != null) {
-            this.form.controls.deviceTypes.patchValue(this.savedFilterSelection.deviceTypes);
-        }
-
-        if(this.savedFilterSelection.location != null) {
-            this.form.controls.location.patchValue(this.savedFilterSelection.location);
-        }
-
-        if(this.savedFilterSelection.network != null) {
-            this.form.controls.network.patchValue(this.savedFilterSelection.network);
-        }
-
-        if(this.savedFilterSelection.attributeKeys != null) {
-            this.savedFilterSelection.attributeKeys.forEach(key => this.addAttributeKeyOption(key));
-            this.form.controls.attributeKeys.patchValue(this.savedFilterSelection.attributeKeys);
-        }
-
-        if(this.savedFilterSelection.attributeValues != null) {
-            this.savedFilterSelection.attributeValues.forEach(value => this.addAttributeValueOption(value));
-            this.form.controls.attributeValues.patchValue(this.savedFilterSelection.attributeValues);
-        }
-
-        if(this.savedFilterSelection.deviceAttributeBlacklist?.find(attr => attr.key === 'inactive' && attr.value === 'true', origin === 'web-ui')) {
-            this.form.controls.filter_inactive.patchValue(true);
-            this.cd.markForCheck(); 
-        }
-    }
-
-    resetConnectionFilter() {
-        this.form.controls.connectionState.patchValue(DeviceInstancesRouterStateTabEnum.ALL);
-    }
-
-    resetLocationFilter() {
-        this.form.controls.location.patchValue(undefined);
-    }
-
-    resetNetworkFilter() {
-        this.form.controls.network.patchValue(undefined);
-    }
-
-    resetDeviceTypeFilter() {
-        this.form.controls.deviceTypes.patchValue([]);
-    }
-
-    resetAttributeKeyFilter() {
-        this.form.controls.attributeKeys.patchValue([]);
-    }
-
-    resetAttributeValueFilter() {
-        this.form.controls.attributeValues.patchValue([]);
-    }
-
-    // allows filtering for attributes that no currently listed device uses
-    addAttributeKeyOption = (text: string): string => {
-        this.attributeKeyOptions = this.addOption(this.attributeKeyOptions, text);
-        return text;
-    };
-
-    addAttributeValueOption = (text: string): string => {
-        this.attributeValueOptions = this.addOption(this.attributeValueOptions, text);
-        return text;
-    };
-
-    private addOption(options: string[], text: string): string[] {
-        if (options.includes(text)) {
-            return options;
-        }
-        return [...options, text].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+        this.dialogRef.close(filterSelection);
     }
 
     close(): void {
         this.dialogRef.close();
     }
 
-    filter() {
-        const filterSelection: FilterSelection = this.form.value as FilterSelection;
-        filterSelection.networkName = this.networkOptions.find(n => n.id === filterSelection.network)?.name;
-        filterSelection.locationName = this.locationOptions.find(n => n.id === filterSelection.location)?.name;
-        filterSelection.deviceTypesNames = [];
-        filterSelection.deviceTypes?.forEach(dt => {
-            filterSelection.deviceTypesNames?.push(this.deviceTypeOptions.find(d => d.id === dt)?.name || '');
-        });        
-        if(this.form.controls.filter_inactive.value) {
-            filterSelection.deviceAttributeBlacklist =  [{key: 'inactive', value: 'true', origin: 'web-ui'}];
-        }
-        this.dialogRef.close(filterSelection);
+    private inactiveIsFiltered(): boolean {
+        return this.savedFilterSelection?.deviceAttributeBlacklist?.find(
+            attr => attr.key === 'inactive' && attr.value === 'true' && attr.origin === 'web-ui') !== undefined;
     }
 }

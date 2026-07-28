@@ -1,85 +1,55 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {FormControl, FormGroup} from '@angular/forms';
-import {OperatorModel} from '../../operator-repo/shared/operator.model';
-import {FilterSelection} from '../shared/pipeline.model';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {map} from 'rxjs';
+import {FilterDialogConfigModel, FilterDialogResultModel} from 'src/app/core/components/filter-dialog/shared/filter-dialog.model';
+import {FilterSelection} from '../shared/pipeline.model';
 import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
-import {FlowModel} from "../../flow-repo/shared/flow.model";
-import {FlowRepoService} from "../../flow-repo/shared/flow-repo.service";
-import {forkJoin} from "rxjs";
+import {FlowRepoService} from '../../flow-repo/shared/flow-repo.service';
 
 @Component({
-  selector: 'app-pipeline-filter-dialog',
-  templateUrl: './pipeline-filter-dialog.component.html',
-  styleUrl: './pipeline-filter-dialog.component.css'
+    selector: 'app-pipeline-filter-dialog',
+    templateUrl: './pipeline-filter-dialog.component.html',
 })
 export class PipelineFilterDialogComponent implements OnInit {
-  ready = false;
-  form = new FormGroup({
-    operators: new FormControl<string[]>([]),
-      flows: new FormControl<string[]>([]),
-  });
+    config: FilterDialogConfigModel = { fields: [] };
+    savedFilterSelection!: FilterSelection | undefined;
 
-  operatorOptions: OperatorModel[] = [] as OperatorModel[];
-    flowsOptions: FlowModel[] = [] as FlowModel[];
-  savedFilterSelection!: FilterSelection | undefined;
-
-  constructor(
+    constructor(
       private dialogRef: MatDialogRef<PipelineFilterDialogComponent>,
       private operatorService: OperatorRepoService,
       private flowRepoService: FlowRepoService,
       @Inject(MAT_DIALOG_DATA) data: FilterSelection | undefined,
-  ) {
-    this.savedFilterSelection = data;
-  }
-
-  ngOnInit(): void {
-      forkJoin({
-          operators: this.operatorService.getOperators('', 9999, 0, 'name', 'asc'),
-          flows: this.flowRepoService.getFlows('',9999, 0, 'name', 'asc'),
-      }).subscribe((value) => {
-              this.operatorOptions = value.operators.operators;
-              this.flowsOptions = value.flows.flows;
-              this.preselectFormValues();
-              this.ready = true;
-          }
-      );
-  }
-
-  preselectFormValues() {
-    if(!this.savedFilterSelection) {
-      return;
+    ) {
+        this.savedFilterSelection = data;
     }
 
-    if(this.savedFilterSelection.operators != null) {
-      this.form.controls.operators.patchValue(this.savedFilterSelection.operators);
+    ngOnInit(): void {
+        this.config = {
+            fields: [
+                {
+                    key: 'operators', label: 'Operator', type: 'multiselect', icon: 'settings', section: 'Pipeline',
+                    items$: this.operatorService.getOperators('', 9999, 0, 'name', 'asc').pipe(map(value => value.operators)),
+                    bindLabel: 'name', bindValue: '_id', value: this.savedFilterSelection?.operators,
+                },
+                {
+                    key: 'flows', label: 'Flow', type: 'multiselect', icon: 'loop', section: 'Pipeline',
+                    items$: this.flowRepoService.getFlows('', 9999, 0, 'name', 'asc').pipe(map(value => value.flows)),
+                    bindLabel: 'name', bindValue: '_id', value: this.savedFilterSelection?.flows,
+                },
+            ]
+        };
     }
-      if(this.savedFilterSelection.flows != null) {
-          this.form.controls.flows.patchValue(this.savedFilterSelection.flows);
-      }
-  }
 
-  filter() {
-    const filterSelection: FilterSelection = this.form.value as FilterSelection;
-    filterSelection.operatorNames = [];
-      filterSelection.flowNames = [];
-    filterSelection.operators?.forEach(op => {
-      filterSelection.operatorNames?.push(this.operatorOptions.find(d => d._id === op)?.name || '');
-    });
-      filterSelection.flows?.forEach(fl => {
-          filterSelection.flowNames?.push(this.flowsOptions.find(d => d._id === fl)?.name || '');
-      });
-    this.dialogRef.close(filterSelection);
-  }
+    filter(result: FilterDialogResultModel): void {
+        this.dialogRef.close({
+            operators: result.values['operators'] || [],
+            operatorNames: result.labels['operators'],
+            flows: result.values['flows'] || [],
+            flowNames: result.labels['flows'],
+        } as FilterSelection);
+    }
 
-  close(): void {
-    this.dialogRef.close();
-  }
-
-  resetOperatorFilter() {
-    this.form.controls.operators.patchValue([]);
-  }
-    resetFlowFilter() {
-        this.form.controls.flows.patchValue([]);
+    close(): void {
+        this.dialogRef.close();
     }
 }

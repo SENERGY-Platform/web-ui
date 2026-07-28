@@ -14,7 +14,41 @@
  * limitations under the License.
  */
 
-#filter-container {
-    margin-top: 20px;
-    width: 50vh;
+/* the dialog structure has to stay a direct child of the dialog surface */
+:host {
+    display: contents;
+}
+
+.filter-container {
+    margin-top: 12px;
+    min-width: 360px;
+    width: 100%;
+}
+
+.section-title {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    opacity: 0.6;
+    text-transform: uppercase;
+}
+
+.section-title:not(:first-child) {
+    margin-top: 16px;
+}
+
+.section-title + mat-divider {
+    margin-bottom: 8px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.checkbox-row {
+    margin-bottom: 4px;
+}
+
+mat-dialog-actions button + button {
+    margin-left: 8px;
 }

@@ -59,6 +59,7 @@ import { MatErrorMessagesDirective } from './directives/matError.directive';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from './directives/close-mtx-select-on-scroll.directive';
 import { NotificationsComponent } from './components/notifications/notifications.component';
+import { FilterDialogComponent } from './components/filter-dialog/filter-dialog.component';
 
 export const keycloakServiceToken = new InjectionToken<KeycloakService>('KeycloakService');
 
@@ -115,6 +116,7 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         FitTextComponent,
         MatErrorMessagesDirective,
         NotificationsComponent,
+        FilterDialogComponent,
     ],
     exports: [
         SidenavComponent,
@@ -130,6 +132,7 @@ export const keycloakServiceToken = new InjectionToken<KeycloakService>('Keycloa
         GenericValidator,
         FitTextComponent,
         MatErrorMessagesDirective,
+        FilterDialogComponent,
     ],
     providers: [
         {

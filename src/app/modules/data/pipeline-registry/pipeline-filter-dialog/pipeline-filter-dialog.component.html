@@ -14,36 +14,4 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Filter</h2>
-
-<mat-dialog-content>
-    <senergy-spinner [show]="!ready"></senergy-spinner>
-
-    <div [formGroup]="form" fxFlex fxLayout="column" id="filter-container" *ngIf="ready">
-        <div>
-            <mat-form-field fxFlex color="accent" appearance="outline">
-                <mat-icon matPrefix>settings</mat-icon>
-                <mat-label>Operator</mat-label>
-                <mtx-select [items]="operatorOptions" formControlName="operators" bindLabel="name" bindValue="_id"
-                            appendTo=".ng-select-anchor" multiple closeOnSelect="false"></mtx-select>
-                <mat-error senergyError label="Operator"></mat-error>
-            </mat-form-field>
-            <button mat-button (click)="resetOperatorFilter()"><mat-icon>cancel</mat-icon></button>
-        </div>
-        <div>
-            <mat-form-field fxFlex color="accent" appearance="outline">
-                <mat-icon matPrefix>loop</mat-icon>
-                <mat-label>Flow</mat-label>
-                <mtx-select [items]="flowsOptions" formControlName="flows" bindLabel="name" bindValue="_id"
-                            appendTo=".ng-select-anchor" multiple closeOnSelect="false"></mtx-select>
-                <mat-error senergyError label="Flow"></mat-error>
-            </mat-form-field>
-            <button mat-button (click)="resetFlowFilter()"><mat-icon>cancel</mat-icon></button>
-        </div>
-    </div>
-</mat-dialog-content>
-
-<mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="filter()" [disabled]="form.invalid">Filter</button>
-</mat-dialog-actions>
+<senergy-filter-dialog [config]="config" (filterEvent)="filter($event)" (cancelEvent)="close()"></senergy-filter-dialog>

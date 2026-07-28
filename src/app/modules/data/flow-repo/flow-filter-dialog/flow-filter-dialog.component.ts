@@ -1,23 +1,16 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {FormControl, FormGroup} from '@angular/forms';
-import {OperatorModel} from '../../operator-repo/shared/operator.model';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {map} from 'rxjs';
+import {FilterDialogConfigModel, FilterDialogResultModel} from 'src/app/core/components/filter-dialog/shared/filter-dialog.model';
 import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
-import {forkJoin} from 'rxjs';
 import {FilterSelection} from '../shared/flow.model';
 
 @Component({
     selector: 'app-flow-filter-dialog',
     templateUrl: './flow-filter-dialog.component.html',
-    styleUrl: './flow-filter-dialog.component.css'
 })
 export class FlowFilterDialogComponent implements OnInit {
-    ready = false;
-    form = new FormGroup({
-        operators: new FormControl<string[]>([]),
-    });
-
-    operatorOptions: OperatorModel[] = [] as OperatorModel[];
+    config: FilterDialogConfigModel = { fields: [] };
     savedFilterSelection!: FilterSelection | undefined;
 
     constructor(
@@ -29,41 +22,25 @@ export class FlowFilterDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        forkJoin({
-            operators: this.operatorService.getOperators('', 9999, 0, 'name', 'asc'),
-        }).subscribe((value) => {
-                this.operatorOptions = value.operators.operators;
-                this.preselectFormValues();
-                this.ready = true;
-            }
-        );
+        this.config = {
+            fields: [
+                {
+                    key: 'operators', label: 'Operator', type: 'multiselect', icon: 'settings', section: 'Flow',
+                    items$: this.operatorService.getOperators('', 9999, 0, 'name', 'asc').pipe(map(value => value.operators)),
+                    bindLabel: 'name', bindValue: '_id', value: this.savedFilterSelection?.operators,
+                },
+            ]
+        };
     }
 
-    preselectFormValues() {
-        if (!this.savedFilterSelection) {
-            return;
-        }
-
-        if (this.savedFilterSelection.operators != null) {
-            this.form.controls.operators.patchValue(this.savedFilterSelection.operators);
-        }
-    }
-
-    filter() {
-        const filterSelection: FilterSelection = this.form.value as FilterSelection;
-        filterSelection.operatorNames = [];
-        filterSelection.operators?.forEach(op => {
-            filterSelection.operatorNames?.push(this.operatorOptions.find(d => d._id === op)?.name || '');
-        });
-        this.dialogRef.close(filterSelection);
+    filter(result: FilterDialogResultModel): void {
+        this.dialogRef.close({
+            operators: result.values['operators'] || [],
+            operatorNames: result.labels['operators'],
+        } as FilterSelection);
     }
 
     close(): void {
         this.dialogRef.close();
     }
-
-    resetOperatorFilter() {
-        this.form.controls.operators.patchValue([]);
-    }
-
 }
