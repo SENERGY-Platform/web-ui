@@ -31,12 +31,14 @@ import {ReportComponent} from './report/report.component';
 import {MatCardModule} from '@angular/material/card';
 import {ReportObjectComponent} from './report/report-object/report-object.component';
 import {MatInputModule} from '@angular/material/input';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatRadioModule} from '@angular/material/radio';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {CoreModule} from '../../core/core.module';
 import {ReportsComponent} from './reports/reports.component';
 import {ReportFilesComponent} from './reportFiles/reportFiles.component';
 import {QueryPreviewDialogComponent} from './report/report-object/query-preview/query-preview-dialog.component';
+import {QueryEditorComponent} from './report/report-object/query-editor/query-editor.component';
+import {ReportTreeComponent} from './report/report-tree/report-tree.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -52,7 +54,8 @@ const editReport: Route = { path: 'reporting/edit/:reportId', pathMatch: 'full',
 const reportFilesList: Route = { path: 'reporting/files/:reportId', pathMatch: 'full', component: ReportFilesComponent, data: { header: 'Report Files' } };
 
 @NgModule({
-    declarations: [TemplatesComponent, ReportComponent, ReportObjectComponent, ReportsComponent, ReportFilesComponent, QueryPreviewDialogComponent],
+    declarations: [TemplatesComponent, ReportComponent, ReportObjectComponent, ReportTreeComponent,
+        QueryEditorComponent, ReportsComponent, ReportFilesComponent, QueryPreviewDialogComponent],
     imports: [
         RouterModule.forChild([templateList, reportsList, newReport, editReport, reportFilesList]),
         CommonModule,
@@ -69,8 +72,7 @@ const reportFilesList: Route = { path: 'reporting/files/:reportId', pathMatch: '
         MatCardModule,
         MatInputModule,
         ReactiveFormsModule,
-        FormsModule,
-        MatRadioModule,
+        MatButtonToggleModule,
         CoreModule,
         MatDialogModule,
         MatExpansionModule,

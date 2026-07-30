@@ -14,30 +14,59 @@
  * limitations under the License.
  */
 
-.report-component {
-    margin-top: 15px;
-    margin-bottom: 15px;
+.object-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
-.reporting-object {
-    margin-top: 10px;
+.object-path {
+    font-size: 1.1em;
+    font-weight: 500;
 }
 
-div[role="group"] mat-form-field + mat-form-field {
-    margin-left: 8px;
+.object-type {
+    opacity: 0.6;
+    font-size: 12px;
 }
 
+.input-type {
+    align-self: flex-start;
+    margin-bottom: 16px;
+}
 
-.ctrl .mat-expansion-panel-header-description {
-    justify-content: space-between;
+.children-title {
+    opacity: 0.7;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.child-row {
+    display: flex;
     align-items: center;
-}
-
-.ctrl {
-    margin-right: 20px;
-}
-
-.ctrl .pointer {
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+    padding: 8px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+    font: inherit;
+    color: inherit;
     cursor: pointer;
+    text-align: left;
 }
 
+.child-row:hover {
+    background: rgba(128, 128, 128, 0.12);
+}
+
+.child-type {
+    opacity: 0.6;
+    font-size: 12px;
+}
+
+.empty-hint {
+    opacity: 0.7;
+}

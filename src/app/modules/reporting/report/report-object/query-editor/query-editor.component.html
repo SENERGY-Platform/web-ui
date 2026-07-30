@@ -1,0 +1,165 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<div [formGroup]="form" fxLayout="column">
+    <div fxLayout="row" fxLayoutAlign="end center">
+        <button mat-icon-button matTooltip="Preview Query" [disabled]="previewRunning || form.invalid"
+            (click)="previewQuery()">
+            <mat-icon>preview</mat-icon>
+        </button>
+    </div>
+
+    <mat-form-field fxFlex color="accent" appearance="outline">
+        <mat-label>Device</mat-label>
+        <mtx-select formControlName="device" [items]="allDevices" bindLabel="display_name" bindValue="id"
+            virtualScroll="true" placeholder="Type to search" appendTo=".ng-select-anchor"></mtx-select>
+        <mat-error senergyError label="Device"></mat-error>
+    </mat-form-field>
+
+    <mat-form-field fxFlex color="accent" appearance="outline">
+        <mat-label>Service</mat-label>
+        <mtx-select formControlName="service" [items]="deviceType.services" bindLabel="name" bindValue="id"
+            placeholder="Type to search" appendTo=".ng-select-anchor" hideSelected="false"></mtx-select>
+        <mat-error senergyError label="Service"></mat-error>
+    </mat-form-field>
+
+    <mat-form-field fxFill color="accent" appearance="outline">
+        <mat-label>Path</mat-label>
+        <mtx-select formControlName="path" [items]="servicePaths" [addTag]="true"
+            placeholder="Choose or write yourself" appendTo=".ng-select-anchor"></mtx-select>
+        <mat-error senergyError label="Path"></mat-error>
+    </mat-form-field>
+
+    <div role="group" class="form-grouping">
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>Field Group Type</mat-label>
+            <mtx-select formControlName="groupType" appendTo=".ng-select-anchor">
+                <mtx-option *ngFor="let type of fieldGroupTypes" [value]="type">{{type}}</mtx-option>
+            </mtx-select>
+            <mat-hint>Aggregation of the values</mat-hint>
+            <mat-error senergyError label="Field Group Type"></mat-error>
+        </mat-form-field>
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>Time Frame</mat-label>
+            <input matInput formControlName="timeframeNumber">
+            <mat-hint>Relative to the report creation</mat-hint>
+            <mat-error senergyError label="Time Frame"></mat-error>
+        </mat-form-field>
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>Time Frame Unit</mat-label>
+            <mtx-select formControlName="timeframeUnit" appendTo=".ng-select-anchor">
+                <mtx-option *ngFor="let units of timeUnits" [value]="units.unit">{{units.desc}}</mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="Time Frame Unit"></mat-error>
+        </mat-form-field>
+    </div>
+
+    <div role="group" class="form-grouping">
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="picker_start" formControlName="start">
+            <mat-hint>DD/MM/YYYY</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="picker_start"></mat-datepicker-toggle>
+            <mat-datepicker #picker_start></mat-datepicker>
+            <mat-error senergyError label="Start Date"></mat-error>
+        </mat-form-field>
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>Rolling Start Date</mat-label>
+            <mtx-select formControlName="rollingStartDate" appendTo=".ng-select-anchor">
+                <mtx-option [value]="''"></mtx-option>
+                <mtx-option [value]="'month'">Monat</mtx-option>
+                <mtx-option [value]="'year'">Jahr</mtx-option>
+            </mtx-select>
+            <mat-hint>Moves the start date on every run</mat-hint>
+            <mat-error senergyError label="Rolling Start Date"></mat-error>
+        </mat-form-field>
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="picker_end" formControlName="end">
+            <mat-hint>DD/MM/YYYY</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="picker_end"></mat-datepicker-toggle>
+            <mat-datepicker #picker_end></mat-datepicker>
+            <mat-error senergyError label="End Date"></mat-error>
+        </mat-form-field>
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>Rolling End Date</mat-label>
+            <mtx-select formControlName="rollingEndDate" appendTo=".ng-select-anchor">
+                <mtx-option [value]="''"></mtx-option>
+                <mtx-option [value]="'month'">Monat</mtx-option>
+                <mtx-option [value]="'year'">Jahr</mtx-option>
+            </mtx-select>
+            <mat-hint>Moves the end date on every run</mat-hint>
+            <mat-error senergyError label="Rolling End Date"></mat-error>
+        </mat-form-field>
+    </div>
+
+    <div fxLayout="row" fxLayoutAlign="start center">
+        <button type="button" mat-button color="accent" (click)="showAdvanced = !showAdvanced">
+            <mat-icon>{{showAdvanced ? 'expand_less' : 'expand_more'}}</mat-icon>
+            Advanced{{advancedCount > 0 ? ' (' + advancedCount + ' in use)' : ''}}
+        </button>
+    </div>
+
+    <div *ngIf="showAdvanced" fxLayout="column">
+        <div role="group" class="form-grouping">
+            <mat-form-field fxFlex color="accent" appearance="outline">
+                <mat-label>Grouping Time</mat-label>
+                <input matInput formControlName="groupingTimeNumber">
+                <mat-hint>One value per interval</mat-hint>
+                <mat-error senergyError label="Grouping Time"></mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex color="accent" appearance="outline">
+                <mat-label>Grouping Time Unit</mat-label>
+                <mtx-select formControlName="groupingTimeUnit" appendTo=".ng-select-anchor">
+                    <mtx-option *ngFor="let units of timeUnits" [value]="units.unit">{{units.desc}}</mtx-option>
+                </mtx-select>
+                <mat-error senergyError label="Grouping Time Unit"></mat-error>
+            </mat-form-field>
+        </div>
+
+        <div role="group" class="form-grouping">
+            <mat-form-field fxFlex color="accent" appearance="outline">
+                <mat-label>Sorting Index</mat-label>
+                <input matInput type="number" formControlName="orderColumnIndex">
+                <mat-hint>Column to sort by</mat-hint>
+                <mat-error senergyError label="Sorting Index"></mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex color="accent" appearance="outline">
+                <mat-label>Sorting</mat-label>
+                <mtx-select formControlName="orderDirection" appendTo=".ng-select-anchor">
+                    <mtx-option *ngFor="let type of sortTypes" [value]="type">{{type}}</mtx-option>
+                </mtx-select>
+                <mat-error senergyError label="Sorting"></mat-error>
+            </mat-form-field>
+        </div>
+
+        <div role="group" class="form-grouping">
+            <mat-form-field fxFlex color="accent" appearance="outline">
+                <mat-label>ResultObject</mat-label>
+                <mtx-select formControlName="resultObject" appendTo=".ng-select-anchor">
+                    <mtx-option *ngFor="let type of resultObjectTypes" [value]="type">{{type}}</mtx-option>
+                </mtx-select>
+                <mat-hint>Shape of the result in the template</mat-hint>
+                <mat-error senergyError label="ResultObject"></mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex color="accent" appearance="outline">
+                <mat-label>ResultKey</mat-label>
+                <input matInput type="number" min="0" formControlName="resultKey">
+                <mat-hint>Index of the used column</mat-hint>
+                <mat-error senergyError label="ResultKey"></mat-error>
+            </mat-form-field>
+        </div>
+    </div>
+</div>

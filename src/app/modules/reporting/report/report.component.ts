@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
 import {
@@ -28,27 +29,57 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 import { HttpResponse } from '@angular/common/http';
-import { switchMap, of } from 'rxjs';
+import { Subject, switchMap, of, takeUntil } from 'rxjs';
+import {
+    DynamicFormGroup,
+    ReportValidationError,
+    buildReportObjectsForm,
+    collectValidationErrors,
+    reportObjectsFromForm
+} from '../shared/report-object-form';
+import {
+    ReportObjectNode,
+    buildReportObjectNodes,
+    copyReportObjectItem,
+    errorCountsByPath,
+    findNode,
+    flattenNodes,
+    isContainer,
+    removeReportObjectItem
+} from '../shared/report-object-node';
+import { REPORT_SETTINGS_PATH, ReportObjectViewService } from '../shared/report-object-view.service';
 
 @Component({
     selector: 'senergy-reporting-new',
     templateUrl: './report.component.html',
     styleUrls: ['./report.component.css'],
+    providers: [ReportObjectViewService],
 })
-export class ReportComponent implements OnInit {
+export class ReportComponent implements OnInit, OnDestroy {
 
-    reportName = '';
     reportId: string | null = null;
     template: TemplateModel = { data: {} } as TemplateModel;
     report: ReportModel = {} as ReportModel;
     ready = false;
     templateId: string | null = null;
     allDevices: DeviceInstanceModel[] = [];
-    cron: string | undefined;
-    emailReceivers?: string[];
-    emailSubject?: string;
-    emailText?: string;
-    emailHTML?: string;
+    validationErrors: ReportValidationError[] = [];
+    errorCounts: Map<string, number> = new Map<string, number>();
+    nodes: ReportObjectNode[] = [];
+    selectedNode?: ReportObjectNode;
+    treeFilter = new FormControl<string>('', { nonNullable: true });
+
+    form = new FormGroup({
+        name: new FormControl<string>('', { nonNullable: true, validators: Validators.required }),
+        cron: new FormControl<string | null>(null),
+        emailSubject: new FormControl<string | null>(null),
+        emailText: new FormControl<string | null>(null),
+        emailHTML: new FormControl<string | null>(null),
+        emailReceivers: new FormArray<FormControl<string>>([]),
+        data: new FormGroup<{ [key: string]: AbstractControl }>({}),
+    });
+
+    private destroy = new Subject<void>();
 
     constructor(
         private route: ActivatedRoute,
@@ -56,13 +87,18 @@ export class ReportComponent implements OnInit {
         public utilsService: UtilService,
         private reportingService: ReportingService,
         private deviceInstanceService: DeviceInstancesService,
-        private router: Router
+        private router: Router,
+        private viewService: ReportObjectViewService
     ) {
         this.reportId = this.route.snapshot.paramMap.get('reportId');
         this.templateId = this.route.snapshot.paramMap.get('templateId');
     }
 
     ngOnInit() {
+        this.form.statusChanges.pipe(takeUntil(this.destroy)).subscribe(() => this.updateValidation());
+        this.viewService.selected$.pipe(takeUntil(this.destroy))
+            .subscribe((path: string) => this.selectedNode = findNode(this.nodes, path));
+        this.updateValidation();
         this.deviceInstanceService.getDeviceInstances({ limit: 9999, offset: 0 }).subscribe((devices) => {
             this.allDevices = devices.result;
         });
@@ -73,6 +109,69 @@ export class ReportComponent implements OnInit {
         } else {
             this.ready = true;
         }
+    }
+
+    ngOnDestroy() {
+        this.destroy.next();
+        this.destroy.complete();
+    }
+
+    get dataForm(): DynamicFormGroup {
+        return this.form.controls.data;
+    }
+
+    get emailReceivers(): FormArray<FormControl<string>> {
+        return this.form.controls.emailReceivers;
+    }
+
+    get settingsSelected(): boolean {
+        return this.viewService.selectedPath === REPORT_SETTINGS_PATH;
+    }
+
+    isValid(): boolean {
+        return this.form.valid;
+    }
+
+    selectSettings() {
+        this.viewService.select(REPORT_SETTINGS_PATH);
+    }
+
+    /**
+     * Opens the report object of the given path - including the objects it is nested in - and selects it.
+     */
+    revealObject(path: string) {
+        if (path === REPORT_SETTINGS_PATH) {
+            this.selectSettings();
+            return;
+        }
+        this.viewService.reveal(path);
+    }
+
+    expandAll() {
+        this.viewService.expandAll(flattenNodes(this.nodes)
+            .filter((node: ReportObjectNode) => isContainer(node))
+            .map((node: ReportObjectNode) => node.path));
+    }
+
+    collapseAll() {
+        this.viewService.collapseAll();
+    }
+
+    copyItem(node: ReportObjectNode) {
+        const path = copyReportObjectItem(node);
+        this.buildNodes();
+        if (path !== undefined) {
+            this.revealObject(path);
+        }
+    }
+
+    removeItem(node: ReportObjectNode) {
+        if (!removeReportObjectItem(node)) {
+            return;
+        }
+        const parentPath = node.parent?.path;
+        this.buildNodes();
+        this.revealObject(parentPath !== undefined ? parentPath : REPORT_SETTINGS_PATH);
     }
 
     /**
@@ -115,27 +214,12 @@ export class ReportComponent implements OnInit {
         return index;
     }
 
-    trackByKey(_: number, item: { key: string }) {
-        return item.key;
-    }
-
     addEmailAddress() {
-        if (this.emailReceivers === undefined || this.emailReceivers === null) {
-            this.emailReceivers = [''];
-        } else {
-            this.emailReceivers.push('');
-        }
+        this.emailReceivers.push(new FormControl<string>('', { nonNullable: true }));
     }
 
     deleteEmailAddress(i: number) {
-        if (this.emailReceivers === undefined || this.emailReceivers === null) {
-            return;
-        }
-        this.emailReceivers.splice(i, 1);
-    }
-
-    isValid(): boolean {
-        return this.reportName.trim().length > 0;
+        this.emailReceivers.removeAt(i);
     }
 
     private loadReport(reportId: string) {
@@ -146,18 +230,13 @@ export class ReportComponent implements OnInit {
                 }
                 this.report = resp.data;
                 this.templateId = this.report.templateId;
-                this.reportName = this.report.name;
-                this.cron = this.report.cron;
-                this.emailReceivers = this.report.emailReceivers;
-                this.emailSubject = this.report.emailSubject;
-                this.emailText = this.report.emailText;
-                this.emailHTML = this.report.emailHTML;
                 this.template.data = {
                     dataJsonString: '',
                     dataStructured: this.report.data,
                     id: '',
                     name: ''
                 };
+                this.patchForm(this.report);
                 return this.reportingService.getTemplate(this.templateId);
             })
         ).subscribe((resp: TemplateResponseModel | null) => {
@@ -172,22 +251,63 @@ export class ReportComponent implements OnInit {
         this.reportingService.getTemplate(templateId).subscribe((resp: TemplateResponseModel | null) => {
             if (resp !== null) {
                 this.template = resp.data;
+                this.setDataForm();
             }
             this.ready = true;
         });
     }
 
+    private patchForm(report: ReportModel) {
+        this.form.patchValue({
+            name: report.name || '',
+            cron: report.cron ?? null,
+            emailSubject: report.emailSubject ?? null,
+            emailText: report.emailText ?? null,
+            emailHTML: report.emailHTML ?? null,
+        });
+        this.emailReceivers.clear();
+        (report.emailReceivers || []).forEach((email: string) =>
+            this.emailReceivers.push(new FormControl<string>(email, { nonNullable: true }))
+        );
+        this.setDataForm();
+    }
+
+    private setDataForm() {
+        this.form.setControl('data', buildReportObjectsForm(this.template.data?.dataStructured));
+        this.buildNodes();
+        this.updateValidation();
+    }
+
+    private buildNodes() {
+        this.nodes = buildReportObjectNodes(this.template.data?.dataStructured, this.dataForm);
+        this.selectedNode = findNode(this.nodes, this.viewService.selectedPath);
+    }
+
+    private updateValidation() {
+        const errors = collectValidationErrors(this.dataForm);
+        if (this.form.controls.name.invalid) {
+            errors.unshift({
+                path: REPORT_SETTINGS_PATH,
+                field: 'Report Name',
+                message: 'Report Name is required'
+            });
+        }
+        this.validationErrors = errors;
+        this.errorCounts = errorCountsByPath(errors);
+    }
+
     private buildReport(id: string | null): ReportModel {
+        const value = this.form.getRawValue();
         const report = {
             templateId: this.templateId,
-            name: this.reportName,
+            name: value.name,
             templateName: this.template.name,
-            data: this.template.data?.dataStructured,
-            cron: this.cron,
-            emailReceivers: this.emailReceivers,
-            emailSubject: this.emailSubject,
-            emailText: this.emailText,
-            emailHTML: this.emailHTML,
+            data: reportObjectsFromForm(this.template.data?.dataStructured, this.dataForm),
+            cron: value.cron ?? undefined,
+            emailReceivers: value.emailReceivers,
+            emailSubject: value.emailSubject ?? undefined,
+            emailText: value.emailText ?? undefined,
+            emailHTML: value.emailHTML ?? undefined,
         } as ReportModel;
         if (id !== null) {
             report.id = id;

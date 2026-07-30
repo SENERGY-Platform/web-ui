@@ -1,0 +1,100 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* The component renders itself again for the nested objects, so its host must not be inline. */
+:host {
+    display: block;
+}
+
+.tree-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 36px;
+    padding-right: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.tree-row:hover {
+    background: rgba(128, 128, 128, 0.12);
+}
+
+.tree-row.selected {
+    background: rgba(128, 128, 128, 0.22);
+    font-weight: 500;
+}
+
+/*
+ * The buttons center their icon themselves instead of relying on the padding of the material icon button, because the
+ * global icon stylesheet makes the icon inline-block and it would then sit below the middle of the row.
+ */
+.tree-toggle,
+.tree-action {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+}
+
+.tree-toggle .mat-icon,
+.tree-action .mat-icon {
+    display: block;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    margin: 0;
+}
+
+.tree-toggle-spacer {
+    width: 28px;
+    flex: none;
+}
+
+.tree-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex: none;
+    opacity: 0.7;
+}
+
+.tree-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tree-detail {
+    flex: 1;
+    min-width: 0;
+    opacity: 0.6;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tree-error {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex: none;
+}

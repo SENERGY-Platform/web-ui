@@ -1,0 +1,46 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<div *ngFor="let node of visibleNodes(); trackBy: trackByPath">
+    <div class="tree-row" [class.selected]="selectedPath === node.path" [style.padding-left.px]="8 + depth * 16"
+        (click)="select(node)">
+        <button *ngIf="isContainer(node)" mat-icon-button class="tree-toggle" (click)="toggle(node, $event)"
+            [attr.aria-label]="'Toggle ' + node.key">
+            <mat-icon>{{isExpanded(node) ? 'expand_more' : 'chevron_right'}}</mat-icon>
+        </button>
+        <span *ngIf="!isContainer(node)" class="tree-toggle-spacer"></span>
+
+        <mat-icon class="tree-icon">{{icon(node)}}</mat-icon>
+        <span class="tree-label">{{node.key}}</span>
+        <span class="tree-detail">{{detail(node)}}</span>
+
+        <mat-icon *ngIf="errors(node) > 0" color="warn" class="tree-error"
+            [matTooltip]="errors(node) + ' missing input(s)'">warning</mat-icon>
+
+        <button *ngIf="node.item" mat-icon-button class="tree-action" matTooltip="copy Item"
+            (click)="emitCopyItem(node, $event)">
+            <mat-icon>content_copy</mat-icon>
+        </button>
+        <button *ngIf="node.item" mat-icon-button class="tree-action" matTooltip="delete Item"
+            (click)="emitRemoveItem(node, $event)">
+            <mat-icon>delete</mat-icon>
+        </button>
+    </div>
+
+    <senergy-reporting-tree *ngIf="isContainer(node) && isExpanded(node)" [nodes]="node.children"
+        [depth]="depth + 1" [errorCounts]="errorCounts" [filter]="filter" (copyItem)="copyItem.emit($event)"
+        (removeItem)="removeItem.emit($event)">
+    </senergy-reporting-tree>
+</div>
