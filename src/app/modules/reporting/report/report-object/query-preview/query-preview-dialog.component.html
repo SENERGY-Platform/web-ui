@@ -13,13 +13,36 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<h2 mat-dialog-title>Query Result</h2>
+<h2 mat-dialog-title>Query Preview</h2>
+
 <mat-dialog-content>
-    <p>Item count: {{queryPreview.dataCount}}</p>
-    <div fxLayout="row">
-      <pre *ngFor="let value of values" [innerHTML]="value" class="json-container"></pre>
+    <div class="preview-info">
+        {{totalRows}} {{totalRows === 1 ? 'row' : 'rows'}}, {{columns.length}}
+        {{columns.length === 1 ? 'column' : 'columns'}}
+        <span *ngIf="truncated">&middot; showing the first {{rows.length}}</span>
+    </div>
+
+    <div class="table-container">
+        <table mat-table [dataSource]="rows">
+            <ng-container [matColumnDef]="indexColumn" sticky>
+                <th mat-header-cell *matHeaderCellDef class="index-cell">#</th>
+                <td mat-cell *matCellDef="let row; let i = index" class="index-cell">{{i + 1}}</td>
+            </ng-container>
+
+            <ng-container *ngFor="let column of columns" [matColumnDef]="column.key">
+                <th mat-header-cell *matHeaderCellDef>{{column.label}}</th>
+                <td mat-cell *matCellDef="let row" [class.numeric]="isNumber(row[column.index])">
+                    <span *ngIf="isTimestamp(row[column.index])">{{row[column.index] | date:'medium'}}</span>
+                    <span *ngIf="!isTimestamp(row[column.index])">{{display(row[column.index])}}</span>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
     </div>
 </mat-dialog-content>
-<mat-dialog-actions>
+
+<mat-dialog-actions align="end">
     <button mat-button mat-raised-button color="accent" (click)="onCloseClick()">Close</button>
 </mat-dialog-actions>

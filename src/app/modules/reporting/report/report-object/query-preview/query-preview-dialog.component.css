@@ -14,7 +14,39 @@
  * limitations under the License.
  */
 
-.report-component {
-    margin-top: 15px;
-    margin-bottom: 15px;
+.preview-info {
+    opacity: 0.7;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.table-container {
+    overflow: auto;
+    max-height: 60vh;
+}
+
+table {
+    width: 100%;
+}
+
+th,
+td {
+    white-space: nowrap;
+    padding-right: 16px;
+}
+
+/* Numbers and timestamps are easier to compare in a fixed width and right aligned. */
+td {
+    font-variant-numeric: tabular-nums;
+}
+
+td.numeric {
+    text-align: right;
+}
+
+.index-cell {
+    width: 48px;
+    padding-right: 8px;
+    text-align: right;
+    opacity: 0.6;
 }
