@@ -28,6 +28,8 @@ import { ReportingService } from '../shared/reporting.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
+import { HttpResponse } from '@angular/common/http';
+import { switchMap, of } from 'rxjs';
 
 @Component({
     selector: 'senergy-reporting-new',
@@ -41,14 +43,14 @@ export class ReportComponent implements OnInit {
     template: TemplateModel = { data: {} } as TemplateModel;
     report: ReportModel = {} as ReportModel;
     ready = false;
-    templateId: string | null = '';
-    requestObject: Map<string, any> = new Map<string, any>();
+    templateId: string | null = null;
     allDevices: DeviceInstanceModel[] = [];
     cron: string | undefined;
     emailReceivers?: string[];
     emailSubject?: string;
     emailText?: string;
     emailHTML?: string;
+
     constructor(
         private route: ActivatedRoute,
         public snackBar: MatSnackBar,
@@ -59,63 +61,38 @@ export class ReportComponent implements OnInit {
     ) {
         this.reportId = this.route.snapshot.paramMap.get('reportId');
         this.templateId = this.route.snapshot.paramMap.get('templateId');
-        this.deviceInstanceService.getDeviceInstances({ limit: 9999, offset: 0 }).subscribe((devices) => {
-            this.allDevices = devices.result;
-        });
     }
 
     ngOnInit() {
-        if (this.reportId != null) {
-            this.reportingService.getReport(this.reportId).subscribe((resp: ReportResponseModel | null) => {
-                if (resp !== null) {
-                    this.report = resp.data;
-                    this.templateId = this.report.templateId;
-                    this.reportName = this.report.name;
-                    this.cron = this.report.cron;
-                    this.emailReceivers = this.report.emailReceivers;
-                    this.emailSubject = this.report.emailSubject;
-                    this.emailText = this.report.emailText;
-                    this.emailHTML = this.report.emailHTML;
-                    this.template.data = { dataJsonString: '', dataStructured: {} as Map<string, ReportObjectModel>, id: '', name: '' };
-                    this.template.data.dataStructured = this.report.data;
-                    this.reportingService.getTemplate(this.templateId).subscribe((resp2: TemplateResponseModel | null) => {
-                        if (resp2 !== null) {
-                            this.template.name = resp2.data.name;
-                        }
-                        this.ready = true;
-                    });
-                }
-            });
-        }
-        if (this.templateId != null) {
-            this.reportingService.getTemplate(this.templateId).subscribe((resp: TemplateResponseModel | null) => {
-                if (resp !== null) {
-                    this.template = resp.data;
-                }
-                this.ready = true;
-            });
+        this.deviceInstanceService.getDeviceInstances({ limit: 9999, offset: 0 }).subscribe((devices) => {
+            this.allDevices = devices.result;
+        });
+        if (this.reportId !== null) {
+            this.loadReport(this.reportId);
+        } else if (this.templateId !== null) {
+            this.loadTemplate(this.templateId);
+        } else {
+            this.ready = true;
         }
     }
 
+    /**
+     * Creates the report in the reporting service. For a new report the view is redirected to the
+     * edit route of the created report.
+     */
     create() {
-        this.ready=false;
-        this.reportingService.createReport({
-            id: this.reportId, templateId: this.templateId, name: this.reportName,
-            templateName: this.template.name, data: this.template.data?.dataStructured,
-            cron: this.cron, emailReceivers: this.emailReceivers,
-            emailSubject: this.emailSubject,
-            emailText: this.emailText,
-            emailHTML: this.emailHTML,
-        } as ReportModel).subscribe(resp => {
-            if (resp !== null) {
-                this.snackBar.open('Report created', 'ReportCreate', {
-                    duration: 2000
-                });
-                this.ready=true;
-                if (this.reportId == null) {
-                    this.reportId = resp.id;
-                    this.router.navigateByUrl('/reporting/edit/' + this.reportId);
-                }
+        this.ready = false;
+        this.reportingService.createReport(this.buildReport(this.reportId)).subscribe(resp => {
+            this.ready = true;
+            if (resp === null) {
+                return;
+            }
+            this.snackBar.open('Report created', 'ReportCreate', {
+                duration: 2000
+            });
+            if (this.reportId === null && resp.id !== null) {
+                this.reportId = resp.id;
+                this.router.navigateByUrl('/reporting/edit/' + this.reportId);
             }
         });
     }
@@ -126,45 +103,21 @@ export class ReportComponent implements OnInit {
      * No return value, but opens a snackbar with a success message if the report is saved successfully.
      */
     save() {
-        this.reportingService.saveReport({
-            templateId: this.templateId, name: this.reportName,
-            templateName: this.template.name, data: this.template.data?.dataStructured,
-            cron: this.cron, emailReceivers: this.emailReceivers,
-            emailSubject: this.emailSubject,
-            emailText: this.emailText,
-            emailHTML: this.emailHTML,
-        } as ReportModel).subscribe(resp => {
-            if (resp !== null) {
-                if (resp.status === 200) {
-                    this.snackBar.open('Report saved', 'ReportSave', {
-                        duration: 2000
-                    });
-                }
-            }
-        });
+        this.reportingService.saveReport(this.buildReport(null))
+            .subscribe(resp => this.showResult(resp, 'Report saved', 'ReportSave'));
     }
 
     update() {
-        this.reportingService.updateReport({
-            id: this.reportId, templateId: this.templateId, name: this.reportName,
-            templateName: this.template.name, data: this.template.data?.dataStructured,
-            cron: this.cron, emailReceivers: this.emailReceivers,
-            emailSubject: this.emailSubject,
-            emailText: this.emailText,
-            emailHTML: this.emailHTML,
-        } as ReportModel).subscribe(resp => {
-            if (resp !== null) {
-                if (resp.status === 200) {
-                    this.snackBar.open('Report updated', 'ReportUpdate', {
-                        duration: 2000
-                    });
-                }
-            }
-        });
+        this.reportingService.updateReport(this.buildReport(this.reportId))
+            .subscribe(resp => this.showResult(resp, 'Report updated', 'ReportUpdate'));
     }
 
     trackByIndex(index: number, _: any) {
         return index;
+    }
+
+    trackByKey(_: number, item: { key: string }) {
+        return item.key;
     }
 
     addEmailAddress() {
@@ -180,5 +133,74 @@ export class ReportComponent implements OnInit {
             return;
         }
         this.emailReceivers.splice(i, 1);
+    }
+
+    isValid(): boolean {
+        return this.reportName.trim().length > 0;
+    }
+
+    private loadReport(reportId: string) {
+        this.reportingService.getReport(reportId).pipe(
+            switchMap((resp: ReportResponseModel | null) => {
+                if (resp === null) {
+                    return of(null);
+                }
+                this.report = resp.data;
+                this.templateId = this.report.templateId;
+                this.reportName = this.report.name;
+                this.cron = this.report.cron;
+                this.emailReceivers = this.report.emailReceivers;
+                this.emailSubject = this.report.emailSubject;
+                this.emailText = this.report.emailText;
+                this.emailHTML = this.report.emailHTML;
+                this.template.data = {
+                    dataJsonString: '',
+                    dataStructured: this.report.data,
+                    id: '',
+                    name: ''
+                };
+                return this.reportingService.getTemplate(this.templateId);
+            })
+        ).subscribe((resp: TemplateResponseModel | null) => {
+            if (resp !== null) {
+                this.template.name = resp.data.name;
+            }
+            this.ready = true;
+        });
+    }
+
+    private loadTemplate(templateId: string) {
+        this.reportingService.getTemplate(templateId).subscribe((resp: TemplateResponseModel | null) => {
+            if (resp !== null) {
+                this.template = resp.data;
+            }
+            this.ready = true;
+        });
+    }
+
+    private buildReport(id: string | null): ReportModel {
+        const report = {
+            templateId: this.templateId,
+            name: this.reportName,
+            templateName: this.template.name,
+            data: this.template.data?.dataStructured as Map<string, ReportObjectModel>,
+            cron: this.cron,
+            emailReceivers: this.emailReceivers,
+            emailSubject: this.emailSubject,
+            emailText: this.emailText,
+            emailHTML: this.emailHTML,
+        } as ReportModel;
+        if (id !== null) {
+            report.id = id;
+        }
+        return report;
+    }
+
+    private showResult(resp: HttpResponse<string> | null, message: string, action: string) {
+        if (resp !== null && resp.status >= 200 && resp.status < 300) {
+            this.snackBar.open(message, action, {
+                duration: 2000
+            });
+        }
     }
 }

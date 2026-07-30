@@ -19,10 +19,12 @@
     <div [hidden]="!ready">
         <div class="button-header background-color-accent">
             <div fxLayout="column">
-                <button mat-icon-button matTooltip="Save" (click)="save()" *ngIf="reportId === null">
+                <button mat-icon-button matTooltip="Save" (click)="save()" *ngIf="reportId === null"
+                        [disabled]="!isValid()">
                     <mat-icon>save</mat-icon>
                 </button>
-                <button mat-icon-button matTooltip="Update" (click)="update()" *ngIf="reportId !== null">
+                <button mat-icon-button matTooltip="Update" (click)="update()" *ngIf="reportId !== null"
+                        [disabled]="!isValid()">
                     <mat-icon>save</mat-icon>
                 </button>
             </div>
@@ -43,7 +45,7 @@
                         </div>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Report Name</mat-label>
-                            <input matInput [(ngModel)]="reportName">
+                            <input matInput required [(ngModel)]="reportName">
                             <mat-error senergyError label="Report Name"></mat-error>
                         </mat-form-field>
                     </div>
@@ -91,14 +93,14 @@
             </mat-expansion-panel>
 
             <div *ngIf="template.data !== undefined">
-                <senergy-reporting-object *ngFor="let element of template.data.dataStructured | keyvalue"
-                                          [requestObject]="requestObject"
-                                          [name]="element.key"
-                                          [data]="element.value"
-                                          [allDevices]="allDevices">
+                <senergy-reporting-object
+                    *ngFor="let element of template.data.dataStructured | keyvalue; trackBy: trackByKey"
+                    [name]="element.key"
+                    [data]="element.value"
+                    [allDevices]="allDevices">
                 </senergy-reporting-object>
             </div>
-            <button mat-fab class="fab" (click)="create()" matTooltip="Create Report">
+            <button mat-fab class="fab" (click)="create()" matTooltip="Create Report" [disabled]="!isValid()">
                 <mat-icon>create</mat-icon>
             </button>
         </div>
