@@ -43,6 +43,12 @@ table {
     width: 100%;
 }
 
+.report-name {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
 .offset {
     margin-right: 8px;
 }

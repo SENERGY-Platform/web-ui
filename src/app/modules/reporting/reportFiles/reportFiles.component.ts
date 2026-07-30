@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
@@ -23,82 +23,112 @@ import {
     ReportFileModel,
     ReportModel, ReportResponseModel,
 } from '../shared/reporting.model';
-import {ReportingService} from '../shared/reporting.service';
-import {MatTableDataSource} from '@angular/material/table';
-import {ActivatedRoute} from '@angular/router';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {saveAs} from 'file-saver';
-import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
-import { environment } from 'src/environments/environment';
+import { ReportingService } from '../shared/reporting.service';
+import { MatTableDataSource } from '@angular/material/table';
+import { ActivatedRoute } from '@angular/router';
+import { saveAs } from 'file-saver';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { PreferencesService } from '../../../core/services/preferences.service';
+import { reportFileName } from '../shared/report-file-name';
 
 @Component({
     selector: 'senergy-reporting-report-files',
     templateUrl: './reportFiles.component.html',
     styleUrls: ['./reportFiles.component.css'],
 })
-export class ReportFilesComponent implements OnInit {
+export class ReportFilesComponent implements OnInit, AfterViewInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    @ViewChild('sort', { static: false }) sort!: MatSort;
+    @ViewChild(MatSort, { static: false }) sort?: MatSort;
 
     reportId: string | null = null;
 
     report: ReportModel = {} as ReportModel;
     reportsDataSource = new MatTableDataSource<ReportFileModel>();
-    displayedColumns: string[] = ['id','type','createdAt', 'download'];
+    displayedColumns: string[] = ['id', 'type', 'createdAt', 'download'];
+    pageSize = this.preferencesService.pageSize;
     ready = false;
+    downloading = false;
 
     constructor(
         private route: ActivatedRoute,
         public snackBar: MatSnackBar,
-        private errorHandlerService: ErrorHandlerService,
         public utilsService: UtilService,
         private reportingService: ReportingService,
-        private ladonService: LadonService,
+        private dialogsService: DialogsService,
+        private preferencesService: PreferencesService,
     ) {
         this.reportId = this.route.snapshot.paramMap.get('reportId');
     }
 
     ngOnInit() {
-        if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/report/file').DELETE) {
+        if (this.reportingService.userHasDeleteReportFileAuthorization()) {
             this.displayedColumns.push('delete');
         }
-        if (this.reportId != null) {
-            this.reportingService.getReport(this.reportId).subscribe((resp: ReportResponseModel | null) => {
-                if (resp !== null) {
-                    this.report = resp.data;
-                    this.reportsDataSource.data = this.report.reportFiles;
-                }
-                this.ready = true;
-            });
-        }
-    }
-
-    async download($event: Event, fileId: string) {
-        $event.stopPropagation();
-        try {
-            if (this.reportId != null) {
-                this.reportingService.getReportFile(this.reportId, fileId).subscribe((resp: Blob | null) => {
-                    if (resp !== null) {
-                        saveAs(resp);
-                    }
-                });
-            }
-        } catch (_) {
-            this.errorHandlerService.handleErrorWithSnackBar('Failed to download', 'ReportingFileDownload', 'download', null)(undefined);
+        if (this.reportId === null) {
+            this.ready = true;
             return;
         }
+        this.reportingService.getReport(this.reportId).subscribe((resp: ReportResponseModel | null) => {
+            if (resp !== null) {
+                this.report = resp.data;
+                this.reportsDataSource.data = this.report.reportFiles || [];
+            }
+            this.ready = true;
+        });
     }
 
-    delete($event: Event, fileId: string) {
-        $event.stopPropagation();
-        if (this.reportId != null) {
-            this.reportingService.deleteReportFile(this.reportId, fileId).subscribe(() => {
-                this.snackBar.open('File deleted', 'ReportingFileDelete', {
-                    duration: 3000,
-                });
-                this.reportsDataSource.data = this.reportsDataSource.data.filter((reportFile: ReportFileModel) => reportFile.id !== fileId);
-            });
+    ngAfterViewInit() {
+        if (this.sort !== undefined) {
+            this.reportsDataSource.sort = this.sort;
         }
+        if (this.paginator === undefined) {
+            return;
+        }
+        this.reportsDataSource.paginator = this.paginator;
+        this.paginator.page.subscribe((event) => {
+            this.preferencesService.pageSize = event.pageSize;
+            this.pageSize = event.pageSize;
+        });
+    }
+
+    download($event: Event, reportFile: ReportFileModel) {
+        $event.stopPropagation();
+        if (this.reportId === null) {
+            return;
+        }
+        this.downloading = true;
+        this.reportingService.getReportFile(this.reportId, reportFile.id).subscribe((resp: Blob | null) => {
+            this.downloading = false;
+            if (resp !== null) {
+                saveAs(resp, reportFileName((this.report.name || 'report') + '_' + reportFile.id, reportFile.type));
+            }
+        });
+    }
+
+    delete($event: Event, reportFile: ReportFileModel) {
+        $event.stopPropagation();
+        if (this.reportId === null) {
+            return;
+        }
+        const reportId = this.reportId;
+        this.dialogsService
+            .openDeleteDialog('report file ' + reportFile.id)
+            .afterClosed()
+            .subscribe((deleteFile: boolean) => {
+                if (!deleteFile) {
+                    return;
+                }
+                this.reportingService.deleteReportFile(reportId, reportFile.id).subscribe((resp) => {
+                    if (resp === null) {
+                        return;
+                    }
+                    this.snackBar.open('File deleted', 'ReportingFileDelete', {
+                        duration: 3000,
+                    });
+                    this.report.reportFiles = (this.report.reportFiles || []).filter((file: ReportFileModel) => file.id !== reportFile.id);
+                    this.reportsDataSource.data = this.report.reportFiles;
+                });
+            });
     }
 
 }

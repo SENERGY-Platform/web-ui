@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
@@ -23,58 +23,116 @@ import {
     ReportListResponseModel,
     ReportModel,
 } from '../shared/reporting.model';
-import {ReportingService} from '../shared/reporting.service';
-import {MatTableDataSource} from '@angular/material/table';
-import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
-import { environment } from 'src/environments/environment';
+import { ReportingService } from '../shared/reporting.service';
+import { MatTableDataSource } from '@angular/material/table';
+import { Observable, Subscription, concatMap, map } from 'rxjs';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { PreferencesService } from '../../../core/services/preferences.service';
 
 @Component({
     selector: 'senergy-reporting-reports',
     templateUrl: './reports.component.html',
     styleUrls: ['./reports.component.css'],
 })
-export class ReportsComponent implements OnInit {
+export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    @ViewChild('sort', { static: false }) sort!: MatSort;
+    @ViewChild(MatSort, { static: false }) sort?: MatSort;
 
-    reports: ReportModel[] = [] as ReportModel[];
+    reports: ReportModel[] = [];
     reportsDataSource = new MatTableDataSource<ReportModel>();
-    displayedColumns: string[] = ['id', 'name','createdAt','updatedAt'];
+    displayedColumns: string[] = ['id', 'name', 'createdAt', 'updatedAt'];
+    pageSize = this.preferencesService.pageSize;
     ready = false;
+
+    private searchSub?: Subscription;
 
     constructor(
         public snackBar: MatSnackBar,
         public utilsService: UtilService,
         private reportingService: ReportingService,
-        private ladonService: LadonService,
+        private searchbarService: SearchbarService,
+        private dialogsService: DialogsService,
+        private preferencesService: PreferencesService,
     ) {}
 
     ngOnInit() {
-        if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/report/file').GET) {
+        if (this.reportingService.userHasReadReportFileAuthorization()) {
             this.displayedColumns.push('files');
         }
-        if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/report').PUT) {
+        if (this.reportingService.userHasUpdateReportAuthorization()) {
             this.displayedColumns.push('edit');
         }
-        if (this.ladonService.getUserAuthorizationsForURI(environment.reportEngineUrl + '/report').DELETE) {
+        if (this.reportingService.userHasDeleteReportAuthorization()) {
             this.displayedColumns.push('delete');
         }
-        this.reportingService.getReports().subscribe((resp: ReportListResponseModel | null) => {
-            if (resp !== null) {
-                this.reports = resp.data || [];
-                this.reportsDataSource.data = this.reports;
-            }
-            this.ready = true;
+        this.initSearch();
+    }
+
+    ngAfterViewInit() {
+        if (this.sort !== undefined) {
+            this.reportsDataSource.sort = this.sort;
+        }
+        if (this.paginator === undefined) {
+            return;
+        }
+        this.reportsDataSource.paginator = this.paginator;
+        this.paginator.page.subscribe((event) => {
+            this.preferencesService.pageSize = event.pageSize;
+            this.pageSize = event.pageSize;
         });
     }
 
-    deleteReport(id: string){
-        this.reportingService.deleteReport(id).subscribe(() => {
-            this.snackBar.open('Report deleted', 'ReportDelete', {
-                duration: 3000,
+    ngOnDestroy() {
+        this.searchSub?.unsubscribe();
+    }
+
+    deleteReport(report: ReportModel) {
+        if (report.id === undefined) {
+            return;
+        }
+        const id = report.id;
+        this.dialogsService
+            .openDeleteDialog('report ' + report.name)
+            .afterClosed()
+            .subscribe((deleteReport: boolean) => {
+                if (!deleteReport) {
+                    return;
+                }
+                this.reportingService.deleteReport(id).subscribe((resp) => {
+                    if (resp === null) {
+                        return;
+                    }
+                    this.snackBar.open('Report deleted', 'ReportDelete', {
+                        duration: 3000,
+                    });
+                    this.reports = this.reports.filter((r: ReportModel) => r.id !== id);
+                    this.reportsDataSource.data = this.reports;
+                });
             });
-            this.reportsDataSource.data = this.reportsDataSource.data.filter((report: ReportModel) => report.id !== id);
-        });
     }
 
+    private initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.pipe(
+            concatMap((searchText: string) => this.reload().pipe(map(() => searchText))),
+        ).subscribe((searchText: string) => this.filter(searchText));
+    }
+
+    private reload(): Observable<unknown> {
+        this.ready = false;
+        return this.reportingService.getReports().pipe(map((resp: ReportListResponseModel | null) => {
+            this.reports = resp?.data || [];
+            this.ready = true;
+        }));
+    }
+
+    private filter(searchText: string) {
+        const search = searchText.toLowerCase();
+        this.reportsDataSource.data = this.reports.filter((report: ReportModel) =>
+            search === ''
+            || (report.name || '').toLowerCase().indexOf(search) !== -1
+            || (report.id || '').toLowerCase().indexOf(search) !== -1
+            || (report.templateName || '').toLowerCase().indexOf(search) !== -1
+        );
+    }
 }

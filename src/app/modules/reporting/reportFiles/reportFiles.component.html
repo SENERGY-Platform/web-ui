@@ -16,14 +16,15 @@
 
 
 <div class="layout-margin">
-    <div class="mat-elevation-z1" [hidden]="!ready || (report.reportFiles.length === 0 && ready)">
+    <senergy-spinner [show]="!ready || downloading"></senergy-spinner>
+    <div *ngIf="ready && report.name" class="report-name">{{report.name}}</div>
+    <div class="mat-elevation-z1" [hidden]="!ready || reportsDataSource.data.length === 0">
         <div class="table-container">
-            <table #sort="matSort" mat-table [dataSource]="reportsDataSource" matSort
-                   matSortActive="name"
-                   matSortDirection="asc" matSortDisableClear>
+            <table mat-table [dataSource]="reportsDataSource" matSort matSortActive="createdAt"
+                   matSortDirection="desc" matSortDisableClear>
 
                 <ng-container matColumnDef="id">
-                    <th mat-header-cell *matHeaderCellDef>Id</th>
+                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Id</th>
                     <td mat-cell *matCellDef="let element">
                         <div>
                             {{element.id}}
@@ -32,7 +33,7 @@
                 </ng-container>
 
                 <ng-container matColumnDef="type">
-                    <th mat-header-cell *matHeaderCellDef>Typ</th>
+                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Typ</th>
                     <td mat-cell *matCellDef="let element">
                         <div>
                             {{element.type}}
@@ -41,7 +42,7 @@
                 </ng-container>
 
                 <ng-container matColumnDef="createdAt">
-                    <th mat-header-cell *matHeaderCellDef>createdAt</th>
+                    <th mat-header-cell mat-sort-header *matHeaderCellDef>createdAt</th>
                     <td mat-cell *matCellDef="let element">
                         <div>
                             {{element.createdAt | date:"medium"}}
@@ -52,7 +53,8 @@
                 <ng-container matColumnDef="download">
                     <th mat-header-cell *matHeaderCellDef class="button-column">Download</th>
                     <td mat-cell *matCellDef="let element">
-                        <button mat-icon-button color="accent" (click)="download($event, element.id)" matTooltip="Download">
+                        <button mat-icon-button color="accent" [disabled]="downloading"
+                                (click)="download($event, element)" matTooltip="Download">
                             <mat-icon>download-circle</mat-icon>
                         </button>
                     </td>
@@ -61,16 +63,18 @@
                 <ng-container matColumnDef="delete">
                     <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
                     <td mat-cell *matCellDef="let element">
-                        <button mat-icon-button color="accent" (click)="delete($event, element.id)" matTooltip="Delete">
+                        <button mat-icon-button color="warn" (click)="delete($event, element)" matTooltip="Delete">
                             <mat-icon>delete</mat-icon>
                         </button>
                     </td>
                 </ng-container>
 
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             </table>
         </div>
+        <mat-paginator #paginator [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+                       showFirstLastButtons></mat-paginator>
     </div>
-    <div *ngIf="report.reportFiles?.length === 0 && ready">No report files found.</div>
+    <div *ngIf="ready && reportsDataSource.data.length === 0">No report files found.</div>
 </div>
