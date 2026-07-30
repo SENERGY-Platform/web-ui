@@ -37,15 +37,15 @@ export interface TemplateDataModel {
     id: string;
     name: string;
     dataJsonString: string;
-    dataStructured: Map<string, ReportObjectModel>;
+    dataStructured: { [key: string]: ReportObjectModel };
 }
 
 export interface ReportObjectModel {
     name: string;
     valueType: string;
     value: any | undefined;
-    fields: Map<string, ReportObjectModel> | undefined;
-    children: {[key: string]: ReportObjectModel} | undefined;
+    fields: { [key: string]: ReportObjectModel } | undefined;
+    children: { [key: string]: ReportObjectModel } | undefined;
     length: number | undefined;
     query?: QueriesRequestV2ElementTimescaleModel | undefined;
     queryOptions?: ReportObjectModelQueryOptions;
@@ -78,7 +78,7 @@ export interface ReportModel {
     name: string;
     templateName: string;
     templateId: string;
-    data: Map<string, ReportObjectModel>;
+    data: { [key: string]: ReportObjectModel };
     reportFiles: ReportFileModel[];
     cron?: string;
     emailReceivers?: string[];

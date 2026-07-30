@@ -19,7 +19,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
 import {
     ReportModel,
-    ReportObjectModel,
     ReportResponseModel,
     TemplateModel,
     TemplateResponseModel
@@ -183,7 +182,7 @@ export class ReportComponent implements OnInit {
             templateId: this.templateId,
             name: this.reportName,
             templateName: this.template.name,
-            data: this.template.data?.dataStructured as Map<string, ReportObjectModel>,
+            data: this.template.data?.dataStructured,
             cron: this.cron,
             emailReceivers: this.emailReceivers,
             emailSubject: this.emailSubject,
