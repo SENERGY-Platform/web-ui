@@ -24,19 +24,17 @@
         <mat-panel-description *ngIf="data.valueType==='object'"></mat-panel-description>
         <mat-panel-description *ngIf="inputType==='query' && data.valueType==='array'">
             <mat-icon aria-hidden="false" aria-label="Query" fontIcon="list"></mat-icon>
-            {{queryDevice.display_name ||
-            queryDevice?.display_name}}/{{queryService.name}}/{{data.query!.columns[0].name}}
+            {{getDeviceName(queryDevice)}}/{{queryService.name}}/{{data.query?.columns?.[0]?.name}}
         </mat-panel-description>
         <mat-panel-description *ngIf="inputType==='query' && data.valueType!=='array'">
             <mat-icon aria-hidden="false" aria-label="Query" fontIcon="build"></mat-icon>
-            {{queryDevice.display_name ||
-            queryDevice?.display_name}}/{{queryService.name}}/{{data.query!.columns[0].name}}
+            {{getDeviceName(queryDevice)}}/{{queryService.name}}/{{data.query?.columns?.[0]?.name}}
         </mat-panel-description>
         <div class="ctrl" *ngIf="dynamic">
-            <mat-icon [ngStyle]="{'color':'grey'}" [matTooltip]="'delete Item'" fontIcon="delete"
-                (click)="emitRemoveItem()"></mat-icon>
-            <mat-icon [ngStyle]="{'color':'grey'}" [matTooltip]="'copy Item'" fontIcon="content_copy"
-                (click)="emitCopyItem()"></mat-icon>
+            <mat-icon class="pointer" [ngStyle]="{'color':'grey'}" [matTooltip]="'delete Item'" fontIcon="delete"
+                (click)="emitRemoveItem($event)"></mat-icon>
+            <mat-icon class="pointer" [ngStyle]="{'color':'grey'}" [matTooltip]="'copy Item'" fontIcon="content_copy"
+                (click)="emitCopyItem($event)"></mat-icon>
         </div>
     </mat-expansion-panel-header>
     <ng-template matExpansionPanelContent>
@@ -50,7 +48,7 @@
                     <mat-radio-button value="devices">Devices</mat-radio-button>
                 </mat-radio-group>
                 <button *ngIf="inputType === 'query' && data.query !== undefined" mat-icon-button
-                    matTooltip="Preview Query" (click)="previewQuery()">
+                    matTooltip="Preview Query" [disabled]="previewRunning" (click)="previewQuery()">
                     <mat-icon>preview</mat-icon>
                 </button>
             </div>
@@ -58,11 +56,9 @@
             <div *ngIf="inputType === 'query' && data.query !== undefined" fxLayout="column">
                 <mat-form-field fxFlex color="accent" appearance="outline">
                     <mat-label>Device</mat-label>
-                    <mtx-select ngDefaultControl (ngModelChange)="queryDeviceChanged($event).subscribe()"
-                        [(ngModel)]="queryDevice" appendTo=".ng-select-anchor">
-                        <mtx-option *ngFor="let option of allDevices"
-                            [value]="option">{{getDeviceName(option)}}</mtx-option>
-                    </mtx-select>
+                    <mtx-select ngDefaultControl [items]="allDevices" bindLabel="display_name" virtualScroll="true"
+                        placeholder="Type to search" (ngModelChange)="onQueryDeviceChanged($event)"
+                        [(ngModel)]="queryDevice" appendTo=".ng-select-anchor"></mtx-select>
                     <mat-error senergyError label="Device"></mat-error>
                 </mat-form-field>
 
@@ -76,10 +72,9 @@
 
                 <mat-form-field fxFill color="accent" appearance="outline">
                     <mat-label>Path</mat-label>
-                    <mtx-select matInput [(ngModel)]="data.query!.columns[0].name"
+                    <mtx-select [(ngModel)]="data.query!.columns[0].name" [addTag]="true"
                         placeholder="Choose or write yourself" appendTo=".ng-select-anchor">
-                        <mtx-option *ngFor="let path of queryServicePaths | keyvalue"
-                            [value]="path.value">{{path.value}}</mtx-option>
+                        <mtx-option *ngFor="let path of queryServicePaths" [value]="path">{{path}}</mtx-option>
                     </mtx-select>
                     <mat-error senergyError label="Path"></mat-error>
                 </mat-form-field>
@@ -206,17 +201,14 @@
                     </mat-form-field>
                 </div>
                 <div *ngIf="data.valueType === 'object' && data.fields !== undefined">
-
-                    <senergy-reporting-object *ngFor="let element of data.fields | keyvalue"
-                        [requestObject]="requestObject" [name]="element.key" [data]="element.value"
-                        [allDevices]="allDevices">
+                    <senergy-reporting-object *ngFor="let element of data.fields | keyvalue; trackBy: trackByKey"
+                        [name]="element.key" [data]="element.value" [allDevices]="allDevices">
                     </senergy-reporting-object>
                 </div>
                 <div *ngIf="data.valueType === 'array' && data.children !== undefined">
-                    <senergy-reporting-object *ngFor="let element of data.children | keyvalue"
-                        [requestObject]="requestObject" [name]="element.key" [data]="element.value"
-                        [allDevices]="allDevices" [dynamic]="true" (removeItemEmitter)="removeItem($event)"
-                        (copyItemEmitter)="addItem($event)">
+                    <senergy-reporting-object *ngFor="let element of data.children | keyvalue; trackBy: trackByKey"
+                        [name]="element.key" [data]="element.value" [allDevices]="allDevices" [dynamic]="true"
+                        (removeItemEmitter)="removeItem($event)" (copyItemEmitter)="addItem($event)">
                     </senergy-reporting-object>
                 </div>
             </div>
@@ -224,12 +216,11 @@
             <div *ngIf="inputType === 'devices'" fxLayout="column">
                 <mat-form-field fxFill color="accent" appearance="outline">
                     <mat-label>Last Days</mat-label>
-                    <mtx-select [(ngModel)]="this.data!.deviceQuery!.last" placeholder="Choose or write yourself"
+                    <mtx-select [(ngModel)]="data!.deviceQuery!.last" placeholder="Choose or write yourself"
                         [addTag]="addDeviceQueryLastValue()" appendTo=".ng-select-anchor">
-                        <mtx-option *ngFor="let values of deviceQueryLastValues | keyvalue"
-                            [value]="values.value">{{values.value}}</mtx-option>
+                        <mtx-option *ngFor="let value of deviceQueryLastValues" [value]="value">{{value}}</mtx-option>
                     </mtx-select>
-                    <mat-error senergyError label="Path"></mat-error>
+                    <mat-error senergyError label="Last Days"></mat-error>
                 </mat-form-field>
             </div>
         </div>
