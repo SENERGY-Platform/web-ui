@@ -42,7 +42,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     styleUrls: ['./import-instances.component.css'],
 })
 export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestroy {
-    displayedColumns = ['select', 'name', 'image', 'created_at', 'updated_at', 'export'];
+    displayedColumns = ['select', 'status', 'name', 'image', 'created_at', 'updated_at', 'export'];
     dataSource = new MatTableDataSource<ImportInstancesModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
@@ -124,7 +124,13 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.load().subscribe();
+            this.selectionClear();
+            this.load().subscribe({
+                next: () => {
+                    this.dataReady = true;
+                },
+                error: (err) => this.handleLoadError(err),
+            });
         });
     }
 
@@ -206,9 +212,18 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
         this.selectionClear();
         this.dataReady = false;
 
-        forkJoin([this.load(), this.getTotalNumberOfTypes()]).subscribe(_ => {
-            this.dataReady = true;
+        forkJoin([this.load(), this.getTotalNumberOfTypes()]).subscribe({
+            next: () => {
+                this.dataReady = true;
+            },
+            error: (err) => this.handleLoadError(err),
         });
+    }
+
+    private handleLoadError(err: any) {
+        console.error(err);
+        this.snackBar.open('Error loading imports', 'close', { panelClass: 'snack-bar-error' });
+        this.dataReady = true;
     }
 
 

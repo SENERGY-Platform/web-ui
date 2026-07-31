@@ -18,6 +18,12 @@ export interface ImportInstanceConfigModel {
     value: any;
 }
 
+export interface ImportInstanceStatusModel {
+    running: boolean;
+    transitioning: boolean;
+    message?: string;
+}
+
 export interface ImportInstancesModel {
     id: string;
     name: string;
@@ -29,4 +35,6 @@ export interface ImportInstancesModel {
     generated: boolean;
     created_at: Date;
     updated_at: Date;
+    /** Filled from the deployment backend on read, never persisted */
+    status?: ImportInstanceStatusModel;
 }

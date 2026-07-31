@@ -54,6 +54,28 @@ th.mat-mdc-header-cell {
     margin-top: -20px;
 }
 
+.circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.green {
+    background: #008700;
+}
+
+.red {
+    background: #db0000;
+}
+
+.yellow {
+    background: yellow;
+}
+
+.grey {
+    background: grey;
+}
+
 .filter-chip-container {
     margin-top: 12px;
     margin-bottom: 12px;
