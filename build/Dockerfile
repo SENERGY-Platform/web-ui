@@ -22,6 +22,8 @@ ARG VERSION="no version provided"
 ENV VERSION=${VERSION}
 ADD build-env.sh /
 COPY --from=builder /tmp/workspace/dist/senergy-web-ui/browser/ /usr/share/nginx/html/
+# extractLicenses writes the third-party notices next to the browser folder, not into it
+COPY --from=builder /tmp/workspace/dist/senergy-web-ui/3rdpartylicenses.txt /usr/share/nginx/html/
 RUN chmod -R a+r /usr/share/nginx/html
 COPY build/conf /etc/nginx/conf.d/default.conf
 CMD ["/bin/sh",  "-c",  "/build-env.sh /usr/share/nginx/html/ /usr/share/nginx/html/ && exec nginx -g 'daemon off;'"]
