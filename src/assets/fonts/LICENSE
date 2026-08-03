@@ -1,0 +1,19 @@
+The fonts in this directory are third-party files, distributed under their own
+license rather than as part of this project.
+
+Roboto — KFOlCnqEu92Fr1MmSU5fBBc9.ttf (300), KFOmCnqEu92Fr1Mu4mxP.ttf (400),
+KFOlCnqEu92Fr1MmEU9fBBc9.ttf (500)
+
+    Copyright Google LLC
+    Licensed under the Apache License, Version 2.0
+    https://github.com/googlefonts/roboto
+
+Material Symbols — MaterialSymbolsOutlined.woff2, MaterialSymbolsRounded.woff2,
+MaterialSymbolsSharp.woff2
+
+    Copyright Google LLC
+    Licensed under the Apache License, Version 2.0
+    https://github.com/google/material-design-icons
+
+The full text of the Apache License, Version 2.0 is in the LICENSE file at the
+root of this repository, and at http://www.apache.org/licenses/LICENSE-2.0
