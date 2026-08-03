@@ -98,7 +98,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     const currentDetailLevel = this.detailLevel(this.groupTime);
                     switch (evt.type) {
                         case 'click': // zoom in
-                            if (found && currentDetailLevel < DetailLevel.ms) {
+                            if (labelInfo !== null && currentDetailLevel < DetailLevel.ms) {
                                 const newDetailLevel = currentDetailLevel + 1;
                                 this.groupTime = this.groupTimeFromDetailLevel(newDetailLevel);
                                 this.hAxisFormat = this.xAxisFormat(newDetailLevel);

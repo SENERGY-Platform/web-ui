@@ -1,98 +1,124 @@
-// https://stackoverflow.com/a/78262452
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-// Helper function to rotate a point around a center
-function rotatePoint(cx: any, cy: any, angle: any, px: any, py: any): any {
-    const s = Math.sin(angle);
-    const c = Math.cos(angle);
+import { Scale } from 'chart.js';
 
-    // Translate point to origin
-    px -= cx;
-    py -= cy;
+/**
+ * Hit testing for the tick labels of a chart axis, so that a click on a label can be resolved to
+ * the tick it belongs to. Chart.js does not report label clicks itself, so the boxes are derived
+ * from the layout it keeps on the scale.
+ */
 
-    // Rotate point
-    const xnew = px * c - py * s;
-    const ynew = px * s + py * c;
-
-    // Translate point back
-    return { x: xnew + cx, y: ynew + cy };
+/** The part of the internal scale layout the hit test reads. Not covered by the public typings. */
+interface ScaleLabelLayout {
+    _labelItems?: {
+        label: string | string[];
+        options: { rotation: number; translation: [number, number] };
+    }[];
+    _labelSizes?: { widths: number[]; heights: number[] };
 }
 
-// Helper function to check if a point is inside a polygon
-function isPointInPolygon(polygonObj: any, px: any, py: any): any {
-    const polygon = Object.values(polygonObj).filter(point => typeof point === 'object');
-    let inside = false;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        // @ts-expect-error stack overflow
-         const xi = polygon[i].x, yi = polygon[i].y;
-        // @ts-expect-error stack overflow
-         const xj = polygon[j].x, yj = polygon[j].y;
+export interface AxisLabelHitBox {
+    index: number;
+    label: string | string[];
+    /** Point the label is rotated around, which is where the tick meets the axis. */
+    pivot: { x: number; y: number };
+    /** Extent of the label box in its own unrotated frame, relative to the pivot. */
+    bounds: { left: number; right: number; top: number; bottom: number };
+    /** Rotation of the label in radians. */
+    rotation: number;
+}
 
-         // Check if point is on the edge
-         const onEdge = (py - yi) * (xj - xi) === (px - xi) * (yj - yi) &&
-              Math.min(xi, xj) <= px && px <= Math.max(xi, xj) &&
-              Math.min(yi, yj) <= py && py <= Math.max(yi, yj);
-         if (onEdge) {
-              return true;
-         }
+export interface AxisLabelHit {
+    label: string | string[];
+    index: number;
+}
 
-         const intersect = ((yi > py) != (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
-         if (intersect) inside = !inside;
+/**
+ * Builds one box per tick label of the given axis. Returns an empty list while the axis has not
+ * been laid out yet.
+ */
+export const getLabelHitBoxes = (scale: Scale | undefined): AxisLabelHitBox[] => {
+    const layout = scale as unknown as ScaleLabelLayout | undefined;
+    const items = layout?._labelItems;
+    const sizes = layout?._labelSizes;
+    if (items === undefined || sizes === undefined) {
+        return [];
     }
-    return inside;
-}
+    return items.map((item, index: number) => {
+        const width = sizes.widths[index];
+        const rotation = item.options.rotation;
+        const [x, y] = item.options.translation;
+        // Chart.js centers an upright label below its tick, but right aligns a rotated one, so the
+        // translation is the top center of the box in the first case and its top right in the second.
+        return {
+            index,
+            label: item.label,
+            pivot: { x, y },
+            bounds: {
+                left: rotation === 0 ? -width / 2 : -width,
+                right: rotation === 0 ? width / 2 : 0,
+                top: 0,
+                bottom: sizes.heights[index],
+            },
+            rotation,
+        };
+    });
+};
 
-export const findLabel = (labels: any, evt: any): any => {
-    if (!labels) {
+/**
+ * Finds the label the given point falls into. The boxes of rotated labels can overlap; the last
+ * match wins, which keeps the tick closer to the end of the axis.
+ */
+export const findLabel = (
+    boxes: AxisLabelHitBox[] | undefined,
+    point: { x: number | null; y: number | null } | undefined
+): [boolean, AxisLabelHit | null] => {
+    // Chart.js reports events without coordinates, for example a click triggered from the keyboard.
+    if (boxes === undefined || point === undefined || point.x === null || point.y === null) {
         return [false, null];
     }
-    let found = false;
-    let res = null;
-
-    labels.forEach((label: any) => {
-        if (isPointInPolygon(label, evt.x, evt.y)) {
-            res = {
-                label: label.label,
-                index: label.index,
-            };
-            found = true;
+    const x = point.x;
+    const y = point.y;
+    let hit: AxisLabelHit | null = null;
+    boxes.forEach((box: AxisLabelHitBox) => {
+        if (contains(box, x, y)) {
+            hit = { label: box.label, index: box.index };
         }
     });
-    return [found, res];
+    return [hit !== null, hit];
 };
 
-export const getLabelHitBoxes = (x: any): any => {
-    if (!x._labelItems) {
-        return;
-    }
+/**
+ * Tolerance for the bounds check. Rotating a point on the edge of a box leaves a rounding error of a
+ * few multiples of the machine epsilon, which without the tolerance would drop clicks on the edge.
+ */
+const EDGE_TOLERANCE = 1e-9;
 
-    const hitBoxes = x._labelItems.map((e: any, i: any) => {
-        const width = x._labelSizes.widths[i];
-        const height = x._labelSizes.heights[i];
-        const rotation = e.options.rotation;
-        // if there is no rotation the translation is the top center of the label box
-        // If there is a rotation the translation is the top right corner of the label box
-        let urx;
-        if (rotation === 0) {
-            urx = e.options.translation[0] + width / 2;
-        } else {
-            urx = e.options.translation[0];
-        }
-        const ury = e.options.translation[1];
-
-        // Step 2: Calculate the corners of the rectangle
-        const corners = [
-            { x: urx, y: ury }, // Top-right
-            { x: urx - width, y: ury }, // Top-left
-            { x: urx - width, y: ury + height }, // Bottom-left
-            { x: urx, y: ury + height }, // Bottom-right
-        ];
-        // Step 3: Rotate corners around top right corner
-        const hitBox = corners.map((corner: any) =>
-            rotatePoint(urx, ury, rotation, corner.x, corner.y)
-        );
-
-        return { ...hitBox, label: e.label, index: i };
-    });
-    return hitBoxes;
-};
-
+/**
+ * Rotates the point back into the frame of the label instead of rotating the box, which reduces the
+ * test to a comparison against the bounds. The edges count as inside.
+ */
+function contains(box: AxisLabelHitBox, x: number, y: number): boolean {
+    const dx = x - box.pivot.x;
+    const dy = y - box.pivot.y;
+    const cos = Math.cos(box.rotation);
+    const sin = Math.sin(box.rotation);
+    const localX = dx * cos + dy * sin;
+    const localY = dy * cos - dx * sin;
+    return localX >= box.bounds.left - EDGE_TOLERANCE && localX <= box.bounds.right + EDGE_TOLERANCE
+        && localY >= box.bounds.top - EDGE_TOLERANCE && localY <= box.bounds.bottom + EDGE_TOLERANCE;
+}
