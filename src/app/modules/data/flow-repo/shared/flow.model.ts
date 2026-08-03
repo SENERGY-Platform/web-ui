@@ -29,6 +29,10 @@ export interface FlowModel {
     dateUpdated: number;
 }
 
+export interface FlowCreateResponse {
+    _id: string;
+}
+
 export interface FlowOperatorUsage {
     OperatorID: string;
     Flows: OperatorUsageFlowStats[];

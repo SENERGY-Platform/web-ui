@@ -20,7 +20,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import {Observable, throwError} from 'rxjs';
-import {FlowModel, FlowOperatorUsage} from './flow.model';
+import {FlowCreateResponse, FlowModel, FlowOperatorUsage} from './flow.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
@@ -71,16 +71,20 @@ export class FlowRepoService {
         );
     }
 
-    saveFlow(flow: FlowModel): Observable<HttpResponse<FlowModel> | null> {
+    /**
+     * Creates the flow if it has no id yet, otherwise updates the existing one.
+     * Only the create response carries a body: the id of the new flow.
+     */
+    saveFlow(flow: FlowModel): Observable<HttpResponse<FlowCreateResponse> | null> {
         if (flow._id === undefined) {
             return this.http
-                .put<FlowModel>(environment.flowRepoUrl + '/flow/', flow, {observe: 'response'})
+                .put<FlowCreateResponse>(environment.flowRepoUrl + '/flow/', flow, {observe: 'response'})
                 .pipe(catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'putFlow: Error', null)));
         } else {
             const id = flow._id;
             delete flow._id;
             return this.http
-                .post<FlowModel>(environment.flowRepoUrl + '/flow/' + id + '/', flow, {observe: 'response'})
+                .post<FlowCreateResponse>(environment.flowRepoUrl + '/flow/' + id + '/', flow, {observe: 'response'})
                 .pipe(catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'postFlow: Error', null)));
         }
     }

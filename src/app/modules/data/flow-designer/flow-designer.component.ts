@@ -17,7 +17,7 @@
 import {Component, AfterViewInit, ViewChild} from '@angular/core';
 import {IOModel, OperatorModel} from '../operator-repo/shared/operator.model';
 import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {OperatorRepoService} from '../operator-repo/shared/operator-repo.service';
 import {FlowModel} from '../flow-repo/shared/flow.model';
 import {DiagramEditorComponent} from '../diagram-editor/diagram-editor.component';
@@ -42,6 +42,7 @@ export class FlowDesignerComponent implements AfterViewInit {
 
     constructor(
         private route: ActivatedRoute,
+        private router: Router,
         private operatorRepoService: OperatorRepoService,
         private flowRepoService: FlowRepoService,
         public snackBar: MatSnackBar,
@@ -203,14 +204,21 @@ export class FlowDesignerComponent implements AfterViewInit {
         const svg = this.diagram.paperService.getPaper().svg.cloneNode(true) as SVGElement;
         this.flow.image = this.createSVGFromModel(svg);
         this.flow.model = this.diagram.getGraph();
+        const isNewFlow = this.flow._id === undefined;
         const flow = Object.assign({}, this.flow);
         this.flowRepoService.saveFlow(flow).subscribe(resp => {
-            if (resp != null) {
-                if (resp.status == 200) {
-                    this.snackBar.open('Flow saved', undefined, {
-                        duration: 2000,
-                    });
-                }
+            if (resp == null) {
+                return;
+            }
+            this.snackBar.open('Flow saved', undefined, {
+                duration: 2000,
+            });
+            // Only the create response carries the id of the new flow. Keeping it
+            // makes every following save update that flow instead of creating another one.
+            const id = resp.body?._id;
+            if (isNewFlow && id !== undefined) {
+                this.flow._id = id;
+                this.router.navigate(['/data/designer', id]);
             }
         });
     }
