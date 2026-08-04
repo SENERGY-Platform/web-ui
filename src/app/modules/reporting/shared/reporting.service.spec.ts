@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
+import { TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ReportingService } from './reporting.service';
+import { REPORT_JOB_POLL_MAX_FAILURES, ReportingService } from './reporting.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
-import { ReportListResponseModel, ReportModel } from './reporting.model';
+import {
+    ReportJobModel,
+    ReportJobResponseModel,
+    ReportListResponseModel,
+    ReportModel
+} from './reporting.model';
 
 class MockLadonService {
     authorizations: { [key: string]: { [method: string]: boolean } } = {};
@@ -94,6 +99,138 @@ describe('ReportingService', () => {
         const req = httpMock.expectOne(environment.reportEngineUrl + '/report/file/r1/f1');
         expect(req.request.responseType).toBe('blob');
         req.flush(new Blob(['content']));
+    });
+
+    it('should request a single report job', (done) => {
+        const job = { id: 'j1', reportId: 'r1', status: 'running' } as ReportJobModel;
+        service.getReportJob('j1').subscribe((resp: ReportJobResponseModel | null) => {
+            expect(resp?.data).toEqual(job);
+            done();
+        });
+        const req = httpMock.expectOne(environment.reportEngineUrl + '/report/job/j1');
+        expect(req.request.method).toBe('GET');
+        req.flush({ data: job });
+    });
+
+    it('should return null if the report job is gone', (done) => {
+        service.getReportJob('j1').subscribe((resp: ReportJobResponseModel | null) => {
+            expect(resp).toBeNull();
+            done();
+        });
+        httpMock.expectOne(environment.reportEngineUrl + '/report/job/j1')
+            .flush('not found', { status: 404, statusText: 'Not Found' });
+    });
+
+    it('should request the report jobs of a report', (done) => {
+        service.getReportJobs('r1', 5).subscribe(() => done());
+        const req = httpMock.expectOne(environment.reportEngineUrl + '/report/job?reportId=r1&limit=5');
+        expect(req.request.method).toBe('GET');
+        req.flush({ data: [] });
+    });
+
+    it('should request the report jobs without filters', (done) => {
+        service.getReportJobs().subscribe(() => done());
+        httpMock.expectOne(environment.reportEngineUrl + '/report/job').flush({ data: [] });
+    });
+
+    it('should poll a report job until it is done', fakeAsync(() => {
+        const seen: (ReportJobModel | null)[] = [];
+        let completed = false;
+        service.pollReportJob('j1', 10).subscribe({
+            next: (job: ReportJobModel | null) => seen.push(job),
+            complete: () => completed = true,
+        });
+        tick();
+
+        httpMock.expectOne(environment.reportEngineUrl + '/report/job/j1')
+            .flush({ data: { id: 'j1', reportId: 'r1', status: 'running' } });
+        tick(10);
+        httpMock.expectOne(environment.reportEngineUrl + '/report/job/j1')
+            .flush({ data: { id: 'j1', reportId: 'r1', status: 'done', reportFileId: 'f1' } });
+
+        expect(seen.length).toBe(2);
+        expect(seen[0]?.status).toBe('running');
+        expect(seen[1]?.status).toBe('done');
+        expect(completed).toBe(true);
+        discardPeriodicTasks();
+    }));
+
+    it('should stop polling a report job that failed', fakeAsync(() => {
+        let completed = false;
+        service.pollReportJob('j1', 10).subscribe({ complete: () => completed = true });
+        tick();
+
+        httpMock.expectOne(environment.reportEngineUrl + '/report/job/j1')
+            .flush({ data: { id: 'j1', reportId: 'r1', status: 'failed', error: 'boom' } });
+
+        expect(completed).toBe(true);
+        discardPeriodicTasks();
+    }));
+
+    // A single failed request must not make the ui give up on a running report.
+    it('should keep polling through a single failed request', fakeAsync(() => {
+        const seen: (ReportJobModel | null)[] = [];
+        service.pollReportJob('j1', 10).subscribe((job: ReportJobModel | null) => seen.push(job));
+        tick();
+
+        httpMock.expectOne(environment.reportEngineUrl + '/report/job/j1')
+            .flush('error', { status: 500, statusText: 'Internal Server Error' });
+        expect(seen.length).toBe(0);
+
+        tick(10);
+        httpMock.expectOne(environment.reportEngineUrl + '/report/job/j1')
+            .flush({ data: { id: 'j1', reportId: 'r1', status: 'done' } });
+
+        expect(seen.length).toBe(1);
+        expect(seen[0]?.status).toBe('done');
+        discardPeriodicTasks();
+    }));
+
+    it('should give up polling after repeated failures', fakeAsync(() => {
+        const seen: (ReportJobModel | null)[] = [];
+        let completed = false;
+        service.pollReportJob('j1', 10).subscribe({
+            next: (job: ReportJobModel | null) => seen.push(job),
+            complete: () => completed = true,
+        });
+        tick();
+
+        for (let i = 0; i < REPORT_JOB_POLL_MAX_FAILURES; i++) {
+            httpMock.expectOne(environment.reportEngineUrl + '/report/job/j1')
+                .flush('error', { status: 500, statusText: 'Internal Server Error' });
+            tick(10);
+        }
+
+        expect(seen).toEqual([null]);
+        expect(completed).toBe(true);
+        discardPeriodicTasks();
+    }));
+
+    it('should report an unfinished report job of a report', (done) => {
+        service.getUnfinishedReportJob('r1').subscribe((job: ReportJobModel | null) => {
+            expect(job?.id).toBe('j1');
+            done();
+        });
+        httpMock.expectOne(environment.reportEngineUrl + '/report/job?reportId=r1&limit=1')
+            .flush({ data: [{ id: 'j1', reportId: 'r1', status: 'running' }] });
+    });
+
+    it('should report no unfinished report job when the newest one is done', (done) => {
+        service.getUnfinishedReportJob('r1').subscribe((job: ReportJobModel | null) => {
+            expect(job).toBeNull();
+            done();
+        });
+        httpMock.expectOne(environment.reportEngineUrl + '/report/job?reportId=r1&limit=1')
+            .flush({ data: [{ id: 'j1', reportId: 'r1', status: 'done' }] });
+    });
+
+    it('should report no unfinished report job for a report without any', (done) => {
+        service.getUnfinishedReportJob('r1').subscribe((job: ReportJobModel | null) => {
+            expect(job).toBeNull();
+            done();
+        });
+        httpMock.expectOne(environment.reportEngineUrl + '/report/job?reportId=r1&limit=1')
+            .flush({ data: [] });
     });
 
     it('should report missing authorizations as false', () => {

@@ -18,16 +18,29 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { environment } from '../../../../environments/environment';
-import { catchError } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { catchError, concatMap, filter, map, takeWhile } from 'rxjs/operators';
+import { Observable, defer, timer } from 'rxjs';
 import {
     ReportCreateResponseModel,
+    ReportJobListResponseModel,
+    ReportJobModel,
+    ReportJobResponseModel,
     ReportListResponseModel, ReportModel,
     ReportResponseModel,
     TemplateListResponseModel,
     TemplateResponseModel
 } from './reporting.model';
+import { reportJobDone } from './report-job';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
+
+/** How often a running report job is asked for its status. */
+export const REPORT_JOB_POLL_INTERVAL_MS = 2000;
+
+/**
+ * How many failed status requests in a row end the polling. A single hiccup must
+ * not make the ui give up on a report that is still being built.
+ */
+export const REPORT_JOB_POLL_MAX_FAILURES = 3;
 
 @Injectable({
     providedIn: 'root',
@@ -37,6 +50,7 @@ export class ReportingService {
     private readonly reportUrl = environment.reportEngineUrl + '/report';
     private readonly reportFileUrl = environment.reportEngineUrl + '/report/file';
     private readonly reportCreateUrl = environment.reportEngineUrl + '/report/create';
+    private readonly reportJobUrl = environment.reportEngineUrl + '/report/job';
     private readonly templateUrl = environment.reportEngineUrl + '/templates';
 
     constructor(
@@ -48,7 +62,7 @@ export class ReportingService {
     getTemplates(): Observable<TemplateListResponseModel | null> {
         return this.http.get<TemplateListResponseModel>(this.templateUrl)
             .pipe(
-                catchError(this.errorHandlerService.handleError(ReportingService.name, 'getTemplates: Error', null)),
+                catchError(this.errorHandlerService.handleErrorWithSnackBar('Templates could not be loaded', ReportingService.name, 'getTemplates: Error', null)),
             );
     }
 
@@ -64,6 +78,67 @@ export class ReportingService {
             .pipe(
                 catchError(this.errorHandlerService.handleErrorWithSnackBar('Report could not be created', ReportingService.name, 'createReport: Error', null)),
             );
+    }
+
+    /**
+     * Gets the status of a single report file creation.
+     */
+    getReportJob(jobId: string): Observable<ReportJobResponseModel | null> {
+        return this.http.get<ReportJobResponseModel>(this.reportJobUrl + '/' + jobId)
+            .pipe(
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'getReportJob: Error', null)),
+            );
+    }
+
+    /**
+     * Gets the most recent report file creations, newest first.
+     */
+    getReportJobs(reportId?: string, limit?: number): Observable<ReportJobListResponseModel | null> {
+        const params: string[] = [];
+        if (reportId !== undefined) {
+            params.push('reportId=' + encodeURIComponent(reportId));
+        }
+        if (limit !== undefined) {
+            params.push('limit=' + limit);
+        }
+        const url = this.reportJobUrl + (params.length > 0 ? '?' + params.join('&') : '');
+        return this.http.get<ReportJobListResponseModel>(url)
+            .pipe(
+                catchError(this.errorHandlerService.handleError(ReportingService.name, 'getReportJobs: Error', null)),
+            );
+    }
+
+    /**
+     * Emits the status of a report job until it is done or failed, then completes.
+     * Emits null and completes when the status could not be read repeatedly.
+     */
+    pollReportJob(jobId: string, intervalMs: number = REPORT_JOB_POLL_INTERVAL_MS): Observable<ReportJobModel | null> {
+        return defer(() => {
+            let failures = 0;
+            return timer(0, intervalMs).pipe(
+                concatMap(() => this.getReportJob(jobId)),
+                map((resp: ReportJobResponseModel | null) => {
+                    failures = resp === null ? failures + 1 : 0;
+                    return resp === null ? null : resp.data;
+                }),
+                // keep polling through the odd failed request, give up after a few
+                filter((job: ReportJobModel | null) => job !== null || failures >= REPORT_JOB_POLL_MAX_FAILURES),
+                takeWhile((job: ReportJobModel | null) => job !== null && !reportJobDone(job), true),
+            );
+        });
+    }
+
+    /**
+     * Emits the report job that is currently building a file for the given report,
+     * or null when none is in progress.
+     */
+    getUnfinishedReportJob(reportId: string): Observable<ReportJobModel | null> {
+        return this.getReportJobs(reportId, 1).pipe(
+            map((resp: ReportJobListResponseModel | null) => {
+                const job = resp?.data?.[0];
+                return job !== undefined && !reportJobDone(job) ? job : null;
+            }),
+        );
     }
 
     saveReport(data: ReportModel = {} as ReportModel): Observable<HttpResponse<string> | null> {

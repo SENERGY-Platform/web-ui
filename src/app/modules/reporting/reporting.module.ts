@@ -23,6 +23,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatIconModule} from '@angular/material/icon';
 import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatSortModule} from '@angular/material/sort';
 import {MatTableModule} from '@angular/material/table';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -77,6 +78,7 @@ const reportFilesList: Route = { path: 'reporting/files/:reportId', pathMatch: '
         MatDialogModule,
         MatExpansionModule,
         MatDatepickerModule,
+        MatProgressBarModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
         MatNativeDateModule

@@ -18,6 +18,15 @@
 <div class="layout-margin">
     <senergy-spinner [show]="!ready || downloading"></senergy-spinner>
     <div *ngIf="ready && report.name" class="report-name">{{report.name}}</div>
+    <div *ngIf="reportJob !== null" class="job-status mat-elevation-z1">
+        <mat-icon *ngIf="reportJobRunning">hourglass_empty</mat-icon>
+        <mat-icon *ngIf="reportJobFailed" color="warn">warning</mat-icon>
+        <mat-icon *ngIf="!reportJobRunning && !reportJobFailed" class="color-accent">check_circle</mat-icon>
+        <div class="job-status-body">
+            <span>{{reportJobLabel}}</span>
+            <mat-progress-bar *ngIf="reportJobRunning" mode="indeterminate" color="accent"></mat-progress-bar>
+        </div>
+    </div>
     <div class="mat-elevation-z1" [hidden]="!ready || reportsDataSource.data.length === 0">
         <div class="table-container">
             <table mat-table [dataSource]="reportsDataSource" matSort matSortActive="createdAt"

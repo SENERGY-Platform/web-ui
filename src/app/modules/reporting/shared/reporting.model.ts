@@ -97,4 +97,31 @@ export interface ReportFileModel {
 
 export interface ReportCreateResponseModel {
     id: string | null;
+    jobId: string | null;
+}
+
+export type ReportJobStatus = 'pending' | 'running' | 'done' | 'failed';
+
+/**
+ * Tracks one report file creation in the reporting service. Creating a report file
+ * is queued there, so the file only exists once the job reached the done status.
+ */
+export interface ReportJobModel {
+    id: string;
+    reportId: string;
+    status: ReportJobStatus;
+    step?: string;
+    reportFileId?: string;
+    error?: string;
+    createdAt: string;
+    startedAt?: string;
+    finishedAt?: string;
+}
+
+export interface ReportJobResponseModel {
+    data: ReportJobModel;
+}
+
+export interface ReportJobListResponseModel {
+    data: ReportJobModel[];
 }

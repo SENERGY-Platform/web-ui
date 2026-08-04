@@ -21,6 +21,35 @@
     z-index: 100;
 }
 
+/* sits next to the fab, so the status of a queued report stays visible while editing */
+.job-status {
+    position: fixed;
+    bottom: 15px;
+    right: 90px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 8px 8px 16px;
+    border-radius: 4px;
+    background: var(--mat-app-background-color, #fff);
+    max-width: min(480px, calc(100vw - 120px));
+}
+
+.job-status-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 180px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.job-status-body span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .main-panel {
     height: calc(100% - 64px);
     overflow: hidden;

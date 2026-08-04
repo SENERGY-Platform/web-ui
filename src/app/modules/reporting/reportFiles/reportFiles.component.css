@@ -49,6 +49,28 @@ table {
     margin-bottom: 10px;
 }
 
+.job-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.job-status-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+}
+
+.job-status-body span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .offset {
     margin-right: 8px;
 }

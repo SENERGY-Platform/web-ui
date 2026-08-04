@@ -31,7 +31,7 @@ import { Observable, of } from 'rxjs';
 
 import { ReportFilesComponent } from './reportFiles.component';
 import { ReportingService } from '../shared/reporting.service';
-import { ReportFileModel, ReportModel, ReportResponseModel } from '../shared/reporting.model';
+import { ReportFileModel, ReportJobModel, ReportModel, ReportResponseModel } from '../shared/reporting.model';
 import { CoreModule } from '../../../core/core.module';
 import { DialogsService } from '../../../core/services/dialogs.service';
 
@@ -40,12 +40,36 @@ const reportFiles = [
     { id: 'f2', type: 'pdf', createdAt: '2026-02-01T00:00:00Z' },
 ] as ReportFileModel[];
 
+const runningJob = (): ReportJobModel => ({
+    id: 'j1', reportId: 'r1', status: 'running', step: 'rendering', createdAt: '2026-01-01T00:00:00Z',
+});
+
+const doneJob = (): ReportJobModel => ({
+    id: 'j1', reportId: 'r1', status: 'done', reportFileId: 'f3', createdAt: '2026-01-01T00:00:00Z',
+});
+
+const failedJob = (): ReportJobModel => ({
+    id: 'j1', reportId: 'r1', status: 'failed', error: 'template not found', createdAt: '2026-01-01T00:00:00Z',
+});
+
 class MockReportingService {
     report: ReportModel | undefined = { id: 'r1', name: 'Energy Report', reportFiles } as ReportModel;
     deleted: string[] = [];
+    unfinishedJob: ReportJobModel | null = null;
+    jobUpdates: ReportJobModel[] = [];
+    reportLoads = 0;
 
     getReport(_id: string): Observable<ReportResponseModel | null> {
+        this.reportLoads++;
         return of(this.report === undefined ? null : { data: this.report });
+    }
+
+    getUnfinishedReportJob(_reportId: string): Observable<ReportJobModel | null> {
+        return of(this.unfinishedJob);
+    }
+
+    pollReportJob(_jobId: string): Observable<ReportJobModel | null> {
+        return of(...this.jobUpdates);
     }
 
     deleteReportFile(_reportId: string, fileId: string): Observable<HttpResponse<string> | null> {
@@ -169,6 +193,76 @@ describe('ReportFilesComponent', () => {
         expect(component.downloading).toBe(false);
     }));
 
+    it('should show no status when no report file is being built', fakeAsync(() => {
+        fixture.detectChanges();
+        tick();
+
+        expect(component.reportJob).toBeNull();
+        expect(component.reportJobRunning).toBe(false);
+    }));
+
+    it('should show the progress of a report file that is still being built', fakeAsync(() => {
+        reportingService.unfinishedJob = runningJob();
+        reportingService.jobUpdates = [runningJob()];
+
+        fixture.detectChanges();
+        tick();
+
+        expect(component.reportJob?.id).toBe('j1');
+        expect(component.reportJobRunning).toBe(true);
+        expect(component.reportJobLabel).toBe('Rendering report');
+    }));
+
+    // The new file only shows up in the report model, so the list has to be read again.
+    it('should reload the file list once the report file is done', fakeAsync(() => {
+        reportingService.unfinishedJob = runningJob();
+        reportingService.jobUpdates = [runningJob(), doneJob()];
+        reportingService.report = {
+            id: 'r1', name: 'Energy Report',
+            reportFiles: [...reportFiles, { id: 'f3', type: 'pdf', createdAt: '2026-03-01T00:00:00Z' }],
+        } as ReportModel;
+
+        fixture.detectChanges();
+        tick();
+
+        expect(reportingService.reportLoads).toBe(2);
+        expect(component.reportsDataSource.data.length).toBe(3);
+        expect(component.reportJobRunning).toBe(false);
+    }));
+
+    it('should render the status of a report file that is being built', fakeAsync(() => {
+        reportingService.unfinishedJob = runningJob();
+        reportingService.jobUpdates = [runningJob()];
+
+        fixture.detectChanges();
+        tick();
+        fixture.detectChanges();
+
+        const status = (fixture.nativeElement as HTMLElement).querySelector('.job-status');
+        expect(status).not.toBeNull();
+        expect(status?.textContent).toContain('Rendering report');
+    }));
+
+    it('should render no status strip when nothing is being built', fakeAsync(() => {
+        fixture.detectChanges();
+        tick();
+        fixture.detectChanges();
+
+        expect((fixture.nativeElement as HTMLElement).querySelector('.job-status')).toBeNull();
+    }));
+
+    it('should not reload the file list when the report file failed', fakeAsync(() => {
+        reportingService.unfinishedJob = runningJob();
+        reportingService.jobUpdates = [runningJob(), failedJob()];
+
+        fixture.detectChanges();
+        tick();
+
+        expect(reportingService.reportLoads).toBe(1);
+        expect(component.reportJobFailed).toBe(true);
+        expect(component.reportJobLabel).toBe('Report creation failed: template not found');
+    }));
+
     describe('without a report id in the route', () => {
         beforeEach(waitForAsync(() => {
             TestBed.resetTestingModule();
@@ -180,6 +274,12 @@ describe('ReportFilesComponent', () => {
 
             expect(component.ready).toBe(true);
             expect(component.reportsDataSource.data.length).toBe(0);
+        });
+
+        it('should not look for report jobs', () => {
+            fixture.detectChanges();
+
+            expect(component.reportJob).toBeNull();
         });
     });
 });

@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
+import { Subject, takeUntil } from 'rxjs';
 import { UtilService } from 'src/app/core/services/util.service';
 import {
     ReportFileModel,
+    ReportJobModel,
     ReportModel, ReportResponseModel,
 } from '../shared/reporting.model';
+import { reportJobDone, reportJobFailed, reportJobLabel } from '../shared/report-job';
 import { ReportingService } from '../shared/reporting.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
@@ -36,7 +39,7 @@ import { reportFileName } from '../shared/report-file-name';
     templateUrl: './reportFiles.component.html',
     styleUrls: ['./reportFiles.component.css'],
 })
-export class ReportFilesComponent implements OnInit, AfterViewInit {
+export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild(MatSort, { static: false }) sort?: MatSort;
 
@@ -48,6 +51,9 @@ export class ReportFilesComponent implements OnInit, AfterViewInit {
     pageSize = this.preferencesService.pageSize;
     ready = false;
     downloading = false;
+    reportJob: ReportJobModel | null = null;
+
+    private destroy = new Subject<void>();
 
     constructor(
         private route: ActivatedRoute,
@@ -68,13 +74,25 @@ export class ReportFilesComponent implements OnInit, AfterViewInit {
             this.ready = true;
             return;
         }
-        this.reportingService.getReport(this.reportId).subscribe((resp: ReportResponseModel | null) => {
-            if (resp !== null) {
-                this.report = resp.data;
-                this.reportsDataSource.data = this.report.reportFiles || [];
-            }
-            this.ready = true;
-        });
+        this.loadReport(this.reportId);
+        this.resumeReportJob(this.reportId);
+    }
+
+    ngOnDestroy() {
+        this.destroy.next();
+        this.destroy.complete();
+    }
+
+    get reportJobLabel(): string {
+        return this.reportJob === null ? '' : reportJobLabel(this.reportJob);
+    }
+
+    get reportJobFailed(): boolean {
+        return this.reportJob !== null && reportJobFailed(this.reportJob);
+    }
+
+    get reportJobRunning(): boolean {
+        return this.reportJob !== null && !reportJobDone(this.reportJob);
     }
 
     ngAfterViewInit() {
@@ -131,4 +149,34 @@ export class ReportFilesComponent implements OnInit, AfterViewInit {
             });
     }
 
+    private loadReport(reportId: string) {
+        this.reportingService.getReport(reportId).subscribe((resp: ReportResponseModel | null) => {
+            if (resp !== null) {
+                this.report = resp.data;
+                this.reportsDataSource.data = this.report.reportFiles || [];
+            }
+            this.ready = true;
+        });
+    }
+
+    /**
+     * Shows the progress of a report file that is still being built and reloads the
+     * list once it is there, so the user does not have to refresh the page.
+     */
+    private resumeReportJob(reportId: string) {
+        this.reportingService.getUnfinishedReportJob(reportId).pipe(takeUntil(this.destroy))
+            .subscribe((job: ReportJobModel | null) => {
+                if (job === null) {
+                    return;
+                }
+                this.reportJob = job;
+                this.reportingService.pollReportJob(job.id).pipe(takeUntil(this.destroy))
+                    .subscribe((polled: ReportJobModel | null) => {
+                        this.reportJob = polled;
+                        if (polled !== null && polled.status === 'done') {
+                            this.loadReport(reportId);
+                        }
+                    });
+            });
+    }
 }

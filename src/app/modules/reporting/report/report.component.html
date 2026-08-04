@@ -141,7 +141,24 @@
             </div>
         </div>
 
-        <button mat-fab class="fab" (click)="create()" matTooltip="Create Report" [disabled]="!isValid()">
+        <div *ngIf="reportJob !== null" class="job-status mat-elevation-z1">
+            <mat-icon *ngIf="reportJobRunning">hourglass_empty</mat-icon>
+            <mat-icon *ngIf="reportJobFinished && !reportJobFailed" class="color-accent">check_circle</mat-icon>
+            <mat-icon *ngIf="reportJobFailed" color="warn">warning</mat-icon>
+            <div class="job-status-body">
+                <span>{{reportJobLabel}}</span>
+                <mat-progress-bar *ngIf="reportJobRunning" mode="indeterminate" color="accent">
+                </mat-progress-bar>
+            </div>
+            <a *ngIf="reportJobFinished && !reportJobFailed && reportId !== null" mat-button color="accent"
+               routerLink="/reporting/files/{{reportId}}">Show files</a>
+            <button mat-icon-button *ngIf="reportJobFinished" (click)="dismissReportJob()" matTooltip="Dismiss">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <button mat-fab class="fab" (click)="create()" matTooltip="Create Report"
+                [disabled]="!isValid() || creating || reportJobRunning">
             <mat-icon>create</mat-icon>
         </button>
     </div>

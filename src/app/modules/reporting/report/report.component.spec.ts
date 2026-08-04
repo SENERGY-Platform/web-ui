@@ -34,6 +34,7 @@ import { ReportComponent } from './report.component';
 import { ReportingService } from '../shared/reporting.service';
 import {
     ReportCreateResponseModel,
+    ReportJobModel,
     ReportModel,
     ReportObjectModel,
     ReportResponseModel,
@@ -58,13 +59,37 @@ const incompleteObjects = (): { [key: string]: ReportObjectModel } => ({
     } as ReportObjectModel,
 });
 
+const runningJob = (): ReportJobModel => ({
+    id: 'j1', reportId: 'r1', status: 'running', step: 'collecting_data', createdAt: '2026-01-01T00:00:00Z',
+});
+
+const failedJob = (): ReportJobModel => ({
+    id: 'j1', reportId: 'r1', status: 'failed', error: 'template not found', createdAt: '2026-01-01T00:00:00Z',
+});
+
+const doneJob = (): ReportJobModel => ({
+    id: 'j1', reportId: 'r1', status: 'done', reportFileId: 'f1', createdAt: '2026-01-01T00:00:00Z',
+});
+
 class MockReportingService {
-    createResponse: ReportCreateResponseModel | null = { id: 'r-new' };
+    createResponse: ReportCreateResponseModel | null = { id: 'r-new', jobId: 'j-new' };
     templateObjects: { [key: string]: ReportObjectModel } = completeObjects();
     reportObjects: { [key: string]: ReportObjectModel } = completeObjects();
     saved: ReportModel[] = [];
     updated: ReportModel[] = [];
     created: ReportModel[] = [];
+    unfinishedJob: ReportJobModel | null = null;
+    jobUpdates: ReportJobModel[] = [];
+    polledJobIds: string[] = [];
+
+    getUnfinishedReportJob(_reportId: string): Observable<ReportJobModel | null> {
+        return of(this.unfinishedJob);
+    }
+
+    pollReportJob(jobId: string): Observable<ReportJobModel | null> {
+        this.polledJobIds.push(jobId);
+        return of(...this.jobUpdates);
+    }
 
     getTemplate(id: string): Observable<TemplateResponseModel | null> {
         return of({
@@ -246,25 +271,46 @@ describe('ReportComponent', () => {
             expect(viewService.isExpanded('consumption')).toBe(false);
         });
 
-        it('should redirect to the edit route after creating the report', () => {
+        it('should redirect to the edit route after queueing the report', () => {
+            fixture.detectChanges();
+            component.form.controls.name.setValue('My Report');
+
+            component.create();
+
+            expect(component.creating).toBe(false);
+            expect(component.reportId).toBe('r-new');
+            expect(router.navigateByUrl).toHaveBeenCalledWith('/reporting/edit/r-new');
+        });
+
+        // The redirect recreates the component, which picks the job up again on init.
+        it('should leave watching the job to the edit route it redirects to', () => {
+            fixture.detectChanges();
+            component.form.controls.name.setValue('My Report');
+
+            component.create();
+
+            expect(reportingService.polledJobIds).toEqual([]);
+        });
+
+        it('should stay usable if queueing the report fails', () => {
+            fixture.detectChanges();
+            reportingService.createResponse = null;
+
+            component.create();
+
+            expect(component.creating).toBe(false);
+            expect(component.ready).toBe(true);
+            expect(router.navigateByUrl).not.toHaveBeenCalled();
+        });
+
+        // The editor must stay usable while the report file is being built.
+        it('should not block the editor while the report is being created', () => {
             fixture.detectChanges();
             component.form.controls.name.setValue('My Report');
 
             component.create();
 
             expect(component.ready).toBe(true);
-            expect(component.reportId).toBe('r-new');
-            expect(router.navigateByUrl).toHaveBeenCalledWith('/reporting/edit/r-new');
-        });
-
-        it('should stay usable if creating the report fails', () => {
-            fixture.detectChanges();
-            reportingService.createResponse = null;
-
-            component.create();
-
-            expect(component.ready).toBe(true);
-            expect(router.navigateByUrl).not.toHaveBeenCalled();
         });
 
         it('should add and remove e-mail receivers', () => {
@@ -313,6 +359,103 @@ describe('ReportComponent', () => {
             expect(reportingService.updated[0].templateId).toBe('t1');
             expect(reportingService.updated[0].emailReceivers).toEqual(['a@b.c']);
             tick(2000);
+        }));
+
+        it('should show the progress of the queued report file', fakeAsync(() => {
+            fixture.detectChanges();
+            tick();
+            reportingService.createResponse = { id: 'r1', jobId: 'j1' };
+            reportingService.jobUpdates = [runningJob()];
+
+            component.create();
+
+            expect(reportingService.polledJobIds).toEqual(['j1']);
+            expect(component.reportJobRunning).toBe(true);
+            expect(component.reportJobLabel).toBe('Collecting data');
+            tick(2000);
+        }));
+
+        it('should report that the report file is ready', fakeAsync(() => {
+            fixture.detectChanges();
+            tick();
+            reportingService.createResponse = { id: 'r1', jobId: 'j1' };
+            reportingService.jobUpdates = [runningJob(), doneJob()];
+
+            component.create();
+
+            expect(component.reportJobRunning).toBe(false);
+            expect(component.reportJobFinished).toBe(true);
+            expect(component.reportJobFailed).toBe(false);
+            expect(component.reportJobLabel).toBe('Report created');
+            tick(2000);
+        }));
+
+        it('should show why the report file could not be created', fakeAsync(() => {
+            fixture.detectChanges();
+            tick();
+            reportingService.createResponse = { id: 'r1', jobId: 'j1' };
+            reportingService.jobUpdates = [failedJob()];
+
+            component.create();
+
+            expect(component.reportJobFailed).toBe(true);
+            expect(component.reportJobLabel).toBe('Report creation failed: template not found');
+            tick(2000);
+        }));
+
+        it('should let the status be dismissed once it is finished', fakeAsync(() => {
+            fixture.detectChanges();
+            tick();
+            reportingService.createResponse = { id: 'r1', jobId: 'j1' };
+            reportingService.jobUpdates = [doneJob()];
+            component.create();
+
+            component.dismissReportJob();
+
+            expect(component.reportJob).toBeNull();
+            tick(2000);
+        }));
+
+        // Without this the status would be lost on a reload and after the redirect
+        // that follows creating a brand new report.
+        it('should pick up a report file that is still being built on init', fakeAsync(() => {
+            reportingService.unfinishedJob = runningJob();
+            reportingService.jobUpdates = [runningJob()];
+
+            fixture.detectChanges();
+            tick();
+
+            expect(component.reportJob?.id).toBe('j1');
+            expect(reportingService.polledJobIds).toEqual(['j1']);
+        }));
+
+        it('should render the status next to the create button', fakeAsync(() => {
+            reportingService.unfinishedJob = runningJob();
+            reportingService.jobUpdates = [runningJob()];
+
+            fixture.detectChanges();
+            tick();
+            fixture.detectChanges();
+
+            const status = (fixture.nativeElement as HTMLElement).querySelector('.job-status');
+            expect(status).not.toBeNull();
+            expect(status?.textContent).toContain('Collecting data');
+        }));
+
+        it('should render no status strip when nothing is being built', fakeAsync(() => {
+            fixture.detectChanges();
+            tick();
+            fixture.detectChanges();
+
+            expect((fixture.nativeElement as HTMLElement).querySelector('.job-status')).toBeNull();
+        }));
+
+        it('should show no status when nothing is being built', fakeAsync(() => {
+            fixture.detectChanges();
+            tick();
+
+            expect(component.reportJob).toBeNull();
+            expect(reportingService.polledJobIds).toEqual([]);
         }));
     });
 });

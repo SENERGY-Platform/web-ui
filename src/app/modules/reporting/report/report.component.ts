@@ -19,11 +19,13 @@ import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
 import {
+    ReportJobModel,
     ReportModel,
     ReportResponseModel,
     TemplateModel,
     TemplateResponseModel
 } from '../shared/reporting.model';
+import { reportJobDone, reportJobFailed, reportJobLabel } from '../shared/report-job';
 import { ReportingService } from '../shared/reporting.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
@@ -61,6 +63,8 @@ export class ReportComponent implements OnInit, OnDestroy {
     template: TemplateModel = { data: {} } as TemplateModel;
     report: ReportModel = {} as ReportModel;
     ready = false;
+    creating = false;
+    reportJob: ReportJobModel | null = null;
     templateId: string | null = null;
     allDevices: DeviceInstanceModel[] = [];
     validationErrors: ReportValidationError[] = [];
@@ -104,6 +108,7 @@ export class ReportComponent implements OnInit, OnDestroy {
         });
         if (this.reportId !== null) {
             this.loadReport(this.reportId);
+            this.resumeReportJob(this.reportId);
         } else if (this.templateId !== null) {
             this.loadTemplate(this.templateId);
         } else {
@@ -175,24 +180,73 @@ export class ReportComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Creates the report in the reporting service. For a new report the view is redirected to the
-     * edit route of the created report.
+     * Queues creation of a report file. The reporting service builds the file in the
+     * background, so this returns before the file exists and the job it hands back is
+     * watched for the status. For a new report the view is redirected to the edit
+     * route of the created report, where the job is picked up again.
      */
     create() {
-        this.ready = false;
+        this.creating = true;
+        this.reportJob = null;
         this.reportingService.createReport(this.buildReport(this.reportId)).subscribe(resp => {
-            this.ready = true;
+            this.creating = false;
             if (resp === null) {
                 return;
             }
-            this.snackBar.open('Report created', 'ReportCreate', {
+            this.snackBar.open('Report creation started', 'ReportCreate', {
                 duration: 2000
             });
             if (this.reportId === null && resp.id !== null) {
                 this.reportId = resp.id;
                 this.router.navigateByUrl('/reporting/edit/' + this.reportId);
+                return;
+            }
+            if (resp.jobId !== null) {
+                this.watchReportJob(resp.jobId);
             }
         });
+    }
+
+    get reportJobLabel(): string {
+        return this.reportJob === null ? '' : reportJobLabel(this.reportJob);
+    }
+
+    get reportJobFailed(): boolean {
+        return this.reportJob !== null && reportJobFailed(this.reportJob);
+    }
+
+    get reportJobRunning(): boolean {
+        return this.reportJob !== null && !reportJobDone(this.reportJob);
+    }
+
+    get reportJobFinished(): boolean {
+        return this.reportJob !== null && reportJobDone(this.reportJob);
+    }
+
+    dismissReportJob() {
+        this.reportJob = null;
+    }
+
+    /**
+     * Follows a report file creation until it is finished.
+     */
+    private watchReportJob(jobId: string) {
+        this.reportingService.pollReportJob(jobId).pipe(takeUntil(this.destroy))
+            .subscribe((job: ReportJobModel | null) => this.reportJob = job);
+    }
+
+    /**
+     * Picks up a report file creation that is still running, so the status survives a
+     * reload and the redirect after creating a new report.
+     */
+    private resumeReportJob(reportId: string) {
+        this.reportingService.getUnfinishedReportJob(reportId).pipe(takeUntil(this.destroy))
+            .subscribe((job: ReportJobModel | null) => {
+                if (job !== null) {
+                    this.reportJob = job;
+                    this.watchReportJob(job.id);
+                }
+            });
     }
 
     /**
