@@ -315,7 +315,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
      * column change, so 'compact' and 'list' have to be acted on here to be visible at all - while
      * compacting for the other four would rearrange the layout the user chose to keep.
      */
-    private applyRepack() {
+    applyRepack() {
         const mode = this.layoutMode();
         if (mode === 'compact' || mode === 'list') {
             this.grid?.compact(mode);
@@ -362,6 +362,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             // which re-packs from the ViewChild setter. Touching this.grid now would hit the dead one.
             return;
         }
+        this.applyRepack();
         this.saveWidgetPositions();
     }
 
