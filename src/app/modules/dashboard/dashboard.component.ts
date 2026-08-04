@@ -36,9 +36,12 @@ import { ErrorHandlerService } from 'src/app/core/services/error-handler.service
 import { elementCB, GridstackComponent } from 'gridstack/dist/angular';
 import { GridStack, GridStackOptions } from 'gridstack';
 import {
+    COLUMN_BANDS,
     DEFAULT_LAYOUT_MODE,
     LAYOUT_MODES,
     LayoutMode,
+    MAX_COLUMNS,
+    MIN_UNIT_PX,
 } from './shared/dashboard.model';
 
 @Component({
@@ -81,6 +84,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.grid = undefined;
         } else {
             this.grid = GridStack.init(undefined, component.el);
+            // columnOpts is only consulted on resize, so a fresh grid sits at 12 columns until the
+            // window happens to change - asking for the check settles it now
+            this.grid?.onResize();
             this.applyRepack();
             // deliberately not saved: re-packing on load is a rendering decision, and writing it back
             // makes every dashboard rewrite its coordinates just by being opened
@@ -96,6 +102,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
      */
     gridOptions: GridStackOptions = {};
     readonly layoutModes = LAYOUT_MODES;
+    /** Width the grid is held to, so no column falls below MIN_UNIT_PX - the wrapper scrolls instead. */
+    gridMinWidth = MIN_UNIT_PX;
 
     constructor(
         private dashboardService: DashboardService,
@@ -237,9 +245,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private refreshGridOptions() {
         this.gridOptions = {
             columnOpts: {
-                columnWidth: 350,
+                breakpoints: COLUMN_BANDS,
+                columnMax: MAX_COLUMNS,
                 layout: this.layoutMode(),
-                columnMax: 12,
             },
             margin: 5,
             handleClass: 'drag-handler',

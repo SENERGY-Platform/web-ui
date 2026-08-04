@@ -36,6 +36,31 @@ export const LAYOUT_MODES: { mode: LayoutMode; label: string; hint: string }[] =
     { mode: 'none', label: 'Fixed', hint: 'Leave the arrangement alone, clamping only what no longer fits' },
 ];
 
+/** Most columns a grid ever renders, and gridstack's own maximum. */
+export const MAX_COLUMNS = 12;
+
+/**
+ * Smallest a single grid unit may be, in px, in either direction. Below roughly this a widget stops
+ * being able to show anything, so the grid is held to this per column and the page scrolls sideways
+ * instead. Cells are square - gridstack's cellHeight default - so this floors the row height too.
+ */
+export const MIN_UNIT_PX = 330;
+
+/**
+ * Width bands that keep every column at least MIN_UNIT_PX wide, in the shape gridstack expects: each
+ * `w` an upper bound, one pixel short of where the next column would fit, which makes the count
+ * floor(width / MIN_UNIT_PX). gridstack's own columnWidth option rounds to nearest instead, and
+ * rounding up is what lets a column fall under the target: at 525px a 350px target gives two of 262px.
+ *
+ * Widest first, and the order has to be ours: gridstack sorts breakpoints only while building a grid,
+ * not in updateOptions(), so ascending bands handed to a live grid fail the first comparison and leave
+ * the column count untouched.
+ */
+export const COLUMN_BANDS: { w: number; c: number }[] = Array.from(
+    { length: MAX_COLUMNS },
+    (_unused, index) => MAX_COLUMNS - index,
+).map((columns) => ({ w: MIN_UNIT_PX * (columns + 1) - 1, c: columns }));
+
 export interface DashboardModel {
     id: string;
     name: string;

@@ -103,20 +103,23 @@
                 <!-- only drag/resize stop are bound: gridstack's `change` also fires when it re-columns
                      itself as the window narrows, which is what let a resize rewrite every stored
                      coordinate, and added/removed are already covered by the widget manipulation
-                     subscribe. -->
-                <gridstack class="grid-stack" (dragStartCB)="startDrag()"
-                    (dragStopCB)="stopDrag($event)" (resizeStopCB)="saveWidgetPositions()"
-                    [options]="gridOptions" *ngIf="zoomedWidgetIndex === null"
-                    [ngClass]="{'gridstack-with-button': userHasCreateWidgetAuthorization}">
-                    <gridstack-item *ngFor="let widget of dashboards[activeTabIndex].widgets; trackBy:trackById" [id]="'gridstack-item-' + widget.id"
-                        [ngClass]="{'color-sidenav': inDragMode}"
-                        [options]="{x: widget.x, y: widget.y, w: widget.w, h: widget.h, noResize: !resizable(dashboardTypesEnumFromString(widget.type))}">
-                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization"
-                            [userHasUpdatePropertiesAuthorization]="userHasUpdateWidgetPropertiesAuthorization"
-                            [userHasUpdateNameAuthorization]="userHasUpdateWidgetNameAuthorization"
-                            [dashboardId]="dashboard.id" [widget]="widget" [zoom]="false" class="item"></senergy-widget>
-                    </gridstack-item>
-                </gridstack>
+                     subscribe. The scroll wrapper is ours because Material's .mat-mdc-tab-body-content
+                     is overflow-x: hidden and would clip it. -->
+                <div class="grid-scroll" *ngIf="zoomedWidgetIndex === null">
+                    <gridstack class="grid-stack" [options]="gridOptions" (dragStartCB)="startDrag()"
+                        (dragStopCB)="stopDrag($event)" (resizeStopCB)="saveWidgetPositions()"
+                        [style.min-width.px]="gridMinWidth"
+                        [ngClass]="{'gridstack-with-button': userHasCreateWidgetAuthorization}">
+                        <gridstack-item *ngFor="let widget of dashboards[activeTabIndex].widgets; trackBy:trackById" [id]="'gridstack-item-' + widget.id"
+                            [ngClass]="{'color-sidenav': inDragMode}"
+                            [options]="{x: widget.x, y: widget.y, w: widget.w, h: widget.h, noResize: !resizable(dashboardTypesEnumFromString(widget.type))}">
+                            <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization"
+                                [userHasUpdatePropertiesAuthorization]="userHasUpdateWidgetPropertiesAuthorization"
+                                [userHasUpdateNameAuthorization]="userHasUpdateWidgetNameAuthorization"
+                                [dashboardId]="dashboard.id" [widget]="widget" [zoom]="false" class="item"></senergy-widget>
+                        </gridstack-item>
+                    </gridstack>
+                </div>
             </div>
 
         </mat-tab>
