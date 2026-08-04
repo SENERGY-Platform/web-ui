@@ -65,6 +65,18 @@
                         matTooltip="reorder widgets">
                         <mat-icon>open_with</mat-icon>
                     </button>
+                    <button *ngIf="userHasUpdateDashboardAuthorization" mat-icon-button
+                        [matMenuTriggerFor]="layout" color="accent"
+                        matTooltip="set what happens to the widgets when the window changes width">
+                        <mat-icon>view_quilt</mat-icon>
+                    </button>
+                    <mat-menu #layout="matMenu" [overlapTrigger]="false" xPosition="before">
+                        <button mat-menu-item *ngFor="let option of layoutModes"
+                            (click)="selectLayoutMode(option.mode)" [matTooltip]="option.hint"
+                            matTooltipPosition="left">
+                            <p [ngClass]="{'color-accent': layoutMode() === option.mode}">{{option.label}}</p>
+                        </button>
+                    </mat-menu>
                     <button *ngIf="userHasUpdateDashboardAuthorization" (click)="openEditDashboardDialog()"
                         mat-icon-button color="accent" matTooltip="edit dashboard">
                         <mat-icon>edit</mat-icon>

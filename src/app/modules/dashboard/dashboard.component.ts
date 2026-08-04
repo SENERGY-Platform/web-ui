@@ -35,6 +35,11 @@ import { ChartsService } from '../../widgets/charts/shared/charts.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { elementCB, GridstackComponent } from 'gridstack/dist/angular';
 import { GridStack, GridStackOptions } from 'gridstack';
+import {
+    DEFAULT_LAYOUT_MODE,
+    LAYOUT_MODES,
+    LayoutMode,
+} from './shared/dashboard.model';
 
 @Component({
     selector: 'senergy-dashboard',
@@ -76,7 +81,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.grid = undefined;
         } else {
             this.grid = GridStack.init(undefined, component.el);
-            this.grid?.compact();
+            this.applyRepack();
             // deliberately not saved: re-packing on load is a rendering decision, and writing it back
             // makes every dashboard rewrite its coordinates just by being opened
         }
@@ -90,6 +95,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
      * change detection pass, including mid-drag.
      */
     gridOptions: GridStackOptions = {};
+    readonly layoutModes = LAYOUT_MODES;
 
     constructor(
         private dashboardService: DashboardService,
@@ -167,6 +173,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.activeTabIndex = index;
             this.navigate();
         }
+        // the layout mode belongs to the dashboard, so the grid is reconfigured per tab
+        this.refreshGridOptions();
     }
 
     refreshTime(time: number): void {
@@ -182,12 +190,55 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.refreshGridOptions();
     }
 
+    /** The active dashboard's layout mode. Absent or unrecognised reads as the default. */
+    layoutMode(): LayoutMode {
+        const stored = this.dashboards[this.activeTabIndex]?.layout_mode;
+        return LAYOUT_MODES.some((option) => option.mode === stored) ? (stored as LayoutMode) : DEFAULT_LAYOUT_MODE;
+    }
+
+    /** Stores the chosen layout mode on the dashboard and applies it without waiting for a resize. */
+    selectLayoutMode(mode: LayoutMode) {
+        const dashboard = this.dashboards[this.activeTabIndex];
+        if (dashboard === undefined || mode === this.layoutMode()) {
+            return;
+        }
+        dashboard.layout_mode = mode;
+        this.refreshGridOptions();
+        this.applyRepack();
+        this.persistDashboard(dashboard);
+    }
+
+    /**
+     * Saves the dashboard and takes the fresh updatedAt from the response - the service versions a
+     * dashboard by that stamp and refuses a write carrying a stale one, so without this only the first
+     * change of a session is accepted.
+     */
+    private persistDashboard(dashboard: DashboardModel) {
+        this.dashboardService.updateDashboard(dashboard).subscribe((updated) => {
+            if (updated?.updatedAt !== undefined) {
+                dashboard.updatedAt = updated.updatedAt;
+            }
+        });
+    }
+
+    /**
+     * Re-packs the grid, in the two modes that do that. gridstack only consults columnOpts.layout on a
+     * column change, so 'compact' and 'list' have to be acted on here to be visible at all - while
+     * compacting for the other four would rearrange the layout the user chose to keep.
+     */
+    private applyRepack() {
+        const mode = this.layoutMode();
+        if (mode === 'compact' || mode === 'list') {
+            this.grid?.compact(mode);
+        }
+    }
+
     /** Rebuilds the grid options for the active dashboard. */
     private refreshGridOptions() {
         this.gridOptions = {
             columnOpts: {
                 columnWidth: 350,
-                layout: 'compact',
+                layout: this.layoutMode(),
                 columnMax: 12,
             },
             margin: 5,

@@ -29,7 +29,7 @@ import { DashboardComponent } from './dashboard.component';
 import { CoreModule } from '../../core/core.module';
 import { ResponsiveService } from '../../core/services/responsive.service';
 import { DeviceStatusService } from '../../widgets/device-status/shared/device-status.service';
-import { DashboardModel } from './shared/dashboard.model';
+import { DashboardModel, DEFAULT_LAYOUT_MODE, LayoutMode } from './shared/dashboard.model';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
@@ -122,6 +122,31 @@ describe('DashboardComponent', () => {
             expect(component.inDragMode).toBeFalse();
         }),
     );
+
+    describe('layout mode', () => {
+        it('reads a dashboard with no stored mode as the default', () => {
+            expect(component.dashboards[0].layout_mode).toBeUndefined();
+            expect(component.layoutMode()).toBe(DEFAULT_LAYOUT_MODE);
+        });
+
+        it('reads an unrecognised stored mode as the default', () => {
+            component.dashboards[0].layout_mode = 'sideways' as LayoutMode;
+            expect(component.layoutMode()).toBe(DEFAULT_LAYOUT_MODE);
+        });
+
+        it('stores the picked mode on the dashboard', () => {
+            dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({} as DashboardModel);
+            component.selectLayoutMode('scale');
+            expect(component.dashboards[0].layout_mode).toBe('scale');
+            expect(component.layoutMode()).toBe('scale');
+        });
+
+        it('takes the fresh updatedAt from the save response', () => {
+            dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({ updatedAt: 'later' } as DashboardModel);
+            component.selectLayoutMode('none');
+            expect(component.dashboards[0].updatedAt).toBe('later');
+        });
+    });
 
     describe('moving a widget to another dashboard', () => {
         const widgetIds = (dashboard: DashboardModel) => dashboard.widgets.map((widget) => widget.id);
