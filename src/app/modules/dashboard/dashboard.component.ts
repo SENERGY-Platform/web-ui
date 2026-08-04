@@ -210,7 +210,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     saveWidgetPositions() {
-        this.grid?.compact();
         const dashboard = this.dashboards[this.activeTabIndex];
         const widgetPositionUpdates: WidgetUpdatePosition[] = [];
         const nodes = this.grid?.engine.nodes;
