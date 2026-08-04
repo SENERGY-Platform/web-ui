@@ -198,6 +198,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.refreshGridOptions();
     }
 
+    /**
+     * Swaps dashboard position with left or right neighbor and updates indices of both dashboards
+     *
+     * @param moveLeft true -> swap with left neighbor, false -> swap with right neighbor
+     */
+    moveDashboard(moveLeft: boolean) {
+        const newIndex = moveLeft ? this.activeTabIndex - 1 : this.activeTabIndex + 1;
+        if (newIndex < 0 || newIndex > this.dashboards.length - 1) {
+            console.error('Cant move dashboard to position ' + newIndex);
+            return;
+        }
+        const observables: Observable<DashboardModel>[] = [];
+        let dashboard = this.dashboards[this.activeTabIndex];
+        dashboard.index = newIndex;
+        observables.push(this.dashboardService.updateDashboard(dashboard));
+        dashboard = this.dashboards[newIndex];
+        dashboard.index = this.activeTabIndex;
+        observables.push(this.dashboardService.updateDashboard(dashboard));
+        forkJoin(observables).subscribe(() => {
+            moveItemInArray(this.dashboards, this.activeTabIndex, newIndex);
+            this.setTabIndex(newIndex);
+        });
+    }
+
     /** The active dashboard's layout mode. Absent or unrecognised reads as the default. */
     layoutMode(): LayoutMode {
         const stored = this.dashboards[this.activeTabIndex]?.layout_mode;
@@ -256,30 +280,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         };
     }
 
-    /**
-     * Swaps dashboard position with left or right neighbor and updates indices of both dashboards
-     *
-     * @param moveLeft true -> swap with left neighbor, false -> swap with right neighbor
-     */
-    moveDashboard(moveLeft: boolean) {
-        const newIndex = moveLeft ? this.activeTabIndex - 1 : this.activeTabIndex + 1;
-        if (newIndex < 0 || newIndex > this.dashboards.length - 1) {
-            console.error('Cant move dashboard to position ' + newIndex);
-            return;
-        }
-        const observables: Observable<DashboardModel>[] = [];
-        let dashboard = this.dashboards[this.activeTabIndex];
-        dashboard.index = newIndex;
-        observables.push(this.dashboardService.updateDashboard(dashboard));
-        dashboard = this.dashboards[newIndex];
-        dashboard.index = this.activeTabIndex;
-        observables.push(this.dashboardService.updateDashboard(dashboard));
-        forkJoin(observables).subscribe(() => {
-            moveItemInArray(this.dashboards, this.activeTabIndex, newIndex);
-            this.setTabIndex(newIndex);
-        });
-    }
-
     startDrag() {
         this.dragging = true;
     }
@@ -288,7 +288,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.dragging = false;
         if (this.moveWidgetToDashboardIfNeeded($event.el, $event.event)) {
             // nothing to re-pack here: this grid is on its way out and the destination builds its own,
-            // which re-packs as it comes up. Touching this.grid now would hit the dead one.
+            // which re-packs from the ViewChild setter. Touching this.grid now would hit the dead one.
             return;
         }
         this.saveWidgetPositions();
