@@ -34,7 +34,7 @@ import { MatTabGroup } from '@angular/material/tabs';
 import { ChartsService } from '../../widgets/charts/shared/charts.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { elementCB, GridstackComponent } from 'gridstack/dist/angular';
-import { GridStack } from 'gridstack';
+import { GridStack, GridStackOptions } from 'gridstack';
 
 @Component({
     selector: 'senergy-dashboard',
@@ -84,6 +84,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     resizable = resizable;
     dashboardTypesEnumFromString = dashboardTypesEnumFromString;
 
+    /**
+     * Options bound to the grid, as a stored object rather than a template literal: the wrapper hands
+     * every new object to GridStack.updateOptions(), so a literal would reconfigure the grid on every
+     * change detection pass, including mid-drag.
+     */
+    gridOptions: GridStackOptions = {};
+
     constructor(
         private dashboardService: DashboardService,
         private dialogsService: DialogsService,
@@ -121,6 +128,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.userHasDeleteWidgetAuthorization = this.dashboardService.userHasDeleteWidgetAuthorization();
         this.userHasCreateWidgetAuthorization = this.dashboardService.userHasCreateWidgetAuthorization();
         this.userHasMoveWidgetAuthorization = this.dashboardService.userHasMoveWidgetAuthorization();
+        // disableResize comes from the authorization above
+        this.refreshGridOptions();
     }
 
     initAllWidgets() {
@@ -169,6 +178,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     toggleDragMode() {
         this.inDragMode = !this.inDragMode;
+        // disableDrag follows this, so the grid has to be told
+        this.refreshGridOptions();
+    }
+
+    /** Rebuilds the grid options for the active dashboard. */
+    private refreshGridOptions() {
+        this.gridOptions = {
+            columnOpts: {
+                columnWidth: 350,
+                layout: 'compact',
+                columnMax: 12,
+            },
+            margin: 5,
+            handleClass: 'drag-handler',
+            disableDrag: !this.inDragMode,
+            disableResize: !this.userHasMoveWidgetAuthorization,
+        };
     }
 
     /**
