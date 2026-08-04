@@ -63,10 +63,10 @@ export class NotificationService implements OnDestroy {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            notifications: this.notifications,
             notificationService: this,
         };
-        dialogConfig.width = '80vw';
+        dialogConfig.width = '860px';
+        dialogConfig.maxWidth = '95vw';
         const dialogRef = this.dialog.open(NotificationDialogComponent, dialogConfig);
         return dialogRef.afterClosed();
     }

@@ -49,6 +49,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatTabsModule } from '@angular/material/tabs';
 import { InputDialogComponent } from './dialogs/input-dialog.component';
 import { IsJsonValidatorDirective } from './validators/is-json-validator.directive';
 import { GenericValidator } from './validators/generc-validator.directive';
@@ -95,6 +96,7 @@ export { keycloakServiceToken };
         MatCheckboxModule,
         MatTableModule,
         MatButtonToggleModule,
+        MatTabsModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
     ],

@@ -15,160 +15,209 @@
   -->
 
 <h2 mat-dialog-title>
-    <span fxFlex>Notifications</span>
+    <span fxFlex>Notification settings</span>
 </h2>
-<mat-dialog-content fxFill >
-        <div [fxShow]="mode === modes.SETTINGS">
-            <form [formGroup]="channelTopicConfigForm" class="channelTopicConfigForm">
-                <mat-form-field appearance="outline" color="accent">
-                    <mat-label>Websocket</mat-label>
-                    <mtx-select required multiple formControlName="websoket"
-                        [items]="allTopics" closeOnSelect="false" appendTo=".ng-select-anchor">
-                    </mtx-select>
-                </mat-form-field>
+<mat-dialog-content>
+    <mat-tab-group color="accent" animationDuration="0ms">
+        <mat-tab label="Delivery">
+            <p class="tab-intro">
+                Pick where each kind of notification reaches you. A notification is only delivered through the
+                channels ticked in its row.
+                <a [href]="docsUrl" target="_blank" rel="noopener">Learn more</a>
+            </p>
 
-                <mat-form-field appearance="outline" color="accent">
-                    <mat-label>MQTT</mat-label>
-                    <mtx-select required multiple formControlName="mqtt" [items]="allTopics"
-                        closeOnSelect="false" appendTo=".ng-select-anchor">
-                    </mtx-select>
-                </mat-form-field>
+            <senergy-spinner [show]="!settingsReady"></senergy-spinner>
 
-                <mat-form-field appearance="outline" color="accent">
-                    <mat-label>Push</mat-label>
-                    <mtx-select required multiple formControlName="push"
-                        [items]="allTopics" closeOnSelect="false" appendTo=".ng-select-anchor">
-                    </mtx-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" color="accent">
-                    <mat-label>E-Mail</mat-label>
-                    <mtx-select required multiple formControlName="email"
-                        [items]="allTopics" closeOnSelect="false" appendTo=".ng-select-anchor">
-                    </mtx-select>
-                </mat-form-field>
-            </form>
-            <div style="padding-bottom: 2em">
-                <mat-checkbox [formControl]="platformBrokerActive" [matTooltip]="platformBrokerTooltip">Publish on
-                    platform
-                    broker
-                </mat-checkbox>
+            <div class="empty-state" *ngIf="loadFailed">
+                Your delivery settings could not be loaded. Please close the dialog and try again.
             </div>
-            <div fxLayout="row">
-                <span fxFlex>Custom Brokers</span>
-                <button mat-icon-button color="accent" matTooltip="Add custom broker" (click)="addBroker()">
-                    <mat-icon>add</mat-icon>
-                </button>
-            </div>
-            <div class="table-container">
-                <table mat-table [dataSource]="brokers" [fxShow]="totalBrokers > 0">
 
-                    <ng-container matColumnDef="address">
-                        <th mat-header-cell *matHeaderCellDef>Address</th>
-                        <td mat-cell *matCellDef="let element">{{element.address}}</td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="topic">
-                        <th mat-header-cell *matHeaderCellDef>Topic</th>
-                        <td mat-cell *matCellDef="let element"> {{element.topic}}</td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="created_at">
-                        <th mat-header-cell *matHeaderCellDef>Created</th>
-                        <td mat-cell *matCellDef="let element"> {{element.CreatedAt | date:'short'}}</td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="updated_at">
-                        <th mat-header-cell *matHeaderCellDef>Updated</th>
-                        <td mat-cell *matCellDef="let element"> {{element.UpdatedAt | date:'short'}}</td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="enabled">
-                        <th mat-header-cell *matHeaderCellDef></th>
-                        <td mat-cell *matCellDef="let element">
-                            <mat-icon color="accent" matTooltip="enabled"
-                                *ngIf="element.enabled">check_circle</mat-icon>
-                            <mat-icon color="warn" matTooltip="disabled" *ngIf="!element.enabled">do_not_disturb_on
-                            </mat-icon>
-                        </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="edit">
-                        <th mat-header-cell *matHeaderCellDef>Edit</th>
-                        <td mat-cell *matCellDef="let element">
-                            <button mat-icon-button color="accent" matTooltip="Edit" (click)="editBroker(element)">
-                                <mat-icon>edit</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="delete">
-                        <th mat-header-cell *matHeaderCellDef>Delete</th>
-                        <td mat-cell *matCellDef="let element">
-                            <button matTooltip="Delete" mat-icon-button color="warn" (click)="deleteBroker(element)">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
-
-                    <tr mat-header-row *matHeaderRowDef="['address', 'topic', 'enabled', 'edit', 'delete']"></tr>
-                    <tr mat-row *matRowDef="let row; columns: ['address', 'topic', 'enabled', 'edit', 'delete'];"></tr>
-                </table>
-            </div>
-            <mat-paginator [fxShow]="totalBrokers > 0" [length]="totalBrokers" [pageSize]="preferencesService.pageSize"
-                [pageSizeOptions]="[20, 50, 75, 100]" (page)="moveBrokerPage($event)" showFirstLastButtons
-                aria-label="Select page">
-            </mat-paginator>
-        </div>
-
-        <div [fxShow]="mode === modes.BROKER_EDIT">
-            <form [formGroup]="brokerEditGroup">
-                <mat-form-field color="accent" appearance="outline" fxFill>
-                    <mat-label>Address</mat-label>
-                    <input matInput formControlName="address" placeholder="Host:Port" required>
-                    <mat-error senergyError label="Address"></mat-error>
-                </mat-form-field>
-
-                <mat-form-field color="accent" appearance="outline" fxFill>
-                    <mat-label>Topic</mat-label>
-                    <input matInput formControlName="topic">
-                    <mat-error senergyError label="Topic"></mat-error>
-                </mat-form-field>
-
-                <mat-form-field color="accent" appearance="outline" fxFill>
-                    <mat-label>User</mat-label>
-                    <input matInput formControlName="user">
-                    <mat-error senergyError label="User"></mat-error>
-                </mat-form-field>
-
-                <mat-form-field color="accent" appearance="outline" fxFill>
-                    <mat-label>Password</mat-label>
-                    <input matInput formControlName="password">
-                    <mat-error senergyError label="Password"></mat-error>
-                </mat-form-field>
-
-                <div style="padding-bottom: 1em">QoS
-                    <mat-button-toggle-group formControlName="qos">
-                        <mat-button-toggle [value]="0">0</mat-button-toggle>
-                        <mat-button-toggle [value]="1">1</mat-button-toggle>
-                        <mat-button-toggle [value]="2">2</mat-button-toggle>
-                    </mat-button-toggle-group>
+            <div class="matrix" *ngIf="settingsReady && !loadFailed">
+                <div class="matrix-row matrix-header">
+                    <div class="topic-cell">Notification</div>
+                    <div class="channel-cell" *ngFor="let channel of channels">
+                        <mat-checkbox color="accent" [checked]="allEnabledForChannel(channel.channel)"
+                            [indeterminate]="someEnabledForChannel(channel.channel)"
+                            (change)="toggleChannel(channel.channel, $event.checked)"
+                            [matTooltip]="'Enable or disable every notification for ' + channel.label">
+                        </mat-checkbox>
+                        <span class="channel-label">
+                            {{channel.label}}
+                            <mat-icon class="info-icon" [matTooltip]="channelTooltip(channel)"
+                                matTooltipClass="notification-tooltip">info_outline</mat-icon>
+                        </span>
+                    </div>
                 </div>
 
-                <div>
-                    <mat-checkbox formControlName="enabled">Enabled</mat-checkbox>
-                    <button mat-raised-button class="float-right" color="accent" [disabled]="brokerEditGroup.invalid"
-                        (click)="saveBroker()">
-                        Save
+                <div class="matrix-row" *ngFor="let topic of topics" [class.legacy-row]="topic.legacy">
+                    <div class="topic-cell">
+                        <mat-icon class="topic-icon" color="accent">{{topic.icon}}</mat-icon>
+                        <div class="topic-text">
+                            <div class="topic-label">
+                                {{topic.label}}
+                                <span class="topic-slug">{{topic.topic}}</span>
+                                <span class="legacy-badge" *ngIf="topic.legacy"
+                                    matTooltip="Kept for backwards compatibility only.">legacy</span>
+                                <mat-icon class="unreachable-icon" color="warn" *ngIf="isTopicUnreachable(topic.topic)"
+                                    matTooltip="No channel selected — you will not be told about these at all.">
+                                    notifications_off</mat-icon>
+                            </div>
+                            <div class="topic-desc">{{topic.description}}</div>
+                        </div>
+                    </div>
+                    <div class="channel-cell" *ngFor="let channel of channels">
+                        <mat-checkbox color="accent" [checked]="isEnabled(channel.channel, topic.topic)"
+                            (change)="toggle(channel.channel, topic.topic, $event.checked)"
+                            [attr.aria-label]="topic.label + ' via ' + channel.label">
+                        </mat-checkbox>
+                    </div>
+                </div>
+            </div>
+        </mat-tab>
+
+        <mat-tab label="MQTT brokers">
+            <div *ngIf="mode === modes.BROKER_LIST">
+                <p class="tab-intro">
+                    Destinations for the MQTT channel. Notifications are published when they are created or
+                    updated; deletions are not published.
+                </p>
+
+                <div class="platform-broker">
+                    <mat-checkbox color="accent" [formControl]="platformBrokerActive"
+                        [matTooltip]="platformBrokerTooltip">
+                        Publish on platform broker
+                    </mat-checkbox>
+                </div>
+
+                <div fxLayout="row" fxLayoutAlign="start center" class="broker-list-header">
+                    <span fxFlex>Custom brokers</span>
+                    <button mat-icon-button color="accent" matTooltip="Add custom broker" (click)="addBroker()">
+                        <mat-icon>add</mat-icon>
                     </button>
                 </div>
-            </form>
-        </div>
+
+                <div class="table-container" *ngIf="totalBrokers > 0; else noBrokers">
+                    <table mat-table [dataSource]="brokers" [trackBy]="trackBrokerById">
+
+                        <ng-container matColumnDef="address">
+                            <th mat-header-cell *matHeaderCellDef>Address</th>
+                            <td mat-cell *matCellDef="let element">{{element.address}}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="topic">
+                            <th mat-header-cell *matHeaderCellDef>Topic</th>
+                            <td mat-cell *matCellDef="let element"> {{element.topic}}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="enabled">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let element">
+                                <mat-icon color="accent" matTooltip="enabled"
+                                    *ngIf="element.enabled">check_circle</mat-icon>
+                                <mat-icon color="warn" matTooltip="disabled" *ngIf="!element.enabled">
+                                    do_not_disturb_on
+                                </mat-icon>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="edit">
+                            <th mat-header-cell *matHeaderCellDef>Edit</th>
+                            <td mat-cell *matCellDef="let element">
+                                <button mat-icon-button color="accent" matTooltip="Edit" (click)="editBroker(element)">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="delete">
+                            <th mat-header-cell *matHeaderCellDef>Delete</th>
+                            <td mat-cell *matCellDef="let element">
+                                <button matTooltip="Delete" mat-icon-button color="warn"
+                                    (click)="deleteBroker(element)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="['address', 'topic', 'enabled', 'edit', 'delete']"></tr>
+                        <tr mat-row
+                            *matRowDef="let row; columns: ['address', 'topic', 'enabled', 'edit', 'delete'];"></tr>
+                    </table>
+                </div>
+
+                <ng-template #noBrokers>
+                    <div class="empty-state">No custom brokers configured.</div>
+                </ng-template>
+
+                <mat-paginator *ngIf="totalBrokers > 0" [length]="totalBrokers"
+                    [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+                    (page)="moveBrokerPage($event)" showFirstLastButtons aria-label="Select page">
+                </mat-paginator>
+            </div>
+
+            <div *ngIf="mode === modes.BROKER_EDIT">
+                <form [formGroup]="brokerEditGroup">
+                    <mat-form-field color="accent" appearance="outline" fxFill>
+                        <mat-label>Address</mat-label>
+                        <input matInput formControlName="address" placeholder="Host:Port" required>
+                        <mat-error senergyError label="Address"></mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field color="accent" appearance="outline" fxFill>
+                        <mat-label>Topic</mat-label>
+                        <input matInput formControlName="topic">
+                        <mat-error senergyError label="Topic"></mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field color="accent" appearance="outline" fxFill>
+                        <mat-label>User</mat-label>
+                        <input matInput formControlName="user">
+                        <mat-error senergyError label="User"></mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field color="accent" appearance="outline" fxFill>
+                        <mat-label>Password</mat-label>
+                        <input matInput type="password" formControlName="password">
+                        <mat-error senergyError label="Password"></mat-error>
+                    </mat-form-field>
+
+                    <div class="qos-row">QoS
+                        <mat-button-toggle-group formControlName="qos">
+                            <mat-button-toggle [value]="0">0</mat-button-toggle>
+                            <mat-button-toggle [value]="1">1</mat-button-toggle>
+                            <mat-button-toggle [value]="2">2</mat-button-toggle>
+                        </mat-button-toggle-group>
+                    </div>
+
+                    <div>
+                        <mat-checkbox color="accent" formControlName="enabled">Enabled</mat-checkbox>
+                        <button mat-raised-button class="float-right" color="accent"
+                            [disabled]="brokerEditGroup.invalid" (click)="saveBroker()">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button *ngIf="mode === modes.BROKER_EDIT" color="accent"
-        (click)="gotoSettings()">Back
+<mat-dialog-actions fxLayoutAlign="start center">
+    <span class="save-state" fxFlex>
+        <ng-container [ngSwitch]="saveState">
+            <span *ngSwitchCase="'saving'" class="save-state-saving">
+                <mat-icon class="inline-icon">sync</mat-icon> Saving…
+            </span>
+            <span *ngSwitchCase="'saved'" class="save-state-saved">
+                <mat-icon class="inline-icon">check</mat-icon> All changes saved
+            </span>
+            <span *ngSwitchCase="'error'" class="save-state-error">
+                <mat-icon class="inline-icon" color="warn">error_outline</mat-icon>
+                Could not save — your last change was reverted. Please try again.
+            </span>
+        </ng-container>
+    </span>
+    <button mat-raised-button *ngIf="mode === modes.BROKER_EDIT" color="accent" (click)="gotoBrokerList()">Back
     </button>
     <button mat-raised-button color="primary" (click)="close()">Close</button>
 </mat-dialog-actions>

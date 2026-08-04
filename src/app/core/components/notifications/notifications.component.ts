@@ -25,13 +25,9 @@ import { Subject, takeUntil, debounceTime } from 'rxjs';
 import {
   NotificationModel,
   NotificationTopic,
-  notificationTopicAnalytics,
-  notificationTopicConnector,
-  notificationTopicDeveloper,
+  getTopicIcon,
   notificationTopicDeviceOffline,
   notificationTopicIncident,
-  notificationTopicMGW,
-  notificationTopicProcesses,
   notificationTopicSmartService,
 } from './shared/notification.model';
 import { NotificationService } from './shared/notification.service';
@@ -77,17 +73,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   dataSource = new MatTableDataSource<NotificationDisplayModel>();
   selection = new SelectionModel<NotificationDisplayModel>(true, []);
   displayedColumns: string[] = ['select', 'topic', 'title', 'message', 'details', 'created_at', 'actions'];
-
-  private readonly topicIconMap: Record<string, string> = {
-    [notificationTopicProcesses]: 'timeline',
-    [notificationTopicSmartService]: 'design_services',
-    [notificationTopicDeviceOffline]: 'cloud_off',
-    [notificationTopicDeveloper]: 'engineering',
-    [notificationTopicConnector]: 'device_hub',
-    [notificationTopicMGW]: 'home',
-    [notificationTopicIncident]: 'warning',
-    [notificationTopicAnalytics]: 'bar_chart',
-  };
 
   private readonly deviceReferencePattern = /device (.+?)\s*\((urn:infai:ses:device:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\)/;
 
@@ -205,7 +190,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   getTopicIcon(topic?: NotificationTopic): string {
-    return this.topicIconMap[topic || ''] || 'chat';
+    return getTopicIcon(topic);
   }
 
   trackByNotificationId(_: number, notification: NotificationModel): string {

@@ -14,21 +14,137 @@
  * limitations under the License.
  */
 
-.container {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
 mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }
 
-.date {
-    padding-right: 8px;
+.tab-intro {
+    margin: 16px 0;
+    line-height: 1.4;
 }
 
-.icon-spacer {
-    width: 24px;
+/* Delivery matrix: topics as rows, channels as columns. */
+.matrix {
+    min-width: 620px;
+}
+
+.matrix-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(4, 84px);
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.matrix-row:last-child {
+    border-bottom: none;
+}
+
+.matrix-header {
+    font-weight: 500;
+    align-items: end;
+}
+
+.matrix-header .channel-cell {
+    flex-direction: column;
+    gap: 2px;
+}
+
+.channel-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 12px;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.topic-cell {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+}
+
+.channel-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.topic-icon {
+    flex: 0 0 auto;
+    margin-top: 1px;
+}
+
+.topic-text {
+    min-width: 0;
+}
+
+.topic-label {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.topic-desc {
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 1.35;
+    opacity: 0.7;
+}
+
+.topic-slug {
+    font-family: monospace;
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.06);
+    opacity: 0.75;
+}
+
+.legacy-badge {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.08);
+    opacity: 0.7;
+}
+
+.legacy-row .topic-icon,
+.legacy-row .topic-label {
+    opacity: 0.7;
+}
+
+.info-icon,
+.unreachable-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    cursor: help;
+}
+
+.info-icon {
+    opacity: 0.55;
+}
+
+::ng-deep .notification-tooltip {
+    white-space: pre-line;
+}
+
+/* Brokers */
+.platform-broker {
+    padding-bottom: 1.5em;
+}
+
+.broker-list-header {
+    font-weight: 500;
 }
 
 table {
@@ -37,34 +153,61 @@ table {
 
 .table-container {
     position: relative;
-    max-width: 100%
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 ::ng-deep td.mat-mdc-cell {
     word-wrap: break-word;
     white-space: pre-wrap;
-    max-width: calc((80vw - 232px)/2);
 }
 
 .mat-column-enabled {
     width: 40px;
 }
+
 .mat-column-edit {
     width: 20px;
 }
+
 .mat-column-delete {
     width: 20px;
 }
 
+.empty-state {
+    padding: 24px;
+    text-align: center;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.qos-row {
+    padding-bottom: 1em;
+}
+
 .float-right {
-    float: right
+    float: right;
 }
 
-.notification-content{
-    white-space:pre-wrap;
+/* Autosave feedback */
+.save-state {
+    font-size: 12px;
+    min-height: 24px;
 }
 
-.channelTopicConfigForm {
-    display: flex;
-    justify-content: space-between;
+.save-state span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.save-state-saving,
+.save-state-saved {
+    opacity: 0.7;
+}
+
+.inline-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
 }
