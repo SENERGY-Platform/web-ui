@@ -44,17 +44,24 @@ describe('DashboardComponent', () => {
     let component: DashboardComponent;
     let fixture: ComponentFixture<DashboardComponent>;
 
-    const responsiveServiceSpy: Spy<ResponsiveService> = createSpyFromClass<ResponsiveService>(ResponsiveService);
-    const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService, {
-        observablePropsToSpyOn: ['dashboardObservable', 'dashboardWidgetObservable']
-    });
-    dashboardServiceSpy.userHasCreateDashboardAuthorization.and.returnValue(of(true));
-    dashboardServiceSpy.userHasUpdateDashboardAuthorization.and.returnValue(of(true));
-    dashboardServiceSpy.userHasDeleteDashboardAuthorization.and.returnValue(of(true));
-    const deviceStatusServiceSpy: Spy<DeviceStatusService> = createSpyFromClass<DeviceStatusService>(DeviceStatusService);
+    // the spies are rebuilt per test on purpose: each one holds a single ReplaySubject that
+    // nextOneTimeWith completes, so a spy kept across tests replays the first test's value to all the
+    // others - which handed every component the same dashboard object to mutate
+    let responsiveServiceSpy: Spy<ResponsiveService>;
+    let dashboardServiceSpy: Spy<DashboardService>;
+    let deviceStatusServiceSpy: Spy<DeviceStatusService>;
 
     beforeEach(
         waitForAsync(() => {
+            responsiveServiceSpy = createSpyFromClass<ResponsiveService>(ResponsiveService);
+            dashboardServiceSpy = createSpyFromClass<DashboardService>(DashboardService, {
+                observablePropsToSpyOn: ['dashboardObservable', 'dashboardWidgetObservable']
+            });
+            dashboardServiceSpy.userHasCreateDashboardAuthorization.and.returnValue(of(true));
+            dashboardServiceSpy.userHasUpdateDashboardAuthorization.and.returnValue(of(true));
+            dashboardServiceSpy.userHasDeleteDashboardAuthorization.and.returnValue(of(true));
+            deviceStatusServiceSpy = createSpyFromClass<DeviceStatusService>(DeviceStatusService);
+
             responsiveServiceSpy.observeMqAlias.and.nextOneTimeWith('md');
             dashboardServiceSpy.getDashboards.and.nextOneTimeWith([
                 {
