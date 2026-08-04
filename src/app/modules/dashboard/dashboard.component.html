@@ -77,6 +77,24 @@
                             <p [ngClass]="{'color-accent': layoutMode() === option.mode}">{{option.label}}</p>
                         </button>
                     </mat-menu>
+                    <button *ngIf="userHasUpdateDashboardAuthorization" mat-icon-button
+                        [matMenuTriggerFor]="columns" color="accent"
+                        matTooltip="set how many columns the widgets are laid out on">
+                        <mat-icon>view_column</mat-icon>
+                    </button>
+                    <mat-menu #columns="matMenu" [overlapTrigger]="false" xPosition="before">
+                        <button mat-menu-item (click)="selectColumns(0)" matTooltipPosition="left"
+                            matTooltip="Take the column count from the window width, as a dashboard always has">
+                            <p [ngClass]="{'color-accent': isAutoColumns()}">Auto</p>
+                        </button>
+                        <mat-divider></mat-divider>
+                        <button mat-menu-item *ngFor="let count of columnChoices" (click)="selectColumns(count)"
+                            matTooltip="Hold this many columns at every window width" matTooltipPosition="left">
+                            <p [ngClass]="{'color-accent': fixedColumns() === count}">
+                                {{count}} {{count === 1 ? 'column' : 'columns'}}
+                            </p>
+                        </button>
+                    </mat-menu>
                     <button *ngIf="userHasUpdateDashboardAuthorization" (click)="openEditDashboardDialog()"
                         mat-icon-button color="accent" matTooltip="edit dashboard">
                         <mat-icon>edit</mat-icon>

@@ -39,6 +39,9 @@ export const LAYOUT_MODES: { mode: LayoutMode; label: string; hint: string }[] =
 /** Most columns a grid ever renders, and gridstack's own maximum. */
 export const MAX_COLUMNS = 12;
 
+/** Fewest columns a dashboard can be pinned to. */
+export const MIN_COLUMNS = 1;
+
 /**
  * Smallest a single grid unit may be, in px, in either direction. Below roughly this a widget stops
  * being able to show anything, so the grid is held to this per column and the page scrolls sideways
@@ -61,6 +64,12 @@ export const COLUMN_BANDS: { w: number; c: number }[] = Array.from(
     (_unused, index) => MAX_COLUMNS - index,
 ).map((columns) => ({ w: MIN_UNIT_PX * (columns + 1) - 1, c: columns }));
 
+/**
+ * A dashboard pinned to this many columns keeps them at every window width. Anything outside
+ * MIN_COLUMNS..MAX_COLUMNS, or absent, means the count follows the width instead - see AUTO_COLUMNS.
+ */
+export const AUTO_COLUMNS = 0;
+
 export interface DashboardModel {
     id: string;
     name: string;
@@ -71,4 +80,9 @@ export interface DashboardModel {
     updatedAt?: string;
     /** Optional: absent while the dashboard service predates the field - treat as DEFAULT_LAYOUT_MODE. */
     layout_mode?: LayoutMode;
+    /**
+     * Columns to hold at every window width, or AUTO_COLUMNS to derive the count from the width.
+     * Optional: absent while the dashboard service predates the field, which reads as auto.
+     */
+    columns?: number;
 }

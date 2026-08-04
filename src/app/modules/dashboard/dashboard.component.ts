@@ -34,13 +34,15 @@ import { MatTabGroup } from '@angular/material/tabs';
 import { ChartsService } from '../../widgets/charts/shared/charts.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { elementCB, GridstackComponent } from 'gridstack/dist/angular';
-import { GridStack, GridStackOptions } from 'gridstack';
+import { GridStack, GridStackOptions, Responsive } from 'gridstack';
 import {
+    AUTO_COLUMNS,
     COLUMN_BANDS,
     DEFAULT_LAYOUT_MODE,
     LAYOUT_MODES,
     LayoutMode,
     MAX_COLUMNS,
+    MIN_COLUMNS,
     MIN_UNIT_PX,
 } from './shared/dashboard.model';
 
@@ -104,6 +106,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     readonly layoutModes = LAYOUT_MODES;
     /** Width the grid is held to, so no column falls below MIN_UNIT_PX - the wrapper scrolls instead. */
     gridMinWidth = MIN_UNIT_PX;
+    readonly columnChoices = Array.from(
+        { length: MAX_COLUMNS - MIN_COLUMNS + 1 },
+        (_unused, index) => MIN_COLUMNS + index,
+    );
 
     constructor(
         private dashboardService: DashboardService,
@@ -236,8 +242,52 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
         dashboard.layout_mode = mode;
         this.refreshGridOptions();
+        this.applyColumnCount();
         this.applyRepack();
         this.persistDashboard(dashboard);
+    }
+
+    /** Columns the active dashboard is pinned to, or AUTO_COLUMNS while the count follows the width. */
+    fixedColumns(): number {
+        const stored = this.dashboards[this.activeTabIndex]?.columns;
+        return stored !== undefined && stored >= MIN_COLUMNS && stored <= MAX_COLUMNS ? stored : AUTO_COLUMNS;
+    }
+
+    isAutoColumns(): boolean {
+        return this.fixedColumns() === AUTO_COLUMNS;
+    }
+
+    /**
+     * Pins the active dashboard to a column count, or hands the count back to the window width when
+     * given AUTO_COLUMNS or anything out of range - which is what the menu's Auto entry sends.
+     */
+    selectColumns(columns: number) {
+        const dashboard = this.dashboards[this.activeTabIndex];
+        const wanted = columns >= MIN_COLUMNS && columns <= MAX_COLUMNS ? columns : AUTO_COLUMNS;
+        if (dashboard === undefined || wanted === this.fixedColumns()) {
+            return;
+        }
+        dashboard.columns = wanted;
+        this.refreshGridOptions();
+        this.applyColumnCount();
+        this.persistDashboard(dashboard);
+    }
+
+    /**
+     * Brings the live grid onto the chosen column count without waiting for a window resize.
+     *
+     * This is the only thing that applies a pinned count: updateOptions() treats columnOpts and column
+     * as alternatives, so the null columnOpts from refreshGridOptions() makes it skip o.column. Call
+     * this whenever the count changes, and keep it after refreshGridOptions() so the grid is reconfigured
+     * before the new options object reaches the wrapper.
+     */
+    private applyColumnCount() {
+        const fixed = this.fixedColumns();
+        if (fixed === AUTO_COLUMNS) {
+            this.grid?.onResize();
+        } else {
+            this.grid?.column(fixed, this.layoutMode());
+        }
     }
 
     /**
@@ -267,17 +317,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     /** Rebuilds the grid options for the active dashboard. */
     private refreshGridOptions() {
-        this.gridOptions = {
-            columnOpts: {
-                breakpoints: COLUMN_BANDS,
-                columnMax: MAX_COLUMNS,
-                layout: this.layoutMode(),
-            },
+        const fixed = this.fixedColumns();
+        const options: GridStackOptions = {
             margin: 5,
             handleClass: 'drag-handler',
             disableDrag: !this.inDragMode,
             disableResize: !this.userHasMoveWidgetAuthorization,
         };
+        if (fixed === AUTO_COLUMNS) {
+            // the bands already hold every column above the floor, so this only bites on a viewport
+            // narrower than a single unit
+            this.gridMinWidth = MIN_UNIT_PX;
+            options.columnOpts = {
+                breakpoints: COLUMN_BANDS,
+                columnMax: MAX_COLUMNS,
+                layout: this.layoutMode(),
+            };
+        } else {
+            // pinned: the count cannot give way, so the width has to - hence the scroll
+            this.gridMinWidth = fixed * MIN_UNIT_PX;
+            options.column = fixed;
+            // null, not undefined: updateOptions() only drops a columnOpts already on a live grid when
+            // told null, so undefined would leave a previously auto grid re-deriving its own count
+            options.columnOpts = null as unknown as Responsive;
+        }
+        this.gridOptions = options;
     }
 
     startDrag() {

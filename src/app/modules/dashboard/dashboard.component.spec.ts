@@ -29,7 +29,7 @@ import { DashboardComponent } from './dashboard.component';
 import { CoreModule } from '../../core/core.module';
 import { ResponsiveService } from '../../core/services/responsive.service';
 import { DeviceStatusService } from '../../widgets/device-status/shared/device-status.service';
-import { DashboardModel, DEFAULT_LAYOUT_MODE, LayoutMode } from './shared/dashboard.model';
+import { AUTO_COLUMNS, DashboardModel, DEFAULT_LAYOUT_MODE, LayoutMode, MAX_COLUMNS, MIN_COLUMNS } from './shared/dashboard.model';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
@@ -205,6 +205,48 @@ describe('DashboardComponent', () => {
             component.moveWidgetToDashboard('widget-2', 7).subscribe();
             expect(widgetIds(component.dashboards[0])).toEqual(['widget-1', 'widget-2']);
             expect(widgetIds(component.dashboards[1])).toEqual(['widget-3']);
+        });
+    });
+
+    describe('column count', () => {
+        it('reads a dashboard with no stored count as auto', () => {
+            expect(component.dashboards[0].columns).toBeUndefined();
+            expect(component.isAutoColumns()).toBeTrue();
+            expect(component.fixedColumns()).toBe(AUTO_COLUMNS);
+        });
+
+        it('reads a stored count above the maximum as auto', () => {
+            component.dashboards[0].columns = MAX_COLUMNS + 1;
+            expect(component.isAutoColumns()).toBeTrue();
+        });
+
+        it('reads a stored count below the minimum as auto', () => {
+            component.dashboards[0].columns = MIN_COLUMNS - 1;
+            expect(component.isAutoColumns()).toBeTrue();
+        });
+
+        it('pins the dashboard to the picked count', () => {
+            dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({} as DashboardModel);
+            component.selectColumns(3);
+            expect(component.dashboards[0].columns).toBe(3);
+            expect(component.fixedColumns()).toBe(3);
+            expect(component.isAutoColumns()).toBeFalse();
+        });
+
+        it('hands the count back to the window width when auto is picked', () => {
+            dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({} as DashboardModel);
+            component.selectColumns(3);
+            dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({} as DashboardModel);
+            component.selectColumns(AUTO_COLUMNS);
+            expect(component.isAutoColumns()).toBeTrue();
+        });
+
+        it('unpins rather than storing a picked count that is out of range', () => {
+            dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({} as DashboardModel);
+            component.selectColumns(5);
+            dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({} as DashboardModel);
+            component.selectColumns(MAX_COLUMNS + 4);
+            expect(component.isAutoColumns()).toBeTrue();
         });
     });
 });
