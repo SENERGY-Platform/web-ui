@@ -47,7 +47,7 @@ export const MIN_COLUMNS = 1;
  * being able to show anything, so the grid is held to this per column and the page scrolls sideways
  * instead. Cells are square - gridstack's cellHeight default - so this floors the row height too.
  */
-export const MIN_UNIT_PX = 330;
+export const MIN_UNIT_PX = 350;
 
 /**
  * Width bands that keep every column at least MIN_UNIT_PX wide, in the shape gridstack expects: each
