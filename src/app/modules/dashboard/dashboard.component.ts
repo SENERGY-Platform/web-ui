@@ -77,7 +77,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         } else {
             this.grid = GridStack.init(undefined, component.el);
             this.grid?.compact();
-            this.saveWidgetPositions();
+            // deliberately not saved: re-packing on load is a rendering decision, and writing it back
+            // makes every dashboard rewrite its coordinates just by being opened
         }
     }
     resizable = resizable;

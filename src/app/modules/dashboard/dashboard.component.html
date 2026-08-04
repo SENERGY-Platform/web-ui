@@ -88,9 +88,12 @@
 
                 </div>
 
-                <gridstack class="grid-stack" (change)="saveWidgetPositions()" (dragStartCB)="startDrag()"
-                    (dragStopCB)="stopDrag($event)" (addedCB)="saveWidgetPositions()"
-                    (removedCB)="saveWidgetPositions()" [options]="{
+                <!-- only drag/resize stop are bound: gridstack's `change` also fires when it re-columns
+                     itself as the window narrows, which is what let a resize rewrite every stored
+                     coordinate, and added/removed are already covered by the widget manipulation
+                     subscribe. -->
+                <gridstack class="grid-stack" (dragStartCB)="startDrag()"
+                    (dragStopCB)="stopDrag($event)" (resizeStopCB)="saveWidgetPositions()" [options]="{
         columnOpts: {
             columnWidth: 350,
             layout: 'compact',
