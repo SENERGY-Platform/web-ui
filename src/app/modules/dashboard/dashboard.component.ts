@@ -21,7 +21,7 @@ import { WidgetModel, WidgetUpdatePosition } from './shared/dashboard-widget.mod
 import { DashboardWidgetManipulationModel } from './shared/dashboard-widget-manipulation.model';
 import { DashboardManipulationEnum } from './shared/dashboard-manipulation.enum';
 import { DashboardManipulationModel } from './shared/dashboard-manipulation.model';
-import { catchError, forkJoin, Observable, of, Subscription } from 'rxjs';
+import { catchError, forkJoin, Observable, of, Subscription, tap } from 'rxjs';
 import { DashboardTypesEnum, dashboardTypesEnumFromString, resizable } from './shared/dashboard-types.enum';
 import { DeviceStatusService } from '../../widgets/device-status/shared/device-status.service';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
@@ -192,10 +192,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     refreshTime(time: number): void {
-        this.dashboards[this.activeTabIndex].refresh_time = time;
-        this.dashboardService.updateDashboard(this.dashboards[this.activeTabIndex]).subscribe(() => {
-            this.refreshAllWidgets();
-        });
+        const dashboard = this.dashboards[this.activeTabIndex];
+        dashboard.refresh_time = time;
+        this.persistDashboard(dashboard).subscribe(() => this.refreshAllWidgets());
     }
 
     toggleDragMode() {
@@ -244,7 +243,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.refreshGridOptions();
         this.applyColumnCount();
         this.applyRepack();
-        this.persistDashboard(dashboard);
+        this.persistDashboard(dashboard).subscribe();
     }
 
     /** Columns the active dashboard is pinned to, or AUTO_COLUMNS while the count follows the width. */
@@ -270,7 +269,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         dashboard.columns = wanted;
         this.refreshGridOptions();
         this.applyColumnCount();
-        this.persistDashboard(dashboard);
+        this.persistDashboard(dashboard).subscribe();
     }
 
     /**
@@ -295,12 +294,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
      * dashboard by that stamp and refuses a write carrying a stale one, so without this only the first
      * change of a session is accepted.
      */
-    private persistDashboard(dashboard: DashboardModel) {
-        this.dashboardService.updateDashboard(dashboard).subscribe((updated) => {
-            if (updated?.updatedAt !== undefined) {
-                dashboard.updatedAt = updated.updatedAt;
-            }
-        });
+    private persistDashboard(dashboard: DashboardModel): Observable<DashboardModel> {
+        return this.dashboardService.updateDashboard(dashboard).pipe(
+            tap((updated) => {
+                if (updated?.updatedAt !== undefined) {
+                    dashboard.updatedAt = updated.updatedAt;
+                }
+            }),
+        );
     }
 
     /**

@@ -123,6 +123,20 @@ describe('DashboardComponent', () => {
         }),
     );
 
+    describe('refresh time', () => {
+        it('stores the picked time on the dashboard', () => {
+            dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({} as DashboardModel);
+            component.refreshTime(30);
+            expect(component.dashboards[0].refresh_time).toBe(30);
+        });
+
+        it('takes the fresh updatedAt from the save response', () => {
+            dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({ updatedAt: 'later' } as DashboardModel);
+            component.refreshTime(15);
+            expect(component.dashboards[0].updatedAt).toBe('later');
+        });
+    });
+
     describe('layout mode', () => {
         it('reads a dashboard with no stored mode as the default', () => {
             expect(component.dashboards[0].layout_mode).toBeUndefined();
