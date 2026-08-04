@@ -48,7 +48,7 @@ export class ElementSizeService {
     private calcHeightPercentage(height: number, heightPercentageAdjustment: number): string {
         let percentage = 0;
         if (height < 500) {
-            percentage = 80;
+            percentage = 90;
         } else {
             percentage = 95;
         }
@@ -59,12 +59,12 @@ export class ElementSizeService {
         let percentage = 0;
 
         if (width < 800) {
-            percentage = 80;
+            percentage = 90;
         } else {
             if (width < 1100) {
-                percentage = 82;
+                percentage = 95;
             } else {
-                percentage = 85;
+                percentage = 100;
             }
         }
         return percentage - widthPercentageAdjustment + '%';
