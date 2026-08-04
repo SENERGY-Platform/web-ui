@@ -70,7 +70,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     grid: GridStack | undefined;
     @ViewChild(GridstackComponent)
     set gridstackComponent(component: GridstackComponent | undefined) {
-        if (component !== undefined) {
+        if (component === undefined) {
+            // the tab's grid has been torn down - dropping it keeps anything that still reaches for
+            // this.grid from calling a destroyed instance, whose engine and element are already gone
+            this.grid = undefined;
+        } else {
             this.grid = GridStack.init(undefined, component.el);
             this.grid?.compact();
             this.saveWidgetPositions();
@@ -197,7 +201,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     stopDrag($event: elementCB) {
         this.dragging = false;
         if (this.moveWidgetToDashboardIfNeeded($event.el, $event.event)) {
-            this.grid?.compact();
+            // nothing to re-pack here: this grid is on its way out and the destination builds its own,
+            // which re-packs as it comes up. Touching this.grid now would hit the dead one.
             return;
         }
         this.saveWidgetPositions();
@@ -483,9 +488,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 $event.clientY > rect.top &&
                 $event.clientY < rect.bottom
             ) {
-                this.moveWidgetToDashboard(item.id, i).subscribe();
-                this.setTabIndex(i);
-                this.cd.detectChanges();
+                // deferred out of gridstack's dragstop handler, which is what we are inside: switching
+                // tabs tears down the grid that handler belongs to, and gridstack goes on to use its
+                // engine and element after we return - both of which destroy() has deleted by then
+                setTimeout(() => {
+                    this.moveWidgetToDashboard(item.id, i).subscribe();
+                    this.setTabIndex(i);
+                    this.cd.detectChanges();
+                }, 0);
                 return true;
             }
         }
