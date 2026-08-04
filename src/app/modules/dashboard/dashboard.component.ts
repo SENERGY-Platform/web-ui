@@ -86,8 +86,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.grid = undefined;
         } else {
             this.grid = GridStack.init(undefined, component.el);
-            // columnOpts is only consulted on resize, so a fresh grid sits at 12 columns until the
-            // window happens to change - asking for the check settles it now
+            // the grid derives its column count from the bands as it is built, but that happens while it
+            // is still empty - before its own items can put a scrollbar on the wrapper and take a few
+            // pixels off the width. Re-measuring settles the count when those pixels cross a band edge,
+            // rather than leaving it to the resize observer a moment later.
             this.grid?.onResize();
             this.applyRepack();
             // deliberately not saved: re-packing on load is a rendering decision, and writing it back
@@ -233,7 +235,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         return LAYOUT_MODES.some((option) => option.mode === stored) ? (stored as LayoutMode) : DEFAULT_LAYOUT_MODE;
     }
 
-    /** Stores the chosen layout mode on the dashboard and applies it without waiting for a resize. */
+    /**
+     * Stores the chosen layout mode on the dashboard. 'compact' and 'list' re-pack straight away; the
+     * other four only describe what a column change does to the widgets, so they take effect the next
+     * time the count actually changes.
+     */
     selectLayoutMode(mode: LayoutMode) {
         const dashboard = this.dashboards[this.activeTabIndex];
         if (dashboard === undefined || mode === this.layoutMode()) {
