@@ -67,6 +67,12 @@ describe('DashboardComponent', () => {
                 {
                     id: 'dashboard-1',
                     name: 'test-dashboard',
+                    widgets: [{ id: 'widget-1', x: 0, y: 0, w: 1, h: 1 }, { id: 'widget-2', x: 1, y: 0, w: 1, h: 1 }],
+                },
+                {
+                    id: 'dashboard-2',
+                    name: 'other-dashboard',
+                    widgets: [{ id: 'widget-3', x: 0, y: 0, w: 1, h: 1 }],
                 },
             ] as DashboardModel[]);
 
@@ -116,4 +122,64 @@ describe('DashboardComponent', () => {
             expect(component.inDragMode).toBeFalse();
         }),
     );
+
+    describe('moving a widget to another dashboard', () => {
+        const widgetIds = (dashboard: DashboardModel) => dashboard.widgets.map((widget) => widget.id);
+
+        it('takes the widget off the dashboard it came from', () => {
+            dashboardServiceSpy.updateWidgetPosition.and.nextOneTimeWith({ message: 'ok' });
+            component.moveWidgetToDashboard('gridstack-item-widget-2', 1).subscribe();
+            expect(widgetIds(component.dashboards[0])).toEqual(['widget-1']);
+        });
+
+        it('puts the widget on the dashboard it was dropped on', () => {
+            dashboardServiceSpy.updateWidgetPosition.and.nextOneTimeWith({ message: 'ok' });
+            component.moveWidgetToDashboard('gridstack-item-widget-2', 1).subscribe();
+            expect(widgetIds(component.dashboards[1])).toEqual(['widget-3', 'widget-2']);
+        });
+
+        it('puts the widget above everything already on that dashboard, not below it', () => {
+            dashboardServiceSpy.updateWidgetPosition.and.nextOneTimeWith({ message: 'ok' });
+            component.dashboards[1].widgets = [
+                { id: 'widget-3', x: 0, y: 0, w: 2, h: 2 },
+                { id: 'widget-4', x: 0, y: 2, w: 1, h: 3 },
+            ] as any;
+            component.moveWidgetToDashboard('widget-2', 1).subscribe();
+            const moved = component.dashboards[1].widgets.find((widget) => widget.id === 'widget-2');
+            // the grid pushes it down onto the first free spot from here - anything below the widgets
+            // already there is off the bottom of the page on a dashboard of any size
+            expect(moved?.x).toBe(0);
+            expect(moved?.y).toBe(0);
+        });
+
+        it('sends the position it was given, not the one it came from', () => {
+            dashboardServiceSpy.updateWidgetPosition.and.nextOneTimeWith({ message: 'ok' });
+            component.moveWidgetToDashboard('widget-2', 1).subscribe();
+            const [updates] = dashboardServiceSpy.updateWidgetPosition.calls.mostRecent().args;
+            expect(updates[0].x).toBe(0);
+            expect(updates[0].y).toBe(0);
+        });
+
+        it('tells the service which dashboard the widget came from and went to', () => {
+            dashboardServiceSpy.updateWidgetPosition.and.nextOneTimeWith({ message: 'ok' });
+            component.moveWidgetToDashboard('widget-2', 1).subscribe();
+            const [updates] = dashboardServiceSpy.updateWidgetPosition.calls.mostRecent().args;
+            expect(updates.length).toBe(1);
+            expect(updates[0].id).toBe('widget-2');
+            expect(updates[0].dashboardOrigin).toBe('dashboard-1');
+            expect(updates[0].dashboardDestination).toBe('dashboard-2');
+        });
+
+        it('leaves both dashboards alone when the target index is the dashboard already shown', () => {
+            component.moveWidgetToDashboard('widget-2', 0).subscribe();
+            expect(widgetIds(component.dashboards[0])).toEqual(['widget-1', 'widget-2']);
+            expect(widgetIds(component.dashboards[1])).toEqual(['widget-3']);
+        });
+
+        it('leaves both dashboards alone when the target index does not exist', () => {
+            component.moveWidgetToDashboard('widget-2', 7).subscribe();
+            expect(widgetIds(component.dashboards[0])).toEqual(['widget-1', 'widget-2']);
+            expect(widgetIds(component.dashboards[1])).toEqual(['widget-3']);
+        });
+    });
 });

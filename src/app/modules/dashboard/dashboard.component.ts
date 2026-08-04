@@ -451,18 +451,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (this.dashboards[toIndex].widgets === undefined) {
             this.dashboards[toIndex].widgets = [];
         }
-        let x = 0;
-        let y = 0;
-        this.dashboards[toIndex].widgets.forEach(element => {
-            if ((element.y || 0) > y) {
-                y = element.y || 0;
-            }
-            if ((element.x || 0) > y) {
-                x = element.x || 0;
-            }
-        });
-        widgets[0].x = x + 1;
-        widgets[0].y = y + 1;
+        // top left, rather than a row below the lowest widget already there: the grid pushes a colliding
+        // widget downwards, so the first free spot from the top is where this lands, and the tab we switch
+        // to shows it. Placing it past the last widget put it below the fold on any dashboard with a few
+        // widgets on it - far enough that the move looked like it had not happened at all.
+        widgets[0].x = 0;
+        widgets[0].y = 0;
         const widgetPositionUpdates: WidgetUpdatePosition[] = [{
             id,
             x: widgets[0].x,
