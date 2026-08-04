@@ -15,7 +15,7 @@
  */
 
 import { CommonModule } from '@angular/common';
-import { InjectionToken, NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
@@ -60,8 +60,9 @@ import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from './directives/close-mtx-select-on-scroll.directive';
 import { NotificationsComponent } from './components/notifications/notifications.component';
 import { FilterDialogComponent } from './components/filter-dialog/filter-dialog.component';
+import { keycloakServiceToken } from './services/keycloak-service.token';
 
-export const keycloakServiceToken = new InjectionToken<KeycloakService>('KeycloakService');
+export { keycloakServiceToken };
 
 
 @NgModule({

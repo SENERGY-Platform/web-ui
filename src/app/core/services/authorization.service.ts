@@ -23,7 +23,7 @@ import {ErrorHandlerService} from './error-handler.service';
 import { HttpClient, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import {AuthorizationProfileModel} from '../model/authorization/authorization-profile.model';
 import {AuthorizationUserProfileModel} from '../model/authorization/authorization-user-profile.model';
-import {keycloakServiceToken} from '../core.module';
+import {keycloakServiceToken} from './keycloak-service.token';
 import {KeycloakConfidentialService} from './keycloak-confidential.service';
 import {KeycloakOptions} from 'keycloak-angular';
 
