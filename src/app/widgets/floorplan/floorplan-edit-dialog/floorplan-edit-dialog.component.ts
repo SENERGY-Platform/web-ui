@@ -25,10 +25,23 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
-import { DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeAspectNodeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
-import { draw, FloorplanWidgetCapabilityModel, FloorplanWidgetPropertiesModel, fpCriteriaConnectionStatus, image, isPlaced, migrateColoring } from '../shared/floorplan.model';
+import {
+  defaultVoidTogglePairs,
+  draw,
+  impliedControllingCriteria,
+  FloorplanWidgetCapabilityModel,
+  FloorplanWidgetPropertiesModel,
+  fpCriteriaConnectionStatus,
+  image,
+  isControllingFunction,
+  isNumericCharacteristic,
+  isPlaced,
+  migrateColoring,
+  StateSourceContextModel,
+} from '../shared/floorplan.model';
 import { materialIconNames } from 'src/app/core/model/icon.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
@@ -55,7 +68,9 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
   step: number | undefined;
   materialIconNames = materialIconNames;
-  functionIdToType = new Map<string, string>();
+  voidTogglePairs = defaultVoidTogglePairs();
+  /** base characteristic of the function's concept, undefined for functions without input */
+  functionIdToCharacteristic = new Map<string, DeviceTypeCharacteristicsModel | undefined>();
 
   form = new FormGroup({
     image: new FormControl<string | null>(null),
@@ -147,6 +162,11 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
 
     forkJoin(obs).subscribe(_ => {
       this.ready = true;
+      // the device groups arrive next to the placements, so their controls can only be described now
+      const controllingFunctionIds: string[] = [];
+      this.form.controls.placements.controls.forEach(p =>
+        controllingFunctionIds.push(...this.getControllingCriteria(p.value.deviceGroupId || '').map(c => c.function_id)));
+      this.loadCharacteristics(controllingFunctionIds).subscribe();
       this.form.controls.image.valueChanges.subscribe(() => this.draw());
       for (let i = 0; i < 5; i++) {
         setTimeout(() => { // needs to draw ready=true first
@@ -285,31 +305,35 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
       colorLow: new FormControl<string>('#808080'),
       colorHigh: new FormControl<string>('#808080'),
     });
-    fg.controls.criteria.valueChanges.pipe(concatMap(c => {
-      if (c?.function_id === undefined) {
-        return of([]);
-      }
-      if (this.functionIdToType.has(c.function_id)) {
-        return of([]);
-      }
-      return this.deviceGroupsService.getFunctionListByIds([c.function_id]).pipe(
-        concatMap(functions => this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) }).pipe(map(concepts => ({ concepts, functions })))),
-        map((res) => res.functions.forEach(f => {
-          const concept = res.concepts.result.find(conc => f.concept_id === conc.id);
-          if (concept === undefined) {
-            return;
-          }
-          const t = concept.characteristics.find(characteristic => characteristic.id === concept.base_characteristic_id)?.type;
-          if (t === undefined) {
-            return;
-          }
-          this.functionIdToType.set(f.id, t);
-        })));
-    })).subscribe();
+    fg.controls.criteria.valueChanges.pipe(concatMap(c => this.loadCharacteristics(c?.function_id === undefined ? [] : [c.function_id]))).subscribe();
+    // the controlling criteria of the group are offered as controls, annotated with the input they get
+    fg.controls.deviceGroupId.valueChanges.pipe(concatMap(id => this.loadCharacteristics(this.getControllingCriteria(id || '').map(c => c.function_id)))).subscribe();
     if (value !== undefined) {
       fg.patchValue(value);
     }
     return fg;
+  }
+
+  /** Caches the base characteristic of the concept of every given function, which describes its input */
+  private loadCharacteristics(functionIds: string[]): Observable<null> {
+    const missing = functionIds
+      .filter(id => !this.functionIdToCharacteristic.has(id))
+      .filter((v, i, a) => a.indexOf(v) === i);
+    if (missing.length === 0) {
+      return of(null);
+    }
+    // functions the repository does not know, e.g. the connection status, keep their empty entry
+    missing.forEach(id => this.functionIdToCharacteristic.set(id, undefined));
+    return this.deviceGroupsService.getFunctionListByIds(missing).pipe(
+      concatMap(functions => this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) })
+        .pipe(map(concepts => ({ concepts, functions })))),
+      map(res => {
+        res.functions.forEach(f => {
+          const concept = res.concepts.result.find(conc => f.concept_id === conc.id);
+          this.functionIdToCharacteristic.set(f.id, concept?.characteristics.find(c => c.id === concept.base_characteristic_id));
+        });
+        return null;
+      }));
   }
 
   addNewColoring(arr: FormArray): void {
@@ -408,13 +432,62 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     return this.deviceGroups.find(d => d.id === deviceGroupId);
   }
 
+  /** Criteria with a value to display */
+  getMeasuringCriteria(deviceGroupId: string): DeviceGroupCriteriaModel[] {
+    return (this.getDeviceGroup(deviceGroupId)?.criteria || []).filter(c => !isControllingFunction(c.function_id));
+  }
+
+  /** Criteria that can be executed, offered as controls */
+  getControllingCriteria(deviceGroupId: string): DeviceGroupCriteriaModel[] {
+    return (this.getDeviceGroup(deviceGroupId)?.criteria || []).filter(c => isControllingFunction(c.function_id));
+  }
+
+  /**
+   * The controls left to select for a placement. A displayed measurement is operated through its own
+   * value in the widget, so the control it already gives access to is not offered a second time.
+   */
+  getSelectableControllingCriteria(tab: FormGroup): DeviceGroupCriteriaModel[] {
+    const deviceGroupId = tab.value.deviceGroupId || '';
+    const all = this.getControllingCriteria(deviceGroupId);
+    const displayed: DeviceGroupCriteriaModel[] = [tab.value.criteria, ...(tab.value.tooltipCriteria || [])]
+      .filter(c => c != null && !isControllingFunction(c.function_id));
+    const implied: DeviceGroupCriteriaModel[] = [];
+    displayed.forEach(c => implied.push(...impliedControllingCriteria(c, this.stateSourceContext(deviceGroupId, displayed), this.voidTogglePairs)));
+    return all.filter(c => !implied.some(i => this.compareCriteriaWithoutInteraction(c, i)));
+  }
+
+  private stateSourceContext(deviceGroupId: string, displayed: DeviceGroupCriteriaModel[]): StateSourceContextModel {
+    return {
+      criteria: this.getDeviceGroup(deviceGroupId)?.criteria || [],
+      configured: displayed,
+      aspects: this.aspects,
+      conceptOf: (functionId: string) => this.functions.find(f => f.id === functionId)?.concept_id,
+      // the device types are not loaded here, the dialog only needs to know whether a control is implied
+      serviceGroups: [],
+      describe: c => this.describeCriteria(c),
+      // no reportedAmbiguities: the dialog resolves this while rendering, and the widget reports them
+    };
+  }
+
+  private compareCriteriaWithoutInteraction(a: DeviceGroupCriteriaModel, b: DeviceGroupCriteriaModel): boolean {
+    return a.function_id === b.function_id && a.device_class_id === b.device_class_id && a.aspect_id === b.aspect_id;
+  }
+
   describeCriteria(criteria: DeviceGroupCriteriaModel | null): string {
     if (criteria == null) {
       return '';
     }
     switch (criteria.function_id) {
       case fpCriteriaConnectionStatus: return 'Connection Status';
-      default: return (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
+      default: {
+        const f = this.functions.find(f2 => f2.id === criteria.function_id);
+        // the display name is optional, so fall back to the name before showing the raw id
+        return [
+          f?.display_name || f?.name || criteria.function_id,
+          criteria.device_class_id === '' ? '' : this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '',
+          criteria.aspect_id === '' ? '' : this.aspects.find(a => a.id === criteria.aspect_id)?.name || '',
+        ].filter(part => part !== '').join(' ');
+      }
     }
   }
 
@@ -443,17 +516,18 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     this.draw();
   }
 
+  /** Drops the interaction, which the widget does not distinguish, and the duplicates that creates */
   private filterCriteria(d: DeviceGroupModel) {
     d.criteria?.forEach(c => c.interaction = '');
-    d.criteria = d.criteria?.filter(c => c.function_id.startsWith('urn:infai:ses:measuring-function')).filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i);
+    d.criteria = d.criteria?.filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i);
   }
 
   criteriaIsNumeric(tab: FormGroup): boolean {
-    const t = this.functionIdToType.get(tab.controls.criteria.value.function_id);
-    if (t === 'https://schema.org/Integer' || t === 'https://schema.org/Float') {
-      return true;
+    const functionId = tab.controls.criteria.value?.function_id;
+    if (functionId === undefined) {
+      return false;
     }
-    return false;
+    return isNumericCharacteristic(this.functionIdToCharacteristic.get(functionId));
   }
 
   startCropping() {

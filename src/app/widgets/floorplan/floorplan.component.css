@@ -111,6 +111,21 @@
     z-index: 999;
 }
 
+.tooltip-actions {
+    text-align: right;
+}
+
+/* a measurement that operates a control reads as a link, because that is what its value does */
+.value-link {
+    color: var(--mat-sys-primary, #3f51b5);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.value-link:hover {
+    text-decoration: none;
+}
+
 .tooltip-colorbox {
     margin-right: 0.25rem;
     height: 10px;

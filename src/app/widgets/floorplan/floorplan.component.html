@@ -43,19 +43,36 @@
                     <span class="tooltip-colorbox"
                       [ngStyle]="{'background': chartjs.tooltipContext.tooltip.labelColors[i].backgroundColor}"></span>
                   </td>
-                  <td>{{this.chartjs.tooltipDatasets[i].label}}</td>
+                  <!-- a measurement that operates a control shows its value as the button doing so -->
+                  <td colspan="2"
+                    [ngClass]="{'value-link': linkedControl(chartjs.tooltipDatasets[i].datasetIndex, widget.properties.floorplan!.placements[chartjs.tooltipDatasets[i].datasetIndex].criteria) !== undefined}"
+                    [matTooltip]="linkedControl(chartjs.tooltipDatasets[i].datasetIndex, widget.properties.floorplan!.placements[chartjs.tooltipDatasets[i].datasetIndex].criteria)?.label || ''"
+                    (click)="performLinkedControl(chartjs.tooltipDatasets[i].datasetIndex, widget.properties.floorplan!.placements[chartjs.tooltipDatasets[i].datasetIndex].criteria)">
+                    {{this.chartjs.tooltipDatasets[i].label}}
+                  </td>
                 </tr>
                 <ng-container *ngFor="let line of chartjs.tooltipCriteria">
                   <ng-container *ngIf="line.matchDsIndex === this.chartjs.tooltipDatasets[i].datasetIndex">
                     <tr *ngFor="let c of line.values">
                       <td>{{c.description}}</td>
-                      <td [colSpan]="c.control && c.control.characteristic === undefined ? 1 : 2">{{c.label}}</td>
-                      <td *ngIf="c.control && c.control.characteristic === undefined">
-                        <button mat-icon-button color="accent" class="small-icon-button"
-                          (click)="performAction(widget.properties.floorplan!.placements[line.matchDsIndex].deviceGroupId, c.control.criteria)"
-                          matTooltip="Toggle"><mat-icon>mode_off_on</mat-icon></button>
+                      <td colspan="2" [ngClass]="{'value-link': linkedControl(line.matchDsIndex, c.criteria) !== undefined}"
+                        [matTooltip]="linkedControl(line.matchDsIndex, c.criteria)?.label || ''"
+                        (click)="performLinkedControl(line.matchDsIndex, c.criteria)">{{c.label}}</td>
+                    </tr>
+                    <tr *ngFor="let control of compactControls(line.matchDsIndex)">
+                      <td>{{control.label}}</td>
+                      <td colspan="2">
+                        <senergy-capability-control [control]="control" [compact]="true"
+                          (run)="performControl(line.matchDsIndex, $event)"></senergy-capability-control>
                       </td>
-                      <!-- TODO add overlay for controls with characteristic -->
+                    </tr>
+                    <tr *ngIf="needsControlDialog(line.matchDsIndex)">
+                      <td colspan="3" class="tooltip-actions">
+                        <button mat-icon-button color="accent" class="small-icon-button"
+                          (click)="openControlDialog(line.matchDsIndex)" matTooltip="Controls">
+                          <mat-icon>tune</mat-icon>
+                        </button>
+                      </td>
                     </tr>
                   </ng-container>
                 </ng-container>
@@ -68,11 +85,16 @@
           <tr *ngFor="let row of unplacedRows">
             <td><mat-icon [style.color]="row.color" class="unplaced-icon">{{row.icon}}</mat-icon></td>
             <td class="unplaced-alias">{{row.alias}}</td>
-            <td class="unplaced-value">{{row.value}}</td>
+            <td class="unplaced-value"
+              [ngClass]="{'value-link': linkedControl(row.index, widget.properties.floorplan!.placements[row.index].criteria) !== undefined}"
+              [matTooltip]="linkedControl(row.index, widget.properties.floorplan!.placements[row.index].criteria)?.label || ''"
+              (click)="performLinkedControl(row.index, widget.properties.floorplan!.placements[row.index].criteria)">{{row.value}}</td>
             <td class="unplaced-action">
-              <button *ngIf="hasAction(row.index)" mat-mini-fab color="accent"
-                (click)="performRowAction(row.index)" matTooltip="Toggle">
-                <mat-icon>mode_off_on</mat-icon>
+              <senergy-capability-control *ngFor="let control of compactControls(row.index)" [control]="control"
+                [compact]="true" (run)="performControl(row.index, $event)"></senergy-capability-control>
+              <button *ngIf="needsControlDialog(row.index)" mat-icon-button color="accent" class="small-icon-button"
+                (click)="openControlDialog(row.index)" matTooltip="Controls">
+                <mat-icon>tune</mat-icon>
               </button>
             </td>
           </tr>

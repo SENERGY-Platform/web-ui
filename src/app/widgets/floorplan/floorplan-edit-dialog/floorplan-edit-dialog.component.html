@@ -112,7 +112,7 @@
             <mtx-select required formControlName="criteria" [hideSelected]="false" closeOnSelect virtualScroll="true"
               placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria"
               appendTo=".ng-select-anchor">
-              <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
+              <mtx-option *ngFor="let criteria of getMeasuringCriteria(tab.value.deviceGroupId)"
                 [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
               <mtx-option *ngFor="let criteria of defaultCriteria"
                 [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
@@ -120,15 +120,19 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" color="accent" style="display: flex;">
-            <mat-label>Tooltip Criteria</mat-label>
+            <mat-label>Tooltip Criteria and Controls</mat-label>
             <mtx-select formControlName="tooltipCriteria" [hideSelected]="false" virtualScroll="true"
               placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria" appendTo=".ng-select-anchor"
               multiple closeOnSelect="false">
               <mtx-option *ngFor="let criteria of defaultCriteria"
                 [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
-              <mtx-option *ngFor="let criteria of getDeviceGroup(tab.value.deviceGroupId)?.criteria || []"
+              <mtx-option *ngFor="let criteria of getMeasuringCriteria(tab.value.deviceGroupId)"
+                [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
+              <mtx-option *ngFor="let criteria of getSelectableControllingCriteria(tab)"
                 [value]="criteria">{{describeCriteria(criteria)}}</mtx-option>
             </mtx-select>
+            <mat-hint>A measurement that can also be set acts as its own control, the remaining controls
+              can be added here</mat-hint>
           </mat-form-field>
 
           <table style="width: 100%;">

@@ -19,9 +19,12 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { of } from 'rxjs';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { DeviceGroupCriteriaModel, DeviceGroupModel } from '../../../modules/devices/device-groups/shared/device-groups.model';
 import { DeviceGroupsService } from '../../../modules/devices/device-groups/shared/device-groups.service';
+import { DeviceTypeFunctionModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import { ConceptsService } from '../../../modules/metadata/concepts/shared/concepts.service';
 import { DeviceClassesService } from '../../../modules/metadata/device-classes/shared/device-classes.service';
 import { FunctionsService } from '../../../modules/metadata/functions/shared/functions.service';
@@ -30,6 +33,8 @@ import { FloorplanEditDialogComponent } from './floorplan-edit-dialog.component'
 describe('FloorplanEditDialogComponent', () => {
     let component: FloorplanEditDialogComponent;
     let fixture: ComponentFixture<FloorplanEditDialogComponent>;
+    const deviceGroupsSpy: Spy<DeviceGroupsService> = createSpyFromClass<DeviceGroupsService>(DeviceGroupsService);
+    const conceptsSpy: Spy<ConceptsService> = createSpyFromClass<ConceptsService>(ConceptsService);
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
@@ -41,10 +46,10 @@ describe('FloorplanEditDialogComponent', () => {
                 { provide: MAT_DIALOG_DATA, useValue: { widgetId: 'widgetId', dashboardId: 'dashboardId', aspectRatio: 1 } },
                 { provide: DashboardService, useValue: createSpyFromClass<DashboardService>(DashboardService) },
                 { provide: ErrorHandlerService, useValue: createSpyFromClass<ErrorHandlerService>(ErrorHandlerService) },
-                { provide: DeviceGroupsService, useValue: createSpyFromClass<DeviceGroupsService>(DeviceGroupsService) },
+                { provide: DeviceGroupsService, useValue: deviceGroupsSpy },
                 { provide: FunctionsService, useValue: createSpyFromClass<FunctionsService>(FunctionsService) },
                 { provide: DeviceClassesService, useValue: createSpyFromClass<DeviceClassesService>(DeviceClassesService) },
-                { provide: ConceptsService, useValue: createSpyFromClass<ConceptsService>(ConceptsService) },
+                { provide: ConceptsService, useValue: conceptsSpy },
             ],
         }).compileComponents();
     }));
@@ -94,5 +99,56 @@ describe('FloorplanEditDialogComponent', () => {
         expect(tab.value.alias).toBe('Kitchen');
         expect(tab.value.showAlias).toBeTrue();
         expect(tab.value.showAliasWhenZoomed).toBeTrue();
+    });
+
+    describe('selectable controls', () => {
+        const setPosition = 'urn:infai:ses:controlling-function:set-position';
+        const getPosition = 'urn:infai:ses:measuring-function:get-position';
+        const setColor = 'urn:infai:ses:controlling-function:set-color';
+
+        const criteria = (functionId: string): DeviceGroupCriteriaModel =>
+            ({ function_id: functionId, aspect_id: 'room', device_class_id: 'curtain', interaction: '' });
+
+        const fn = (id: string, conceptId: string): DeviceTypeFunctionModel =>
+            ({ id, name: id, display_name: id, description: '', rdf_type: '', concept_id: conceptId });
+
+        beforeEach(() => {
+            deviceGroupsSpy.getFunctionListByIds.and.returnValue(of([]));
+            conceptsSpy.getConceptsWithCharacteristics.and.returnValue(of({ result: [], total: 0 }));
+            component.deviceGroups = [{
+                id: 'deviceGroupId',
+                criteria: [criteria(getPosition), criteria(setPosition), criteria(setColor)],
+            } as DeviceGroupModel];
+            component.functions = [fn(getPosition, 'position'), fn(setPosition, 'position'), fn(setColor, 'color')];
+            component.aspects = [{
+                id: 'room', name: 'Room', root_id: 'room', parent_id: '', child_ids: [], ancestor_ids: [], descendent_ids: [],
+            }];
+        });
+
+        const tabWith = (value: any) => {
+            component.addNewPlacement();
+            const tab = component.form.controls.placements.at(0);
+            tab.patchValue({ deviceGroupId: 'deviceGroupId', ...value });
+            return tab;
+        };
+
+        it('offers every control of the group while no measurement is displayed', () => {
+            const tab = tabWith({});
+
+            expect(component.getSelectableControllingCriteria(tab).map(c => c.function_id)).toEqual([setPosition, setColor]);
+        });
+
+        it('leaves out the control a displayed measurement already gives access to', () => {
+            // the widget operates that one through the value it shows for the measurement
+            const tab = tabWith({ criteria: criteria(getPosition) });
+
+            expect(component.getSelectableControllingCriteria(tab).map(c => c.function_id)).toEqual([setColor]);
+        });
+
+        it('leaves out the control of a measurement selected for the tooltip', () => {
+            const tab = tabWith({ tooltipCriteria: [criteria(getPosition)] });
+
+            expect(component.getSelectableControllingCriteria(tab).map(c => c.function_id)).toEqual([setColor]);
+        });
     });
 });

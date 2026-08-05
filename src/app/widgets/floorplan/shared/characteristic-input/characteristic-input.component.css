@@ -1,0 +1,73 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.characteristic-input {
+    width: 100%;
+}
+
+.full-width {
+    display: flex;
+}
+
+.slider-row,
+.buttons-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* the value indicator of a discrete slider reaches 28px above it and would cover whatever sits there */
+.slider-row {
+    padding-top: 1.75rem;
+}
+
+.slider-row mat-slider {
+    flex-grow: 1;
+    min-width: 6rem;
+}
+
+.buttons-row {
+    flex-wrap: wrap;
+}
+
+.input-label {
+    white-space: nowrap;
+}
+
+.input-value {
+    white-space: nowrap;
+    text-align: right;
+    min-width: 3rem;
+}
+
+/* the picked option of a button row, mat-stroked-button keeps the layout stable while it is highlighted */
+.selected-value {
+    background: var(--mat-sys-secondary-container, rgba(0, 0, 0, .12));
+    font-weight: bold;
+}
+
+.nested {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-left: 0.5rem;
+    border-left: 1px solid rgba(0, 0, 0, .12);
+}
+
+.list-entry {
+    display: flex;
+    align-items: center;
+}

@@ -21,7 +21,34 @@ import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
 import { map, Observable, Subscription, of, forkJoin, concatMap, delay } from 'rxjs';
-import { CriteriaAndBaseCharacteristicModel, DeviceGroupWithValueModel, fpCriteriaConnectionStatus, image, isPlaced, migrateColoring, TooltipCriteria } from './shared/floorplan.model';
+import {
+  aspectDistance,
+  controlIcon,
+  controlState,
+  defaultVoidTogglePairs,
+  DeviceGroupCriteriaWithValueModel,
+  DeviceGroupWithValueModel,
+  findStateSource,
+  impliedControllingCriteria,
+  FloorplanControlInput,
+  FloorplanControlModel,
+  FloorplanWidgetCapabilityModel,
+  fpCriteriaConnectionStatus,
+  image,
+  isControllingFunction,
+  isOneClickControl,
+  isPlaced,
+  mergeVoidToggles,
+  migrateColoring,
+  needsServiceGroups,
+  readCommands,
+  resolveControlInput,
+  ServiceGroupFunctionModel,
+  serviceGroupFunctions,
+  StateSourceContextModel,
+  TooltipCriteria,
+  VoidTogglePair,
+} from './shared/floorplan.model';
 import { DeviceCommandModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
 import { Point } from '@angular/cdk/drag-drop';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
@@ -32,10 +59,10 @@ import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concep
 import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { DeviceTypeAspectNodeModel, DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeCharacteristicsModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
-import { environment } from '../../../environments/environment';
-import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { ConnectionHistoryDialogComponent } from '../shared/connection-history-dialog/connection-history-dialog.component';
+import { FloorplanControlDialogComponent, FloorplanControlDialogData } from './floorplan-control-dialog/floorplan-control-dialog.component';
+import { CapabilityCommandModel } from './shared/capability-control/capability-control.component';
 
 @Component({
   selector: 'senergy-floorplan',
@@ -59,12 +86,22 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   img: HTMLImageElement | undefined;
   draws = 0;
   functionIdToUnit = new Map<string, string>();
+  /** base characteristic of the function's concept, undefined for functions without input */
+  functionIdToCharacteristic = new Map<string, DeviceTypeCharacteristicsModel | undefined>();
   deviceGroups: DeviceGroupWithValueModel[] = [];
   aspects: DeviceTypeAspectNodeModel[] = [];
   functions: DeviceTypeFunctionModel[] = [];
   deviceClasses: DeviceTypeDeviceClassModel[] = [];
-  concepts: ConceptsCharacteristicsModel[] = [];
   unplacedRows: { index: number; alias: string; icon: string; color: string; value: string }[] = [];
+  /** the controlling functions of each placement, by the same index as the datasets */
+  controls: FloorplanControlModel[][] = [];
+  /** functions per service group, per device type, of a device group - only loaded when it is needed */
+  deviceGroupServiceGroups = new Map<string, ServiceGroupFunctionModel[][]>();
+  /** controls are resolved on every redraw, so an ambiguity is only reported the first time */
+  reportedAmbiguities = new Set<string>();
+
+  /** function triples that read and switch a state without ever taking an input */
+  voidTogglePairs: VoidTogglePair[] = defaultVoidTogglePairs();
 
   chartjs: {
     options: ChartConfiguration['options'];
@@ -103,9 +140,12 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.chartjs.tooltipCriteria = [];
                 this.chartjs.tooltipDatasets.forEach(x => {
                   const tc: TooltipCriteria = { matchDsIndex: x.datasetIndex, values: [] };
-                  const deviceGroup = this.deviceGroups.find(dg => dg.id === this.widget.properties.floorplan?.placements[x.datasetIndex].deviceGroupId);
                   const placement = this.widget.properties.floorplan?.placements[x.datasetIndex];
                   placement?.tooltipCriteria?.forEach(c => {
+                    if (isControllingFunction(c.function_id)) {
+                      // controlling criteria have no value to display, they are rendered as controls
+                      return;
+                    }
                     if (this.compareCriteriaWithoutInteraction(placement.criteria, c)) {
                       // This criteria is selected for the placement, do not show again in tooltip
                       return;
@@ -124,23 +164,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
                     if (this.functionIdToUnit.has(c.function_id)) {
                       label += ' ' + this.functionIdToUnit.get(c.function_id);
                     }
-
-                    const relatedControllingCriteria = this.filterRelatedControllingCriteria(c, deviceGroup?.criteria || [], c.value.message);
-                    let control: {
-                      characteristic?: DeviceTypeCharacteristicsModel,
-                      criteria: DeviceGroupCriteriaModel,
-                    } | undefined;
-                    if (relatedControllingCriteria.length === 1) {
-                      const conceptId = this.functions.find(f => f.id === relatedControllingCriteria[0].function_id)?.concept_id;
-                      const concept = this.concepts.find(concept2 => concept2.id === conceptId);
-                      control = {
-                        characteristic: concept?.characteristics.find(char => char.id === concept.base_characteristic_id),
-                        criteria: relatedControllingCriteria[0],
-                      };
-                    } else if (relatedControllingCriteria.length > 1) {
-                      console.warn('Floorplan: Found multiple controlling criteria, please check device type');
-                    }
-                    tc.values.push({ label, description: this.describeCriteria(c), control });
+                    tc.values.push({ label, description: this.describeCriteria(c), criteria: c });
                   });
                   this.chartjs.tooltipCriteria.push(tc);
                 });
@@ -148,9 +172,14 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
               }
             },
             external: (context) => {
-              if (context.tooltip.dataPoints !== undefined && context.tooltip.dataPoints.length > 0) {
-                context.tooltip.title = context.tooltip.dataPoints.map(x => this.widget.properties.floorplan?.placements[x.datasetIndex].alias || '');
+              if (context.tooltip.dataPoints === undefined || context.tooltip.dataPoints.length === 0) {
+                // chart.js clears the tooltip as soon as the pointer sits on the tooltip instead of the
+                // dot. Taking that over would empty the tooltip, hand the pointer back to the canvas and
+                // show it again - the loop that makes the widget flicker. The last tooltip stays instead,
+                // until the pointer leaves the widget or it is closed.
+                return;
               }
+              context.tooltip.title = context.tooltip.dataPoints.map(x => this.widget.properties.floorplan?.placements[x.datasetIndex].alias || '');
               this.chartjs.tooltipContext = context;
               this.chartjs.tooltipDisplay = 'initial';
               this.cd.detectChanges();
@@ -359,8 +388,8 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     const obs: Observable<unknown>[] = [];
     obs.push(this.deviceGroupsService.getAspectListByIds(undefined).pipe(map(a => this.aspects = a)));
     obs.push(this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').pipe(map(c => this.deviceClasses = c.result)));
-    obs.push(this.refresh());
-    forkJoin(obs).subscribe(_ => {
+    // the aspects have to be known before the first refresh, it pairs the criteria along the aspect tree
+    forkJoin(obs).pipe(concatMap(_ => this.refresh())).subscribe(_ => {
       this.draw();
       this.ready = true;
     });
@@ -403,6 +432,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     const showValue: boolean[] = [];
     const showValueWhenZoomed: boolean[] = [];
     const icons: string[] = [];
+    const controls: FloorplanControlModel[][] = [];
     const unplacedRows: { index: number; alias: string; icon: string; color: string; value: string }[] = [];
     this.widget.properties.floorplan?.placements.forEach((p, i) => {
       if (this.widget.properties.floorplan === undefined || this.widget.properties.floorplan.placements === null || this.img === undefined) {
@@ -460,6 +490,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       icons[i] = icon;
       showValueWhenZoomed[i] = zoom;
       showValue[i] = notZoom;
+      controls[i] = this.resolveControls(p);
       if (!isPlaced(p)) {
         // keep the dataset to preserve index alignment with the placements, but draw nothing
         datasets[i] = { data: [], label, backgroundColor: color };
@@ -471,6 +502,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color };
     });
     this.unplacedRows = unplacedRows;
+    this.controls = controls;
     this.chartjs.data = { datasets };
     this.chartjs.icons = icons;
     this.chartjs.showValueWhenZoomed = showValueWhenZoomed;
@@ -491,46 +523,28 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.refreshing = true;
     this.img = image(this.widget.properties);
-    const commands: DeviceCommandModel[] = [];
-    const idsToCheckOnline: string[] = [];
+    let commands: DeviceCommandModel[] = [];
+    let idsToCheckOnline: string[] = [];
 
-    return this.loadMissingDeviceGroups().pipe(concatMap(_ => {
+    return this.loadMissingDeviceGroups().pipe(
+      concatMap(_ => this.loadMissingFunctionInfo()),
+      concatMap(_ => this.loadMissingServiceGroups()),
+      concatMap(_ => {
       if (this.widget.properties.floorplan === undefined) {
         return of(null);
       }
 
-      this.widget.properties.floorplan.placements.forEach(p => {
-        p.tooltipCriteria?.forEach(c2 => {
-          if (c2.function_id === fpCriteriaConnectionStatus) {
-              idsToCheckOnline.push(p.deviceGroupId || '');
-          } else {
-          commands.push({
-            group_id: p.deviceGroupId || undefined,
-            function_id: c2.function_id,
-            aspect_id: c2.aspect_id,
-            device_class_id: c2.device_class_id,
-          });
-        }
-        });
-        if (p.criteria.function_id === fpCriteriaConnectionStatus) {
-          idsToCheckOnline.push(p.deviceGroupId || '');
-        } else {
-        commands.push({
-          group_id: p.deviceGroupId || undefined,
-          function_id: p.criteria.function_id,
-          aspect_id: p.criteria.aspect_id,
-          device_class_id: p.criteria.device_class_id,
-        });
-      }
-      });
+      const reads = readCommands(this.widget.properties.floorplan.placements, this.stateSources());
+      commands = reads.commands;
+      idsToCheckOnline = reads.onlineDeviceGroupIds;
       const o: Observable<unknown>[] = [];
       if (commands.length > 0) {
-        o?.push(this.loadMissingFunctionInfo().pipe(concatMap(_1 => this.deviceCommandService.runCommands(commands, true)), map(res => {
+        o?.push(this.deviceCommandService.runCommands(commands, true).pipe(map(res => {
           commands.forEach((com, i) => {
-            const criteria = this.deviceGroups.find(dg => dg.id === com.group_id)?.criteria?.find(crit => this.compareCriteriaWithoutInteraction(crit, com as DeviceGroupCriteriaModel));
-            if (criteria !== undefined) {
-              criteria.value = res[i];
-            }
+            // criteria differing only by interaction all report the same value
+            this.deviceGroups.find(dg => dg.id === com.group_id)?.criteria
+              ?.filter(crit => this.compareCriteriaWithoutInteraction(crit, com as DeviceGroupCriteriaModel))
+              .forEach(crit => crit.value = res[i]);
 
             this.widget.properties.floorplan?.placements.forEach(p => {
               if (p.deviceGroupId !== com.group_id) {
@@ -551,8 +565,6 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
         })));
       } else {
         o.push(of(null));
-        this.draw();
-        this.refreshing = false;
       }
       if (idsToCheckOnline.length > 0) {
         o.push(this.deviceInstancesService.getCurrentDeviceConnectionStatusMap(idsToCheckOnline, []).pipe(map(statusMap => {
@@ -585,6 +597,12 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
         this.cd.detectChanges();
       }));
     }));
+  }
+
+  /** Names a function by its display name, falling back to its name before showing the raw id */
+  private describeFunction(functionId: string): string {
+    const f = this.functions.find(f2 => f2.id === functionId);
+    return f?.display_name || f?.name || functionId;
   }
 
   edit() {
@@ -648,36 +666,37 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
 
   loadMissingFunctionInfo(): Observable<null> {
     const obs: Observable<any>[] = [of(null)];
-    let functionIds = this.widget.properties.floorplan?.placements.map(p => p.criteria.function_id) || [];
+    let functionIds: string[] = [];
+    this.widget.properties.floorplan?.placements.forEach(p => {
+      functionIds.push(p.criteria.function_id);
+      functionIds.push(...(p.tooltipCriteria || []).map(c => c.function_id));
+    });
     this.deviceGroups.forEach(d => {
       if (d.criteria === undefined) {
         return;
       }
       functionIds.push(...d.criteria.map(c => c.function_id));
     });
-    functionIds = functionIds.filter(fId => !this.functionIdToUnit.has(fId));
-    if (functionIds !== undefined && functionIds?.length > 0) {
+    functionIds = functionIds
+      // the connection status is no real function, asking for it can fail the whole query
+      .filter(fId => fId !== fpCriteriaConnectionStatus)
+      .filter(fId => !this.functionIdToUnit.has(fId))
+      .filter((v, i, a) => a.indexOf(v) === i);
+    if (functionIds.length > 0) {
+      // remember the ids that stay unresolved as well, so they are not requested on every refresh
+      functionIds.forEach(fId => this.functionIdToUnit.set(fId, ''));
       obs.push(this.deviceGroupsService.getFunctionListByIds(functionIds).pipe(
         concatMap(functions => {
           this.functions.push(...functions);
-          return this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) }).pipe(map(concepts => {
-            this.concepts.push(...(concepts.result));
-            return { concepts, functions };
-          }));
+          return this.conceptsService.getConceptsWithCharacteristics({ ids: functions.map(f => f.concept_id) })
+            .pipe(map(concepts => ({ concepts, functions })));
         }),
         map((res) => res.functions.forEach(f => {
           const concept = res.concepts.result.find(c => f.concept_id === c.id);
-          if (concept === undefined) {
-            this.functionIdToUnit.set(f.id, '');
-            return;
-          }
-          const displayUnit = concept.characteristics.find(c => c.id === concept.base_characteristic_id)?.display_unit;
-          if (displayUnit === undefined) {
-            this.functionIdToUnit.set(f.id, '');
-            return;
-          }
-          this.functionIdToUnit.set(f.id, displayUnit);
-          return;
+          // a function without a concept takes no input and reports no unit
+          const characteristic = concept?.characteristics.find(c => c.id === concept.base_characteristic_id);
+          this.functionIdToCharacteristic.set(f.id, characteristic);
+          this.functionIdToUnit.set(f.id, characteristic?.display_unit || '');
         }),
         )));
     }
@@ -710,90 +729,306 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
+  /** Names a criteria by its function, narrowed down by whichever of device class and aspect it carries */
   describeCriteria(criteria: DeviceGroupCriteriaModel | null): string {
     if (criteria == null) {
       return '';
     }
-    return (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
+    return [
+      this.describeFunction(criteria.function_id),
+      criteria.device_class_id === '' ? '' : this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '',
+      criteria.aspect_id === '' ? '' : this.aspects.find(a => a.id === criteria.aspect_id)?.name || '',
+    ].filter(part => part !== '').join(' ');
   }
 
-  findRelatedControllingCriteria(datasetIndex: number): { criteriaAndCharacteristic: CriteriaAndBaseCharacteristicModel[]; deviceGroupId: string } {
-    const placement = this.widget.properties.floorplan?.placements[datasetIndex];
-    if (placement === undefined) {
-      return { criteriaAndCharacteristic: [], deviceGroupId: '' };
-    }
+  /** The measuring criteria a placement displays, in the order the tooltip lists them */
+  displayedCriteria(placement: FloorplanWidgetCapabilityModel): DeviceGroupCriteriaWithValueModel[] {
+    return [placement.criteria, ...(placement.tooltipCriteria || [])]
+      .filter(c => !isControllingFunction(c.function_id))
+      .filter((c, i, a) => a.findIndex(c2 => this.compareCriteriaWithoutInteraction(c, c2)) === i);
+  }
+
+  /** The controlling criteria selected for a placement on their own */
+  private selectedControllingCriteria(placement: FloorplanWidgetCapabilityModel, deviceGroup: DeviceGroupWithValueModel): DeviceGroupCriteriaModel[] {
+    return (placement.tooltipCriteria || [])
+      .filter(c => isControllingFunction(c.function_id))
+      // a criteria the group lost, e.g. because a device left it, can no longer be executed
+      .filter(c => (deviceGroup.criteria || []).some(c2 => this.compareCriteriaWithoutInteraction(c, c2)))
+      .filter((c, i, a) => a.findIndex(c2 => this.compareCriteriaWithoutInteraction(c, c2)) === i);
+  }
+
+  /**
+   * The controls of a placement. A displayed measurement that has a controlling counterpart is operated
+   * through its own value, so it brings its control along; the remaining controls are the ones selected
+   * on their own.
+   */
+  resolveControls(placement: FloorplanWidgetCapabilityModel): FloorplanControlModel[] {
     const deviceGroup = this.deviceGroups.find(dg => dg.id === placement.deviceGroupId);
     if (deviceGroup === undefined) {
-      return { criteriaAndCharacteristic: [], deviceGroupId: '' };
+      return [];
     }
-
-    const relatedControllingCriteria = this.filterRelatedControllingCriteria(placement.criteria, deviceGroup.criteria || [], placement.criteria.value?.message);
-    const criteriaAndCharacteristic = relatedControllingCriteria.map(criteria => {
-      const conceptId = this.functions.find(f => f.id === relatedControllingCriteria[0].function_id)?.concept_id;
-      const concept = this.concepts.find(concept2 => concept2.id === conceptId);
-      return { criteria, baseCharacteristic: concept?.characteristics.find(char => char.id === concept.base_characteristic_id) === undefined };
+    const controls: FloorplanControlModel[] = [];
+    this.displayedCriteria(placement).forEach(measuring => {
+      const control = this.controlVia(placement, deviceGroup, measuring);
+      if (control !== undefined) {
+        controls.push(control);
+      }
     });
-    return { criteriaAndCharacteristic, deviceGroupId: deviceGroup.id };
+    const covered = (criteria: DeviceGroupCriteriaModel) => controls.some(c =>
+      this.compareCriteriaWithoutInteraction(c.criteria, criteria) ||
+      (c.offCriteria !== undefined && this.compareCriteriaWithoutInteraction(c.offCriteria, criteria)));
+    const standalone = this.selectedControllingCriteria(placement, deviceGroup).filter(c => !covered(c));
+    return [
+      ...controls,
+      ...mergeVoidToggles(standalone.map(c => this.newControl(placement, deviceGroup, c)), this.voidTogglePairs),
+    ];
   }
 
-  /** Whether the placement can be controlled directly, i.e. by clicking its dot or its button in the table */
+  /** The control a displayed measurement gives access to, operated through the value shown for it */
+  private controlVia(placement: FloorplanWidgetCapabilityModel, deviceGroup: DeviceGroupWithValueModel, measuring: DeviceGroupCriteriaWithValueModel): FloorplanControlModel | undefined {
+    if (measuring.function_id === fpCriteriaConnectionStatus) {
+      return {
+        criteria: { function_id: fpCriteriaConnectionStatus, interaction: '', aspect_id: '', device_class_id: '' },
+        label: 'Connection Status', icon: 'history', input: FloorplanControlInput.Action, via: measuring,
+      };
+    }
+    const implied = impliedControllingCriteria(measuring, this.stateSourceContext(placement, deviceGroup), this.voidTogglePairs);
+    if (implied.length === 0) {
+      return undefined;
+    }
+    // the value shown for the measurement is the state of its control, so both always agree
+    const value = measuring.value?.status_code === 200 ? measuring.value.message : undefined;
+    const pair = this.voidTogglePairs.find(p => p.state === measuring.function_id);
+    const on = pair === undefined ? undefined : implied.find(c => c.function_id === pair.on);
+    const off = pair === undefined ? undefined : implied.find(c => c.function_id === pair.off);
+    if (on !== undefined && off !== undefined) {
+      return {
+        criteria: on, offCriteria: off, label: this.describeCriteria(measuring),
+        icon: controlIcon(FloorplanControlInput.Toggle), input: FloorplanControlInput.Toggle,
+        via: measuring, state: controlState(value, FloorplanControlInput.Toggle),
+      };
+    }
+    const criteria = implied[0];
+    const characteristic = this.functionIdToCharacteristic.get(criteria.function_id);
+    const input = resolveControlInput(characteristic);
+    return {
+      criteria,
+      label: this.describeCriteria(criteria),
+      icon: controlIcon(input),
+      input,
+      characteristic,
+      via: measuring,
+      state: controlState(value, input),
+    };
+  }
+
+  private newControl(placement: FloorplanWidgetCapabilityModel, deviceGroup: DeviceGroupWithValueModel, criteria: DeviceGroupCriteriaModel): FloorplanControlModel {
+    if (criteria.function_id === fpCriteriaConnectionStatus) {
+      return { criteria, label: 'Connection Status', icon: 'history', input: FloorplanControlInput.Action };
+    }
+    const characteristic = this.functionIdToCharacteristic.get(criteria.function_id);
+    const input = resolveControlInput(characteristic);
+    const source = this.stateSourceOf(placement, deviceGroup, criteria) as DeviceGroupCriteriaWithValueModel | undefined;
+    return {
+      criteria,
+      label: this.describeCriteria(criteria),
+      icon: controlIcon(input),
+      input,
+      characteristic,
+      state: source?.value?.status_code === 200 ? controlState(source.value.message, input) : undefined,
+    };
+  }
+
+  /** The measuring criteria of the device group reporting what the control currently is set to */
+  private stateSourceOf(placement: FloorplanWidgetCapabilityModel, deviceGroup: DeviceGroupWithValueModel, criteria: DeviceGroupCriteriaModel): DeviceGroupCriteriaModel | undefined {
+    const pair = this.voidTogglePairs.find(p => p.on === criteria.function_id || p.off === criteria.function_id);
+    if (pair !== undefined) {
+      // functions without input have no concept to pair them up, the semantic keys name their state
+      return (deviceGroup.criteria || []).find(c => c.function_id === pair.state &&
+        aspectDistance(c.aspect_id, criteria.aspect_id, this.aspects) !== undefined);
+    }
+    return findStateSource(criteria, this.stateSourceContext(placement, deviceGroup));
+  }
+
+  private stateSourceContext(placement: FloorplanWidgetCapabilityModel, deviceGroup: DeviceGroupWithValueModel): StateSourceContextModel {
+    return {
+      criteria: deviceGroup.criteria || [],
+      configured: [placement.criteria, ...(placement.tooltipCriteria || [])],
+      aspects: this.aspects,
+      conceptOf: (functionId: string) => this.functions.find(f => f.id === functionId)?.concept_id,
+      serviceGroups: this.deviceGroupServiceGroups.get(deviceGroup.id) || [],
+      serviceGroupsLoaded: this.deviceGroupServiceGroups.has(deviceGroup.id),
+      describe: c => this.describeCriteria(c),
+      reportedAmbiguities: this.reportedAmbiguities,
+    };
+  }
+
+  /**
+   * The measuring criteria the controls of every placement need, so a refresh reads them too. Controls
+   * reached through a displayed measurement need nothing, that value is read for the tooltip anyway.
+   */
+  private stateSources(): DeviceGroupCriteriaModel[][] {
+    return (this.widget.properties.floorplan?.placements || []).map(p => {
+      const deviceGroup = this.deviceGroups.find(dg => dg.id === p.deviceGroupId);
+      if (deviceGroup === undefined) {
+        return [];
+      }
+      const sources: DeviceGroupCriteriaModel[] = [];
+      this.resolveControls(p).filter(c => c.via === undefined).forEach(c => {
+        const source = this.stateSourceOf(p, deviceGroup, c.criteria);
+        if (source !== undefined) {
+          sources.push(source);
+        }
+      });
+      return sources;
+    });
+  }
+
+  /**
+   * Loads the device types behind a device group while its criteria alone cannot tell apart two measuring
+   * functions of one concept - a thermostat measuring both the room and the target temperature. Only the
+   * device type says which of them belongs to the same service group as the controlling function.
+   */
+  loadMissingServiceGroups(): Observable<null> {
+    const groupIds: string[] = [];
+    this.widget.properties.floorplan?.placements.forEach(p => {
+      const deviceGroup = this.deviceGroups.find(dg => dg.id === p.deviceGroupId);
+      if (deviceGroup === undefined || this.deviceGroupServiceGroups.has(deviceGroup.id) || groupIds.indexOf(deviceGroup.id) !== -1) {
+        return;
+      }
+      const context = this.stateSourceContext(p, deviceGroup);
+      const ambiguous = this.displayedCriteria(p).some(c => needsServiceGroups(c, context, true)) ||
+        this.selectedControllingCriteria(p, deviceGroup).some(c => needsServiceGroups(c, context, false));
+      if (ambiguous) {
+        groupIds.push(deviceGroup.id);
+      }
+    });
+    if (groupIds.length === 0) {
+      return of(null);
+    }
+    const deviceIds: string[] = [];
+    groupIds.forEach(id => deviceIds.push(...(this.deviceGroups.find(dg => dg.id === id)?.device_ids || [])));
+    const uniqueDeviceIds = deviceIds.filter((v, i, a) => a.indexOf(v) === i);
+    if (uniqueDeviceIds.length === 0) {
+      groupIds.forEach(id => this.deviceGroupServiceGroups.set(id, []));
+      return of(null);
+    }
+    return this.deviceInstancesService.getDeviceInstancesWithDeviceType({ limit: uniqueDeviceIds.length, offset: 0, deviceIds: uniqueDeviceIds }).pipe(
+      map(devices => {
+        groupIds.forEach(groupId => {
+          const group = this.deviceGroups.find(dg => dg.id === groupId);
+          const perDeviceType: ServiceGroupFunctionModel[][] = [];
+          (group?.device_ids || []).forEach(deviceId => {
+            const deviceType = devices.result.find(d => d.id === deviceId)?.device_type;
+            if (deviceType !== undefined && deviceType !== null) {
+              perDeviceType.push(serviceGroupFunctions(deviceType));
+            }
+          });
+          this.deviceGroupServiceGroups.set(groupId, perDeviceType);
+        });
+        return null;
+      }));
+  }
+
+  /** Whether clicking the dot or the table row of the placement does anything */
   hasAction(datasetIndex: number): boolean {
-    const info = this.findRelatedControllingCriteria(datasetIndex);
-    return info.criteriaAndCharacteristic.length === 1 && info.criteriaAndCharacteristic[0].characteristic === undefined;
+    return (this.controls[datasetIndex] || []).length > 0;
+  }
+
+  /**
+   * The control the displayed value of a criteria operates, which turns that value into a button. The
+   * control gets no button of its own then.
+   */
+  linkedControl(datasetIndex: number, criteria: DeviceGroupCriteriaModel | undefined): FloorplanControlModel | undefined {
+    if (criteria === undefined) {
+      return undefined;
+    }
+    return (this.controls[datasetIndex] || []).find(c => c.via !== undefined && this.compareCriteriaWithoutInteraction(c.via, criteria));
+  }
+
+  /** The controls that are not reachable through a displayed value and need a row of their own */
+  standaloneControls(datasetIndex: number): FloorplanControlModel[] {
+    return (this.controls[datasetIndex] || []).filter(c => c.via === undefined);
+  }
+
+  /** The standalone controls that fit into a tooltip or table row */
+  compactControls(datasetIndex: number): FloorplanControlModel[] {
+    return this.standaloneControls(datasetIndex).filter(c => isOneClickControl(c.input));
+  }
+
+  /** Whether a control can only be reached through the dialog, because no row can hold its input */
+  needsControlDialog(datasetIndex: number): boolean {
+    return this.standaloneControls(datasetIndex).some(c => !isOneClickControl(c.input));
   }
 
   performRowAction(datasetIndex: number) {
-    if (!this.hasAction(datasetIndex)) {
+    const controls = this.controls[datasetIndex] || [];
+    if (controls.length === 0) {
       return;
     }
-    const info = this.findRelatedControllingCriteria(datasetIndex);
-    this.performAction(info.deviceGroupId, info.criteriaAndCharacteristic[0].criteria);
-  }
-
-  filterRelatedControllingCriteria(c: DeviceGroupCriteriaModel, l: DeviceGroupCriteriaModel[], value?: any): DeviceGroupCriteriaModel[] {
-    switch (c.function_id) {
-      case fpCriteriaConnectionStatus:
-        return [{
-          function_id: fpCriteriaConnectionStatus,
-          interaction: '',
-          aspect_id: '',
-          device_class_id: '',
-        }];
-      case environment.getOnOffFunctionId:
-        let functionId;
-        let t = value;
-        if (Array.isArray(value)) {
-          value.forEach(v => t &&= v);
-        }
-        if (t) {
-          functionId = environment.setOffFunctionId;
-        } else {
-          functionId = environment.setOnFunctionId;
-        }
-        return l.filter(c2 => c2.function_id === functionId);
-      default:
-        const conceptId = this.functions.find(f => f.id === c.function_id)?.concept_id;
-        if (conceptId === undefined) {
-          return [];
-        }
-        return l.filter(c2 => {
-          if (!c2.function_id.startsWith('urn:infai:ses:controlling-function')) {
-            return false;
-          }
-          if (c2.aspect_id !== c.aspect_id) {
-            return false;
-          }
-          const f = this.functions.find(f2 => f2.id === c2.function_id);
-          return f?.concept_id === conceptId;
-        });
+    if (controls.length > 1) {
+      this.openControlDialog(datasetIndex);
+      return;
     }
+    this.performOrAsk(datasetIndex, controls[0]);
   }
 
-  performAction(deviceGroupId: string | null, criteria: DeviceGroupCriteriaModel, value?: any) {
+  /** Operates the control the displayed value of a criteria stands for, if it has one */
+  performLinkedControl(datasetIndex: number, criteria: DeviceGroupCriteriaModel | undefined) {
+    const control = this.linkedControl(datasetIndex, criteria);
+    if (control === undefined) {
+      return;
+    }
+    this.performOrAsk(datasetIndex, control);
+  }
+
+  /** Runs a control right away, or asks for its value in the dialog when it takes one */
+  performOrAsk(datasetIndex: number, control: FloorplanControlModel) {
+    if (!isOneClickControl(control.input)) {
+      this.openControlDialog(datasetIndex);
+      return;
+    }
+    if (control.input === FloorplanControlInput.Toggle) {
+      // one click has to flip the state, so it runs the opposite of what the state reports
+      this.performControl(datasetIndex, { criteria: control.state ? control.offCriteria || control.criteria : control.criteria });
+      return;
+    }
+    if (control.input === FloorplanControlInput.Switch) {
+      this.performControl(datasetIndex, { criteria: control.criteria, value: !control.state });
+      return;
+    }
+    this.performControl(datasetIndex, { criteria: control.criteria });
+  }
+
+  openControlDialog(datasetIndex: number) {
+    const placement = this.widget.properties.floorplan?.placements[datasetIndex];
+    if (placement === undefined) {
+      return;
+    }
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = false;
+    dialogConfig.data = {
+      alias: placement.alias,
+      controls: this.controls[datasetIndex] || [],
+      run: (command: CapabilityCommandModel) => this.runControl(placement.deviceGroupId, command),
+    } as FloorplanControlDialogData;
+    this.dialog.open(FloorplanControlDialogComponent, dialogConfig);
+  }
+
+  performControl(datasetIndex: number, command: CapabilityCommandModel) {
+    const placement = this.widget.properties.floorplan?.placements[datasetIndex];
+    if (placement === undefined) {
+      return;
+    }
+    this.runControl(placement.deviceGroupId, command).subscribe();
+  }
+
+  /** Runs a control and refreshes afterwards, so the new state is picked up */
+  runControl(deviceGroupId: string | null, command: CapabilityCommandModel): Observable<unknown> {
     if (deviceGroupId === null) {
-      return;
+      return of(null);
     }
-    if (criteria.function_id === fpCriteriaConnectionStatus) {
+    if (command.criteria.function_id === fpCriteriaConnectionStatus) {
       const dialogConfig = new MatDialogConfig();
       dialogConfig.width = '75vw';
       dialogConfig.disableClose = false;
@@ -801,16 +1036,17 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
         id: deviceGroupId,
       };
       this.dialog.open(ConnectionHistoryDialogComponent, dialogConfig);
-      return;
+      return of(null);
     }
-    const command: DeviceCommandModel = {
-      function_id: criteria.function_id,
+    const deviceCommand: DeviceCommandModel = {
+      function_id: command.criteria.function_id,
       group_id: deviceGroupId,
-      device_class_id: criteria.device_class_id,
-      aspect_id: criteria.aspect_id,
-      input: value,
+      device_class_id: command.criteria.device_class_id,
+      aspect_id: command.criteria.aspect_id,
+      input: command.value,
     };
-    this.deviceCommandService.runCommands([command]).pipe(delay(750), concatMap(_ => this.refresh())).subscribe();
+    // the devices need a moment before they report the new state
+    return this.deviceCommandService.runCommands([deviceCommand]).pipe(delay(750), concatMap(_ => this.refresh()));
   }
 
   closeChartjsTooltip() {

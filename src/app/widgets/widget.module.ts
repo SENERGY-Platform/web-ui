@@ -132,6 +132,9 @@ import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { FloorplanComponent } from './floorplan/floorplan.component';
 import { FloorplanEditDialogComponent } from './floorplan/floorplan-edit-dialog/floorplan-edit-dialog.component';
+import { FloorplanControlDialogComponent } from './floorplan/floorplan-control-dialog/floorplan-control-dialog.component';
+import { CapabilityControlComponent } from './floorplan/shared/capability-control/capability-control.component';
+import { CharacteristicInputComponent } from './floorplan/shared/characteristic-input/characteristic-input.component';
 import { ColorPickerComponent, ColorPickerDirective } from 'ngx-color-picker';
 import { CloseMtxSelectOnScrollDirective } from '../core/directives/close-mtx-select-on-scroll.directive';
 import { ConnectionHistoryDialogComponent } from './shared/connection-history-dialog/connection-history-dialog.component';
@@ -264,6 +267,9 @@ registerLocaleData(localeDe, 'de');
         AxisConfigComponent,
         FloorplanComponent,
         FloorplanEditDialogComponent,
+        FloorplanControlDialogComponent,
+        CapabilityControlComponent,
+        CharacteristicInputComponent,
         ConnectionHistoryDialogComponent,
     ],
     exports: [
