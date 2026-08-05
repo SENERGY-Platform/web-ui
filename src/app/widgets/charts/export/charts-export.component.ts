@@ -36,6 +36,7 @@ moment.locale('de');
 import 'chartjs-adapter-moment';
 import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
 import { findLabel, getLabelHitBoxes } from './chartjs-axis-click';
+import { bucketTimes, describeBucketGap, findBucketGaps } from './chartjs-bucket-gaps';
 
 enum DetailLevel {
     ms = 6,
@@ -329,6 +330,11 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 animation: false,
                 maintainAspectRatio: false,
                 events: ['click', 'mousemove'],
+                datasets: {
+                    // a bucket measured as 0 has no bar to draw, so give it a stub on the baseline
+                    // instead of letting it look like a bucket that has no value at all
+                    bar: { minBarLength: 2 },
+                },
                 onHover: (_, elements, chart) => {
                     const hoveredIndex = elements !== undefined && elements.length > 0 ? elements[0].datasetIndex : null;
                     this.updateDatasetHoverStyle(hoveredIndex, chart);
@@ -552,7 +558,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         if (i === 0) {
                             this.chartjs.maxDateMs = (data as Date).valueOf();
                         } else {
-                            if (data !== null && data !== 0) {
+                            // a 0 is a measured value and keeps its bucket; only a missing value is skipped
+                            if (data !== null) {
                                 datasets[i - 1].data.push({ y: data as number, x: (row[0] as Date).valueOf() });
                             }
                         }
@@ -651,6 +658,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                             );
                         });
                     }
+                    // pushed last so the markers stay on top of the grid shading
+                    this.gapAnnotations(bucketTimes(this.chartExportData.dataTable)).forEach(a => this.chartjs.annotations?.push(a));
                     this.resizeChart();
                     this.chartExport?.draw();
                     this.cd.detectChanges();
@@ -664,6 +673,41 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             this.refreshing = false;
         }
 
+    }
+
+    /**
+     * Marks each run of buckets the query returned nothing for. On a timeseries axis a missing bucket
+     * takes up no space, so the marker goes on the boundary between the two buckets that surround it
+     * and carries the number of buckets that were skipped there.
+     */
+    private gapAnnotations(times: number[]): AnnotationOptions[] {
+        const gaps = findBucketGaps(times, this.groupTime);
+        if (gaps.length === 0) {
+            return [];
+        }
+        const markerColor = window.getComputedStyle(document.getElementsByClassName('color-lookup-warn')[0], null).getPropertyValue('color');
+        // naming every gap buries the data it is meant to qualify, so past a few only the longest is named
+        const named = gaps.length <= 3 ? gaps : [gaps.reduce((longest, gap) => (gap.count > longest.count ? gap : longest))];
+        return gaps.map(gap => ({
+            type: 'line',
+            scaleID: 'x',
+            value: (gap.from + gap.to) / 2,
+            borderColor: markerColor,
+            borderWidth: 2,
+            borderDash: [3, 3],
+            label: {
+                content: describeBucketGap(gap, this.groupTime),
+                display: named.includes(gap),
+                position: 'start',
+                // runs along the line, so the text cannot overflow the chart sideways
+                rotation: 90,
+                // the dashed line carries the signal; the text stays in the ink the axis labels use
+                color: Chart.defaults.color as string,
+                backgroundColor: 'rgba(255,255,255,0.8)',
+                font: { size: 11, weight: 'normal' },
+                padding: 4,
+            },
+        } as AnnotationOptions));
     }
 
     setupZoomChartSettings(lastOverride?: string) {
