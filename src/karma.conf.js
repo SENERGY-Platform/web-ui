@@ -29,9 +29,10 @@ module.exports = function (config) {
       require('karma-mocha-reporter'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
-    proxies: {
-      '/src/img/': '/src/img/'
-    },
+    // No proxy for /src/img/: it is served from the test target's assets in
+    // angular.json, the same way the build target serves it. Mapping the path to
+    // itself here made karma proxy to itself, so every image request the app makes
+    // ended as a "failed to proxy ... socket hang up" warning.
     client: {
       clearContext: false // leave Jasmine Spec Runner output visible in browser
     },

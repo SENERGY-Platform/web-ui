@@ -163,6 +163,11 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
+              {
+                "glob": "**/*",
+                "input": "src/img/",
+                "output": "/src/img/"
+              },
               "src/manifest.webmanifest"
             ]
           }
