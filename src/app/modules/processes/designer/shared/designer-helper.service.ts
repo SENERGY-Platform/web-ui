@@ -44,18 +44,41 @@ export class DesignerHelperService {
         if(element.incoming) {
             for (let index = 0; index < element.incoming.length; index++) {
                 const incoming = element.incoming[index].source;
-                if (
-                    incoming.businessObject.extensionElements &&
-                    incoming.businessObject.extensionElements.values &&
-                    incoming.businessObject.extensionElements.values[0] &&
-                    incoming.businessObject.extensionElements.values[0].outputParameters
-                ) {
-                    result = result.concat(incoming.businessObject.extensionElements.values[0].outputParameters);
-                }
+                result = result.concat(this.getOwnOutputs(incoming));
                 result = result.concat(this.getIncomingOutputs(incoming, done));
             }
         }
         return result;
+    }
+
+    /**
+     * Names of the process variables that already hold a value by the time `element`
+     * is reached, so a script is never offered a variable that does not exist yet at
+     * that point in the flow.
+     *
+     * A sequence flow is the special case: its condition is evaluated once the element
+     * it leaves has finished, so that element's own outputs are available too. For
+     * everything else only strictly preceding elements count -- an element's own
+     * outputs are produced by the very step being configured, not before it.
+     */
+    getAvailableVariables(element: BpmnElement): string[] {
+        const source = element.businessObject?.$type === 'bpmn:SequenceFlow' ? element.source : undefined;
+
+        const outputs = source
+            ? this.getOwnOutputs(source).concat(this.getIncomingOutputs(source))
+            : this.getIncomingOutputs(element);
+
+        const names = outputs.map((output) => output.name).filter((name) => !!name);
+        return Array.from(new Set(names)).sort();
+    }
+
+    /** Output parameters declared on the element itself. */
+    private getOwnOutputs(element: BpmnElement): BpmnParameter[] {
+        const values = element.businessObject?.extensionElements?.values;
+        if (values && values[0] && values[0].outputParameters) {
+            return values[0].outputParameters;
+        }
+        return [];
     }
 
     checkConstraints(modeler: any): Observable<DesignerErrorModel[][]> {

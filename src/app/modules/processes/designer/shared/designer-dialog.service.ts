@@ -31,7 +31,8 @@ import {
 } from '../../../metadata/device-types-overview/shared/device-type-selection.model';
 import { TaskConfigDialogComponent } from '../dialogs/task-config-dialog/task-config-dialog.component';
 import { NotificationConfigDialogComponent } from '../dialogs/notification-config-dialog/notification-config-dialog.component';
-import { ConditionalEventEditModel } from './designer-dialog.model';
+import { ConditionalEventEditModel, ScriptEditModel } from './designer-dialog.model';
+import { ScriptEditorDialogComponent } from '../dialogs/script-editor-dialog/script-editor-dialog.component';
 import { ProcessIoDesignerInfo } from '../../process-io/shared/process-io.model';
 import { ProcessIoDesignerDialogComponent } from '../dialogs/process-io-designer-dialog/process-io-designer-dialog.component';
 import { ConditionalEventDialogComponent } from '../dialogs/conditional-event-dialog/conditional-event-dialog.component';
@@ -150,6 +151,13 @@ export class DesignerDialogService {
         dialogConfig.disableClose = false;
         dialogConfig.data = { info };
         return this.dialog.open(ProcessIoDesignerDialogComponent, dialogConfig).afterClosed();
+    }
+
+    openScriptEditorDialog(script: ScriptEditModel, variables: string[]): Observable<ScriptEditModel | undefined> {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = { script, variables };
+        return this.dialog.open(ScriptEditorDialogComponent, dialogConfig).afterClosed();
     }
 
     openIncidentConfigDialog(config: ProcessIncidentsConfig) {

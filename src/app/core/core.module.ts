@@ -62,6 +62,7 @@ import { CloseMtxSelectOnScrollDirective } from './directives/close-mtx-select-o
 import { NotificationsComponent } from './components/notifications/notifications.component';
 import { FilterDialogComponent } from './components/filter-dialog/filter-dialog.component';
 import { keycloakServiceToken } from './services/keycloak-service.token';
+import { CodeEditorComponent } from './components/code-editor/code-editor.component';
 
 export { keycloakServiceToken };
 
@@ -120,6 +121,7 @@ export { keycloakServiceToken };
         MatErrorMessagesDirective,
         NotificationsComponent,
         FilterDialogComponent,
+        CodeEditorComponent,
     ],
     exports: [
         SidenavComponent,
@@ -136,6 +138,7 @@ export { keycloakServiceToken };
         FitTextComponent,
         MatErrorMessagesDirective,
         FilterDialogComponent,
+        CodeEditorComponent,
     ],
     providers: [
         {

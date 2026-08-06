@@ -40,7 +40,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DesignerErrorModel } from './shared/designer-error.model';
 import { DesignerSnackBarComponent } from './snack-bar/designer-snack-bar.component';
 import { defaultIfEmpty } from 'rxjs/operators';
-import { ConditionalEventEditModel } from './shared/designer-dialog.model';
+import { ConditionalEventEditModel, ScriptEditModel } from './shared/designer-dialog.model';
 import { defaultProcessIoDesignerConfig, ProcessIoDesignerConfig, ProcessIoDesignerInfo } from '../process-io/shared/process-io.model';
 import { ProcessIncidentsConfig } from '../incidents/shared/process-incidents.model';
 
@@ -114,6 +114,14 @@ export class ProcessDesignerComponent implements OnInit {
                                 callback(result);
                             }
                         });
+                },
+                editScript: (m: ScriptEditModel, element: BpmnElement, callback: (result: ScriptEditModel) => void) => {
+                    const variables = that.designerService.getAvailableVariables(element);
+                    that.designerDialogService.openScriptEditorDialog(m, variables).subscribe((result: ScriptEditModel | undefined) => {
+                        if (result) {
+                            callback(result);
+                        }
+                    });
                 },
                 editConditionalEvent: (m: ConditionalEventEditModel, callback: (result: ConditionalEventEditModel) => void) => {
                     that.designerDialogService

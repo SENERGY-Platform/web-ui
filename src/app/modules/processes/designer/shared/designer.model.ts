@@ -50,6 +50,8 @@ export interface BpmnElement {
     id: string;
     incoming?: BpmnElementRef[];
     businessObject: BpmnBusinessObject;
+    /** Set on a bpmn:SequenceFlow: the element it leaves. Sequence flows have no `incoming`. */
+    source?: BpmnElement;
 }
 
 interface BpmnParentElement {

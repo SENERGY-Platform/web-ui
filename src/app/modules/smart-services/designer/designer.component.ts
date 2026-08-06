@@ -46,6 +46,9 @@ import {
 } from './dialog/edit-smart-service-json-extraction-dialog/edit-smart-service-json-extraction-dialog.component';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
 import { SmartServiceExtendedReleaseModel } from '../releases/shared/release.model';
+import { ScriptEditModel } from '../../processes/designer/shared/designer-dialog.model';
+import { DesignerDialogService } from '../../processes/designer/shared/designer-dialog.service';
+import { DesignerHelperService } from '../../processes/designer/shared/designer-helper.service';
 
 @Component({
     selector: 'senergy-smart-service-designer',
@@ -69,12 +72,15 @@ export class SmartServiceDesignerComponent implements OnInit {
         private snackBar: MatSnackBar,
         private dialogService: DialogsService,
         private router: Router,
-        private dialog: MatDialog
+        private dialog: MatDialog,
+        protected designerService: DesignerHelperService,
+        protected designerDialogService: DesignerDialogService
     ) {}
 
     ngOnInit() {
         setTimeout(() => {
             const dialog = this.dialog;
+            const that = this;
             this.id = this.route.snapshot.paramMap.get('id') || '';
             this.releaseId =this.route.snapshot.paramMap.get('releaseId') || '';
 
@@ -129,6 +135,22 @@ export class SmartServiceDesignerComponent implements OnInit {
                     editDialogRef.afterClosed().subscribe((value: SmartServiceTaskInputOutputDescription) => {
                         if (value) {
                             callback(value);
+                        }
+                    });
+                },
+
+                /*
+                 * Sequence flow conditions and the other camunda script fields, which
+                 * decide which way a smart service proceeds. The dialog is the process
+                 * designer's -- same panel field, same engine -- and the available
+                 * variables come from the same flow walk, which only relies on the
+                 * camunda inputOutput shape that both designers use.
+                 */
+                editScript: (m: ScriptEditModel, element: BpmnElement, callback: (result: ScriptEditModel) => void) => {
+                    const variables = that.designerService.getAvailableVariables(element);
+                    that.designerDialogService.openScriptEditorDialog(m, variables).subscribe((result: ScriptEditModel | undefined) => {
+                        if (result) {
+                            callback(result);
                         }
                     });
                 },

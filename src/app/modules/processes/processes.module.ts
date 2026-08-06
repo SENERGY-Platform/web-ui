@@ -76,6 +76,7 @@ import {ShortKeyPipe} from './process-io/shared/short-key.pipe';
 import {ProcessIoVariableEditDialogComponent} from './process-io/dialogs/process-io-variable-edit-dialog.component';
 import {ConditionalEventDialogComponent} from './designer/dialogs/conditional-event-dialog/conditional-event-dialog.component';
 import { IncidentDialogComponent } from './designer/dialogs/incident-dialog/incident-dialog.component';
+import { ScriptEditorDialogComponent } from './designer/dialogs/script-editor-dialog/script-editor-dialog.component';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 import { SortComponent } from 'src/app/core/components/sort/sort.component';
@@ -197,6 +198,7 @@ const processIo: Route = {
         ShortKeyPipe,
         ProcessIoVariableEditDialogComponent,
         IncidentDialogComponent,
+        ScriptEditorDialogComponent,
         SortComponent,
     ],
 })

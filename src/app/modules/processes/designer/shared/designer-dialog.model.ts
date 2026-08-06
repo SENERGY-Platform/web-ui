@@ -21,6 +21,17 @@ export interface FilterCriteriaDialogResultModel {
     label: string;
 }
 
+/**
+ * A script held by a bpmn element -- a sequence flow condition, a script task or a
+ * listener. `scriptFormat` is the value of the panel's own Script Format field and
+ * is only used to pick the highlighting; it is not written back.
+ */
+export interface ScriptEditModel {
+    script: string;
+    scriptFormat: string;
+    label: string;
+}
+
 export interface ConditionalEventEditModel {
     aspect: string;
     iotfunction: string;

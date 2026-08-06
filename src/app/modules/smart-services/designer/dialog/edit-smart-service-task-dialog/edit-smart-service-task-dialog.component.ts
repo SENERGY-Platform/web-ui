@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Inject, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     SmartServiceTaskInputDescription,
@@ -54,13 +54,14 @@ import { DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel } from '../../../
 import { FunctionsService } from '../../../../metadata/functions/shared/functions.service';
 import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceClassesService } from '../../../../metadata/device-classes/shared/device-classes.service';
-import { edit as barceEdit, acequire as braceAcequire } from 'brace';
-import 'brace/mode/javascript';
-import 'brace/mode/json';
-import 'brace/ext/language_tools';
-import { completer } from './ace-code-completer';
+import { CodeEditorCompletion, CodeEditorCompletionSource } from '../../../../../core/components/code-editor/code-editor-completion';
+import { smartServiceCompletions } from './smart-service-completions';
+import { smartServiceScriptEnvTypes } from './scriptenv-types';
+import {
+    CodeEditorScriptEnvironment,
+    gojaScriptEnvironment,
+} from '../../../../../core/components/code-editor/code-editor-environment';
 import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
-// import * as langTools from 'brace/ext/language_tools';
 
 interface Criteria {
     interaction?: string;
@@ -85,7 +86,7 @@ interface DeviceTypeAspectNodeModelWithRootName extends DeviceTypeAspectNodeMode
     templateUrl: './edit-smart-service-task-dialog.component.html',
     styleUrls: ['./edit-smart-service-task-dialog.component.css'],
 })
-export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
+export class EditSmartServiceTaskDialogComponent implements OnInit {
     init: SmartServiceTaskDescription;
     result: SmartServiceTaskDescription;
     tabs: string[] = ['process_deployment', 'process_deployment_start', 'analytics', 'export', 'import', 'info', 'device_repository', 'watcher'];
@@ -164,10 +165,14 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
             }
         };
 
-    @ViewChild('preScriptEditor') private preScriptEditor!: ElementRef<HTMLElement>;
-    @ViewChild('postScriptEditor') private postScriptEditor!: ElementRef<HTMLElement>;
-
-    @ViewChild('infoModuleDataEditor') private infoModuleDataEditor!: ElementRef<HTMLElement>;
+    /*
+     * Script and module-data contents. These hold the value rather than reading it
+     * back out of the editor on save, so that a script survives even when its panel
+     * was never opened and no editor was ever created for it.
+     */
+    preScript = '';
+    postScript = '';
+    infoModuleData = '';
 
 
     constructor(
@@ -230,37 +235,92 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
         }
     }
 
-    ngAfterViewInit(): void {
-        const that = this;
-        const langTools = braceAcequire('ace/ext/language_tools');
-        if (langTools) {
-            langTools.setCompleters([langTools.snippetCompleter, langTools.keyWordCompleter, {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                getCompletions(_: any, session: any, pos: any, ___: any, callback: any) {
-                    switch (session.$modeId) {
-                        case 'ace/mode/json':
-                            that.setAceJsonCompleter(callback);
-                            return;
-                        case 'ace/mode/javascript':
-                            that.setAceJsCompleter(session, pos, callback);
-                            return;
-                        default:
-                            console.error('unknown ace editor mode:', session.$modeId);
-                    }
-
-
-                }
-            }]);
-        } else {
-            console.error('unable to load language_tools');
-        }
-        this.setInfoModuleDataAceEditor(this.infoModuleDataEditor);
-        this.setAceJsEditor(this.preScriptEditor, 'prescript');
-        this.setAceJsEditor(this.postScriptEditor, 'postscript');
+    ngOnInit(): void {
+        this.infoModuleData = this.getModuleDataFromInputs(this.result.inputs);
+        this.preScript = this.getChunkedDataFromInputs('prescript', this.result.inputs, '');
+        this.postScript = this.getChunkedDataFromInputs('postscript', this.result.inputs, '');
     }
 
-    private setAceJsonCompleter(callback: any) {
-        let completers = ([] as BpmnParameterWithLabel[])
+    /**
+     * Pre/postscripts run in the smart-service workers' goja runtime, with the
+     * scriptenv namespaces injected. Declaring those to the editor is also what keeps
+     * the diagnostics honest: without them every deviceRepo call reads as undefined.
+     */
+    readonly scriptEnvironment: CodeEditorScriptEnvironment = {
+        ...gojaScriptEnvironment,
+        extraLibs: [{ filePath: 'ts:senergy-scriptenv.d.ts', content: smartServiceScriptEnvTypes }],
+    };
+
+    /*
+     * Completions for the javascript editors: the generated ones from
+     * smart-service-module-worker-lib, followed by the ids of the metadata this
+     * dialog has loaded. Declared as an arrow property so it can be handed to the
+     * editor component as an input without losing `this`.
+     *
+     * The metadata lists are filled by requests started in the constructor, so this
+     * is evaluated per keystroke rather than built once -- whatever has arrived by
+     * then is offered, which is how the ace version behaved too.
+     */
+    jsCompletions: CodeEditorCompletionSource = (request) => {
+        const completions: CodeEditorCompletion[] = [...smartServiceCompletions(request)];
+
+        completions.push({
+            caption: 'filter criteria struct',
+            value: 'var criteria = ' + JSON.stringify({
+                aspect_id: '',
+                device_class_id: '',
+                function_id: '',
+                interaction: ''
+            } as Criteria) + '/*remove unused fields*/',
+            meta: 'static'
+        });
+
+        this.functions.forEach(value => {
+            completions.push({
+                caption: 'function: ' + value.name,
+                value: `"${value.id}"/*${value.name}*/`,
+                meta: 'static',
+                icon: 'function'
+            });
+        });
+
+        this.deviceClasses.forEach(value => {
+            completions.push({
+                caption: 'device-class: ' + value.name,
+                value: `"${value.id}"/*${value.name}*/`,
+                meta: 'static',
+                icon: 'device-class'
+            });
+        });
+
+        this.aspects.forEach(value => {
+            completions.push({
+                caption: 'aspect: ' + value.name,
+                value: `"${value.id}"/*${value.name}*/`,
+                meta: 'static',
+                icon: 'aspect'
+            });
+        });
+
+        const interactions: string[] = ['event', 'request', 'event+request'];
+        interactions.forEach(value => {
+            completions.push({
+                caption: 'interaction: ' + value,
+                value: `"${value}"`,
+                meta: 'static'
+            });
+        });
+
+        return completions;
+    };
+
+    /*
+     * Completions for the module-data json editor: the process variables reaching
+     * this element, offered as ${...} references, and the form fields among them
+     * additionally as {{.}} template placeholders.
+     */
+    jsonCompletions: CodeEditorCompletionSource = () => {
+        const processVariables = ([] as BpmnParameterWithLabel[])
             .concat(this.availableProcessVariables.get('iot_form_fields') || [])
             .concat(this.availableProcessVariables.get('value_form_fields') || [])
             .concat(this.availableProcessVariables.get('process_deployment') || [])
@@ -273,108 +333,18 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
                 value: '${' + value.name + '}',
                 meta: 'static'
             }));
-        completers = completers.concat(
-            ([] as BpmnParameterWithLabel[])
-                .concat(this.availableProcessVariables.get('iot_form_fields') || [])
-                .concat(this.availableProcessVariables.get('value_form_fields') || [])
-                .map(value => ({
-                    caption: 'placeholder: ' + value.name,
-                    value: '{{.' + value.name + '}}',
-                    meta: 'static'
-                }))
-        );
-        callback(null, completers);
-    }
 
-    private setAceJsCompleter(session: any, pos: any, callback: any) {
-         
-        const that = this;
-        completer.getCompletions(null, session, pos, null, function (_: any, completers: { caption: string; value: string; meta: string }[]) {
-            if (!completers) {
-                completers = [];
-            }
-
-            completers.push({
-                caption: 'filter criteria struct',
-                value: 'var criteria = ' + JSON.stringify({
-                    aspect_id: '',
-                    device_class_id: '',
-                    function_id: '',
-                    interaction: ''
-                } as Criteria) + '/*remove unused fields*/',
+        const placeholders = ([] as BpmnParameterWithLabel[])
+            .concat(this.availableProcessVariables.get('iot_form_fields') || [])
+            .concat(this.availableProcessVariables.get('value_form_fields') || [])
+            .map(value => ({
+                caption: 'placeholder: ' + value.name,
+                value: '{{.' + value.name + '}}',
                 meta: 'static'
-            });
+            }));
 
-            that.functions.forEach(value => {
-                completers.push({
-                    caption: 'function: ' + value.name,
-                    value: `"${value.id}"/*${value.name}*/`,
-                    meta: 'static'
-                });
-            });
-
-            that.deviceClasses.forEach(value => {
-                completers.push({
-                    caption: 'device-class: ' + value.name,
-                    value: `"${value.id}"/*${value.name}*/`,
-                    meta: 'static'
-                });
-            });
-
-            that.aspects.forEach(value => {
-                completers.push({
-                    caption: 'aspect: ' + value.name,
-                    value: `"${value.id}"/*${value.name}*/`,
-                    meta: 'static'
-                });
-            });
-
-            const interactions: string[] = ['event', 'request', 'event+request'];
-            interactions.forEach(value => {
-                completers.push({
-                    caption: 'interaction: ' + value,
-                    value: `"${value}"`,
-                    meta: 'static'
-                });
-            });
-
-
-            callback(null, completers);
-        });
-    }
-
-
-    private setAceJsEditor(element: ElementRef<HTMLElement>, inputNamePrefix: string) {
-        if (element) {
-            const editor = barceEdit(element.nativeElement);
-            editor.getSession().setMode('ace/mode/javascript');
-            editor.setOptions({
-                enableBasicAutocompletion: true,
-                enableLiveAutocompletion: true,
-                minLines: 20,
-                maxLines: Infinity
-            });
-            editor.setValue(this.getChunkedDataFromInputs(inputNamePrefix, this.result.inputs, ''));
-        } else {
-            console.error(inputNamePrefix + ' scriptEditor not loaded');
-        }
-    }
-
-    private setInfoModuleDataAceEditor(element: ElementRef<HTMLElement>) {
-        if (element) {
-            const editor = barceEdit(element.nativeElement);
-            editor.getSession().setMode('ace/mode/json');
-            editor.setOptions({
-                enableBasicAutocompletion: true,
-                enableLiveAutocompletion: true,
-                minLines: 20,
-                maxLines: Infinity
-            });
-            editor.setValue(this.getModuleDataFromInputs(this.result.inputs));
-        } else {
-            console.error('info module data editor not loaded');
-        }
-    }
+        return processVariables.concat(placeholders);
+    };
 
     ensureResultFields() {
         const processDeploymentTopic = this.tabs[0];
@@ -1617,9 +1587,8 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
         });
 
         temp.push({ name: 'info.module_type', type: 'text', value: this.infoModuleType });
-        const infoModuleData = barceEdit(this.infoModuleDataEditor.nativeElement).getValue();
-        if (infoModuleData) {
-            temp = temp.concat(this.getChunkedInputs('info.module_data', infoModuleData));
+        if (this.infoModuleData) {
+            temp = temp.concat(this.getChunkedInputs('info.module_data', this.infoModuleData));
         }
         temp.push({ name: 'info.key', type: 'text', value: this.infoKey });
 
@@ -1631,14 +1600,12 @@ export class EditSmartServiceTaskDialogComponent implements AfterViewInit {
 
         temp = temp.filter(e => e.name.startsWith(result.topic + '.')); // filter unused inputs
 
-        const preScript = barceEdit(this.preScriptEditor.nativeElement).getValue();
-        if (preScript) {
-            temp = temp.concat(this.getChunkedInputs('prescript', preScript));
+        if (this.preScript) {
+            temp = temp.concat(this.getChunkedInputs('prescript', this.preScript));
         }
 
-        const postScript = barceEdit(this.postScriptEditor.nativeElement).getValue();
-        if (postScript) {
-            temp = temp.concat(this.getChunkedInputs('postscript', postScript));
+        if (this.postScript) {
+            temp = temp.concat(this.getChunkedInputs('postscript', this.postScript));
         }
 
         result.inputs = temp;

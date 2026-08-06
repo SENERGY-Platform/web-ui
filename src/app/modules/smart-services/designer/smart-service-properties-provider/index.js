@@ -12,6 +12,7 @@ var CamundaProvider = camundaimport.propertiesProvider[1];
 
 import { textBox } from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 import { nextId } from 'bpmn-js-properties-panel/lib/Utils';
+import { augmentScriptEntries } from '../../../processes/designer/bpmn-js/properties-provider/ScriptEditorEntry';
 /* never used
 const typeString = "https://schema.org/Text";
 const typeInteger = "https://schema.org/Integer";
@@ -30,6 +31,10 @@ function SmartServicePropertiesProvider(eventBus, canvas, bpmnFactory, elementFa
         camundaTabs[0].groups.unshift(createDescriptionGroup(element));
         camundaTabs[0].groups.unshift(createTaskGroup(element, bpmnjs, eventBus, bpmnFactory, elementFactory, autoPlace, replace, selection));
         camundaTabs[0].groups.unshift(createSmartServiceInputsGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
+        // gives the camunda script fields (sequence flow conditions in particular) the
+        // same editor button the process designer has -- the panel's own field is a few
+        // lines tall and these decide which way a smart service proceeds
+        augmentScriptEntries(camundaTabs, bpmnjs);
         return camundaTabs;
     };
 }

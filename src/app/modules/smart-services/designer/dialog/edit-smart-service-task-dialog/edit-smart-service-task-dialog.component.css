@@ -91,11 +91,6 @@
     align-items: baseline;
 }
 
-.ace-editor {
-    width: 100%;
-    height: 300px;
-}
-
 .module-data-editor{
     margin-bottom: 15px;
 }

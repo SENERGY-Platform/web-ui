@@ -562,34 +562,38 @@
         </div>
       </mat-tab>
       <mat-tab label="Info">
-        <div class="smart-service-task-tab">
-          <div>
-            <mat-form-field appearance="outline" color="accent" class="full-width">
-              <mat-label>Task Name</mat-label>
-              <input matInput [(ngModel)]="result.name" type="text">
-              <mat-error senergyError label="Task Name"></mat-error>
-            </mat-form-field>
+        <!-- lazy so that opening the dialog does not pull in the code editor -->
+        <ng-template matTabContent>
+          <div class="smart-service-task-tab">
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Task Name</mat-label>
+                <input matInput [(ngModel)]="result.name" type="text">
+                <mat-error senergyError label="Task Name"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Key</mat-label>
+                <input matInput [(ngModel)]="infoKey" type="text"
+                  matTooltip="optional key used to reference the module for updates">
+                <mat-error senergyError label="Key"></mat-error>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>ModuleType</mat-label>
+                <input matInput [(ngModel)]="infoModuleType" type="text">
+                <mat-error senergyError label="Module Type"></mat-error>
+              </mat-form-field>
+            </div>
+            <div class="module-data-editor">
+              <h4>Module-Data</h4>
+              <senergy-code-editor [(value)]="infoModuleData" [language]="'json'" [completions]="jsonCompletions">
+              </senergy-code-editor>
+            </div>
           </div>
-          <div>
-            <mat-form-field appearance="outline" color="accent" class="full-width">
-              <mat-label>Key</mat-label>
-              <input matInput [(ngModel)]="infoKey" type="text"
-                matTooltip="optional key used to reference the module for updates">
-              <mat-error senergyError label="Key"></mat-error>
-            </mat-form-field>
-          </div>
-          <div>
-            <mat-form-field appearance="outline" color="accent" class="full-width">
-              <mat-label>ModuleType</mat-label>
-              <input matInput [(ngModel)]="infoModuleType" type="text">
-              <mat-error senergyError label="Module Type"></mat-error>
-            </mat-form-field>
-          </div>
-          <div class="module-data-editor">
-            <h4>Module-Data</h4>
-            <div #infoModuleDataEditor id="infoModuleDataEditor" class="ace-editor"></div>
-          </div>
-        </div>
+        </ng-template>
       </mat-tab>
       <mat-tab label="Device-Repository">
         <div class="smart-service-task-tab">
@@ -840,11 +844,14 @@
             PreScript
           </mat-panel-title>
         </mat-expansion-panel-header>
-        <div>
-          <a href="https://raw.githubusercontent.com/SENERGY-Platform/smart-service-module-worker-lib/main/doc/jsdoc.js"
-            target="_blank">JsDoc</a>
-          <div #preScriptEditor id="preScriptEditor" class="ace-editor"></div>
-        </div>
+        <!-- lazy so that the code editor is only fetched once a script is opened -->
+        <ng-template matExpansionPanelContent>
+          <div>
+            <senergy-code-editor [(value)]="preScript" [language]="'javascript'" [completions]="jsCompletions"
+                                 [scriptEnvironment]="scriptEnvironment">
+            </senergy-code-editor>
+          </div>
+        </ng-template>
       </mat-expansion-panel>
       <mat-expansion-panel>
         <mat-expansion-panel-header>
@@ -852,11 +859,14 @@
             PostScript
           </mat-panel-title>
         </mat-expansion-panel-header>
-        <div>
-          <a href="https://raw.githubusercontent.com/SENERGY-Platform/smart-service-module-worker-lib/main/doc/jsdoc.js"
-            target="_blank">JsDoc</a>
-          <div #postScriptEditor id="postScriptEditor" class="ace-editor"></div>
-        </div>
+        <!-- lazy so that the code editor is only fetched once a script is opened -->
+        <ng-template matExpansionPanelContent>
+          <div>
+            <senergy-code-editor [(value)]="postScript" [language]="'javascript'" [completions]="jsCompletions"
+                                 [scriptEnvironment]="scriptEnvironment">
+            </senergy-code-editor>
+          </div>
+        </ng-template>
       </mat-expansion-panel>
     </mat-accordion>
 </mat-dialog-content>

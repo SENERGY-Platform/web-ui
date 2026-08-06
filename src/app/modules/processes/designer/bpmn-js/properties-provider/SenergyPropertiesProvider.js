@@ -15,6 +15,7 @@
  */
 
 import { processIncident, external, io, msgevent, email, notification, influx, info, timeHelper, description, order } from './IotProps';
+import { augmentScriptEntries } from './ScriptEditorEntry';
 
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import inherits from 'inherits';
@@ -38,6 +39,9 @@ function SenergyPropertiesProvider(eventBus, canvas, bpmnFactory, elementRegistr
         camundaTabs[0].groups.unshift(createInfluxTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
         camundaTabs[0].groups.unshift(createTimeEventHelperGroup(element, bpmnjs, eventBus, modeling));
         camundaTabs[0].groups.unshift(createIncidentTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
+
+        // must run over the camunda tabs, whose entries hold the script fields
+        augmentScriptEntries(camundaTabs, bpmnjs);
 
         return camundaTabs;
     };

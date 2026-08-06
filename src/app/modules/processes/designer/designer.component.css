@@ -49,6 +49,11 @@
     width: 47px;
 }
 
+/* the panel's script textarea stays editable; this button is just a second way in */
+#js-properties-panel ::ng-deep .senergy-script-entry .bpmn-iot-button {
+    margin-top: 4px;
+}
+
 .button-header {
     padding-left: 8px;
     padding-top: 7px;

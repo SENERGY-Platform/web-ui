@@ -1,0 +1,41 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h2 mat-dialog-title>
+  Edit Script<span *ngIf="label">: {{label}}</span>
+</h2>
+
+<mat-dialog-content>
+  <!-- the separator is drawn in css between adjacent parts, so a missing script
+       format does not leave a leading one -->
+  <div class="script-hint">
+    <span class="script-hint-part" *ngIf="scriptFormat">Script Format: {{scriptFormat}}</span>
+    <span class="script-hint-part" *ngIf="variables.length">
+      {{variables.length}} process variable(s) available here
+    </span>
+    <span class="script-hint-part" *ngIf="!variables.length">
+      No process variables are set yet at this point in the flow
+    </span>
+  </div>
+  <senergy-code-editor [(value)]="script" [language]="language" [completions]="completions" height="60vh"
+                       [scriptEnvironment]="scriptEnvironment">
+  </senergy-code-editor>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="ok()">Save</button>
+</mat-dialog-actions>
