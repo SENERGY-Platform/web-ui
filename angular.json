@@ -99,7 +99,10 @@
             "allowedCommonJsDependencies": [
               "*"
             ],
-            "browser": "src/main.ts"
+            "browser": "src/main.ts",
+            "loader": {
+              ".ttf": "file"
+            }
           },
           "configurations": {
             "production": {
