@@ -114,7 +114,7 @@
                 <ng-container matColumnDef="display_name">
                     <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
                     <td mat-cell *matCellDef="let device">
-                        {{device.display_name}}
+                        {{device.display_name || device.name}}
                     </td>
                 </ng-container>
 

@@ -160,8 +160,8 @@ export class DeviceInstancesEditDialogComponent implements OnDestroy {
                 origin: this.nicknameAttributeOrigin,
                 value: this.displayname
             } as Attribute);
-            this.device.display_name = this.displayname;
         }
+        this.device.display_name = this.displayname;
     }
 
     isValid(): boolean {
