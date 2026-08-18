@@ -17,10 +17,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { Observable, timer } from 'rxjs';
-import { catchError, map, mergeMap, retryWhen } from 'rxjs/operators';
+import { Observable, of, timer } from 'rxjs';
+import { catchError, concatMap, map, mergeMap, retryWhen } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { DeploymentsModel, ProcessStartParameter } from './deployments.model';
+import { DeploymentDependenciesModel, DeploymentsModel, ProcessStartParameter } from './deployments.model';
 import { CamundaVariable } from './deployments-definition.model';
 import { DeploymentsMissingDependenciesModel } from './deployments-missing-dependencies.model';
 import {
@@ -52,28 +52,91 @@ export class DeploymentsService {
     }
 
     list(query: string, limit: number, offset: number, feature: string, order: string, source: string, id?: string): Observable<DeploymentsModel[]> {
-        let url =
-            environment.apiAggregatorUrl +
-            '/processes?sortBy=' +
-            feature +
-            '&sortOrder=' +
-            order +
-            '&maxResults=' +
-            limit +
-            '&firstResult=' +
-            offset;
-        if (query) {
-            url += '&nameLike=' + encodeURIComponent('%' + query + '%');
-        }
-        if (source) {
-            url += '&source=' + encodeURIComponent(source);
-        }
+        let deployments: Observable<DeploymentsModel[]>;
         if (id) {
-            url += '&id=' + encodeURIComponent(id);
+            deployments = this.getSingleDeployment(id).pipe(map((deployment) => (deployment ? [deployment] : [])));
+        } else {
+            deployments = this.getAllMinimal(query, limit, offset, feature, order, source);
         }
-        return this.http.get<DeploymentsModel[]>(url).pipe(
-            map((resp) => resp || []),
+        return deployments.pipe(
+            concatMap((result) => this.completeOnlineState(result)),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getAll', [])),
+        );
+    }
+
+    private getSingleDeployment(id: string): Observable<DeploymentsModel | null> {
+        return this.http
+            .get<Omit<DeploymentsModel, 'diagram'> & { diagram: string | { svg: string } }>(
+                environment.processDeploymentUrl + '/v3/deployments/' + encodeURIComponent(id) + '?with_options=false',
+            )
+            .pipe(
+                map((deployment) => {
+                    if (deployment && typeof deployment.diagram === 'object' && deployment.diagram !== null) {
+                        return { ...deployment, diagram: deployment.diagram.svg } as DeploymentsModel;
+                    }
+                    return deployment as DeploymentsModel;
+                }),
+            );
+    }
+
+    private completeOnlineState(deployments: DeploymentsModel[]): Observable<DeploymentsModel[]> {
+        if (deployments.length === 0) {
+            return of(deployments);
+        }
+        const deploymentIds = deployments.map((deployment) => deployment.id);
+        return this.getDependenciesList(deploymentIds).pipe(
+            concatMap((dependencies) => {
+                const unique = (v: string, i: number, a: string[]) => a.indexOf(v) === i;
+                const deviceIds = dependencies
+                    .flatMap((dependency) => (dependency.devices || []).map((device) => device.device_id))
+                    .filter(unique);
+                return this.getCurrentDeviceStates(deviceIds).pipe(
+                    map((deviceStates) => {
+                        const dependenciesIndex = new Map<string, DeploymentDependenciesModel>();
+                        dependencies.forEach((dependency) => dependenciesIndex.set(dependency.deployment_id, dependency));
+                        deployments.forEach((deployment) => {
+                            // event dependencies are not checked and count as online
+                            deployment.online = true;
+                            deployment.offline_reasons = [];
+                            (dependenciesIndex.get(deployment.id)?.devices || []).forEach((device) => {
+                                if ((deviceStates.get(device.device_id) || []).includes(false)) {
+                                    deployment.online = false;
+                                    deployment.offline_reasons.push({
+                                        type: 'device-offline',
+                                        id: device.device_id,
+                                        additional_info: { name: device.name },
+                                        description: 'device ' + device.name + ' is offline',
+                                    });
+                                }
+                            });
+                        });
+                        return deployments;
+                    }),
+                );
+            }),
+        );
+    }
+
+    private getDependenciesList(deploymentIds: string[]): Observable<DeploymentDependenciesModel[]> {
+        return this.http
+            .get<DeploymentDependenciesModel[]>(
+                environment.processDeploymentUrl + '/dependencies?ids=' + deploymentIds.map(encodeURIComponent).join(','),
+            )
+            .pipe(map((resp) => resp || []));
+    }
+
+    private getCurrentDeviceStates(deviceIds: string[]): Observable<Map<string, boolean[]>> {
+        if (deviceIds.length === 0) {
+            return of(new Map<string, boolean[]>());
+        }
+        return this.http.post<any>(environment.connectionLogUrl + '/current/query/map-original', { ids: deviceIds }).pipe(
+            map((obj) => {
+                const m = new Map<string, boolean[]>();
+                for (const key of Object.keys(obj || {})) {
+                    m.set(key, obj[key]);
+                }
+                return m;
+            }),
         );
     }
 

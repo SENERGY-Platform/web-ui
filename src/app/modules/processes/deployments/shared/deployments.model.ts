@@ -38,6 +38,16 @@ export interface DeploymentsOfflineReasonsModel {
     description: string;
 }
 
+export interface DeploymentDependenciesModel {
+    deployment_id: string;
+    devices:
+        | {
+              device_id: string;
+              name: string;
+          }[]
+        | null;
+}
+
 
 export interface ProcessStartParameter{
     id: string;
