@@ -18,7 +18,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, concatMap, map } from 'rxjs/operators';
 import { forkJoin, Observable, of } from 'rxjs';
 import {
     DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
@@ -37,6 +37,8 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
 import { UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement } from './used-in-device-type.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { UsedInDeviceTypesDialogComponent } from '../dialogs/used-in-device-types-dialog.component';
+import { ImportTypesService } from 'src/app/modules/imports/import-types/shared/import-types.service';
+import { ImportTypeContentVariableModel } from 'src/app/modules/imports/import-types/shared/import-types.model';
 
 @Injectable({
     providedIn: 'root',
@@ -47,6 +49,7 @@ export class DeviceTypeService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService,
         private dialog: MatDialog,
+        private importTypesService: ImportTypesService,
     ) {}
 
     openUsedInDeviceTypeDialog(element: UsedInDeviceTypeResponseElement) {
@@ -228,9 +231,37 @@ export class DeviceTypeService {
         );
     }
 
+    /** Returns aspect-nodes used with measuring-functions by devices or imports, including their ancestors. */
     getAspectNodesWithMeasuringFunction(): Observable<DeviceTypeAspectNodeModel[]> {
-        return this.http.get<DeviceTypeAspectNodeModel[] | null>(environment.apiAggregatorUrl + '/aspect-nodes?function=measuring-function').pipe(
-            map((resp) => resp || []),
+        return forkJoin({
+            deviceAspectNodes: this.getAspectNodesWithMeasuringFunctionOfDevicesOnly(),
+            importCriteria: this.listImportTypeCriteria(),
+        }).pipe(
+            concatMap(({ deviceAspectNodes, importCriteria }) => {
+                const knownIds = deviceAspectNodes.map((node) => node.id);
+                const additionalIds = importCriteria
+                    .map((criteria) => criteria.aspect_id)
+                    .filter((id): id is string => id !== undefined && id !== '' && !knownIds.includes(id))
+                    .filter(this.unique);
+                if (additionalIds.length === 0) {
+                    return of(deviceAspectNodes);
+                }
+                return this.getAspectNodesByIds(additionalIds).pipe(
+                    concatMap((importAspectNodes) => {
+                        const allIds = knownIds.concat(additionalIds);
+                        const ancestorIds = importAspectNodes
+                            .flatMap((node) => node.ancestor_ids || [])
+                            .filter((id) => !allIds.includes(id))
+                            .filter(this.unique);
+                        if (ancestorIds.length === 0) {
+                            return of(deviceAspectNodes.concat(importAspectNodes));
+                        }
+                        return this.getAspectNodesByIds(ancestorIds).pipe(
+                            map((ancestorNodes) => deviceAspectNodes.concat(importAspectNodes, ancestorNodes)),
+                        );
+                    }),
+                );
+            }),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectNodesWithMeasuringFunction', [])),
         );
     }
@@ -249,11 +280,62 @@ export class DeviceTypeService {
         );
     }
 
+    /** Returns measuring-functions used with the aspect (or its descendants) by devices or imports. */
     getAspectsMeasuringFunctionsWithImports(aspectId: string): Observable<DeviceTypeFunctionModel[]> {
-        return this.http.get<DeviceTypeFunctionModel[]>(environment.apiAggregatorUrl + '/aspects/' + aspectId + '/measuring-functions').pipe(
-            map((resp) => resp || []),
+        return forkJoin({
+            deviceFunctions: this.getAspectsMeasuringFunctions(aspectId),
+            aspectNodes: this.getAspectNodesByIds([aspectId]),
+            importCriteria: this.listImportTypeCriteria(),
+        }).pipe(
+            concatMap(({ deviceFunctions, aspectNodes, importCriteria }) => {
+                const aspectIds = [aspectId].concat(aspectNodes[0]?.descendent_ids || []);
+                const knownFunctionIds = deviceFunctions.map((f) => f.id);
+                const additionalFunctionIds = importCriteria
+                    .filter((criteria) => criteria.aspect_id !== undefined && aspectIds.includes(criteria.aspect_id))
+                    .map((criteria) => criteria.function_id)
+                    .filter((id): id is string => id !== undefined && id !== '' && !knownFunctionIds.includes(id))
+                    .filter(this.unique);
+                if (additionalFunctionIds.length === 0) {
+                    return of(deviceFunctions);
+                }
+                return this.getFunctionsByIds(additionalFunctionIds).pipe(
+                    map((importFunctions) => deviceFunctions.concat(importFunctions)),
+                );
+            }),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectsMeasuringFunctionsWithImports', [])),
         );
+    }
+
+    getAspectNodesByIds(ids: string[]): Observable<DeviceTypeAspectNodeModel[]> {
+        return this.http.post<DeviceTypeAspectNodeModel[] | null>(environment.deviceRepoUrl + '/query/aspect-nodes', { ids }).pipe(
+            map((resp) => resp || []),
+        );
+    }
+
+    getFunctionsByIds(ids: string[]): Observable<DeviceTypeFunctionModel[]> {
+        return this.http
+            .get<DeviceTypeFunctionModel[] | null>(environment.deviceRepoUrl + '/functions?ids=' + ids.map(encodeURIComponent).join(','))
+            .pipe(map((resp) => resp || []));
+    }
+
+    private listImportTypeCriteria(): Observable<{ function_id?: string; aspect_id?: string }[]> {
+        return this.importTypesService.listImportTypes('', 9999, 0, 'name.asc').pipe(
+            map((importTypes) => importTypes.result.flatMap((importType) => this.contentVariableCriteria(importType.output))),
+        );
+    }
+
+    private contentVariableCriteria(contentVariable: ImportTypeContentVariableModel | null): { function_id?: string; aspect_id?: string }[] {
+        if (!contentVariable) {
+            return [];
+        }
+        const criteria: { function_id?: string; aspect_id?: string }[] = [
+            { function_id: contentVariable.function_id, aspect_id: contentVariable.aspect_id },
+        ];
+        return criteria.concat((contentVariable.sub_content_variables || []).flatMap((sub) => this.contentVariableCriteria(sub)));
+    }
+
+    private unique(value: string, index: number, all: string[]): boolean {
+        return all.indexOf(value) === index;
     }
 
     getLeafCharacteristics(): Observable<DeviceTypeCharacteristicsModel[]> {
