@@ -49,7 +49,6 @@ export const environment = {
   flowRepoUrl: '${process.env.FLOW_REPO_URL}',
   flowEngineUrl: '${process.env.FLOW_ENGINE_URL}',
   flowParserUrl: '${process.env.FLOW_PARSER_URL}',
-  apiAggregatorUrl: '${process.env.API_AGGREGATOR_URL}',
   iotRepoUrl: '${process.env.IOT_REPO_URL}',
   dashboardServiceUrl: '${process.env.DASHBOARD_SERVICE_URL}',
   usersServiceUrl: '${process.env.USERS_SERVICE_URL}',

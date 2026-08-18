@@ -98,7 +98,6 @@ export class LadonService {
             environment.flowEngineUrl,
             environment.flowParserUrl,
 
-            environment.apiAggregatorUrl,
             environment.iotRepoUrl,
             environment.operatorRepoUrl,
             environment.smartServiceRepoUrl,
