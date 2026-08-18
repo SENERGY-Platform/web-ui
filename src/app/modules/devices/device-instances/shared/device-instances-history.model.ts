@@ -14,39 +14,6 @@
  * limitations under the License.
  */
 
-import { Attribute } from './device-instances.model';
-
-/**
- * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link ResourceHistoricalConnectionStatesModelV2} instead.
- */
-export interface DeviceInstancesHistoryModel {
-    creator: string;
-    date: number;
-    name: string;
-    display_name: string;
-    log_state: string;
-    log_history: { values: LogHistoryValues[] | null };
-    log_edge: (string | boolean)[] | null;
-    attributes?: Attribute[];
-}
-
-/**
- * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link ResourceHistoricalConnectionStatesModelV2} instead.
- */
-interface LogHistoryValues {
-    0: number /** time          */;
-    1: boolean /** connected     */;
-    2: string /** connectorName */;
-}
-
-/**
- * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link ResourceHistoricalConnectionStatesModelV2} instead.
- */
-export interface DeviceInstancesHistoryModelWithId extends DeviceInstancesHistoryModel {
-    id: string;
-}
-
-
 export interface ResourceHistoricalConnectionStatesModelV2 {
     id: string;
     next_state: ConnectionStateModelV2 | null,

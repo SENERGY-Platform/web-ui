@@ -18,7 +18,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map, reduce, share, concatMap } from 'rxjs/operators';
+import { catchError, map, concatMap } from 'rxjs/operators';
 import {
     Attribute,
     DeviceFilterCriteriaModel,
@@ -32,7 +32,7 @@ import {
     OfflineSinceModel,
 } from './device-instances.model';
 import { forkJoin, Observable, of } from 'rxjs';
-import { DeviceInstancesHistoryModel, ResourceHistoricalConnectionStatesModelV2, DeviceInstancesHistoryModelWithId } from './device-instances-history.model';
+import { ResourceHistoricalConnectionStatesModelV2 } from './device-instances-history.model';
 import { UtilService } from '../../../../core/services/util.service';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
@@ -44,8 +44,6 @@ import { NetworksService } from '../../networks/shared/networks.service';
 })
 
 export class DeviceInstancesService {
-    private getDeviceHistoryObservable7d: Observable<DeviceInstancesHistoryModel[]> | null = null;
-    private getDeviceHistoryObservable1h: Observable<DeviceInstancesHistoryModel[]> | null = null;
     nicknameAttributeKey = 'shared/nickname';
     authorizations: PermissionTestResponse;
     authorizationsDisplayName: PermissionTestResponse;
@@ -399,56 +397,6 @@ export class DeviceInstancesService {
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceSelections', [])),
         );
-    }
-
-    /**
-     * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link getDeviceHistoryV2} instead.
-     */
-    getDeviceHistory(limit: number, offset: number, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
-        return this.http
-            .get<DeviceInstancesHistoryModelWithId[]>(environment.apiAggregatorUrl + '/devices?offset=' + offset + '&limit=' + limit + '&log=' + logDuration)
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory', [])),
-                share(),
-            );
-    }
-
-    /**
-     * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link getDeviceHistoryV2} instead.
-     */
-    getDeviceHistoryAll(batchsize: number, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
-        return new Observable<DeviceInstancesHistoryModelWithId[]>(subscriber => {
-            const limit = batchsize;
-            let offset = 0;
-            // eslint-disable-next-line prefer-const
-            let getDeviceHistoryBatch: () => void;
-            const next = (value: DeviceInstancesHistoryModelWithId[]) => {
-                if (value && value.length) {
-                    offset = offset + limit;
-                    subscriber.next(value);
-                }
-                if (!value || !value.length || value.length < limit) {
-                    subscriber.complete();
-                } else {
-                    getDeviceHistoryBatch();
-                }
-            };
-            getDeviceHistoryBatch = () => {
-                this.getDeviceHistory(limit, offset, logDuration).subscribe(next);
-            };
-            getDeviceHistoryBatch();
-        });
-    }
-
-    /**
-     * @deprecated This relies on the apiAggreagtor and should not be used. Use {@link getDeviceHistoryV2} instead.
-     */
-    getDeviceHistory7d(): Observable<DeviceInstancesHistoryModel[] | null> {
-        if (this.getDeviceHistoryObservable7d === null) {
-            this.getDeviceHistoryObservable7d = this.getDeviceHistoryAll(1000, '7d').pipe(reduce((acc, value) => acc.concat(value)));
-        }
-        return this.getDeviceHistoryObservable7d;
     }
 
     getDeviceHistoryV2(options: { id: string, range?: string, since?: string; until?: string; }): Observable<ResourceHistoricalConnectionStatesModelV2 | null> {

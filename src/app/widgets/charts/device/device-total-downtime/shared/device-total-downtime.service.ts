@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {ChartsModel} from '../../../shared/charts.model';
 import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
 import {ElementSizeService} from '../../../../../core/services/element-size.service';
@@ -27,14 +27,16 @@ import {ChartDataTableModel} from '../../../../../core/model/chart/chart-data-ta
 import {DeviceTotalDowntimeEditDialogComponent} from '../dialogs/device-total-downtime-edit-dialog.component';
 import {DeviceInstancesService} from '../../../../../modules/devices/device-instances/shared/device-instances.service';
 import {
-    DeviceInstancesHistoryModel
+    ResourceHistoricalConnectionStatesModelV2
 } from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
-import {map} from 'rxjs/operators';
+import {catchError, concatMap, map} from 'rxjs/operators';
+
+/** Per device: connection state changes of the current day, ascending as [unix seconds, connected]. */
+type ConnectionTimeline = [number, boolean][];
 
 const customColor = '#4484ce'; // /* cc */
 const stateTrue = true;
 const stateFalse = false;
-const dayInMs = 86400000;
 
 @Injectable({
     providedIn: 'root',
@@ -67,16 +69,45 @@ export class DeviceTotalDowntimeService {
     }
 
     getTotalDowntime(widgetId: string): Observable<ChartsModel> {
-        return this.deviceInstancesService.getDeviceHistory7d().pipe(
-            map(d => d || []),
-            map((devices: DeviceInstancesHistoryModel[]) => {
-                if (devices.length === 0) {
+        const midnight = new Date();
+        midnight.setHours(0, 0, 0, 0);
+        return this.deviceInstancesService.getDeviceInstances({limit: 9999, offset: 0}).pipe(
+            concatMap((devices) => {
+                const ids = devices.result.map((device) => device.id);
+                if (ids.length === 0) {
+                    return of(new Map<string, ResourceHistoricalConnectionStatesModelV2[]>());
+                }
+                return this.deviceInstancesService.getHistory({ids, since: midnight});
+            }),
+            catchError(() => of(new Map<string, ResourceHistoricalConnectionStatesModelV2[]>())),
+            map((histories) => {
+                const timelines = this.toConnectionTimelines(histories, midnight);
+                if (timelines.length === 0) {
                     return this.setDevicesTotalDowntimeChartValues(widgetId, new ChartDataTableModel([[]]));
                 } else {
-                    return this.setDevicesTotalDowntimeChartValues(widgetId, this.processTimelineFailureRatio(devices));
+                    return this.setDevicesTotalDowntimeChartValues(widgetId, this.processTimelineFailureRatio(timelines));
                 }
             })
         );
+    }
+
+    private toConnectionTimelines(histories: Map<string, ResourceHistoricalConnectionStatesModelV2[]>, since: Date): ConnectionTimeline[] {
+        const timelines: ConnectionTimeline[] = [];
+        histories.forEach((resourceHistories) => {
+            (resourceHistories || []).forEach((history) => {
+                const timeline: ConnectionTimeline = [];
+                if (history.prev_state !== null) {
+                    timeline.push([since.getTime() / 1000, history.prev_state.connected]);
+                }
+                (history.states || []).forEach((state) => {
+                    timeline.push([new Date(state.time).getTime() / 1000, state.connected]);
+                });
+                if (timeline.length > 0) {
+                    timelines.push(timeline);
+                }
+            });
+        });
+        return timelines;
     }
 
     private setDevicesTotalDowntimeChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
@@ -98,7 +129,7 @@ export class DeviceTotalDowntimeService {
         });
     }
 
-    private processTimelineFailureRatio(devices: DeviceInstancesHistoryModel[]): ChartDataTableModel {
+    private processTimelineFailureRatio(timelines: ConnectionTimeline[]): ChartDataTableModel {
         const today = new Date();
         const intervalDurationInMin = 15;
         const intervalDurationInMs = intervalDurationInMin * 60 * 1000;
@@ -112,27 +143,20 @@ export class DeviceTotalDowntimeService {
             interval.push({stateConnected: 0, stateDisconnected: 0});
         }
 
-        devices.forEach((device: DeviceInstancesHistoryModel) => {
+        timelines.forEach((timeline: ConnectionTimeline) => {
             intervalIndex = 0;
             timeLeft = intervalDurationInMs;
             intervalFull = false;
 
-            if (device.log_history.values !== null) {
-                const lastIndex = device.log_history.values.length - 1;
-                const diffToday = today.getTime() - new Date(device.log_history.values[lastIndex][0] * 1000).getTime();
-                const statusLastIndex = device.log_history.values[lastIndex][1];
-                spreadIntoTimeZones(statusLastIndex, diffToday);
+            const lastIndex = timeline.length - 1;
+            const diffToday = today.getTime() - new Date(timeline[lastIndex][0] * 1000).getTime();
+            const statusLastIndex = timeline[lastIndex][1];
+            spreadIntoTimeZones(statusLastIndex, diffToday);
 
-                for (let z = lastIndex; z >= 1 && !intervalFull; z--) {
-                    const diffDates = (device.log_history.values[z][0] - device.log_history.values[z - 1][0]) * 1000;
-                    const statusBefore = device.log_history.values[z - 1][1];
-                    spreadIntoTimeZones(statusBefore, diffDates);
-                }
-            }
-
-            if (device.log_edge !== null && !intervalFull) {
-                const statusEdge: boolean = device.log_edge[1] as boolean;
-                spreadIntoTimeZones(statusEdge, dayInMs);
+            for (let z = lastIndex; z >= 1 && !intervalFull; z--) {
+                const diffDates = (timeline[z][0] - timeline[z - 1][0]) * 1000;
+                const statusBefore = timeline[z - 1][1];
+                spreadIntoTimeZones(statusBefore, diffDates);
             }
         });
 
