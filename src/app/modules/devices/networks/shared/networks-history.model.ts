@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-export interface NetworksHistoryModel {
-    name: string;
-    device_local_ids: string[];
-    log_state: string;
-    log_history: { values: LogHistoryValues[] | null };
-    log_edge: (string | boolean)[] | null;
-}
+import { ExtendedHubModel } from './networks.model';
+import { ResourceHistoricalConnectionStatesModelV2 } from '../../device-instances/shared/device-instances-history.model';
 
-interface LogHistoryValues {
-    0: number /** time          */;
-    1: boolean /** connected     */;
-    2: string /** connectorName */;
+export interface NetworksHistoryModel {
+    network: ExtendedHubModel;
+    history: ResourceHistoricalConnectionStatesModelV2 | null;
 }

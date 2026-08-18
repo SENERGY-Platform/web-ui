@@ -18,8 +18,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { catchError, concatMap, map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import {
     ExtendedHubModel,
     ExtendedHubTotalModel,
@@ -29,6 +29,7 @@ import {
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { NetworksEditDialogComponent } from '../dialogs/networks-edit-dialog.component';
 import { NetworksHistoryModel } from './networks-history.model';
+import { ResourceHistoricalConnectionStatesModelV2 } from '../../device-instances/shared/device-instances-history.model';
 import { NetworksClearDialogComponent } from '../dialogs/networks-clear-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
@@ -92,11 +93,36 @@ export class NetworksService {
             .pipe(catchError(this.errorHandlerService.handleError(NetworksService.name, 'create', null)));
     }
 
-    getNetworksHistory(duration: string): Observable<NetworksHistoryModel[]> {
-        return this.http.get<NetworksHistoryModel[]>(environment.apiAggregatorUrl + '/hubs?limit=10000&log=' + duration).pipe(
-            map((resp) => resp || []),
+    getNetworksHistory(range: string): Observable<NetworksHistoryModel[]> {
+        return this.listExtendedHubs({ limit: 10000, offset: 0 }).pipe(
+            concatMap((hubs) => {
+                const networks = hubs.result || [];
+                if (networks.length === 0) {
+                    return of([]);
+                }
+                return this.getHubsConnectionHistory(networks.map((network) => network.id), range).pipe(
+                    map((histories) => networks.map((network) => ({
+                        network,
+                        history: (histories.get(network.id) || [])[0] || null,
+                    }))),
+                );
+            }),
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworksHistory', [])),
         );
+    }
+
+    private getHubsConnectionHistory(ids: string[], range: string): Observable<Map<string, ResourceHistoricalConnectionStatesModelV2[]>> {
+        return this.http
+            .post<any>(environment.connectionLogUrl + '/historical/query/map-original', { ids, range })
+            .pipe(
+                map((obj) => {
+                    const m = new Map<string, ResourceHistoricalConnectionStatesModelV2[]>();
+                    for (const key of Object.keys(obj || {})) {
+                        m.set(key, obj[key]);
+                    }
+                    return m;
+                }),
+            );
     }
 
     openNetworkEditDialog(network?: HubModel): void {

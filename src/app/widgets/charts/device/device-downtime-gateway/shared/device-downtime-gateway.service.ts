@@ -29,8 +29,8 @@ import { NetworksService } from '../../../../../modules/devices/networks/shared/
 import { DeviceDowntimeGatewayModel } from './device-downtime-gateway.model';
 import { NetworksHistoryModel } from '../../../../../modules/devices/networks/shared/networks-history.model';
 
-const stateConnected = 'connected';
-const stateDisconnected = 'disconnected';
+const stateConnected = 'online';
+const stateDisconnected = 'offline';
 const stateTrue = true;
 const stateFalse = false;
 const dayInMs = 86400000;
@@ -70,7 +70,7 @@ export class DeviceDowntimeGatewayService {
 
     getDevicesDowntimePerGateway(widget: WidgetModel): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-            this.networksService.getNetworksHistory('7d').subscribe((gateways) => {
+            this.networksService.getNetworksHistory('168h').subscribe((gateways) => {
                 if (gateways.length === 0) {
                     observer.next(this.setDevicesDowntimePerGatewayChartValues(widget.id, new ChartDataTableModel([[]])));
                 } else {
@@ -105,19 +105,30 @@ export class DeviceDowntimeGatewayService {
             const text = Math.round(failureRatio * 10000) / 100 + '%';
             if (hideZeroPercentage) {
                 if (failureRatio > 0) {
-                    dataTable.data.push([gateway.name, failureRatio, text, customColor]);
+                    dataTable.data.push([gateway.network.name, failureRatio, text, customColor]);
                 }
             } else {
-                dataTable.data.push([gateway.name, failureRatio, text, customColor]);
+                dataTable.data.push([gateway.network.name, failureRatio, text, customColor]);
             }
         });
         return dataTable;
     }
 
     private calcDisconnectedTime(item: NetworksHistoryModel): DeviceDowntimeGatewayModel {
-        const itemStatus = new DeviceDowntimeGatewayModel(0, 0, 0, 0, 0, 0, item.name);
-        if (item.log_history.values === null) {
-            switch (item.log_state) {
+        const itemStatus = new DeviceDowntimeGatewayModel(0, 0, 0, 0, 0, 0, item.network.name);
+
+        /** connection state changes within the window, ascending as [time in ms, connected];
+         *  prev_state covers the time between the window start and the first change */
+        const timeline: [number, boolean][] = [];
+        if (item.history?.prev_state) {
+            timeline.push([today.getTime() - failureTimeInMs, item.history.prev_state.connected]);
+        }
+        (item.history?.states || []).forEach((state) => {
+            timeline.push([new Date(state.time).getTime(), state.connected]);
+        });
+
+        if (timeline.length === 0) {
+            switch (item.network.connection_state) {
             case stateConnected: {
                 addTimeConnected(failureTimeInMs);
                 break;
@@ -129,19 +140,13 @@ export class DeviceDowntimeGatewayService {
             }
         } else {
             /** calculate delta from last index time till now*/
-            const lastIndex: number = item.log_history.values.length - 1;
-            const diffToday = today.getTime() - new Date(item.log_history.values[lastIndex]['0'] * 1000).getTime();
-            addTimeToConnectionStatus(item.log_history.values[lastIndex]['1'], diffToday);
+            const lastIndex: number = timeline.length - 1;
+            const diffToday = today.getTime() - timeline[lastIndex][0];
+            addTimeToConnectionStatus(timeline[lastIndex][1], diffToday);
 
             for (let x = lastIndex; x >= 1; x--) {
-                const diff = (item.log_history.values[x]['0'] - item.log_history.values[x - 1]['0']) * 1000;
-                addTimeToConnectionStatus(item.log_history.values[x - 1]['1'], diff);
-            }
-
-            /** check if input object existed before first index of log history */
-            if (item.log_edge !== null) {
-                const timeDiff = failureTimeInMs - itemStatus.timeDisconnectedInMs - itemStatus.timeConnectedInMs;
-                addTimeToConnectionStatus(item.log_edge[1] === true, timeDiff);
+                const diff = timeline[x][0] - timeline[x - 1][0];
+                addTimeToConnectionStatus(timeline[x - 1][1], diff);
             }
         }
         itemStatus.timeConnectedInS = Math.round(itemStatus.timeConnectedInMs / 60000);
