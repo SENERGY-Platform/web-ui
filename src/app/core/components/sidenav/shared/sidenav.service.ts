@@ -51,6 +51,7 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 import { CostService } from 'src/app/modules/cost/shared/cost.service';
 import { LadonService } from '../../../../modules/admin/permissions/shared/services/ladom.service';
 import { CertificatesService } from 'src/app/modules/credentials/certificates/shared/certificates.service';
+import { EnvironmentsService } from 'src/app/modules/environments/shared/environments.service';
 
 @Injectable({
     providedIn: 'root',
@@ -95,6 +96,7 @@ export class SidenavService implements OnDestroy {
         private costService: CostService,
         private ladonService: LadonService,
         private certificatesService: CertificatesService,
+        private environmentsService: EnvironmentsService,
     ) { }
 
     ngOnDestroy() {
@@ -295,6 +297,14 @@ export class SidenavService implements OnDestroy {
         return new SidenavSectionModel('Credentials', 'toggle', 'passkey', '/credentials', sections);
     }
 
+    setupSimulationSection(): SidenavSectionModel {
+        const sections = this.checkAuthorizationForSections([
+            [this.environmentsService.userHasReadAuthorization, new SidenavPageModel('Environments', 'link', 'precision_manufacturing', '/environments'), this.environmentsService],
+        ]);
+
+        return new SidenavSectionModel('Simulation', 'toggle', 'precision_manufacturing', '/environments', sections);
+    }
+
     loadSections(): SidenavSectionModel[] {
         let sections: SidenavSectionModel[] = [
             this.setupAnalyticsSection(),
@@ -309,6 +319,7 @@ export class SidenavService implements OnDestroy {
             this.setupCostSection(),
             this.setupReportsSection(),
             this.setupCredentials(),
+            this.setupSimulationSection(),
         ];
 
         if (this.dashboardService.userHasReadDashboardAuthorization()) {
@@ -318,7 +329,7 @@ export class SidenavService implements OnDestroy {
         // Just keep Main sections that have at least one subsection
         sections = sections.filter(section => section.pages.length > 0 || section.name === 'Dashboard');
 
-        const sortedSectionTitles = ['Dashboard', 'Reporting', 'Smart Services', 'Processes', 'Exports', 'Analytics', 'Device Management', 'Imports', 'Cost', 'Metadata', 'Credentials', 'Admin', 'Developer'];
+        const sortedSectionTitles = ['Dashboard', 'Reporting', 'Smart Services', 'Processes', 'Exports', 'Analytics', 'Device Management', 'Imports', 'Cost', 'Metadata', 'Simulation', 'Credentials', 'Admin', 'Developer'];
         sections.sort(function (section1, section2) {
             return sortedSectionTitles.indexOf(section1.name) - sortedSectionTitles.indexOf(section2.name);
         });

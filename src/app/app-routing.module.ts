@@ -114,6 +114,11 @@ const devModule: Route = {
   loadChildren: () => import('./modules/api-doc/api-doc.module').then((m) => m.ApiDocModule),
   data: { preload: false },
 };
+const environmentsModule: Route = {
+  matcher: startsWithMatcher('environments'),
+  loadChildren: () => import('./modules/environments/environments.module').then((m) => m.EnvironmentsModule),
+  data: { preload: true },
+};
 
 @NgModule({
   imports: [
@@ -134,6 +139,7 @@ const devModule: Route = {
         credentialsModule,
         costsModule,
         devModule,
+        environmentsModule,
       ],
       {
         preloadingStrategy: SelectiveChunkPreloadStrategy,

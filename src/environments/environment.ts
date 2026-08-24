@@ -121,6 +121,7 @@ export const environment = {
     connectionLogUrl: 'http://localhost',
     certAuthorityUrl: 'http://localhost',
     lorawanConnectorUrl: 'http://localhost',
+    mosesUrl: 'http://localhost',
     mockPermissionsV2: false,
     mockCostService: false,
 };
