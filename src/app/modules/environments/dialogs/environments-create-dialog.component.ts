@@ -16,7 +16,7 @@
 
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { ENVIRONMENT_TYPES, Environment, EnvironmentType, environmentTypeLabel } from '../shared/environments.model';
+import { ENVIRONMENT_TYPES, Environment, EnvironmentType, defaultZoneTypeFor, environmentTypeLabel } from '../shared/environments.model';
 
 @Component({
     selector: 'senergy-environments-create-dialog',
@@ -39,7 +39,14 @@ export class EnvironmentsCreateDialogComponent {
         if (!this.name || !this.type) {
             return;
         }
-        const env: Environment = { name: this.name, type: this.type };
+        // The api refuses an environment without a zone, and a create dialog
+        // that cannot create is worse than one that asks for more. The starter
+        // zone is what the user renames first, so it carries a plain name.
+        const env: Environment = {
+            name: this.name,
+            type: this.type,
+            zones: [{ name: 'New zone', type: defaultZoneTypeFor(this.type) }],
+        };
         this.dialogRef.close(env);
     }
 }

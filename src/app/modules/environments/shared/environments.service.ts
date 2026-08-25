@@ -79,9 +79,15 @@ export class EnvironmentsService {
         );
     }
 
-    createEnvironment(env: Environment): Observable<Environment | null> {
+    createEnvironment(env: Environment): Observable<Environment | ValidationError | ApiError> {
         return this.http.post<Environment>(this.environmentsUrl, env).pipe(
-            catchError(this.errorHandlerService.handleError(EnvironmentsService.name, 'createEnvironment', null)),
+            catchError((error: HttpErrorResponse) => {
+                this.errorHandlerService.logError(EnvironmentsService.name, 'createEnvironment', error);
+                if (isValidationError(error.error)) {
+                    return of(error.error as ValidationError);
+                }
+                return of({ message: describeHttpError(error) } as ApiError);
+            }),
         );
     }
 

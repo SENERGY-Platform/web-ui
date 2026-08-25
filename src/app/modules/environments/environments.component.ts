@@ -22,7 +22,7 @@ import { Router } from '@angular/router';
 import { saveAs } from 'file-saver';
 import { EnvironmentsService } from './shared/environments.service';
 import { DialogsService } from '../../core/services/dialogs.service';
-import { Environment, environmentTypeLabel } from './shared/environments.model';
+import { ApiError, Environment, ValidationError, environmentTypeLabel, isApiError, isValidationError } from './shared/environments.model';
 import { countEnvironmentEntities, EnvironmentEntityCounts } from './shared/environments-count';
 import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create-dialog.component';
 
@@ -116,12 +116,8 @@ export class EnvironmentsComponent implements OnInit {
     newEnvironment(): void {
         this.dialog.open(EnvironmentsCreateDialogComponent).afterClosed().subscribe((env: Environment | undefined) => {
             if (env) {
-                this.environmentsService.createEnvironment(env).subscribe(created => {
-                    if (created && created.id) {
-                        this.router.navigate(['environments', created.id]);
-                    } else {
-                        this.snackBar.open('Error while creating the environment!', 'close', { panelClass: 'snack-bar-error' });
-                    }
+                this.environmentsService.createEnvironment(env).subscribe(result => {
+                    this.afterCreate(result, 'creating');
                 });
             }
         });
@@ -148,12 +144,8 @@ export class EnvironmentsComponent implements OnInit {
                 input.value = '';
                 return;
             }
-            this.environmentsService.createEnvironment(env).subscribe(created => {
-                if (created && created.id) {
-                    this.router.navigate(['environments', created.id]);
-                } else {
-                    this.snackBar.open('Error while importing the environment!', 'close', { panelClass: 'snack-bar-error' });
-                }
+            this.environmentsService.createEnvironment(env).subscribe(result => {
+                this.afterCreate(result, 'importing');
             });
             input.value = '';
         };
@@ -162,5 +154,28 @@ export class EnvironmentsComponent implements OnInit {
             input.value = '';
         };
         reader.readAsText(file);
+    }
+
+    /**
+     * A create that fails carries a reason, and a generic message hides it: the
+     * api answers a rejected document with the offending field, which is the
+     * only thing that tells the user what to change.
+     */
+    private afterCreate(result: Environment | ValidationError | ApiError, verb: string): void {
+        if (isValidationError(result)) {
+            const first = (result.problems || [])[0];
+            const detail = first ? first.path + ': ' + first.message : 'the document was rejected';
+            this.snackBar.open('Error while ' + verb + ' the environment - ' + detail, 'close', { panelClass: 'snack-bar-error' });
+            return;
+        }
+        if (isApiError(result)) {
+            this.snackBar.open('Error while ' + verb + ' the environment - ' + result.message, 'close', { panelClass: 'snack-bar-error' });
+            return;
+        }
+        if (result.id) {
+            this.router.navigate(['environments', result.id]);
+            return;
+        }
+        this.snackBar.open('Error while ' + verb + ' the environment!', 'close', { panelClass: 'snack-bar-error' });
     }
 }

@@ -328,3 +328,19 @@ export interface ApiError {
 export function isApiError(value: unknown): value is ApiError {
     return !!value && typeof (value as ApiError).message === 'string';
 }
+
+/**
+ * The zone type a new environment starts with. The api refuses an environment
+ * without a zone, so the create dialog has to seed one, and seeding the level a
+ * site of that kind actually starts at saves the first correction.
+ */
+export function defaultZoneTypeFor(type: EnvironmentType): ZoneType {
+    switch (type) {
+        case 'industrial_site':
+            return 'site';
+        case 'apartment':
+            return 'unit';
+        default:
+            return 'building';
+    }
+}
