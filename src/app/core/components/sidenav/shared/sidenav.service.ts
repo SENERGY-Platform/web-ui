@@ -300,6 +300,7 @@ export class SidenavService implements OnDestroy {
     setupSimulationSection(): SidenavSectionModel {
         const sections = this.checkAuthorizationForSections([
             [this.environmentsService.userHasReadAuthorization, new SidenavPageModel('Environments', 'link', 'precision_manufacturing', '/environments'), this.environmentsService],
+            [this.environmentsService.userHasDatasetReadAuthorization, new SidenavPageModel('Datasets', 'link', 'dataset', '/environments/datasets'), this.environmentsService],
         ]);
 
         return new SidenavSectionModel('Simulation', 'toggle', 'precision_manufacturing', '/environments', sections);

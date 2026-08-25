@@ -13,3 +13,165 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+.title-bar {
+    margin-bottom: 8px;
+}
+
+.problems-list {
+    background: rgba(244, 67, 54, 0.08);
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.problems-list-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.editor-body {
+    gap: 16px;
+}
+
+.tree-panel {
+    overflow: auto;
+    border-right: 1px solid rgba(0, 0, 0, 0.12);
+    padding-right: 8px;
+}
+
+.tree-panel-large {
+    width: 340px;
+    min-width: 340px;
+    height: calc(100vh - 260px);
+}
+
+.tree-invisible {
+    display: none;
+}
+
+.env-tree ul,
+.env-tree li {
+    margin-top: 0;
+    margin-bottom: 0;
+    list-style-type: none;
+}
+
+.tree-node {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+.tree-node:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.tree-node.selected {
+    background: rgba(68, 132, 206, 0.16); /* cc accent */
+}
+
+.tree-node-toggle-spacer {
+    width: 40px;
+    display: inline-block;
+}
+
+.tree-node-label {
+    margin-left: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tree-node-fill {
+    flex: 1 1 auto;
+}
+
+.node-editor-panel {
+    overflow: auto;
+    padding-left: 8px;
+}
+
+.node-problems {
+    background: rgba(244, 67, 54, 0.08);
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.node-problem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.node-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.third-width {
+    width: 220px;
+    margin-right: 8px;
+}
+
+.code-textarea {
+    font-family: monospace;
+}
+
+.factors-block {
+    margin-bottom: 16px;
+}
+
+.factors-label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.factors-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.factor-field {
+    width: 56px;
+}
+
+.formula-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.live-state-panel {
+    padding: 16px 4px;
+}
+
+.live-state-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(0, 0, 0, 0.6);
+    font-style: italic;
+}
+
+.live-state-section {
+    margin-bottom: 24px;
+}
+
+.live-state-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.manage-datasets-link {
+    display: block;
+}

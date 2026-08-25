@@ -201,6 +201,16 @@ describe('EnvironmentsComponent', () => {
         expect(component.dataSource.data.length).toBe(2);
     });
 
+    it('should open the editor for an existing environment', () => {
+        fixture.detectChanges();
+        const router = TestBed.inject(Router);
+        const navigateSpy = spyOn(router, 'navigate');
+
+        component.open(environments[0]);
+
+        expect(navigateSpy).toHaveBeenCalledWith(['environments', 'e1']);
+    });
+
     it('should export the fetched environment as a JSON blob', () => {
         fixture.detectChanges();
         const saveAsSpy = spyOn(fileSaver, 'saveAs');
@@ -213,9 +223,10 @@ describe('EnvironmentsComponent', () => {
         expect(filename).toBe('Plant A.json');
     });
 
-    it('should import a valid JSON file by creating an environment and reloading the list', (done) => {
+    it('should import a valid JSON file by creating an environment and opening its editor', (done) => {
         fixture.detectChanges();
-        const reloadSpy = spyOn(component, 'reload');
+        const router = TestBed.inject(Router);
+        const navigateSpy = spyOn(router, 'navigate');
         const imported: Environment = { name: 'Imported', type: 'apartment' };
         const input = { files: fakeFileList(JSON.stringify(imported)), value: 'environment.json' } as unknown as HTMLInputElement;
 
@@ -223,7 +234,7 @@ describe('EnvironmentsComponent', () => {
 
         setTimeout(() => {
             expect(environmentsService.created).toEqual([imported]);
-            expect(reloadSpy).toHaveBeenCalled();
+            expect(navigateSpy).toHaveBeenCalledWith(['environments', 'new-id']);
             expect(input.value).toBe('');
             done();
         }, 50);

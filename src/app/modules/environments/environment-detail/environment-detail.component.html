@@ -14,6 +14,427 @@
   ~ limitations under the License.
   -->
 
-<div class="container layout-margin">
-    <p>Environment editor for {{id}} is not built yet.</p>
+<senergy-spinner [show]="!dataReady"></senergy-spinner>
+
+<div class="environment-detail-container layout-margin" fxLayout="column" *ngIf="dataReady && environment">
+    <div class="title-bar" fxLayout="row" fxLayoutAlign="space-between center">
+        <h2>{{environment.name || 'Environment'}}</h2>
+        <div fxLayout="row" fxLayoutGap="8px">
+            <button mat-stroked-button [disabled]="isSaving" (click)="discard()">
+                <mat-icon>undo</mat-icon> Discard
+            </button>
+            <button mat-raised-button color="accent" [disabled]="!isDirty || isSaving" (click)="save()">
+                <mat-icon>save</mat-icon> Save
+            </button>
+        </div>
+    </div>
+
+    <div class="problems-list" *ngIf="problems.length > 0">
+        <div class="problems-list-item" *ngFor="let p of problems">
+            <mat-icon color="warn">error</mat-icon>
+            <span>{{p.path}}: {{p.message}}</span>
+        </div>
+    </div>
+
+    <mat-tab-group backgroundColor="accent" color="primary">
+    <mat-tab label="Editor">
+    <div class="editor-body" fxLayout="column" fxLayout.gt-xs="row">
+        <div class="tree-panel" [ngClass.gt-xs]="'tree-panel-large'">
+            <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="env-tree">
+                <mat-nested-tree-node *matTreeNodeDef="let node">
+                    <li>
+                        <div class="tree-node" [class.selected]="node.key === selectedNode?.key" (click)="select(node)">
+                            <button mat-icon-button matTreeNodeToggle *ngIf="node.children.length > 0" (click)="$event.stopPropagation()">
+                                <mat-icon class="mat-icon-rtl-mirror">
+                                    {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                                </mat-icon>
+                            </button>
+                            <span class="tree-node-toggle-spacer" *ngIf="node.children.length === 0"></span>
+
+                            <mat-icon matBadge="!" matBadgeColor="warn" matBadgeSize="small" [matBadgeHidden]="!problemNodeKeys.has(node.key)">
+                                {{node.icon}}
+                            </mat-icon>
+                            <span class="tree-node-label">{{node.data.name || node.name}}</span>
+                            <span class="tree-node-fill"></span>
+
+                            <ng-container [ngSwitch]="node.kind">
+                                <ng-container *ngSwitchCase="'environment'">
+                                    <button mat-icon-button matTooltip="Add zone" (click)="addZone(node); $event.stopPropagation()">
+                                        <mat-icon>add</mat-icon>
+                                    </button>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'zone'">
+                                    <button mat-icon-button matTooltip="Add sub-zone" (click)="addZone(node); $event.stopPropagation()">
+                                        <mat-icon>create_new_folder</mat-icon>
+                                    </button>
+                                    <button mat-icon-button matTooltip="Add asset" (click)="addAsset(node); $event.stopPropagation()">
+                                        <mat-icon>add_box</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="warn" matTooltip="Delete zone" (click)="deleteNode(node); $event.stopPropagation()">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'asset'">
+                                    <button mat-icon-button matTooltip="Add channel" (click)="addChannel(node); $event.stopPropagation()">
+                                        <mat-icon>add</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="warn" matTooltip="Delete asset" (click)="deleteNode(node); $event.stopPropagation()">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'channel'">
+                                    <button mat-icon-button color="warn" matTooltip="Delete channel" (click)="deleteNode(node); $event.stopPropagation()">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                        <ul [class.tree-invisible]="!treeControl.isExpanded(node)">
+                            <ng-container matTreeNodeOutlet></ng-container>
+                        </ul>
+                    </li>
+                </mat-nested-tree-node>
+            </mat-tree>
+        </div>
+
+        <div class="node-editor-panel" fxFlex *ngIf="selectedNode">
+            <div class="node-problems" *ngIf="selectedNodeProblems.length > 0">
+                <div class="node-problem" *ngFor="let p of selectedNodeProblems">
+                    <mat-icon color="warn">error</mat-icon>
+                    <span>{{p.suffix ? p.suffix + ': ' : ''}}{{p.message}}</span>
+                </div>
+            </div>
+
+            <form class="node-form" [ngSwitch]="selectedNode.kind">
+                <ng-container *ngSwitchCase="'environment'">
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>Name</mat-label>
+                        <input matInput [(ngModel)]="selectedEnvironment!.name" (ngModelChange)="markDirty()" name="env-name">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>Type</mat-label>
+                        <mtx-select [(ngModel)]="selectedEnvironment!.type" (ngModelChange)="markDirty()" name="env-type"
+                            appendTo=".ng-select-anchor">
+                            <mtx-option *ngFor="let t of ENVIRONMENT_TYPES" [value]="t">{{environmentTypeLabel(t)}}</mtx-option>
+                        </mtx-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" color="accent" class="third-width">
+                        <mat-label>Seed</mat-label>
+                        <input matInput type="number" step="1" [(ngModel)]="selectedEnvironment!.seed" (ngModelChange)="markDirty()"
+                            name="env-seed">
+                    </mat-form-field>
+
+                    <h3>Context</h3>
+                    <senergy-environments-key-value-editor [record]="selectedEnvironment!.context" mode="mixed"
+                        (recordChange)="setEnvironmentContext(selectedEnvironment!, $event)">
+                    </senergy-environments-key-value-editor>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'zone'">
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>Name</mat-label>
+                        <input matInput [(ngModel)]="selectedZone!.name" (ngModelChange)="markDirty()" name="zone-name">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>Type</mat-label>
+                        <mtx-select [(ngModel)]="selectedZone!.type" (ngModelChange)="markDirty()" name="zone-type"
+                            appendTo=".ng-select-anchor">
+                            <mtx-option *ngFor="let t of ZONE_TYPES" [value]="t">{{zoneTypeLabel(t)}}</mtx-option>
+                        </mtx-select>
+                    </mat-form-field>
+
+                    <h3>Initial States</h3>
+                    <senergy-environments-key-value-editor [record]="selectedZone!.initial_states" mode="mixed"
+                        (recordChange)="setZoneInitialStates(selectedZone!, $event)">
+                    </senergy-environments-key-value-editor>
+
+                    <h3>Time Constants (seconds)</h3>
+                    <senergy-environments-key-value-editor [record]="selectedZone!.time_constants" mode="number"
+                        (recordChange)="setTimeConstants(selectedZone!, $event)">
+                    </senergy-environments-key-value-editor>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'asset'">
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>Name</mat-label>
+                        <input matInput [(ngModel)]="selectedAsset!.name" (ngModelChange)="markDirty()" name="asset-name">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>Kind</mat-label>
+                        <mtx-select [(ngModel)]="selectedAsset!.kind" (ngModelChange)="markDirty()" name="asset-kind"
+                            appendTo=".ng-select-anchor">
+                            <mtx-option *ngFor="let k of ASSET_KINDS" [value]="k">{{assetKindLabel(k)}}</mtx-option>
+                        </mtx-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>External Ref</mat-label>
+                        <input matInput [(ngModel)]="selectedAsset!.external_ref" (ngModelChange)="markDirty()" name="asset-external-ref">
+                        <mat-hint>Platform device id.</mat-hint>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>External Type Id</mat-label>
+                        <input matInput [(ngModel)]="selectedAsset!.external_type_id" (ngModelChange)="markDirty()"
+                            name="asset-external-type-id">
+                        <mat-hint>Platform device type id.</mat-hint>
+                    </mat-form-field>
+
+                    <h3>Initial States</h3>
+                    <senergy-environments-key-value-editor [record]="selectedAsset!.initial_states" mode="mixed"
+                        (recordChange)="setAssetInitialStates(selectedAsset!, $event)">
+                    </senergy-environments-key-value-editor>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'channel'">
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>Name</mat-label>
+                        <input matInput [(ngModel)]="selectedChannel!.name" (ngModelChange)="markDirty()" name="channel-name">
+                    </mat-form-field>
+
+                    <mat-button-toggle-group [value]="selectedChannel!.direction"
+                        (change)="setChannelDirection(selectedChannel!, $event.value)" name="channel-direction">
+                        <mat-button-toggle *ngFor="let d of DIRECTIONS" [value]="d">{{directionLabel(d)}}</mat-button-toggle>
+                    </mat-button-toggle-group>
+
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>External Ref</mat-label>
+                        <input matInput [(ngModel)]="selectedChannel!.external_ref" (ngModelChange)="markDirty()" name="channel-external-ref">
+                        <mat-hint>The platform service id this channel publishes to.</mat-hint>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" color="accent" class="third-width">
+                        <mat-label>Interval (seconds)</mat-label>
+                        <input matInput type="number" step="1" [(ngModel)]="selectedChannel!.interval_seconds" (ngModelChange)="markDirty()"
+                            name="channel-interval">
+                        <mat-hint>Send interval in seconds, 0 = on command only.</mat-hint>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" color="accent" class="third-width">
+                        <mat-label>Unit</mat-label>
+                        <input matInput [(ngModel)]="selectedChannel!.unit" (ngModelChange)="markDirty()" name="channel-unit">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" color="accent" class="third-width">
+                        <mat-label>Characteristic Id</mat-label>
+                        <input matInput [(ngModel)]="selectedChannel!.characteristic_id" (ngModelChange)="markDirty()"
+                            name="channel-characteristic-id">
+                    </mat-form-field>
+
+                    <mat-divider></mat-divider>
+                    <h3>Source</h3>
+
+                    <mat-button-toggle-group [value]="selectedChannel!.source?.kind"
+                        (change)="onSourceKindChange(selectedChannel!, $event.value)" name="source-kind">
+                        <mat-button-toggle *ngFor="let k of SOURCE_KINDS" [value]="k">{{sourceKindLabel(k)}}</mat-button-toggle>
+                    </mat-button-toggle-group>
+
+                    <ng-container [ngSwitch]="selectedChannel!.source?.kind">
+                        <ng-container *ngSwitchCase="'script'">
+                            <mat-form-field appearance="outline" color="accent" class="third-width">
+                                <mat-label>Own compute interval (seconds)</mat-label>
+                                <input matInput type="number" step="1" [(ngModel)]="selectedChannel!.source!.interval_seconds"
+                                    (ngModelChange)="markDirty()" name="script-interval">
+                                <mat-hint>Own compute interval, 0 = when sending.</mat-hint>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" color="accent" class="full-width">
+                                <mat-label>Code</mat-label>
+                                <textarea matInput class="code-textarea" rows="10" [(ngModel)]="selectedChannel!.source!.script!.code"
+                                    (ngModelChange)="markDirty()" name="script-code"></textarea>
+                            </mat-form-field>
+                        </ng-container>
+
+                        <ng-container *ngSwitchCase="'profile'">
+                            <mat-form-field appearance="outline" color="accent" class="third-width">
+                                <mat-label>Base</mat-label>
+                                <input matInput type="number" [(ngModel)]="selectedChannel!.source!.profile!.base" (ngModelChange)="markDirty()"
+                                    name="profile-base">
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" color="accent" class="third-width">
+                                <mat-label>Spread (%)</mat-label>
+                                <input matInput type="number" [(ngModel)]="selectedChannel!.source!.profile!.spread_percent"
+                                    (ngModelChange)="markDirty()" name="profile-spread">
+                            </mat-form-field>
+                            <mat-checkbox [(ngModel)]="selectedChannel!.source!.profile!.cumulative" (ngModelChange)="markDirty()"
+                                name="profile-cumulative">
+                                Cumulative
+                            </mat-checkbox>
+
+                            <div class="factors-block">
+                                <span class="factors-label">Hour factors</span>
+                                <div class="factors-row">
+                                    <mat-form-field appearance="outline" color="accent" class="factor-field"
+                                        *ngFor="let h of hourIndexes">
+                                        <mat-label>{{h}}</mat-label>
+                                        <input matInput type="number" [ngModel]="selectedChannel!.source!.profile!.hour_factors?.[h]"
+                                            [ngModelOptions]="{standalone: true}"
+                                            (ngModelChange)="setHourFactor(selectedChannel!.source!.profile!, h, $event)">
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <div class="factors-block">
+                                <span class="factors-label">Weekday factors</span>
+                                <div class="factors-row">
+                                    <mat-form-field appearance="outline" color="accent" class="factor-field"
+                                        *ngFor="let w of weekdayIndexes">
+                                        <mat-label>{{weekdayLabels[w]}}</mat-label>
+                                        <input matInput type="number" [ngModel]="selectedChannel!.source!.profile!.weekday_factors?.[w]"
+                                            [ngModelOptions]="{standalone: true}"
+                                            (ngModelChange)="setWeekdayFactor(selectedChannel!.source!.profile!, w, $event)">
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </ng-container>
+
+                        <ng-container *ngSwitchCase="'dataset'">
+                            <mat-form-field appearance="outline" color="accent" class="third-width">
+                                <mat-label>Origin</mat-label>
+                                <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.origin" (ngModelChange)="markDirty()"
+                                    name="dataset-origin" appendTo=".ng-select-anchor">
+                                    <mtx-option *ngFor="let o of DATASET_ORIGINS" [value]="o">{{datasetOriginLabel(o)}}</mtx-option>
+                                </mtx-select>
+                            </mat-form-field>
+
+                            <ng-container *ngIf="selectedChannel!.source!.dataset!.origin === 'file'">
+                                <mat-form-field appearance="outline" color="accent" class="third-width">
+                                    <mat-label>Dataset</mat-label>
+                                    <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.ref" (ngModelChange)="markDirty()"
+                                        name="dataset-ref" appendTo=".ng-select-anchor">
+                                        <mtx-option *ngFor="let d of datasets" [value]="d.id">{{d.name}}</mtx-option>
+                                    </mtx-select>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" color="accent" class="third-width">
+                                    <mat-label>Column</mat-label>
+                                    <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.column" (ngModelChange)="markDirty()"
+                                        name="dataset-column" appendTo=".ng-select-anchor">
+                                        <mtx-option *ngFor="let c of columnsForDataset(selectedChannel!.source!.dataset!.ref)"
+                                            [value]="c.name">{{c.name}}</mtx-option>
+                                    </mtx-select>
+                                </mat-form-field>
+                                <a mat-button color="accent" routerLink="/environments/datasets" class="manage-datasets-link">
+                                    <mat-icon>open_in_new</mat-icon> Manage datasets
+                                </a>
+                            </ng-container>
+
+                            <ng-container *ngIf="selectedChannel!.source!.dataset!.origin === 'platform'">
+                                <mat-form-field appearance="outline" color="accent" class="third-width">
+                                    <mat-label>Ref</mat-label>
+                                    <input matInput [(ngModel)]="selectedChannel!.source!.dataset!.ref" (ngModelChange)="markDirty()"
+                                        name="dataset-platform-ref">
+                                    <mat-hint>Platform device id.</mat-hint>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" color="accent" class="third-width">
+                                    <mat-label>Service Ref</mat-label>
+                                    <input matInput [(ngModel)]="selectedChannel!.source!.dataset!.service_ref" (ngModelChange)="markDirty()"
+                                        name="dataset-service-ref">
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" color="accent" class="third-width">
+                                    <mat-label>Column</mat-label>
+                                    <input matInput [(ngModel)]="selectedChannel!.source!.dataset!.column" (ngModelChange)="markDirty()"
+                                        name="dataset-platform-column">
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" color="accent" class="third-width">
+                                    <mat-label>Window</mat-label>
+                                    <input matInput [(ngModel)]="selectedChannel!.source!.dataset!.window" (ngModelChange)="markDirty()"
+                                        name="dataset-window">
+                                    <mat-hint>How far back to fetch, e.g. 36h, 7d, 4w.</mat-hint>
+                                </mat-form-field>
+                            </ng-container>
+
+                            <mat-form-field appearance="outline" color="accent" class="third-width">
+                                <mat-label>Resample</mat-label>
+                                <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.resample" (ngModelChange)="markDirty()"
+                                    name="dataset-resample" appendTo=".ng-select-anchor">
+                                    <mtx-option *ngFor="let r of RESAMPLE_MODES" [value]="r">{{resampleModeLabel(r)}}</mtx-option>
+                                </mtx-select>
+                                <mat-hint>{{resampleModeHint(selectedChannel!.source!.dataset!.resample)}}</mat-hint>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" color="accent" class="third-width">
+                                <mat-label>Anchor</mat-label>
+                                <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.anchor" (ngModelChange)="markDirty()"
+                                    name="dataset-anchor" appendTo=".ng-select-anchor">
+                                    <mtx-option *ngFor="let a of ANCHOR_MODES" [value]="a">{{anchorModeLabel(a)}}</mtx-option>
+                                </mtx-select>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" color="accent" class="third-width">
+                                <mat-label>Scale</mat-label>
+                                <input matInput type="number" [(ngModel)]="selectedChannel!.source!.dataset!.scale"
+                                    (ngModelChange)="markDirty()" name="dataset-scale">
+                                <mat-hint>0 = unscaled.</mat-hint>
+                            </mat-form-field>
+                            <mat-checkbox [(ngModel)]="selectedChannel!.source!.dataset!.cumulative" (ngModelChange)="markDirty()"
+                                name="dataset-cumulative">
+                                Cumulative
+                            </mat-checkbox>
+                        </ng-container>
+
+                        <ng-container *ngSwitchCase="'formula'">
+                            <mat-form-field appearance="outline" color="accent" class="full-width">
+                                <mat-label>Expression</mat-label>
+                                <textarea matInput class="code-textarea" rows="6" [(ngModel)]="selectedChannel!.source!.formula!.expression"
+                                    (ngModelChange)="markDirty()" name="formula-expression"></textarea>
+                            </mat-form-field>
+                            <div class="formula-inputs">
+                                <div class="formula-input-row" *ngFor="let entry of formulaEntries; trackBy: trackByFormulaName">
+                                    <mat-form-field appearance="outline" color="accent" class="third-width">
+                                        <mat-label>Name</mat-label>
+                                        <input matInput #formulaNameField [value]="entry.name"
+                                            (blur)="renameFormulaInput(entry.name, formulaNameField.value)">
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" color="accent" class="third-width">
+                                        <mat-label>Reference</mat-label>
+                                        <input matInput [ngModel]="entry.ref" [ngModelOptions]="{standalone: true}"
+                                            (ngModelChange)="setFormulaInput(entry.name, $event)">
+                                        <mat-hint>Reference: context.&lt;key&gt;, zone.&lt;key&gt;, asset.&lt;key&gt;, channel.&lt;id&gt;.</mat-hint>
+                                    </mat-form-field>
+                                    <button mat-icon-button type="button" color="warn" (click)="removeFormulaInput(entry.name)">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                                <button mat-stroked-button color="accent" type="button" (click)="addFormulaInput()">
+                                    <mat-icon>add</mat-icon> Add input
+                                </button>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+                </ng-container>
+            </form>
+        </div>
+    </div>
+    </mat-tab>
+
+    <mat-tab label="Live state">
+        <div class="live-state-panel">
+            <p class="live-state-hint">
+                <mat-icon>info</mat-icon>
+                Sets values on the running simulation; they take effect on the next tick. Current live values are not shown here.
+            </p>
+
+            <div class="live-state-section">
+                <h3>Context</h3>
+                <senergy-environments-key-value-editor [record]="contextDraft" mode="mixed"
+                    (recordChange)="onContextChange($event)">
+                </senergy-environments-key-value-editor>
+            </div>
+
+            <div class="live-state-section" *ngFor="let entry of zoneStates">
+                <h3>Zone: {{entry.target.name}}</h3>
+                <senergy-environments-key-value-editor [record]="entry.draft" mode="mixed"
+                    [keyHint]="zoneKeyHint(entry)" (recordChange)="onZoneStateChange(entry, $event)">
+                </senergy-environments-key-value-editor>
+            </div>
+
+            <div class="live-state-section" *ngFor="let entry of assetStates">
+                <h3>Asset: {{entry.target.name}}</h3>
+                <senergy-environments-key-value-editor [record]="entry.draft" mode="mixed"
+                    (recordChange)="onAssetStateChange(entry, $event)">
+                </senergy-environments-key-value-editor>
+            </div>
+
+            <div class="live-state-actions">
+                <button mat-raised-button color="accent" [disabled]="!pendingChange || liveStateApplying"
+                    (click)="applyLiveState()">
+                    <mat-icon>bolt</mat-icon> Apply
+                </button>
+            </div>
+        </div>
+    </mat-tab>
+    </mat-tab-group>
 </div>

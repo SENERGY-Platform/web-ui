@@ -1,0 +1,550 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { FlexLayoutModule } from '@ngbracket/ngx-layout';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTreeModule } from '@angular/material/tree';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { CoreModule } from '../../../core/core.module';
+import { EnvironmentDetailComponent } from './environment-detail.component';
+import { EnvironmentsKeyValueEditorComponent } from '../key-value-editor/environments-key-value-editor.component';
+import { EnvironmentsService } from '../shared/environments.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
+import { environment } from '../../../../environments/environment';
+import { Environment } from '../shared/environments.model';
+
+class MockLadonService {
+    getUserAuthorizationsForURI(_uri: string): any {
+        return undefined;
+    }
+}
+
+class ActivatedRouteStub {
+    snapshot = { paramMap: { get: (_key: string) => 'e1' } };
+}
+
+// z1 carries one asset with one channel, enough to exercise the tree build and the
+// per-kind editor getters without the size of a full fixture environment.
+const nestedEnvironment: Environment = {
+    id: 'e1',
+    name: 'Plant A',
+    type: 'industrial_site',
+    seed: 1,
+    zones: [
+        {
+            id: 'z1',
+            name: 'Building',
+            type: 'building',
+            assets: [
+                {
+                    id: 'a1',
+                    name: 'Meter 1',
+                    kind: 'meter',
+                    channels: [
+                        {
+                            id: 'c1',
+                            name: 'Power',
+                            direction: 'sensor',
+                            source: { kind: 'script', script: { code: 'return 1;' } },
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+};
+
+describe('EnvironmentDetailComponent', () => {
+    let component: EnvironmentDetailComponent;
+    let fixture: ComponentFixture<EnvironmentDetailComponent>;
+    let httpMock: HttpTestingController;
+    const environmentsUrl = environment.mosesUrl + '/environments';
+    const datasetsUrl = environment.mosesUrl + '/datasets';
+
+    beforeEach(waitForAsync(() => {
+        TestBed.configureTestingModule({
+            declarations: [EnvironmentDetailComponent, EnvironmentsKeyValueEditorComponent],
+            imports: [
+                CommonModule,
+                FormsModule,
+                FlexLayoutModule,
+                CoreModule,
+                NoopAnimationsModule,
+                MatTableModule,
+                MatButtonModule,
+                MatIconModule,
+                MatTooltipModule,
+                MatDialogModule,
+                MatFormFieldModule,
+                MatInputModule,
+                MatSnackBarModule,
+                MatTreeModule,
+                MatButtonToggleModule,
+                MatBadgeModule,
+                MatCheckboxModule,
+                MatDividerModule,
+                MatTabsModule,
+                MtxSelectModule,
+            ],
+            providers: [
+                EnvironmentsService,
+                DialogsService,
+                { provide: LadonService, useClass: MockLadonService },
+                { provide: ActivatedRoute, useClass: ActivatedRouteStub },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(EnvironmentDetailComponent);
+        component = fixture.componentInstance;
+        httpMock = TestBed.inject(HttpTestingController);
+    }));
+
+    afterEach(() => {
+        httpMock.verify();
+    });
+
+    /**
+     * Drives ngOnInit's two requests (environment + datasets) and settles change detection.
+     * Flushes a deep clone: the component normalizes and then mutates its environment in
+     * place, and the shared `nestedEnvironment` fixture must stay pristine across tests.
+     */
+    function loadWith(env: Environment): void {
+        fixture.detectChanges();
+        httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(env)));
+        httpMock.expectOne(datasetsUrl).flush([]);
+        fixture.detectChanges();
+    }
+
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
+
+    it('loads the environment, builds the tree and selects the root by default', () => {
+        loadWith(nestedEnvironment);
+
+        expect(component.dataReady).toBe(true);
+        expect(component.root?.kind).toBe('environment');
+        expect(component.root?.children.length).toBe(1);
+        expect(component.selectedNode?.kind).toBe('environment');
+        expect(component.selectedEnvironment?.name).toBe('Plant A');
+    });
+
+    it('selects a clicked node and exposes it through the matching getter', () => {
+        loadWith(nestedEnvironment);
+
+        const zoneNode = component.root!.children[0];
+        component.select(zoneNode);
+        fixture.detectChanges();
+
+        expect(component.selectedNode?.kind).toBe('zone');
+        expect(component.selectedZone?.name).toBe('Building');
+
+        const assetNode = zoneNode.children[0];
+        component.select(assetNode);
+        expect(component.selectedAsset?.name).toBe('Meter 1');
+
+        const channelNode = assetNode.children[0];
+        component.select(channelNode);
+        expect(component.selectedChannel?.name).toBe('Power');
+    });
+
+    describe('isDirty (event-based, not a whole-document diff)', () => {
+        it('is not dirty right after loading', () => {
+            loadWith(nestedEnvironment);
+            expect(component.isDirty).toBe(false);
+        });
+
+        it('becomes dirty when a field mutator runs', () => {
+            loadWith(nestedEnvironment);
+            component.setEnvironmentContext(component.selectedEnvironment!, { outdoor_temp: 5 });
+            expect(component.isDirty).toBe(true);
+        });
+
+        it('does not become dirty from merely selecting a different node', () => {
+            loadWith(nestedEnvironment);
+            const zoneNode = component.root!.children[0];
+
+            component.select(zoneNode);
+
+            expect(component.isDirty).toBe(false);
+        });
+
+        it('resets to false on discard (reload)', () => {
+            loadWith(nestedEnvironment);
+            component.markDirty();
+            expect(component.isDirty).toBe(true);
+
+            component.discard();
+            httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(nestedEnvironment)));
+
+            expect(component.isDirty).toBe(false);
+        });
+    });
+
+    describe('save', () => {
+        it('adds a new zone under the root, selects it immediately and marks the document dirty', () => {
+            loadWith(nestedEnvironment);
+
+            component.addZone(component.root!);
+            fixture.detectChanges();
+
+            expect(component.environment?.zones?.length).toBe(2);
+            expect(component.selectedNode?.kind).toBe('zone');
+            expect(component.selectedZone?.name).toBe('New Zone');
+            expect(component.isDirty).toBe(true);
+        });
+
+        it('saves successfully, shows a success snackbar and reloads while keeping the current selection', () => {
+            loadWith(nestedEnvironment);
+            const zoneNode = component.root!.children[0];
+            component.select(zoneNode);
+            component.markDirty();
+            const snackBarSpy = spyOn((component as any).snackBar, 'open');
+
+            component.save();
+            const putReq = httpMock.expectOne(environmentsUrl + '/e1');
+            expect(putReq.request.method).toBe('PUT');
+            putReq.flush(JSON.parse(JSON.stringify(nestedEnvironment)));
+
+            expect(snackBarSpy).toHaveBeenCalledWith('Environment saved successfully.', undefined, { duration: 2000 });
+
+            // save() reloads (the server may have assigned ids) -- the reload must preserve selection
+            const getReq = httpMock.expectOne(environmentsUrl + '/e1');
+            getReq.flush(JSON.parse(JSON.stringify(nestedEnvironment)));
+
+            expect(component.selectedNode?.kind).toBe('zone');
+            expect(component.selectedZone?.name).toBe('Building');
+            expect(component.isDirty).toBe(false);
+        });
+
+        it('shows the problems and does not reload on a structured ValidationError', () => {
+            loadWith(nestedEnvironment);
+            component.markDirty();
+            const snackBarSpy = spyOn((component as any).snackBar, 'open');
+
+            component.save();
+            httpMock
+                .expectOne(environmentsUrl + '/e1')
+                .flush({ problems: [{ path: 'name', message: 'must not be empty' }] }, { status: 400, statusText: 'Bad Request' });
+
+            expect(component.problems.length).toBe(1);
+            expect(snackBarSpy).toHaveBeenCalledWith('The environment could not be saved: see the problems below.', 'close', {
+                panelClass: 'snack-bar-error',
+            });
+            httpMock.expectNone(environmentsUrl + '/e1'); // no reload
+        });
+
+        // BLOCKING regression: a 400 with a plain-text body (a Go json.Unmarshal message,
+        // not a {problems: [...]} object) used to fall through "not a ValidationError" into
+        // the truthy-result success branch, reporting "saved successfully" and reloading --
+        // silently discarding the edit that had just failed to save.
+        it('does not report success or reload on a plaintext 400 body, and shows the error text', () => {
+            loadWith(nestedEnvironment);
+            component.markDirty();
+            const snackBarSpy = spyOn((component as any).snackBar, 'open');
+            const plainTextBody = 'unable to read the request body: json: cannot unmarshal number 900.5 into ... int64';
+
+            component.save();
+            httpMock.expectOne(environmentsUrl + '/e1').flush(plainTextBody, { status: 400, statusText: 'Bad Request' });
+
+            expect(snackBarSpy).not.toHaveBeenCalledWith('Environment saved successfully.', jasmine.anything(), jasmine.anything());
+            expect(snackBarSpy).toHaveBeenCalledWith(plainTextBody, 'close', { panelClass: 'snack-bar-error' });
+            expect(component.isDirty).toBe(true); // the edit is still there, nothing was discarded
+            httpMock.expectNone(environmentsUrl + '/e1'); // no reload
+        });
+
+        it('does not report success or reload on a 500', () => {
+            loadWith(nestedEnvironment);
+            component.markDirty();
+            const snackBarSpy = spyOn((component as any).snackBar, 'open');
+
+            component.save();
+            httpMock.expectOne(environmentsUrl + '/e1').flush('boom', { status: 500, statusText: 'Internal Server Error' });
+
+            expect(snackBarSpy).toHaveBeenCalledWith('boom', 'close', { panelClass: 'snack-bar-error' });
+            httpMock.expectNone(environmentsUrl + '/e1');
+        });
+
+        // Client-side pre-check: seed/interval_seconds/time_constants are int64 server-side
+        // and produce an opaque unmarshal error; catching a non-integer value here means the
+        // request is never sent at all, and the message names the offending field.
+        it('blocks the save client-side when a seed is not a whole number, without calling the API', () => {
+            loadWith(nestedEnvironment);
+            component.selectedEnvironment!.seed = 900.5;
+            component.markDirty();
+            const snackBarSpy = spyOn((component as any).snackBar, 'open');
+
+            component.save();
+
+            expect(snackBarSpy).toHaveBeenCalledWith('These fields must be whole numbers: seed', 'close', { panelClass: 'snack-bar-error' });
+            httpMock.expectNone(environmentsUrl + '/e1');
+        });
+    });
+
+    describe('problem indexing (Set/Map computed once from the ValidationError, not per node per check)', () => {
+        it('marks the tree node for a top-level field problem and shows it above the selected node once selected', () => {
+            loadWith(nestedEnvironment);
+            component.markDirty();
+
+            component.save();
+            httpMock
+                .expectOne(environmentsUrl + '/e1')
+                .flush({ problems: [{ path: 'zones[0].name', message: 'must not be empty' }] }, { status: 400, statusText: 'Bad Request' });
+
+            const zoneNode = component.root!.children[0];
+            expect(component.problemNodeKeys.has(component.root!.key)).toBe(true); // root contains every location
+            expect(component.problemNodeKeys.has(zoneNode.key)).toBe(true);
+
+            component.select(zoneNode);
+            expect(component.selectedNodeProblems).toEqual([{ message: 'must not be empty', suffix: 'name' }]);
+        });
+
+        it('does not show an ancestor\'s badge-worthy problem as belonging to a sibling node', () => {
+            loadWith(nestedEnvironment);
+            component.addZone(component.root!); // a second, sibling zone
+            const secondZone = component.selectedNode!;
+            component.markDirty();
+
+            component.save();
+            httpMock
+                .expectOne(environmentsUrl + '/e1')
+                .flush({ problems: [{ path: 'zones[0].name', message: 'must not be empty' }] }, { status: 400, statusText: 'Bad Request' });
+
+            expect(component.problemNodeKeys.has(secondZone.key)).toBe(false);
+        });
+
+        // BLOCKING-adjacent regression: indexes shift on add/delete, so a problem list from
+        // before the structural change would point at the wrong node afterwards.
+        it('clears stale problems when the tree structure changes', () => {
+            loadWith(nestedEnvironment);
+            component.markDirty();
+            component.save();
+            httpMock
+                .expectOne(environmentsUrl + '/e1')
+                .flush({ problems: [{ path: 'zones[0].name', message: 'must not be empty' }] }, { status: 400, statusText: 'Bad Request' });
+            expect(component.problems.length).toBe(1);
+
+            component.addAsset(component.root!.children[0]);
+
+            expect(component.problems).toEqual([]);
+            expect(component.problemNodeKeys.size).toBe(0);
+        });
+    });
+
+    describe('deleting a node', () => {
+        // BLOCKING-adjacent regression: with 3 siblings [A, B, C] and B selected, deleting A
+        // shifts C into B's old array index. A naive "keep selectedKey, fall back to root
+        // only if it no longer resolves" re-resolves the old key against whatever now sits
+        // there -- i.e. it would silently select the next sibling instead of noticing
+        // anything happened. The fix always lands on the deleted node's parent instead.
+        it('always selects the parent after a delete, even when a different (earlier) sibling was removed', () => {
+            loadWith(nestedEnvironment);
+            component.addZone(component.root!); // zones: [Building, New Zone]
+            const buildingZone = component.root!.children[0];
+            const newZone = component.root!.children[1];
+            component.select(newZone); // select the *second* zone, not the one about to be deleted
+            spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({ afterClosed: () => ({ subscribe: (cb: any) => cb(true) }) } as any);
+
+            component.deleteNode(buildingZone); // delete the *first* zone
+
+            expect(component.environment?.zones?.length).toBe(1);
+            expect(component.environment?.zones?.[0].name).toBe('New Zone');
+            expect(component.selectedNode?.kind).toBe('environment');
+        });
+
+        it('selects the environment root after deleting a top-level zone', () => {
+            loadWith(nestedEnvironment);
+            const zoneNode = component.root!.children[0];
+            component.select(zoneNode);
+            spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({ afterClosed: () => ({ subscribe: (cb: any) => cb(true) }) } as any);
+
+            component.deleteNode(zoneNode);
+
+            expect(component.environment?.zones?.length).toBe(0);
+            expect(component.selectedNode?.kind).toBe('environment');
+        });
+
+        it('selects the parent asset after deleting its channel', () => {
+            loadWith(nestedEnvironment);
+            const zoneNode = component.root!.children[0];
+            const assetNode = zoneNode.children[0];
+            const channelNode = assetNode.children[0];
+            component.select(channelNode);
+            spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({ afterClosed: () => ({ subscribe: (cb: any) => cb(true) }) } as any);
+
+            component.deleteNode(channelNode);
+
+            const newAssetNode = component.root!.children[0].children[0];
+            expect(component.selectedNode?.kind).toBe('asset');
+            expect(component.selectedNode?.key).toBe(newAssetNode.key);
+        });
+
+        it('does not delete anything and keeps the selection when the confirmation is declined', () => {
+            loadWith(nestedEnvironment);
+            const zoneNode = component.root!.children[0];
+            component.select(zoneNode);
+            spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({ afterClosed: () => ({ subscribe: (cb: any) => cb(false) }) } as any);
+
+            component.deleteNode(zoneNode);
+
+            expect(component.environment?.zones?.length).toBe(1);
+            expect(component.selectedNode?.key).toBe(zoneNode.key);
+        });
+    });
+
+    describe('formula inputs (cached array, not rebuilt from the map on every keystroke)', () => {
+        function selectFormulaChannel(): void {
+            const channelNode = component.root!.children[0].children[0].children[0];
+            component.select(channelNode);
+            component.onSourceKindChange(component.selectedChannel!, 'formula');
+        }
+
+        it('keeps the same formulaEntries array reference across an unrelated re-selection of the same node', () => {
+            loadWith(nestedEnvironment);
+            selectFormulaChannel();
+            component.addFormulaInput();
+            const entriesAfterAdd = component.formulaEntries;
+
+            // typing in the Reference field must not rebuild the array (that would reset
+            // the DOM row and drop focus)
+            component.setFormulaInput(entriesAfterAdd[0].name, 'context.outdoor_temp');
+
+            expect(component.formulaEntries).toBe(entriesAfterAdd);
+            expect(component.formulaEntries[0].ref).toBe('context.outdoor_temp');
+        });
+
+        it('rebuilds formulaEntries when an input is added, renamed or removed', () => {
+            loadWith(nestedEnvironment);
+            selectFormulaChannel();
+
+            component.addFormulaInput();
+            expect(component.formulaEntries.length).toBe(1);
+            const firstName = component.formulaEntries[0].name;
+
+            component.renameFormulaInput(firstName, 'temp');
+            expect(component.formulaEntries.map((e) => e.name)).toEqual(['temp']);
+
+            component.removeFormulaInput('temp');
+            expect(component.formulaEntries).toEqual([]);
+        });
+
+        it('trackByFormulaName tracks by name', () => {
+            expect(component.trackByFormulaName(0, { name: 'a' })).toBe('a');
+        });
+    });
+
+    describe('Live state tab', () => {
+        // z1 also carries initial_states/time_constants and a1 initial_states, so the
+        // live-state drafts have something to seed from and to touch.
+        const envWithState: Environment = JSON.parse(JSON.stringify(nestedEnvironment));
+        envWithState.zones![0].initial_states = { occupied: true };
+        envWithState.zones![0].time_constants = { occupied: 900 };
+        envWithState.zones![0].assets![0].initial_states = { power: 0 };
+
+        it('seeds context/zone/asset drafts from initial_states but starts with nothing pending', () => {
+            loadWith(envWithState);
+
+            expect(component.zoneStates.length).toBe(1);
+            expect(component.zoneStates[0].draft).toEqual({ occupied: true });
+            expect(component.assetStates.length).toBe(1);
+            expect(component.assetStates[0].draft).toEqual({ power: 0 });
+            expect(component.pendingChange).toBeUndefined(); // nothing touched yet -- Apply stays disabled
+        });
+
+        it('only includes a key in the pending change once it has actually been edited', () => {
+            loadWith(envWithState);
+
+            const zoneEntry = component.zoneStates[0];
+            // untouched re-emit of the same values (e.g. a sibling row's edit) must not appear
+            component.onZoneStateChange(zoneEntry, { occupied: true });
+            expect(component.pendingChange).toBeUndefined();
+
+            component.onZoneStateChange(zoneEntry, { occupied: false });
+            expect(component.pendingChange).toEqual({ zones: { z1: { occupied: false } } });
+        });
+
+        it('combines touched context, zone and asset keys into one StateChange sent via setStateChecked', () => {
+            loadWith(envWithState);
+
+            component.onContextChange({ outdoor_temp: 5 });
+            component.onZoneStateChange(component.zoneStates[0], { occupied: false });
+            component.onAssetStateChange(component.assetStates[0], { power: 42 });
+
+            component.applyLiveState();
+
+            const req = httpMock.expectOne(environmentsUrl + '/e1/state');
+            expect(req.request.method).toBe('PATCH');
+            expect(req.request.body).toEqual({
+                context: { outdoor_temp: 5 },
+                zones: { z1: { occupied: false } },
+                assets: { a1: { power: 42 } },
+            });
+            req.flush(null, { status: 204, statusText: 'No Content' });
+        });
+
+        it('clears the touched keys after a successful apply, disabling Apply again', () => {
+            loadWith(envWithState);
+            component.onZoneStateChange(component.zoneStates[0], { occupied: false });
+
+            component.applyLiveState();
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush(null, { status: 204, statusText: 'No Content' });
+
+            expect(component.pendingChange).toBeUndefined();
+        });
+
+        it('shows the API message on a 404 (environment not running) instead of silently failing', () => {
+            loadWith(envWithState);
+            component.onZoneStateChange(component.zoneStates[0], { occupied: false });
+            const snackBarSpy = spyOn((component as any).snackBar, 'open');
+
+            component.applyLiveState();
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush('environment e1 is not running', { status: 404, statusText: 'Not Found' });
+
+            expect(snackBarSpy).toHaveBeenCalledWith('environment e1 is not running', 'close', { panelClass: 'snack-bar-error' });
+        });
+
+        it('does not call the API when nothing is touched', () => {
+            loadWith(envWithState);
+
+            expect(component.pendingChange).toBeUndefined();
+            component.applyLiveState();
+
+            httpMock.expectNone(environmentsUrl + '/e1/state');
+        });
+    });
+});

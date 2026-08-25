@@ -27,17 +27,35 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTreeModule } from '@angular/material/tree';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CoreModule } from '../../core/core.module';
 import { EnvironmentsComponent } from './environments.component';
 import { EnvironmentDetailComponent } from './environment-detail/environment-detail.component';
 import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create-dialog.component';
+import { EnvironmentsKeyValueEditorComponent } from './key-value-editor/environments-key-value-editor.component';
+import { EnvironmentsDatasetsComponent } from './datasets/environments-datasets.component';
+import { EnvironmentsDatasetUploadDialogComponent } from './datasets/dialogs/environments-dataset-upload-dialog.component';
 
 const environments: Route = {
     path: 'environments',
     pathMatch: 'full',
     component: EnvironmentsComponent,
     data: { header: 'Environments' },
+};
+// Must be registered before environmentDetail: both are pathMatch 'full', and the router
+// takes the first match in array order, so 'environments/:id' would otherwise swallow
+// 'environments/datasets' with id="datasets". See environments.module.spec.ts.
+const environmentDatasets: Route = {
+    path: 'environments/datasets',
+    pathMatch: 'full',
+    component: EnvironmentsDatasetsComponent,
+    data: { header: 'Datasets' },
 };
 const environmentDetail: Route = {
     path: 'environments/:id',
@@ -46,18 +64,23 @@ const environmentDetail: Route = {
     data: { header: 'Environments' },
 };
 
+export const ENVIRONMENTS_ROUTES: Route[] = [environments, environmentDatasets, environmentDetail];
+
 @NgModule({
     declarations: [
         EnvironmentsComponent,
         EnvironmentDetailComponent,
         EnvironmentsCreateDialogComponent,
+        EnvironmentsKeyValueEditorComponent,
+        EnvironmentsDatasetsComponent,
+        EnvironmentsDatasetUploadDialogComponent,
     ],
     imports: [
         CommonModule,
         FormsModule,
         FlexLayoutModule,
         CoreModule,
-        RouterModule.forChild([environments, environmentDetail]),
+        RouterModule.forChild(ENVIRONMENTS_ROUTES),
         MatTableModule,
         MatButtonModule,
         MatIconModule,
@@ -66,6 +89,12 @@ const environmentDetail: Route = {
         MatFormFieldModule,
         MatInputModule,
         MatSnackBarModule,
+        MatTreeModule,
+        MatButtonToggleModule,
+        MatBadgeModule,
+        MatCheckboxModule,
+        MatDividerModule,
+        MatTabsModule,
         MtxSelectModule,
     ],
 })

@@ -49,17 +49,140 @@ export function environmentTypeLabel(type: EnvironmentType | undefined): string 
 
 export type ZoneType = 'site' | 'building' | 'floor' | 'unit' | 'hall' | 'room';
 
+export const ZONE_TYPES: ZoneType[] = ['site', 'building', 'floor', 'unit', 'hall', 'room'];
+
+const zoneTypeLabels: Record<ZoneType, string> = {
+    site: 'Site',
+    building: 'Building',
+    floor: 'Floor',
+    unit: 'Unit',
+    hall: 'Hall',
+    room: 'Room',
+};
+
+export function zoneTypeLabel(type: ZoneType | undefined): string {
+    if (type === undefined) {
+        return 'Unknown';
+    }
+    return zoneTypeLabels[type] || type;
+}
+
 export type AssetKind = 'meter' | 'inverter' | 'machine' | 'sensor' | 'actuator';
+
+export const ASSET_KINDS: AssetKind[] = ['meter', 'inverter', 'machine', 'sensor', 'actuator'];
+
+const assetKindLabels: Record<AssetKind, string> = {
+    meter: 'Meter',
+    inverter: 'Inverter',
+    machine: 'Machine',
+    sensor: 'Sensor',
+    actuator: 'Actuator',
+};
+
+export function assetKindLabel(kind: AssetKind | undefined): string {
+    if (kind === undefined) {
+        return 'Unknown';
+    }
+    return assetKindLabels[kind] || kind;
+}
 
 export type Direction = 'sensor' | 'actuator';
 
+export const DIRECTIONS: Direction[] = ['sensor', 'actuator'];
+
+const directionLabels: Record<Direction, string> = {
+    sensor: 'Sensor',
+    actuator: 'Actuator',
+};
+
+export function directionLabel(direction: Direction | undefined): string {
+    if (direction === undefined) {
+        return 'Unknown';
+    }
+    return directionLabels[direction] || direction;
+}
+
 export type SourceKind = 'script' | 'profile' | 'dataset' | 'formula';
+
+export const SOURCE_KINDS: SourceKind[] = ['script', 'profile', 'dataset', 'formula'];
+
+const sourceKindLabels: Record<SourceKind, string> = {
+    script: 'Script',
+    profile: 'Profile',
+    dataset: 'Dataset',
+    formula: 'Formula',
+};
+
+export function sourceKindLabel(kind: SourceKind | undefined): string {
+    if (kind === undefined) {
+        return 'Unknown';
+    }
+    return sourceKindLabels[kind] || kind;
+}
 
 export type DatasetOrigin = 'platform' | 'file' | 'endpoint';
 
+// The editor only offers file and platform; 'endpoint' has no editor built for it yet.
+export const DATASET_ORIGINS: DatasetOrigin[] = ['file', 'platform'];
+
+const datasetOriginLabels: Record<DatasetOrigin, string> = {
+    file: 'Uploaded file',
+    platform: 'Platform device',
+    endpoint: 'Endpoint',
+};
+
+export function datasetOriginLabel(origin: DatasetOrigin | undefined): string {
+    if (origin === undefined) {
+        return 'Unknown';
+    }
+    return datasetOriginLabels[origin] || origin;
+}
+
 export type ResampleMode = 'hold' | 'linear' | 'distribute';
 
+export const RESAMPLE_MODES: ResampleMode[] = ['hold', 'linear', 'distribute'];
+
+const resampleModeLabels: Record<ResampleMode, string> = {
+    hold: 'Hold',
+    linear: 'Linear',
+    distribute: 'Distribute',
+};
+
+const resampleModeHints: Record<ResampleMode, string> = {
+    hold: 'Hold: keeps the last value, for state-like data (e.g. on/off).',
+    linear: 'Linear: interpolates between values, for continuously varying data (e.g. temperature).',
+    distribute: 'Distribute: spreads a value over time, for cumulative quantities (e.g. energy).',
+};
+
+export function resampleModeLabel(mode: ResampleMode | undefined): string {
+    if (mode === undefined) {
+        return 'Unknown';
+    }
+    return resampleModeLabels[mode] || mode;
+}
+
+export function resampleModeHint(mode: ResampleMode | undefined): string {
+    if (mode === undefined) {
+        return '';
+    }
+    return resampleModeHints[mode] || '';
+}
+
 export type AnchorMode = 'loop' | 'original';
+
+export const ANCHOR_MODES: AnchorMode[] = ['loop', 'original'];
+
+const anchorModeLabels: Record<AnchorMode, string> = {
+    loop: 'Loop',
+    original: 'Original',
+};
+
+export function anchorModeLabel(mode: AnchorMode | undefined): string {
+    if (mode === undefined) {
+        return 'Unknown';
+    }
+    return anchorModeLabels[mode] || mode;
+}
 
 export interface Environment {
     id?: string;
@@ -170,6 +293,11 @@ export interface ValidationError {
     problems?: Problem[];
 }
 
+/** Distinguishes a 400 validation body from the Environment also returned by the same PUT. */
+export function isValidationError(value: unknown): value is ValidationError {
+    return !!value && Array.isArray((value as ValidationError).problems);
+}
+
 export interface StateChange {
     context?: Record<string, unknown>;
     zones?: Record<string, Record<string, unknown>>;
@@ -190,4 +318,13 @@ export interface DatasetMeta {
     size_bytes?: number;
     created_unix?: number;
     columns?: DatasetColumn[];
+}
+
+/** A describable failure body for an endpoint that has no structured error type of its own (a plain message, e.g. "line 12: ..."). */
+export interface ApiError {
+    message: string;
+}
+
+export function isApiError(value: unknown): value is ApiError {
+    return !!value && typeof (value as ApiError).message === 'string';
 }

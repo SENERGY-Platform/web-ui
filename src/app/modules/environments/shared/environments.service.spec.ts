@@ -23,7 +23,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { EnvironmentsService } from './environments.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
-import { DatasetMeta, Environment, StateChange } from './environments.model';
+import { DatasetMeta, Environment, StateChange, ValidationError } from './environments.model';
 
 class MockLadonService {
     authorizations: { [key: string]: { [method: string]: boolean } } = {};
@@ -106,13 +106,49 @@ describe('EnvironmentsService', () => {
 
     it('should replace an environment with a PUT on /environments/{id}', (done) => {
         const env: Environment = { id: 'e1', name: 'Plant A' };
-        service.updateEnvironment('e1', env).subscribe(resp => {
+        service.updateEnvironmentChecked('e1', env).subscribe(resp => {
             expect(resp).toEqual(env);
             done();
         });
         const req = httpMock.expectOne(environmentsUrl + '/e1');
         expect(req.request.method).toBe('PUT');
         req.flush(env);
+    });
+
+    it('should surface the ValidationError body of a 400 response instead of swallowing it', (done) => {
+        const env: Environment = { id: 'e1', name: '' };
+        const validationError: ValidationError = { problems: [{ path: 'name', message: 'must not be empty' }] };
+        service.updateEnvironmentChecked('e1', env).subscribe(resp => {
+            expect(resp).toEqual(validationError);
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1');
+        req.flush(validationError, { status: 400, statusText: 'Bad Request' });
+    });
+
+    // Regression: a 400 whose body is plain text (a Go json.Unmarshal message, not a
+    // {problems: [...]} object) must not be silently treated as a ValidationError or,
+    // worse, as success -- both isValidationError(string) checks are false, so this has
+    // to fall through to the ApiError branch rather than being lost.
+    it('should surface a plaintext 400 body as an ApiError rather than swallowing or misreading it', (done) => {
+        const env: Environment = { id: 'e1', seed: 900.5 };
+        const plainTextBody = 'unable to read the request body: json: cannot unmarshal number 900.5 into Go struct field Environment.seed of type int64';
+        service.updateEnvironmentChecked('e1', env).subscribe(resp => {
+            expect(resp).toEqual({ message: plainTextBody });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1');
+        req.flush(plainTextBody, { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should surface a non-400 error of the checked update as an ApiError, like the other checked methods', (done) => {
+        const env: Environment = { id: 'e1', name: 'Plant A' };
+        service.updateEnvironmentChecked('e1', env).subscribe(resp => {
+            expect(resp).toEqual({ message: 'boom' });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1');
+        req.flush('boom', { status: 500, statusText: 'Internal Server Error' });
     });
 
     it('should delete an environment with a DELETE on /environments/{id}', (done) => {
@@ -125,16 +161,26 @@ describe('EnvironmentsService', () => {
         req.flush(null, { status: 204, statusText: 'No Content' });
     });
 
-    it('should patch the live state with a PATCH on /environments/{id}/state', (done) => {
+    it('should patch the live state with a PATCH on /environments/{id}/state and report success as true', (done) => {
         const change: StateChange = { context: { outdoor_temp: 12 } };
-        service.setState('e1', change).subscribe(resp => {
-            expect(resp).toBeTrue();
+        service.setStateChecked('e1', change).subscribe(resp => {
+            expect(resp).toBe(true);
             done();
         });
         const req = httpMock.expectOne(environmentsUrl + '/e1/state');
         expect(req.request.method).toBe('PATCH');
         expect(req.request.body).toEqual(change);
         req.flush(null, { status: 204, statusText: 'No Content' });
+    });
+
+    it('should surface a 404 body of setStateChecked as an ApiError instead of a bare false', (done) => {
+        const change: StateChange = { context: { outdoor_temp: 12 } };
+        service.setStateChecked('e1', change).subscribe(resp => {
+            expect(resp).toEqual({ message: 'environment e1 is not running' });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/state');
+        req.flush('environment e1 is not running', { status: 404, statusText: 'Not Found' });
     });
 
     it('should list datasets with a GET on /datasets', (done) => {
@@ -160,7 +206,7 @@ describe('EnvironmentsService', () => {
 
     it('should upload a dataset as raw body with name and tz as query params', (done) => {
         const meta: DatasetMeta = { id: 'd1', name: 'profile.csv', timezone: 'Europe/Berlin' };
-        service.uploadDataset('profile.csv', 'time,value\n1,2', 'Europe/Berlin').subscribe(resp => {
+        service.uploadDatasetChecked('profile.csv', 'time,value\n1,2', 'Europe/Berlin').subscribe(resp => {
             expect(resp).toEqual(meta);
             done();
         });
@@ -172,7 +218,7 @@ describe('EnvironmentsService', () => {
 
     it('should upload a dataset without a tz query param when none is given', (done) => {
         const meta: DatasetMeta = { id: 'd1', name: 'profile.csv' };
-        service.uploadDataset('profile.csv', 'time,value\n1,2').subscribe(resp => {
+        service.uploadDatasetChecked('profile.csv', 'time,value\n1,2').subscribe(resp => {
             expect(resp).toEqual(meta);
             done();
         });
@@ -186,7 +232,7 @@ describe('EnvironmentsService', () => {
     // implementation computes it, so a regression to HttpParams would actually fail this.
     it('should fully percent-encode a name containing a semicolon and an umlaut', (done) => {
         const meta: DatasetMeta = { id: 'd1', name: 'Halle A; Zähler 3' };
-        service.uploadDataset('Halle A; Zähler 3', 'time,value\n1,2').subscribe(resp => {
+        service.uploadDatasetChecked('Halle A; Zähler 3', 'time,value\n1,2').subscribe(resp => {
             expect(resp).toEqual(meta);
             done();
         });
@@ -194,5 +240,22 @@ describe('EnvironmentsService', () => {
         expect(req.request.method).toBe('POST');
         expect(req.request.body).toBe('time,value\n1,2');
         req.flush(meta);
+    });
+
+    // The whole point of the checked variant: a broken CSV line is the entire value of
+    // the error, and a bare failure would collapse it to nothing usable.
+    it('should surface the broken-line message of a failed upload as an ApiError', (done) => {
+        service.uploadDatasetChecked('profile.csv', 'time,value\nnot-a-number,2').subscribe(resp => {
+            expect(resp).toEqual({ message: 'line 2: "not-a-number" is not a valid timestamp' });
+            done();
+        });
+        const req = httpMock.expectOne(datasetsUrl + '?name=profile.csv');
+        req.flush('line 2: "not-a-number" is not a valid timestamp', { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should report dataset authorizations independently of the environment ones', () => {
+        expect(service.userHasDatasetReadAuthorization()).toBeFalse();
+        expect(service.userHasDatasetCreateAuthorization()).toBeFalse();
+        expect(service.userHasDatasetDeleteAuthorization()).toBeFalse();
     });
 });

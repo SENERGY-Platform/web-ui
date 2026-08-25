@@ -118,8 +118,7 @@ export class EnvironmentsComponent implements OnInit {
             if (env) {
                 this.environmentsService.createEnvironment(env).subscribe(created => {
                     if (created && created.id) {
-                        // The editor does not exist yet, so there is nowhere to navigate to.
-                        this.reload();
+                        this.router.navigate(['environments', created.id]);
                     } else {
                         this.snackBar.open('Error while creating the environment!', 'close', { panelClass: 'snack-bar-error' });
                     }
@@ -151,8 +150,7 @@ export class EnvironmentsComponent implements OnInit {
             }
             this.environmentsService.createEnvironment(env).subscribe(created => {
                 if (created && created.id) {
-                    // The editor does not exist yet, so there is nowhere to navigate to.
-                    this.reload();
+                    this.router.navigate(['environments', created.id]);
                 } else {
                     this.snackBar.open('Error while importing the environment!', 'close', { panelClass: 'snack-bar-error' });
                 }
