@@ -23,6 +23,11 @@ table {
     border-bottom: none;
 }
 
+.hint {
+    margin-top: 0;
+    opacity: 0.7;
+}
+
 .user-input {
     margin-top: 6px;
 }

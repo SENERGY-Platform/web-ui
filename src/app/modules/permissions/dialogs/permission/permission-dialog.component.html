@@ -17,6 +17,8 @@
 <h2 mat-dialog-title>Permissions for {{name}}</h2>
 
 <mat-dialog-content>
+    <p class="hint" *ngIf="hint">{{hint}}</p>
+
     <senergy-permission-table #userTable [permissions]="permissions.user_permissions" [type]="permissionTypes.user"
         [users]="users" [userId]="userId" [isAdmin]="isAdmin" [descriptions]="descriptions" [header]="true"
         [icon]="'person'"></senergy-permission-table>

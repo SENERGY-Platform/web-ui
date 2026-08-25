@@ -33,8 +33,17 @@ import { of } from 'rxjs';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { DeviceInstanceModel } from './shared/device-instances.model';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+
+const device = (id: string, administrate: boolean) => ({
+    id,
+    name: id,
+    display_name: id,
+    permissions: { read: true, write: administrate, execute: true, administrate },
+} as DeviceInstanceModel);
 
 describe('DeviceInstancesComponent', () => {
     let component: DeviceInstancesComponent;
@@ -50,6 +59,8 @@ describe('DeviceInstancesComponent', () => {
 
     const exportDataServiceSpy: Spy<ExportDataService> = createSpyFromClass(ExportDataService);
     exportDataServiceSpy.userHasUsageAuthroization.and.returnValue(false);
+
+    const permissionsDialogServiceSpy: Spy<PermissionsDialogService> = createSpyFromClass(PermissionsDialogService);
 
     beforeEach(
         waitForAsync(() => {
@@ -69,6 +80,7 @@ describe('DeviceInstancesComponent', () => {
         { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
         { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
         { provide: ExportDataService, useValue: exportDataServiceSpy },
+        { provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
     ]
@@ -84,6 +96,41 @@ describe('DeviceInstancesComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('shares only the selected devices the user administrates', () => {
+        permissionsDialogServiceSpy.openPermissionV2BulkDialog.calls.reset();
+        permissionsDialogServiceSpy.openPermissionV2BulkDialog.and.returnValue(of(true));
+        component.selection.select(device('own-device', true), device('foreign-device', false));
+
+        component.shareMultipleDevices();
+
+        const args = permissionsDialogServiceSpy.openPermissionV2BulkDialog.calls.mostRecent().args;
+        expect(args[0]).toBe('devices');
+        expect(args[1]).toEqual(['own-device']);
+        expect(args[2]).toBe('1 device');
+        expect(args[3]).toContain('1 selected device is left out');
+        expect(component.selection.selected).toEqual([]);
+    });
+
+    it('shares nothing when the user administrates none of the selected devices', () => {
+        permissionsDialogServiceSpy.openPermissionV2BulkDialog.calls.reset();
+        component.selection.select(device('foreign-device', false));
+
+        component.shareMultipleDevices();
+
+        expect(permissionsDialogServiceSpy.openPermissionV2BulkDialog).not.toHaveBeenCalled();
+        expect(component.selection.selected.length).toBe(1);
+    });
+
+    it('keeps the selection when the share dialog is cancelled', () => {
+        permissionsDialogServiceSpy.openPermissionV2BulkDialog.calls.reset();
+        permissionsDialogServiceSpy.openPermissionV2BulkDialog.and.returnValue(of(false));
+        component.selection.select(device('own-device', true));
+
+        component.shareMultipleDevices();
+
+        expect(component.selection.selected.length).toBe(1);
     });
 });
 

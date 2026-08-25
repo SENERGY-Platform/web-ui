@@ -423,6 +423,37 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         this.permissionsDialogService.openPermissionV2Dialog('devices', device.id, device.display_name || device.name);
     }
 
+    // devices without administrate rights cannot be shared, they are left out of a bulk share
+    administrableSelection(): DeviceInstanceModel[] {
+        return this.selection.selected.filter((device: DeviceInstanceModel) => device.permissions.administrate);
+    }
+
+    shareMultipleDevices(): void {
+        const devices = this.administrableSelection();
+        if (devices.length === 0) {
+            this.snackBar.open('You may only share devices you administrate.', 'close', { panelClass: 'snack-bar-error' });
+            return;
+        }
+        const skipped = this.selection.selected.length - devices.length;
+        let hint = 'The permissions are added to the permissions these devices already have.';
+        if (skipped > 0) {
+            hint += ' ' + skipped + (skipped > 1 ? ' selected devices are' : ' selected device is') +
+                ' left out, because you do not administrate ' + (skipped > 1 ? 'them.' : 'it.');
+        }
+        this.permissionsDialogService
+            .openPermissionV2BulkDialog(
+                'devices',
+                devices.map((device: DeviceInstanceModel) => device.id),
+                devices.length + (devices.length > 1 ? ' devices' : ' device'),
+                hint,
+            )
+            .subscribe((saved: boolean) => {
+                if (saved) {
+                    this.selectionClear();
+                }
+            });
+    }
+
     private getRouterParams(): void {
         this.activatedRoute.queryParamMap.subscribe(params => {
             if (params !== undefined && params !== null) {

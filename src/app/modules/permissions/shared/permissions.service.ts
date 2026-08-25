@@ -17,8 +17,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { Observable } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, concatMap, map } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { PermissionsResourceBaseModel, PermissionsV2ResourceBaseModel, PermissionsV2ResourceModel, PermissionsV2RightsAndIdModel} from './permissions-resource.model';
 import { PermissionsUserModel } from './permissions-user.model';
@@ -98,6 +98,32 @@ export class PermissionsService {
                     this.errorHandlerService.handleError(PermissionsService.name, 'setResourcePermissionsV2', false),
                 ),
             );
+    }
+
+    // adds the given permissions to the ones a resource already has. entries of the same user,
+    // group or role are replaced, all others stay untouched.
+    addResourcePermissionsV2(topicID: string, ressourceID: string, added: PermissionsV2ResourceBaseModel): Observable<boolean> {
+        return this.getResourcePermissionsV2(topicID, ressourceID).pipe(
+            concatMap((current: PermissionsV2ResourceModel) => {
+                // getResourcePermissionsV2 answers a failed request with an empty object. merging into
+                // that and writing the result would drop every existing permission, so refuse instead.
+                if (current.user_permissions === undefined) {
+                    return of(false);
+                }
+                return this.setResourcePermissionsV2(topicID, ressourceID, PermissionsService.mergeResourcePermissionsV2(current, added));
+            }),
+        );
+    }
+
+    static mergeResourcePermissionsV2(
+        current: PermissionsV2ResourceBaseModel,
+        added: PermissionsV2ResourceBaseModel,
+    ): PermissionsV2ResourceBaseModel {
+        return {
+            user_permissions: { ...current.user_permissions, ...added.user_permissions },
+            group_permissions: { ...current.group_permissions, ...added.group_permissions },
+            role_permissions: { ...current.role_permissions, ...added.role_permissions },
+        };
     }
 
     getUserById(userId: string): Observable<PermissionsUserModel> {

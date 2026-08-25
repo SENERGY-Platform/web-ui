@@ -237,25 +237,29 @@
                             </button>
                         </td>
                     </ng-container>
-
-                    <ng-container matColumnDef="header-delete-all">
-                        <th mat-header-cell *matHeaderCellDef colspan="10">
-                            <div fxLayout="row">
-                                <div fxLayoutAlign="center center">You have
-                                    selected {{selection.selected.length}} items
-                                </div>
-                                <button matTooltip="Delete" mat-icon-button color="accent"
-                                    (click)="deleteMultipleItems()">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </div>
-                        </th>
-                    </ng-container>
-
-                    <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
-                        [hidden]="selection.selected.length === 0">
-                    </tr>
                 </span>
+
+                <ng-container matColumnDef="header-delete-all">
+                    <th mat-header-cell *matHeaderCellDef colspan="10">
+                        <div fxLayout="row">
+                            <div fxLayoutAlign="center center">You have
+                                selected {{selection.selected.length}} items
+                            </div>
+                            <button *ngIf="userHasShareAuthoriation" matTooltip="Share" mat-icon-button color="accent"
+                                (click)="shareMultipleDevices()" [disabled]="administrableSelection().length === 0">
+                                <mat-icon>share</mat-icon>
+                            </button>
+                            <button *ngIf="userHasDeleteAuthorization" matTooltip="Delete" mat-icon-button
+                                color="accent" (click)="deleteMultipleItems()">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    </th>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
+                    [hidden]="selection.selected.length === 0 || (!userHasDeleteAuthorization && !userHasShareAuthoriation)">
+                </tr>
 
                 <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true">
                 </tr>

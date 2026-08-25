@@ -30,6 +30,7 @@ export interface PermissionDialogComponentData {
     name: string;
     permissions: PermissionsV2ResourceBaseModel;
     kind?: string;
+    hint?: string;
 }
 
 
@@ -47,6 +48,7 @@ export class PermissionDialogComponent implements OnInit {
     groupFormControl = new UntypedFormControl('');
     roleFormControl = new UntypedFormControl('');
     name: string;
+    hint?: string;
     userId: null | string = null;
     permissions: PermissionsV2ResourceBaseModel;
     users: PermissionsUserModel[] = [];
@@ -74,6 +76,7 @@ export class PermissionDialogComponent implements OnInit {
         data: PermissionDialogComponentData,
     ) {
         this.name = data.name;
+        this.hint = data.hint;
         this.permissions = data.permissions;
         switch (data.kind) {
             case 'devices':
