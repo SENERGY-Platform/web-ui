@@ -22,7 +22,15 @@ import { environment } from '../../../../environments/environment';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
-import { ApiError, DatasetMeta, Environment, isValidationError, StateChange, ValidationError } from './environments.model';
+import {
+    ApiError,
+    CatalogDeviceType,
+    DatasetMeta,
+    Environment,
+    isValidationError,
+    StateChange,
+    ValidationError,
+} from './environments.model';
 
 /**
  * Best-effort human message for an endpoint with no structured error body of its own.
@@ -57,6 +65,8 @@ export class EnvironmentsService {
 
     private readonly environmentsUrl = environment.mosesUrl + '/environments';
     private readonly datasetsUrl = environment.mosesUrl + '/datasets';
+    private readonly deviceTypesUrl = environment.mosesUrl + '/device-types';
+    private readonly devicesUrl = environment.mosesUrl + '/devices';
 
     constructor(
         private http: HttpClient,
@@ -177,6 +187,21 @@ export class EnvironmentsService {
         return this.http.delete(this.datasetsUrl + '/' + encodeURIComponent(id), { observe: 'response' }).pipe(
             map(() => true),
             catchError(this.errorHandlerService.handleError(EnvironmentsService.name, 'deleteDataset', false)),
+        );
+    }
+
+    /** Every device type an asset can be built from, with readable service names -- see CatalogDeviceType. */
+    listDeviceTypes(): Observable<CatalogDeviceType[]> {
+        return this.http.get<CatalogDeviceType[]>(this.deviceTypesUrl).pipe(
+            catchError(this.errorHandlerService.handleError(EnvironmentsService.name, 'listDeviceTypes', [])),
+        );
+    }
+
+    /** Deleting one that does not exist is not an error -- see the swagger description. */
+    deleteDevice(id: string): Observable<boolean> {
+        return this.http.delete(this.devicesUrl + '/' + encodeURIComponent(id), { observe: 'response' }).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError(EnvironmentsService.name, 'deleteDevice', false)),
         );
     }
 

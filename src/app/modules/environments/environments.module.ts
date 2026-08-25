@@ -34,10 +34,12 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { NgApexchartsModule } from 'ng-apexcharts';
 import { CoreModule } from '../../core/core.module';
 import { EnvironmentsComponent } from './environments.component';
 import { EnvironmentDetailComponent } from './environment-detail/environment-detail.component';
 import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create-dialog.component';
+import { EnvironmentsAddMachineDialogComponent } from './environment-detail/dialogs/environments-add-machine-dialog.component';
 import { EnvironmentsKeyValueEditorComponent } from './key-value-editor/environments-key-value-editor.component';
 import { EnvironmentsDatasetsComponent } from './datasets/environments-datasets.component';
 import { EnvironmentsDatasetUploadDialogComponent } from './datasets/dialogs/environments-dataset-upload-dialog.component';
@@ -71,6 +73,7 @@ export const ENVIRONMENTS_ROUTES: Route[] = [environments, environmentDatasets, 
         EnvironmentsComponent,
         EnvironmentDetailComponent,
         EnvironmentsCreateDialogComponent,
+        EnvironmentsAddMachineDialogComponent,
         EnvironmentsKeyValueEditorComponent,
         EnvironmentsDatasetsComponent,
         EnvironmentsDatasetUploadDialogComponent,
@@ -96,6 +99,7 @@ export const ENVIRONMENTS_ROUTES: Route[] = [environments, environmentDatasets, 
         MatDividerModule,
         MatTabsModule,
         MtxSelectModule,
+        NgApexchartsModule,
     ],
 })
 export class EnvironmentsModule { }

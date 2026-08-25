@@ -17,19 +17,29 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
+import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexLegend, ApexStroke, ApexXAxis, ApexYAxis } from 'ng-apexcharts';
 import { EnvironmentsService } from '../shared/environments.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
+import { DeleteDialogOptions, DeleteDialogResponse } from '../../../core/dialogs/delete-dialog.component';
+import { DeviceInstancesSelectDialogComponent } from '../../devices/device-instances/dialogs/device-instances-select-dialog.component';
+import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
+import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
+import { DeviceTypeModel } from '../../metadata/device-types-overview/shared/device-type.model';
 import {
     ANCHOR_MODES,
+    anchorModeHint,
     anchorModeLabel,
     Asset,
     ASSET_KINDS,
     assetKindLabel,
+    CatalogDeviceType,
     Channel,
     DatasetColumn,
     DatasetMeta,
+    DatasetSource,
     DATASET_ORIGINS,
     datasetOriginLabel,
     DIRECTIONS,
@@ -47,6 +57,7 @@ import {
     Source,
     SourceKind,
     SOURCE_KINDS,
+    sourceKindDescription,
     sourceKindLabel,
     StateChange,
     Zone,
@@ -54,9 +65,13 @@ import {
     zoneTypeLabel,
 } from '../shared/environments.model';
 import { EnvTreeNode, buildEnvironmentTree, findNodeByKey, locationKey, pathToKey } from '../shared/environments-tree';
-import { locationContains, problemPath, sameLocation } from '../shared/environments-path';
+import { locationContains, ProblemPath, problemPath, sameLocation } from '../shared/environments-path';
 import { applySourceKind, withFactorSet } from '../shared/environments-source';
 import { findNonIntegerFields } from '../shared/environments-integrity';
+import { assetFromDeviceType } from '../shared/environments-device';
+import { AddMachineDialogResult, EnvironmentsAddMachineDialogComponent } from './dialogs/environments-add-machine-dialog.component';
+import { collectFormulaReferences, FormulaReferenceOption } from '../shared/environments-formula-refs';
+import { mondayStartWeekday, profilePreviewPoints } from '../shared/environments-profile-preview';
 import {
     buildStateChange,
     diffTouchedKeys,
@@ -65,6 +80,18 @@ import {
     NamedStateTarget,
     pickTouched,
 } from '../shared/environments-live-state';
+
+/** Just the apx-chart inputs the profile preview binds; ApexOptions itself has no single narrower type for a partial config. */
+interface ProfileChartOptions {
+    series: ApexAxisChartSeries;
+    chart: ApexChart;
+    xaxis: ApexXAxis;
+    yaxis: ApexYAxis;
+    dataLabels: ApexDataLabels;
+    stroke: ApexStroke;
+    legend: ApexLegend;
+    colors: string[];
+}
 
 interface SelectedNodeProblem {
     message: string;
@@ -116,6 +143,27 @@ export class EnvironmentDetailComponent implements OnInit {
     selectedNodeProblems: SelectedNodeProblem[] = [];
     /** Formula source's inputs as a stable array for *ngFor; recomputed on selection or structural change, not on every keystroke. */
     formulaEntries: { name: string; ref: string }[] = [];
+    /** Every channel/context/zone/asset key a formula input could point at; recomputed whenever the document's structure changes. */
+    formulaReferenceOptions: FormulaReferenceOption[] = [];
+
+    /** The device catalog a machine can be built from, loaded once; also used to show a readable name for external_type_id. */
+    deviceTypes: CatalogDeviceType[] = [];
+    private deviceTypesById = new Map<string, CatalogDeviceType>();
+
+    /**
+     * Platform devices referenced by a dataset source's platform origin, keyed by device id
+     * (the source's `ref`). Looked up on demand as the corresponding channel is shown, not
+     * eagerly for the whole document -- most environments reference at most a handful.
+     */
+    platformDeviceNames = new Map<string, string>();
+    platformDeviceTypes = new Map<string, DeviceTypeModel>();
+    private loadingPlatformDevices = new Set<string>();
+
+    /** The 24-hour preview chart for the selected channel's profile source; undefined when no profile is selected. */
+    profileChart: ProfileChartOptions | undefined;
+    readonly todayWeekday = mondayStartWeekday(new Date());
+    sourceKindDescription = sourceKindDescription;
+    anchorModeHint = anchorModeHint;
 
     // template lookups: the model file's UI helper arrays/label functions, exposed on the instance
     ENVIRONMENT_TYPES = ENVIRONMENT_TYPES;
@@ -158,11 +206,18 @@ export class EnvironmentDetailComponent implements OnInit {
         private environmentsService: EnvironmentsService,
         private dialogsService: DialogsService,
         private snackBar: MatSnackBar,
+        private dialog: MatDialog,
+        private deviceInstancesService: DeviceInstancesService,
+        private platformDeviceTypeService: PlatformDeviceTypeService,
     ) {}
 
     ngOnInit(): void {
         this.id = this.route.snapshot.paramMap.get('id') || '';
         this.environmentsService.listDatasets().subscribe((datasets) => (this.datasets = datasets));
+        this.environmentsService.listDeviceTypes().subscribe((types) => {
+            this.deviceTypes = types;
+            this.deviceTypesById = new Map(types.filter((t) => t.id).map((t) => [t.id as string, t]));
+        });
         this.load();
     }
 
@@ -281,6 +336,8 @@ export class EnvironmentDetailComponent implements OnInit {
         this.selectedNode = node;
         this.refreshSelectedNodeProblems();
         this.refreshFormulaEntries();
+        this.refreshProfileChart();
+        this.ensurePlatformDeviceLoaded(this.selectedChannel?.source?.dataset);
     }
 
     get selectedEnvironment(): Environment | undefined {
@@ -299,6 +356,26 @@ export class EnvironmentDetailComponent implements OnInit {
         return this.selectedNode?.kind === 'channel' ? (this.selectedNode.data as Channel) : undefined;
     }
 
+    /** The device type name behind the selected asset's external_type_id, or the raw id while the catalog is still loading. */
+    get selectedAssetDeviceTypeName(): string | undefined {
+        const typeId = this.selectedAsset?.external_type_id;
+        if (!typeId) {
+            return undefined;
+        }
+        return this.deviceTypesById.get(typeId)?.name || typeId;
+    }
+
+    /** The service name behind the selected channel's external_ref, resolved through its own asset's device type. */
+    get selectedChannelServiceName(): string | undefined {
+        const channel = this.selectedChannel;
+        if (!channel?.external_ref || !this.selectedNode) {
+            return undefined;
+        }
+        const asset = this.assetAt(this.selectedNode.location);
+        const deviceType = asset?.external_type_id ? this.deviceTypesById.get(asset.external_type_id) : undefined;
+        return deviceType?.services?.find((s) => s.id === channel.external_ref)?.name || channel.external_ref;
+    }
+
     addZone(node: EnvTreeNode): void {
         const zones = this.zonesOf(node);
         zones.push({ name: 'New Zone', type: 'room' });
@@ -306,11 +383,28 @@ export class EnvironmentDetailComponent implements OnInit {
         this.afterStructuralChange();
     }
 
-    addAsset(node: EnvTreeNode): void {
-        const assets = this.assetsOf(node);
-        assets.push({ name: 'New Asset', kind: 'sensor' });
-        this.selectedKey = locationKey('asset', { zoneIndexes: node.location.zoneIndexes, assetIndex: assets.length - 1 });
-        this.afterStructuralChange();
+    /**
+     * Opens the "New machine" dialog and builds the asset from the chosen device type's
+     * services -- this is the only way to add an asset now (see assetFromDeviceType): every
+     * channel it needs already exists on the device type, so there is nothing left to
+     * configure by hand just to get a working machine. external_ref is left unset: the
+     * server creates the platform device on save (see the asset's external_type_id) and
+     * writes its id back, so there is no POST here and so nothing can be left orphaned by a
+     * cancelled or rejected save.
+     */
+    addMachine(node: EnvTreeNode): void {
+        this.dialog
+            .open(EnvironmentsAddMachineDialogComponent)
+            .afterClosed()
+            .subscribe((result: AddMachineDialogResult | undefined) => {
+                if (!result) {
+                    return;
+                }
+                const assets = this.assetsOf(node);
+                assets.push(assetFromDeviceType(result.deviceType, result.name));
+                this.selectedKey = locationKey('asset', { zoneIndexes: node.location.zoneIndexes, assetIndex: assets.length - 1 });
+                this.afterStructuralChange();
+            });
     }
 
     addChannel(node: EnvTreeNode): void {
@@ -326,13 +420,22 @@ export class EnvironmentDetailComponent implements OnInit {
 
     deleteNode(node: EnvTreeNode): void {
         const name = (node.data as { name?: string }).name || node.name;
+        const deviceId = node.kind === 'asset' ? (node.data as Asset).external_ref : undefined;
+        const options: DeleteDialogOptions | undefined = deviceId
+            ? {
+                  checkboxText: 'Also delete its platform device. Timeseries already recorded for it are orphaned, not deleted.',
+                  checkboxDefault: true,
+              }
+            : undefined;
         this.dialogsService
-            .openDeleteDialog(node.kind + ' "' + name + '"')
+            .openDeleteDialog(node.kind + ' "' + name + '"', options)
             .afterClosed()
-            .subscribe((confirmed: boolean) => {
+            .subscribe((result: boolean | DeleteDialogResponse) => {
+                const confirmed = typeof result === 'boolean' ? result : result?.confirmed;
                 if (!confirmed) {
                     return;
                 }
+                const alsoDeleteDevice = deviceId && typeof result !== 'boolean' && result.checkboxChecked;
                 // Always land on the deleted node's parent: relying on "keep selectedKey,
                 // fall back to root if it no longer resolves" silently moves the selection
                 // to whatever now occupies the old key when a *different*, earlier sibling
@@ -340,13 +443,24 @@ export class EnvironmentDetailComponent implements OnInit {
                 this.selectedKey = this.parentKeyOf(node);
                 this.removeNode(node);
                 this.afterStructuralChange();
+                if (alsoDeleteDevice && deviceId) {
+                    this.environmentsService.deleteDevice(deviceId).subscribe();
+                }
             });
     }
 
     onSourceKindChange(channel: Channel, kind: SourceKind): void {
         channel.source = applySourceKind(channel.source || {}, kind);
         this.refreshFormulaEntries();
+        this.refreshProfileChart();
+        this.ensurePlatformDeviceLoaded(channel.source?.dataset);
         this.markDirty();
+    }
+
+    /** Bound to every profile field that is not a per-hour/per-weekday factor (those go through setHourFactor/setWeekdayFactor). */
+    onProfileFieldChange(): void {
+        this.markDirty();
+        this.refreshProfileChart();
     }
 
     setEnvironmentContext(env: Environment, record: Record<string, unknown>): void {
@@ -378,15 +492,77 @@ export class EnvironmentDetailComponent implements OnInit {
     setHourFactor(profile: ProfileSource, index: number, value: number): void {
         profile.hour_factors = withFactorSet(profile.hour_factors, 24, index, Number(value));
         this.markDirty();
+        this.refreshProfileChart();
     }
 
     setWeekdayFactor(profile: ProfileSource, index: number, value: number): void {
         profile.weekday_factors = withFactorSet(profile.weekday_factors, 7, index, Number(value));
         this.markDirty();
+        this.refreshProfileChart();
     }
 
     columnsForDataset(datasetId: string | undefined): DatasetColumn[] {
         return this.datasets.find((d) => d.id === datasetId)?.columns || [];
+    }
+
+    /** Opens the shared device picker and, once a device is chosen, resolves its display name, type and service catalog. */
+    selectPlatformDevice(dataset: DatasetSource): void {
+        this.dialog
+            .open(DeviceInstancesSelectDialogComponent)
+            .afterClosed()
+            .subscribe((ids: string[] | undefined) => {
+                const id = ids?.[0];
+                if (!id) {
+                    return;
+                }
+                dataset.ref = id;
+                dataset.service_ref = undefined;
+                dataset.column = undefined;
+                this.markDirty();
+                this.ensurePlatformDeviceLoaded(dataset);
+            });
+    }
+
+    /** Every service of the device a platform-origin dataset source points at, for the Service select. */
+    platformServiceOptions(dataset: DatasetSource): DeviceTypeModel['services'] {
+        const deviceType = dataset.ref ? this.platformDeviceTypes.get(dataset.ref) : undefined;
+        return deviceType?.services || [];
+    }
+
+    /** Every value path of the chosen service's outputs, for the Column select. */
+    platformColumnOptions(dataset: DatasetSource): string[] {
+        const service = this.platformServiceOptions(dataset).find((s) => s.id === dataset.service_ref);
+        const paths: string[] = [];
+        (service?.outputs || []).forEach((output) => {
+            this.platformDeviceTypeService.getValuePathsAndContentVariables(output.content_variable).forEach((p) => paths.push(p.path));
+        });
+        return paths;
+    }
+
+    /**
+     * Loads the display name and device type of a platform-origin dataset's device, once,
+     * so the read-only Device field shows something meaningful for a document loaded from
+     * the server (not only for one just picked in this session). No-op for any other origin,
+     * an unset ref, or a ref already loaded/loading.
+     */
+    private ensurePlatformDeviceLoaded(dataset: DatasetSource | undefined): void {
+        const id = dataset?.origin === 'platform' ? dataset.ref : undefined;
+        if (!id || this.platformDeviceNames.has(id) || this.loadingPlatformDevices.has(id)) {
+            return;
+        }
+        this.loadingPlatformDevices.add(id);
+        this.deviceInstancesService.getDeviceInstance(id).subscribe((device) => {
+            this.loadingPlatformDevices.delete(id);
+            if (!device) {
+                return;
+            }
+            this.platformDeviceNames.set(id, device.display_name || id);
+            this.platformDeviceTypeService.getDeviceType(device.device_type_id).subscribe((deviceType) => {
+                if (deviceType) {
+                    this.platformDeviceTypes.set(id, deviceType);
+                }
+            });
+        });
     }
 
     addFormulaInput(): void {
@@ -481,6 +657,14 @@ export class EnvironmentDetailComponent implements OnInit {
         return zone!;
     }
 
+    /** The Asset a channel (or an asset itself) is located under, from its tree location. */
+    private assetAt(location: ProblemPath): Asset | undefined {
+        if (location.assetIndex === undefined) {
+            return undefined;
+        }
+        return (this.zoneAt(location.zoneIndexes).assets || [])[location.assetIndex];
+    }
+
     /** The zones array that directly holds the zone at `parentZoneIndexes` -- the environment's own for the empty chain. */
     private zonesContainerFor(parentZoneIndexes: number[]): Zone[] {
         const holder: { zones?: Zone[] } = parentZoneIndexes.length === 0 ? this.environment! : this.zoneAt(parentZoneIndexes);
@@ -558,12 +742,43 @@ export class EnvironmentDetailComponent implements OnInit {
         this.formulaEntries = Object.entries(inputs).map(([name, ref]) => ({ name, ref }));
     }
 
+    /**
+     * Rebuilds the profile preview chart for the currently selected channel. Explicitly
+     * invoked after every edit that could change the curve (base/spread/cumulative,
+     * factors, switching source kind, selecting a different node) instead of a template
+     * getter, so a chart library redraw does not run on every unrelated change-detection tick.
+     */
+    private refreshProfileChart(): void {
+        const profile = this.selectedChannel?.source?.kind === 'profile' ? this.selectedChannel.source.profile : undefined;
+        if (!profile) {
+            this.profileChart = undefined;
+            return;
+        }
+        const points = profilePreviewPoints(profile, this.todayWeekday);
+        const hasSpread = (profile.spread_percent ?? 0) > 0;
+        const series: ApexAxisChartSeries = [{ name: 'Value', data: points.map((p) => p.value) }];
+        if (hasSpread) {
+            series.push({ name: 'Low', data: points.map((p) => p.low) }, { name: 'High', data: points.map((p) => p.high) });
+        }
+        this.profileChart = {
+            series,
+            chart: { type: 'line', height: 220, toolbar: { show: false }, animations: { enabled: false } },
+            xaxis: { categories: points.map((p) => p.hour + ':00') },
+            yaxis: {},
+            dataLabels: { enabled: false },
+            stroke: { width: hasSpread ? [3, 1, 1] : [3], dashArray: hasSpread ? [0, 4, 4] : [0], curve: 'smooth' },
+            legend: { show: hasSpread },
+            colors: hasSpread ? ['#008FFB', '#999999', '#999999'] : ['#008FFB'],
+        };
+    }
+
     private rebuildTree(): void {
         if (!this.environment) {
             return;
         }
         this.root = buildEnvironmentTree(this.environment);
         this.dataSource.data = [this.root];
+        this.formulaReferenceOptions = collectFormulaReferences(this.environment);
         this.revealSelection();
     }
 
@@ -577,6 +792,8 @@ export class EnvironmentDetailComponent implements OnInit {
         pathToKey(this.root, this.selectedKey).forEach((n) => this.treeControl.expand(n));
         this.refreshSelectedNodeProblems();
         this.refreshFormulaEntries();
+        this.refreshProfileChart();
+        this.ensurePlatformDeviceLoaded(this.selectedChannel?.source?.dataset);
     }
 
     /**

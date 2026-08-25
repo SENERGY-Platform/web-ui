@@ -23,7 +23,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { EnvironmentsService } from './environments.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
-import { DatasetMeta, Environment, StateChange, ValidationError } from './environments.model';
+import { CatalogDeviceType, DatasetMeta, Environment, StateChange, ValidationError } from './environments.model';
 
 class MockLadonService {
     authorizations: { [key: string]: { [method: string]: boolean } } = {};
@@ -38,6 +38,8 @@ describe('EnvironmentsService', () => {
     let httpMock: HttpTestingController;
     const environmentsUrl = environment.mosesUrl + '/environments';
     const datasetsUrl = environment.mosesUrl + '/datasets';
+    const deviceTypesUrl = environment.mosesUrl + '/device-types';
+    const devicesUrl = environment.mosesUrl + '/devices';
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -251,6 +253,27 @@ describe('EnvironmentsService', () => {
         });
         const req = httpMock.expectOne(datasetsUrl + '?name=profile.csv');
         req.flush('line 2: "not-a-number" is not a valid timestamp', { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should list device types with a GET on /device-types', (done) => {
+        const types: CatalogDeviceType[] = [{ id: 't1', name: 'Machine', services: [{ id: 's1', name: 'Power', direction: 'sensor' }] }];
+        service.listDeviceTypes().subscribe(resp => {
+            expect(resp).toEqual(types);
+            done();
+        });
+        const req = httpMock.expectOne(deviceTypesUrl);
+        expect(req.request.method).toBe('GET');
+        req.flush(types);
+    });
+
+    it('should delete a device with a DELETE on /devices/{id}', (done) => {
+        service.deleteDevice('d1').subscribe(resp => {
+            expect(resp).toBeTrue();
+            done();
+        });
+        const req = httpMock.expectOne(devicesUrl + '/d1');
+        expect(req.request.method).toBe('DELETE');
+        req.flush(null, { status: 204, statusText: 'No Content' });
     });
 
     it('should report dataset authorizations independently of the environment ones', () => {

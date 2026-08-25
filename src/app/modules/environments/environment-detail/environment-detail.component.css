@@ -175,3 +175,40 @@
 .manage-datasets-link {
     display: block;
 }
+
+.section-hint {
+    margin-top: -8px;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+}
+
+.source-kind-descriptions {
+    margin: 4px 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.source-kind-description {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+}
+
+.readonly-hint-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-chart {
+    margin-bottom: 16px;
+}
+
+.inline-help-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+    vertical-align: middle;
+    color: rgba(0, 0, 0, 0.5);
+    cursor: help;
+}

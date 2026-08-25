@@ -19,6 +19,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 export interface DeleteDialogOptions {
     checkboxText?: string;
+    /** Initial state of the checkbox, e.g. to default a destructive follow-up action to on. Defaults to false. */
+    checkboxDefault?: boolean;
 }
 
 export interface DeleteDialogResponse {
@@ -38,6 +40,7 @@ export class DeleteDialogComponent {
     constructor(private dialogRef: MatDialogRef<DeleteDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { text: string, options?: DeleteDialogOptions }) {
         this.text = data.text;
         this.options = data.options;
+        this.checked = data.options?.checkboxDefault ?? false;
     }
 
     cancel(): void {

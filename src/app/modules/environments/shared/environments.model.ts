@@ -120,6 +120,20 @@ export function sourceKindLabel(kind: SourceKind | undefined): string {
     return sourceKindLabels[kind] || kind;
 }
 
+const sourceKindDescriptions: Record<SourceKind, string> = {
+    script: 'Own JavaScript that computes the value.',
+    profile: 'A daily pattern built from a base value and hour/weekday factors.',
+    dataset: 'Replays real, previously recorded measurements.',
+    formula: 'Computed from other channels or context values.',
+};
+
+export function sourceKindDescription(kind: SourceKind | undefined): string {
+    if (kind === undefined) {
+        return '';
+    }
+    return sourceKindDescriptions[kind] || '';
+}
+
 export type DatasetOrigin = 'platform' | 'file' | 'endpoint';
 
 // The editor only offers file and platform; 'endpoint' has no editor built for it yet.
@@ -182,6 +196,45 @@ export function anchorModeLabel(mode: AnchorMode | undefined): string {
         return 'Unknown';
     }
     return anchorModeLabels[mode] || mode;
+}
+
+const anchorModeHints: Record<AnchorMode, string> = {
+    loop: 'Loop: when the dataset repeats, it starts over from its first point again.',
+    original: 'Original: when the dataset repeats, it continues from its own original timestamps.',
+};
+
+export function anchorModeHint(mode: AnchorMode | undefined): string {
+    if (mode === undefined) {
+        return '';
+    }
+    return anchorModeHints[mode] || '';
+}
+
+/**
+ * A device type from the MOSES catalog (GET /device-types): only what an asset's channels
+ * need, with readable names, so an editor can offer a machine to pick instead of typing ids.
+ */
+export interface CatalogDeviceType {
+    id?: string;
+    name?: string;
+    services?: CatalogService[];
+}
+
+/** One of a catalog device type's services, i.e. what one channel of an asset built from it looks like. */
+export interface CatalogService {
+    id?: string;
+    name?: string;
+    direction?: Direction;
+    characteristic_id?: string;
+    value_path?: string;
+}
+
+/** The platform device created for a simulated asset (POST /devices). */
+export interface CatalogDevice {
+    id?: string;
+    local_id?: string;
+    name?: string;
+    device_type_id?: string;
 }
 
 export interface Environment {

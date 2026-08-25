@@ -18,6 +18,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -26,7 +27,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -37,6 +38,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { NgApexchartsModule } from 'ng-apexcharts';
 import { CoreModule } from '../../../core/core.module';
 import { EnvironmentDetailComponent } from './environment-detail.component';
 import { EnvironmentsKeyValueEditorComponent } from '../key-value-editor/environments-key-value-editor.component';
@@ -44,11 +46,32 @@ import { EnvironmentsService } from '../shared/environments.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
-import { Environment } from '../shared/environments.model';
+import { CatalogDeviceType, Environment } from '../shared/environments.model';
+import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
+import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 
 class MockLadonService {
     getUserAuthorizationsForURI(_uri: string): any {
         return undefined;
+    }
+}
+
+// The dataset/platform origin lookups are not exercised by the nestedEnvironment fixtures
+// (none of them reference a platform device), so these stand in for the real platform
+// services purely to keep DI resolvable without pulling in their whole dependency graph.
+class MockDeviceInstancesService {
+    getDeviceInstance(_id: string): any {
+        return of(null);
+    }
+}
+
+class MockPlatformDeviceTypeService {
+    getDeviceType(_id: string): any {
+        return of(null);
+    }
+
+    getValuePathsAndContentVariables(_contentVariable: any): any[] {
+        return [];
     }
 }
 
@@ -93,6 +116,8 @@ describe('EnvironmentDetailComponent', () => {
     let httpMock: HttpTestingController;
     const environmentsUrl = environment.mosesUrl + '/environments';
     const datasetsUrl = environment.mosesUrl + '/datasets';
+    const deviceTypesUrl = environment.mosesUrl + '/device-types';
+    const devicesUrl = environment.mosesUrl + '/devices';
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
@@ -118,12 +143,15 @@ describe('EnvironmentDetailComponent', () => {
                 MatDividerModule,
                 MatTabsModule,
                 MtxSelectModule,
+                NgApexchartsModule,
             ],
             providers: [
                 EnvironmentsService,
                 DialogsService,
                 { provide: LadonService, useClass: MockLadonService },
                 { provide: ActivatedRoute, useClass: ActivatedRouteStub },
+                { provide: DeviceInstancesService, useClass: MockDeviceInstancesService },
+                { provide: PlatformDeviceTypeService, useClass: MockPlatformDeviceTypeService },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
             ],
@@ -139,14 +167,16 @@ describe('EnvironmentDetailComponent', () => {
     });
 
     /**
-     * Drives ngOnInit's two requests (environment + datasets) and settles change detection.
-     * Flushes a deep clone: the component normalizes and then mutates its environment in
-     * place, and the shared `nestedEnvironment` fixture must stay pristine across tests.
+     * Drives ngOnInit's three requests (environment + datasets + device types) and settles
+     * change detection. Flushes a deep clone: the component normalizes and then mutates its
+     * environment in place, and the shared `nestedEnvironment` fixture must stay pristine
+     * across tests.
      */
-    function loadWith(env: Environment): void {
+    function loadWith(env: Environment, deviceTypes: CatalogDeviceType[] = []): void {
         fixture.detectChanges();
         httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(env)));
         httpMock.expectOne(datasetsUrl).flush([]);
+        httpMock.expectOne(deviceTypesUrl).flush(deviceTypes);
         fixture.detectChanges();
     }
 
@@ -359,7 +389,7 @@ describe('EnvironmentDetailComponent', () => {
                 .flush({ problems: [{ path: 'zones[0].name', message: 'must not be empty' }] }, { status: 400, statusText: 'Bad Request' });
             expect(component.problems.length).toBe(1);
 
-            component.addAsset(component.root!.children[0]);
+            component.addZone(component.root!.children[0]);
 
             expect(component.problems).toEqual([]);
             expect(component.problemNodeKeys.size).toBe(0);
@@ -424,6 +454,124 @@ describe('EnvironmentDetailComponent', () => {
 
             expect(component.environment?.zones?.length).toBe(1);
             expect(component.selectedNode?.key).toBe(zoneNode.key);
+        });
+
+        // The dialog defaults the checkbox to checked (see checkboxDefault), but the actual
+        // deletion still only happens when the response says it was checked -- this pins the
+        // component's own reaction to that response, not the dialog's default.
+        it('deletes the platform device only when the checkbox in the delete dialog was confirmed', () => {
+            loadWith(nestedEnvironment);
+            const assetNode = component.root!.children[0].children[0];
+            (assetNode.data as any).external_ref = 'd1';
+            spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({
+                afterClosed: () => ({ subscribe: (cb: any) => cb({ confirmed: true, checkboxChecked: true }) }),
+            } as any);
+
+            component.deleteNode(assetNode);
+
+            const req = httpMock.expectOne(devicesUrl + '/d1');
+            expect(req.request.method).toBe('DELETE');
+            req.flush(null, { status: 204, statusText: 'No Content' });
+        });
+
+        it('does not delete the platform device when the checkbox was left unchecked', () => {
+            loadWith(nestedEnvironment);
+            const assetNode = component.root!.children[0].children[0];
+            (assetNode.data as any).external_ref = 'd1';
+            spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({
+                afterClosed: () => ({ subscribe: (cb: any) => cb({ confirmed: true, checkboxChecked: false }) }),
+            } as any);
+
+            component.deleteNode(assetNode);
+
+            httpMock.expectNone(devicesUrl + '/d1');
+        });
+
+        it('does not ask about the platform device for an asset that has none', () => {
+            loadWith(nestedEnvironment);
+            const assetNode = component.root!.children[0].children[0];
+            const openDeleteDialog = spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({
+                afterClosed: () => ({ subscribe: (cb: any) => cb(true) }),
+            } as any);
+
+            component.deleteNode(assetNode);
+
+            expect(openDeleteDialog.calls.mostRecent().args[1]).toBeUndefined();
+            httpMock.expectNone(devicesUrl);
+        });
+    });
+
+    describe('adding a machine', () => {
+        const deviceType: CatalogDeviceType = {
+            id: 't1',
+            name: 'Press',
+            services: [
+                { id: 's1', name: 'Power', direction: 'sensor', characteristic_id: 'watt' },
+                { id: 's2', name: 'Switch', direction: 'actuator', characteristic_id: 'bool' },
+            ],
+        };
+
+        it('adds an asset with one channel per service and selects it, without calling the platform (no device POST)', () => {
+            loadWith(nestedEnvironment);
+            spyOn(TestBed.inject(MatDialog), 'open').and.returnValue({
+                afterClosed: () => of({ name: 'Press 1', deviceType }),
+            } as any);
+            const zoneNode = component.root!.children[0];
+
+            component.addMachine(zoneNode);
+
+            httpMock.expectNone(devicesUrl);
+            const assets = component.environment?.zones?.[0].assets || [];
+            expect(assets.length).toBe(2);
+            const created = assets[1];
+            expect(created.external_ref).toBeUndefined(); // filled in by the server on save
+            expect(created.external_type_id).toBe('t1');
+            expect(created.channels?.length).toBe(2);
+            expect(component.selectedAsset).toBe(created);
+        });
+
+        it('does not create anything when the dialog is cancelled', () => {
+            loadWith(nestedEnvironment);
+            spyOn(TestBed.inject(MatDialog), 'open').and.returnValue({ afterClosed: () => of(undefined) } as any);
+            const zoneNode = component.root!.children[0];
+
+            component.addMachine(zoneNode);
+
+            httpMock.expectNone(devicesUrl);
+            expect(component.environment?.zones?.[0].assets?.length).toBe(1);
+        });
+    });
+
+    describe('device type / service lookups for the read-only asset and channel fields', () => {
+        it('resolves the selected asset\'s external_type_id to the device type name once the catalog is loaded', () => {
+            loadWith(nestedEnvironment, [{ id: 'dt1', name: 'Meter Type', services: [] }]);
+            const assetNode = component.root!.children[0].children[0];
+            (assetNode.data as any).external_type_id = 'dt1';
+            component.select(assetNode);
+
+            expect(component.selectedAssetDeviceTypeName).toBe('Meter Type');
+        });
+
+        it('falls back to the raw id when the device type is not (yet) in the catalog', () => {
+            loadWith(nestedEnvironment, []);
+            const assetNode = component.root!.children[0].children[0];
+            (assetNode.data as any).external_type_id = 'dt1';
+            component.select(assetNode);
+
+            expect(component.selectedAssetDeviceTypeName).toBe('dt1');
+        });
+
+        it('resolves the selected channel\'s external_ref to its service name via the asset\'s device type', () => {
+            loadWith(nestedEnvironment, [
+                { id: 'dt1', name: 'Meter Type', services: [{ id: 's1', name: 'Power Draw', direction: 'sensor' }] },
+            ]);
+            const assetNode = component.root!.children[0].children[0];
+            (assetNode.data as any).external_type_id = 'dt1';
+            const channelNode = assetNode.children[0];
+            (channelNode.data as any).external_ref = 's1';
+            component.select(channelNode);
+
+            expect(component.selectedChannelServiceName).toBe('Power Draw');
         });
     });
 
