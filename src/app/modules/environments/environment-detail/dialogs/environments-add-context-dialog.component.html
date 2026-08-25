@@ -1,0 +1,45 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h2 mat-dialog-title>Add context</h2>
+
+<mat-dialog-content>
+    <div class="preset-list">
+        <div class="preset-row" *ngFor="let preset of presets" [class.selected]="preset.id === selected.id"
+            (click)="selectPreset(preset)">
+            <div class="preset-label">{{preset.label}}</div>
+            <div class="preset-description">{{preset.description}}</div>
+        </div>
+    </div>
+
+    <div class="preset-preview" *ngIf="chart">
+        <apx-chart [series]="chart.series" [chart]="chart.chart" [xaxis]="chart.xaxis" [yaxis]="chart.yaxis"
+            [dataLabels]="chart.dataLabels" [stroke]="chart.stroke" [legend]="chart.legend" [colors]="chart.colors">
+        </apx-chart>
+    </div>
+
+    <mat-form-field appearance="outline" color="accent" class="full-width">
+        <mat-label>Context key</mat-label>
+        <input matInput [(ngModel)]="key" name="context-key">
+        <mat-hint *ngIf="!keyError">Read from a formula or any zone as context.{{key || '...'}}.</mat-hint>
+    </mat-form-field>
+    <p class="key-error" *ngIf="keyError">{{keyError}}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions style="display: flex; justify-content: end;">
+    <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
+    <button mat-raised-button color="accent" (click)="add()" [disabled]="!!keyError">Add</button>
+</mat-dialog-actions>

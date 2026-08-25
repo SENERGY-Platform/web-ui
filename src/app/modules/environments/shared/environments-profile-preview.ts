@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexLegend, ApexStroke, ApexXAxis, ApexYAxis } from 'ng-apexcharts';
 import { ProfileSource } from './environments.model';
 
 export interface ProfilePreviewPoint {
@@ -21,6 +22,18 @@ export interface ProfilePreviewPoint {
     value: number;
     low: number;
     high: number;
+}
+
+/** Just the apx-chart inputs the profile preview binds; ApexOptions itself has no single narrower type for a partial config. */
+export interface ProfileChartOptions {
+    series: ApexAxisChartSeries;
+    chart: ApexChart;
+    xaxis: ApexXAxis;
+    yaxis: ApexYAxis;
+    dataLabels: ApexDataLabels;
+    stroke: ApexStroke;
+    legend: ApexLegend;
+    colors: string[];
 }
 
 /**
@@ -45,4 +58,29 @@ export function profilePreviewPoints(profile: ProfileSource, weekday: number): P
 /** Monday-start weekday index (0=Mon..6=Sun) for a date, matching weekday_factors' convention. */
 export function mondayStartWeekday(date: Date): number {
     return (date.getDay() + 6) % 7;
+}
+
+/**
+ * Builds the apx-chart config for a profile's 24-hour preview, shared by every place that
+ * shows this curve (the channel/context source editor, the "add context" preset picker) so
+ * they cannot drift into slightly different renderings of the same data.
+ */
+export function profileChartOptions(profile: ProfileSource, weekday: number): ProfileChartOptions {
+    const points = profilePreviewPoints(profile, weekday);
+    const hasSpread = (profile.spread_percent ?? 0) > 0;
+    const series: ApexAxisChartSeries = [{ name: 'Value', data: points.map((p) => p.value) }];
+    if (hasSpread) {
+        series.push({ name: 'Low', data: points.map((p) => p.low) }, { name: 'High', data: points.map((p) => p.high) });
+    }
+    return {
+        series,
+        chart: { type: 'line', height: 220, toolbar: { show: false }, animations: { enabled: false } },
+        xaxis: { categories: points.map((p) => p.hour + ':00') },
+        // unformatted floats render as 25.0000000000000000 on the axis
+        yaxis: { labels: { formatter: (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: 1 }) } },
+        dataLabels: { enabled: false },
+        stroke: { width: hasSpread ? [3, 1, 1] : [3], dashArray: hasSpread ? [0, 4, 4] : [0], curve: 'smooth' },
+        legend: { show: hasSpread },
+        colors: hasSpread ? ['#008FFB', '#999999', '#999999'] : ['#008FFB'],
+    };
 }

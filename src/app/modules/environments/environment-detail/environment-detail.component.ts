@@ -20,7 +20,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
-import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexLegend, ApexStroke, ApexXAxis, ApexYAxis } from 'ng-apexcharts';
 import { EnvironmentsService } from '../shared/environments.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeleteDialogOptions, DeleteDialogResponse } from '../../../core/dialogs/delete-dialog.component';
@@ -29,19 +28,13 @@ import { DeviceInstancesService } from '../../devices/device-instances/shared/de
 import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceTypeModel } from '../../metadata/device-types-overview/shared/device-type.model';
 import {
-    ANCHOR_MODES,
-    anchorModeHint,
-    anchorModeLabel,
     Asset,
     ASSET_KINDS,
     assetKindLabel,
     CatalogDeviceType,
     Channel,
-    DatasetColumn,
     DatasetMeta,
     DatasetSource,
-    DATASET_ORIGINS,
-    datasetOriginLabel,
     DIRECTIONS,
     directionLabel,
     Environment,
@@ -50,10 +43,6 @@ import {
     isApiError,
     isValidationError,
     Problem,
-    ProfileSource,
-    RESAMPLE_MODES,
-    resampleModeHint,
-    resampleModeLabel,
     Source,
     SourceKind,
     SOURCE_KINDS,
@@ -66,12 +55,16 @@ import {
 } from '../shared/environments.model';
 import { EnvTreeNode, buildEnvironmentTree, findNodeByKey, locationKey, pathToKey } from '../shared/environments-tree';
 import { locationContains, ProblemPath, problemPath, sameLocation } from '../shared/environments-path';
-import { applySourceKind, withFactorSet } from '../shared/environments-source';
+import { applySourceKind } from '../shared/environments-source';
 import { findNonIntegerFields } from '../shared/environments-integrity';
 import { assetFromDeviceType } from '../shared/environments-device';
 import { AddMachineDialogResult, EnvironmentsAddMachineDialogComponent } from './dialogs/environments-add-machine-dialog.component';
+import {
+    AddContextDialogResult,
+    EnvironmentsAddContextDialogComponent,
+} from './dialogs/environments-add-context-dialog.component';
 import { collectFormulaReferences, FormulaReferenceOption } from '../shared/environments-formula-refs';
-import { mondayStartWeekday, profilePreviewPoints } from '../shared/environments-profile-preview';
+import { mondayStartWeekday } from '../shared/environments-profile-preview';
 import {
     buildStateChange,
     diffTouchedKeys,
@@ -80,18 +73,6 @@ import {
     NamedStateTarget,
     pickTouched,
 } from '../shared/environments-live-state';
-
-/** Just the apx-chart inputs the profile preview binds; ApexOptions itself has no single narrower type for a partial config. */
-interface ProfileChartOptions {
-    series: ApexAxisChartSeries;
-    chart: ApexChart;
-    xaxis: ApexXAxis;
-    yaxis: ApexYAxis;
-    dataLabels: ApexDataLabels;
-    stroke: ApexStroke;
-    legend: ApexLegend;
-    colors: string[];
-}
 
 interface SelectedNodeProblem {
     message: string;
@@ -159,11 +140,9 @@ export class EnvironmentDetailComponent implements OnInit {
     platformDeviceTypes = new Map<string, DeviceTypeModel>();
     private loadingPlatformDevices = new Set<string>();
 
-    /** The 24-hour preview chart for the selected channel's profile source; undefined when no profile is selected. */
-    profileChart: ProfileChartOptions | undefined;
+    /** Today's weekday, for every profile editor's 24-hour preview (they all preview "today"). */
     readonly todayWeekday = mondayStartWeekday(new Date());
     sourceKindDescription = sourceKindDescription;
-    anchorModeHint = anchorModeHint;
 
     // template lookups: the model file's UI helper arrays/label functions, exposed on the instance
     ENVIRONMENT_TYPES = ENVIRONMENT_TYPES;
@@ -176,17 +155,6 @@ export class EnvironmentDetailComponent implements OnInit {
     directionLabel = directionLabel;
     SOURCE_KINDS = SOURCE_KINDS;
     sourceKindLabel = sourceKindLabel;
-    DATASET_ORIGINS = DATASET_ORIGINS;
-    datasetOriginLabel = datasetOriginLabel;
-    RESAMPLE_MODES = RESAMPLE_MODES;
-    resampleModeLabel = resampleModeLabel;
-    resampleModeHint = resampleModeHint;
-    ANCHOR_MODES = ANCHOR_MODES;
-    anchorModeLabel = anchorModeLabel;
-
-    hourIndexes = Array.from({ length: 24 }, (_, i) => i);
-    weekdayIndexes = Array.from({ length: 7 }, (_, i) => i);
-    weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     // Live state tab: draft values to PATCH onto the running simulation. Prefilled from
     // the definition's initial_states as a starting suggestion, not as the current live
@@ -336,7 +304,6 @@ export class EnvironmentDetailComponent implements OnInit {
         this.selectedNode = node;
         this.refreshSelectedNodeProblems();
         this.refreshFormulaEntries();
-        this.refreshProfileChart();
         this.ensurePlatformDeviceLoaded(this.selectedChannel?.source?.dataset);
     }
 
@@ -452,15 +419,8 @@ export class EnvironmentDetailComponent implements OnInit {
     onSourceKindChange(channel: Channel, kind: SourceKind): void {
         channel.source = applySourceKind(channel.source || {}, kind);
         this.refreshFormulaEntries();
-        this.refreshProfileChart();
         this.ensurePlatformDeviceLoaded(channel.source?.dataset);
         this.markDirty();
-    }
-
-    /** Bound to every profile field that is not a per-hour/per-weekday factor (those go through setHourFactor/setWeekdayFactor). */
-    onProfileFieldChange(): void {
-        this.markDirty();
-        this.refreshProfileChart();
     }
 
     setEnvironmentContext(env: Environment, record: Record<string, unknown>): void {
@@ -489,20 +449,43 @@ export class EnvironmentDetailComponent implements OnInit {
         this.markDirty();
     }
 
-    setHourFactor(profile: ProfileSource, index: number, value: number): void {
-        profile.hour_factors = withFactorSet(profile.hour_factors, 24, index, Number(value));
-        this.markDirty();
-        this.refreshProfileChart();
+    /** Every context key already in use, static and driven alike -- passed to the "Add context" dialog as its collision check. */
+    existingContextKeys(env: Environment): string[] {
+        return [...Object.keys(env.context || {}), ...Object.keys(env.context_sources || {})];
     }
 
-    setWeekdayFactor(profile: ProfileSource, index: number, value: number): void {
-        profile.weekday_factors = withFactorSet(profile.weekday_factors, 7, index, Number(value));
-        this.markDirty();
-        this.refreshProfileChart();
+    /** context_sources as a stable array for *ngFor; recomputed on demand, not cached -- the map is small and rarely changes. */
+    contextSourceEntries(env: Environment): { key: string; source: Source }[] {
+        return Object.entries(env.context_sources || {}).map(([key, source]) => ({ key, source }));
     }
 
-    columnsForDataset(datasetId: string | undefined): DatasetColumn[] {
-        return this.datasets.find((d) => d.id === datasetId)?.columns || [];
+    trackByContextKey(_index: number, entry: { key: string }): string {
+        return entry.key;
+    }
+
+    openAddContextDialog(env: Environment): void {
+        this.dialog
+            .open(EnvironmentsAddContextDialogComponent, { data: { existingKeys: this.existingContextKeys(env) } })
+            .afterClosed()
+            .subscribe((result: AddContextDialogResult | undefined) => {
+                if (!result) {
+                    return;
+                }
+                if (!env.context_sources) {
+                    env.context_sources = {};
+                }
+                env.context_sources[result.key] = result.source;
+                this.ensurePlatformDeviceLoaded(result.source.dataset);
+                this.markDirty();
+            });
+    }
+
+    removeContextSource(env: Environment, key: string): void {
+        if (!env.context_sources) {
+            return;
+        }
+        delete env.context_sources[key];
+        this.markDirty();
     }
 
     /** Opens the shared device picker and, once a device is chosen, resolves its display name, type and service catalog. */
@@ -543,9 +526,10 @@ export class EnvironmentDetailComponent implements OnInit {
      * Loads the display name and device type of a platform-origin dataset's device, once,
      * so the read-only Device field shows something meaningful for a document loaded from
      * the server (not only for one just picked in this session). No-op for any other origin,
-     * an unset ref, or a ref already loaded/loading.
+     * an unset ref, or a ref already loaded/loading. Public: also called from the template
+     * for a driven context source's dataset panel on expand.
      */
-    private ensurePlatformDeviceLoaded(dataset: DatasetSource | undefined): void {
+    ensurePlatformDeviceLoaded(dataset: DatasetSource | undefined): void {
         const id = dataset?.origin === 'platform' ? dataset.ref : undefined;
         if (!id || this.platformDeviceNames.has(id) || this.loadingPlatformDevices.has(id)) {
             return;
@@ -742,37 +726,6 @@ export class EnvironmentDetailComponent implements OnInit {
         this.formulaEntries = Object.entries(inputs).map(([name, ref]) => ({ name, ref }));
     }
 
-    /**
-     * Rebuilds the profile preview chart for the currently selected channel. Explicitly
-     * invoked after every edit that could change the curve (base/spread/cumulative,
-     * factors, switching source kind, selecting a different node) instead of a template
-     * getter, so a chart library redraw does not run on every unrelated change-detection tick.
-     */
-    private refreshProfileChart(): void {
-        const profile = this.selectedChannel?.source?.kind === 'profile' ? this.selectedChannel.source.profile : undefined;
-        if (!profile) {
-            this.profileChart = undefined;
-            return;
-        }
-        const points = profilePreviewPoints(profile, this.todayWeekday);
-        const hasSpread = (profile.spread_percent ?? 0) > 0;
-        const series: ApexAxisChartSeries = [{ name: 'Value', data: points.map((p) => p.value) }];
-        if (hasSpread) {
-            series.push({ name: 'Low', data: points.map((p) => p.low) }, { name: 'High', data: points.map((p) => p.high) });
-        }
-        this.profileChart = {
-            series,
-            chart: { type: 'line', height: 220, toolbar: { show: false }, animations: { enabled: false } },
-            xaxis: { categories: points.map((p) => p.hour + ':00') },
-            // unformatted floats render as 25.0000000000000000 on the axis
-            yaxis: { labels: { formatter: (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: 1 }) } },
-            dataLabels: { enabled: false },
-            stroke: { width: hasSpread ? [3, 1, 1] : [3], dashArray: hasSpread ? [0, 4, 4] : [0], curve: 'smooth' },
-            legend: { show: hasSpread },
-            colors: hasSpread ? ['#008FFB', '#999999', '#999999'] : ['#008FFB'],
-        };
-    }
-
     private rebuildTree(): void {
         if (!this.environment) {
             return;
@@ -793,7 +746,6 @@ export class EnvironmentDetailComponent implements OnInit {
         pathToKey(this.root, this.selectedKey).forEach((n) => this.treeControl.expand(n));
         this.refreshSelectedNodeProblems();
         this.refreshFormulaEntries();
-        this.refreshProfileChart();
         this.ensurePlatformDeviceLoaded(this.selectedChannel?.source?.dataset);
     }
 

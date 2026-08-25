@@ -25,6 +25,24 @@ describe('collectFormulaReferences', () => {
         expect(options).toContain({ value: 'context.irradiation', label: 'irradiation', group: 'context' });
     });
 
+    it('offers a driven context key (context_sources) the same way as a static one', () => {
+        const env: Environment = {
+            context: { outdoor_temp: 5 },
+            context_sources: { working_hours: { kind: 'profile', interval_seconds: 300, profile: { base: 1 } } },
+        };
+        const options = collectFormulaReferences(env);
+        expect(options).toContain({ value: 'context.working_hours', label: 'working_hours', group: 'context' });
+    });
+
+    it('does not duplicate a context key that is both static and driven', () => {
+        const env: Environment = {
+            context: { outdoor_temp: 5 },
+            context_sources: { outdoor_temp: { kind: 'profile', interval_seconds: 300, profile: { base: 5 } } },
+        };
+        const options = collectFormulaReferences(env);
+        expect(options.filter((o) => o.value === 'context.outdoor_temp').length).toBe(1);
+    });
+
     // Regression target: zones nest arbitrarily deep via Zone.zones, and an early version
     // that only looked at the top-level zones array would miss everything below it.
     it('walks nested zones to find channels and state keys at every depth', () => {

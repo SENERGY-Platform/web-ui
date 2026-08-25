@@ -37,11 +37,14 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { CoreModule } from '../../../core/core.module';
 import { EnvironmentDetailComponent } from './environment-detail.component';
 import { EnvironmentsKeyValueEditorComponent } from '../key-value-editor/environments-key-value-editor.component';
+import { EnvironmentsProfileEditorComponent } from './profile-editor/environments-profile-editor.component';
+import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsService } from '../shared/environments.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
@@ -121,7 +124,12 @@ describe('EnvironmentDetailComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            declarations: [EnvironmentDetailComponent, EnvironmentsKeyValueEditorComponent],
+            declarations: [
+                EnvironmentDetailComponent,
+                EnvironmentsKeyValueEditorComponent,
+                EnvironmentsProfileEditorComponent,
+                EnvironmentsDatasetEditorComponent,
+            ],
             imports: [
                 CommonModule,
                 FormsModule,
@@ -142,6 +150,7 @@ describe('EnvironmentDetailComponent', () => {
                 MatCheckboxModule,
                 MatDividerModule,
                 MatTabsModule,
+                MatExpansionModule,
                 MtxSelectModule,
                 NgApexchartsModule,
             ],
@@ -539,6 +548,68 @@ describe('EnvironmentDetailComponent', () => {
 
             httpMock.expectNone(devicesUrl);
             expect(component.environment?.zones?.[0].assets?.length).toBe(1);
+        });
+    });
+
+    describe('context sources (driven context values)', () => {
+        it('renders every context_sources entry as a driven-values row', () => {
+            const env: Environment = {
+                ...nestedEnvironment,
+                context_sources: {
+                    outdoor_temperature: { kind: 'profile', interval_seconds: 300, profile: { base: 12 } },
+                    replay: { kind: 'dataset', interval_seconds: 60, dataset: { origin: 'file', ref: 'ds-1' } },
+                },
+            };
+            loadWith(env);
+
+            const entries = component.contextSourceEntries(component.selectedEnvironment!);
+            expect(entries.map((e) => e.key).sort()).toEqual(['outdoor_temperature', 'replay']);
+        });
+
+        it('existingContextKeys collects both static and driven keys, for the Add dialog\'s collision check', () => {
+            const env: Environment = {
+                ...nestedEnvironment,
+                context: { irradiation: 100 },
+                context_sources: { outdoor_temperature: { kind: 'profile', interval_seconds: 300, profile: {} } },
+            };
+            loadWith(env);
+
+            expect(component.existingContextKeys(component.selectedEnvironment!).sort()).toEqual(['irradiation', 'outdoor_temperature']);
+        });
+
+        it('openAddContextDialog stores the returned key/source under context_sources and marks the document dirty', () => {
+            loadWith(nestedEnvironment);
+            spyOn(TestBed.inject(MatDialog), 'open').and.returnValue({
+                afterClosed: () => of({ key: 'outdoor_temperature', source: { kind: 'profile', interval_seconds: 300, profile: { base: 12 } } }),
+            } as any);
+
+            component.openAddContextDialog(component.selectedEnvironment!);
+
+            expect(component.environment?.context_sources?.['outdoor_temperature']?.profile?.base).toBe(12);
+            expect(component.isDirty).toBe(true);
+        });
+
+        it('does not add anything when the Add dialog is cancelled', () => {
+            loadWith(nestedEnvironment);
+            spyOn(TestBed.inject(MatDialog), 'open').and.returnValue({ afterClosed: () => of(undefined) } as any);
+
+            component.openAddContextDialog(component.selectedEnvironment!);
+
+            expect(component.environment?.context_sources).toBeUndefined();
+            expect(component.isDirty).toBe(false);
+        });
+
+        it('removeContextSource deletes the key and marks the document dirty', () => {
+            const env: Environment = {
+                ...nestedEnvironment,
+                context_sources: { outdoor_temperature: { kind: 'profile', interval_seconds: 300, profile: {} } },
+            };
+            loadWith(env);
+
+            component.removeContextSource(component.selectedEnvironment!, 'outdoor_temperature');
+
+            expect(component.environment?.context_sources?.['outdoor_temperature']).toBeUndefined();
+            expect(component.isDirty).toBe(true);
         });
     });
 

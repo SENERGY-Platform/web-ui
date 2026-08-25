@@ -11,6 +11,20 @@ const industry: Environment = {
     type: 'industrial_site',
     seed: 42,
     context: { outdoor_temperature: 12.5 },
+    context_sources: {
+        outdoor_temperature: {
+            kind: 'profile',
+            interval_seconds: 300,
+            profile: {
+                base: 12,
+                spread_percent: 15,
+                hour_factors: [
+                    0.6, 0.6, 0.6, 0.6, 0.55, 0.5, 0.55, 0.65, 0.8, 0.95, 1.1, 1.2, 1.3, 1.4, 1.45, 1.5, 1.45, 1.35, 1.2, 1.05, 0.9, 0.8,
+                    0.7, 0.65,
+                ],
+            },
+        },
+    },
     zones: [
         {
             id: 'z-site', name: 'Werksgelaende', type: 'site',

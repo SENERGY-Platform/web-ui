@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { mondayStartWeekday, profilePreviewPoints } from './environments-profile-preview';
+import { mondayStartWeekday, profileChartOptions, profilePreviewPoints } from './environments-profile-preview';
 import { ProfileSource } from './environments.model';
 
 describe('profilePreviewPoints', () => {
@@ -53,6 +53,26 @@ describe('profilePreviewPoints', () => {
         const points = profilePreviewPoints({ base: 100 }, 0);
         expect(points[0].low).toBe(100);
         expect(points[0].high).toBe(100);
+    });
+});
+
+describe('profileChartOptions', () => {
+    it('renders a single series when spread is unset', () => {
+        const options = profileChartOptions({ base: 10 }, 0);
+        expect(options.series.length).toBe(1);
+        expect(options.series[0].data as number[]).toEqual(new Array(24).fill(10));
+        expect(options.legend.show).toBe(false);
+    });
+
+    it('adds low/high band series when spread is set', () => {
+        const options = profileChartOptions({ base: 100, spread_percent: 10 }, 0);
+        expect(options.series.length).toBe(3);
+        expect(options.legend.show).toBe(true);
+    });
+
+    it('labels the x-axis with hour categories', () => {
+        const options = profileChartOptions({ base: 1 }, 0);
+        expect(options.xaxis.categories).toEqual(Array.from({ length: 24 }, (_, i) => i + ':00'));
     });
 });
 

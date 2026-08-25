@@ -33,6 +33,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { CoreModule } from '../../core/core.module';
@@ -40,6 +41,9 @@ import { EnvironmentsComponent } from './environments.component';
 import { EnvironmentDetailComponent } from './environment-detail/environment-detail.component';
 import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create-dialog.component';
 import { EnvironmentsAddMachineDialogComponent } from './environment-detail/dialogs/environments-add-machine-dialog.component';
+import { EnvironmentsAddContextDialogComponent } from './environment-detail/dialogs/environments-add-context-dialog.component';
+import { EnvironmentsProfileEditorComponent } from './environment-detail/profile-editor/environments-profile-editor.component';
+import { EnvironmentsDatasetEditorComponent } from './environment-detail/dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsKeyValueEditorComponent } from './key-value-editor/environments-key-value-editor.component';
 import { EnvironmentsDatasetsComponent } from './datasets/environments-datasets.component';
 import { EnvironmentsDatasetUploadDialogComponent } from './datasets/dialogs/environments-dataset-upload-dialog.component';
@@ -81,6 +85,9 @@ const formFieldDefaults = {
         EnvironmentDetailComponent,
         EnvironmentsCreateDialogComponent,
         EnvironmentsAddMachineDialogComponent,
+        EnvironmentsAddContextDialogComponent,
+        EnvironmentsProfileEditorComponent,
+        EnvironmentsDatasetEditorComponent,
         EnvironmentsKeyValueEditorComponent,
         EnvironmentsDatasetsComponent,
         EnvironmentsDatasetUploadDialogComponent,
@@ -105,6 +112,7 @@ const formFieldDefaults = {
         MatCheckboxModule,
         MatDividerModule,
         MatTabsModule,
+        MatExpansionModule,
         MtxSelectModule,
         NgApexchartsModule,
     ],

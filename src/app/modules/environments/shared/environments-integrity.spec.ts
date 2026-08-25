@@ -92,6 +92,23 @@ describe('findNonIntegerFields', () => {
         expect(findNonIntegerFields(env)).toEqual(['zones[0].zones[0].time_constants.temperature']);
     });
 
+    it('flags a non-integer context source interval_seconds with its key-indexed path', () => {
+        const env: Environment = {
+            id: 'e1',
+            context_sources: { outdoor_temperature: { kind: 'profile', interval_seconds: 300.5, profile: {} } },
+        };
+        expect(findNonIntegerFields(env)).toEqual(['context_sources.outdoor_temperature.interval_seconds']);
+    });
+
+    // Boundary: a whole number written as a float literal must not be flagged, same as seed.
+    it('does not flag a whole context source interval_seconds written with a decimal point', () => {
+        const env: Environment = {
+            id: 'e1',
+            context_sources: { outdoor_temperature: { kind: 'profile', interval_seconds: 300.0, profile: {} } },
+        };
+        expect(findNonIntegerFields(env)).toEqual([]);
+    });
+
     it('does not flag fields that are simply unset', () => {
         const env: Environment = {
             id: 'e1',

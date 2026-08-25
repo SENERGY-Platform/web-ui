@@ -245,6 +245,14 @@ export interface Environment {
     seed?: number;
     /** Shared surroundings every zone below can read: outdoor temperature, irradiation, calendar. Initial values only. */
     context?: Record<string, unknown>;
+    /**
+     * Drives context keys over time: outdoor temperature follows a day cycle, irradiance
+     * follows the sun. Without a source a context key keeps its initial value until somebody
+     * sets it by hand. Keyed by the context key the source writes; only 'profile' and
+     * 'dataset' kinds are accepted here, each with a mandatory interval_seconds -- a context
+     * source has no channel publish tick to piggyback on.
+     */
+    context_sources?: { [key: string]: Source };
     zones?: Zone[];
 }
 

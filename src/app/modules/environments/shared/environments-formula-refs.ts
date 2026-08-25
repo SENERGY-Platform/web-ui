@@ -29,14 +29,16 @@ export interface FormulaReferenceOption {
 /**
  * Every reference a formula input could point at: every channel anywhere in the environment
  * (a formula may read a sensor on a different asset or zone, not just its own), plus every
- * context/zone/asset state key that already appears somewhere in the document. Keys are
- * collected rather than a fixed list because they are free-form (see Environment.context) --
- * a fixed dropdown would hide keys a different zone already uses. Walks nested zones, since
- * a zone's own `zones` can hold further zones to any depth.
+ * context/zone/asset state key that already appears somewhere in the document. A context
+ * key driven by a context source is offered the same way a static one is -- a formula reads
+ * both through context.<key> and cannot tell them apart. Keys are collected rather than a
+ * fixed list because they are free-form (see Environment.context) -- a fixed dropdown would
+ * hide keys a different zone already uses. Walks nested zones, since a zone's own `zones`
+ * can hold further zones to any depth.
  */
 export function collectFormulaReferences(environment: Environment): FormulaReferenceOption[] {
     const channelOptions: FormulaReferenceOption[] = [];
-    const contextKeys = new Set<string>(Object.keys(environment.context || {}));
+    const contextKeys = new Set<string>([...Object.keys(environment.context || {}), ...Object.keys(environment.context_sources || {})]);
     const zoneKeys = new Set<string>();
     const assetKeys = new Set<string>();
 

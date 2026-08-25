@@ -1,0 +1,64 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.preset-list {
+    max-height: 260px;
+    overflow: auto;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.preset-row {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.preset-row:last-child {
+    border-bottom: none;
+}
+
+.preset-row:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.preset-row.selected {
+    background: rgba(68, 132, 206, 0.16); /* cc accent */
+}
+
+.preset-label {
+    font-weight: 500;
+}
+
+.preset-description {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+}
+
+.preset-preview {
+    margin-bottom: 12px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.key-error {
+    color: #f44336;
+    font-size: 12px;
+    margin-top: -4px;
+}

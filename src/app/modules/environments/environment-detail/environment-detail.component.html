@@ -127,10 +127,58 @@
                     </mat-form-field>
 
                     <h3>Context</h3>
-                    <p class="section-hint">Shared surroundings every zone can read, e.g. outdoor temperature. Initial values only.</p>
+                    <p class="section-hint">
+                        The context is the shared environment of the whole site: values like outdoor temperature or working
+                        hours that every zone and every formula can read (as context.&lt;key&gt;). Static entries keep their
+                        value until changed on the Live state tab; driven entries below follow a day cycle or replay a
+                        recorded series on their own.
+                    </p>
+
+                    <h4>Static values</h4>
                     <senergy-environments-key-value-editor [record]="selectedEnvironment!.context" mode="mixed"
                         (recordChange)="setEnvironmentContext(selectedEnvironment!, $event)">
                     </senergy-environments-key-value-editor>
+
+                    <h4>Driven values</h4>
+                    <div class="context-sources-list" *ngIf="contextSourceEntries(selectedEnvironment!).length > 0">
+                        <mat-expansion-panel *ngFor="let entry of contextSourceEntries(selectedEnvironment!); trackBy: trackByContextKey"
+                            (opened)="ensurePlatformDeviceLoaded(entry.source.dataset)">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title class="context-source-title">{{entry.key}}</mat-panel-title>
+                                <mat-panel-description class="context-source-description">
+                                    <span class="context-source-meta">{{sourceKindLabel(entry.source.kind)}} &middot; every {{entry.source.interval_seconds || 0}}s</span>
+                                    <button mat-icon-button color="warn" matTooltip="Remove" class="context-source-remove"
+                                        (click)="removeContextSource(selectedEnvironment!, entry.key); $event.stopPropagation()">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </mat-panel-description>
+                            </mat-expansion-panel-header>
+
+                            <mat-form-field appearance="outline" color="accent" class="third-width">
+                                <mat-label>Interval (seconds)</mat-label>
+                                <input matInput type="number" step="1" [(ngModel)]="entry.source.interval_seconds"
+                                    (ngModelChange)="markDirty()" [ngModelOptions]="{standalone: true}" name="context-source-interval">
+                                <mat-hint>How often the value advances, in seconds.</mat-hint>
+                            </mat-form-field>
+
+                            <senergy-environments-profile-editor *ngIf="entry.source.kind === 'profile'"
+                                [profile]="entry.source.profile!" [todayWeekday]="todayWeekday" (profileChange)="markDirty()">
+                            </senergy-environments-profile-editor>
+
+                            <senergy-environments-dataset-editor *ngIf="entry.source.kind === 'dataset'" [dataset]="entry.source.dataset!"
+                                [datasets]="datasets"
+                                [platformDeviceName]="entry.source.dataset?.ref ? (platformDeviceNames.get(entry.source.dataset!.ref!) || entry.source.dataset!.ref) : ''"
+                                [serviceOptions]="platformServiceOptions(entry.source.dataset!)"
+                                [columnOptions]="platformColumnOptions(entry.source.dataset!)"
+                                (selectDevice)="selectPlatformDevice(entry.source.dataset!)" (datasetChange)="markDirty()">
+                            </senergy-environments-dataset-editor>
+                        </mat-expansion-panel>
+                    </div>
+
+                    <button mat-stroked-button color="accent" type="button" class="add-context-button"
+                        (click)="openAddContextDialog(selectedEnvironment!)">
+                        <mat-icon>add</mat-icon> Add context
+                    </button>
                 </ng-container>
 
                 <ng-container *ngSwitchCase="'zone'">
@@ -261,161 +309,18 @@
                         </ng-container>
 
                         <ng-container *ngSwitchCase="'profile'">
-                            <div class="profile-chart" *ngIf="profileChart">
-                                <apx-chart [series]="profileChart.series" [chart]="profileChart.chart" [xaxis]="profileChart.xaxis"
-                                    [yaxis]="profileChart.yaxis" [dataLabels]="profileChart.dataLabels" [stroke]="profileChart.stroke"
-                                    [legend]="profileChart.legend" [colors]="profileChart.colors">
-                                </apx-chart>
-                                <p class="section-hint">24-hour preview for today ({{weekdayLabels[todayWeekday]}}): base &times; hour factor &times; weekday factor.</p>
-                            </div>
-
-                            <div class="field-row">
-                            <mat-form-field appearance="outline" color="accent" class="third-width">
-                                <mat-label>Base</mat-label>
-                                <input matInput type="number" [(ngModel)]="selectedChannel!.source!.profile!.base"
-                                    (ngModelChange)="onProfileFieldChange()" name="profile-base">
-                                <mat-hint>The typical value the day pattern below scales from.</mat-hint>
-                            </mat-form-field>
-                            <mat-form-field appearance="outline" color="accent" class="third-width">
-                                <mat-label>Spread (%)</mat-label>
-                                <input matInput type="number" [(ngModel)]="selectedChannel!.source!.profile!.spread_percent"
-                                    (ngModelChange)="onProfileFieldChange()" name="profile-spread">
-                                <mat-hint>Random variation added around the resulting value, as a percent.</mat-hint>
-                            </mat-form-field>
-                            </div>
-                            <mat-checkbox [(ngModel)]="selectedChannel!.source!.profile!.cumulative" (ngModelChange)="onProfileFieldChange()"
-                                name="profile-cumulative">
-                                Cumulative
-                            </mat-checkbox>
-                            <mat-icon class="inline-help-icon" matTooltip="A meter reading that keeps counting up instead of resetting each cycle.">help_outline</mat-icon>
-
-                            <div class="factors-block">
-                                <span class="factors-label">Hour factors</span>
-                                <p class="section-hint">Multiplies the base value per hour of day; 1 = no change, empty = neutral for every hour.</p>
-                                <div class="factors-row">
-                                    <mat-form-field appearance="outline" color="accent" class="factor-field"
-                                        *ngFor="let h of hourIndexes">
-                                        <mat-label>{{h}}</mat-label>
-                                        <input matInput type="number" [ngModel]="selectedChannel!.source!.profile!.hour_factors?.[h]"
-                                            [ngModelOptions]="{standalone: true}"
-                                            (ngModelChange)="setHourFactor(selectedChannel!.source!.profile!, h, $event)">
-                                    </mat-form-field>
-                                </div>
-                            </div>
-
-                            <div class="factors-block">
-                                <span class="factors-label">Weekday factors</span>
-                                <p class="section-hint">Multiplies the value per weekday; 1 = no change, empty = neutral for every weekday.</p>
-                                <div class="factors-row">
-                                    <mat-form-field appearance="outline" color="accent" class="factor-field"
-                                        *ngFor="let w of weekdayIndexes">
-                                        <mat-label>{{weekdayLabels[w]}}</mat-label>
-                                        <input matInput type="number" [ngModel]="selectedChannel!.source!.profile!.weekday_factors?.[w]"
-                                            [ngModelOptions]="{standalone: true}"
-                                            (ngModelChange)="setWeekdayFactor(selectedChannel!.source!.profile!, w, $event)">
-                                    </mat-form-field>
-                                </div>
-                            </div>
+                            <senergy-environments-profile-editor [profile]="selectedChannel!.source!.profile!" [todayWeekday]="todayWeekday"
+                                (profileChange)="markDirty()">
+                            </senergy-environments-profile-editor>
                         </ng-container>
 
                         <ng-container *ngSwitchCase="'dataset'">
-                            <mat-form-field appearance="outline" color="accent" class="third-width">
-                                <mat-label>Origin</mat-label>
-                                <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.origin" (ngModelChange)="markDirty()"
-                                    name="dataset-origin" appendTo=".ng-select-anchor">
-                                    <mtx-option *ngFor="let o of DATASET_ORIGINS" [value]="o">{{datasetOriginLabel(o)}}</mtx-option>
-                                </mtx-select>
-                                <mat-hint>Uploaded file: a dataset uploaded on the Datasets page. Platform device: a real device's recorded timeseries.</mat-hint>
-                            </mat-form-field>
-
-                            <ng-container *ngIf="selectedChannel!.source!.dataset!.origin === 'file'">
-                                <mat-form-field appearance="outline" color="accent" class="third-width">
-                                    <mat-label>Dataset</mat-label>
-                                    <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.ref" (ngModelChange)="markDirty()"
-                                        name="dataset-ref" appendTo=".ng-select-anchor">
-                                        <mtx-option *ngFor="let d of datasets" [value]="d.id">{{d.name}}</mtx-option>
-                                    </mtx-select>
-                                </mat-form-field>
-                                <mat-form-field appearance="outline" color="accent" class="third-width">
-                                    <mat-label>Column</mat-label>
-                                    <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.column" (ngModelChange)="markDirty()"
-                                        name="dataset-column" appendTo=".ng-select-anchor">
-                                        <mtx-option *ngFor="let c of columnsForDataset(selectedChannel!.source!.dataset!.ref)"
-                                            [value]="c.name">{{c.name}}</mtx-option>
-                                    </mtx-select>
-                                    <mat-hint>Which value column to replay. Empty = the first one.</mat-hint>
-                                </mat-form-field>
-                                <a mat-button color="accent" routerLink="/environments/datasets" class="manage-datasets-link">
-                                    <mat-icon>open_in_new</mat-icon> Manage datasets
-                                </a>
-                            </ng-container>
-
-                            <ng-container *ngIf="selectedChannel!.source!.dataset!.origin === 'platform'">
-                                <div class="readonly-hint-row">
-                                    <mat-form-field appearance="outline" color="accent" class="third-width">
-                                        <mat-label>Device</mat-label>
-                                        <input matInput
-                                            [value]="selectedChannel!.source!.dataset!.ref ? (platformDeviceNames.get(selectedChannel!.source!.dataset!.ref) || selectedChannel!.source!.dataset!.ref) : ''"
-                                            disabled name="dataset-platform-ref">
-                                        <mat-hint>The real device whose recordings this channel replays.</mat-hint>
-                                    </mat-form-field>
-                                    <button mat-stroked-button type="button" color="accent" (click)="selectPlatformDevice(selectedChannel!.source!.dataset!)">
-                                        <mat-icon>search</mat-icon> Select device
-                                    </button>
-                                </div>
-                                <mat-form-field appearance="outline" color="accent" class="third-width">
-                                    <mat-label>Service</mat-label>
-                                    <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.service_ref" (ngModelChange)="markDirty()"
-                                        name="dataset-service-ref" appendTo=".ng-select-anchor">
-                                        <mtx-option *ngFor="let s of platformServiceOptions(selectedChannel!.source!.dataset!)"
-                                            [value]="s.id">{{s.name}}</mtx-option>
-                                    </mtx-select>
-                                    <mat-hint>Which of the device's services to replay.</mat-hint>
-                                </mat-form-field>
-                                <mat-form-field appearance="outline" color="accent" class="third-width">
-                                    <mat-label>Column</mat-label>
-                                    <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.column" (ngModelChange)="markDirty()"
-                                        name="dataset-platform-column" appendTo=".ng-select-anchor">
-                                        <mtx-option *ngFor="let p of platformColumnOptions(selectedChannel!.source!.dataset!)"
-                                            [value]="p">{{p}}</mtx-option>
-                                    </mtx-select>
-                                    <mat-hint>Which output variable of the service to replay.</mat-hint>
-                                </mat-form-field>
-                                <mat-form-field appearance="outline" color="accent" class="third-width">
-                                    <mat-label>Window</mat-label>
-                                    <input matInput [(ngModel)]="selectedChannel!.source!.dataset!.window" (ngModelChange)="markDirty()"
-                                        name="dataset-window">
-                                    <mat-hint>How much history to fetch, backwards from environment start, e.g. 36h, 7d, 4w.</mat-hint>
-                                </mat-form-field>
-                            </ng-container>
-
-                            <mat-form-field appearance="outline" color="accent" class="third-width">
-                                <mat-label>Resample</mat-label>
-                                <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.resample" (ngModelChange)="markDirty()"
-                                    name="dataset-resample" appendTo=".ng-select-anchor">
-                                    <mtx-option *ngFor="let r of RESAMPLE_MODES" [value]="r">{{resampleModeLabel(r)}}</mtx-option>
-                                </mtx-select>
-                                <mat-hint>{{resampleModeHint(selectedChannel!.source!.dataset!.resample)}}</mat-hint>
-                            </mat-form-field>
-                            <mat-form-field appearance="outline" color="accent" class="third-width">
-                                <mat-label>Anchor</mat-label>
-                                <mtx-select [(ngModel)]="selectedChannel!.source!.dataset!.anchor" (ngModelChange)="markDirty()"
-                                    name="dataset-anchor" appendTo=".ng-select-anchor">
-                                    <mtx-option *ngFor="let a of ANCHOR_MODES" [value]="a">{{anchorModeLabel(a)}}</mtx-option>
-                                </mtx-select>
-                                <mat-hint>{{anchorModeHint(selectedChannel!.source!.dataset!.anchor)}}</mat-hint>
-                            </mat-form-field>
-                            <mat-form-field appearance="outline" color="accent" class="third-width">
-                                <mat-label>Scale</mat-label>
-                                <input matInput type="number" [(ngModel)]="selectedChannel!.source!.dataset!.scale"
-                                    (ngModelChange)="markDirty()" name="dataset-scale">
-                                <mat-hint>Multiplies every replayed value. 0 = unscaled.</mat-hint>
-                            </mat-form-field>
-                            <mat-checkbox [(ngModel)]="selectedChannel!.source!.dataset!.cumulative" (ngModelChange)="markDirty()"
-                                name="dataset-cumulative">
-                                Cumulative
-                            </mat-checkbox>
-                            <mat-icon class="inline-help-icon" matTooltip="A meter reading that keeps counting up across a loop boundary instead of jumping back to the first value.">help_outline</mat-icon>
+                            <senergy-environments-dataset-editor [dataset]="selectedChannel!.source!.dataset!" [datasets]="datasets"
+                                [platformDeviceName]="selectedChannel!.source!.dataset!.ref ? (platformDeviceNames.get(selectedChannel!.source!.dataset!.ref) || selectedChannel!.source!.dataset!.ref) : ''"
+                                [serviceOptions]="platformServiceOptions(selectedChannel!.source!.dataset!)"
+                                [columnOptions]="platformColumnOptions(selectedChannel!.source!.dataset!)"
+                                (selectDevice)="selectPlatformDevice(selectedChannel!.source!.dataset!)" (datasetChange)="markDirty()">
+                            </senergy-environments-dataset-editor>
                         </ng-container>
 
                         <ng-container *ngSwitchCase="'formula'">

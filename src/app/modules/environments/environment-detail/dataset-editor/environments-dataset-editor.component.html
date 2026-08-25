@@ -1,0 +1,105 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<mat-form-field appearance="outline" color="accent" class="third-width">
+    <mat-label>Origin</mat-label>
+    <mtx-select [(ngModel)]="dataset!.origin" (ngModelChange)="onFieldChange()" name="dataset-origin"
+        appendTo=".ng-select-anchor">
+        <mtx-option *ngFor="let o of DATASET_ORIGINS" [value]="o">{{datasetOriginLabel(o)}}</mtx-option>
+    </mtx-select>
+    <mat-hint>Uploaded file: a dataset uploaded on the Datasets page. Platform device: a real device's recorded timeseries.</mat-hint>
+</mat-form-field>
+
+<ng-container *ngIf="dataset!.origin === 'file'">
+    <mat-form-field appearance="outline" color="accent" class="third-width">
+        <mat-label>Dataset</mat-label>
+        <mtx-select [(ngModel)]="dataset!.ref" (ngModelChange)="onFieldChange()" name="dataset-ref"
+            appendTo=".ng-select-anchor">
+            <mtx-option *ngFor="let d of datasets" [value]="d.id">{{d.name}}</mtx-option>
+        </mtx-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" color="accent" class="third-width">
+        <mat-label>Column</mat-label>
+        <mtx-select [(ngModel)]="dataset!.column" (ngModelChange)="onFieldChange()" name="dataset-column"
+            appendTo=".ng-select-anchor">
+            <mtx-option *ngFor="let c of columnsForDataset(dataset!.ref)" [value]="c.name">{{c.name}}</mtx-option>
+        </mtx-select>
+        <mat-hint>Which value column to replay. Empty = the first one.</mat-hint>
+    </mat-form-field>
+    <a mat-button color="accent" routerLink="/environments/datasets" class="manage-datasets-link">
+        <mat-icon>open_in_new</mat-icon> Manage datasets
+    </a>
+</ng-container>
+
+<ng-container *ngIf="dataset!.origin === 'platform'">
+    <div class="readonly-hint-row">
+        <mat-form-field appearance="outline" color="accent" class="third-width">
+            <mat-label>Device</mat-label>
+            <input matInput [value]="platformDeviceName || ''" disabled name="dataset-platform-ref">
+            <mat-hint>The real device whose recordings this channel replays.</mat-hint>
+        </mat-form-field>
+        <button mat-stroked-button type="button" color="accent" (click)="selectDevice.emit()">
+            <mat-icon>search</mat-icon> Select device
+        </button>
+    </div>
+    <mat-form-field appearance="outline" color="accent" class="third-width">
+        <mat-label>Service</mat-label>
+        <mtx-select [(ngModel)]="dataset!.service_ref" (ngModelChange)="onFieldChange()" name="dataset-service-ref"
+            appendTo=".ng-select-anchor">
+            <mtx-option *ngFor="let s of serviceOptions" [value]="s.id">{{s.name}}</mtx-option>
+        </mtx-select>
+        <mat-hint>Which of the device's services to replay.</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline" color="accent" class="third-width">
+        <mat-label>Column</mat-label>
+        <mtx-select [(ngModel)]="dataset!.column" (ngModelChange)="onFieldChange()" name="dataset-platform-column"
+            appendTo=".ng-select-anchor">
+            <mtx-option *ngFor="let p of columnOptions" [value]="p">{{p}}</mtx-option>
+        </mtx-select>
+        <mat-hint>Which output variable of the service to replay.</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline" color="accent" class="third-width">
+        <mat-label>Window</mat-label>
+        <input matInput [(ngModel)]="dataset!.window" (ngModelChange)="onFieldChange()" name="dataset-window">
+        <mat-hint>How much history to fetch, backwards from environment start, e.g. 36h, 7d, 4w.</mat-hint>
+    </mat-form-field>
+</ng-container>
+
+<mat-form-field appearance="outline" color="accent" class="third-width">
+    <mat-label>Resample</mat-label>
+    <mtx-select [(ngModel)]="dataset!.resample" (ngModelChange)="onFieldChange()" name="dataset-resample"
+        appendTo=".ng-select-anchor">
+        <mtx-option *ngFor="let r of RESAMPLE_MODES" [value]="r">{{resampleModeLabel(r)}}</mtx-option>
+    </mtx-select>
+    <mat-hint>{{resampleModeHint(dataset!.resample)}}</mat-hint>
+</mat-form-field>
+<mat-form-field appearance="outline" color="accent" class="third-width">
+    <mat-label>Anchor</mat-label>
+    <mtx-select [(ngModel)]="dataset!.anchor" (ngModelChange)="onFieldChange()" name="dataset-anchor"
+        appendTo=".ng-select-anchor">
+        <mtx-option *ngFor="let a of ANCHOR_MODES" [value]="a">{{anchorModeLabel(a)}}</mtx-option>
+    </mtx-select>
+    <mat-hint>{{anchorModeHint(dataset!.anchor)}}</mat-hint>
+</mat-form-field>
+<mat-form-field appearance="outline" color="accent" class="third-width">
+    <mat-label>Scale</mat-label>
+    <input matInput type="number" [(ngModel)]="dataset!.scale" (ngModelChange)="onFieldChange()" name="dataset-scale">
+    <mat-hint>Multiplies every replayed value. 0 = unscaled.</mat-hint>
+</mat-form-field>
+<mat-checkbox [(ngModel)]="dataset!.cumulative" (ngModelChange)="onFieldChange()" name="dataset-cumulative">
+    Cumulative
+</mat-checkbox>
+<mat-icon class="inline-help-icon" matTooltip="A meter reading that keeps counting up across a loop boundary instead of jumping back to the first value.">help_outline</mat-icon>

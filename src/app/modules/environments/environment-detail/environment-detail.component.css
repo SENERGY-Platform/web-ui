@@ -247,3 +247,43 @@
     min-height: 80px;
     max-height: 220px;
 }
+
+.context-sources-list {
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.context-source-title {
+    flex: 0 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Overrides Material's default (flex:2, ellipsis-on-overflow text) -- this description
+   holds a button, not just text, so it needs its own layout instead of the text-truncation
+   rules that would otherwise clip or wrap the button. */
+.context-source-description {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    overflow: visible;
+    white-space: nowrap;
+}
+
+.context-source-meta {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.context-source-remove {
+    flex: 0 0 auto;
+}
+
+.add-context-button {
+    align-self: flex-start;
+    margin-bottom: 16px;
+}

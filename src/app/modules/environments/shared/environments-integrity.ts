@@ -31,6 +31,11 @@ export function findNonIntegerFields(env: Environment): string[] {
     if (env.seed !== undefined && !Number.isInteger(env.seed)) {
         problems.push('seed');
     }
+    Object.entries(env.context_sources || {}).forEach(([key, source]) => {
+        if (source.interval_seconds !== undefined && !Number.isInteger(source.interval_seconds)) {
+            problems.push('context_sources.' + key + '.interval_seconds');
+        }
+    });
 
     const walkZones = (zones: Zone[] | undefined, prefix: string): void => {
         (zones || []).forEach((zone, zoneIndex) => {
