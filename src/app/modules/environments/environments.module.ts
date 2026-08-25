@@ -24,7 +24,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTreeModule } from '@angular/material/tree';
@@ -68,7 +68,14 @@ const environmentDetail: Route = {
 
 export const ENVIRONMENTS_ROUTES: Route[] = [environments, environmentDatasets, environmentDetail];
 
+const formFieldDefaults = {
+    // 'fixed' reserves exactly one hint line; our explanations wrap, and with
+    // 'fixed' they overlap whatever comes below the field
+    subscriptSizing: 'dynamic' as const,
+};
+
 @NgModule({
+    providers: [{ provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: formFieldDefaults }],
     declarations: [
         EnvironmentsComponent,
         EnvironmentDetailComponent,
