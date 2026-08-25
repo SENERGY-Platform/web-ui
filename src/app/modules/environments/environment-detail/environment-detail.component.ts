@@ -764,7 +764,8 @@ export class EnvironmentDetailComponent implements OnInit {
             series,
             chart: { type: 'line', height: 220, toolbar: { show: false }, animations: { enabled: false } },
             xaxis: { categories: points.map((p) => p.hour + ':00') },
-            yaxis: {},
+            // unformatted floats render as 25.0000000000000000 on the axis
+            yaxis: { labels: { formatter: (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: 1 }) } },
             dataLabels: { enabled: false },
             stroke: { width: hasSpread ? [3, 1, 1] : [3], dashArray: hasSpread ? [0, 4, 4] : [0], curve: 'smooth' },
             legend: { show: hasSpread },

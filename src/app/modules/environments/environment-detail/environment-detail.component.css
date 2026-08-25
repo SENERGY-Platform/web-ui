@@ -177,7 +177,8 @@
 }
 
 .section-hint {
-    margin-top: -8px;
+    /* the negative pull-up clipped this text under the toggle above it */
+    margin-top: 2px;
     color: rgba(0, 0, 0, 0.6);
     font-size: 12px;
 }
@@ -211,4 +212,38 @@
     vertical-align: middle;
     color: rgba(0, 0, 0, 0.5);
     cursor: help;
+}
+
+
+/* the per-node actions only appear on hover or selection: three always-visible
+   icon buttons per row ate the 340px column and truncated every name */
+.node-actions {
+    /* display:none rather than visibility:hidden - hidden still reserves the
+       ~120px of three icon buttons and truncates every deeper node's name */
+    display: none;
+}
+
+.tree-node:hover .node-actions,
+.tree-node.selected .node-actions {
+    display: inline-flex;
+}
+
+/* compact fields flow side by side instead of stacking down a narrow column */
+.field-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 16px;
+    align-items: baseline;
+}
+
+.source-kind-descriptions {
+    margin: 4px 0 12px 0;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+}
+
+.code-textarea {
+    font-family: monospace;
+    min-height: 80px;
+    max-height: 220px;
 }

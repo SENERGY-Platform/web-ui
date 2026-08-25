@@ -54,10 +54,10 @@
                             <mat-icon matBadge="!" matBadgeColor="warn" matBadgeSize="small" [matBadgeHidden]="!problemNodeKeys.has(node.key)">
                                 {{node.icon}}
                             </mat-icon>
-                            <span class="tree-node-label">{{node.data.name || node.name}}</span>
+                            <span class="tree-node-label" [title]="node.data.name || node.name">{{node.data.name || node.name}}</span>
                             <span class="tree-node-fill"></span>
 
-                            <ng-container [ngSwitch]="node.kind">
+                            <span class="node-actions" [ngSwitch]="node.kind">
                                 <ng-container *ngSwitchCase="'environment'">
                                     <button mat-icon-button matTooltip="Add zone" (click)="addZone(node); $event.stopPropagation()">
                                         <mat-icon>add</mat-icon>
@@ -87,7 +87,7 @@
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                 </ng-container>
-                            </ng-container>
+                            </span>
                         </div>
                         <ul [class.tree-invisible]="!treeControl.isExpanded(node)">
                             <ng-container matTreeNodeOutlet></ng-container>
@@ -213,6 +213,7 @@
                         <mat-hint>The platform service this channel publishes to. Set automatically, not editable here.</mat-hint>
                     </mat-form-field>
 
+                    <div class="field-row">
                     <mat-form-field appearance="outline" color="accent" class="third-width">
                         <mat-label>Interval (seconds)</mat-label>
                         <input matInput type="number" step="1" [(ngModel)]="selectedChannel!.interval_seconds" (ngModelChange)="markDirty()"
@@ -230,6 +231,7 @@
                             name="channel-characteristic-id">
                         <mat-hint>Gives the value its meaning, e.g. which characteristic on the platform it maps to.</mat-hint>
                     </mat-form-field>
+                    </div>
 
                     <mat-divider></mat-divider>
                     <h3>Source</h3>
@@ -238,10 +240,8 @@
                         (change)="onSourceKindChange(selectedChannel!, $event.value)" name="source-kind">
                         <mat-button-toggle *ngFor="let k of SOURCE_KINDS" [value]="k">{{sourceKindLabel(k)}}</mat-button-toggle>
                     </mat-button-toggle-group>
-                    <div class="source-kind-descriptions">
-                        <span class="source-kind-description" *ngFor="let k of SOURCE_KINDS">
-                            <b>{{sourceKindLabel(k)}}:</b> {{sourceKindDescription(k)}}
-                        </span>
+                    <div class="source-kind-descriptions" *ngIf="selectedChannel!.source?.kind as kind">
+                        {{sourceKindDescription(kind)}}
                     </div>
 
                     <ng-container [ngSwitch]="selectedChannel!.source?.kind">
@@ -269,6 +269,7 @@
                                 <p class="section-hint">24-hour preview for today ({{weekdayLabels[todayWeekday]}}): base &times; hour factor &times; weekday factor.</p>
                             </div>
 
+                            <div class="field-row">
                             <mat-form-field appearance="outline" color="accent" class="third-width">
                                 <mat-label>Base</mat-label>
                                 <input matInput type="number" [(ngModel)]="selectedChannel!.source!.profile!.base"
@@ -281,6 +282,7 @@
                                     (ngModelChange)="onProfileFieldChange()" name="profile-spread">
                                 <mat-hint>Random variation added around the resulting value, as a percent.</mat-hint>
                             </mat-form-field>
+                            </div>
                             <mat-checkbox [(ngModel)]="selectedChannel!.source!.profile!.cumulative" (ngModelChange)="onProfileFieldChange()"
                                 name="profile-cumulative">
                                 Cumulative
