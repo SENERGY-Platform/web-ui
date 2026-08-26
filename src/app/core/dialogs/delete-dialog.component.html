@@ -20,6 +20,11 @@
   <div>
     Should the {{text}} be deleted?
   </div>
+  @if (options?.note) {
+  <div>
+    {{options?.note}}
+  </div>
+  }
   @if (options?.checkboxText) {
   <div>
     <mat-checkbox [(ngModel)]="checked">{{options?.checkboxText}}</mat-checkbox>

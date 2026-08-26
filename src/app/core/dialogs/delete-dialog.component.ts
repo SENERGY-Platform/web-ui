@@ -21,6 +21,8 @@ export interface DeleteDialogOptions {
     checkboxText?: string;
     /** Initial state of the checkbox, e.g. to default a destructive follow-up action to on. Defaults to false. */
     checkboxDefault?: boolean;
+    /** Extra context shown below the question, e.g. a side effect of the deletion the user would otherwise not know about. */
+    note?: string;
 }
 
 export interface DeleteDialogResponse {

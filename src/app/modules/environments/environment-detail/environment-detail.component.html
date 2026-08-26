@@ -251,19 +251,36 @@
                         <mat-hint>Descriptive only -- has no effect on the simulation.</mat-hint>
                     </mat-form-field>
 
-                    <ng-container *ngIf="selectedAsset!.external_type_id">
+                    <h3>Platform device</h3>
+                    <ng-container *ngIf="selectedAsset!.external_ref; else pendingOrNoPlatformDevice">
                         <mat-form-field appearance="outline" color="accent" class="full-width">
-                            <mat-label>Platform device</mat-label>
-                            <input matInput [value]="selectedAsset!.external_ref || 'Device is created when you save'" disabled
-                                name="asset-external-ref">
-                            <mat-hint>The platform device this asset publishes to. Created automatically, not editable here.</mat-hint>
+                            <mat-label>Device</mat-label>
+                            <input matInput [value]="selectedAssetDeviceName" disabled name="asset-external-ref">
+                            <mat-hint>The platform device this asset publishes to. Set automatically, not editable here.</mat-hint>
                         </mat-form-field>
-                        <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-form-field appearance="outline" color="accent" class="full-width" *ngIf="selectedAsset!.external_type_id">
                             <mat-label>Device type</mat-label>
                             <input matInput [value]="selectedAssetDeviceTypeName" disabled name="asset-external-type-id">
-                            <mat-hint>What kind of platform device this is. Set automatically, not editable here.</mat-hint>
                         </mat-form-field>
+                        <p class="section-hint" *ngIf="selectedAsset!.external_managed">
+                            Created by the simulation when this asset was saved. Removing the asset deletes it again.
+                        </p>
+                        <p class="section-hint" *ngIf="!selectedAsset!.external_managed">
+                            An existing platform device you linked. It is never deleted by the simulation.
+                        </p>
+                        <a mat-button color="accent" routerLink="/devices/deviceinstances"
+                            [queryParams]="{'device-id': selectedAsset!.external_ref}" class="platform-device-link">
+                            <mat-icon>open_in_new</mat-icon> Open in Device management
+                        </a>
                     </ng-container>
+                    <ng-template #pendingOrNoPlatformDevice>
+                        <p class="section-hint" *ngIf="selectedAsset!.external_type_id">
+                            On save, a platform device of type {{selectedAssetDeviceTypeName}} will be created for this asset.
+                        </p>
+                        <p class="empty-hint" *ngIf="!selectedAsset!.external_type_id">
+                            Not connected to the platform.
+                        </p>
+                    </ng-template>
 
                     <h3>Initial States</h3>
                     <p class="section-hint">

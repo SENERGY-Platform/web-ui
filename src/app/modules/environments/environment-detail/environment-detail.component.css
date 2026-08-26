@@ -217,6 +217,11 @@
     display: block;
 }
 
+.platform-device-link {
+    display: block;
+    margin-top: 4px;
+}
+
 .section-hint {
     /* the negative pull-up clipped this text under the toggle above it */
     margin-top: 2px;

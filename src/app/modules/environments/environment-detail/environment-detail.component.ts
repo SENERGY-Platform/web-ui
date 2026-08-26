@@ -57,6 +57,7 @@ import { EnvTreeNode, buildEnvironmentTree, findNodeByKey, locationKey, pathToKe
 import { locationContains, ProblemPath, problemPath, sameLocation } from '../shared/environments-path';
 import { applySourceKind } from '../shared/environments-source';
 import { findNonIntegerFields } from '../shared/environments-integrity';
+import { countPendingPlatformDevices } from '../shared/environments-count';
 import { assetFromDeviceType } from '../shared/environments-device';
 import { AddMachineDialogResult, EnvironmentsAddMachineDialogComponent } from './dialogs/environments-add-machine-dialog.component';
 import {
@@ -236,6 +237,10 @@ export class EnvironmentDetailComponent implements OnInit {
             this.snackBar.open('These fields must be whole numbers: ' + nonIntegerFields.join(', '), 'close', { panelClass: 'snack-bar-error' });
             return;
         }
+        // Counted from the document as it is about to be sent, not from the server's answer:
+        // that answer arrives already updated with the new external_refs, so by then there
+        // is nothing left to compare against.
+        const pendingDeviceCount = countPendingPlatformDevices(this.environment);
         this.isSaving = true;
         this.environmentsService.updateEnvironmentChecked(this.environment.id, this.environment).subscribe((result) => {
             this.isSaving = false;
@@ -256,7 +261,11 @@ export class EnvironmentDetailComponent implements OnInit {
             this.isDirty = false;
             this.problems = [];
             this.indexProblems();
-            this.snackBar.open('Environment saved successfully.', undefined, { duration: 2000 });
+            const deviceSuffix =
+                pendingDeviceCount > 0
+                    ? ' · created ' + pendingDeviceCount + ' platform device' + (pendingDeviceCount === 1 ? '' : 's')
+                    : '';
+            this.snackBar.open('Environment saved successfully.' + deviceSuffix, undefined, { duration: 2000 });
             this.load(true); // the server may have assigned ids to new nodes; keep the current selection
         });
     }
@@ -327,6 +336,7 @@ export class EnvironmentDetailComponent implements OnInit {
         this.refreshSelectedNodeProblems();
         this.refreshFormulaEntries();
         this.ensurePlatformDeviceLoaded(this.selectedChannel?.source?.dataset);
+        this.ensureDeviceNameLoaded(this.selectedAsset?.external_ref);
     }
 
     get selectedEnvironment(): Environment | undefined {
@@ -352,6 +362,15 @@ export class EnvironmentDetailComponent implements OnInit {
             return undefined;
         }
         return this.deviceTypesById.get(typeId)?.name || typeId;
+    }
+
+    /** The platform device name behind the selected asset's external_ref, or the raw id while it is still loading. */
+    get selectedAssetDeviceName(): string | undefined {
+        const id = this.selectedAsset?.external_ref;
+        if (!id) {
+            return undefined;
+        }
+        return this.platformDeviceNames.get(id) || id;
     }
 
     /** The service name behind the selected channel's external_ref, resolved through its own asset's device type. */
@@ -409,12 +428,23 @@ export class EnvironmentDetailComponent implements OnInit {
 
     deleteNode(node: EnvTreeNode): void {
         const name = (node.data as { name?: string }).name || node.name;
-        const deviceId = node.kind === 'asset' ? (node.data as Asset).external_ref : undefined;
+        const asset = node.kind === 'asset' ? (node.data as Asset) : undefined;
+        const deviceId = asset?.external_ref;
+        // Honest about what the checkbox would actually do: a device the simulation created
+        // itself is safe to remove along with the asset, but one the user linked is a real
+        // platform device that happens to still exist after the asset is gone -- offering the
+        // same default-checked box for both would nudge people into deleting someone else's
+        // equipment by habit.
         const options: DeleteDialogOptions | undefined = deviceId
-            ? {
-                  checkboxText: 'Also delete its platform device. Timeseries already recorded for it are orphaned, not deleted.',
-                  checkboxDefault: true,
-              }
+            ? asset?.external_managed
+                ? {
+                      checkboxText: 'Also delete its platform device. It was created by the simulation when this asset was saved; timeseries already recorded for it are orphaned, not deleted.',
+                      checkboxDefault: true,
+                  }
+                : {
+                      checkboxText: 'Also delete its platform device. This is an existing device you linked, not one the simulation created -- deleting it here is permanent on the platform side.',
+                      checkboxDefault: false,
+                  }
             : undefined;
         this.dialogsService
             .openDeleteDialog(node.kind + ' "' + name + '"', options)
@@ -552,12 +582,21 @@ export class EnvironmentDetailComponent implements OnInit {
     /**
      * Loads the display name and device type of a platform-origin dataset's device, once,
      * so the read-only Device field shows something meaningful for a document loaded from
-     * the server (not only for one just picked in this session). No-op for any other origin,
-     * an unset ref, or a ref already loaded/loading. Public: also called from the template
-     * for a driven context source's dataset panel on expand.
+     * the server (not only for one just picked in this session). No-op for any other origin
+     * or an unset ref. Public: also called from the template for a driven context source's
+     * dataset panel on expand.
      */
     ensurePlatformDeviceLoaded(dataset: DatasetSource | undefined): void {
-        const id = dataset?.origin === 'platform' ? dataset.ref : undefined;
+        this.ensureDeviceNameLoaded(dataset?.origin === 'platform' ? dataset.ref : undefined);
+    }
+
+    /**
+     * Loads the display name and device type of a platform device by id, once -- the common
+     * core of ensurePlatformDeviceLoaded (a dataset source's device) and the selected asset's
+     * own external_ref (its Platform device block). No-op for an unset id or one already
+     * loaded/loading.
+     */
+    private ensureDeviceNameLoaded(id: string | undefined): void {
         if (!id || this.platformDeviceNames.has(id) || this.loadingPlatformDevices.has(id)) {
             return;
         }
@@ -775,6 +814,7 @@ export class EnvironmentDetailComponent implements OnInit {
         this.refreshSelectedNodeProblems();
         this.refreshFormulaEntries();
         this.ensurePlatformDeviceLoaded(this.selectedChannel?.source?.dataset);
+        this.ensureDeviceNameLoaded(this.selectedAsset?.external_ref);
     }
 
     /**

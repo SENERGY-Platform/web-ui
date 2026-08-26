@@ -42,3 +42,49 @@ function countZones(zones: Zone[] | undefined, counts: EnvironmentEntityCounts):
         countZones(zone.zones, counts);
     });
 }
+
+/**
+ * Assets whose platform device the simulation created itself (external_managed=true, see
+ * Asset.external_managed): deleting the environment also deletes those devices. Everything
+ * else -- external_managed false or absent, i.e. an existing device the user linked -- is
+ * never touched by that delete, so it does not count here. Descends through the same
+ * arbitrarily nested zone tree as countEnvironmentEntities.
+ */
+export function countManagedPlatformDevices(env: Environment): number {
+    let count = 0;
+    const walk = (zones: Zone[] | undefined): void => {
+        (zones || []).forEach(zone => {
+            (zone.assets || []).forEach(asset => {
+                if (asset.external_managed) {
+                    count += 1;
+                }
+            });
+            walk(zone.zones);
+        });
+    };
+    walk(env.zones);
+    return count;
+}
+
+/**
+ * Assets that will get a new platform device created for them on the next save: they carry
+ * external_type_id but not yet external_ref (see assetFromDeviceType's doc comment -- a new
+ * machine is deliberately built this way, with the server filling in external_ref on save).
+ * Meant to be read from the document as it is about to be sent, before a save's response can
+ * update it.
+ */
+export function countPendingPlatformDevices(env: Environment): number {
+    let count = 0;
+    const walk = (zones: Zone[] | undefined): void => {
+        (zones || []).forEach(zone => {
+            (zone.assets || []).forEach(asset => {
+                if (asset.external_type_id && !asset.external_ref) {
+                    count += 1;
+                }
+            });
+            walk(zone.zones);
+        });
+    };
+    walk(env.zones);
+    return count;
+}

@@ -357,6 +357,35 @@ describe('EnvironmentDetailComponent', () => {
             expect(snackBarSpy).toHaveBeenCalledWith('These fields must be whole numbers: seed', 'close', { panelClass: 'snack-bar-error' });
             httpMock.expectNone(environmentsUrl + '/e1');
         });
+
+        // A new machine's asset carries external_type_id without external_ref until it is
+        // saved (see assetFromDeviceType) -- the success message should say so, counted from
+        // the document as sent, not from the (identical, in this fixture) server answer.
+        it('mentions how many platform devices were created when the saved document had pending ones', () => {
+            const envWithPendingDevice: Environment = JSON.parse(JSON.stringify(nestedEnvironment));
+            envWithPendingDevice.zones![0].assets!.push({ id: 'a2', name: 'Press 1', external_type_id: 't1' });
+            loadWith(envWithPendingDevice);
+            component.markDirty();
+            const snackBarSpy = spyOn((component as any).snackBar, 'open');
+
+            component.save();
+            httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(envWithPendingDevice)));
+
+            expect(snackBarSpy).toHaveBeenCalledWith('Environment saved successfully. · created 1 platform device', undefined, { duration: 2000 });
+            httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(envWithPendingDevice))); // the reload
+        });
+
+        it('does not mention platform devices when the saved document had none pending', () => {
+            loadWith(nestedEnvironment);
+            component.markDirty();
+            const snackBarSpy = spyOn((component as any).snackBar, 'open');
+
+            component.save();
+            httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(nestedEnvironment)));
+
+            expect(snackBarSpy).toHaveBeenCalledWith('Environment saved successfully.', undefined, { duration: 2000 });
+            httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(nestedEnvironment))); // the reload
+        });
     });
 
     describe('problem indexing (Set/Map computed once from the ValidationError, not per node per check)', () => {
@@ -498,6 +527,37 @@ describe('EnvironmentDetailComponent', () => {
             component.deleteNode(assetNode);
 
             httpMock.expectNone(devicesUrl + '/d1');
+        });
+
+        it('defaults the checkbox to checked and explains the simulation created the device, for a managed device', () => {
+            loadWith(nestedEnvironment);
+            const assetNode = component.root!.children[0].children[0];
+            (assetNode.data as any).external_ref = 'd1';
+            (assetNode.data as any).external_managed = true;
+            const openDeleteDialog = spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({
+                afterClosed: () => ({ subscribe: (cb: any) => cb(true) }),
+            } as any);
+
+            component.deleteNode(assetNode);
+
+            const options = openDeleteDialog.calls.mostRecent().args[1];
+            expect(options!.checkboxDefault).toBe(true);
+            expect(options!.checkboxText).toContain('created by the simulation');
+        });
+
+        it('defaults the checkbox to unchecked and warns the device is a real, linked one, when external_managed is not true', () => {
+            loadWith(nestedEnvironment);
+            const assetNode = component.root!.children[0].children[0];
+            (assetNode.data as any).external_ref = 'd1'; // external_managed left undefined, like an older server's response
+            const openDeleteDialog = spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({
+                afterClosed: () => ({ subscribe: (cb: any) => cb(true) }),
+            } as any);
+
+            component.deleteNode(assetNode);
+
+            const options = openDeleteDialog.calls.mostRecent().args[1];
+            expect(options!.checkboxDefault).toBe(false);
+            expect(options!.checkboxText).toContain('existing device you linked');
         });
 
         it('does not ask about the platform device for an asset that has none', () => {
@@ -647,6 +707,40 @@ describe('EnvironmentDetailComponent', () => {
             component.select(channelNode);
 
             expect(component.selectedChannelServiceName).toBe('Power Draw');
+        });
+    });
+
+    describe('the Platform device block\'s name resolution', () => {
+        it('resolves the selected asset\'s external_ref to the device\'s display name', () => {
+            loadWith(nestedEnvironment);
+            const assetNode = component.root!.children[0].children[0];
+            (assetNode.data as any).external_ref = 'd1';
+            spyOn(TestBed.inject(DeviceInstancesService), 'getDeviceInstance').and.returnValue(
+                of({ id: 'd1', display_name: 'Boiler Room Meter', device_type_id: 'dt1' } as any),
+            );
+
+            component.select(assetNode);
+
+            expect(component.selectedAssetDeviceName).toBe('Boiler Room Meter');
+        });
+
+        it('falls back to the raw id while the device name is not (yet) resolved', () => {
+            loadWith(nestedEnvironment); // MockDeviceInstancesService resolves every lookup to null
+            const assetNode = component.root!.children[0].children[0];
+            (assetNode.data as any).external_ref = 'd1';
+
+            component.select(assetNode);
+
+            expect(component.selectedAssetDeviceName).toBe('d1');
+        });
+
+        it('is undefined for an asset without external_ref', () => {
+            loadWith(nestedEnvironment);
+            const assetNode = component.root!.children[0].children[0];
+
+            component.select(assetNode);
+
+            expect(component.selectedAssetDeviceName).toBeUndefined();
         });
     });
 

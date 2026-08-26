@@ -98,8 +98,12 @@ class MockEnvironmentsService {
 
 class MockDialogsService {
     confirmed = true;
+    lastText: string | undefined;
+    lastOptions: unknown;
 
-    openDeleteDialog(_text: string): any {
+    openDeleteDialog(text: string, options?: unknown): any {
+        this.lastText = text;
+        this.lastOptions = options;
         return { afterClosed: () => of(this.confirmed) };
     }
 }
@@ -189,6 +193,29 @@ describe('EnvironmentsComponent', () => {
 
         expect(environmentsService.deletedIds).toEqual(['e1']);
         expect(component.dataSource.data.length).toBe(1);
+    });
+
+    it('should mention the platform devices the simulation created when deleting an environment that has them', () => {
+        fixture.detectChanges();
+        const envWithManagedDevice: Environment = {
+            id: 'e3',
+            name: 'With device',
+            zones: [{ id: 'z1', assets: [{ id: 'a1', external_ref: 'd1', external_managed: true }] }],
+        };
+
+        component.delete(envWithManagedDevice);
+
+        expect(dialogsService.lastOptions).toEqual({
+            note: 'This also deletes the 1 platform device the simulation created (linked existing devices are kept).',
+        });
+    });
+
+    it('should not mention platform devices when none of the environment\'s assets are managed by the simulation', () => {
+        fixture.detectChanges();
+
+        component.delete(environments[0]);
+
+        expect(dialogsService.lastOptions).toBeUndefined();
     });
 
     it('should keep the environment if the deletion was not confirmed', () => {

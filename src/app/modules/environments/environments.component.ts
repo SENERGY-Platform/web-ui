@@ -22,8 +22,9 @@ import { Router } from '@angular/router';
 import { saveAs } from 'file-saver';
 import { EnvironmentsService } from './shared/environments.service';
 import { DialogsService } from '../../core/services/dialogs.service';
+import { DeleteDialogResponse } from '../../core/dialogs/delete-dialog.component';
 import { ApiError, Environment, ValidationError, environmentTypeLabel, isApiError, isValidationError } from './shared/environments.model';
-import { countEnvironmentEntities, EnvironmentEntityCounts } from './shared/environments-count';
+import { countEnvironmentEntities, countManagedPlatformDevices, EnvironmentEntityCounts } from './shared/environments-count';
 import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create-dialog.component';
 
 /** One row of the table: the environment plus its counts, computed once per reload. */
@@ -96,10 +97,20 @@ export class EnvironmentsComponent implements OnInit {
     }
 
     delete(env: Environment): void {
+        const managedDeviceCount = countManagedPlatformDevices(env);
+        const note =
+            managedDeviceCount > 0
+                ? 'This also deletes the ' +
+                  managedDeviceCount +
+                  ' platform device' +
+                  (managedDeviceCount === 1 ? '' : 's') +
+                  ' the simulation created (linked existing devices are kept).'
+                : undefined;
         this.dialogsService
-            .openDeleteDialog('environment ' + (env.name || env.id))
+            .openDeleteDialog('environment ' + (env.name || env.id), note ? { note } : undefined)
             .afterClosed()
-            .subscribe((confirmed: boolean) => {
+            .subscribe((result: boolean | DeleteDialogResponse) => {
+                const confirmed = typeof result === 'boolean' ? result : result?.confirmed;
                 if (confirmed && env.id) {
                     this.environmentsService.deleteEnvironment(env.id).subscribe(ok => {
                         if (ok) {

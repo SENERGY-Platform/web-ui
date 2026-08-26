@@ -277,6 +277,14 @@ export interface Asset {
     /** Preserved verbatim across a migration: it keeps the existing timeseries in timescale attached to this asset. */
     external_ref?: string;
     external_type_id?: string;
+    /**
+     * Whether the simulation created external_ref's platform device itself (true, so it also
+     * removes it when the asset or the environment is deleted) or the user linked an existing
+     * one (false/absent, never touched by a delete). Decided entirely server-side -- the
+     * client sending it back on save has no effect. Older servers do not send this field yet;
+     * treat undefined the same as false.
+     */
+    external_managed?: boolean;
     initial_states?: Record<string, unknown>;
     channels?: Channel[];
 }

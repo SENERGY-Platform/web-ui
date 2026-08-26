@@ -39,6 +39,7 @@ const industry: Environment = {
                             id: 'a-compressor', name: 'Kompressor 1', kind: 'machine',
                             external_ref: 'urn:infai:ses:device:7283f08c-d41f-4d00-b89b-e88f932cfb3f',
                             external_type_id: 'urn:infai:ses:device-type:dc5bf705-4216-40c2-ba3f-24f57dc8f3e5',
+                            external_managed: true, // created by the simulation when this environment was saved
                             initial_states: { rpm: 0, kwh: 290508.5 },
                             channels: [
                                 {
@@ -61,6 +62,22 @@ const industry: Environment = {
                                     id: 'c-replay', name: 'Referenzlastgang', direction: 'sensor',
                                     external_ref: 'urn:infai:ses:service:44ffd95e', interval_seconds: 60,
                                     source: { kind: 'dataset', dataset: { origin: 'file', ref: 'ds-1', column: 'Wirkleistung', resample: 'linear', anchor: 'loop' } },
+                                },
+                            ],
+                        },
+                        {
+                            // A pre-existing device the user linked, not one the simulation created --
+                            // external_managed stays false, so the Platform device block's other origin
+                            // line is reachable in the preview too.
+                            id: 'a-thermostat', name: 'Heizkoerperthermostat', kind: 'sensor',
+                            external_ref: 'urn:infai:ses:device:existing-thermostat-af31',
+                            external_type_id: 'urn:dt:thermo',
+                            external_managed: false,
+                            channels: [
+                                {
+                                    id: 'c-temp', name: 'Get Temperature', direction: 'sensor',
+                                    external_ref: 'urn:svc:t1', interval_seconds: 60,
+                                    source: { kind: 'profile', profile: { base: 20, spread_percent: 5 } },
                                 },
                             ],
                         },
@@ -92,6 +109,40 @@ const deviceTypes = [
     ] },
 ];
 
+// Platform devices behind the two assets' external_ref, resolved by the environment editor's
+// Platform device block (via extended-devices) so its screenshots show a real name instead of
+// falling back to the raw id.
+const extendedDevices: Record<string, { id: string; display_name: string; device_type_id: string }> = {
+    'urn:infai:ses:device:7283f08c-d41f-4d00-b89b-e88f932cfb3f': {
+        id: 'urn:infai:ses:device:7283f08c-d41f-4d00-b89b-e88f932cfb3f',
+        display_name: 'Kompressor 1 (Platform)',
+        device_type_id: 'urn:infai:ses:device-type:dc5bf705-4216-40c2-ba3f-24f57dc8f3e5',
+    },
+    'urn:infai:ses:device:existing-thermostat-af31': {
+        id: 'urn:infai:ses:device:existing-thermostat-af31',
+        display_name: 'Heizkoerper Buero 2 (Bestand)',
+        device_type_id: 'urn:dt:thermo',
+    },
+};
+
+/**
+ * Mimics the server behaviour a save() round trip in the real MOSES relies on: a new asset
+ * (external_type_id set, no external_ref yet, see assetFromDeviceType) gets a platform device
+ * created for it, with external_managed set true. Mutates in place -- the request body is a
+ * throwaway parsed object, not the shared `industry` fixture.
+ */
+function assignPendingDeviceRefs(zones: any[] | undefined): void {
+    (zones || []).forEach((zone) => {
+        (zone.assets || []).forEach((asset: any, i: number) => {
+            if (asset.external_type_id && !asset.external_ref) {
+                asset.external_ref = 'urn:infai:ses:device:preview-generated-' + (zone.id || 'zone') + '-' + i;
+                asset.external_managed = true;
+            }
+        });
+        assignPendingDeviceRefs(zone.zones);
+    });
+}
+
 @Injectable()
 export class FixtureInterceptor implements HttpInterceptor {
     intercept(request: HttpRequest<unknown>, _next: HttpHandler): Observable<HttpEvent<unknown>> {
@@ -109,13 +160,19 @@ export class FixtureInterceptor implements HttpInterceptor {
             return answer(industry);
         }
         if (url.includes('/environments/env-industry') && request.method === 'PUT') {
-            return answer(request.body);
+            const saved = request.body as Environment;
+            assignPendingDeviceRefs(saved.zones);
+            return answer(saved);
         }
         if (url.endsWith('/device-types')) {
             return answer(deviceTypes);
         }
         if (url.endsWith('/datasets') && request.method === 'GET') {
             return answer(datasets);
+        }
+        if (url.includes('/extended-devices/')) {
+            const id = decodeURIComponent(url.substring(url.lastIndexOf('/') + 1));
+            return answer(extendedDevices[id] || null);
         }
         //platform device/device-type lookups of the dataset editor and anything else
         return answer([]);
