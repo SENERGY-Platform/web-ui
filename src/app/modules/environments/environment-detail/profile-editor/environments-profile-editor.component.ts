@@ -16,7 +16,6 @@
 
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ProfileSource } from '../../shared/environments.model';
-import { withFactorSet } from '../../shared/environments-source';
 import { profileChartOptions, ProfileChartOptions } from '../../shared/environments-profile-preview';
 
 /**
@@ -42,6 +41,7 @@ export class EnvironmentsProfileEditorComponent implements OnChanges {
     chart: ProfileChartOptions | undefined;
     readonly hourIndexes = Array.from({ length: 24 }, (_, i) => i);
     readonly weekdayIndexes = Array.from({ length: 7 }, (_, i) => i);
+    readonly hourLabels = this.hourIndexes.map(String);
     readonly weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -50,25 +50,25 @@ export class EnvironmentsProfileEditorComponent implements OnChanges {
         }
     }
 
-    /** Bound to every profile field that is not a per-hour/per-weekday factor (those go through setHourFactor/setWeekdayFactor). */
+    /** Bound to every profile field that is not the hour/weekday factor bars (those go through setHourFactors/setWeekdayFactors). */
     onFieldChange(): void {
         this.refreshChart();
         this.profileChange.emit();
     }
 
-    setHourFactor(index: number, value: number): void {
+    setHourFactors(values: number[]): void {
         if (!this.profile) {
             return;
         }
-        this.profile.hour_factors = withFactorSet(this.profile.hour_factors, 24, index, Number(value));
+        this.profile.hour_factors = values;
         this.onFieldChange();
     }
 
-    setWeekdayFactor(index: number, value: number): void {
+    setWeekdayFactors(values: number[]): void {
         if (!this.profile) {
             return;
         }
-        this.profile.weekday_factors = withFactorSet(this.profile.weekday_factors, 7, index, Number(value));
+        this.profile.weekday_factors = values;
         this.onFieldChange();
     }
 

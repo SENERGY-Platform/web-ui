@@ -54,4 +54,18 @@ describe('EnvironmentsCreateDialogComponent', () => {
         component.create();
         expect(dialogRef.close).not.toHaveBeenCalled();
     });
+
+    // The user should see a real value in the Editor's Seed field right away, not an
+    // empty one they have to think to fill in themselves.
+    it('assigns a random integer seed in [1, 999999]', () => {
+        const env = created('Werk', 'industrial_site');
+        expect(Number.isInteger(env.seed)).toBe(true);
+        expect(env.seed as number).toBeGreaterThanOrEqual(1);
+        expect(env.seed as number).toBeLessThanOrEqual(999999);
+    });
+
+    it('assigns a different seed on repeated creates (not a fixed constant)', () => {
+        const seeds = new Set(Array.from({ length: 20 }, () => created('Werk', 'industrial_site').seed));
+        expect(seeds.size).toBeGreaterThan(1);
+    });
 });

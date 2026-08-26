@@ -166,6 +166,13 @@ export class EnvironmentDetailComponent implements OnInit {
     liveStateApplying = false;
     /** Undefined (nothing touched) drives the Apply button's disabled state; recomputed on every touch, not read as a method from the template. */
     pendingChange: StateChange | undefined;
+    /**
+     * When the drafts above were last (re)seeded from the loaded definition -- there is no
+     * read-back for the simulation's actual current values (see setStateChecked's doc
+     * comment), so this is what the "reference values as of ..." status line honestly shows
+     * instead of a fabricated "live" feed.
+     */
+    liveStateLastRefreshed: Date | undefined;
 
     private selectedNodeProblemsByKey = new Map<string, SelectedNodeProblem[]>();
 
@@ -277,6 +284,21 @@ export class EnvironmentDetailComponent implements OnInit {
             entry.target.timeConstantKeys.includes(key)
                 ? 'This value follows its set point gradually over this zone\'s time constant instead of jumping to it immediately.'
                 : undefined;
+    }
+
+    /** Whether there is anything on the Live state tab to show at all -- an unsaved environment has nothing running, and a saved one might still have no context/zones/assets. */
+    get liveStateIsEmpty(): boolean {
+        return !this.environment?.id || (!this.hasEntries(this.contextDraft) && this.zoneStates.length === 0 && this.assetStates.length === 0);
+    }
+
+    /**
+     * Re-derives the Live state drafts from the currently loaded definition, discarding any
+     * unsent edits -- the visible, on-demand form of what already happens automatically
+     * right after every load()/save() (see resetLiveState). Bound to the tab's "Reload
+     * current values" button.
+     */
+    reloadLiveStateDefaults(): void {
+        this.resetLiveState();
     }
 
     applyLiveState(): void {
@@ -447,6 +469,11 @@ export class EnvironmentDetailComponent implements OnInit {
     setChannelDirection(channel: Channel, direction: Channel['direction']): void {
         channel.direction = direction;
         this.markDirty();
+    }
+
+    /** Whether a record has at least one entry -- drives the Static values empty-state hint. */
+    hasEntries(record: Record<string, unknown> | undefined): boolean {
+        return !!record && Object.keys(record).length > 0;
     }
 
     /** Every context key already in use, static and driven alike -- passed to the "Add context" dialog as its collision check. */
@@ -710,6 +737,7 @@ export class EnvironmentDetailComponent implements OnInit {
             draft: { ...target.initialStates },
             touched: new Set<string>(),
         }));
+        this.liveStateLastRefreshed = new Date();
         this.recomputePendingChange();
     }
 

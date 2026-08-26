@@ -41,7 +41,7 @@
                     class="menu-toggle-list">
                     <li *ngFor="let page of section.pages">
                         <button mat-button
-                                routerLink="{{page.state}}" routerLinkActive="background-color-sidenav"
+                                routerLink="{{page.state}}" [class.background-color-sidenav]="isPageActive(page, section)"
                                 (click)="closeSidenav()" class="md-button-toggle">
                             <mat-icon aria-hidden="false" matBadge="{{page.badge}}"
                                       [matBadgeHidden]="!page.badge || page.badge === ''"

@@ -123,62 +123,83 @@
                         <mat-label>Seed</mat-label>
                         <input matInput type="number" step="1" [(ngModel)]="selectedEnvironment!.seed" (ngModelChange)="markDirty()"
                             name="env-seed">
-                        <mat-hint>Same seed and same clock produce the same simulated values.</mat-hint>
+                        <mat-icon matSuffix class="inline-help-icon"
+                            matTooltip="The starting point for every random value in this environment (noise, cumulative meters, ...). Same seed and same clock always reproduce the same values. Only change it if you want a different roll of the dice.">help_outline</mat-icon>
                     </mat-form-field>
 
                     <h3>Context</h3>
                     <p class="section-hint">
                         The context is the shared environment of the whole site: values like outdoor temperature or working
                         hours that every zone and every formula can read (as context.&lt;key&gt;). Static entries keep their
-                        value until changed on the Live state tab; driven entries below follow a day cycle or replay a
-                        recorded series on their own.
+                        value until changed on the Live state tab; driven entries follow a day cycle or replay a recorded
+                        series on their own.
                     </p>
 
-                    <h4>Static values</h4>
-                    <senergy-environments-key-value-editor [record]="selectedEnvironment!.context" mode="mixed"
-                        (recordChange)="setEnvironmentContext(selectedEnvironment!, $event)">
-                    </senergy-environments-key-value-editor>
-
-                    <h4>Driven values</h4>
-                    <div class="context-sources-list" *ngIf="contextSourceEntries(selectedEnvironment!).length > 0">
-                        <mat-expansion-panel *ngFor="let entry of contextSourceEntries(selectedEnvironment!); trackBy: trackByContextKey"
-                            (opened)="ensurePlatformDeviceLoaded(entry.source.dataset)">
-                            <mat-expansion-panel-header>
-                                <mat-panel-title class="context-source-title">{{entry.key}}</mat-panel-title>
-                                <mat-panel-description class="context-source-description">
-                                    <span class="context-source-meta">{{sourceKindLabel(entry.source.kind)}} &middot; every {{entry.source.interval_seconds || 0}}s</span>
-                                    <button mat-icon-button color="warn" matTooltip="Remove" class="context-source-remove"
-                                        (click)="removeContextSource(selectedEnvironment!, entry.key); $event.stopPropagation()">
-                                        <mat-icon>delete</mat-icon>
-                                    </button>
-                                </mat-panel-description>
-                            </mat-expansion-panel-header>
-
-                            <mat-form-field appearance="outline" color="accent" class="third-width">
-                                <mat-label>Interval (seconds)</mat-label>
-                                <input matInput type="number" step="1" [(ngModel)]="entry.source.interval_seconds"
-                                    (ngModelChange)="markDirty()" [ngModelOptions]="{standalone: true}" name="context-source-interval">
-                                <mat-hint>How often the value advances, in seconds.</mat-hint>
-                            </mat-form-field>
-
-                            <senergy-environments-profile-editor *ngIf="entry.source.kind === 'profile'"
-                                [profile]="entry.source.profile!" [todayWeekday]="todayWeekday" (profileChange)="markDirty()">
-                            </senergy-environments-profile-editor>
-
-                            <senergy-environments-dataset-editor *ngIf="entry.source.kind === 'dataset'" [dataset]="entry.source.dataset!"
-                                [datasets]="datasets"
-                                [platformDeviceName]="entry.source.dataset?.ref ? (platformDeviceNames.get(entry.source.dataset!.ref!) || entry.source.dataset!.ref) : ''"
-                                [serviceOptions]="platformServiceOptions(entry.source.dataset!)"
-                                [columnOptions]="platformColumnOptions(entry.source.dataset!)"
-                                (selectDevice)="selectPlatformDevice(entry.source.dataset!)" (datasetChange)="markDirty()">
-                            </senergy-environments-dataset-editor>
-                        </mat-expansion-panel>
+                    <div class="context-subsection">
+                        <h4>Static values</h4>
+                        <p class="section-hint">
+                            A static entry is a fixed fact about the site that sources can read, e.g. energy_price = 0.32
+                            or floor_area = 1200. A formula reads it as context.energy_price. It only changes when you
+                            edit it here or on the Live state tab.
+                        </p>
+                        <p class="empty-hint" *ngIf="!hasEntries(selectedEnvironment!.context)">
+                            No static values yet. Add one when several formulas should share a fact about the site.
+                        </p>
+                        <senergy-environments-key-value-editor [record]="selectedEnvironment!.context" mode="mixed"
+                            (recordChange)="setEnvironmentContext(selectedEnvironment!, $event)">
+                        </senergy-environments-key-value-editor>
                     </div>
 
-                    <button mat-stroked-button color="accent" type="button" class="add-context-button"
-                        (click)="openAddContextDialog(selectedEnvironment!)">
-                        <mat-icon>add</mat-icon> Add context
-                    </button>
+                    <div class="context-subsection">
+                        <h4>Driven values</h4>
+                        <p class="section-hint">
+                            A driven value changes on its own instead of staying fixed, e.g. outdoor temperature warming
+                            up over the afternoon or a season replayed from a real recording. Zones and formulas read it
+                            exactly like a static value.
+                        </p>
+                        <p class="empty-hint" *ngIf="contextSourceEntries(selectedEnvironment!).length === 0">
+                            No driven values yet.
+                        </p>
+                        <div class="context-sources-list" *ngIf="contextSourceEntries(selectedEnvironment!).length > 0">
+                            <mat-expansion-panel *ngFor="let entry of contextSourceEntries(selectedEnvironment!); trackBy: trackByContextKey"
+                                (opened)="ensurePlatformDeviceLoaded(entry.source.dataset)">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title class="context-source-title">{{entry.key}}</mat-panel-title>
+                                    <mat-panel-description class="context-source-description">
+                                        <span class="context-source-meta">{{sourceKindLabel(entry.source.kind)}} &middot; every {{entry.source.interval_seconds || 0}}s</span>
+                                        <button mat-icon-button color="warn" matTooltip="Remove" class="context-source-remove"
+                                            (click)="removeContextSource(selectedEnvironment!, entry.key); $event.stopPropagation()">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </mat-panel-description>
+                                </mat-expansion-panel-header>
+
+                                <mat-form-field appearance="outline" color="accent" class="third-width">
+                                    <mat-label>Interval (seconds)</mat-label>
+                                    <input matInput type="number" step="1" [(ngModel)]="entry.source.interval_seconds"
+                                        (ngModelChange)="markDirty()" [ngModelOptions]="{standalone: true}" name="context-source-interval">
+                                    <mat-hint>How often the value advances, in seconds.</mat-hint>
+                                </mat-form-field>
+
+                                <senergy-environments-profile-editor *ngIf="entry.source.kind === 'profile'"
+                                    [profile]="entry.source.profile!" [todayWeekday]="todayWeekday" (profileChange)="markDirty()">
+                                </senergy-environments-profile-editor>
+
+                                <senergy-environments-dataset-editor *ngIf="entry.source.kind === 'dataset'" [dataset]="entry.source.dataset!"
+                                    [datasets]="datasets"
+                                    [platformDeviceName]="entry.source.dataset?.ref ? (platformDeviceNames.get(entry.source.dataset!.ref!) || entry.source.dataset!.ref) : ''"
+                                    [serviceOptions]="platformServiceOptions(entry.source.dataset!)"
+                                    [columnOptions]="platformColumnOptions(entry.source.dataset!)"
+                                    (selectDevice)="selectPlatformDevice(entry.source.dataset!)" (datasetChange)="markDirty()">
+                                </senergy-environments-dataset-editor>
+                            </mat-expansion-panel>
+                        </div>
+
+                        <button mat-stroked-button color="accent" type="button" class="add-context-button"
+                            (click)="openAddContextDialog(selectedEnvironment!)">
+                            <mat-icon>add</mat-icon> Add driven value
+                        </button>
+                    </div>
                 </ng-container>
 
                 <ng-container *ngSwitchCase="'zone'">
@@ -196,13 +217,21 @@
                     </mat-form-field>
 
                     <h3>Initial States</h3>
-                    <p class="section-hint">Seeds the running simulation's state at start. Not the current live value.</p>
+                    <p class="section-hint">
+                        What this zone starts with when the simulation boots, e.g. temperature = 20. Sensors and
+                        formulas in this zone read these values; scripts can change them while the simulation runs.
+                        This is not the current live value -- see the Live state tab for that.
+                    </p>
                     <senergy-environments-key-value-editor [record]="selectedZone!.initial_states" mode="mixed"
                         (recordChange)="setZoneInitialStates(selectedZone!, $event)">
                     </senergy-environments-key-value-editor>
 
                     <h3>Time Constants (seconds)</h3>
-                    <p class="section-hint">How slowly a state value follows a newly set point instead of jumping to it immediately, in seconds, per state key.</p>
+                    <p class="section-hint">
+                        How sluggishly this zone follows a change, in seconds per value. Example: a time constant of
+                        1800 for temperature means a heating step needs about 30 minutes until two thirds of it show
+                        in the value. Leave a key out for one that should jump instantly instead.
+                    </p>
                     <senergy-environments-key-value-editor [record]="selectedZone!.time_constants" mode="number"
                         (recordChange)="setTimeConstants(selectedZone!, $event)">
                     </senergy-environments-key-value-editor>
@@ -237,7 +266,11 @@
                     </ng-container>
 
                     <h3>Initial States</h3>
-                    <p class="section-hint">Seeds the running simulation's state at start. Not the current live value.</p>
+                    <p class="section-hint">
+                        What this asset starts with when the simulation boots, e.g. temperature = 20. Sensors and
+                        formulas on this asset read these values; scripts can change them while the simulation runs.
+                        This is not the current live value -- see the Live state tab for that.
+                    </p>
                     <senergy-environments-key-value-editor [record]="selectedAsset!.initial_states" mode="mixed"
                         (recordChange)="setAssetInitialStates(selectedAsset!, $event)">
                     </senergy-environments-key-value-editor>
@@ -277,7 +310,8 @@
                         <mat-label>Characteristic Id</mat-label>
                         <input matInput [(ngModel)]="selectedChannel!.characteristic_id" (ngModelChange)="markDirty()"
                             name="channel-characteristic-id">
-                        <mat-hint>Gives the value its meaning, e.g. which characteristic on the platform it maps to.</mat-hint>
+                        <mat-icon matSuffix class="inline-help-icon"
+                            matTooltip="What kind of quantity this is, e.g. temperature in °C -- lets the platform display and convert the value correctly.">help_outline</mat-icon>
                     </mat-form-field>
                     </div>
 
@@ -364,38 +398,65 @@
 
     <mat-tab label="Live state">
         <div class="live-state-panel">
-            <p class="live-state-hint">
-                <mat-icon>info</mat-icon>
-                Sets values on the running simulation; they take effect on the next tick. Current live values are not shown here.
+            <p class="live-state-intro">
+                This tab shows the reference values this simulation was defined with -- the site's context and each
+                zone's/asset's state -- so you can see what it starts from before changing anything. When you do want
+                to nudge it: change a value and apply it, e.g. set the outdoor temperature to -5 and watch the
+                heating channels react. Applied changes take effect on the next tick and do not change the
+                definition on the Editor tab.
             </p>
 
-            <div class="live-state-section">
-                <h3>Context</h3>
-                <senergy-environments-key-value-editor [record]="contextDraft" mode="mixed"
-                    (recordChange)="onContextChange($event)">
-                </senergy-environments-key-value-editor>
-            </div>
-
-            <div class="live-state-section" *ngFor="let entry of zoneStates">
-                <h3>Zone: {{entry.target.name}}</h3>
-                <senergy-environments-key-value-editor [record]="entry.draft" mode="mixed"
-                    [keyHint]="zoneKeyHint(entry)" (recordChange)="onZoneStateChange(entry, $event)">
-                </senergy-environments-key-value-editor>
-            </div>
-
-            <div class="live-state-section" *ngFor="let entry of assetStates">
-                <h3>Asset: {{entry.target.name}}</h3>
-                <senergy-environments-key-value-editor [record]="entry.draft" mode="mixed"
-                    (recordChange)="onAssetStateChange(entry, $event)">
-                </senergy-environments-key-value-editor>
-            </div>
-
-            <div class="live-state-actions">
-                <button mat-raised-button color="accent" [disabled]="!pendingChange || liveStateApplying"
-                    (click)="applyLiveState()">
-                    <mat-icon>bolt</mat-icon> Apply
+            <div class="live-state-status">
+                <span class="live-state-status-dot" [class.applying]="liveStateApplying"
+                    [matTooltip]="liveStateApplying ? 'Applying...' : 'Reference values, not a live telemetry feed -- see the text above.'"></span>
+                <span class="live-state-status-text">
+                    Reference values as of {{liveStateLastRefreshed ? (liveStateLastRefreshed | date:'HH:mm:ss') : '--'}}
+                </span>
+                <button mat-stroked-button type="button" (click)="reloadLiveStateDefaults()">
+                    <mat-icon>refresh</mat-icon> Reload current values
                 </button>
             </div>
+
+            <ng-container *ngIf="!liveStateIsEmpty; else liveStateEmptyState">
+                <div class="live-state-section">
+                    <h3>Context</h3>
+                    <senergy-environments-live-state-tiles [record]="contextDraft" [baseline]="environment!.context"
+                        emptyHint="No context values yet." (recordChange)="onContextChange($event)">
+                    </senergy-environments-live-state-tiles>
+                </div>
+
+                <div class="live-state-section" *ngFor="let entry of zoneStates">
+                    <h3>Zone: {{entry.target.name}}</h3>
+                    <senergy-environments-live-state-tiles [record]="entry.draft" [baseline]="entry.target.initialStates"
+                        [keyHint]="zoneKeyHint(entry)" emptyHint="No initial state to show for this zone."
+                        (recordChange)="onZoneStateChange(entry, $event)">
+                    </senergy-environments-live-state-tiles>
+                </div>
+
+                <div class="live-state-section" *ngFor="let entry of assetStates">
+                    <h3>Asset: {{entry.target.name}}</h3>
+                    <senergy-environments-live-state-tiles [record]="entry.draft" [baseline]="entry.target.initialStates"
+                        emptyHint="No initial state to show for this asset." (recordChange)="onAssetStateChange(entry, $event)">
+                    </senergy-environments-live-state-tiles>
+                </div>
+
+                <div class="live-state-actions">
+                    <button mat-raised-button color="accent" [disabled]="!pendingChange || liveStateApplying"
+                        matTooltip="Takes effect on the simulation's next tick." (click)="applyLiveState()">
+                        <mat-icon>bolt</mat-icon> Apply to simulation
+                    </button>
+                </div>
+            </ng-container>
+
+            <ng-template #liveStateEmptyState>
+                <p class="live-state-empty-hint" *ngIf="!environment!.id">
+                    This environment is not saved yet, so there is no running simulation to show or change. Save it
+                    on the Editor tab first, then come back here.
+                </p>
+                <p class="live-state-empty-hint" *ngIf="environment!.id">
+                    Nothing to show yet: this environment has no context values, zones or assets.
+                </p>
+            </ng-template>
         </div>
     </mat-tab>
     </mat-tab-group>

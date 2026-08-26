@@ -121,10 +121,10 @@ export function sourceKindLabel(kind: SourceKind | undefined): string {
 }
 
 const sourceKindDescriptions: Record<SourceKind, string> = {
-    script: 'Own JavaScript that computes the value.',
-    profile: 'A daily pattern built from a base value and hour/weekday factors.',
-    dataset: 'Replays real, previously recorded measurements.',
-    formula: 'Computed from other channels or context values.',
+    script: 'Own JavaScript that computes the value -- for anything the other three kinds cannot express.',
+    profile: 'A repeating daily pattern, e.g. higher power on weekday afternoons and near-zero overnight.',
+    dataset: 'Replays real, previously recorded measurements, e.g. a week of actual power readings.',
+    formula: 'Computed live from other channels or context values, e.g. °F from a °C reading.',
 };
 
 export function sourceKindDescription(kind: SourceKind | undefined): string {
