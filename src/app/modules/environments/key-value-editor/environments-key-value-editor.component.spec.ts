@@ -124,6 +124,17 @@ describe('EnvironmentsKeyValueEditorComponent', () => {
         expect(component.rows).toBe(rowsBeforeEcho); // same row objects, not rebuilt
     });
 
+    it('clears the rows when the selection moves to a record that is undefined, with no emit pending', () => {
+        // an asset with initial_states, then one without any: nothing was emitted in
+        // between, so undefined must not read as this component's own echo -- the bug
+        // was the previous asset's rows surviving under the new selection
+        setRecord({ rpm: 0, kwh: 290508.5 });
+        expect(component.rows.length).toBe(2);
+
+        setRecord(undefined);
+        expect(component.rows).toEqual([]);
+    });
+
     describe('non-primitive values', () => {
         it('shows a boolean value as a read-only JSON preview instead of stringifying it lossily', () => {
             setRecord({ occupied: false });

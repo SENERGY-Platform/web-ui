@@ -70,7 +70,10 @@ export class EnvironmentsKeyValueEditorComponent implements OnChanges {
         if (!change) {
             return;
         }
-        const isOwnEcho = change.currentValue === this.lastEmittedRef;
+        // an echo can only be pending when something was emitted; without this,
+        // switching from a record to an undefined one (asset without initial
+        // states) matches undefined === undefined and keeps the old rows
+        const isOwnEcho = this.lastEmittedRef !== undefined && change.currentValue === this.lastEmittedRef;
         this.lastEmittedRef = undefined;
         if (!isOwnEcho) {
             this.rows = this.toRows(this.record);
