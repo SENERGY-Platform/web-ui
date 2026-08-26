@@ -93,6 +93,15 @@
 .node-editor-panel {
     overflow: auto;
     padding-left: 8px;
+    /* room below the last field's hint, so the scroll end does not look cut off */
+    padding-bottom: 24px;
+}
+
+/* Side-by-side layout only: without a bound, overflow:auto never scrolls -- the
+   panel grows past the app shell and the shell cuts the bottom off instead.
+   Same bound as .tree-panel-large, so both columns end on one line. */
+.node-editor-panel-large {
+    max-height: calc(100vh - 260px);
 }
 
 .node-problems {

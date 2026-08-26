@@ -97,7 +97,7 @@
             </mat-tree>
         </div>
 
-        <div class="node-editor-panel" fxFlex *ngIf="selectedNode">
+        <div class="node-editor-panel" [ngClass.gt-xs]="'node-editor-panel-large'" fxFlex *ngIf="selectedNode">
             <div class="node-problems" *ngIf="selectedNodeProblems.length > 0">
                 <div class="node-problem" *ngFor="let p of selectedNodeProblems">
                     <mat-icon color="warn">error</mat-icon>
