@@ -155,16 +155,57 @@
     padding: 16px 4px;
 }
 
-.live-state-hint {
+.live-state-intro {
+    max-width: 900px;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 13px;
+}
+
+.live-state-status {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-bottom: 20px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.live-state-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(68, 132, 206, 0.7); /* cc accent */
+    flex: 0 0 auto;
+}
+
+.live-state-status-dot.applying {
+    background: #f4511e;
+    animation: live-state-pulse 1s ease-in-out infinite;
+}
+
+@keyframes live-state-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.live-state-status-text {
+    flex: 1 1 auto;
+    font-size: 12px;
     color: rgba(0, 0, 0, 0.6);
-    font-style: italic;
 }
 
 .live-state-section {
     margin-bottom: 24px;
+}
+
+.live-state-section h3 {
+    margin: 0 0 8px;
+}
+
+.live-state-empty-hint {
+    color: rgba(0, 0, 0, 0.6);
+    font-style: italic;
 }
 
 .live-state-actions {
@@ -179,8 +220,40 @@
 .section-hint {
     /* the negative pull-up clipped this text under the toggle above it */
     margin-top: 2px;
+    margin-bottom: 8px;
     color: rgba(0, 0, 0, 0.6);
     font-size: 12px;
+}
+
+.empty-hint {
+    margin: 0 0 8px;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 13px;
+    font-style: italic;
+}
+
+/* Static and driven values get the same heading/hint/content rhythm and the same
+   block-to-block spacing, instead of the driven block visually running into whatever
+   follows it. */
+.context-subsection {
+    margin-bottom: 20px;
+}
+
+.context-subsection:last-child {
+    margin-bottom: 16px;
+}
+
+.node-form h3 {
+    margin: 24px 0 4px;
+}
+
+.node-form h3:first-of-type {
+    margin-top: 0;
+}
+
+.node-form h4 {
+    margin: 0 0 4px;
+    font-size: 14px;
 }
 
 .source-kind-descriptions {

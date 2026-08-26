@@ -21,6 +21,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { SidenavService } from './shared/sidenav.service';
 import { SidenavSectionModel } from './shared/sidenav-section.model';
+import { SidenavPageModel } from './shared/sidenav-page.model';
 import { ResponsiveService } from '../../services/responsive.service';
 import { fadeInAnimation } from '../../../animations/fade-in.animation';
 
@@ -36,6 +37,8 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     sections: SidenavSectionModel[] = [];
     openSection: null | string = null;
     zIndex = -1;
+    /** The current url (no query/fragment), kept in sync by getActiveSection() -- isPageActive() matches against it. */
+    currentUrl = '';
 
     get shouldStartOpen(): boolean {
         return JSON.parse(sessionStorage.getItem('SidenavComponent/shouldStartOpen') || 'true');
@@ -82,6 +85,23 @@ export class SidenavComponent implements OnInit, AfterViewInit {
         if (section.type === 'link') {
             this.closeSidenav();
         }
+    }
+
+    /**
+     * Whether `page`'s button should be highlighted as active. routerLinkActive alone matches
+     * by prefix, so a section whose pages share a prefix (e.g. /environments and
+     * /environments/datasets) would highlight both at once on the longer page's route. This
+     * picks the longest-matching page in the section instead, so only one page lights up.
+     */
+    isPageActive(page: SidenavPageModel, section: SidenavSectionModel): boolean {
+        if (!this.matchesPage(page)) {
+            return false;
+        }
+        return !section.pages.some((other) => other !== page && this.matchesPage(other) && other.state.length > page.state.length);
+    }
+
+    private matchesPage(page: SidenavPageModel): boolean {
+        return this.currentUrl === page.state || this.currentUrl.startsWith(page.state + '/');
     }
 
     closeSidenav(): void {
@@ -134,6 +154,7 @@ export class SidenavComponent implements OnInit, AfterViewInit {
                 map(() => this.router.url.split('?')[0].split('#')[0]),
             )
             .subscribe((url: string) => {
+                this.currentUrl = url;
                 const activeSection = url.split('/').filter((segment) => segment.length > 0)[0];
                 this.openSection = activeSection ? '/' + activeSection : null;
             });

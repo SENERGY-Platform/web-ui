@@ -45,8 +45,16 @@ export class EnvironmentsCreateDialogComponent {
         const env: Environment = {
             name: this.name,
             type: this.type,
+            // A random starting seed so the editor shows a real value right away instead of
+            // an empty field the user has to think to fill in -- see the seed field's hint.
+            seed: randomSeed(),
             zones: [{ name: 'New zone', type: defaultZoneTypeFor(this.type) }],
         };
         this.dialogRef.close(env);
     }
+}
+
+/** An integer in [1, 999999]; Math.random is fine here, this only needs to look different per environment, not be cryptographically random. */
+function randomSeed(): number {
+    return Math.floor(Math.random() * 999999) + 1;
 }

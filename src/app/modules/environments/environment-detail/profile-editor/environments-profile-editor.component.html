@@ -30,7 +30,8 @@
 <mat-form-field appearance="outline" color="accent" class="third-width">
     <mat-label>Spread (%)</mat-label>
     <input matInput type="number" [(ngModel)]="profile!.spread_percent" (ngModelChange)="onFieldChange()" name="profile-spread">
-    <mat-hint>Random variation added around the resulting value, as a percent.</mat-hint>
+    <mat-icon matSuffix class="inline-help-icon"
+        matTooltip="Random noise added around the value, as a percent -- e.g. 5 means the value randomly varies by up to ±5%.">help_outline</mat-icon>
 </mat-form-field>
 </div>
 <mat-checkbox [(ngModel)]="profile!.cumulative" (ngModelChange)="onFieldChange()" name="profile-cumulative">
@@ -40,24 +41,22 @@
 
 <div class="factors-block">
     <span class="factors-label">Hour factors</span>
-    <p class="section-hint">Multiplies the base value per hour of day; 1 = no change, empty = neutral for every hour.</p>
-    <div class="factors-row">
-        <mat-form-field appearance="outline" color="accent" class="factor-field" *ngFor="let h of hourIndexes">
-            <mat-label>{{h}}</mat-label>
-            <input matInput type="number" [ngModel]="profile!.hour_factors?.[h]" [ngModelOptions]="{standalone: true}"
-                (ngModelChange)="setHourFactor(h, $event)">
-        </mat-form-field>
-    </div>
+    <p class="section-hint">
+        How the day shapes the value. Each bar scales the base value for one hour -- 1 leaves it unchanged, 0
+        switches it off, 2 doubles it. Click or drag across the bars to shape the day.
+    </p>
+    <senergy-environments-factor-bars [values]="profile!.hour_factors" [count]="24" [labels]="hourLabels" labelPrefix="Hour"
+        (valuesChange)="setHourFactors($event)">
+    </senergy-environments-factor-bars>
 </div>
 
 <div class="factors-block">
     <span class="factors-label">Weekday factors</span>
-    <p class="section-hint">Multiplies the value per weekday; 1 = no change, empty = neutral for every weekday.</p>
-    <div class="factors-row">
-        <mat-form-field appearance="outline" color="accent" class="factor-field" *ngFor="let w of weekdayIndexes">
-            <mat-label>{{weekdayLabels[w]}}</mat-label>
-            <input matInput type="number" [ngModel]="profile!.weekday_factors?.[w]" [ngModelOptions]="{standalone: true}"
-                (ngModelChange)="setWeekdayFactor(w, $event)">
-        </mat-form-field>
-    </div>
+    <p class="section-hint">
+        How the day of the week shapes the value. 1 leaves it unchanged, 0 switches it off, 2 doubles it. Click or
+        drag across the bars to shape the week.
+    </p>
+    <senergy-environments-factor-bars [values]="profile!.weekday_factors" [count]="7" [labels]="weekdayLabels"
+        (valuesChange)="setWeekdayFactors($event)">
+    </senergy-environments-factor-bars>
 </div>

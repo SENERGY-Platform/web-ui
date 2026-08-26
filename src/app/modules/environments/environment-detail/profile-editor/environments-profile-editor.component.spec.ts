@@ -72,18 +72,25 @@ describe('EnvironmentsProfileEditorComponent', () => {
         expect((component.chart!.series[0].data as number[])[0]).toBe(20);
     });
 
-    it('materializes a neutral 24-length hour_factors array on the first factor edit', () => {
+    it('writes the factor-bars output straight onto profile.hour_factors and marks the change dirty', () => {
         setProfile({ base: 10 });
-        component.setHourFactor(5, 2);
-        expect(component.profile!.hour_factors!.length).toBe(24);
-        expect(component.profile!.hour_factors![5]).toBe(2);
-        expect(component.profile!.hour_factors![0]).toBe(1);
+        let emitted = false;
+        component.profileChange.subscribe(() => (emitted = true));
+
+        component.setHourFactors([2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+
+        expect(component.profile!.hour_factors![0]).toBe(2);
+        expect(emitted).toBe(true);
     });
 
-    it('materializes a neutral 7-length weekday_factors array on the first factor edit', () => {
+    it('writes the factor-bars output straight onto profile.weekday_factors and marks the change dirty', () => {
         setProfile({ base: 10 });
-        component.setWeekdayFactor(5, 0);
-        expect(component.profile!.weekday_factors!.length).toBe(7);
-        expect(component.profile!.weekday_factors![5]).toBe(0);
+        let emitted = false;
+        component.profileChange.subscribe(() => (emitted = true));
+
+        component.setWeekdayFactors([1, 1, 1, 1, 1, 0, 0]);
+
+        expect(component.profile!.weekday_factors).toEqual([1, 1, 1, 1, 1, 0, 0]);
+        expect(emitted).toBe(true);
     });
 });

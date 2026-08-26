@@ -43,8 +43,10 @@ import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create
 import { EnvironmentsAddMachineDialogComponent } from './environment-detail/dialogs/environments-add-machine-dialog.component';
 import { EnvironmentsAddContextDialogComponent } from './environment-detail/dialogs/environments-add-context-dialog.component';
 import { EnvironmentsProfileEditorComponent } from './environment-detail/profile-editor/environments-profile-editor.component';
+import { EnvironmentsFactorBarsComponent } from './environment-detail/factor-bars/environments-factor-bars.component';
 import { EnvironmentsDatasetEditorComponent } from './environment-detail/dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsKeyValueEditorComponent } from './key-value-editor/environments-key-value-editor.component';
+import { EnvironmentsLiveStateTilesComponent } from './environment-detail/live-state/environments-live-state-tiles.component';
 import { EnvironmentsDatasetsComponent } from './datasets/environments-datasets.component';
 import { EnvironmentsDatasetUploadDialogComponent } from './datasets/dialogs/environments-dataset-upload-dialog.component';
 
@@ -87,8 +89,10 @@ const formFieldDefaults = {
         EnvironmentsAddMachineDialogComponent,
         EnvironmentsAddContextDialogComponent,
         EnvironmentsProfileEditorComponent,
+        EnvironmentsFactorBarsComponent,
         EnvironmentsDatasetEditorComponent,
         EnvironmentsKeyValueEditorComponent,
+        EnvironmentsLiveStateTilesComponent,
         EnvironmentsDatasetsComponent,
         EnvironmentsDatasetUploadDialogComponent,
     ],

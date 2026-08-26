@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+.key-value-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .key-value-row {
     display: flex;
     align-items: center;
@@ -22,14 +28,18 @@
 
 .key-field {
     width: 220px;
+    flex: 0 0 220px;
 }
 
 .value-field {
     width: 220px;
+    flex: 0 0 220px;
 }
 
 .type-toggle {
-    margin-bottom: 16px;
+    /* was margin-bottom: 16px, which offset the toggle below the row's vertical center
+       and made the row look crooked next to the key/value fields */
+    flex: 0 0 auto;
 }
 
 .key-hint-icon {

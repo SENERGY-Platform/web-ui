@@ -1,0 +1,166 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.empty-hint {
+    margin: 0 0 8px;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 13px;
+    font-style: italic;
+}
+
+.live-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.live-tile {
+    position: relative;
+    flex: 1 1 160px;
+    min-width: 150px;
+    max-width: 240px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    padding: 10px 12px 12px;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* a value that differs from where it started (initial_states/context) is what
+   "nudging" the simulation actually means -- worth a visible highlight */
+.live-tile.changed {
+    border-color: rgba(68, 132, 206, 0.6); /* cc accent */
+    background: rgba(68, 132, 206, 0.06);
+}
+
+/* the edit row (type toggle + value field + save/cancel) needs more room than the
+   plain readout -- without this, a tile at its normal max-width squeezes the value
+   field down to a couple of pixels, and a "12.5" reads as a clipped "1" */
+.live-tile.live-tile-editing {
+    max-width: none;
+    flex: 1 1 260px;
+}
+
+.live-tile-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 24px;
+}
+
+.live-tile-key {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.live-tile-hint-icon {
+    font-size: 15px;
+    height: 15px;
+    width: 15px;
+    color: rgba(0, 0, 0, 0.5);
+    cursor: help;
+}
+
+/* editing/removing a value is the secondary action here -- it only appears on hover
+   (or selection via keyboard focus), matching the tree node action pattern used
+   elsewhere in this editor */
+.live-tile-actions {
+    display: none;
+    margin-left: auto;
+    gap: 0;
+}
+
+.live-tile:hover .live-tile-actions,
+.live-tile:focus-within .live-tile-actions {
+    display: flex;
+}
+
+.live-tile-action {
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+}
+
+.live-tile-action .mat-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+}
+
+.live-tile-value {
+    margin-top: 4px;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.2;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.live-tile-baseline {
+    margin-top: 2px;
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.live-tile-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+
+.live-tile-type-toggle,
+.live-tile-edit-row button {
+    flex: 0 0 auto;
+}
+
+.live-tile-edit-field {
+    /* wide enough for a number input's spinner plus a handful of digits without clipping;
+       flex-shrink: 0 so the toggle group and buttons cannot compress it below that */
+    width: 90px;
+    flex: 0 0 90px;
+}
+
+.live-tile-key-field {
+    width: 100px;
+}
+
+.live-tile-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 64px;
+    border-style: dashed;
+    color: rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+}
+
+.live-tile-add:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.live-tile-add-editing {
+    flex: 1 1 100%;
+    max-width: none;
+}

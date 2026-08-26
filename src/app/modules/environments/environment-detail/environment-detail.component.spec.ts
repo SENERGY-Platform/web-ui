@@ -44,7 +44,9 @@ import { CoreModule } from '../../../core/core.module';
 import { EnvironmentDetailComponent } from './environment-detail.component';
 import { EnvironmentsKeyValueEditorComponent } from '../key-value-editor/environments-key-value-editor.component';
 import { EnvironmentsProfileEditorComponent } from './profile-editor/environments-profile-editor.component';
+import { EnvironmentsFactorBarsComponent } from './factor-bars/environments-factor-bars.component';
 import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
+import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
 import { EnvironmentsService } from '../shared/environments.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
@@ -128,7 +130,9 @@ describe('EnvironmentDetailComponent', () => {
                 EnvironmentDetailComponent,
                 EnvironmentsKeyValueEditorComponent,
                 EnvironmentsProfileEditorComponent,
+                EnvironmentsFactorBarsComponent,
                 EnvironmentsDatasetEditorComponent,
+                EnvironmentsLiveStateTilesComponent,
             ],
             imports: [
                 CommonModule,

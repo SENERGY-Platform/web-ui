@@ -1,0 +1,108 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+:host {
+    display: block;
+    width: 100%;
+}
+
+.factor-bars {
+    width: 100%;
+}
+
+.factor-bars-track {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    /* a definite height, not min-height -- the bars below resolve their height as a
+       percentage of this element, which only works against a definite height. With only
+       min-height set, that percentage has nothing to resolve against and every bar
+       collapses to 0, leaving the track visually empty. */
+    height: 140px;
+    gap: 2px;
+    padding: 20px 0 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.24);
+    cursor: pointer;
+    /* dragging must not scroll the page (touch) or select surrounding text */
+    touch-action: none;
+    user-select: none;
+}
+
+.factor-bar-col {
+    position: relative;
+    flex: 1 1 0;
+    align-self: stretch;
+    display: flex;
+    align-items: flex-end;
+}
+
+.factor-bar {
+    width: 100%;
+    min-height: 1px;
+    border-radius: 2px 2px 0 0;
+    background: rgba(68, 132, 206, 0.85); /* cc accent */
+    transition: height 0.05s linear;
+}
+
+.factor-bar.neutral {
+    background: rgba(68, 132, 206, 0.28);
+}
+
+.factor-bar-value {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.87);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.factor-bars-refline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px dashed rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+
+.factor-bars-refline-label {
+    position: absolute;
+    right: 0;
+    top: -14px;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.factor-bars-labels {
+    display: flex;
+    gap: 2px;
+    margin-top: 4px;
+}
+
+.factor-bar-label {
+    flex: 1 1 0;
+    text-align: center;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.factor-bars-precise-field {
+    width: 160px;
+    margin-top: 8px;
+}
