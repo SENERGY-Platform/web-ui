@@ -69,12 +69,13 @@ then `npm install && npm run start_dev`.
 
 ## Deployment
 
-Deployed through `rancher-2-defs`. **Pushing to `master` is already the
+Deployment happens outside this repository. **Pushing to `master` is already the
 release**: the prod workflow tags every push and builds the image from that tag.
 There is no window between merge and release — see `docs/`.
 
 ## Further documentation
 
 `docs/` holds knowledge about this app that is not visible in the code: which
-files a service URL touches, how to verify a change without a build, and what a
-push to `master` triggers. Written for whoever works on it next, human or agent.
+files a service URL touches, how to verify a change without a build, what a push
+to `master` triggers, and why swagger-ui and the AsyncAPI component must share
+one React. Written for whoever works on it next, human or agent.
