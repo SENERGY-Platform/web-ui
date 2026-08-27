@@ -1,7 +1,7 @@
 /* Preview harness fixtures - local only. Answers every backend call locally. */
 import { Injectable } from '@angular/core';
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Environment } from '../app/modules/environments/shared/environments.model';
 
@@ -9,6 +9,11 @@ const industry: Environment = {
     id: 'env-industry',
     name: 'Industry',
     type: 'industrial_site',
+    // Optimistic locking (see Environment.version): every PUT below echoes this back
+    // incremented, so a second edit against a stale copy (e.g. two preview tabs) would 409.
+    // Testing hook: PUT-ing a name ending in "conflict" simulates that second write landing
+    // first, so the visual check can trigger the 409 conflict dialog without two tabs.
+    version: 3,
     seed: 42,
     context: { outdoor_temperature: 12.5 },
     context_sources: {
@@ -143,25 +148,79 @@ function assignPendingDeviceRefs(zones: any[] | undefined): void {
     });
 }
 
+// When the preview app started -- liveEnvironmentState below uses the elapsed time since
+// then, not the absolute epoch time itself, so the compressor's cumulative kwh counts up
+// from its starting reading instead of jumping to "epoch seconds times a scale factor".
+const previewStart = Date.now() / 1000;
+
+/**
+ * The GET .../state answer: ticks with real time so two polls a few seconds apart visibly
+ * differ, for the Live state tab's "updates every 10s" preview screenshots. running: true
+ * always -- there is no fixture path for a stopped simulation, the editor's own hint text
+ * covers that case.
+ */
+function liveEnvironmentState(): unknown {
+    const t = Date.now() / 1000;
+    const elapsed = t - previewStart;
+    const round1 = (n: number) => Math.round(n * 10) / 10;
+    return {
+        running: true,
+        as_of: new Date().toISOString(),
+        context: { outdoor_temperature: round1(12.5 + 3 * Math.sin(t / 20)) },
+        zones: {
+            'z-hall': {
+                temperature: round1(18 + 2 * Math.sin(t / 25)),
+                humidity: round1(40 + 5 * Math.sin(t / 33)),
+            },
+        },
+        assets: {
+            'a-compressor': {
+                rpm: Math.round(1200 + 300 * Math.sin(t / 15)),
+                kwh: Math.round((290508.5 + elapsed * 0.05) * 100) / 100,
+            },
+        },
+    };
+}
+
 @Injectable()
 export class FixtureInterceptor implements HttpInterceptor {
     intercept(request: HttpRequest<unknown>, _next: HttpHandler): Observable<HttpEvent<unknown>> {
         const url = request.url;
         const answer = (body: unknown, status = 200): Observable<HttpEvent<unknown>> =>
             of(new HttpResponse({ status, body: body as object })).pipe(delay(80));
+        // HttpResponse (above) is always a *successful* event as far as HttpClient is
+        // concerned, whatever numeric status it carries -- an HttpErrorResponse is what
+        // actually makes the request's Observable error out, the same way a real non-2xx
+        // response does when it comes back through HttpXhrBackend.
+        const answerError = (body: unknown, status: number): Observable<HttpEvent<unknown>> =>
+            throwError(() => new HttpErrorResponse({ status, error: body, url })).pipe(delay(80));
 
         if (url.endsWith('/environments') && request.method === 'GET') {
             return answer([industry]);
         }
         if (url.includes('/environments/env-industry') && url.endsWith('/state')) {
-            return answer(null, 204);
+            if (request.method === 'GET') {
+                return answer(liveEnvironmentState());
+            }
+            return answer(null, 204); // PATCH: applying a live-state change
         }
         if (url.includes('/environments/env-industry') && request.method === 'GET') {
             return answer(industry);
         }
         if (url.includes('/environments/env-industry') && request.method === 'PUT') {
             const saved = request.body as Environment;
+            // Testing hook for the visual 409 check: naming the environment "...conflict"
+            // simulates a concurrent write landing first, without needing two preview tabs.
+            if ((saved.name || '').endsWith('conflict')) {
+                industry.version = (industry.version || 0) + 1;
+                return answerError(
+                    'version conflict: you have version ' + (saved.version ?? 0) + ', current is ' + industry.version,
+                    409,
+                );
+            }
             assignPendingDeviceRefs(saved.zones);
+            industry.version = (industry.version || 0) + 1;
+            saved.version = industry.version;
             return answer(saved);
         }
         if (url.endsWith('/device-types')) {

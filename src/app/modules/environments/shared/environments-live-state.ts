@@ -90,6 +90,22 @@ export function pickTouched(record: Record<string, unknown>, touched: ReadonlySe
     return result;
 }
 
+/**
+ * The subset of `record` whose keys are NOT touched -- pickTouched's complement. A live-state
+ * poll merges this into a draft instead of the whole response, so a key the user is mid-edit
+ * on (touched, not yet applied) keeps its local value instead of being clobbered by the next
+ * poll tick.
+ */
+export function pickUntouched(record: Record<string, unknown>, touched: ReadonlySet<string>): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+    Object.keys(record).forEach((key) => {
+        if (!touched.has(key)) {
+            result[key] = record[key];
+        }
+    });
+    return result;
+}
+
 function filterNonEmpty(byId: Record<string, Record<string, unknown>>): Record<string, Record<string, unknown>> {
     const result: Record<string, Record<string, unknown>> = {};
     Object.entries(byId).forEach(([id, values]) => {

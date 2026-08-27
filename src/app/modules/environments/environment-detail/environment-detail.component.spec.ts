@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
@@ -341,6 +341,58 @@ describe('EnvironmentDetailComponent', () => {
 
             expect(snackBarSpy).toHaveBeenCalledWith('boom', 'close', { panelClass: 'snack-bar-error' });
             httpMock.expectNone(environmentsUrl + '/e1');
+        });
+
+        // Optimistic locking (Environment.version): a 409 gets its own conflict dialog
+        // instead of the generic error snackbar -- see openVersionConflictDialog.
+        describe('409 optimistic-locking conflict', () => {
+            it('opens the conflict dialog instead of a generic error snackbar, and does not reload on its own', () => {
+                loadWith(nestedEnvironment);
+                component.markDirty();
+                const snackBarSpy = spyOn((component as any).snackBar, 'open');
+                const dialogOpen = spyOn(TestBed.inject(MatDialog), 'open').and.returnValue({
+                    afterClosed: () => of(false),
+                } as any);
+
+                component.save();
+                httpMock
+                    .expectOne(environmentsUrl + '/e1')
+                    .flush('version conflict: you have 1, current is 2', { status: 409, statusText: 'Conflict' });
+
+                expect(dialogOpen).toHaveBeenCalled();
+                expect(snackBarSpy).not.toHaveBeenCalled();
+                expect(component.isDirty).toBe(true); // "Keep editing" -- nothing was discarded
+                httpMock.expectNone(environmentsUrl + '/e1'); // no reload
+            });
+
+            it('reloads, discarding the edit, when the dialog is closed with "Reload"', () => {
+                loadWith(nestedEnvironment);
+                component.markDirty();
+                spyOn(TestBed.inject(MatDialog), 'open').and.returnValue({ afterClosed: () => of(true) } as any);
+
+                component.save();
+                httpMock
+                    .expectOne(environmentsUrl + '/e1')
+                    .flush('version conflict: you have 1, current is 2', { status: 409, statusText: 'Conflict' });
+
+                const reloadReq = httpMock.expectOne(environmentsUrl + '/e1');
+                reloadReq.flush(JSON.parse(JSON.stringify(nestedEnvironment)));
+                expect(component.isDirty).toBe(false);
+            });
+
+            it('does not reload when the dialog is closed with "Keep editing"', () => {
+                loadWith(nestedEnvironment);
+                component.markDirty();
+                spyOn(TestBed.inject(MatDialog), 'open').and.returnValue({ afterClosed: () => of(false) } as any);
+
+                component.save();
+                httpMock
+                    .expectOne(environmentsUrl + '/e1')
+                    .flush('version conflict: you have 1, current is 2', { status: 409, statusText: 'Conflict' });
+
+                httpMock.expectNone(environmentsUrl + '/e1');
+                expect(component.isDirty).toBe(true);
+            });
         });
 
         // Client-side pre-check: seed/interval_seconds/time_constants are int64 server-side
@@ -863,5 +915,134 @@ describe('EnvironmentDetailComponent', () => {
 
             httpMock.expectNone(environmentsUrl + '/e1/state');
         });
+    });
+
+    describe('Live state tab: real-time polling', () => {
+        const envWithState: Environment = JSON.parse(JSON.stringify(nestedEnvironment));
+        envWithState.zones![0].initial_states = { occupied: true };
+        envWithState.zones![0].assets![0].initial_states = { power: 0 };
+
+        function activateLiveStateTab(): void {
+            component.onTabChange({ tab: { textLabel: 'Live state' } } as any);
+        }
+
+        function leaveLiveStateTab(): void {
+            component.onTabChange({ tab: { textLabel: 'Editor' } } as any);
+        }
+
+        it('does not poll while the Editor tab is active', () => {
+            loadWith(envWithState);
+            httpMock.expectNone(environmentsUrl + '/e1/state');
+        });
+
+        it('polls GET .../state immediately on activating the Live state tab, and again every 10s while it stays active', fakeAsync(() => {
+            loadWith(envWithState);
+            activateLiveStateTab();
+            tick(); // flushes timer(0, ...)'s immediate (0ms due) first emission
+
+            const req1 = httpMock.expectOne(environmentsUrl + '/e1/state');
+            expect(req1.request.method).toBe('GET');
+            req1.flush({ running: true, as_of: '2026-08-27T10:00:00Z', context: {}, zones: {}, assets: {} });
+
+            httpMock.expectNone(environmentsUrl + '/e1/state'); // nothing again before 10s pass
+            tick(10000);
+            const req2 = httpMock.expectOne(environmentsUrl + '/e1/state');
+            req2.flush({ running: true, as_of: '2026-08-27T10:00:10Z', context: {}, zones: {}, assets: {} });
+
+            discardPeriodicTasks();
+        }));
+
+        it('stops polling once the tab is left, and does not resume on its own', fakeAsync(() => {
+            loadWith(envWithState);
+            activateLiveStateTab();
+            tick();
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush({ running: true, as_of: '2026-08-27T10:00:00Z', context: {}, zones: {}, assets: {} });
+
+            leaveLiveStateTab();
+            tick(20000);
+
+            httpMock.expectNone(environmentsUrl + '/e1/state');
+            discardPeriodicTasks();
+        }));
+
+        it('stops polling on destroy', fakeAsync(() => {
+            loadWith(envWithState);
+            activateLiveStateTab();
+            tick();
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush({ running: true, as_of: '2026-08-27T10:00:00Z', context: {}, zones: {}, assets: {} });
+
+            fixture.destroy();
+            tick(20000);
+
+            httpMock.expectNone(environmentsUrl + '/e1/state');
+        }));
+
+        it('shows the real runtime values when running, updating liveStateRunning/liveStateAsOf', fakeAsync(() => {
+            loadWith(envWithState);
+            activateLiveStateTab();
+            tick(); // flushes timer(0, ...)'s immediate (0ms due) first emission
+
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush({
+                running: true,
+                as_of: '2026-08-27T10:00:00Z',
+                context: {},
+                zones: { z1: { occupied: false } },
+                assets: { a1: { power: 42 } },
+            });
+
+            expect(component.liveStateRunning).toBe(true);
+            expect(component.liveStateAsOf).toEqual(new Date('2026-08-27T10:00:00Z'));
+            expect(component.zoneStates[0].draft).toEqual({ occupied: false });
+            expect(component.assetStates[0].draft).toEqual({ power: 42 });
+
+            discardPeriodicTasks();
+        }));
+
+        it('falls back to the reference values and flags not-running when the simulation is not running', fakeAsync(() => {
+            loadWith(envWithState);
+            activateLiveStateTab();
+            tick(); // flushes timer(0, ...)'s immediate (0ms due) first emission
+
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush({ running: false, as_of: '2026-08-27T10:00:00Z' });
+
+            expect(component.liveStateRunning).toBe(false);
+            // untouched by the (running:false) poll -- still the definition's initial_states
+            expect(component.zoneStates[0].draft).toEqual({ occupied: true });
+            expect(component.assetStates[0].draft).toEqual({ power: 0 });
+
+            discardPeriodicTasks();
+        }));
+
+        it('does not overwrite a touched (edited but not yet applied) key with a poll update, but does refresh untouched ones', fakeAsync(() => {
+            loadWith(envWithState);
+            component.onZoneStateChange(component.zoneStates[0], { occupied: false }); // user edit, not yet applied
+            activateLiveStateTab();
+            tick(); // flushes timer(0, ...)'s immediate (0ms due) first emission
+
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush({
+                running: true,
+                as_of: '2026-08-27T10:00:00Z',
+                context: {},
+                zones: { z1: { occupied: true } }, // server disagrees with the untouched-from-server-POV edit
+                assets: { a1: { power: 7 } }, // untouched -- must be applied
+            });
+
+            expect(component.zoneStates[0].draft).toEqual({ occupied: false }); // kept: still touched, not applied
+            expect(component.assetStates[0].draft).toEqual({ power: 7 }); // refreshed: was untouched
+
+            discardPeriodicTasks();
+        }));
+
+        it('leaves the drafts alone on a failed poll (null from the service) instead of clearing them', fakeAsync(() => {
+            loadWith(envWithState);
+            activateLiveStateTab();
+            tick();
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush('environment e1 is not running', { status: 404, statusText: 'Not Found' });
+
+            expect(component.liveStateRunning).toBeUndefined();
+            expect(component.zoneStates[0].draft).toEqual({ occupied: true });
+
+            discardPeriodicTasks();
+        }));
     });
 });

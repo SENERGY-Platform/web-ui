@@ -193,6 +193,10 @@
     animation: live-state-pulse 1s ease-in-out infinite;
 }
 
+.live-state-status-dot.live {
+    background: #43a047;
+}
+
 @keyframes live-state-pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
@@ -215,6 +219,14 @@
 .live-state-empty-hint {
     color: rgba(0, 0, 0, 0.6);
     font-style: italic;
+}
+
+.live-state-not-running-hint {
+    max-width: 900px;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 13px;
+    font-style: italic;
+    margin-top: -4px;
 }
 
 .live-state-actions {

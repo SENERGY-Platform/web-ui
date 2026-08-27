@@ -241,6 +241,14 @@ export interface Environment {
     id?: string;
     name?: string;
     type?: EnvironmentType;
+    /**
+     * Server-counted write generation, for optimistic locking. The client sends back the
+     * version it read on every PUT unchanged; if another write landed since, the server
+     * answers 409 instead of applying the edit. 0 or absent means unchecked (an older
+     * client, or a document from before this field existed) -- the server accepts the
+     * write regardless. A successful PUT's response carries the new version.
+     */
+    version?: number;
     /** Every stochastic source derives from seed, so the same environment and clock produce the same values. */
     seed?: number;
     /** Shared surroundings every zone below can read: outdoor temperature, irradiation, calendar. Initial values only. */
@@ -392,10 +400,23 @@ export interface DatasetMeta {
 /** A describable failure body for an endpoint that has no structured error type of its own (a plain message, e.g. "line 12: ..."). */
 export interface ApiError {
     message: string;
+    /** The HTTP status the server answered with, when known -- e.g. 409 for an optimistic-locking conflict on a save. */
+    status?: number;
 }
 
 export function isApiError(value: unknown): value is ApiError {
     return !!value && typeof (value as ApiError).message === 'string';
+}
+
+/**
+ * The GET /environments/{id}/state answer: the same shape as the PATCH input (StateChange),
+ * plus whether the simulation is running at all and when this snapshot was taken. running:
+ * false means the simulation is not running -- context/zones/assets are omitted, there is
+ * nothing live to show.
+ */
+export interface EnvironmentState extends StateChange {
+    running: boolean;
+    as_of: string;
 }
 
 /**

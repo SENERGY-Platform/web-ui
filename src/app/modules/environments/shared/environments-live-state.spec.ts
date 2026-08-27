@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { buildStateChange, diffTouchedKeys, flattenAssetTargets, flattenZoneTargets, pickTouched } from './environments-live-state';
+import { buildStateChange, diffTouchedKeys, flattenAssetTargets, flattenZoneTargets, pickTouched, pickUntouched } from './environments-live-state';
 import { Zone } from './environments.model';
 
 // building carries a sub-zone (floor) with an asset each, so a flattener that only looks
@@ -101,6 +101,20 @@ describe('pickTouched', () => {
 
     it('returns an empty object when nothing is touched', () => {
         expect(pickTouched({ a: 1 }, new Set())).toEqual({});
+    });
+});
+
+describe('pickUntouched (pickTouched\'s complement -- what a live-state poll is allowed to overwrite)', () => {
+    it('keeps only untouched keys', () => {
+        expect(pickUntouched({ a: 1, b: 2, c: 3 }, new Set(['a', 'c']))).toEqual({ b: 2 });
+    });
+
+    it('returns the whole record when nothing is touched', () => {
+        expect(pickUntouched({ a: 1, b: 2 }, new Set())).toEqual({ a: 1, b: 2 });
+    });
+
+    it('returns an empty object when every key is touched', () => {
+        expect(pickUntouched({ a: 1, b: 2 }, new Set(['a', 'b']))).toEqual({});
     });
 });
 

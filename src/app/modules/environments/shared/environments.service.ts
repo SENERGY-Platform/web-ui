@@ -27,6 +27,7 @@ import {
     CatalogDeviceType,
     DatasetMeta,
     Environment,
+    EnvironmentState,
     isValidationError,
     StateChange,
     ValidationError,
@@ -107,7 +108,9 @@ export class EnvironmentsService {
      * else -- including a 400 whose body is plain text (e.g. a Go json.Unmarshal message
      * like "cannot unmarshal number 900.5 into ... int64"). Never falls back to null/true:
      * a caller that only checks "is this a ValidationError" and otherwise assumes success
-     * would treat that plain-text 400 as a save that worked.
+     * would treat that plain-text 400 as a save that worked. The ApiError carries the HTTP
+     * status too -- the editor needs to tell a 409 (optimistic-locking conflict, see
+     * Environment.version) apart from any other failure.
      */
     updateEnvironmentChecked(id: string, env: Environment): Observable<Environment | ValidationError | ApiError> {
         return this.http.put<Environment>(this.environmentsUrl + '/' + encodeURIComponent(id), env).pipe(
@@ -116,8 +119,20 @@ export class EnvironmentsService {
                 if (isValidationError(error.error)) {
                     return of(error.error as ValidationError);
                 }
-                return of({ message: describeHttpError(error) } as ApiError);
+                return of({ message: describeHttpError(error), status: error.status } as ApiError);
             }),
+        );
+    }
+
+    /**
+     * The simulation's actual current values, for the Live state tab's live view: null on any
+     * failure (including a 404 for one that has not been migrated/is not running), same as
+     * getEnvironment -- distinguishing failure reasons is not worth it for a value polled
+     * every 10s, it just means the tab keeps showing whatever it showed before.
+     */
+    getEnvironmentState(id: string): Observable<EnvironmentState | null> {
+        return this.http.get<EnvironmentState>(this.environmentsUrl + '/' + encodeURIComponent(id) + '/state').pipe(
+            catchError(this.errorHandlerService.handleError(EnvironmentsService.name, 'getEnvironmentState', null)),
         );
     }
 

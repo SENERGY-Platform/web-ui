@@ -170,6 +170,31 @@ describe('EnvironmentsLiveStateTilesComponent', () => {
         });
     });
 
+    describe('external record replacement while a tile is being edited (e.g. a live-state poll)', () => {
+        // A poll refreshes untouched tiles by replacing the whole record every 10s (see
+        // environment-detail's applyLiveStatePoll) -- closing the edit field on every such
+        // refresh would make editing effectively impossible while polling is active.
+        it('keeps the tile open for editing across an unrelated external record replacement', () => {
+            setRecord({ temperature: 20, occupied: 1 });
+            component.startEdit(component.tiles[0]);
+            expect(component.editingKey).toBe('temperature');
+
+            setRecord({ temperature: 21, occupied: 1 }); // e.g. a poll updating the untouched "temperature" tile
+
+            expect(component.editingKey).toBe('temperature');
+        });
+
+        it('closes the edit field only once its own tile actually disappears from the new record', () => {
+            setRecord({ temperature: 20, occupied: 1 });
+            component.startEdit(component.tiles[0]);
+            expect(component.editingKey).toBe('temperature');
+
+            setRecord({ occupied: 1 }); // "temperature" row is gone
+
+            expect(component.editingKey).toBeUndefined();
+        });
+    });
+
     describe('non-primitive values', () => {
         it('shows a boolean value as a read-only JSON preview instead of stringifying it lossily', () => {
             setRecord({ occupied: false });

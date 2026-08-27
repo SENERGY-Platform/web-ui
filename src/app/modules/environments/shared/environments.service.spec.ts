@@ -136,7 +136,7 @@ describe('EnvironmentsService', () => {
         const env: Environment = { id: 'e1', seed: 900.5 };
         const plainTextBody = 'unable to read the request body: json: cannot unmarshal number 900.5 into Go struct field Environment.seed of type int64';
         service.updateEnvironmentChecked('e1', env).subscribe(resp => {
-            expect(resp).toEqual({ message: plainTextBody });
+            expect(resp).toEqual({ message: plainTextBody, status: 400 });
             done();
         });
         const req = httpMock.expectOne(environmentsUrl + '/e1');
@@ -146,11 +146,26 @@ describe('EnvironmentsService', () => {
     it('should surface a non-400 error of the checked update as an ApiError, like the other checked methods', (done) => {
         const env: Environment = { id: 'e1', name: 'Plant A' };
         service.updateEnvironmentChecked('e1', env).subscribe(resp => {
-            expect(resp).toEqual({ message: 'boom' });
+            expect(resp).toEqual({ message: 'boom', status: 500 });
             done();
         });
         const req = httpMock.expectOne(environmentsUrl + '/e1');
         req.flush('boom', { status: 500, statusText: 'Internal Server Error' });
+    });
+
+    // Optimistic locking (Environment.version): the editor tells a 409 apart from any other
+    // failure by this status field -- collapsing it back to a bare message would make that
+    // impossible.
+    it('should carry the HTTP status on a 409 optimistic-locking conflict from the checked update', (done) => {
+        const env: Environment = { id: 'e1', name: 'Plant A', version: 3 };
+        const conflictMessage = 'version conflict: you have 3, current is 4';
+        service.updateEnvironmentChecked('e1', env).subscribe(resp => {
+            expect(resp).toEqual({ message: conflictMessage, status: 409 });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1');
+        expect(req.request.body.version).toBe(3);
+        req.flush(conflictMessage, { status: 409, statusText: 'Conflict' });
     });
 
     it('should delete an environment with a DELETE on /environments/{id}', (done) => {
@@ -179,6 +194,26 @@ describe('EnvironmentsService', () => {
         const change: StateChange = { context: { outdoor_temp: 12 } };
         service.setStateChecked('e1', change).subscribe(resp => {
             expect(resp).toEqual({ message: 'environment e1 is not running' });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/state');
+        req.flush('environment e1 is not running', { status: 404, statusText: 'Not Found' });
+    });
+
+    it('should get the live state with a GET on /environments/{id}/state', (done) => {
+        const state = { running: true, as_of: '2026-08-27T10:00:00Z', context: { outdoor_temp: 5 }, zones: { z1: { occupied: true } }, assets: {} };
+        service.getEnvironmentState('e1').subscribe(resp => {
+            expect(resp).toEqual(state);
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/state');
+        expect(req.request.method).toBe('GET');
+        req.flush(state);
+    });
+
+    it('should return null instead of throwing when the live state endpoint fails', (done) => {
+        service.getEnvironmentState('e1').subscribe(resp => {
+            expect(resp).toBeNull();
             done();
         });
         const req = httpMock.expectOne(environmentsUrl + '/e1/state');

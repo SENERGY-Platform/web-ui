@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTabChangeEvent } from '@angular/material/tabs';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
+import { Subscription, timer } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { EnvironmentsService } from '../shared/environments.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeleteDialogOptions, DeleteDialogResponse } from '../../../core/dialogs/delete-dialog.component';
@@ -40,6 +43,7 @@ import {
     Environment,
     ENVIRONMENT_TYPES,
     environmentTypeLabel,
+    EnvironmentState,
     isApiError,
     isValidationError,
     Problem,
@@ -73,7 +77,9 @@ import {
     flattenZoneTargets,
     NamedStateTarget,
     pickTouched,
+    pickUntouched,
 } from '../shared/environments-live-state';
+import { EnvironmentsVersionConflictDialogComponent } from './dialogs/environments-version-conflict-dialog.component';
 
 interface SelectedNodeProblem {
     message: string;
@@ -97,7 +103,7 @@ interface LiveStateEntry {
     templateUrl: './environment-detail.component.html',
     styleUrls: ['./environment-detail.component.css'],
 })
-export class EnvironmentDetailComponent implements OnInit {
+export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     id = '';
     environment: Environment | undefined;
     dataReady = false;
@@ -168,12 +174,20 @@ export class EnvironmentDetailComponent implements OnInit {
     /** Undefined (nothing touched) drives the Apply button's disabled state; recomputed on every touch, not read as a method from the template. */
     pendingChange: StateChange | undefined;
     /**
-     * When the drafts above were last (re)seeded from the loaded definition -- there is no
-     * read-back for the simulation's actual current values (see setStateChecked's doc
-     * comment), so this is what the "reference values as of ..." status line honestly shows
-     * instead of a fabricated "live" feed.
+     * When the drafts above were last (re)seeded from the loaded definition. Only the
+     * fallback status line's timestamp while the simulation is not running or not yet
+     * polled -- see liveStateAsOf for the genuinely live one.
      */
     liveStateLastRefreshed: Date | undefined;
+    /**
+     * Whether the simulation is running, per the last GET .../state poll -- undefined before
+     * the first poll answers (e.g. right after opening the tab). Drives which status line and
+     * which hint the template shows; see startLiveStatePolling.
+     */
+    liveStateRunning: boolean | undefined;
+    /** The server's as_of from the last poll while running -- what the "Live · as of ..." status line shows. */
+    liveStateAsOf: Date | undefined;
+    private liveStatePollSub: Subscription | undefined;
 
     private selectedNodeProblemsByKey = new Map<string, SelectedNodeProblem[]>();
 
@@ -195,6 +209,19 @@ export class EnvironmentDetailComponent implements OnInit {
             this.deviceTypesById = new Map(types.filter((t) => t.id).map((t) => [t.id as string, t]));
         });
         this.load();
+    }
+
+    ngOnDestroy(): void {
+        this.stopLiveStatePolling();
+    }
+
+    /** Bound to the tab group's (selectedTabChange): polling only ever runs while the Live state tab is actually visible. */
+    onTabChange(event: MatTabChangeEvent): void {
+        if (event.tab.textLabel === 'Live state') {
+            this.startLiveStatePolling();
+        } else {
+            this.stopLiveStatePolling();
+        }
     }
 
     /** @param preserveSelection Keep the current selectedKey instead of resetting to the root -- used after a successful save, so the user is not bounced out of what they were editing. */
@@ -251,6 +278,14 @@ export class EnvironmentDetailComponent implements OnInit {
                 return;
             }
             if (isApiError(result)) {
+                if (result.status === 409) {
+                    // Somebody else's write landed since this document was loaded (see
+                    // Environment.version) -- a generic error snackbar would not explain what
+                    // to do about it, so this gets its own dialog instead. The edit stays
+                    // dirty either way; only "Reload" actually discards it.
+                    this.openVersionConflictDialog();
+                    return;
+                }
                 // Anything from a 500 to a plaintext 400 (e.g. a Go json.Unmarshal message)
                 // lands here -- it must never be mistaken for success, and the edit stays
                 // exactly as the user left it (no load(), nothing to re-confirm or redo).
@@ -757,6 +792,71 @@ export class EnvironmentDetailComponent implements OnInit {
         this.markDirty();
         this.rebuildTree();
         this.indexProblems();
+    }
+
+    /** Opens the 409 conflict dialog and reloads (discarding the unsaved edit) only if the user chose "Reload". */
+    private openVersionConflictDialog(): void {
+        this.dialog
+            .open(EnvironmentsVersionConflictDialogComponent)
+            .afterClosed()
+            .subscribe((shouldReload: boolean | undefined) => {
+                if (shouldReload) {
+                    this.load();
+                }
+            });
+    }
+
+    /**
+     * Polls GET .../state every 10s while the Live state tab is active (see onTabChange), so
+     * the tab can show the simulation's actual current values instead of only the definition's
+     * reference ones. Fires immediately on activation (timer's 0 due time), not just after the
+     * first 10s. Any single failed poll (transient network hiccup, environment not running/not
+     * migrated) just leaves the tab showing whatever it showed before -- see getEnvironmentState.
+     */
+    private startLiveStatePolling(): void {
+        this.stopLiveStatePolling();
+        const id = this.environment?.id;
+        if (!id) {
+            return;
+        }
+        this.liveStatePollSub = timer(0, 10000)
+            .pipe(switchMap(() => this.environmentsService.getEnvironmentState(id)))
+            .subscribe((state) => this.applyLiveStatePoll(state));
+    }
+
+    private stopLiveStatePolling(): void {
+        this.liveStatePollSub?.unsubscribe();
+        this.liveStatePollSub = undefined;
+    }
+
+    /**
+     * Merges one poll's answer into the drafts -- only into untouched keys (see pickUntouched),
+     * so a value the user is mid-edit on but has not applied yet keeps their local value
+     * instead of being overwritten from underneath them. No merge at all while not running:
+     * the drafts keep showing the definition's reference values as seeded by resetLiveState.
+     */
+    private applyLiveStatePoll(state: EnvironmentState | null): void {
+        if (!state) {
+            return;
+        }
+        this.liveStateRunning = state.running;
+        if (!state.running) {
+            return;
+        }
+        this.liveStateAsOf = new Date(state.as_of);
+        this.contextDraft = { ...this.contextDraft, ...pickUntouched(state.context || {}, this.contextTouched) };
+        this.zoneStates.forEach((entry) => {
+            const values = (state.zones || {})[entry.target.id];
+            if (values) {
+                entry.draft = { ...entry.draft, ...pickUntouched(values, entry.touched) };
+            }
+        });
+        this.assetStates.forEach((entry) => {
+            const values = (state.assets || {})[entry.target.id];
+            if (values) {
+                entry.draft = { ...entry.draft, ...pickUntouched(values, entry.touched) };
+            }
+        });
     }
 
     /** (Re)seeds the Live state tab's drafts from the definition's initial_states, discarding any unsent edits. */

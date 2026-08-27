@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    <mat-tab-group backgroundColor="accent" color="primary">
+    <mat-tab-group backgroundColor="accent" color="primary" (selectedTabChange)="onTabChange($event)">
     <mat-tab label="Editor">
     <div class="editor-body" fxLayout="column" fxLayout.gt-xs="row">
         <div class="tree-panel" [ngClass.gt-xs]="'tree-panel-large'">
@@ -416,19 +416,29 @@
     <mat-tab label="Live state">
         <div class="live-state-panel">
             <p class="live-state-intro">
-                This tab shows the reference values this simulation was defined with -- the site's context and each
-                zone's/asset's state -- so you can see what it starts from before changing anything. When you do want
-                to nudge it: change a value and apply it, e.g. set the outdoor temperature to -5 and watch the
+                While the simulation is running, this tab shows its actual current values -- the site's context and
+                each zone's/asset's state -- refreshed every 10 seconds. When it is not running, it falls back to
+                the reference values this simulation was defined with, so you can still see what it starts from.
+                Change a value and apply it to nudge it, e.g. set the outdoor temperature to -5 and watch the
                 heating channels react. Applied changes take effect on the next tick and do not change the
                 definition on the Editor tab.
             </p>
 
+            <p class="live-state-not-running-hint" *ngIf="liveStateRunning === false">
+                The simulation is not running -- showing the definition's reference values.
+            </p>
+
             <div class="live-state-status">
-                <span class="live-state-status-dot" [class.applying]="liveStateApplying"
-                    [matTooltip]="liveStateApplying ? 'Applying...' : 'Reference values, not a live telemetry feed -- see the text above.'"></span>
-                <span class="live-state-status-text">
-                    Reference values as of {{liveStateLastRefreshed ? (liveStateLastRefreshed | date:'HH:mm:ss') : '--'}}
+                <span class="live-state-status-dot" [class.applying]="liveStateApplying" [class.live]="liveStateRunning && !liveStateApplying"
+                    [matTooltip]="liveStateApplying ? 'Applying...' : (liveStateRunning ? 'Live values, polled every 10s.' : 'Reference values, not a live telemetry feed.')"></span>
+                <span class="live-state-status-text" *ngIf="liveStateRunning; else referenceStatusText">
+                    Live &middot; as of {{liveStateAsOf | date:'HH:mm:ss'}} &middot; updates every 10s
                 </span>
+                <ng-template #referenceStatusText>
+                    <span class="live-state-status-text">
+                        Reference values as of {{liveStateLastRefreshed ? (liveStateLastRefreshed | date:'HH:mm:ss') : '--'}}
+                    </span>
+                </ng-template>
                 <button mat-stroked-button type="button" (click)="reloadLiveStateDefaults()">
                     <mat-icon>refresh</mat-icon> Reload current values
                 </button>

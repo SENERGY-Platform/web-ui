@@ -42,6 +42,7 @@ import { EnvironmentDetailComponent } from './environment-detail/environment-det
 import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create-dialog.component';
 import { EnvironmentsAddMachineDialogComponent } from './environment-detail/dialogs/environments-add-machine-dialog.component';
 import { EnvironmentsAddContextDialogComponent } from './environment-detail/dialogs/environments-add-context-dialog.component';
+import { EnvironmentsVersionConflictDialogComponent } from './environment-detail/dialogs/environments-version-conflict-dialog.component';
 import { EnvironmentsProfileEditorComponent } from './environment-detail/profile-editor/environments-profile-editor.component';
 import { EnvironmentsFactorBarsComponent } from './environment-detail/factor-bars/environments-factor-bars.component';
 import { EnvironmentsDatasetEditorComponent } from './environment-detail/dataset-editor/environments-dataset-editor.component';
@@ -88,6 +89,7 @@ const formFieldDefaults = {
         EnvironmentsCreateDialogComponent,
         EnvironmentsAddMachineDialogComponent,
         EnvironmentsAddContextDialogComponent,
+        EnvironmentsVersionConflictDialogComponent,
         EnvironmentsProfileEditorComponent,
         EnvironmentsFactorBarsComponent,
         EnvironmentsDatasetEditorComponent,

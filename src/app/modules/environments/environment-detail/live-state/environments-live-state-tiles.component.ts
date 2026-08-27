@@ -74,8 +74,17 @@ export class EnvironmentsLiveStateTilesComponent implements OnChanges {
         }
         const isOwnEcho = change.currentValue === this.lastEmittedRef;
         this.lastEmittedRef = undefined;
-        if (!isOwnEcho) {
-            this.tiles = this.toTiles(this.record);
+        if (isOwnEcho) {
+            return;
+        }
+        this.tiles = this.toTiles(this.record);
+        // A live-state poll (see environment-detail's applyLiveStatePoll) replaces `record`
+        // every 10s to refresh the untouched tiles -- closing whichever tile the user has
+        // open for editing on every such refresh would make editing effectively impossible
+        // while a poll is running. Only drop editingKey if its own tile actually disappeared
+        // (row deleted server-side); draftValue is separate component state, so an in-progress
+        // edit of that tile is unaffected by its displayed (non-edited) value changing underneath.
+        if (this.editingKey !== undefined && !this.tiles.some((t) => t.key === this.editingKey)) {
             this.editingKey = undefined;
         }
     }
