@@ -79,9 +79,23 @@ describe('applySourceKind', () => {
         expect(result.script).toBeUndefined();
     });
 
-    it('resets interval_seconds to 0 when switching to aggregate', () => {
+    it('drops the other variants when switching from script to schedule', () => {
+        const source: Source = { kind: 'script', interval_seconds: 5, script: { code: 'return 1;' } };
+        const result = applySourceKind(source, 'schedule');
+        expect(result).toEqual({ kind: 'schedule', interval_seconds: 0, schedule: {} });
+        expect(result.script).toBeUndefined();
+    });
+
+    it('resets interval_seconds to 0 when switching to aggregate or schedule', () => {
         const source: Source = { kind: 'script', interval_seconds: 30, script: { code: 'return 1;' } };
         expect(applySourceKind(source, 'aggregate').interval_seconds).toBe(0);
+        expect(applySourceKind(source, 'schedule').interval_seconds).toBe(0);
+    });
+
+    it('keeps the existing schedule config when switching to schedule again', () => {
+        const source: Source = { kind: 'schedule', schedule: { state_key: 'programme', states: [{ name: 'idle' }] } };
+        const result = applySourceKind(source, 'schedule');
+        expect(result.schedule).toEqual({ state_key: 'programme', states: [{ name: 'idle' }] });
     });
 });
 

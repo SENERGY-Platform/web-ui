@@ -415,6 +415,12 @@
                                 through a document import or the API).
                             </p>
                         </ng-container>
+
+                        <ng-container *ngSwitchCase="'schedule'">
+                            <senergy-environments-schedule-editor [schedule]="selectedChannel!.source!.schedule!"
+                                [contextKeyOptions]="existingContextKeys(environment!)" (scheduleChange)="markDirty()">
+                            </senergy-environments-schedule-editor>
+                        </ng-container>
                     </ng-container>
                 </ng-container>
             </form>

@@ -102,9 +102,9 @@ export function directionLabel(direction: Direction | undefined): string {
     return directionLabels[direction] || direction;
 }
 
-export type SourceKind = 'script' | 'profile' | 'dataset' | 'formula' | 'aggregate';
+export type SourceKind = 'script' | 'profile' | 'dataset' | 'formula' | 'aggregate' | 'schedule';
 
-export const SOURCE_KINDS: SourceKind[] = ['script', 'profile', 'dataset', 'formula', 'aggregate'];
+export const SOURCE_KINDS: SourceKind[] = ['script', 'profile', 'dataset', 'formula', 'aggregate', 'schedule'];
 
 const sourceKindLabels: Record<SourceKind, string> = {
     script: 'Script',
@@ -112,6 +112,7 @@ const sourceKindLabels: Record<SourceKind, string> = {
     dataset: 'Dataset',
     formula: 'Formula',
     aggregate: 'Aggregate',
+    schedule: 'Schedule',
 };
 
 export function sourceKindLabel(kind: SourceKind | undefined): string {
@@ -127,6 +128,7 @@ const sourceKindDescriptions: Record<SourceKind, string> = {
     dataset: 'Replays real, previously recorded measurements, e.g. a week of actual power readings.',
     formula: 'Computed live from other channels or context values, e.g. °F from a °C reading.',
     aggregate: 'Sums the last values of the sub-metered assets\' channels carrying the same characteristic -- no configuration.',
+    schedule: 'A cyclic state machine: named states with a duration and a published value, optionally gated by a context key.',
 };
 
 export function sourceKindDescription(kind: SourceKind | undefined): string {
@@ -321,6 +323,7 @@ export interface Source {
     profile?: ProfileSource;
     dataset?: DatasetSource;
     formula?: FormulaSource;
+    schedule?: ScheduleSource;
 }
 
 export interface ScriptSource {
@@ -361,6 +364,48 @@ export interface FormulaSource {
     expression?: string;
     /** Maps a name usable in expression to a channel id or context key. */
     inputs?: Record<string, string>;
+}
+
+/**
+ * A machine programme declared as data: a cycle of named states, each held for a
+ * duration and publishing a value of its own. The name of the current state is written
+ * into the asset state under state_key, so a formula, the live state endpoint and a
+ * dashboard can all read what the plant is doing instead of guessing it from the load.
+ */
+export interface ScheduleSource {
+    /** Run in the order they are written; the last one is followed by the first again unless run_once is set. */
+    states?: ScheduleState[];
+    /** The asset state key the current state's name is written under. Mandatory. */
+    state_key?: string;
+    gate?: ScheduleGate;
+    /** Holds the last state instead of starting the cycle over -- the shape of a job rather than a running plant. */
+    run_once?: boolean;
+}
+
+/** One step of the programme. */
+export interface ScheduleState {
+    /** What is written into the asset state while this step runs. */
+    name?: string;
+    /** How long the step is held, in whole seconds. */
+    duration_seconds?: number;
+    /** Varies duration_seconds per cycle, as a percent below 100. */
+    duration_spread_percent?: number;
+    /** What the channel publishes while the step runs. */
+    value?: number;
+    /** The random variation around value, per time slot -- the same convention as a profile's spread. */
+    spread_percent?: number;
+    /** Further asset state values this step declares, e.g. the air demand of a running machine. */
+    state_writes?: Record<string, number>;
+}
+
+/**
+ * Starts the programme from a context key, which is what a shift calendar is: the cycle
+ * restarts at the first state every time the key rises above threshold. Threshold is
+ * exclusive -- open means strictly greater -- so the default of 0 fits a 0/1 calendar.
+ */
+export interface ScheduleGate {
+    context_key?: string;
+    threshold?: number;
 }
 
 export interface Problem {

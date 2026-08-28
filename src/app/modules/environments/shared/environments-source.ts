@@ -45,6 +45,9 @@ export function applySourceKind(source: Source, kind: SourceKind): Source {
             // Configurationless: the whole configuration is the sub-metering tree, so
             // there is no variant object to materialise here.
             break;
+        case 'schedule':
+            next.schedule = source.schedule || {};
+            break;
     }
     return next;
 }

@@ -44,6 +44,7 @@ import { EnvironmentsAddMachineDialogComponent } from './environment-detail/dial
 import { EnvironmentsAddContextDialogComponent } from './environment-detail/dialogs/environments-add-context-dialog.component';
 import { EnvironmentsVersionConflictDialogComponent } from './environment-detail/dialogs/environments-version-conflict-dialog.component';
 import { EnvironmentsProfileEditorComponent } from './environment-detail/profile-editor/environments-profile-editor.component';
+import { EnvironmentsScheduleEditorComponent } from './environment-detail/schedule-editor/environments-schedule-editor.component';
 import { EnvironmentsFactorBarsComponent } from './environment-detail/factor-bars/environments-factor-bars.component';
 import { EnvironmentsDatasetEditorComponent } from './environment-detail/dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsKeyValueEditorComponent } from './key-value-editor/environments-key-value-editor.component';
@@ -91,6 +92,7 @@ const formFieldDefaults = {
         EnvironmentsAddContextDialogComponent,
         EnvironmentsVersionConflictDialogComponent,
         EnvironmentsProfileEditorComponent,
+        EnvironmentsScheduleEditorComponent,
         EnvironmentsFactorBarsComponent,
         EnvironmentsDatasetEditorComponent,
         EnvironmentsKeyValueEditorComponent,

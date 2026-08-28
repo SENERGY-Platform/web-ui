@@ -68,6 +68,29 @@ const industry: Environment = {
                                     external_ref: 'urn:infai:ses:service:44ffd95e', interval_seconds: 60,
                                     source: { kind: 'dataset', dataset: { origin: 'file', ref: 'ds-1', column: 'Wirkleistung', resample: 'linear', anchor: 'loop' } },
                                 },
+                                {
+                                    // The machine programme: idle, then a short ramp, then running, gated by the
+                                    // same outdoor_temperature context key the plant's driven context uses (see
+                                    // context_sources above) -- exercises the schedule editor's state list, the
+                                    // per-state spread fields, state_writes and the gate in the preview harness.
+                                    id: 'c-programme', name: 'Programme', direction: 'sensor',
+                                    external_ref: 'urn:infai:ses:service:9c2f10aa', interval_seconds: 30,
+                                    source: {
+                                        kind: 'schedule',
+                                        schedule: {
+                                            state_key: 'programme',
+                                            states: [
+                                                { name: 'idle', duration_seconds: 600, value: 0, duration_spread_percent: 10 },
+                                                { name: 'ramp', duration_seconds: 120, value: 8, spread_percent: 5 },
+                                                {
+                                                    name: 'run', duration_seconds: 1800, value: 15, spread_percent: 8,
+                                                    state_writes: { air_demand: 90 },
+                                                },
+                                            ],
+                                            gate: { context_key: 'outdoor_temperature', threshold: 5 },
+                                        },
+                                    },
+                                },
                             ],
                         },
                         {

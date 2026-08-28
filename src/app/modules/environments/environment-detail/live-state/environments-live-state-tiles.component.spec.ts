@@ -146,6 +146,28 @@ describe('EnvironmentsLiveStateTilesComponent', () => {
         expect(emitted).toBe(false);
     });
 
+    describe('string values (e.g. a schedule state name written into the asset state)', () => {
+        it('builds an editable text tile for a string value, not a read-only one', () => {
+            setRecord({ programme: 'idle' });
+            expect(component.tiles[0].isText).toBe(true);
+            expect(component.tiles[0].readOnly).toBe(false);
+            expect(component.tiles[0].value).toBe('idle');
+        });
+
+        it('commits an edited string value and emits it as a string, not coerced to a number', () => {
+            setRecord({ programme: 'idle' });
+            let emitted: Record<string, unknown> | undefined;
+            component.recordChange.subscribe((r) => (emitted = r));
+
+            component.startEdit(component.tiles[0]);
+            expect(component.draftIsText).toBe(true);
+            component.draftValue = 'running';
+            component.commitEdit();
+
+            expect(emitted).toEqual({ programme: 'running' });
+        });
+    });
+
     describe('baseline ("was X") caption', () => {
         it('flags a tile whose current value differs from its baseline', () => {
             setRecord({ temperature: 25 });

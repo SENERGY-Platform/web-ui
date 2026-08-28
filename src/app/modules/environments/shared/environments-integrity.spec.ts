@@ -109,6 +109,38 @@ describe('findNonIntegerFields', () => {
         expect(findNonIntegerFields(env)).toEqual([]);
     });
 
+    it('flags a non-integer schedule state duration with its state-indexed path', () => {
+        const env: Environment = {
+            id: 'e1',
+            zones: [
+                {
+                    id: 'z1',
+                    assets: [
+                        {
+                            id: 'a1',
+                            channels: [
+                                {
+                                    id: 'c1',
+                                    source: {
+                                        kind: 'schedule',
+                                        schedule: {
+                                            state_key: 'programme',
+                                            states: [
+                                                { name: 'idle', duration_seconds: 600 },
+                                                { name: 'run', duration_seconds: 300.5 },
+                                            ],
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        };
+        expect(findNonIntegerFields(env)).toEqual(['zones[0].assets[0].channels[0].source.schedule.states[1].duration_seconds']);
+    });
+
     it('does not flag fields that are simply unset', () => {
         const env: Environment = {
             id: 'e1',

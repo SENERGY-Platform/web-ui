@@ -987,6 +987,9 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         if (s.kind === 'formula' && !s.formula) {
             s.formula = {};
         }
+        if (s.kind === 'schedule' && !s.schedule) {
+            s.schedule = {};
+        }
         return s;
     }
 }

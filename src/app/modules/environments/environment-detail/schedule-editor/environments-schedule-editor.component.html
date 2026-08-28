@@ -1,0 +1,125 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="schedule-chart" *ngIf="chart">
+    <apx-chart [series]="chart.series" [chart]="chart.chart" [plotOptions]="chart.plotOptions" [xaxis]="chart.xaxis"
+        [yaxis]="chart.yaxis" [dataLabels]="chart.dataLabels" [colors]="chart.colors">
+    </apx-chart>
+    <p class="section-hint">Timeline over up to 3 cycles; runtime values vary by the spread, the preview does not.</p>
+</div>
+
+<mat-form-field appearance="outline" color="accent" class="full-width">
+    <mat-label>State key</mat-label>
+    <input matInput [(ngModel)]="schedule!.state_key" (ngModelChange)="onFieldChange()" name="schedule-state-key">
+    <mat-hint>The asset state key the current state's name is written under.</mat-hint>
+</mat-form-field>
+
+<div class="states-block">
+    <span class="states-label">States</span>
+    <p class="section-hint" *ngIf="!schedule?.states?.length">No states yet -- add one to define the programme.</p>
+
+    <div class="state-row" *ngFor="let state of schedule!.states; let i = index; trackBy: trackByState">
+        <div class="state-row-fields">
+            <mat-form-field appearance="outline" color="accent" class="state-name-field">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="state.name" [ngModelOptions]="{standalone: true}" (ngModelChange)="onFieldChange()">
+            </mat-form-field>
+            <mat-form-field appearance="outline" color="accent" class="state-narrow-field">
+                <mat-label>Duration (s)</mat-label>
+                <input matInput type="number" step="1" [(ngModel)]="state.duration_seconds" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="onFieldChange()">
+            </mat-form-field>
+            <mat-form-field appearance="outline" color="accent" class="state-narrow-field">
+                <mat-label>Value</mat-label>
+                <input matInput type="number" [(ngModel)]="state.value" [ngModelOptions]="{standalone: true}" (ngModelChange)="onFieldChange()">
+            </mat-form-field>
+            <mat-form-field appearance="outline" color="accent" class="state-narrow-field">
+                <mat-label>Duration spread (%)</mat-label>
+                <input matInput type="number" [(ngModel)]="state.duration_spread_percent" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="onFieldChange()">
+                <mat-icon matSuffix class="inline-help-icon"
+                    matTooltip="Random variation of this step's duration, per cycle, as a percent below 100.">help_outline</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" color="accent" class="state-narrow-field">
+                <mat-label>Value spread (%)</mat-label>
+                <input matInput type="number" [(ngModel)]="state.spread_percent" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="onFieldChange()">
+                <mat-icon matSuffix class="inline-help-icon"
+                    matTooltip="Random noise added around the value, per evaluation -- the same convention as a profile's spread.">help_outline</mat-icon>
+            </mat-form-field>
+
+            <span class="state-row-actions">
+                <button mat-icon-button type="button" matTooltip="Move up" [disabled]="i === 0" (click)="moveStateUp(i)">
+                    <mat-icon>arrow_upward</mat-icon>
+                </button>
+                <button mat-icon-button type="button" matTooltip="Move down" [disabled]="i === schedule!.states!.length - 1"
+                    (click)="moveStateDown(i)">
+                    <mat-icon>arrow_downward</mat-icon>
+                </button>
+                <button mat-icon-button type="button" color="warn" matTooltip="Remove state" (click)="removeState(i)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </span>
+        </div>
+
+        <button mat-button type="button" class="writes-toggle" (click)="toggleWrites(state)">
+            {{writeCount(state)}} write{{writeCount(state) === 1 ? '' : 's'}}
+            <mat-icon>{{isWritesExpanded(state) ? 'expand_less' : 'expand_more'}}</mat-icon>
+        </button>
+        <div class="state-writes" *ngIf="isWritesExpanded(state)">
+            <senergy-environments-key-value-editor [record]="state.state_writes" mode="number" keyLabel="State key"
+                (recordChange)="setStateWrites(state, $event)">
+            </senergy-environments-key-value-editor>
+        </div>
+    </div>
+
+    <button mat-stroked-button color="accent" type="button" (click)="addState()">
+        <mat-icon>add</mat-icon> Add state
+    </button>
+</div>
+
+<mat-divider></mat-divider>
+
+<mat-checkbox [ngModel]="!!schedule!.gate" (ngModelChange)="setGateEnabled($event)" name="schedule-gate-enabled">
+    Gate on a context key
+</mat-checkbox>
+<div class="gate-block" *ngIf="schedule!.gate">
+    <div class="field-row">
+        <mat-form-field appearance="outline" color="accent" class="state-narrow-field">
+            <mat-label>Context key</mat-label>
+            <mtx-select [(ngModel)]="schedule!.gate!.context_key" [ngModelOptions]="{standalone: true}" [items]="contextKeyOptions"
+                appendTo=".ng-select-anchor" (ngModelChange)="onFieldChange()">
+            </mtx-select>
+            <mat-icon matSuffix class="inline-help-icon"
+                matTooltip="Only keys already declared under context or context_sources -- the API rejects an undeclared one.">help_outline</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" color="accent" class="state-narrow-field">
+            <mat-label>Threshold</mat-label>
+            <input matInput type="number" [(ngModel)]="schedule!.gate!.threshold" (ngModelChange)="onFieldChange()"
+                name="schedule-gate-threshold">
+        </mat-form-field>
+    </div>
+    <p class="section-hint">
+        Runs while {{schedule!.gate!.context_key || '(key)'}} is greater than the threshold; otherwise the machine
+        reads "off" and publishes 0. Every opening restarts the cycle at the first state.
+    </p>
+</div>
+
+<mat-checkbox [(ngModel)]="schedule!.run_once" (ngModelChange)="onFieldChange()" name="schedule-run-once">
+    Run once
+</mat-checkbox>
+<mat-icon class="inline-help-icon"
+    matTooltip="Holds the last state instead of starting the cycle over, e.g. a forklift charging once per shift.">help_outline</mat-icon>

@@ -44,6 +44,7 @@ import { CoreModule } from '../../../core/core.module';
 import { EnvironmentDetailComponent } from './environment-detail.component';
 import { EnvironmentsKeyValueEditorComponent } from '../key-value-editor/environments-key-value-editor.component';
 import { EnvironmentsProfileEditorComponent } from './profile-editor/environments-profile-editor.component';
+import { EnvironmentsScheduleEditorComponent } from './schedule-editor/environments-schedule-editor.component';
 import { EnvironmentsFactorBarsComponent } from './factor-bars/environments-factor-bars.component';
 import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
@@ -130,6 +131,7 @@ describe('EnvironmentDetailComponent', () => {
                 EnvironmentDetailComponent,
                 EnvironmentsKeyValueEditorComponent,
                 EnvironmentsProfileEditorComponent,
+                EnvironmentsScheduleEditorComponent,
                 EnvironmentsFactorBarsComponent,
                 EnvironmentsDatasetEditorComponent,
                 EnvironmentsLiveStateTilesComponent,
@@ -226,7 +228,43 @@ describe('EnvironmentDetailComponent', () => {
         expect(component.selectedChannel?.name).toBe('Power');
     });
 
-    describe('the aggregate source kind', () => {
+    describe('schedule and aggregate source kinds', () => {
+        it('normalizeSource materialises an empty schedule config for a channel loaded as kind schedule without one', () => {
+            const env: Environment = {
+                ...nestedEnvironment,
+                zones: [
+                    {
+                        ...nestedEnvironment.zones![0],
+                        assets: [
+                            {
+                                ...nestedEnvironment.zones![0].assets![0],
+                                channels: [{ id: 'c1', name: 'Power', direction: 'sensor', source: { kind: 'schedule' } }],
+                            },
+                        ],
+                    },
+                ],
+            };
+            loadWith(env);
+
+            const channelNode = component.root!.children[0].children[0].children[0];
+            component.select(channelNode);
+
+            expect(component.selectedChannel!.source!.schedule).toEqual({});
+        });
+
+        it('onSourceKindChange to schedule drops the previous variant and materialises an empty schedule', () => {
+            loadWith(nestedEnvironment);
+            const channelNode = component.root!.children[0].children[0].children[0];
+            component.select(channelNode);
+
+            component.onSourceKindChange(component.selectedChannel!, 'schedule');
+            fixture.detectChanges();
+
+            expect(component.selectedChannel!.source!.kind).toBe('schedule');
+            expect(component.selectedChannel!.source!.schedule).toEqual({});
+            expect(component.selectedChannel!.source!.script).toBeUndefined();
+        });
+
         it('onSourceKindChange to aggregate drops the previous variant and materialises nothing', () => {
             loadWith(nestedEnvironment);
             const channelNode = component.root!.children[0].children[0].children[0];
