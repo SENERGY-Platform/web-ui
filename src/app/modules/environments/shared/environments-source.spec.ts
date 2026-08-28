@@ -69,6 +69,20 @@ describe('applySourceKind', () => {
         expect(source.kind).toBe('script');
         expect(source.script).toEqual({ code: 'return 1;' });
     });
+
+    // aggregate has no variant object at all -- the whole configuration is the
+    // sub-metering tree, so nothing gets materialised for it.
+    it('drops every other variant and materialises nothing when switching to aggregate', () => {
+        const source: Source = { kind: 'script', script: { code: 'return 1;' }, interval_seconds: 5 };
+        const result = applySourceKind(source, 'aggregate');
+        expect(result).toEqual({ kind: 'aggregate', interval_seconds: 0 });
+        expect(result.script).toBeUndefined();
+    });
+
+    it('resets interval_seconds to 0 when switching to aggregate', () => {
+        const source: Source = { kind: 'script', interval_seconds: 30, script: { code: 'return 1;' } };
+        expect(applySourceKind(source, 'aggregate').interval_seconds).toBe(0);
+    });
 });
 
 describe('withFactorSet', () => {

@@ -226,6 +226,20 @@ describe('EnvironmentDetailComponent', () => {
         expect(component.selectedChannel?.name).toBe('Power');
     });
 
+    describe('the aggregate source kind', () => {
+        it('onSourceKindChange to aggregate drops the previous variant and materialises nothing', () => {
+            loadWith(nestedEnvironment);
+            const channelNode = component.root!.children[0].children[0].children[0];
+            component.select(channelNode);
+
+            component.onSourceKindChange(component.selectedChannel!, 'aggregate');
+            fixture.detectChanges();
+
+            expect(component.selectedChannel!.source!.kind).toBe('aggregate');
+            expect(component.selectedChannel!.source!.script).toBeUndefined();
+        });
+    });
+
     describe('isDirty (event-based, not a whole-document diff)', () => {
         it('is not dirty right after loading', () => {
             loadWith(nestedEnvironment);

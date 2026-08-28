@@ -41,6 +41,10 @@ export function applySourceKind(source: Source, kind: SourceKind): Source {
         case 'formula':
             next.formula = source.formula || {};
             break;
+        case 'aggregate':
+            // Configurationless: the whole configuration is the sub-metering tree, so
+            // there is no variant object to materialise here.
+            break;
     }
     return next;
 }

@@ -102,15 +102,16 @@ export function directionLabel(direction: Direction | undefined): string {
     return directionLabels[direction] || direction;
 }
 
-export type SourceKind = 'script' | 'profile' | 'dataset' | 'formula';
+export type SourceKind = 'script' | 'profile' | 'dataset' | 'formula' | 'aggregate';
 
-export const SOURCE_KINDS: SourceKind[] = ['script', 'profile', 'dataset', 'formula'];
+export const SOURCE_KINDS: SourceKind[] = ['script', 'profile', 'dataset', 'formula', 'aggregate'];
 
 const sourceKindLabels: Record<SourceKind, string> = {
     script: 'Script',
     profile: 'Profile',
     dataset: 'Dataset',
     formula: 'Formula',
+    aggregate: 'Aggregate',
 };
 
 export function sourceKindLabel(kind: SourceKind | undefined): string {
@@ -125,6 +126,7 @@ const sourceKindDescriptions: Record<SourceKind, string> = {
     profile: 'A repeating daily pattern, e.g. higher power on weekday afternoons and near-zero overnight.',
     dataset: 'Replays real, previously recorded measurements, e.g. a week of actual power readings.',
     formula: 'Computed live from other channels or context values, e.g. °F from a °C reading.',
+    aggregate: 'Sums the last values of the sub-metered assets\' channels carrying the same characteristic -- no configuration.',
 };
 
 export function sourceKindDescription(kind: SourceKind | undefined): string {
