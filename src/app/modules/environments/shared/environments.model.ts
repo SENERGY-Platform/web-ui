@@ -356,7 +356,7 @@ export interface DatasetSource {
     cumulative?: boolean;
     resample?: ResampleMode;
     anchor?: AnchorMode;
-    /** How much of a platform timeseries is fetched, backwards from environment start, e.g. "36h", "7d", "4w". */
+    /** How much of a platform timeseries is fetched, backwards from environment start, e.g. "36h", "7d", "4w", "1y". */
     window?: string;
 }
 
