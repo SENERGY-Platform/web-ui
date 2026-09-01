@@ -38,6 +38,7 @@ import {
     Channel,
     DatasetMeta,
     DatasetSource,
+    DatedChange,
     DIRECTIONS,
     directionLabel,
     Environment,
@@ -69,6 +70,7 @@ import {
     EnvironmentsAddContextDialogComponent,
 } from './dialogs/environments-add-context-dialog.component';
 import { collectFormulaReferences, FormulaReferenceOption } from '../shared/environments-formula-refs';
+import { collectTimelineTargets, TimelineTargetOption } from '../shared/environments-timeline-targets';
 import { mondayStartWeekday } from '../shared/environments-profile-preview';
 import {
     buildStateChange,
@@ -133,6 +135,15 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     formulaEntries: { name: string; ref: string }[] = [];
     /** Every channel/context/zone/asset key a formula input could point at; recomputed whenever the document's structure changes. */
     formulaReferenceOptions: FormulaReferenceOption[] = [];
+    /** Every target the timeline's closed grammar allows; recomputed whenever the document's structure changes, same as the formula ones above. */
+    timelineTargetOptions: TimelineTargetOption[] = [];
+    /**
+     * Context keys the timeline governs (its context.<key> targets) -- PATCH .../state rejects
+     * an actual change to one of these, so the Live state tab locks their tile and excludes them
+     * from pendingChange rather than letting the user provoke that 400. Recomputed alongside the
+     * timeline target options and on every timeline edit (see onTimelineChange).
+     */
+    lockedContextKeys: ReadonlySet<string> = new Set();
 
     /** The device catalog a machine can be built from, loaded once; also used to show a readable name for external_type_id. */
     deviceTypes: CatalogDeviceType[] = [];
@@ -353,6 +364,15 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.liveStateApplying = true;
         this.environmentsService.setStateChecked(this.environment.id, change).subscribe((result) => {
             this.liveStateApplying = false;
+            if (isValidationError(result)) {
+                // e.g. "context.energy_price: driven by the timeline, cannot be changed here" --
+                // the reason the server rejected it, not a bare "Http failure response ... 400".
+                const message =
+                    (result.problems || []).map((p) => (p.path ? p.path + ': ' : '') + (p.message || '')).join(' · ') ||
+                    'The change was rejected.';
+                this.snackBar.open(message, 'close', { panelClass: 'snack-bar-error' });
+                return;
+            }
             if (isApiError(result)) {
                 this.snackBar.open(result.message, 'close', { panelClass: 'snack-bar-error' });
                 return;
@@ -578,6 +598,19 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         }
         delete env.context_sources[key];
         this.markDirty();
+    }
+
+    /** Materialises timeline as [] on first read, same convention as zonesOf/assetsOf/channelsOf -- the editor mutates the array in place. */
+    timelineOf(env: Environment): DatedChange[] {
+        if (!env.timeline) {
+            env.timeline = [];
+        }
+        return env.timeline;
+    }
+
+    onTimelineChange(): void {
+        this.markDirty();
+        this.refreshLockedContextKeys();
     }
 
     /** Opens the shared device picker and, once a device is chosen, resolves its display name, type and service catalog. */
@@ -885,7 +918,12 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.zoneStates.forEach((entry) => (zonesById[entry.target.id] = pickTouched(entry.draft, entry.touched)));
         const assetsById: Record<string, Record<string, unknown>> = {};
         this.assetStates.forEach((entry) => (assetsById[entry.target.id] = pickTouched(entry.draft, entry.touched)));
-        this.pendingChange = buildStateChange(pickTouched(this.contextDraft, this.contextTouched), zonesById, assetsById);
+        // Belt and braces alongside the tiles' locked keys (see lockedContextKeys): a
+        // timeline-governed key must never reach the PATCH body, or the Apply button provokes
+        // exactly the 400 it exists to avoid.
+        const context = pickTouched(this.contextDraft, this.contextTouched);
+        this.lockedContextKeys.forEach((key) => delete context[key]);
+        this.pendingChange = buildStateChange(context, zonesById, assetsById);
     }
 
     private refreshFormulaEntries(): void {
@@ -900,7 +938,19 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.root = buildEnvironmentTree(this.environment);
         this.dataSource.data = [this.root];
         this.formulaReferenceOptions = collectFormulaReferences(this.environment);
+        this.timelineTargetOptions = collectTimelineTargets(this.environment);
+        this.refreshLockedContextKeys();
         this.revealSelection();
+    }
+
+    /** Context keys targeted by a context.<key> timeline entry -- see lockedContextKeys. Not context_source.<key>: that prefix never matches. */
+    private refreshLockedContextKeys(): void {
+        const prefix = 'context.';
+        this.lockedContextKeys = new Set(
+            (this.environment?.timeline || [])
+                .filter((change) => change.target?.startsWith(prefix))
+                .map((change) => change.target!.slice(prefix.length)),
+        );
     }
 
     private revealSelection(): void {

@@ -45,6 +45,7 @@ import { EnvironmentDetailComponent } from './environment-detail.component';
 import { EnvironmentsKeyValueEditorComponent } from '../key-value-editor/environments-key-value-editor.component';
 import { EnvironmentsProfileEditorComponent } from './profile-editor/environments-profile-editor.component';
 import { EnvironmentsScheduleEditorComponent } from './schedule-editor/environments-schedule-editor.component';
+import { EnvironmentsTimelineEditorComponent } from './timeline-editor/environments-timeline-editor.component';
 import { EnvironmentsFactorBarsComponent } from './factor-bars/environments-factor-bars.component';
 import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
@@ -132,6 +133,7 @@ describe('EnvironmentDetailComponent', () => {
                 EnvironmentsKeyValueEditorComponent,
                 EnvironmentsProfileEditorComponent,
                 EnvironmentsScheduleEditorComponent,
+                EnvironmentsTimelineEditorComponent,
                 EnvironmentsFactorBarsComponent,
                 EnvironmentsDatasetEditorComponent,
                 EnvironmentsLiveStateTilesComponent,
@@ -781,6 +783,56 @@ describe('EnvironmentDetailComponent', () => {
         });
     });
 
+    describe('timeline', () => {
+        it('timelineOf materialises an empty array on first read and returns that same array again', () => {
+            loadWith(nestedEnvironment);
+            const env = component.selectedEnvironment!;
+
+            const first = component.timelineOf(env);
+            expect(first).toEqual([]);
+            expect(env.timeline).toBe(first);
+            expect(component.timelineOf(env)).toBe(first);
+        });
+
+        it('collects timeline target options from the loaded document', () => {
+            const env: Environment = { ...nestedEnvironment, context: { energy_price: 0.3 } };
+            loadWith(env);
+
+            expect(component.timelineTargetOptions.map((o) => o.value)).toContain('context.energy_price');
+        });
+
+        it('onTimelineChange marks the document dirty and recomputes lockedContextKeys', () => {
+            const env: Environment = { ...nestedEnvironment, context: { energy_price: 0.3 } };
+            loadWith(env);
+            component.timelineOf(component.selectedEnvironment!).push({ at: '2026-01-01T00:00:00Z', target: 'context.energy_price', value: 1 });
+
+            component.onTimelineChange();
+
+            expect(component.isDirty).toBe(true);
+            expect(component.lockedContextKeys.has('energy_price')).toBe(true);
+        });
+
+        it('excludes a timeline-governed context key from pendingChange even if touched, while leaving an untouched-by-timeline key in', () => {
+            const env: Environment = {
+                ...nestedEnvironment,
+                context: { energy_price: 0.3, other: 1 },
+                timeline: [{ at: '2026-01-01T00:00:00Z', target: 'context.energy_price', value: 1 }],
+            };
+            loadWith(env);
+
+            component.onContextChange({ energy_price: 0.99, other: 2 });
+
+            expect(component.pendingChange).toEqual({ context: { other: 2 } });
+        });
+
+        it('renders the Timeline section on the environment node', () => {
+            loadWith(nestedEnvironment);
+
+            const heading = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('h3')).find((h) => h.textContent?.includes('Timeline'));
+            expect(heading).toBeTruthy();
+        });
+    });
+
     describe('device type / service lookups for the read-only asset and channel fields', () => {
         it('resolves the selected asset\'s external_type_id to the device type name once the catalog is loaded', () => {
             loadWith(nestedEnvironment, [{ id: 'dt1', name: 'Meter Type', services: [] }]);
@@ -957,6 +1009,24 @@ describe('EnvironmentDetailComponent', () => {
             httpMock.expectOne(environmentsUrl + '/e1/state').flush('environment e1 is not running', { status: 404, statusText: 'Not Found' });
 
             expect(snackBarSpy).toHaveBeenCalledWith('environment e1 is not running', 'close', { panelClass: 'snack-bar-error' });
+        });
+
+        it('shows the server-given reason on a 400 ValidationError (e.g. a timeline-governed key) instead of a generic error', () => {
+            loadWith(envWithState);
+            component.onZoneStateChange(component.zoneStates[0], { occupied: false });
+            const snackBarSpy = spyOn((component as any).snackBar, 'open');
+
+            component.applyLiveState();
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush(
+                { problems: [{ path: 'context.energy_price', message: 'driven by the timeline, cannot be changed here' }] },
+                { status: 400, statusText: 'Bad Request' },
+            );
+
+            expect(snackBarSpy).toHaveBeenCalledWith(
+                'context.energy_price: driven by the timeline, cannot be changed here',
+                'close',
+                { panelClass: 'snack-bar-error' },
+            );
         });
 
         it('does not call the API when nothing is touched', () => {

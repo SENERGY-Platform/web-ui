@@ -22,7 +22,8 @@
         <div class="live-tile-header">
             <span class="live-tile-key">{{tile.key}}</span>
             <mat-icon *ngIf="hintFor(tile.key) as hint" class="live-tile-hint-icon" [matTooltip]="hint">info</mat-icon>
-            <span class="live-tile-actions" *ngIf="editingKey !== tile.key">
+            <mat-icon *ngIf="tile.locked" class="live-tile-hint-icon" matTooltip="Driven by the timeline -- not editable here.">schedule</mat-icon>
+            <span class="live-tile-actions" *ngIf="editingKey !== tile.key && !tile.locked">
                 <button mat-icon-button class="live-tile-action" matTooltip="Edit" (click)="startEdit(tile)">
                     <mat-icon>edit</mat-icon>
                 </button>
@@ -33,8 +34,9 @@
         </div>
 
         <ng-container *ngIf="editingKey !== tile.key; else editTpl">
-            <div class="live-tile-value" [matTooltip]="tile.readOnly ? 'Not editable here: not a number or text value.' : 'Click to edit'"
-                (click)="!tile.readOnly && startEdit(tile)">{{tile.value}}</div>
+            <div class="live-tile-value"
+                [matTooltip]="tile.locked ? 'Driven by the timeline -- not editable here.' : (tile.readOnly ? 'Not editable here: not a number or text value.' : 'Click to edit')"
+                (click)="!tile.readOnly && !tile.locked && startEdit(tile)">{{tile.value}}</div>
             <div class="live-tile-baseline" *ngIf="isChangedFromBaseline(tile)">was {{baselineFor(tile)}}</div>
         </ng-container>
         <ng-template #editTpl>

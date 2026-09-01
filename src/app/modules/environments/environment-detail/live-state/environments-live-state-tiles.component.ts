@@ -23,6 +23,8 @@ interface Tile {
     isText: boolean;
     /** A value this editor cannot represent as number/text (boolean, object, array, null) -- shown read-only, passed through unchanged. */
     readOnly: boolean;
+    /** Driven by the timeline (see lockedKeys) -- distinct from readOnly: the type is editable, editing it here is just not allowed. */
+    locked: boolean;
     rawValue?: unknown;
 }
 
@@ -39,6 +41,10 @@ interface Tile {
  * as loaded) -- shown as a small "was X" caption so an edited-but-not-yet-applied value is
  * visibly different from one still at its starting point. It is not the simulation's actual
  * current value: the API has no read-back for that (see the tab's own hint text).
+ *
+ * `lockedKeys`, when given, marks tiles the timeline drives (Environment.timeline's
+ * context.<key> targets): PATCH .../state rejects an actual change to one of these, so their
+ * edit/remove actions are hidden here rather than letting the user provoke that 400.
  */
 @Component({
     selector: 'senergy-environments-live-state-tiles',
@@ -50,6 +56,8 @@ export class EnvironmentsLiveStateTilesComponent implements OnChanges {
     @Input() baseline: Record<string, unknown> | undefined;
     @Input() keyHint: ((key: string) => string | undefined) | undefined;
     @Input() emptyHint = 'No values yet.';
+    /** Keys the timeline drives (see Environment.timeline); PATCH .../state rejects a real change to one of these. */
+    @Input() lockedKeys: ReadonlySet<string> = new Set();
     @Output() recordChange = new EventEmitter<Record<string, unknown>>();
 
     tiles: Tile[] = [];
@@ -69,12 +77,13 @@ export class EnvironmentsLiveStateTilesComponent implements OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         const change = changes['record'];
-        if (!change) {
-            return;
-        }
-        const isOwnEcho = change.currentValue === this.lastEmittedRef;
-        this.lastEmittedRef = undefined;
-        if (isOwnEcho) {
+        if (change) {
+            const isOwnEcho = change.currentValue === this.lastEmittedRef;
+            this.lastEmittedRef = undefined;
+            if (isOwnEcho) {
+                return;
+            }
+        } else if (!changes['lockedKeys']) {
             return;
         }
         this.tiles = this.toTiles(this.record);
@@ -106,6 +115,9 @@ export class EnvironmentsLiveStateTilesComponent implements OnChanges {
     }
 
     startEdit(tile: Tile): void {
+        if (tile.locked) {
+            return;
+        }
         this.editingKey = tile.key;
         this.draftValue = tile.value;
         this.draftIsText = tile.isText;
@@ -126,6 +138,9 @@ export class EnvironmentsLiveStateTilesComponent implements OnChanges {
     }
 
     removeTile(tile: Tile): void {
+        if (tile.locked) {
+            return;
+        }
         this.tiles = this.tiles.filter((t) => t !== tile);
         if (this.editingKey === tile.key) {
             this.editingKey = undefined;
@@ -148,7 +163,7 @@ export class EnvironmentsLiveStateTilesComponent implements OnChanges {
         if (!this.newKey || this.tiles.some((t) => t.key === this.newKey)) {
             return;
         }
-        this.tiles = [...this.tiles, { key: this.newKey, value: this.newValue, isText: this.newIsText, readOnly: false }];
+        this.tiles = [...this.tiles, { key: this.newKey, value: this.newValue, isText: this.newIsText, readOnly: false, locked: false }];
         this.addingNew = false;
         this.emit();
     }
@@ -178,13 +193,14 @@ export class EnvironmentsLiveStateTilesComponent implements OnChanges {
 
     private toTiles(record: Record<string, unknown> | undefined): Tile[] {
         return Object.entries(record || {}).map(([key, value]) => {
+            const locked = this.lockedKeys.has(key);
             if (typeof value === 'number') {
-                return { key, value: String(value), isText: false, readOnly: false };
+                return { key, value: String(value), isText: false, readOnly: false, locked };
             }
             if (typeof value === 'string') {
-                return { key, value, isText: true, readOnly: false };
+                return { key, value, isText: true, readOnly: false, locked };
             }
-            return { key, value: JSON.stringify(value), isText: false, readOnly: true, rawValue: value };
+            return { key, value: JSON.stringify(value), isText: false, readOnly: true, locked, rawValue: value };
         });
     }
 

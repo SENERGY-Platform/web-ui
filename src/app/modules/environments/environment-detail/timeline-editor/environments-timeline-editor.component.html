@@ -1,0 +1,53 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<p class="section-hint">
+    A timeline entry is a jump: at the given time, the target switches straight to the given value, with no ramp and no effect before that time.
+</p>
+<p class="empty-hint" *ngIf="!timeline?.length">No timeline entries yet.</p>
+
+<div class="timeline-row" *ngFor="let row of timeline; let i = index; trackBy: trackByRow">
+    <mat-form-field appearance="outline" color="accent" class="timeline-at-field">
+        <mat-label>At</mat-label>
+        <input matInput type="datetime-local" step="1" [ngModel]="localValue(row)" [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="setAt(row, $event)">
+    </mat-form-field>
+    <mat-form-field appearance="outline" color="accent" class="timeline-target-field">
+        <mat-label>Target</mat-label>
+        <mtx-select [(ngModel)]="row.target" [ngModelOptions]="{standalone: true}" [items]="targetOptions" bindLabel="label"
+            bindValue="value" groupBy="group" appendTo=".ng-select-anchor" (ngModelChange)="onFieldChange()">
+        </mtx-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" color="accent" class="timeline-value-field">
+        <mat-label>Value</mat-label>
+        <input matInput type="number" [(ngModel)]="row.value" [ngModelOptions]="{standalone: true}" (ngModelChange)="onFieldChange()">
+    </mat-form-field>
+    <span class="timeline-row-actions">
+        <button mat-icon-button type="button" matTooltip="Move up" [disabled]="i === 0" (click)="moveRowUp(i)">
+            <mat-icon>arrow_upward</mat-icon>
+        </button>
+        <button mat-icon-button type="button" matTooltip="Move down" [disabled]="i === timeline!.length - 1" (click)="moveRowDown(i)">
+            <mat-icon>arrow_downward</mat-icon>
+        </button>
+        <button mat-icon-button type="button" color="warn" matTooltip="Remove entry" (click)="removeRow(i)">
+            <mat-icon>delete</mat-icon>
+        </button>
+    </span>
+</div>
+
+<button mat-stroked-button color="accent" type="button" (click)="addRow()">
+    <mat-icon>add</mat-icon> Add entry
+</button>

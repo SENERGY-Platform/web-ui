@@ -193,11 +193,25 @@ describe('EnvironmentsService', () => {
     it('should surface a 404 body of setStateChecked as an ApiError instead of a bare false', (done) => {
         const change: StateChange = { context: { outdoor_temp: 12 } };
         service.setStateChecked('e1', change).subscribe(resp => {
-            expect(resp).toEqual({ message: 'environment e1 is not running' });
+            expect(resp).toEqual({ message: 'environment e1 is not running', status: 404 });
             done();
         });
         const req = httpMock.expectOne(environmentsUrl + '/e1/state');
         req.flush('environment e1 is not running', { status: 404, statusText: 'Not Found' });
+    });
+
+    // Regression target: a timeline-governed context key (see Environment.timeline) rejects an
+    // actual change with a structured 400, same shape as a PUT validation failure -- the editor
+    // needs the problems array to show the server's reason instead of a generic error text.
+    it('should surface the ValidationError body of a 400 response from setStateChecked instead of a generic ApiError', (done) => {
+        const change: StateChange = { context: { energy_price: 1 } };
+        const validationError: ValidationError = { problems: [{ path: 'context.energy_price', message: 'driven by the timeline, cannot be changed here' }] };
+        service.setStateChecked('e1', change).subscribe(resp => {
+            expect(resp).toEqual(validationError);
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/state');
+        req.flush(validationError, { status: 400, statusText: 'Bad Request' });
     });
 
     it('should get the live state with a GET on /environments/{id}/state', (done) => {

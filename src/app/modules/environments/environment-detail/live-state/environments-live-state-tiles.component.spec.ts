@@ -217,6 +217,50 @@ describe('EnvironmentsLiveStateTilesComponent', () => {
         });
     });
 
+    describe('locked tiles (driven by the timeline)', () => {
+        it('marks a tile locked when its key is in lockedKeys', () => {
+            component.lockedKeys = new Set(['energy_price']);
+            setRecord({ energy_price: 0.3, other: 1 });
+
+            expect(component.tiles.find((t) => t.key === 'energy_price')?.locked).toBe(true);
+            expect(component.tiles.find((t) => t.key === 'other')?.locked).toBe(false);
+        });
+
+        it('startEdit is a no-op on a locked tile', () => {
+            component.lockedKeys = new Set(['energy_price']);
+            setRecord({ energy_price: 0.3 });
+
+            component.startEdit(component.tiles[0]);
+
+            expect(component.editingKey).toBeUndefined();
+        });
+
+        it('removeTile is a no-op on a locked tile, and does not emit', () => {
+            component.lockedKeys = new Set(['energy_price']);
+            setRecord({ energy_price: 0.3 });
+            let emitted = false;
+            component.recordChange.subscribe(() => (emitted = true));
+
+            component.removeTile(component.tiles[0]);
+
+            expect(component.tiles.length).toBe(1);
+            expect(emitted).toBe(false);
+        });
+
+        it('hides the edit/remove buttons for a locked tile in the rendered template', () => {
+            component.lockedKeys = new Set(['energy_price']);
+            setRecord({ energy_price: 0.3, other: 1 });
+            fixture.detectChanges();
+
+            const rows: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.live-tile'));
+            const lockedRow = rows.find((r) => r.querySelector('.live-tile-key')?.textContent === 'energy_price');
+            const unlockedRow = rows.find((r) => r.querySelector('.live-tile-key')?.textContent === 'other');
+
+            expect(lockedRow?.querySelector('.live-tile-actions')).toBeFalsy();
+            expect(unlockedRow?.querySelector('.live-tile-actions')).toBeTruthy();
+        });
+    });
+
     describe('non-primitive values', () => {
         it('shows a boolean value as a read-only JSON preview instead of stringifying it lossily', () => {
             setRecord({ occupied: false });

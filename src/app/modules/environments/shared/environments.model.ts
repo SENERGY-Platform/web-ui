@@ -265,7 +265,21 @@ export interface Environment {
      * source has no channel publish tick to piggyback on.
      */
     context_sources?: { [key: string]: Source };
+    /**
+     * Scheduled jump changes: at `at`, `target` jumps to `value`, no interpolation -- before
+     * `at` the document's own inline value holds. A context key targeted here is read-only via
+     * PATCH .../state (an unchanged value is still accepted, so the GET->PATCH round trip works).
+     */
+    timeline?: DatedChange[];
     zones?: Zone[];
+}
+
+/** One entry of Environment.timeline. target is drawn from a closed, server-validated grammar. */
+export interface DatedChange {
+    /** RFC3339, whole seconds. */
+    at?: string;
+    target?: string;
+    value?: number;
 }
 
 export interface Zone {

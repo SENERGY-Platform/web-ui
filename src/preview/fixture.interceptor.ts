@@ -15,7 +15,14 @@ const industry: Environment = {
     // first, so the visual check can trigger the 409 conflict dialog without two tabs.
     version: 3,
     seed: 42,
-    context: { outdoor_temperature: 12.5 },
+    context: { outdoor_temperature: 12.5, energy_price: 0.28 },
+    // energy_price is static (not in context_sources), so context.energy_price is a valid
+    // timeline target -- exercises the Timeline editor's target select and the locked-tile
+    // presentation on the Live state tab's Context section.
+    timeline: [
+        { at: '2026-01-15T06:00:00Z', target: 'channel.c-energy.profile.base', value: 18 },
+        { at: '2026-01-15T18:00:00Z', target: 'context.energy_price', value: 0.35 },
+    ],
     context_sources: {
         outdoor_temperature: {
             kind: 'profile',

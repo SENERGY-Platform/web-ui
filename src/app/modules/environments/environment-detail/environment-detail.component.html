@@ -200,6 +200,15 @@
                             <mat-icon>add</mat-icon> Add driven value
                         </button>
                     </div>
+
+                    <h3>Timeline</h3>
+                    <p class="section-hint">
+                        Scheduled one-off jumps: at a given time, a channel or context field switches straight to a new
+                        value, no interpolation. A context key targeted here becomes read-only on the Live state tab.
+                    </p>
+                    <senergy-environments-timeline-editor [timeline]="timelineOf(selectedEnvironment!)"
+                        [targetOptions]="timelineTargetOptions" (timelineChange)="onTimelineChange()">
+                    </senergy-environments-timeline-editor>
                 </ng-container>
 
                 <ng-container *ngSwitchCase="'zone'">
@@ -463,7 +472,7 @@
                 <div class="live-state-section">
                     <h3>Context</h3>
                     <senergy-environments-live-state-tiles [record]="contextDraft" [baseline]="environment!.context"
-                        emptyHint="No context values yet." (recordChange)="onContextChange($event)">
+                        [lockedKeys]="lockedContextKeys" emptyHint="No context values yet." (recordChange)="onContextChange($event)">
                     </senergy-environments-live-state-tiles>
                 </div>
 

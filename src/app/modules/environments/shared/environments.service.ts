@@ -144,16 +144,21 @@ export class EnvironmentsService {
     }
 
     /**
-     * Same PATCH as setState, but keeps the error message instead of collapsing every
-     * failure to `false` -- a 404 here means the environment is not running or has not
-     * been migrated yet, and that reason is what the live-state panel needs to show.
+     * PATCH .../state with the same three-way result as updateEnvironmentChecked: `true` on
+     * success (the endpoint answers 204, nothing to return), a structured ValidationError (400
+     * with a problems array -- e.g. a timeline-governed context key rejected unchanged-only), or
+     * an ApiError for anything else, status included, so a 404 (not running/not migrated) can be
+     * told apart from a 409 or a plain-text 400 the way updateEnvironmentChecked's caller can.
      */
-    setStateChecked(id: string, change: StateChange): Observable<true | ApiError> {
+    setStateChecked(id: string, change: StateChange): Observable<true | ValidationError | ApiError> {
         return this.http.patch(this.environmentsUrl + '/' + encodeURIComponent(id) + '/state', change, { observe: 'response' }).pipe(
             map(() => true as const),
             catchError((error: HttpErrorResponse) => {
                 this.errorHandlerService.logError(EnvironmentsService.name, 'setStateChecked', error);
-                return of({ message: describeHttpError(error) });
+                if (isValidationError(error.error)) {
+                    return of(error.error as ValidationError);
+                }
+                return of({ message: describeHttpError(error), status: error.status } as ApiError);
             }),
         );
     }
