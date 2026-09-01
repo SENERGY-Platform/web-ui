@@ -114,6 +114,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 sub_content_variables: null,
                 value: 'value',
                 aspect_id: null,
+                aspect_ids: [],
                 function_id: null,
                 is_void: null,
                 omit_empty: false,
@@ -152,10 +153,43 @@ describe('DeviceTypesContentVariableDialog', () => {
                 sub_content_variables: null,
                 value: 'value',
                 aspect_id: null,
+                aspect_ids: [],
                 function_id: null,
                 is_void: null,
                 omit_empty: false,
             });
+        }),
+    );
+
+    it(
+        'keeps every aspect and derives the deprecated aspect_id from the selection',
+        fakeAsync(() => {
+            const aspects: DeviceTypeAspectModel[] = [
+                {id: 'urn:infai:ses:aspect:b', name: 'B', sub_aspects: []},
+                {id: 'urn:infai:ses:aspect:a', name: 'A', sub_aspects: []},
+            ];
+            const contentVariable: DeviceTypeContentVariableModel = {
+                id: 'id1',
+                name: 'testName',
+                type: 'https://schema.org/Text',
+                aspect_id: 'urn:infai:ses:aspect:a',
+                aspect_ids: ['urn:infai:ses:aspect:b', 'urn:infai:ses:aspect:a'],
+            } as DeviceTypeContentVariableModel;
+            init(contentVariable, [], [], aspects);
+
+            fixture.detectChanges();
+            flush();
+
+            expect(component.firstFormGroup.getRawValue().aspect_ids)
+                .toEqual(['urn:infai:ses:aspect:b', 'urn:infai:ses:aspect:a']);
+
+            component.firstFormGroup.patchValue({aspect_ids: ['urn:infai:ses:aspect:b']});
+            component.save();
+            flush();
+
+            const saved = matDialogRefSpy.close.calls.mostRecent().args[0] as DeviceTypeContentVariableModel;
+            expect(saved.aspect_ids).toEqual(['urn:infai:ses:aspect:b']);
+            expect(saved.aspect_id).toBe('urn:infai:ses:aspect:b');
         }),
     );
 
@@ -195,6 +229,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 sub_content_variables: [],
                 value: null,
                 aspect_id: null,
+                aspect_ids: [],
                 function_id: null,
                 is_void: false,
                 omit_empty: false,
@@ -241,6 +276,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 ],
                 value: null,
                 aspect_id: null,
+                aspect_ids: [],
                 function_id: null,
                 is_void: null,
                 omit_empty: false,

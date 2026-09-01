@@ -17,6 +17,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
+    contentVariableAspectIds,
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel,
     DeviceTypeFunctionModel
@@ -135,6 +136,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         if (this.firstFormGroup.get('omit_empty')?.value) {
             this.firstFormGroup.patchValue({value: null});
         }
+        this.firstFormGroup.patchValue({aspect_id: this.deprecatedAspectId()});
         this.dialogRef.close(this.firstFormGroup.getRawValue());
     }
 
@@ -227,6 +229,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                     type: 'https://schema.org/Boolean',
                     characteristic_id: '',
                     aspect_id: undefined,
+                    aspect_ids: [],
                 });
             } else {
                 this.firstFormGroup.patchValue({
@@ -256,6 +259,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 sub_content_variables: [{disabled: true, value: this.contentVariable.sub_content_variables}],
                 value: [{disabled: true, value: this.contentVariable.value}],
                 aspect_id: [{disabled: true, value: this.contentVariable.aspect_id}],
+                aspect_ids: [{disabled: true, value: contentVariableAspectIds(this.contentVariable)}],
                 function_id: [{disabled: true, value: this.contentVariable.function_id}],
                 is_void: [{disabled: true, value: this.contentVariable.is_void}],
                 omit_empty: [!!this.contentVariable.omit_empty],
@@ -273,7 +277,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                     unit_reference: [this.contentVariable.unit_reference],
                     sub_content_variables: [this.contentVariable.sub_content_variables],
                     value: [this.contentVariable.value],
-                    aspect_id: [this.contentVariable.aspect_id],
+                    aspect_id: [{disabled: true, value: this.contentVariable.aspect_id ?? null}],
+                    aspect_ids: [contentVariableAspectIds(this.contentVariable)],
                     function_id: [this.contentVariable.function_id],
                     is_void: [this.contentVariable.is_void],
                     omit_empty: [!!this.contentVariable.omit_empty],
@@ -329,6 +334,16 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
 
         this.nonPrimitiveTypes.push({type: 'https://schema.org/StructuredValue', typeShort: 'Structure'});
         this.nonPrimitiveTypes.push({type: 'https://schema.org/ItemList', typeShort: 'List'});
+    }
+
+    // aspect_id is derived the same way the device-repository derives it on read, so that an aspect
+    // the user removed here is not added back to aspect_ids when the device-type is written.
+    private deprecatedAspectId(): string | null {
+        const aspectIds: string[] = this.firstFormGroup.get('aspect_ids')?.value || [];
+        if (aspectIds.length === 0) {
+            return null;
+        }
+        return [...aspectIds].sort()[0];
     }
 
     aspectDisabled(aspect: DeviceTypeAspectModel): boolean {

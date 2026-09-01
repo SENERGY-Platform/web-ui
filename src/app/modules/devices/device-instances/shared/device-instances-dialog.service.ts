@@ -19,6 +19,7 @@ import { DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel } from './device
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { DeviceInstancesServiceDialogComponent } from '../dialogs/device-instances-service-dialog.component';
 import {
+    contentVariableAspectIds,
     DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel
@@ -82,8 +83,9 @@ export class DeviceInstancesDialogService {
                             columnName: path.path,
                         });
                         let description = '';
-                        if (path.contentVariable.aspect_id !== undefined && path.contentVariable.aspect_id.length > 0 && paths.filter(p => p.contentVariable.function_id === path.contentVariable.function_id).length > 1) {
-                            description += aspects.find(a => a.id === path.contentVariable.aspect_id)?.name;
+                        const aspectIds = contentVariableAspectIds(path.contentVariable);
+                        if (aspectIds.length > 0 && paths.filter(p => p.contentVariable.function_id === path.contentVariable.function_id).length > 1) {
+                            description += aspectIds.map(id => aspects.find(a => a.id === id)?.name).join(', ');
                         }
                         if (path.contentVariable.function_id !== undefined && path.contentVariable.function_id.length > 0) {
                             if (description.length > 0) {

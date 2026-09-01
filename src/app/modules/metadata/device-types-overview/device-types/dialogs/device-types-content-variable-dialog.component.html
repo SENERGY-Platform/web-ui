@@ -37,10 +37,10 @@
         <mat-checkbox formControlName="omit_empty">Omit Empty</mat-checkbox>
 
         <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Aspect</mat-label>
-            <mtx-select [items]="aspectOptions" bindValue="id" bindLabel="name" formControlName="aspect_id"
-                appendTo=".ng-select-anchor"></mtx-select>
-            <mat-error senergyError label="Aspect"></mat-error>
+            <mat-label>Aspects</mat-label>
+            <mtx-select [items]="aspectOptions" bindValue="id" bindLabel="name" formControlName="aspect_ids" multiple
+                closeOnSelect="false" appendTo=".ng-select-anchor"></mtx-select>
+            <mat-error senergyError label="Aspects"></mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width" color="accent">

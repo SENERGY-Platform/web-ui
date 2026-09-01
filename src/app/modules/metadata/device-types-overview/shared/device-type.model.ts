@@ -95,10 +95,25 @@ export interface DeviceTypeContentVariableModel {
     sub_content_variables?: DeviceTypeContentVariableModel[];
     serialization_options: string[];
     unit_reference?: string;
+    /** @deprecated kept in sync with aspect_ids by the device-repository; use aspect_ids */
     aspect_id?: string;
+    aspect_ids?: string[];
     function_id?: string;
     is_void: boolean;
     omit_empty?: boolean;
+}
+
+/**
+ * The device-repository deprecated ContentVariable.aspect_id in favor of aspect_ids and keeps both
+ * in sync: on read aspect_id is the alphabetically first entry of aspect_ids, on write aspect_id is
+ * added to aspect_ids. Reading through this function keeps the web-ui working against a
+ * device-repository that predates the change and still sends aspect_id alone.
+ */
+export function contentVariableAspectIds(contentVariable: DeviceTypeContentVariableModel): string[] {
+    if (contentVariable.aspect_ids !== undefined && contentVariable.aspect_ids !== null) {
+        return contentVariable.aspect_ids;
+    }
+    return contentVariable.aspect_id ? [contentVariable.aspect_id] : [];
 }
 
 export interface DeviceTypeConceptModel {
