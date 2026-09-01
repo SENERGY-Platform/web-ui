@@ -1,0 +1,127 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+mat-dialog-content {
+    min-width: 40vw;
+}
+
+/* room for the spinner, so the dialog does not jump in height once the parameters arrive */
+senergy-spinner {
+    display: block;
+    padding: 2em 0;
+}
+
+mat-form-field {
+    width: 100%;
+    display: block;
+}
+
+.release {
+    padding-bottom: 0.5em;
+}
+
+.release-name {
+    font-weight: 500;
+}
+
+.release-description,
+.parameter-description,
+.no-parameters {
+    opacity: 0.7;
+    font-size: 90%;
+}
+
+.parameter-description {
+    /* sits under the input it explains, where a mat-hint would sit */
+    padding: 0 0 0.75em 1em;
+}
+
+/* the reason a value is refused, in the same place as the description but not to be missed */
+.parameter-problem {
+    padding: 0 0 0.5em 1em;
+    font-size: 90%;
+}
+
+.parameter mat-divider {
+    margin: 0.5em 0 1em 0;
+}
+
+.note {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding-bottom: 0.75em;
+    font-size: 90%;
+}
+
+.parameter-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding-bottom: 0.75em;
+}
+
+/*
+ * The label sits left and the switch right, the way a settings row reads. Material puts both in an
+ * internal wrapper, so the split has to be set there rather than on the host.
+ */
+.toggle {
+    display: block;
+    width: 100%;
+    padding-bottom: 0.5em;
+}
+
+.toggle ::ng-deep .mat-internal-form-field {
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+
+/*
+ * labelPosition="before" already orders the label first, but Material gives it margin-left: auto as
+ * well, which soaks up the free space and pushes label and switch together to the right. Moving that
+ * auto margin to the other side is what splits them: justify-content never gets a say here, because
+ * auto margins are resolved before it.
+ */
+.toggle ::ng-deep .mat-internal-form-field > label {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+.list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.list-label {
+    font-weight: 500;
+}
+
+/* the input takes the row, the remove button stays at its end */
+.list-entry {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.list-entry .toggle {
+    flex: 1 1 auto;
+}
+
+.list-entry mat-form-field {
+    flex: 1 1 auto;
+}

@@ -20,7 +20,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { SmartServiceReleaseCreateModel, SmartServiceReleaseModel, SmartServiceExtendedReleaseModel } from './release.model';
+import { SmartServiceReleaseCreateModel, SmartServiceReleaseModel, SmartServiceExtendedReleaseModel, SmartServiceExtendedParameterModel } from './release.model';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
@@ -98,6 +98,20 @@ export class SmartServiceReleasesService {
         return this.http
             .post<SmartServiceReleaseModel>(environment.smartServiceRepoUrl+'/releases', model)
             .pipe(catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'saveProcess', null)));
+    }
+
+    /**
+     * The parameters a release asks for before an instance of it can run. The repository resolves the
+     * criteria of iot parameters into options against the calling user, so this has to be fetched per
+     * user and can not be taken from the parameter descriptions of the extended release.
+     */
+    getReleaseParameters(id: string): Observable<SmartServiceExtendedParameterModel[] | null> {
+        return this.http
+            .get<SmartServiceExtendedParameterModel[] | null>(environment.smartServiceRepoUrl + '/releases/' + id + '/parameters')
+            .pipe(
+                map((resp) => resp || []),
+                catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'getReleaseParameters()', null))
+            );
     }
 
     userHasDeleteAuthorization(): boolean {

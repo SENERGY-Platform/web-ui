@@ -34,6 +34,10 @@ export const environment = {
     /** URLs **/
     processIoUrl: '',
     smartServiceRepoUrl: '',
+    /* OpenSearch Dashboards, for the log lines of a smart service instance. Set by the deployment;
+       while either is empty the instance list offers no link. */
+    openSearchDashboardsUrl: '',
+    openSearchSmartServiceIndexId: '',
     processDeploymentUrl: 'http://localhost',
     processServiceUrl: 'http://localhost',
     processRepoUrl: 'http://localhost',

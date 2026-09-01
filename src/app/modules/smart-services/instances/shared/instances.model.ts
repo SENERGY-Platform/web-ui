@@ -22,6 +22,8 @@ export interface SmartServiceInstanceModel {
     user_id: string;
     design_id: string;
     release_id: string;
+    /** set by the repository when a newer release of the same design exists, the instance can be upgraded to it */
+    new_release_id?: string;
     ready: boolean;
     created_at: number; // unix timestamp
     updated_at: number; // unix timestamp
@@ -39,7 +41,20 @@ export interface SmartServiceInstanceModel {
 
 export interface SmartServiceParameterModel {
     id: string;
-    value: string; // This can be anything. For devices and device groups this is a JSON encoded object
+    value: any; // This can be anything. For devices and device groups this is a JSON encoded object
     label: string;
-    value_label: string;
+    value_label?: string;
+}
+
+/** What POST /releases/{id}/instances expects */
+export interface SmartServiceInstanceInitModel {
+    name: string;
+    description: string;
+    parameters: SmartServiceParameterModel[];
+}
+
+/** What PUT /instances/{id}/info expects */
+export interface SmartServiceInstanceInfoModel {
+    name: string;
+    description: string;
 }

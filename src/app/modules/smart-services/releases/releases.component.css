@@ -81,6 +81,24 @@ mat-grid-list {
     max-height: 30px;
 }
 
+/*
+ * The release date shares its row with the action buttons, so it must never wrap - the row is only
+ * 30px high and a second line breaks out of the fixed footer height.
+ */
+.footer-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* on a tile too narrow for even the short date, cut it with an ellipsis instead of mid-character */
+.footer-date {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .widget-image {
     height: 156px;
     width: 100%;

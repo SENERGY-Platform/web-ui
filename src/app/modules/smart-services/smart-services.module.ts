@@ -68,6 +68,12 @@ import { SmartServiceInstancesComponent } from './instances/instances.component'
 import {
     EsstdExportComponentComponent
 } from './designer/dialog/edit-smart-service-task-dialog/esstd-export-component/esstd-export-component.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { WidgetModule } from 'src/app/widgets/widget.module';
+import {
+    SmartServiceParameterDialogComponent
+} from './instances/dialog/smart-service-parameter-dialog/smart-service-parameter-dialog.component';
 
 const designs: Route = {
     path: 'smart-services/designs',
@@ -152,6 +158,10 @@ const designer: Route = {
         MatExpansionModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
+        MatSlideToggleModule,
+        MatProgressSpinnerModule,
+        // for senergy-characteristic-input, which collects a parameter in the shape of its characteristic
+        WidgetModule,
     ],
     declarations: [
         SmartServiceReleasesComponent,
@@ -162,6 +172,7 @@ const designer: Route = {
         EditSmartServiceInputDialogComponent,
         EditSmartServiceJsonExtractionDialogComponent,
         SmartServiceInstancesComponent,
+        SmartServiceParameterDialogComponent,
         CheckboxValueDirective,
         CriteriaListComponent
     ],

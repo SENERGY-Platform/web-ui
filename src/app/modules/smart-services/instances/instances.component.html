@@ -95,6 +95,42 @@
         </ng-container>
 
 
+        <ng-container matColumnDef="edit">
+          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
+          <td mat-cell *matCellDef="let instance">
+            <button mat-icon-button color="accent" matTooltip="Edit name, description and parameters"
+              [disabled]="instance.permissions_info.permissions.administrate === false"
+              (click)="$event.stopPropagation(); editInstance(instance)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="upgrade">
+          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Upgrade</th>
+          <td mat-cell *matCellDef="let instance">
+            <mat-spinner *ngIf="isUpgrading(instance)" [diameter]="24" [strokeWidth]="3" color="accent"
+              matTooltip="Reading the parameters of the new release"></mat-spinner>
+            <button mat-icon-button color="accent" *ngIf="instance.new_release_id && !isUpgrading(instance)"
+              matTooltip="A newer release of this smart service exists, upgrade to it"
+              [disabled]="instance.permissions_info.permissions.administrate === false"
+              (click)="$event.stopPropagation(); upgradeInstance(instance)">
+              <mat-icon>upgrade</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="logs">
+          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Logs</th>
+          <td mat-cell *matCellDef="let instance">
+            <a mat-icon-button color="accent" matTooltip="Show the log lines of this instance in OpenSearch"
+              [href]="logsUrl(instance)" target="_blank" rel="noopener noreferrer"
+              (click)="$event.stopPropagation()">
+              <mat-icon>plagiarism</mat-icon>
+            </a>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="share">
           <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
           <td mat-cell *matCellDef="let instance">

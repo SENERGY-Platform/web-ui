@@ -30,6 +30,7 @@ import {SmartServiceReleasesService} from './shared/release.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import { DeleteDialogResponse } from 'src/app/core/dialogs/delete-dialog.component';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SmartServiceInstanceDialogService } from '../instances/shared/instance-dialog.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -81,6 +82,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
         private _formBuilder: FormBuilder,
         private activatedRoute: ActivatedRoute,
         private router: Router,
+        private instanceDialogService: SmartServiceInstanceDialogService,
     ) {
 
     }
@@ -278,5 +280,14 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
 
     showInstances(id: string): void {
         this.router.navigate(['smart-services/instances'], { queryParams: { release_id: id } });
+    }
+
+    /** Starts an instance of the release and, once it exists, shows the instances of that release */
+    launchRelease(release: SmartServiceReleaseModel): void {
+        this.instanceDialogService.launch(release).subscribe((created) => {
+            if (created) {
+                this.showInstances(release.id);
+            }
+        });
     }
 }

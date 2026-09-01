@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-
+import { DeviceTypeCharacteristicsModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 
 export interface SmartServiceReleaseCreateModel {
     design_id: string;
@@ -72,4 +72,40 @@ export interface SmartServiceReleaseCriteria {
     function_id?: string;
     device_class_id?: string;
     aspect_id?: string;
+}
+
+/**
+ * A release parameter as the repository hands it out under /releases/{id}/parameters: the
+ * description above, but with the criteria of an iot parameter already resolved into concrete
+ * options and the list sorted by order. `value` is always null here - the values of an existing
+ * instance have to be merged in by the caller.
+ */
+export interface SmartServiceExtendedParameterModel {
+    id: string;
+    label: string;
+    value: any;
+    value_label?: string;
+    description: string;
+    default_value: any;
+    type: string;
+    /** null means free input of `type`; an empty list next to has_no_valid_option means nothing is selectable */
+    options: SmartServiceParameterOptionModel[] | null;
+    multiple: boolean;
+    order: number;
+    characteristic_id?: string;
+    characteristic?: DeviceTypeCharacteristicsModel;
+    optional: boolean;
+    /** the parameter is mandatory and iot-based, but nothing the user may use matches its criteria */
+    has_no_valid_option: boolean;
+}
+
+export interface SmartServiceParameterOptionModel {
+    value: any;
+    label: string;
+    /** groups options in the frontend, e.g. Devices or Imports */
+    kind: string;
+    /** the device, group or import this option belongs to, matched against needs_same_entity_id_in_parameter */
+    entity_id: string;
+    /** the option only applies while the referenced parameter is set to an option of the same entity */
+    needs_same_entity_id_in_parameter?: string;
 }

@@ -285,6 +285,8 @@ registerLocaleData(localeDe, 'de');
         WidgetComponent,
         WidgetFooterComponent,
         TimelineComponent,
+        // used outside the widgets as well, e.g. by the smart service parameter dialog
+        CharacteristicInputComponent,
     ],
     providers: [
         { provide: LOCALE_ID, useValue: 'de' },

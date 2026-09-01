@@ -15,14 +15,13 @@
  */
 
 import { catchError, map, Observable } from 'rxjs';
-import { SmartServiceInstanceModel } from './instances.model';
+import { SmartServiceInstanceInfoModel, SmartServiceInstanceInitModel, SmartServiceInstanceModel, SmartServiceParameterModel } from './instances.model';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
-import {FlowModel} from "../../../data/flow-repo/shared/flow.model";
 
 @Injectable({
     providedIn: 'root',
@@ -83,6 +82,34 @@ export class SmartServiceInstanceService {
         return this.http.get<SmartServiceInstanceModel | null>(environment.smartServiceRepoUrl+'/instances/'+ id).pipe(
             map((resp) => resp),
             catchError(this.errorHandlerService.handleError(SmartServiceInstanceService.name, 'getInstance()', null))
+        );
+    }
+
+    /** Starts an instance of the release. The repository fills in parameters marked auto_select_all itself. */
+    createInstance(releaseId: string, init: SmartServiceInstanceInitModel): Observable<SmartServiceInstanceModel | null> {
+        return this.http.post<SmartServiceInstanceModel>(environment.smartServiceRepoUrl + '/releases/' + releaseId + '/instances', init).pipe(
+            catchError(this.errorHandlerService.handleErrorWithSnackBar('Could not start the smart service!', SmartServiceInstanceService.name, 'createInstance()', null))
+        );
+    }
+
+    /**
+     * Writes the parameters back and restarts the instance with them. Passing a releaseId moves the
+     * instance to that release, which is how an instance is upgraded to a newer one.
+     */
+    updateInstanceParameters(id: string, parameters: SmartServiceParameterModel[], releaseId?: string): Observable<SmartServiceInstanceModel | null> {
+        let params = new HttpParams();
+        if (releaseId) {
+            params = params.set('release_id', releaseId);
+        }
+        return this.http.put<SmartServiceInstanceModel>(environment.smartServiceRepoUrl + '/instances/' + id + '/parameters', parameters, { params }).pipe(
+            catchError(this.errorHandlerService.handleErrorWithSnackBar('Could not update the smart service parameters!', SmartServiceInstanceService.name, 'updateInstanceParameters()', null))
+        );
+    }
+
+    /** Renames the instance. Separate from the parameters, because it does not restart anything. */
+    updateInstanceInfo(id: string, info: SmartServiceInstanceInfoModel): Observable<SmartServiceInstanceModel | null> {
+        return this.http.put<SmartServiceInstanceModel>(environment.smartServiceRepoUrl + '/instances/' + id + '/info', info).pipe(
+            catchError(this.errorHandlerService.handleErrorWithSnackBar('Could not rename the smart service!', SmartServiceInstanceService.name, 'updateInstanceInfo()', null))
         );
     }
 

@@ -30,6 +30,11 @@ import { PermissionsService } from '../../permissions/shared/permissions.service
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { SmartServiceModuleService } from './shared/modules.service';
 import { SmartServiceModuleModel } from './shared/modules.model';
+import { SmartServiceInstanceDialogService } from './shared/instance-dialog.service';
+import { finalize } from 'rxjs/operators';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import { environment } from 'src/environments/environment';
+import { smartServiceLogsUrl } from './shared/opensearch';
 
 
 @Component({
@@ -50,7 +55,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     userHasDeleteAuthorization = false;
     ready = false;
 
-    displayedColumns = ['pub', 'name', 'description', 'error', 'created_at', 'updated_at', 'release', 'share'];
+    displayedColumns = ['pub', 'name', 'description', 'error', 'created_at', 'updated_at', 'release', 'edit', 'upgrade', 'share'];
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<SmartServiceInstanceModel>();
     selection = new SelectionModel<SmartServiceInstanceModel>(true, []);
@@ -67,6 +72,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     userIdToName = new Map<string, string>();
     modulesByInstanceId = new Map<string, SmartServiceModuleModel[]>();
     loadingModulesByInstanceId = new Set<string>();
+    upgradingInstanceIds = new Set<string>();
 
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -81,9 +87,16 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         private permission: PermissionsService,
         private permissionsDialogService: PermissionsDialogService,
         private modulesService: SmartServiceModuleService,
+        private instanceDialogService: SmartServiceInstanceDialogService,
+        private authorizationService: AuthorizationService,
     ) { }
     ngOnInit(): void {
         this.userHasDeleteAuthorization = this.instancesService.userHasDeleteAuthorization();
+        // the log lines are only of use to someone who reads them, and the column is dead weight for
+        // everyone else - it also stays hidden while the deployment has not said where OpenSearch is
+        if (this.authorizationService.userIsDeveloper() && environment.openSearchDashboardsUrl && environment.openSearchSmartServiceIndexId) {
+            this.displayedColumns.push('logs');
+        }
         if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete', 'force-delete');
         }
@@ -260,6 +273,43 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
                     });
                 }
             });
+    }
+
+    /**
+     * Rewriting the parameters makes the repository recreate the modules of the instance, so this needs
+     * administrate rather than write - the same right the delete button asks for.
+     */
+    editInstance(instance: SmartServiceInstanceModel): void {
+        this.instanceDialogService.edit(instance).subscribe((changed) => {
+            if (changed) {
+                this.loadInstances();
+            }
+        });
+    }
+
+    /**
+     * Unlike editing, this has to fetch the parameters of the new release before it knows whether it
+     * needs to ask the user anything at all, so the button reports that wait itself.
+     */
+    upgradeInstance(instance: SmartServiceInstanceModel): void {
+        this.upgradingInstanceIds.add(instance.id);
+        this.instanceDialogService
+            .upgrade(instance)
+            .pipe(finalize(() => this.upgradingInstanceIds.delete(instance.id)))
+            .subscribe((changed) => {
+                if (changed) {
+                    this.loadInstances();
+                }
+            });
+    }
+
+    isUpgrading(instance: SmartServiceInstanceModel): boolean {
+        return this.upgradingInstanceIds.has(instance.id);
+    }
+
+    /** The Discover view filtered to the log lines this instance wrote */
+    logsUrl(instance: SmartServiceInstanceModel): string {
+        return smartServiceLogsUrl(environment.openSearchDashboardsUrl, environment.openSearchSmartServiceIndexId, instance.id);
     }
 
     matSortChange($event: Sort) {
