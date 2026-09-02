@@ -61,6 +61,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     concepts: ConceptsCharacteristicsModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
     aspectOptions: DeviceTypeAspectModelWithRootName[] = [];
+    private classifiedAspects = new Map<string, { classId: string; name: string }>();
     allowVoid = false;
     prohibitedNames: string[] = [];
 
@@ -88,6 +89,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         });
         this.concepts = data.concepts;
         this.aspects = data.aspects;
+        this.classifiedAspects = this.collectClassifiedAspects(this.aspects);
         this.allowVoid = data.allowVoid;
         this.prohibitedNames = data.prohibitedNames;
     }
@@ -278,13 +280,20 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                     sub_content_variables: [this.contentVariable.sub_content_variables],
                     value: [this.contentVariable.value],
                     aspect_id: [{disabled: true, value: this.contentVariable.aspect_id ?? null}],
-                    aspect_ids: [contentVariableAspectIds(this.contentVariable)],
+                    aspect_ids: [contentVariableAspectIds(this.contentVariable), this.aspectClassValidator()],
                     function_id: [this.contentVariable.function_id],
                     is_void: [this.contentVariable.is_void],
                     omit_empty: [!!this.contentVariable.omit_empty],
                 },
                 {validators: typeValueValidator('type', 'value')},
             );
+        }
+
+        // A device-type stored before its aspect hierarchy was classified can already break the rule,
+        // and an untouched control renders no mat-error — the Save button would just be dead.
+        const aspectIdsControl = this.firstFormGroup.get('aspect_ids');
+        if (aspectIdsControl?.invalid) {
+            aspectIdsControl.markAsTouched();
         }
 
         this.firstFormGroup?.get('characteristic_id')?.valueChanges.subscribe((id) => {
@@ -344,6 +353,59 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             return null;
         }
         return [...aspectIds].sort()[0];
+    }
+
+    /**
+     * The device-repository refuses a content variable holding two aspects of the same class. A
+     * hierarchy carries exactly one class, so the rule reads: at most one aspect out of any
+     * classified hierarchy. Two unclassified aspects never collide — there is no class to collide
+     * on — and classifying an existing hierarchy can turn a stored device-type invalid, which is
+     * why this reports rather than silently dropping a selection.
+     */
+    private aspectClassValidator(): ValidatorFn {
+        return (control) => {
+            const colliding = this.collidingAspectNames(control.value);
+            if (colliding.length === 0) {
+                return null;
+            }
+            return {aspectClassCollision: {aspects: colliding}};
+        };
+    }
+
+    private collidingAspectNames(aspectIds: unknown): string[] {
+        if (!Array.isArray(aspectIds)) {
+            return [];
+        }
+        const namesByClass = new Map<string, string[]>();
+        aspectIds.forEach((id) => {
+            const classified = this.classifiedAspects.get(id);
+            if (classified === undefined) {
+                return;
+            }
+            namesByClass.set(classified.classId, (namesByClass.get(classified.classId) || []).concat(classified.name));
+        });
+        const colliding: string[] = [];
+        namesByClass.forEach((names) => {
+            if (names.length > 1) {
+                colliding.push(...names);
+            }
+        });
+        return colliding;
+    }
+
+    /** The root of a hierarchy assigns its class, so every aspect below it shares that one. */
+    private collectClassifiedAspects(roots: DeviceTypeAspectModel[]): Map<string, { classId: string; name: string }> {
+        const result = new Map<string, { classId: string; name: string }>();
+        const collect = (node: DeviceTypeAspectModel, classId: string) => {
+            result.set(node.id, {classId, name: node.name});
+            node.sub_aspects?.forEach((sub) => collect(sub, classId));
+        };
+        roots.forEach((root) => {
+            if (root.aspect_class_id) {
+                collect(root, root.aspect_class_id);
+            }
+        });
+        return result;
     }
 
     aspectDisabled(aspect: DeviceTypeAspectModel): boolean {

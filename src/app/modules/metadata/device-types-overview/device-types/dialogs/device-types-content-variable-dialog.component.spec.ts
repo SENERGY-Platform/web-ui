@@ -194,6 +194,71 @@ describe('DeviceTypesContentVariableDialog', () => {
     );
 
     it(
+        'refuses two aspects of one classified hierarchy and accepts them once the class is gone',
+        fakeAsync(() => {
+            const classified: DeviceTypeAspectModel[] = [
+                {
+                    id: 'urn:infai:ses:aspect:air',
+                    name: 'air',
+                    aspect_class_id: 'urn:infai:ses:aspect-class:environment',
+                    sub_aspects: [
+                        {id: 'urn:infai:ses:aspect:inside_air', name: 'inside_air', sub_aspects: []},
+                        {id: 'urn:infai:ses:aspect:outside_air', name: 'outside_air', sub_aspects: []},
+                    ],
+                },
+                {id: 'urn:infai:ses:aspect:device', name: 'device', sub_aspects: []},
+            ];
+            const contentVariable: DeviceTypeContentVariableModel = {
+                id: 'id1',
+                name: 'testName',
+                type: 'https://schema.org/Text',
+                aspect_ids: ['urn:infai:ses:aspect:inside_air', 'urn:infai:ses:aspect:outside_air'],
+            } as DeviceTypeContentVariableModel;
+            init(contentVariable, [], [], classified);
+
+            fixture.detectChanges();
+            flush();
+
+            const control = component.firstFormGroup.get('aspect_ids');
+            expect(control?.errors?.['aspectClassCollision'].aspects).toEqual(['inside_air', 'outside_air']);
+            // the violation comes out of storage, so it has to be visible without the user touching it
+            expect(control?.touched).toBeTrue();
+
+            // an aspect of another hierarchy does not collide, classified or not
+            control?.setValue(['urn:infai:ses:aspect:inside_air', 'urn:infai:ses:aspect:device']);
+            expect(control?.errors).toBeNull();
+        }),
+    );
+
+    it(
+        'lets two aspects of an unclassified hierarchy stand',
+        fakeAsync(() => {
+            const unclassified: DeviceTypeAspectModel[] = [
+                {
+                    id: 'urn:infai:ses:aspect:air',
+                    name: 'air',
+                    sub_aspects: [
+                        {id: 'urn:infai:ses:aspect:inside_air', name: 'inside_air', sub_aspects: []},
+                        {id: 'urn:infai:ses:aspect:outside_air', name: 'outside_air', sub_aspects: []},
+                    ],
+                },
+            ];
+            const contentVariable: DeviceTypeContentVariableModel = {
+                id: 'id1',
+                name: 'testName',
+                type: 'https://schema.org/Text',
+                aspect_ids: ['urn:infai:ses:aspect:inside_air', 'urn:infai:ses:aspect:outside_air'],
+            } as DeviceTypeContentVariableModel;
+            init(contentVariable, [], [], unclassified);
+
+            fixture.detectChanges();
+            flush();
+
+            expect(component.firstFormGroup.get('aspect_ids')?.errors).toBeNull();
+        }),
+    );
+
+    it(
         'create non-primitive Type',
         fakeAsync(() => {
             const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;

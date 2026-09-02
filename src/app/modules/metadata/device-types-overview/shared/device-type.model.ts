@@ -54,9 +54,36 @@ export interface DeviceTypeServiceModel {
     attributes?: Attribute[];
 }
 
+export interface DeviceTypeAspectClassModel {
+    id: string;
+    name: string;
+}
+
+/**
+ * Marks an aspect that an aspect class has replaced. It rides in the name because an aspect carries
+ * nothing else: models.Aspect has id, name, aspect_class_id and sub_aspects, and a field beyond those
+ * is dropped silently when the device-repository unmarshals the request.
+ */
+export const DEPRECATED_ASPECT_SUFFIX = ' (deprecated)';
+
+export function aspectIsDeprecated(aspect: { name: string }): boolean {
+    return aspect.name.endsWith(DEPRECATED_ASPECT_SUFFIX);
+}
+
+export function deprecatedAspectName(name: string): string {
+    return name.endsWith(DEPRECATED_ASPECT_SUFFIX) ? name : name + DEPRECATED_ASPECT_SUFFIX;
+}
+
+export function withoutDeprecatedSuffix(name: string): string {
+    return name.endsWith(DEPRECATED_ASPECT_SUFFIX) ? name.slice(0, -DEPRECATED_ASPECT_SUFFIX.length) : name;
+}
+
 export interface DeviceTypeAspectModel {
     id: string;
     name: string;
+    // Assigned at the root of the hierarchy; the device-repository copies it down to every
+    // sub-aspect on write, so a sub-aspect carrying a different value is rejected.
+    aspect_class_id?: string | null;
     sub_aspects?: DeviceTypeAspectModel[] | null;
 }
 

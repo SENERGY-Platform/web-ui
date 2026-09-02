@@ -117,6 +117,7 @@ export class LadonService {
 
             environment.deviceRepoUrl,
             environment.deviceRepoUrl + '/aspects',
+            environment.deviceRepoUrl + '/aspect-classes',
             environment.deviceRepoUrl + '/v2/device-classes',
             environment.deviceRepoUrl + '/characteristics',
             environment.deviceRepoUrl + '/v2/concepts',

@@ -54,6 +54,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FunctionsComponent } from './functions/functions.component';
 import { FunctionsEditDialogComponent } from './functions/dialog/functions-edit-dialog.component';
 import { AspectsComponent } from './aspects/aspects.component';
+import { AspectToClassDialogComponent } from './aspects/dialog/aspect-to-class-dialog.component';
 import { DeviceClassesComponent } from './device-classes/device-classes.component';
 import { DeviceClassesEditDialogComponent } from './device-classes/dialog/device-classes-edit-dialog.component';
 import { FunctionsCreateDialogComponent } from './functions/dialog/functions-create-dialog.component';
@@ -135,6 +136,7 @@ const deviceClasses: Route = {
         FunctionsEditDialogComponent,
         FunctionsCreateDialogComponent,
         AspectsComponent,
+        AspectToClassDialogComponent,
         DeviceClassesComponent,
         DeviceClassesEditDialogComponent,
     ],

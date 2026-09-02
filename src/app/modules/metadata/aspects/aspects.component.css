@@ -77,3 +77,26 @@ ul {
     width: 48px;
     height: 48px;
 }
+/* Only a root node carries the aspect class, so the field must not take the room the name needs. */
+.aspect-class {
+    width: 16em;
+    margin-right: 8px;
+}
+
+/* An aspect replaced by an aspect class stays visible so its usages can be moved, but it must not
+   read like a current entry. */
+.deprecated-marker {
+    align-self: center;
+    margin-right: 4px;
+}
+
+.deprecated-name {
+    opacity: 0.6;
+}
+
+/* The aspect class stands where a root aspect would, so its row has to line up with the aspect rows
+   below it: the same form field for the name, and the icon in a button-sized slot so the field starts
+   at the same offset as the aspects' name fields do. */
+.name-taken {
+    color: var(--warn-color, #f44336);
+}

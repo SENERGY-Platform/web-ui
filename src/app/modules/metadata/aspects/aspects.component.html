@@ -25,7 +25,20 @@
                 <button cdkDragHandle mat-icon-button [disabled]="!userIsAdmin || !nodeValid(node)" color="accent" disableRipple class="tree-inline">
                     <mat-icon>drag_handle</mat-icon>
                 </button>
-                <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
+                <mat-icon color="warn" class="deprecated-marker tree-inline" *ngIf="deprecated(node)"
+                    matTooltip="Replaced by an aspect class. Move device-types to the new root aspects, then delete it.">
+                    history
+                </mat-icon>
+                <mat-form-field class="aspect-class" appearance="outline" color="accent"
+                    *ngIf="showsAspectClassField(node)">
+                    <mat-label>Aspect Class</mat-label>
+                    <mtx-select [(ngModel)]="node.aspect_class_id" [ngModelOptions]="{standalone: true}"
+                        [items]="aspectClasses" bindValue="id" bindLabel="name" [clearable]="true"
+                        [disabled]="!userIsAdmin" [addTag]="addAspectClass" addTagText="Create aspect class: "
+                        appendTo=".ng-select-anchor"></mtx-select>
+                </mat-form-field>
+                <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex
+                    [ngClass]="{'deprecated-name': deprecated(node)}">
                     <mat-label>Name</mat-label>
                     <input matInput [(ngModel)]="node.name" required [disabled]="!userIsAdmin">
                     <mat-error senergyError label="Name"></mat-error>
@@ -42,6 +55,8 @@
                         [disabled]="!userIsAdmin">
                     <mat-icon>add</mat-icon>
                 </button>
+                <button mat-icon-button disabled class="tree-inline"
+                        *ngIf="userIsAdmin && userHasAspectClassReadAuthorization"></button>
                 <button mat-icon-button [disabled]="!userIsAdmin" (click)="deleteNode(node)" color="warn"
                         class="tree-inline">
                     <mat-icon>delete</mat-icon>
@@ -49,6 +64,62 @@
 
             </li>
         </mat-tree-node>
+        <mat-nested-tree-node *matTreeNodeDef="let node; when: isGroupRow">
+            <li>
+                <div class="mat-tree-node" fxLayout="row" cdkDropList (cdkDropListDropped)="dropped($event, node)">
+                    <span fxFlex>
+                        <button mat-icon-button matTreeNodeToggle class="nested-tree-inline"
+                                [disabled]="!aspectClassInUse(node)"
+                                [attr.aria-label]="'Toggle ' + node.name">
+                            <mat-icon class="mat-icon-rtl-mirror">
+                                {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                            </mat-icon>
+                        </button>
+                        <button mat-icon-button disabled disableRipple class="nested-tree-inline"
+                                matTooltip="Aspect class. The hierarchies below it carry this class.">
+                            <mat-icon color="accent">sell</mat-icon>
+                        </button>
+                        <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
+                            <mat-label>Aspect Class</mat-label>
+                            <input matInput [(ngModel)]="node.name" required
+                                   [disabled]="!userHasAspectClassUpdateAuthorization">
+                            <mat-error senergyError label="Aspect Class"></mat-error>
+                            <mat-hint class="name-taken" *ngIf="aspectClassNameTaken(node)">Another aspect
+                                class already has this name.</mat-hint>
+                        </mat-form-field>
+                        <button mat-icon-button disabled class="nested-tree-inline"
+                                *ngIf="userHasUsedInAuthorization"></button>
+                        <button mat-icon-button (click)="saveAspectClass(node)" color="accent"
+                                class="nested-tree-inline" *ngIf="userHasAspectClassUpdateAuthorization"
+                                [disabled]="!aspectClassNameValid(node)" matTooltip="Rename aspect class">
+                            <mat-icon>save</mat-icon>
+                        </button>
+                        <button mat-icon-button disabled class="nested-tree-inline"
+                                *ngIf="!userHasAspectClassUpdateAuthorization"></button>
+                        <button mat-icon-button (click)="addAspectToClass(node)" color="accent"
+                                class="nested-tree-inline" [disabled]="!userIsAdmin"
+                                matTooltip="Add a new aspect to this class">
+                            <mat-icon>add</mat-icon>
+                        </button>
+                        <button mat-icon-button disabled class="nested-tree-inline"
+                                *ngIf="userIsAdmin && userHasAspectClassReadAuthorization"></button>
+                        <button mat-icon-button (click)="deleteAspectClass(node)" color="warn"
+                                class="nested-tree-inline" *ngIf="userHasAspectClassDeleteAuthorization"
+                                [disabled]="aspectClassInUse(node)"
+                                [matTooltip]="aspectClassInUse(node)
+                                    ? 'Move or delete the aspects of this class first'
+                                    : 'Delete aspect class'">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                        <button mat-icon-button disabled class="nested-tree-inline"
+                                *ngIf="!userHasAspectClassDeleteAuthorization"></button>
+                    </span>
+                </div>
+                <ul [class.tree-invisible]="!treeControl.isExpanded(node)">
+                    <ng-container matTreeNodeOutlet></ng-container>
+                </ul>
+            </li>
+        </mat-nested-tree-node>
         <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
             <li>
                 <div class="mat-tree-node" fxLayout="row" cdkDropList (cdkDropListDropped)="dropped($event, node)">
@@ -63,7 +134,21 @@
                         <button cdkDragHandle mat-icon-button [disabled]="!userIsAdmin || !nodeValid(node)" color="accent" disableRipple class="nested-tree-inline">
                             <mat-icon>drag_handle</mat-icon>
                         </button>
-                        <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
+                        <mat-icon color="warn" class="deprecated-marker nested-tree-inline"
+                            *ngIf="deprecated(node)"
+                            matTooltip="Replaced by an aspect class. Move device-types to the new root aspects, then delete it.">
+                            history
+                        </mat-icon>
+                        <mat-form-field class="aspect-class" appearance="outline" color="accent"
+                            *ngIf="showsAspectClassField(node)">
+                            <mat-label>Aspect Class</mat-label>
+                            <mtx-select [(ngModel)]="node.aspect_class_id" [ngModelOptions]="{standalone: true}"
+                                [items]="aspectClasses" bindValue="id" bindLabel="name" [clearable]="true"
+                                [disabled]="!userIsAdmin" [addTag]="addAspectClass" addTagText="Create aspect class: "
+                                appendTo=".ng-select-anchor"></mtx-select>
+                        </mat-form-field>
+                        <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex
+                            [ngClass]="{'deprecated-name': deprecated(node)}">
                             <mat-label>Name</mat-label>
                             <input matInput [(ngModel)]="node.name" [disabled]="!userIsAdmin">
                             <mat-error senergyError label="Name"></mat-error>
@@ -81,6 +166,12 @@
                                 [disabled]="!userIsAdmin">
                             <mat-icon>add</mat-icon>
                         </button>
+                        <button mat-icon-button (click)="convertToAspectClass(node)" color="accent"
+                                class="nested-tree-inline" *ngIf="userIsAdmin && userHasAspectClassReadAuthorization"
+                                [disabled]="!convertible(node) || !nodeValid(node)"
+                                matTooltip="Convert to aspect class, sub-aspects become roots of it">
+                            <mat-icon>new_label</mat-icon>
+                        </button>
                         <button mat-icon-button [disabled]="!userIsAdmin" (click)="deleteNode(node)" color="warn"
                                 class="nested-tree-inline">
                             <mat-icon>delete</mat-icon>
@@ -94,7 +185,7 @@
         </mat-nested-tree-node>
     </mat-tree>
     <h3 class="root-drop-zone color-accent" [fxShow]="dragging" cdkDropList (cdkDropListDropped)="dropped($event)">As
-        New Aspect</h3>
+        New Aspect Without Class</h3>
 </div>
 <button mat-fab class="fab" matTooltip="Add new aspect" (click)="newAspect()" *ngIf="userIsAdmin">
     <mat-icon>add</mat-icon>
