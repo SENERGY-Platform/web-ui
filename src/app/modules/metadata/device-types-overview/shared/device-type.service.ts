@@ -195,8 +195,11 @@ export class DeviceTypeService {
 
     deleteDeviceType(id: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceRepoUrl + '/device-types/' + id )
-            .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'deleteDeviceType', false)));
+            .delete(environment.deviceRepoUrl + '/device-types/' + id, { observe: 'response' })
+            .pipe(
+                map(() => true),
+                catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'deleteDeviceType', false)),
+            );
     }
 
     getProtocols(limit: number, offset: number, sort: string, order: string): Observable<DeviceTypeProtocolModel[]> {

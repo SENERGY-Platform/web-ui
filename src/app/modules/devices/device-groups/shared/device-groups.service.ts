@@ -159,8 +159,11 @@ export class DeviceGroupsService {
 
     deleteDeviceGroup(id: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceRepoUrl + '/device-groups/' + encodeURIComponent(id))
-            .pipe(catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'deleteDeviceGroup', false)));
+            .delete(environment.deviceRepoUrl + '/device-groups/' + encodeURIComponent(id), { observe: 'response' })
+            .pipe(
+                map(() => true),
+                catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'deleteDeviceGroup', false)),
+            );
     }
 
     getDeviceGroupListByIds(ids: string[], filterGenericDuplicateCriteria = false): Observable<DeviceGroupModel[]> {

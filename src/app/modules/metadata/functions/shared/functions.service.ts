@@ -84,8 +84,11 @@ export class FunctionsService {
 
     deleteFunction(functionId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceRepoUrl + '/functions/' + functionId )
-            .pipe(catchError(this.errorHandlerService.handleError(FunctionsService.name, 'deleteFunction', false)));
+            .delete(environment.deviceRepoUrl + '/functions/' + functionId, { observe: 'response' })
+            .pipe(
+                map(() => true),
+                catchError(this.errorHandlerService.handleError(FunctionsService.name, 'deleteFunction', false)),
+            );
     }
 
     createFunction(func: DeviceTypeFunctionModel): Observable<DeviceTypeFunctionModel | null> {

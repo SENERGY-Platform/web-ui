@@ -79,8 +79,11 @@ export class DeviceClassesService {
 
     deleteDeviceClasses(deviceClassId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceRepoUrl + '/device-classes/' + deviceClassId)
-            .pipe(catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'deleteDeviceClasses', false)));
+            .delete(environment.deviceRepoUrl + '/device-classes/' + deviceClassId, { observe: 'response' })
+            .pipe(
+                map(() => true),
+                catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'deleteDeviceClasses', false)),
+            );
     }
 
     createDeviceClass(deviceClass: DeviceTypeDeviceClassModel): Observable<DeviceTypeDeviceClassModel | null> {

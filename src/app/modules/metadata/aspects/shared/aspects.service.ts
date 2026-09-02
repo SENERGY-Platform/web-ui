@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { DeviceTypeAspectModel } from '../../device-types-overview/shared/device-type.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
@@ -47,8 +47,11 @@ export class AspectsService {
 
     deleteAspects(aspectId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceRepoUrl + '/aspects/' + aspectId )
-            .pipe(catchError(this.errorHandlerService.handleError(AspectsService.name, 'deleteAspects', false)));
+            .delete(environment.deviceRepoUrl + '/aspects/' + aspectId, { observe: 'response' })
+            .pipe(
+                map(() => true),
+                catchError(this.errorHandlerService.handleError(AspectsService.name, 'deleteAspects', false)),
+            );
     }
 
     createAspect(aspect: DeviceTypeAspectModel): Observable<DeviceTypeAspectModel | null> {

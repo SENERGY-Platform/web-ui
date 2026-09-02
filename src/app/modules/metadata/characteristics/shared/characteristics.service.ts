@@ -61,8 +61,11 @@ export class CharacteristicsService {
 
     deleteCharacteristic(characteristicsId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceRepoUrl + '/characteristics/' + characteristicsId )
-            .pipe(catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'deleteCharacteristic', false)));
+            .delete(environment.deviceRepoUrl + '/characteristics/' + characteristicsId, { observe: 'response' })
+            .pipe(
+                map(() => true),
+                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'deleteCharacteristic', false)),
+            );
     }
 
     getCharacteristic(characteristicsId: string): Observable<DeviceTypeCharacteristicsModel> {

@@ -305,7 +305,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
                 }
 
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    const ok = deletionJobResults.every((r: boolean) => r === true);
                     if (ok) {
                         this.snackBar.open('Characteristics deleted successfully.', undefined, {duration: 2000});
                     } else {

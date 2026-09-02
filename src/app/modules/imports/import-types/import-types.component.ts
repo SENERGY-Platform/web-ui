@@ -241,14 +241,16 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
                     });
                 }
 
-                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                    if (ok) {
+                forkJoin(deletionJobs).subscribe({
+                    next: () => {
                         this.snackBar.open(text + ' deleted successfully.', undefined, { duration: 2000 });
-                    } else {
+                        this.reload();
+                    },
+                    error: (err) => {
+                        console.error(err);
                         this.snackBar.open('Error while deleting ' + text + '!', 'close', { panelClass: 'snack-bar-error' });
-                    }
-                    this.reload();
+                        this.reload();
+                    },
                 });
             });
     }

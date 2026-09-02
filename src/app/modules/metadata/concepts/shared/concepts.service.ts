@@ -110,8 +110,11 @@ export class ConceptsService {
 
     deleteConcept(conceptId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceRepoUrl + '/concepts/' + conceptId )
-            .pipe(catchError(this.errorHandlerService.handleError(ConceptsService.name, 'deleteConcept', false)));
+            .delete(environment.deviceRepoUrl + '/concepts/' + conceptId, { observe: 'response' })
+            .pipe(
+                map(() => true),
+                catchError(this.errorHandlerService.handleError(ConceptsService.name, 'deleteConcept', false)),
+            );
     }
 
     getConcepts(

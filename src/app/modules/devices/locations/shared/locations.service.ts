@@ -75,8 +75,11 @@ export class LocationsService {
 
     deleteLocation(id: string) {
         return this.http
-            .delete<boolean>(environment.deviceRepoUrl + '/locations/' + encodeURIComponent(id))
-            .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'deleteLocation', false)));
+            .delete(environment.deviceRepoUrl + '/locations/' + encodeURIComponent(id), { observe: 'response' })
+            .pipe(
+                map(() => true),
+                catchError(this.errorHandlerService.handleError(LocationsService.name, 'deleteLocation', false)),
+            );
     }
 
     getLocation(id: string): Observable<LocationModel | null> {
