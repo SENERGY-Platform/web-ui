@@ -104,7 +104,7 @@ export class NewExportComponent implements OnInit {
     devices: DeviceInstanceModel[] = [];
     pipelines: PipelineModel[] = [];
     paths = new Map<string, string | undefined>();
-    image: SafeHtml = {};
+    image: SafeHtml = '';
     showImage = false;
     imports: ImportInstancesModel[] = [];
     importTypes: Map<string, ImportTypeModel> = new Map();
@@ -196,6 +196,7 @@ export class NewExportComponent implements OnInit {
                             }
                             if (exp.FilterType === 'deviceId') {
                                 this.exportForm.patchValue({selector: 'device'});
+                                this.disableUnusedSources('device');
                                 setTimeout(() => {
                                     this.devices.forEach((device) => {
                                         if (device.id === exp.Filter) {
@@ -219,13 +220,13 @@ export class NewExportComponent implements OnInit {
                                         }
                                     });
                                 });
-                            }
-                            else if (exp.FilterType === 'operatorId') {
+                            } else if (exp.FilterType === 'operatorId') {
                                 this.exportForm.patchValue({selector: 'pipe'});
+                                this.disableUnusedSources('pipe');
                                 this.pipelines.forEach((pipeline) => {
                                     if (pipeline.id === exp.Filter.split(':')[0]) {
                                         this.exportForm.patchValue({pipeline});
-                                        this.exportForm.value.pipeline.operators.forEach((operator: PipelineOperatorModel) => {
+                                        pipeline.operators.forEach((operator: PipelineOperatorModel) => {
                                             if (operator.id === exp.Filter.split(':')[1]) {
                                                 this.operator = operator;
                                                 this.updateImage(this.operator.id);
@@ -240,18 +241,18 @@ export class NewExportComponent implements OnInit {
                                         });
                                     }
                                 });
-                            }
-                            else if (exp.FilterType === 'pipeId') {
+                            } else if (exp.FilterType === 'pipeId') {
                                 this.snackBar.open('Outdated export version - Please reconfigure and redeploy the export', 'close', {
                                     duration: 5000,
                                     verticalPosition: 'top',
                                     panelClass: 'snack-bar-error'
                                 });
                                 this.exportForm.patchValue({selector: 'pipe'});
+                                this.disableUnusedSources('pipe');
                                 this.pipelines.forEach((pipeline) => {
                                     if (pipeline.id === exp.Filter) {
                                         this.exportForm.patchValue({pipeline});
-                                        if (this.exportForm.value.pipeline.operators.length === 1) {
+                                        if (pipeline.operators.length === 1) {
                                             this.operator = pipeline.operators[0];
                                             this.operatorRepoService
                                                 .getOperator(this.operator.operatorId)
@@ -263,9 +264,9 @@ export class NewExportComponent implements OnInit {
                                         }
                                     }
                                 });
-                            }
-                            else if (exp.FilterType === 'import_id') {
+                            } else if (exp.FilterType === 'import_id') {
                                 this.exportForm.patchValue({selector: 'import'});
+                                this.disableUnusedSources('import');
                                 const importInstance: ImportInstancesModel =
                                     this.imports.find((i) => i.id === exp.Filter) || ({} as ImportInstancesModel);
                                 this.exportForm.patchValue({import: importInstance});
@@ -289,32 +290,37 @@ export class NewExportComponent implements OnInit {
         if (this.exportForm.valid) {
             const self = this;
 
-            this.export.Name = this.exportForm.value.name;
-            this.export.Description = this.exportForm.value.description;
-            this.export.TimePath = this.exportForm.value.timePath;
-            this.export.Values = this.exportForm.value.exportValues;
-            this.export.CustomMqttBroker = this.exportForm.value.customMqttBroker;
-            this.export.CustomMqttUser = this.exportForm.value.customMqttUser;
-            this.export.CustomMqttPassword = this.exportForm.value.customMqttPassword;
-            this.export.CustomMqttBaseTopic = this.exportForm.value.customMqttBaseTopic;
-            this.export.ExportDatabaseID = this.exportForm.value.exportDatabaseId;
-            this.export.TimestampFormat = this.exportForm.value.timestampFormat;
+            // Editing an export disables the fields that pick its source, and a disabled
+            // control is missing from exportForm.value - so the raw value is the one that
+            // still holds what the form shows.
+            const raw = this.exportForm.getRawValue();
 
-            if (this.exportForm.value.selector === 'device') {
-                this.export.EntityName = this.exportForm.value.device.name;
-                this.export.Filter = this.exportForm.value.device.id;
+            this.export.Name = raw.name;
+            this.export.Description = raw.description;
+            this.export.TimePath = raw.timePath;
+            this.export.Values = raw.exportValues;
+            this.export.CustomMqttBroker = raw.customMqttBroker;
+            this.export.CustomMqttUser = raw.customMqttUser;
+            this.export.CustomMqttPassword = raw.customMqttPassword;
+            this.export.CustomMqttBaseTopic = raw.customMqttBaseTopic;
+            this.export.ExportDatabaseID = raw.exportDatabaseId;
+            this.export.TimestampFormat = raw.timestampFormat;
+
+            if (raw.selector === 'device' && raw.device && raw.service) {
+                this.export.EntityName = raw.device.name;
+                this.export.Filter = raw.device.id;
                 this.export.FilterType = 'deviceId';
-                this.export.ServiceName = this.exportForm.value.service.name;
-                this.export.Topic = this.exportForm.value.service.id.replace(/#/g, '_').replace(/:/g, '_');
-            } else if (this.exportForm.value.selector === 'pipe') {
+                this.export.ServiceName = raw.service.name;
+                this.export.Topic = raw.service.id.replace(/#/g, '_').replace(/:/g, '_');
+            } else if (raw.selector === 'pipe' && raw.pipeline && this.operator.id) {
                 this.export.EntityName = this.operator.id;
-                this.export.Filter = this.exportForm.value.pipeline.id + ':' + this.operator.id;
+                this.export.Filter = raw.pipeline.id + ':' + this.operator.id;
                 this.export.FilterType = 'operatorId';
                 this.export.ServiceName = this.operator.name;
                 this.export.Topic = 'analytics-' + this.operator.name;
             }
 
-            if (this.exportForm.value.allMessages) {
+            if (raw.allMessages) {
                 this.export.Offset = 'smallest';
             } else {
                 this.export.Offset = 'largest';
@@ -351,32 +357,49 @@ export class NewExportComponent implements OnInit {
         this.exportForm.markAllAsTouched();
     }
 
+    // Which field names the source of an export, per selector value.
+    private readonly sourceControls = new Map<string | null, string>([
+        ['device', 'device'],
+        ['pipe', 'pipeline'],
+        ['import', 'import'],
+    ]);
+
+    // Picking a source hands the form to that source alone: its field takes part, the
+    // fields of the other two and everything downstream of them do not.
+    private applySelectorState(selection: string | null) {
+        const source = this.sourceControls.get(selection);
+        if (source === undefined) {
+            return;
+        }
+        for (const control of ['device', 'service', 'pipeline', 'operator', 'import', 'timePath']) {
+            if (control === source) {
+                this.exportForm.controls[control].enable({onlySelf: true, emitEvent: false});
+            } else {
+                this.exportForm.controls[control].disable({onlySelf: true, emitEvent: false});
+            }
+        }
+    }
+
+    // An export that already exists keeps the source it was created with, so its own field
+    // stays as the form was built - read only, showing what it points at. The fields of the
+    // other sources have to go: they are required too, and an empty required field that an
+    // edit cannot even reach leaves the form invalid and its edit button disabled. Only
+    // after the export has been patched in does onChanges() subscribe to the selector,
+    // which is why this cannot wait for that handler.
+    private disableUnusedSources(selection: string) {
+        const source = this.sourceControls.get(selection);
+        for (const control of ['device', 'pipeline', 'import']) {
+            if (control !== source) {
+                this.exportForm.controls[control].disable({onlySelf: true, emitEvent: false});
+            }
+        }
+    }
+
     onChanges(): void {
         if (this.exportForm) {
             if (this.exportForm.get('selector')) {
                 this.exportForm.get('selector')?.valueChanges.subscribe((selection) => {
-                    if (selection === 'device') {
-                        this.exportForm.controls['device'].enable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['service'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['pipeline'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['operator'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['import'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['timePath'].disable({onlySelf: true, emitEvent: false});
-                    } else if (selection === 'pipe') {
-                        this.exportForm.controls['device'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['service'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['pipeline'].enable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['operator'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['import'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['timePath'].disable({onlySelf: true, emitEvent: false});
-                    } else if (selection === 'import') {
-                        this.exportForm.controls['device'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['service'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['pipeline'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['operator'].disable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['import'].enable({onlySelf: true, emitEvent: false});
-                        this.exportForm.controls['timePath'].disable({onlySelf: true, emitEvent: false});
-                    }
+                    this.applySelectorState(selection);
 
                     if (!this.id) {
                         this.resetVars();
@@ -465,12 +488,11 @@ export class NewExportComponent implements OnInit {
                     } else {
                         this.exportForm.controls['operator'].disable({onlySelf: true, emitEvent: false});
                     }
-                    this.exportForm.value.pipeline = pipe;
                     this.resetVars();
-                    if (typeof this.exportForm.value.pipeline.image === 'string') {
+                    if (typeof pipe.image === 'string') {
                         const parser = new DOMParser();
                         const svg = parser
-                            .parseFromString(this.exportForm.value.pipeline.image, 'image/svg+xml')
+                            .parseFromString(pipe.image, 'image/svg+xml')
                             .getElementsByTagName('svg')[0];
                         const viewbox = svg.getAttribute('viewbox')!.split(' ');
                         svg.setAttribute('height', viewbox[3]);
@@ -576,9 +598,10 @@ export class NewExportComponent implements OnInit {
     }
 
     updateImage(id: string) {
-        if (typeof this.exportForm.value.pipeline.image === 'string') {
+        const pipeline: PipelineModel | null = this.exportForm.getRawValue().pipeline;
+        if (typeof pipeline?.image === 'string') {
             const parser = new DOMParser();
-            const svg = parser.parseFromString(this.exportForm.value.pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
+            const svg = parser.parseFromString(pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
             const viewbox = svg.getAttribute('viewbox')!.split(' ');
             svg.setAttribute('height', viewbox[3]);
             const elements = svg.getElementsByClassName('joint-cell') as any;
@@ -764,12 +787,14 @@ export class NewExportComponent implements OnInit {
             ) {
                 const rect: DOMRect = operatorNode.getBoundingClientRect();
                 if ($event.x < rect.right && $event.x > rect.left && $event.y > rect.top && $event.y < rect.bottom) {
-                    const clickedOperator = this.exportForm.value.pipeline.operators.find(
+                    const clickedOperator = this.exportForm.getRawValue().pipeline.operators.find(
                         (o: PipelineOperatorModel) => o.id === operatorNode.attributes['model-id'].value,
                     );
                     if (clickedOperator !== undefined) {
-                        this.operator = clickedOperator;
-                        this.operatorChanged(this.operator);
+                        if (clickedOperator.id !== this.operator.id) {
+                            this.operator = clickedOperator;
+                            this.operatorChanged(this.operator);
+                        }
                         return;
                     }
                 }
