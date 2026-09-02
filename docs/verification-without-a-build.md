@@ -8,6 +8,7 @@ case while iterating, where a full build costs more than the feedback is worth.
 **Not this if**: the change has to be *seen* — layout, a Material component's
 rendered structure, anything visual. None of the commands below render anything,
 and the third one type-checks templates but says nothing about how they look.
+Measuring it in a spec does not close that gap either — see below.
 
 ## Three commands
 
@@ -46,3 +47,28 @@ can fail at all — a typo in a template is the cheapest way.
 src/app/.../some.component.html:17:29 - error TS2339: Property 'titleTypo'
 does not exist on type 'SomeDialogData'.
 ```
+
+## A spec can render, but it cannot measure
+
+`npm test` renders real DOM, so `getBoundingClientRect()` returns numbers and an
+alignment assertion looks like verification. It is not one: the `test` target
+lists no `styles`, so only each component's own `styleUrls` are bundled and
+Material's theme never applies. A `mat-icon-button` has no fixed 40px box there
+and collapses to its content — 16px for the empty placeholders this app uses to
+keep columns aligned, 40px once the theme is in.
+
+Two rows differing only in whether their spacer holds an icon therefore measure
+24px apart in the suite and zero apart in the app. Nothing about the failure says
+the measurement is unfounded: the numbers are real and reproducible, and they
+describe a stylesheet nobody loaded. The tell is to measure something known to be
+correct as a control — if that disagrees too, the yardstick is the problem.
+
+What does hold in a spec is structure. For alignment, the run of siblings in
+front of an element is what decides where it starts, and comparing that is
+theme-independent:
+
+```ts
+expect(tagsBefore(groupField)).toEqual(tagsBefore(aspectField));
+```
+
+Anything genuinely visual needs the app.
