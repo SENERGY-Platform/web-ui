@@ -33,14 +33,19 @@ import { EnvironmentsService } from './shared/environments.service';
 import { Environment } from './shared/environments.model';
 import { CoreModule } from '../../core/core.module';
 import { DialogsService } from '../../core/services/dialogs.service';
+import { PermissionsService } from '../permissions/shared/permissions.service';
+import { PermissionsUserModel } from '../permissions/shared/permissions-user.model';
 
 // e1 nests a zone within a zone, so a counting implementation without a
 // recursion step (only looking at the top-level zones) would under-report it.
+// e1 also carries an owner, e2 does not -- exercises both the resolved and the
+// missing-owner path through the same fixture.
 const environments: Environment[] = [
     {
         id: 'e1',
         name: 'Plant A',
         type: 'industrial_site',
+        owner: 'user-1',
         zones: [
             {
                 id: 'building',
@@ -96,6 +101,20 @@ class MockEnvironmentsService {
     }
 }
 
+/** Records every id looked up, so tests can assert a name is resolved once per id, not once per row. */
+class MockPermissionsService {
+    calls: string[] = [];
+    shouldFail = false;
+
+    getUserById(id: string): Observable<PermissionsUserModel> {
+        this.calls.push(id);
+        if (this.shouldFail) {
+            return of({} as PermissionsUserModel);
+        }
+        return of({ id, username: 'Name of ' + id });
+    }
+}
+
 class MockDialogsService {
     confirmed = true;
     lastText: string | undefined;
@@ -125,6 +144,7 @@ describe('EnvironmentsComponent', () => {
     let fixture: ComponentFixture<EnvironmentsComponent>;
     let environmentsService: MockEnvironmentsService;
     let dialogsService: MockDialogsService;
+    let permissionsService: MockPermissionsService;
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
@@ -145,12 +165,14 @@ describe('EnvironmentsComponent', () => {
                 { provide: EnvironmentsService, useClass: MockEnvironmentsService },
                 { provide: DialogsService, useClass: MockDialogsService },
                 { provide: Router, useClass: RouterStub },
+                { provide: PermissionsService, useClass: MockPermissionsService },
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsComponent);
         component = fixture.componentInstance;
         environmentsService = TestBed.inject(EnvironmentsService) as unknown as MockEnvironmentsService;
         dialogsService = TestBed.inject(DialogsService) as unknown as MockDialogsService;
+        permissionsService = TestBed.inject(PermissionsService) as unknown as MockPermissionsService;
     }));
 
     it('should create', () => {
@@ -170,6 +192,44 @@ describe('EnvironmentsComponent', () => {
         const rows = component.dataSource.data;
         expect(rows.find(r => r.environment.id === 'e1')?.counts).toEqual({ zones: 2, assets: 2, channels: 3 });
         expect(rows.find(r => r.environment.id === 'e2')?.counts).toEqual({ zones: 0, assets: 0, channels: 0 });
+    });
+
+    it('should show an Owner column', () => {
+        fixture.detectChanges();
+        expect(component.displayedColumns).toContain('owner');
+    });
+
+    it('should resolve the owner name of a row and expose it through ownerName', () => {
+        fixture.detectChanges();
+
+        expect(permissionsService.calls).toEqual(['user-1']);
+        expect(component.ownerName('user-1')).toBe('Name of user-1');
+    });
+
+    it('should not look up a name for a row without an owner, and not fail the reload', () => {
+        fixture.detectChanges();
+
+        expect(component.dataReady).toBe(true);
+        expect(component.ownerName(undefined)).toBe('');
+    });
+
+    it('should resolve an owner id shared by multiple rows exactly once', () => {
+        spyOn(environmentsService, 'listEnvironments').and.returnValue(of([
+            { id: 'x1', name: 'X1', owner: 'shared-owner' },
+            { id: 'x2', name: 'X2', owner: 'shared-owner' },
+        ]));
+
+        fixture.detectChanges();
+
+        expect(permissionsService.calls).toEqual(['shared-owner']);
+    });
+
+    it('should fall back to the full id when the owner lookup fails', () => {
+        permissionsService.shouldFail = true;
+
+        fixture.detectChanges();
+
+        expect(component.ownerName('user-1')).toBe('user-1');
     });
 
     it('should show the delete column only with delete authorization', () => {

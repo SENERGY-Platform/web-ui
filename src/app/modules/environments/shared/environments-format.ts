@@ -37,3 +37,21 @@ export function formatBytes(bytes: number | undefined): string {
     const rounded = Math.round(value * 10) / 10;
     return rounded + ' ' + UNITS[unitIndex];
 }
+
+/**
+ * Owner cell text: the resolved username once the lookup completed, the id shortened to
+ * 8 characters while it is still in flight, and the full id if the lookup came back without
+ * a username (e.g. a deleted user).
+ */
+export function ownerDisplay(ownerId: string | undefined, userIdToName: { [key: string]: string }, lookupFailed: ReadonlySet<string>): string {
+    if (!ownerId) {
+        return '';
+    }
+    if (userIdToName[ownerId]) {
+        return userIdToName[ownerId];
+    }
+    if (lookupFailed.has(ownerId)) {
+        return ownerId;
+    }
+    return ownerId.slice(0, 8);
+}

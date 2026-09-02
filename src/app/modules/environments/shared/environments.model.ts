@@ -255,6 +255,8 @@ export interface Environment {
     version?: number;
     /** Every stochastic source derives from seed, so the same environment and clock produce the same values. */
     seed?: number;
+    /** Read-only: the Keycloak user id of whoever created the environment. Absent on documents written before this field existed. */
+    owner?: string;
     /** Shared surroundings every zone below can read: outdoor temperature, irradiation, calendar. Initial values only. */
     context?: Record<string, unknown>;
     /**

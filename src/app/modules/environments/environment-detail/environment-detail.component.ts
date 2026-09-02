@@ -24,6 +24,7 @@ import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { Subscription, timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { EnvironmentsService } from '../shared/environments.service';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeleteDialogOptions, DeleteDialogResponse } from '../../../core/dialogs/delete-dialog.component';
 import { DeviceInstancesSelectDialogComponent } from '../../devices/device-instances/dialogs/device-instances-select-dialog.component';
@@ -63,6 +64,7 @@ import { locationContains, ProblemPath, problemPath, sameLocation } from '../sha
 import { applySourceKind } from '../shared/environments-source';
 import { findNonIntegerFields } from '../shared/environments-integrity';
 import { countPendingPlatformDevices } from '../shared/environments-count';
+import { ownerDisplay } from '../shared/environments-format';
 import { assetFromDeviceType } from '../shared/environments-device';
 import { AddMachineDialogResult, EnvironmentsAddMachineDialogComponent } from './dialogs/environments-add-machine-dialog.component';
 import {
@@ -202,9 +204,14 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 
     private selectedNodeProblemsByKey = new Map<string, SelectedNodeProblem[]>();
 
+    /** Owner id -> username, filled in lazily by loadUserNames once the environment is loaded. */
+    userIdToName: { [key: string]: string } = {};
+    private ownerLookupFailed = new Set<string>();
+
     constructor(
         private route: ActivatedRoute,
         private environmentsService: EnvironmentsService,
+        private permissionsService: PermissionsService,
         private dialogsService: DialogsService,
         private snackBar: MatSnackBar,
         private dialog: MatDialog,
@@ -254,7 +261,32 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             this.rebuildTree();
             this.indexProblems();
             this.resetLiveState();
+            this.loadUserNames([env.owner]);
             this.dataReady = true;
+        });
+    }
+
+    /** Owner cell text for the template, see ownerDisplay. */
+    ownerName(ownerId: string | undefined): string {
+        return ownerDisplay(ownerId, this.userIdToName, this.ownerLookupFailed);
+    }
+
+    /** Collects distinct owner ids not resolved yet and looks up each one exactly once. */
+    private loadUserNames(ownerIds: (string | undefined)[]): void {
+        const missing: string[] = [];
+        ownerIds.forEach(id => {
+            if (id && !this.userIdToName[id] && !this.ownerLookupFailed.has(id) && !missing.includes(id)) {
+                missing.push(id);
+            }
+        });
+        missing.forEach(id => {
+            this.permissionsService.getUserById(id).subscribe(value => {
+                if (value?.username) {
+                    this.userIdToName[value.id] = value.username;
+                } else {
+                    this.ownerLookupFailed.add(id);
+                }
+            });
         });
     }
 

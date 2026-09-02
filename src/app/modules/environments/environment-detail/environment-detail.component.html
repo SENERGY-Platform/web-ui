@@ -18,7 +18,10 @@
 
 <div class="environment-detail-container layout-margin" fxLayout="column" *ngIf="dataReady && environment">
     <div class="title-bar" fxLayout="row" fxLayoutAlign="space-between center">
-        <h2>{{environment.name || 'Environment'}}</h2>
+        <div fxLayout="column">
+            <h2>{{environment.name || 'Environment'}}</h2>
+            <span class="owner-line" *ngIf="environment.owner">Owner: {{ownerName(environment.owner)}}</span>
+        </div>
         <div fxLayout="row" fxLayoutGap="8px">
             <button mat-stroked-button [disabled]="isSaving" (click)="discard()">
                 <mat-icon>undo</mat-icon> Discard

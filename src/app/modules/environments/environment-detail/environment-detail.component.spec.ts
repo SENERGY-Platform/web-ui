@@ -18,7 +18,7 @@ import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick, waitF
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -50,6 +50,8 @@ import { EnvironmentsFactorBarsComponent } from './factor-bars/environments-fact
 import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
 import { EnvironmentsService } from '../shared/environments.service';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
+import { PermissionsUserModel } from '../../permissions/shared/permissions-user.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
@@ -60,6 +62,20 @@ import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/d
 class MockLadonService {
     getUserAuthorizationsForURI(_uri: string): any {
         return undefined;
+    }
+}
+
+/** Records every id looked up, so tests can assert a name is resolved once per id. */
+class MockPermissionsService {
+    calls: string[] = [];
+    shouldFail = false;
+
+    getUserById(id: string): Observable<PermissionsUserModel> {
+        this.calls.push(id);
+        if (this.shouldFail) {
+            return of({} as PermissionsUserModel);
+        }
+        return of({ id, username: 'Name of ' + id });
     }
 }
 
@@ -121,6 +137,7 @@ describe('EnvironmentDetailComponent', () => {
     let component: EnvironmentDetailComponent;
     let fixture: ComponentFixture<EnvironmentDetailComponent>;
     let httpMock: HttpTestingController;
+    let permissionsService: MockPermissionsService;
     const environmentsUrl = environment.mosesUrl + '/environments';
     const datasetsUrl = environment.mosesUrl + '/datasets';
     const deviceTypesUrl = environment.mosesUrl + '/device-types';
@@ -169,6 +186,7 @@ describe('EnvironmentDetailComponent', () => {
                 { provide: ActivatedRoute, useClass: ActivatedRouteStub },
                 { provide: DeviceInstancesService, useClass: MockDeviceInstancesService },
                 { provide: PlatformDeviceTypeService, useClass: MockPlatformDeviceTypeService },
+                { provide: PermissionsService, useClass: MockPermissionsService },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
             ],
@@ -177,6 +195,7 @@ describe('EnvironmentDetailComponent', () => {
         fixture = TestBed.createComponent(EnvironmentDetailComponent);
         component = fixture.componentInstance;
         httpMock = TestBed.inject(HttpTestingController);
+        permissionsService = TestBed.inject(PermissionsService) as unknown as MockPermissionsService;
     }));
 
     afterEach(() => {
@@ -228,6 +247,42 @@ describe('EnvironmentDetailComponent', () => {
         const channelNode = assetNode.children[0];
         component.select(channelNode);
         expect(component.selectedChannel?.name).toBe('Power');
+    });
+
+    describe('owner', () => {
+        it('shows the header line with the resolved name when the environment has an owner', () => {
+            loadWith({ ...nestedEnvironment, owner: 'user-1' });
+
+            expect(permissionsService.calls).toEqual(['user-1']);
+            expect(component.ownerName('user-1')).toBe('Name of user-1');
+            const ownerLine = fixture.nativeElement.querySelector('.owner-line') as HTMLElement | null;
+            expect(ownerLine?.textContent).toContain('Name of user-1');
+        });
+
+        it('shows nothing and does not fail loading when the environment has no owner', () => {
+            loadWith(nestedEnvironment);
+
+            expect(permissionsService.calls).toEqual([]);
+            expect(component.dataReady).toBe(true);
+            expect(fixture.nativeElement.querySelector('.owner-line')).toBeNull();
+        });
+
+        it('looks up the owner id only once even after a second load of the same environment', () => {
+            loadWith({ ...nestedEnvironment, owner: 'user-1' });
+            component.load(true);
+            httpMock.expectOne(environmentsUrl + '/e1').flush({ ...nestedEnvironment, owner: 'user-1' });
+            fixture.detectChanges();
+
+            expect(permissionsService.calls).toEqual(['user-1']);
+        });
+
+        it('falls back to the full id when the owner lookup fails', () => {
+            permissionsService.shouldFail = true;
+
+            loadWith({ ...nestedEnvironment, owner: 'user-1' });
+
+            expect(component.ownerName('user-1')).toBe('user-1');
+        });
     });
 
     describe('schedule and aggregate source kinds', () => {

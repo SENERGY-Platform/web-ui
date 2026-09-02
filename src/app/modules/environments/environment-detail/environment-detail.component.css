@@ -18,6 +18,11 @@
     margin-bottom: 8px;
 }
 
+.owner-line {
+    font-size: 12px;
+    opacity: 0.6;
+}
+
 .problems-list {
     background: rgba(244, 67, 54, 0.08);
     border-radius: 4px;

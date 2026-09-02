@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { formatBytes } from './environments-format';
+import { formatBytes, ownerDisplay } from './environments-format';
 
 describe('formatBytes', () => {
     it('formats a size under 1024 as bytes', () => {
@@ -40,5 +40,23 @@ describe('formatBytes', () => {
     it('treats undefined and negative input as 0 B rather than throwing', () => {
         expect(formatBytes(undefined)).toBe('0 B');
         expect(formatBytes(-5)).toBe('0 B');
+    });
+});
+
+describe('ownerDisplay', () => {
+    it('returns the empty string for a missing owner id', () => {
+        expect(ownerDisplay(undefined, {}, new Set())).toBe('');
+    });
+
+    it('returns the resolved username once the lookup completed', () => {
+        expect(ownerDisplay('u1', { u1: 'alice' }, new Set())).toBe('alice');
+    });
+
+    it('shortens the id to 8 characters while the lookup is still in flight', () => {
+        expect(ownerDisplay('user-12345678-long', {}, new Set())).toBe('user-123');
+    });
+
+    it('falls back to the full id once the lookup failed', () => {
+        expect(ownerDisplay('user-12345678-long', {}, new Set(['user-12345678-long']))).toBe('user-12345678-long');
     });
 });

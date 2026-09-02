@@ -25,7 +25,9 @@ import { DialogsService } from '../../core/services/dialogs.service';
 import { DeleteDialogResponse } from '../../core/dialogs/delete-dialog.component';
 import { ApiError, Environment, ValidationError, environmentTypeLabel, isApiError, isValidationError } from './shared/environments.model';
 import { countEnvironmentEntities, countManagedPlatformDevices, EnvironmentEntityCounts } from './shared/environments-count';
+import { ownerDisplay } from './shared/environments-format';
 import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create-dialog.component';
+import { PermissionsService } from '../permissions/shared/permissions.service';
 
 /** One row of the table: the environment plus its counts, computed once per reload. */
 export interface EnvironmentRow {
@@ -39,7 +41,7 @@ export interface EnvironmentRow {
     styleUrls: ['./environments.component.css'],
 })
 export class EnvironmentsComponent implements OnInit {
-    displayedColumns = ['name', 'type', 'zones', 'assets', 'channels'];
+    displayedColumns = ['name', 'type', 'owner', 'zones', 'assets', 'channels'];
     dataSource = new MatTableDataSource<EnvironmentRow>();
     dataReady = false;
     environmentTypeLabel = environmentTypeLabel;
@@ -47,6 +49,10 @@ export class EnvironmentsComponent implements OnInit {
     userHasReadAuthorization = this.environmentsService.userHasReadAuthorization();
     userHasCreateAuthorization = this.environmentsService.userHasCreateAuthorization();
     userHasDeleteAuthorization = this.environmentsService.userHasDeleteAuthorization();
+
+    /** Owner id -> username, filled in lazily by loadUserNames as rows come in. */
+    userIdToName: { [key: string]: string } = {};
+    private ownerLookupFailed = new Set<string>();
 
     @ViewChild('importInput') importInput: any;
 
@@ -56,6 +62,7 @@ export class EnvironmentsComponent implements OnInit {
         private dialog: MatDialog,
         private snackBar: MatSnackBar,
         private router: Router,
+        private permissionsService: PermissionsService,
     ) {}
 
     ngOnInit(): void {
@@ -74,7 +81,32 @@ export class EnvironmentsComponent implements OnInit {
                 environment,
                 counts: countEnvironmentEntities(environment),
             }));
+            this.loadUserNames(envs.map(e => e.owner));
             this.dataReady = true;
+        });
+    }
+
+    /** Owner cell text for the template, see ownerDisplay. */
+    ownerName(ownerId: string | undefined): string {
+        return ownerDisplay(ownerId, this.userIdToName, this.ownerLookupFailed);
+    }
+
+    /** Collects distinct owner ids not resolved yet and looks up each one exactly once. */
+    private loadUserNames(ownerIds: (string | undefined)[]): void {
+        const missing: string[] = [];
+        ownerIds.forEach(id => {
+            if (id && !this.userIdToName[id] && !this.ownerLookupFailed.has(id) && !missing.includes(id)) {
+                missing.push(id);
+            }
+        });
+        missing.forEach(id => {
+            this.permissionsService.getUserById(id).subscribe(value => {
+                if (value?.username) {
+                    this.userIdToName[value.id] = value.username;
+                } else {
+                    this.ownerLookupFailed.add(id);
+                }
+            });
         });
     }
 
