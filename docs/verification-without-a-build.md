@@ -72,3 +72,24 @@ expect(tagsBefore(groupField)).toEqual(tagsBefore(aspectField));
 ```
 
 Anything genuinely visual needs the app.
+
+## The full suite is the CI's job, not necessarily yours
+
+`npm test` bundles all ~101 spec files into one Chrome renderer, and that bundle
+is the single most memory-hungry thing this repository asks of a machine. On a
+constrained one it aborts with `FATAL ERROR: Reached heap limit` before a single
+spec runs — which looks like a broken suite and is not one.
+
+`.github/workflows/test.yml` runs exactly that suite on every push, with
+`--browsers=ChromeHeadlessCI` and an 8 GB heap. So the division is:
+
+- **locally** — `--include='**/<path>/*.spec.ts'` over the specs the change can
+  reach, plus `tsc --noEmit` and, for a template change, `ngc --noEmit`. Fast
+  enough to run repeatedly, and narrow enough to fit.
+- **on the push** — the full suite, as a gate that cannot be skipped by
+  forgetting it.
+
+A local abort is therefore a reason to say which specs you did run, not a reason
+to claim the change is unverified. What it is never a reason for is widening the
+local run until it fits: two Angular builds at once, or one with a raised heap
+ceiling, is how the machine goes down instead of the command.
