@@ -1,0 +1,84 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h2 mat-dialog-title>Share {{data.name || 'Environment'}}</h2>
+
+<mat-dialog-content>
+    <senergy-spinner [show]="loading"></senergy-spinner>
+
+    <ng-container *ngIf="!loading">
+        <p class="hint">Grants read and execute rights on the environment's managed devices. Fixed -- not selectable here.</p>
+
+        <h3>Users</h3>
+        <div class="share-row" *ngFor="let id of users">
+            <span>{{userName(id)}}</span>
+            <button mat-icon-button color="warn" (click)="removeUser(id)" matTooltip="Remove">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+        <form class="user-input">
+            <mat-form-field color="accent" appearance="outline" class="selector">
+                <mat-label>Add user</mat-label>
+                <mtx-select [items]="addableUsers" [formControl]="userFormControl" bindValue="id" bindLabel="username"
+                    appendTo=".ng-select-anchor">
+                </mtx-select>
+            </mat-form-field>
+            <button [disabled]="addableUsers.length === 0" class="margin add-button" mat-icon-button color="accent"
+                (click)="addUser()">
+                <mat-icon>add</mat-icon>
+            </button>
+        </form>
+
+        <mat-divider></mat-divider>
+
+        <h3>Groups</h3>
+        <div class="share-row" *ngFor="let path of groups">
+            <span>{{path}}</span>
+            <button mat-icon-button color="warn" (click)="removeGroup(path)" matTooltip="Remove">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+        <form class="user-input">
+            <mat-form-field color="accent" appearance="outline" class="selector">
+                <mat-label>Add group</mat-label>
+                <mtx-select [items]="addableGroups" [formControl]="groupFormControl" appendTo=".ng-select-anchor">
+                </mtx-select>
+            </mat-form-field>
+            <button [disabled]="addableGroups.length === 0" class="margin add-button" mat-icon-button color="accent"
+                (click)="addGroup()">
+                <mat-icon>add</mat-icon>
+            </button>
+        </form>
+
+        <div class="share-error" *ngIf="errorMessage">
+            <mat-icon color="warn">error</mat-icon>
+            <span>{{errorMessage}}</span>
+        </div>
+
+        <div class="share-error" *ngIf="deviceErrors.length > 0">
+            <mat-icon color="warn">error</mat-icon>
+            <div>
+                <div>Could not update {{deviceErrors.length}} device(s); nothing was saved. Retrying is safe.</div>
+                <div *ngFor="let d of deviceErrors">{{d.id}}: {{d.error}}</div>
+            </div>
+        </div>
+    </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions style="display: flex; justify-content: end;">
+    <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
+    <button mat-raised-button color="accent" [disabled]="loading || saving" (click)="save()">Save</button>
+</mat-dialog-actions>

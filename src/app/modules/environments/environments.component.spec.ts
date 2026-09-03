@@ -17,7 +17,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
@@ -244,6 +244,30 @@ describe('EnvironmentsComponent', () => {
         fixture.detectChanges();
 
         expect(component.displayedColumns).not.toContain('delete');
+    });
+
+    // Share changes the environment, same as delete -- gated the same way.
+    it('should show the share column only with delete authorization', () => {
+        fixture.detectChanges();
+        expect(component.displayedColumns).toContain('share');
+    });
+
+    it('should hide the share column without delete authorization', () => {
+        environmentsService.deleteAuthorized = false;
+        fixture = TestBed.createComponent(EnvironmentsComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+
+        expect(component.displayedColumns).not.toContain('share');
+    });
+
+    it('should open the share dialog for an environment', () => {
+        fixture.detectChanges();
+        const dialogOpenSpy = spyOn(TestBed.inject(MatDialog), 'open').and.returnValue({ afterClosed: () => of(undefined) } as any);
+
+        component.share(environments[0]);
+
+        expect(dialogOpenSpy).toHaveBeenCalledWith(jasmine.anything(), { data: { id: 'e1', name: 'Plant A' } });
     });
 
     it('should delete an environment after the deletion was confirmed', () => {

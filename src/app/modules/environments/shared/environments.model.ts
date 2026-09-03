@@ -471,6 +471,29 @@ export function isApiError(value: unknown): value is ApiError {
     return !!value && typeof (value as ApiError).message === 'string';
 }
 
+/** The device-sharing set of an environment: GET/PUT .../shares. devices is response-only -- how many managed devices it applies to. */
+export interface EnvironmentShares {
+    users: string[];
+    groups: string[];
+    devices?: number;
+}
+
+/** One device permissions-v2 could not update, from a 502 PUT .../shares response. */
+export interface SharesDeviceError {
+    id: string;
+    error: string;
+}
+
+/** The 502 PUT .../shares body: some devices failed and nothing was saved -- retrying the same PUT is safe (idempotent). */
+export interface SharesFailure {
+    devices: SharesDeviceError[];
+}
+
+/** Distinguishes the 502 device-error body from the EnvironmentShares also returned by the same PUT (both carry "devices", array vs number). */
+export function isSharesFailure(value: unknown): value is SharesFailure {
+    return !!value && Array.isArray((value as SharesFailure).devices);
+}
+
 /**
  * The GET /environments/{id}/state answer: the same shape as the PATCH input (StateChange),
  * plus whether the simulation is running at all and when this snapshot was taken. running:

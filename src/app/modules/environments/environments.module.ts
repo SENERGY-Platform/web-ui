@@ -16,7 +16,7 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Route, RouterModule } from '@angular/router';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { MatTableModule } from '@angular/material/table';
@@ -52,6 +52,7 @@ import { EnvironmentsKeyValueEditorComponent } from './key-value-editor/environm
 import { EnvironmentsLiveStateTilesComponent } from './environment-detail/live-state/environments-live-state-tiles.component';
 import { EnvironmentsDatasetsComponent } from './datasets/environments-datasets.component';
 import { EnvironmentsDatasetUploadDialogComponent } from './datasets/dialogs/environments-dataset-upload-dialog.component';
+import { EnvironmentsShareDialogComponent } from './dialogs/environments-share-dialog.component';
 
 const environments: Route = {
     path: 'environments',
@@ -101,10 +102,12 @@ const formFieldDefaults = {
         EnvironmentsLiveStateTilesComponent,
         EnvironmentsDatasetsComponent,
         EnvironmentsDatasetUploadDialogComponent,
+        EnvironmentsShareDialogComponent,
     ],
     imports: [
         CommonModule,
         FormsModule,
+        ReactiveFormsModule,
         FlexLayoutModule,
         CoreModule,
         RouterModule.forChild(ENVIRONMENTS_ROUTES),

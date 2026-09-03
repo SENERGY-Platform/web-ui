@@ -27,6 +27,7 @@ import { ApiError, Environment, ValidationError, environmentTypeLabel, isApiErro
 import { countEnvironmentEntities, countManagedPlatformDevices, EnvironmentEntityCounts } from './shared/environments-count';
 import { ownerDisplay } from './shared/environments-format';
 import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create-dialog.component';
+import { EnvironmentsShareDialogComponent } from './dialogs/environments-share-dialog.component';
 import { PermissionsService } from '../permissions/shared/permissions.service';
 
 /** One row of the table: the environment plus its counts, computed once per reload. */
@@ -69,6 +70,7 @@ export class EnvironmentsComponent implements OnInit {
         this.displayedColumns.push('open');
         this.displayedColumns.push('export');
         if (this.userHasDeleteAuthorization) {
+            this.displayedColumns.push('share');
             this.displayedColumns.push('delete');
         }
         this.reload();
@@ -126,6 +128,13 @@ export class EnvironmentsComponent implements OnInit {
             const file = new Blob([JSON.stringify(full, null, 2)], { type: 'application/json' });
             saveAs(file, (env.name || env.id) + '.json');
         });
+    }
+
+    share(env: Environment): void {
+        if (!env.id) {
+            return;
+        }
+        this.dialog.open(EnvironmentsShareDialogComponent, { data: { id: env.id, name: env.name } });
     }
 
     delete(env: Environment): void {

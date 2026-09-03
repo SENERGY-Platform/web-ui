@@ -27,8 +27,11 @@ import {
     CatalogDeviceType,
     DatasetMeta,
     Environment,
+    EnvironmentShares,
     EnvironmentState,
+    isSharesFailure,
     isValidationError,
+    SharesFailure,
     StateChange,
     ValidationError,
 } from './environments.model';
@@ -133,6 +136,29 @@ export class EnvironmentsService {
     getEnvironmentState(id: string): Observable<EnvironmentState | null> {
         return this.http.get<EnvironmentState>(this.environmentsUrl + '/' + encodeURIComponent(id) + '/state').pipe(
             catchError(this.errorHandlerService.handleError(EnvironmentsService.name, 'getEnvironmentState', null)),
+        );
+    }
+
+    getShares(id: string): Observable<EnvironmentShares | null> {
+        return this.http.get<EnvironmentShares>(this.environmentsUrl + '/' + encodeURIComponent(id) + '/shares').pipe(
+            catchError(this.errorHandlerService.handleError(EnvironmentsService.name, 'getShares', null)),
+        );
+    }
+
+    /**
+     * PUT with a three-way result like updateEnvironmentChecked: the saved EnvironmentShares, a
+     * SharesFailure (502, some devices could not be updated -- nothing was saved, retrying the
+     * same PUT is safe), or an ApiError for anything else, including a 400's plain-text body.
+     */
+    setShares(id: string, shares: EnvironmentShares): Observable<EnvironmentShares | SharesFailure | ApiError> {
+        return this.http.put<EnvironmentShares>(this.environmentsUrl + '/' + encodeURIComponent(id) + '/shares', shares).pipe(
+            catchError((error: HttpErrorResponse) => {
+                this.errorHandlerService.logError(EnvironmentsService.name, 'setShares', error);
+                if (isSharesFailure(error.error)) {
+                    return of(error.error as SharesFailure);
+                }
+                return of({ message: describeHttpError(error), status: error.status } as ApiError);
+            }),
         );
     }
 
