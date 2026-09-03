@@ -20,6 +20,7 @@ import {CoreModule} from '../../../../../core/core.module';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {
+    DeviceTypeAspectClassModel,
     DeviceTypeAspectModel,
     DeviceTypeContentVariableModel,
     DeviceTypeFunctionModel
@@ -39,7 +40,7 @@ describe('DeviceTypesContentVariableDialog', () => {
 
     const matDialogRefSpy: Spy<MatDialogRef<DeviceTypesContentVariableDialogComponent>> =
         createSpyFromClass<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
-    function init(contentVariable: DeviceTypeContentVariableModel, concepts: ConceptsCharacteristicsModel[], functions: DeviceTypeFunctionModel[], aspects: DeviceTypeAspectModel[]) {
+    function init(contentVariable: DeviceTypeContentVariableModel, concepts: ConceptsCharacteristicsModel[], functions: DeviceTypeFunctionModel[], aspects: DeviceTypeAspectModel[], aspectClasses: DeviceTypeAspectClassModel[] = []) {
         TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
             imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule, MtxSelectModule, NoopAnimationsModule],
             declarations: [DeviceTypesContentVariableDialogComponent],
@@ -52,6 +53,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                         concepts,
                         functions,
                         aspects,
+                        aspectClasses,
                         prohibitedNames: [],
                     },
                 },
@@ -227,6 +229,62 @@ describe('DeviceTypesContentVariableDialog', () => {
             // an aspect of another hierarchy does not collide, classified or not
             control?.setValue(['urn:infai:ses:aspect:inside_air', 'urn:infai:ses:aspect:device']);
             expect(control?.errors).toBeNull();
+        }),
+    );
+
+    it(
+        'names the aspect class of a classified aspect and sorts the unclassified ones in front',
+        fakeAsync(() => {
+            const aspects: DeviceTypeAspectModel[] = [
+                {
+                    id: 'urn:infai:ses:aspect:air',
+                    name: 'air',
+                    aspect_class_id: 'urn:infai:ses:aspect-class:environment',
+                    sub_aspects: [
+                        {id: 'urn:infai:ses:aspect:inside_air', name: 'inside_air', sub_aspects: []},
+                        {id: 'urn:infai:ses:aspect:outside_air', name: 'outside_air', sub_aspects: []},
+                    ],
+                },
+                {id: 'urn:infai:ses:aspect:device', name: 'device', sub_aspects: []},
+            ];
+            const aspectClasses: DeviceTypeAspectClassModel[] = [
+                {id: 'urn:infai:ses:aspect-class:environment', name: 'Environment'},
+            ];
+            init({} as DeviceTypeContentVariableModel, [], [], aspects, aspectClasses);
+
+            fixture.detectChanges();
+            flush();
+
+            expect(component.aspectOptions.map(a => [a.name, a.aspect_class_name])).toEqual([
+                ['device', undefined],
+                ['air.inside_air', 'Environment'],
+                ['air.outside_air', 'Environment'],
+            ]);
+            // the picker groups by it, so an aspect without a class has to end up without a group
+            expect(component.aspectClassGroup(component.aspectOptions[0])).toBeUndefined();
+            expect(component.aspectClassGroup(component.aspectOptions[1])).toBe('Environment');
+        }),
+    );
+
+    it(
+        'leaves the aspect class out when the aspect-classes are not readable',
+        fakeAsync(() => {
+            const aspects: DeviceTypeAspectModel[] = [
+                {
+                    id: 'urn:infai:ses:aspect:air',
+                    name: 'air',
+                    aspect_class_id: 'urn:infai:ses:aspect-class:environment',
+                    sub_aspects: [
+                        {id: 'urn:infai:ses:aspect:inside_air', name: 'inside_air', sub_aspects: []},
+                    ],
+                },
+            ];
+            init({} as DeviceTypeContentVariableModel, [], [], aspects, []);
+
+            fixture.detectChanges();
+            flush();
+
+            expect(component.aspectOptions.map(a => a.aspect_class_name)).toEqual([undefined]);
         }),
     );
 

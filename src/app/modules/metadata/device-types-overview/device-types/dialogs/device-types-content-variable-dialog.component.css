@@ -37,3 +37,13 @@
     margin-left: 16px;
 }
 
+
+/* The picker names the aspect class in the group header, the chip has no header to fall back on and
+   names it in front of the aspect. */
+.aspect-class-name {
+    opacity: 0.7;
+}
+
+.aspect-class-name::after {
+    content: " / ";
+}

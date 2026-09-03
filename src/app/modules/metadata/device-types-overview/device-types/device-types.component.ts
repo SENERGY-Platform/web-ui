@@ -16,6 +16,7 @@
 
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
+    DeviceTypeAspectClassModel,
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeContentModel,
@@ -54,6 +55,7 @@ import {
 } from './dialogs/device-types-content-variable-json-dialog.component';
 import { Attribute } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { AddTagFn } from '@ng-matero/extensions/select';
+import { AspectClassesService } from '../../aspects/shared/aspect-classes.service';
 
 interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     tree?: NestedTreeControl<DeviceTypeContentVariableModel>;
@@ -79,6 +81,7 @@ export class DeviceTypesComponent implements OnInit {
     measuringFunctions: DeviceTypeFunctionModel[] = [];
     controllingFunctions: DeviceTypeFunctionModel[] = [];
     aspectList: DeviceTypeAspectModel[] = [];
+    aspectClasses: DeviceTypeAspectClassModel[] = [];
     serializations: string[] = ['json', 'xml', 'plain-text'];
     id = '';
     queryParamFunction = '';
@@ -100,6 +103,7 @@ export class DeviceTypesComponent implements OnInit {
         private route: ActivatedRoute,
         private deviceTypeHelperService: DeviceTypeHelperService,
         private conceptsService: ConceptsService,
+        private aspectClassesService: AspectClassesService,
         private router: Router,
         private changeDetectorRef: ChangeDetectorRef,
     ) {
@@ -167,6 +171,7 @@ export class DeviceTypesComponent implements OnInit {
             disabled,
             concepts: this.concepts,
             aspects: this.aspectList,
+            aspectClasses: this.aspectClasses,
             allowVoid: isInput,
             prohibitedNames: node?.sub_content_variables?.map(s => s.name) || [],
         };
@@ -214,6 +219,7 @@ export class DeviceTypesComponent implements OnInit {
             disabled,
             concepts: this.concepts,
             aspects: this.aspectList,
+            aspectClasses: this.aspectClasses,
             allowVoid: isInput,
             prohibitedNames: inOut.dataSource.data.find(n => n.sub_content_variables?.some(s => s.id === node.id))
                 ?.sub_content_variables
@@ -767,6 +773,20 @@ export class DeviceTypesComponent implements OnInit {
             this.deviceTypeService.getAspects().pipe(
                 map((aspects: DeviceTypeAspectModel[]) => {
                     this.aspectList = aspects;
+                }),
+            ),
+        );
+
+        // The aspect tree names no class, only its id, so the content-variable dialog needs the list to
+        // show which class an aspect belongs to. Reading them is a right of its own, and a user without
+        // it still edits content variables - just without the class.
+        observables.push(
+            (this.aspectClassesService.userHasReadAuthorization()
+                ? this.aspectClassesService.getAspectClasses(9999, 0)
+                : of([] as DeviceTypeAspectClassModel[])
+            ).pipe(
+                map((aspectClasses: DeviceTypeAspectClassModel[]) => {
+                    this.aspectClasses = aspectClasses;
                 }),
             ),
         );

@@ -27,6 +27,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
 import {DeviceTypeService} from '../shared/device-type.service';
+import {AspectClassesService} from '../../aspects/shared/aspect-classes.service';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {of} from 'rxjs';
 import {DeviceTypeModel, DeviceTypeProtocolModel, DeviceTypeServiceModel} from '../shared/device-type.model';
@@ -51,6 +52,7 @@ describe('DeviceTypesComponent', () => {
     };
 
     const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
+    const aspectClassesServiceSpy: Spy<AspectClassesService> = createSpyFromClass<AspectClassesService>(AspectClassesService);
 
     function init(id: string, func: string) {
         deviceTypeServiceSpy.getLeafCharacteristics.and.returnValue(
@@ -146,6 +148,8 @@ describe('DeviceTypesComponent', () => {
         deviceTypeServiceSpy.getAspects.and.returnValue(of());
         deviceTypeServiceSpy.createDeviceType.and.returnValue(of({id: uuid()}));
         deviceTypeServiceSpy.updateDeviceType.and.returnValue(of({id: uuid()}));
+        aspectClassesServiceSpy.userHasReadAuthorization.and.returnValue(true);
+        aspectClassesServiceSpy.getAspectClasses.and.returnValue(of([]));
 
         TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     declarations: [DeviceTypesComponent],
@@ -174,6 +178,7 @@ describe('DeviceTypesComponent', () => {
             },
         },
         { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
+        { provide: AspectClassesService, useValue: aspectClassesServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
     ]

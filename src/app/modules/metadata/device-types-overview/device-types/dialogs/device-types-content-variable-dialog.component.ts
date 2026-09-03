@@ -18,6 +18,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     contentVariableAspectIds,
+    DeviceTypeAspectClassModel,
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel,
     DeviceTypeFunctionModel
@@ -43,6 +44,7 @@ interface DeviceTypeFunctionClassModel extends DeviceTypeFunctionModel {
 
 interface DeviceTypeAspectModelWithRootName extends DeviceTypeAspectModel {
     root_name?: string;
+    aspect_class_name?: string;
 }
 
 @Component({
@@ -62,6 +64,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     aspects: DeviceTypeAspectModel[] = [];
     aspectOptions: DeviceTypeAspectModelWithRootName[] = [];
     private classifiedAspects = new Map<string, { classId: string; name: string }>();
+    private aspectClassNames = new Map<string, string>();
     allowVoid = false;
     prohibitedNames: string[] = [];
 
@@ -76,6 +79,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             functions: DeviceTypeFunctionModel[];
             concepts: ConceptsCharacteristicsModel[];
             aspects: DeviceTypeAspectModel[];
+            aspectClasses?: DeviceTypeAspectClassModel[];
             allowVoid: boolean;
             prohibitedNames: string[];
         },
@@ -90,6 +94,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         this.concepts = data.concepts;
         this.aspects = data.aspects;
         this.classifiedAspects = this.collectClassifiedAspects(this.aspects);
+        this.aspectClassNames = new Map((data.aspectClasses || []).map(c => [c.id, c.name]));
         this.allowVoid = data.allowVoid;
         this.prohibitedNames = data.prohibitedNames;
     }
@@ -113,6 +118,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             this.aspectOptions.push(...this.getAllAspectsOnTree(a, '', a.name));
         });
         this.aspectOptions = this.aspectOptions.filter(a => !this.aspectDisabled(a));
+        this.nameAspectClasses();
         this.highlightCharacteristics();
         this.highlightFunctions();
     }
@@ -407,6 +413,25 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         });
         return result;
     }
+
+    /**
+     * The aspect name alone does not say which class an aspect belongs to, and two classes may hold
+     * aspects of the same name. The class therefore rides along with every option: the picker groups
+     * by it, the chip carries it as a prefix. An aspect without a class carries neither, and a class
+     * whose name is unknown - the aspect-classes are not readable for every user - counts as none.
+     */
+    private nameAspectClasses(): void {
+        this.aspectOptions.forEach((option) => {
+            const classId = this.classifiedAspects.get(option.id)?.classId;
+            option.aspect_class_name = classId === undefined ? undefined : this.aspectClassNames.get(classId);
+        });
+        // Aspects without a class keep the order of the tree and render without a header; the class
+        // groups follow them, so every header stands directly above the aspects it covers.
+        this.aspectOptions.sort((a, b) => (a.aspect_class_name || '').localeCompare(b.aspect_class_name || ''));
+    }
+
+    /** ng-select renders no header for an undefined group, which is what an aspect without a class needs. */
+    aspectClassGroup = (option: DeviceTypeAspectModelWithRootName): string | undefined => option.aspect_class_name;
 
     aspectDisabled(aspect: DeviceTypeAspectModel): boolean {
         return !(aspect.sub_aspects === null || aspect.sub_aspects === undefined || aspect.sub_aspects.length == 0);

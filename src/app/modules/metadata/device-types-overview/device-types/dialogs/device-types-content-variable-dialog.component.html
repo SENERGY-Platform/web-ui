@@ -39,7 +39,13 @@
         <mat-form-field appearance="outline" class="full-width" color="accent">
             <mat-label>Aspects</mat-label>
             <mtx-select [items]="aspectOptions" bindValue="id" bindLabel="name" formControlName="aspect_ids" multiple
-                closeOnSelect="false" appendTo=".ng-select-anchor"></mtx-select>
+                closeOnSelect="false" [groupBy]="aspectClassGroup" appendTo=".ng-select-anchor">
+                <ng-template ng-label-tmp let-item="item" let-clear="clear">
+                    <span class="ng-value-icon left" (click)="clear(item)" aria-hidden="true">&times;</span>
+                    <span class="ng-value-label"><span class="aspect-class-name"
+                            *ngIf="item.aspect_class_name">{{item.aspect_class_name}}</span>{{item.name}}</span>
+                </ng-template>
+            </mtx-select>
             <mat-error senergyError label="Aspects"></mat-error>
         </mat-form-field>
 
