@@ -92,7 +92,7 @@ export class DeviceTypesComponent implements OnInit {
     userHasEditAuthorization = this.deviceTypeService.userHasUpdateAuthorization();
 
     timeAttributeKey = 'senergy/time_path';
-    knownDTAttributes = ['senergy/canary-device-type', 'senergy/snowflake-canary-device-type', 'senergy/local-mqtt', 'senergy/zigbee-dc', 'senergy/zigbee-vendor', 'senergy/zigbee-model', 'senergy/zwave-dc', 'senergy/zwave-type-mapping-key', 'senergy/mqtt-generate-services'];
+    knownDTAttributes = ['senergy/canary-device-type', 'senergy/snowflake-canary-device-type', 'senergy/local-mqtt', 'senergy/zigbee-dc', 'senergy/zigbee-vendor', 'senergy/zigbee-model', 'senergy/zwave-dc', 'senergy/zwave-type-mapping-key', 'senergy/mqtt-generate-services', 'wmbus/driver'];
     knownServiceAttributes = ['senergy/local-mqtt/event-topic-tmpl', 'senergy/local-mqtt/cmd-topic-tmpl', 'senergy/local-mqtt/resp-topic-tmpl', 'senergy/time_path', 'json-unwrap-input', 'json-unwrap-output', 'mgw-service-selection-condition'];
 
     constructor(

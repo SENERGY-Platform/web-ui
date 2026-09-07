@@ -36,7 +36,7 @@ export class DeviceInstancesEditDialogComponent implements OnDestroy {
     nicknameAttributeOrigin = 'shared';
     action = 'Edit';
     localIdIsEditable = false;
-    knownAttributes = ['anomaly-detector', 'timezone', 'inactive', 'last_message_max_age', 'monitor_connection_state', 'platform/mute-format-error', 'senergy/snowflake-canary-device', 'senergy/canary-device', 'senergy/lora/dev-addr', 'senergy/lora/app-key', 'senergy/lora/gen-app-key', 'senergy/lora/nwk-key', 'senergy/lora/app-s-key', 'senergy/lora/nwk-s-enc-key', 'senergy/lora/s-nwk-s-int-key', 'senergy/lora/f-nwk-s-int-key', 'senergy/lora/join-eui', 'senergy/lora/duplicate'];
+    knownAttributes = ['anomaly-detector', 'timezone', 'inactive', 'last_message_max_age', 'monitor_connection_state', 'platform/mute-format-error', 'senergy/snowflake-canary-device', 'senergy/canary-device', 'senergy/lora/dev-addr', 'senergy/lora/app-key', 'senergy/lora/gen-app-key', 'senergy/lora/nwk-key', 'senergy/lora/app-s-key', 'senergy/lora/nwk-s-enc-key', 'senergy/lora/s-nwk-s-int-key', 'senergy/lora/f-nwk-s-int-key', 'senergy/lora/join-eui', 'senergy/lora/duplicate', 'wmbus/driver'];
 
     protocolConstraints: string[] = [];
     userHasUpdateDisplayNameAuthorization = false;
