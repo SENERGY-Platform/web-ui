@@ -1,0 +1,111 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<p class="section-hint">
+    A fault disturbs only what is sent to the platform, not the simulated world -- channel readers, aggregates and the asset state keep the undisturbed value.
+</p>
+<p class="section-hint" *ngIf="!cumulative">
+    Meter exchange only applies to a channel whose source counts up (profile.cumulative or dataset.cumulative).
+</p>
+
+<p class="fault-list-problem" *ngIf="listProblem() as msg">
+    <mat-icon color="warn">error</mat-icon> {{msg}}
+</p>
+
+<p class="empty-hint" *ngIf="!faults?.length">No faults yet.</p>
+
+<div class="fault-row" *ngFor="let fault of faults; let i = index; trackBy: trackByFault" [class.problem-row]="hasRowProblem(i)">
+    <div class="fault-row-fields">
+        <mat-form-field appearance="outline" color="accent" class="fault-kind-field">
+            <mat-label>Kind</mat-label>
+            <mtx-select [ngModel]="fault.kind" [ngModelOptions]="{standalone: true}" (ngModelChange)="onKindChange(fault, $event)"
+                appendTo=".ng-select-anchor">
+                <mtx-option *ngFor="let k of FAULT_KINDS" [value]="k" [disabled]="k === 'meter_exchange' && !cumulative">
+                    <span [attr.title]="k === 'meter_exchange' && !cumulative ? 'Needs a cumulative source (profile.cumulative or dataset.cumulative).' : null">{{faultKindLabel(k)}}</span>
+                </mtx-option>
+            </mtx-select>
+            <mat-hint>{{faultKindDescription(fault.kind)}}</mat-hint>
+        </mat-form-field>
+
+        <mat-button-toggle-group *ngIf="fault.kind !== 'meter_exchange'" [value]="mode(fault)"
+            (change)="onModeChange(fault, $event.value)">
+            <mat-button-toggle value="window">Window</mat-button-toggle>
+            <mat-button-toggle value="rate">Rate</mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <ng-container *ngIf="fault.kind === 'meter_exchange' || mode(fault) === 'window'">
+            <mat-form-field appearance="outline" color="accent" class="fault-narrow-field">
+                <mat-label>From</mat-label>
+                <input matInput type="datetime-local" step="1" [ngModel]="localFrom(fault)" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="setFrom(fault, $event)">
+            </mat-form-field>
+            <mat-form-field appearance="outline" color="accent" class="fault-narrow-field" *ngIf="fault.kind !== 'meter_exchange'">
+                <mat-label>To</mat-label>
+                <input matInput type="datetime-local" step="1" [ngModel]="localTo(fault)" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="setTo(fault, $event)">
+            </mat-form-field>
+        </ng-container>
+
+        <ng-container *ngIf="fault.kind !== 'meter_exchange' && mode(fault) === 'rate'">
+            <mat-form-field appearance="outline" color="accent" class="fault-narrow-field">
+                <mat-label>Per hour</mat-label>
+                <input matInput type="number" [ngModel]="fault.per_hour" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="setNumber(fault, 'per_hour', $event)">
+            </mat-form-field>
+            <mat-form-field appearance="outline" color="accent" class="fault-narrow-field">
+                <mat-label>Duration (s)</mat-label>
+                <input matInput type="number" step="1" [ngModel]="fault.duration_seconds" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="setNumber(fault, 'duration_seconds', $event)">
+            </mat-form-field>
+        </ng-container>
+
+        <mat-form-field appearance="outline" color="accent" class="fault-narrow-field" *ngIf="fault.kind === 'spike'">
+            <mat-label>Factor</mat-label>
+            <input matInput type="number" [ngModel]="fault.factor" [ngModelOptions]="{standalone: true}"
+                (ngModelChange)="setNumber(fault, 'factor', $event)">
+            <mat-icon matSuffix class="inline-help-icon"
+                matTooltip="Multiplies the reading. 0 is a real defect and allowed; 1 is refused, it would be invisible in the series.">help_outline</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" color="accent" class="fault-narrow-field" *ngIf="fault.kind === 'meter_exchange'">
+            <mat-label>Reset to</mat-label>
+            <input matInput type="number" min="0" [ngModel]="fault.reset_to" [ngModelOptions]="{standalone: true}"
+                (ngModelChange)="setNumber(fault, 'reset_to', $event)">
+        </mat-form-field>
+
+        <span class="fault-row-actions">
+            <button mat-icon-button type="button" color="warn" matTooltip="Remove fault" (click)="removeFault(i)">
+                <mat-icon>delete</mat-icon>
+            </button>
+        </span>
+    </div>
+
+    <div class="fault-row-problems" *ngIf="rowProblems(i).length > 0 || clientProblems(fault, i).length > 0">
+        <div class="fault-row-problem" *ngFor="let p of rowProblems(i)">
+            <mat-icon color="warn">error</mat-icon>
+            <span>{{p.field ? p.field + ': ' : ''}}{{p.message}}</span>
+        </div>
+        <div class="fault-row-problem" *ngFor="let msg of clientProblems(fault, i)">
+            <mat-icon color="warn">error</mat-icon>
+            <span>{{msg}}</span>
+        </div>
+    </div>
+</div>
+
+<button mat-stroked-button color="accent" type="button" [disabled]="(faults?.length || 0) >= MAX_FAULTS" (click)="addFault()">
+    <mat-icon>add</mat-icon> Add fault
+</button>
+<p class="section-hint" *ngIf="(faults?.length || 0) >= MAX_FAULTS">At most {{MAX_FAULTS}} faults per channel.</p>

@@ -141,6 +141,30 @@ describe('findNonIntegerFields', () => {
         expect(findNonIntegerFields(env)).toEqual(['zones[0].assets[0].channels[0].source.schedule.states[1].duration_seconds']);
     });
 
+    it('flags a non-integer fault duration with its fault-indexed path', () => {
+        const env: Environment = {
+            id: 'e1',
+            zones: [
+                {
+                    id: 'z1',
+                    assets: [
+                        {
+                            id: 'a1',
+                            channels: [
+                                {
+                                    id: 'c1',
+                                    interval_seconds: 60,
+                                    faults: [{ kind: 'outage', per_hour: 1, duration_seconds: 90.5 }],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        };
+        expect(findNonIntegerFields(env)).toEqual(['zones[0].assets[0].channels[0].faults[0].duration_seconds']);
+    });
+
     it('does not flag fields that are simply unset', () => {
         const env: Environment = {
             id: 'e1',

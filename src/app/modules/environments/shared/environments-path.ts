@@ -29,6 +29,12 @@ export interface ProblemPath {
     suffix?: string;
 }
 
+/** A validation problem located exactly at a node (see indexProblems in environment-detail.component.ts): its message plus the suffix identifying which field within the node it concerns. */
+export interface NodeProblem {
+    message: string;
+    suffix?: string;
+}
+
 const SEGMENT_RE = /^(zones|assets|channels)\[(\d+)\]\.?/;
 
 /**

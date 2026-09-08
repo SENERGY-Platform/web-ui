@@ -46,6 +46,7 @@ import {
     ENVIRONMENT_TYPES,
     environmentTypeLabel,
     EnvironmentState,
+    Fault,
     isApiError,
     isValidationError,
     Problem,
@@ -60,7 +61,7 @@ import {
     zoneTypeLabel,
 } from '../shared/environments.model';
 import { EnvTreeNode, buildEnvironmentTree, findNodeByKey, locationKey, pathToKey } from '../shared/environments-tree';
-import { locationContains, ProblemPath, problemPath, sameLocation } from '../shared/environments-path';
+import { locationContains, NodeProblem, ProblemPath, problemPath, sameLocation } from '../shared/environments-path';
 import { applySourceKind } from '../shared/environments-source';
 import { findNonIntegerFields } from '../shared/environments-integrity';
 import { countPendingPlatformDevices } from '../shared/environments-count';
@@ -86,11 +87,6 @@ import {
 import { EnvironmentsVersionConflictDialogComponent } from './dialogs/environments-version-conflict-dialog.component';
 import { EnvironmentsHistoryComponent } from './history/environments-history.component';
 import { submeteredChildren, SubmeteredChild, submeteringTargets, SubmeteringOption } from '../shared/environments-submetering';
-
-interface SelectedNodeProblem {
-    message: string;
-    suffix?: string;
-}
 
 /** One zone or asset row in the Live state tab: the suggested defaults, the working draft and which keys the user actually touched. */
 interface LiveStateEntry {
@@ -136,7 +132,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     /** Node keys with a problem at or below them, for the tree badge. Recomputed once per problems/tree change, not per template check. */
     problemNodeKeys = new Set<string>();
     /** Problems located exactly at the selected node, for display above its editor. */
-    selectedNodeProblems: SelectedNodeProblem[] = [];
+    selectedNodeProblems: NodeProblem[] = [];
     /** Formula source's inputs as a stable array for *ngFor; recomputed on selection or structural change, not on every keystroke. */
     formulaEntries: { name: string; ref: string }[] = [];
     /** Every channel/context/zone/asset key a formula input could point at; recomputed whenever the document's structure changes. */
@@ -219,7 +215,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     /** Present only while the History tab has been visited at least once (see the tab's default lazy-render behaviour). */
     @ViewChild(EnvironmentsHistoryComponent) historyComponent: EnvironmentsHistoryComponent | undefined;
 
-    private selectedNodeProblemsByKey = new Map<string, SelectedNodeProblem[]>();
+    private selectedNodeProblemsByKey = new Map<string, NodeProblem[]>();
 
     /** Owner id -> username, filled in lazily by loadUserNames once the environment is loaded. */
     userIdToName: { [key: string]: string } = {};
@@ -465,6 +461,18 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         return this.selectedNode?.kind === 'channel' ? (this.selectedNode.data as Channel) : undefined;
     }
 
+    /** Whether the selected channel's source counts up -- the only kind of reading a meter_exchange fault can restart. Mirrors domain.CumulativeSource in moses. */
+    get selectedChannelSourceCumulative(): boolean {
+        const source = this.selectedChannel?.source;
+        if (source?.kind === 'profile') {
+            return !!source.profile?.cumulative;
+        }
+        if (source?.kind === 'dataset') {
+            return !!source.dataset?.cumulative;
+        }
+        return false;
+    }
+
     /** The device type name behind the selected asset's external_type_id, or the raw id while the catalog is still loading. */
     get selectedAssetDeviceTypeName(): string | undefined {
         const typeId = this.selectedAsset?.external_type_id;
@@ -703,9 +711,22 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         return env.timeline;
     }
 
+    /** Materialises a channel's faults as [] on first read, same convention as timelineOf. */
+    faultsOf(channel: Channel): Fault[] {
+        if (!channel.faults) {
+            channel.faults = [];
+        }
+        return channel.faults;
+    }
+
     onTimelineChange(): void {
         this.markDirty();
         this.refreshLockedContextKeys();
+    }
+
+    /** faultsRestructured handler: adding/removing a fault row shifts the server's index-based problems, so it needs the same stale-problem treatment as every other structural edit (see afterStructuralChange). */
+    onFaultsRestructured(): void {
+        this.afterStructuralChange();
     }
 
     /** Opens the shared device picker and, once a device is chosen, resolves its display name, type and service catalog. */
@@ -1154,7 +1175,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             if (parsed.some(({ location }) => locationContains(node.location, location))) {
                 this.problemNodeKeys.add(node.key);
             }
-            const exact: SelectedNodeProblem[] = parsed
+            const exact: NodeProblem[] = parsed
                 .filter(({ location }) => sameLocation(location, node.location))
                 .map(({ problem, location }) => ({ message: problem.message || '', suffix: location.suffix }));
             if (exact.length > 0) {

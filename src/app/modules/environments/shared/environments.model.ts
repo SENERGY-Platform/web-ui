@@ -138,6 +138,38 @@ export function sourceKindDescription(kind: SourceKind | undefined): string {
     return sourceKindDescriptions[kind] || '';
 }
 
+export type FaultKind = 'outage' | 'frozen' | 'spike' | 'meter_exchange';
+
+export const FAULT_KINDS: FaultKind[] = ['outage', 'frozen', 'spike', 'meter_exchange'];
+
+const faultKindLabels: Record<FaultKind, string> = {
+    outage: 'Outage',
+    frozen: 'Frozen',
+    spike: 'Spike',
+    meter_exchange: 'Meter exchange',
+};
+
+export function faultKindLabel(kind: FaultKind | undefined): string {
+    if (kind === undefined) {
+        return 'Unknown';
+    }
+    return faultKindLabels[kind] || kind;
+}
+
+const faultKindDescriptions: Record<FaultKind, string> = {
+    outage: 'Nothing is sent to the platform while it lasts.',
+    frozen: 'The reading of the instant the occurrence began is repeated.',
+    spike: 'The reading is multiplied by a factor.',
+    meter_exchange: 'A cumulative register restarts at a given value and counts on from there.',
+};
+
+export function faultKindDescription(kind: FaultKind | undefined): string {
+    if (kind === undefined) {
+        return '';
+    }
+    return faultKindDescriptions[kind] || '';
+}
+
 export type DatasetOrigin = 'platform' | 'file' | 'endpoint';
 
 // The editor only offers file and platform; 'endpoint' has no editor built for it yet.
@@ -331,6 +363,29 @@ export interface Channel {
     /** The platform service id this channel publishes to. */
     external_ref?: string;
     source?: Source;
+    /** Defects injected into what this channel publishes -- see docs/injected-faults.md in moses. Only meaningful on a sensor channel with interval_seconds > 0. */
+    faults?: Fault[];
+}
+
+/**
+ * One defect injected into a sensor channel's measurement: the value is computed and
+ * remembered undisturbed, only what is published carries the fault. Triggered by either a
+ * window (from/to) or a rate (per_hour/duration_seconds), never both.
+ */
+export interface Fault {
+    kind: FaultKind;
+    /** RFC3339, whole seconds. Window start (inclusive), or the meter_exchange instant. */
+    from?: string;
+    /** RFC3339, whole seconds, exclusive. Window end; not used by meter_exchange, which is one instant. */
+    to?: string;
+    /** Rate mode: occurrences per hour, drawn from the environment seed. */
+    per_hour?: number;
+    /** Rate mode: how long one drawn occurrence lasts, in whole seconds. */
+    duration_seconds?: number;
+    /** spike only: multiplies the reading. 0 is a real defect and allowed; 1 is refused as invisible in the series. */
+    factor?: number;
+    /** meter_exchange only: the reading the new register starts counting from. */
+    reset_to?: number;
 }
 
 export interface Source {

@@ -25,11 +25,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 
-import {
-    EnvironmentsTimelineEditorComponent,
-    toLocalDateTimeInput,
-    toRfc3339Seconds,
-} from './environments-timeline-editor.component';
+import { EnvironmentsTimelineEditorComponent } from './environments-timeline-editor.component';
+import { toLocalDateTimeInput, toRfc3339Seconds } from '../../shared/environments-datetime';
 import { DatedChange } from '../../shared/environments.model';
 
 describe('EnvironmentsTimelineEditorComponent', () => {

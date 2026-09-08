@@ -448,6 +448,18 @@
                             </senergy-environments-schedule-editor>
                         </ng-container>
                     </ng-container>
+
+                    <mat-divider></mat-divider>
+                    <h3>Injected faults</h3>
+                    <ng-container *ngIf="selectedChannel!.direction === 'sensor' && (selectedChannel!.interval_seconds || 0) > 0; else noFaults">
+                        <senergy-environments-faults-editor [faults]="faultsOf(selectedChannel!)" [cumulative]="selectedChannelSourceCumulative"
+                            [problems]="selectedNodeProblems" [stepSeconds]="selectedChannel!.interval_seconds" (faultsChange)="markDirty()"
+                            (faultsRestructured)="onFaultsRestructured()">
+                        </senergy-environments-faults-editor>
+                    </ng-container>
+                    <ng-template #noFaults>
+                        <p class="section-hint">Only available on a sensor channel with an interval -- there are no readings to disturb otherwise.</p>
+                    </ng-template>
                 </ng-container>
             </form>
         </div>

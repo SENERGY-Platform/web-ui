@@ -17,25 +17,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DatedChange } from '../../shared/environments.model';
 import { TimelineTargetOption } from '../../shared/environments-timeline-targets';
-
-/**
- * Converts a datetime-local input's value (local wall-clock time, no timezone) to RFC3339 with
- * whole seconds. Truncates rather than rounds any finer precision -- datetime-local's own
- * granularity (step="1" here, i.e. whole seconds) never produces one in practice.
- */
-export function toRfc3339Seconds(localDateTime: string): string {
-    return new Date(localDateTime).toISOString().slice(0, 19) + 'Z';
-}
-
-/** The inverse of toRfc3339Seconds: an RFC3339 instant to the local wall-clock string a datetime-local input expects. */
-export function toLocalDateTimeInput(at: string): string {
-    const date = new Date(at);
-    const pad = (n: number): string => String(n).padStart(2, '0');
-    return (
-        date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) +
-        'T' + pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds())
-    );
-}
+import { toLocalDateTimeInput, toRfc3339Seconds } from '../../shared/environments-datetime';
 
 /**
  * The timeline editor: one row per DatedChange (when/target/value), add/remove/reorder like the

@@ -59,6 +59,11 @@ export function findNonIntegerFields(env: Environment): string[] {
                             problems.push(channelPath + '.source.schedule.states[' + stateIndex + '].duration_seconds');
                         }
                     });
+                    (channel.faults || []).forEach((fault, faultIndex) => {
+                        if (fault.duration_seconds !== undefined && !Number.isInteger(fault.duration_seconds)) {
+                            problems.push(channelPath + '.faults[' + faultIndex + '].duration_seconds');
+                        }
+                    });
                 });
             });
             walkZones(zone.zones, zonePath + '.');

@@ -48,6 +48,7 @@ import { EnvironmentsKeyValueEditorComponent } from '../key-value-editor/environ
 import { EnvironmentsProfileEditorComponent } from './profile-editor/environments-profile-editor.component';
 import { EnvironmentsScheduleEditorComponent } from './schedule-editor/environments-schedule-editor.component';
 import { EnvironmentsTimelineEditorComponent } from './timeline-editor/environments-timeline-editor.component';
+import { EnvironmentsFaultsEditorComponent } from './faults-editor/environments-faults-editor.component';
 import { EnvironmentsFactorBarsComponent } from './factor-bars/environments-factor-bars.component';
 import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
@@ -223,6 +224,7 @@ describe('EnvironmentDetailComponent', () => {
                 EnvironmentsProfileEditorComponent,
                 EnvironmentsScheduleEditorComponent,
                 EnvironmentsTimelineEditorComponent,
+                EnvironmentsFaultsEditorComponent,
                 EnvironmentsFactorBarsComponent,
                 EnvironmentsDatasetEditorComponent,
                 EnvironmentsLiveStateTilesComponent,
@@ -891,6 +893,88 @@ describe('EnvironmentDetailComponent', () => {
             component.select(subMeterNode);
 
             expect(component.selectedNodeProblems).toEqual([{ message: 'must reference an existing asset', suffix: 'submetered_by' }]);
+        });
+    });
+
+    describe('Injected faults section (channel form)', () => {
+        /** nestedEnvironment's one channel, with interval_seconds overridden -- a fault needs a sensor channel with an interval to disturb. */
+        function withChannelInterval(intervalSeconds: number | undefined): Environment {
+            return {
+                ...nestedEnvironment,
+                zones: [
+                    {
+                        ...nestedEnvironment.zones![0],
+                        assets: [
+                            {
+                                ...nestedEnvironment.zones![0].assets![0],
+                                channels: [{ ...nestedEnvironment.zones![0].assets![0].channels![0], interval_seconds: intervalSeconds }],
+                            },
+                        ],
+                    },
+                ],
+            };
+        }
+
+        function selectTheChannel(): void {
+            const channelNode = component.root!.children[0].children[0].children[0];
+            component.select(channelNode);
+            fixture.detectChanges();
+        }
+
+        it('renders the faults editor for a publishing sensor channel', () => {
+            loadWith(withChannelInterval(60));
+            selectTheChannel();
+
+            expect(fixture.nativeElement.querySelector('senergy-environments-faults-editor')).toBeTruthy();
+        });
+
+        it('shows why not, instead of the editor, for a channel without an interval', () => {
+            loadWith(withChannelInterval(undefined));
+            selectTheChannel();
+
+            expect(fixture.nativeElement.querySelector('senergy-environments-faults-editor')).toBeFalsy();
+            expect(fixture.nativeElement.textContent).toContain('there are no readings to disturb');
+        });
+
+        it('a problem at channels[0].faults[1].to reaches the editor\'s second row', () => {
+            loadWith(withChannelInterval(60));
+            component.markDirty();
+            component.save();
+            httpMock.expectOne(environmentsUrl + '/e1').flush(
+                { problems: [{ path: 'zones[0].assets[0].channels[0].faults[1].to', message: 'must lie after from' }] },
+                { status: 400, statusText: 'Bad Request' },
+            );
+
+            selectTheChannel();
+
+            const editor = fixture.debugElement.query(By.directive(EnvironmentsFaultsEditorComponent))
+                .componentInstance as EnvironmentsFaultsEditorComponent;
+            expect(editor.rowProblems(1)).toEqual([{ field: 'to', message: 'must lie after from' }]);
+        });
+
+        // BLOCKING-adjacent regression, same rationale as the tree-structure one above: removing
+        // a fault row shifts the server's index-based problems, so a stale one must not be left
+        // pointing at the wrong (or a vanished) row.
+        it('removing a fault row clears stale index-based problems instead of misplacing them', () => {
+            const env = withChannelInterval(60);
+            env.zones![0].assets![0].channels![0].faults = [{ kind: 'outage' }, { kind: 'frozen' }];
+            loadWith(env);
+            component.markDirty();
+            component.save();
+            httpMock.expectOne(environmentsUrl + '/e1').flush(
+                { problems: [{ path: 'zones[0].assets[0].channels[0].faults[1].to', message: 'must lie after from' }] },
+                { status: 400, statusText: 'Bad Request' },
+            );
+            selectTheChannel();
+            expect(component.problems.length).toBe(1);
+
+            const editor = fixture.debugElement.query(By.directive(EnvironmentsFaultsEditorComponent))
+                .componentInstance as EnvironmentsFaultsEditorComponent;
+            editor.removeFault(0);
+            fixture.detectChanges();
+
+            expect(component.problems).toEqual([]);
+            expect(editor.rowProblems(0)).toEqual([]);
         });
     });
 
