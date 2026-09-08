@@ -724,6 +724,11 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.refreshLockedContextKeys();
     }
 
+    /** timelineRestructured handler: adding/removing/moving a timeline row shifts the server's index-based problems, so it needs the same stale-problem treatment as every other structural edit (see afterStructuralChange). */
+    onTimelineRestructured(): void {
+        this.afterStructuralChange();
+    }
+
     /** faultsRestructured handler: adding/removing a fault row shifts the server's index-based problems, so it needs the same stale-problem treatment as every other structural edit (see afterStructuralChange). */
     onFaultsRestructured(): void {
         this.afterStructuralChange();

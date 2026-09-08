@@ -28,6 +28,7 @@ import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { EnvironmentsTimelineEditorComponent } from './environments-timeline-editor.component';
 import { toLocalDateTimeInput, toRfc3339Seconds } from '../../shared/environments-datetime';
 import { DatedChange } from '../../shared/environments.model';
+import { NodeProblem } from '../../shared/environments-path';
 
 describe('EnvironmentsTimelineEditorComponent', () => {
     let component: EnvironmentsTimelineEditorComponent;
@@ -52,22 +53,31 @@ describe('EnvironmentsTimelineEditorComponent', () => {
         component = fixture.componentInstance;
     }));
 
+    /** Assigns `problems` and drives ngOnChanges the way a real parent binding would, since a direct property assignment on a fixture created without a host template does not. */
+    function setProblems(problems: NodeProblem[]): void {
+        component.problems = problems;
+        component.ngOnChanges({ problems: { currentValue: problems, previousValue: undefined, firstChange: true, isFirstChange: () => true } });
+    }
+
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
     describe('rows: add/remove/reorder', () => {
-        it('addRow appends a row with sane defaults, mutates in place and emits', () => {
+        it('addRow appends a row with sane defaults, mutates in place and emits both signals', () => {
             const timeline: DatedChange[] = [];
             component.timeline = timeline;
             let emitted = false;
+            let restructured = false;
             component.timelineChange.subscribe(() => (emitted = true));
+            component.timelineRestructured.subscribe(() => (restructured = true));
 
             component.addRow();
 
             expect(timeline.length).toBe(1);
             expect(timeline[0]).toEqual({ at: '', target: '', value: 0 });
             expect(emitted).toBe(true);
+            expect(restructured).toBe(true);
         });
 
         it('does nothing when timeline is not bound yet', () => {
@@ -75,22 +85,25 @@ describe('EnvironmentsTimelineEditorComponent', () => {
             expect(() => component.addRow()).not.toThrow();
         });
 
-        it('removeRow drops the row at the given index and emits', () => {
+        it('removeRow drops the row at the given index and emits both signals', () => {
             const timeline: DatedChange[] = [
                 { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 1 },
                 { at: '2026-01-02T00:00:00Z', target: 'context.b', value: 2 },
             ];
             component.timeline = timeline;
             let emitted = false;
+            let restructured = false;
             component.timelineChange.subscribe(() => (emitted = true));
+            component.timelineRestructured.subscribe(() => (restructured = true));
 
             component.removeRow(0);
 
             expect(timeline.map((r) => r.target)).toEqual(['context.b']);
             expect(emitted).toBe(true);
+            expect(restructured).toBe(true);
         });
 
-        it('moveRowUp/moveRowDown reorder in place and emit', () => {
+        it('moveRowUp/moveRowDown reorder in place and emit both signals', () => {
             const timeline: DatedChange[] = [
                 { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 1 },
                 { at: '2026-01-02T00:00:00Z', target: 'context.b', value: 2 },
@@ -98,7 +111,9 @@ describe('EnvironmentsTimelineEditorComponent', () => {
             ];
             component.timeline = timeline;
             let emitted = false;
+            let restructured = false;
             component.timelineChange.subscribe(() => (emitted = true));
+            component.timelineRestructured.subscribe(() => (restructured = true));
 
             component.moveRowDown(0);
             expect(timeline.map((r) => r.target)).toEqual(['context.b', 'context.a', 'context.c']);
@@ -106,20 +121,24 @@ describe('EnvironmentsTimelineEditorComponent', () => {
             component.moveRowUp(2);
             expect(timeline.map((r) => r.target)).toEqual(['context.b', 'context.c', 'context.a']);
             expect(emitted).toBe(true);
+            expect(restructured).toBe(true);
         });
 
-        it('does not move a row past either end of the list', () => {
+        it('does not move a row past either end of the list, and does not emit timelineRestructured', () => {
             const timeline: DatedChange[] = [
                 { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 1 },
                 { at: '2026-01-02T00:00:00Z', target: 'context.b', value: 2 },
             ];
             component.timeline = timeline;
+            let restructured = false;
+            component.timelineRestructured.subscribe(() => (restructured = true));
 
             component.moveRowUp(0);
             expect(timeline.map((r) => r.target)).toEqual(['context.a', 'context.b']);
 
             component.moveRowDown(1);
             expect(timeline.map((r) => r.target)).toEqual(['context.a', 'context.b']);
+            expect(restructured).toBe(false);
         });
     });
 
@@ -128,16 +147,31 @@ describe('EnvironmentsTimelineEditorComponent', () => {
             expect(component.localValue({})).toBe('');
         });
 
-        it('setAt converts a local datetime-local value to RFC3339 with a trailing Z and emits', () => {
+        it('setAt converts a local datetime-local value to RFC3339 with a trailing Z, emits timelineChange only', () => {
             const row: DatedChange = {};
             component.timeline = [row];
             let emitted = false;
+            let restructured = false;
             component.timelineChange.subscribe(() => (emitted = true));
+            component.timelineRestructured.subscribe(() => (restructured = true));
 
             component.setAt(row, '2026-06-15T08:30:45');
 
             expect(row.at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
             expect(emitted).toBe(true);
+            expect(restructured).toBe(false);
+        });
+
+        it('onFieldChange (target/value edits) emits timelineChange only', () => {
+            let emitted = false;
+            let restructured = false;
+            component.timelineChange.subscribe(() => (emitted = true));
+            component.timelineRestructured.subscribe(() => (restructured = true));
+
+            component.onFieldChange();
+
+            expect(emitted).toBe(true);
+            expect(restructured).toBe(false);
         });
 
         it('setAt with an empty value clears at', () => {
@@ -184,5 +218,123 @@ describe('EnvironmentsTimelineEditorComponent', () => {
         component.timeline = [];
         fixture.detectChanges();
         expect(fixture.nativeElement.querySelector('.empty-hint')).toBeTruthy();
+    });
+
+    describe('problems', () => {
+        it('listProblem returns the message for a problem on the timeline list itself', () => {
+            setProblems([{ message: 'a timeline may carry at most 100 entries, got 101', suffix: 'timeline' }]);
+
+            expect(component.listProblem()).toBe('a timeline may carry at most 100 entries, got 101');
+        });
+
+        it('rowProblems matches a suffix to its row and only that row', () => {
+            setProblems([
+                { message: 'a time is required', suffix: 'timeline[1].at' },
+                { message: 'target problem', suffix: 'timeline[0].target' },
+            ]);
+
+            expect(component.rowProblems(1)).toEqual([{ field: 'at', message: 'a time is required' }]);
+            expect(component.rowProblems(0)).toEqual([{ field: 'target', message: 'target problem' }]);
+            expect(component.hasRowProblem(2)).toBe(false);
+        });
+
+        it('rowProblems also matches a problem naming the whole entry, without a field suffix', () => {
+            setProblems([{ message: 'already changes this target at that instant', suffix: 'timeline[0]' }]);
+
+            expect(component.rowProblems(0)).toEqual([{ field: undefined, message: 'already changes this target at that instant' }]);
+        });
+
+        it('ignores problems for other suffixes, such as a fault or a zone', () => {
+            setProblems([
+                { message: 'must lie after from', suffix: 'faults[0].to' },
+                { message: 'must not be empty', suffix: 'zones[0].name' },
+            ]);
+
+            expect(component.rowProblems(0)).toEqual([]);
+            expect(component.listProblem()).toBeUndefined();
+        });
+    });
+
+    describe('row highlight in the DOM', () => {
+        it('applies problem-row and shows the message only on the row a problem names', () => {
+            component.timeline = [
+                { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 1 },
+                { at: '2026-01-02T00:00:00Z', target: 'context.b', value: 2 },
+            ];
+            setProblems([{ message: 'a time is required', suffix: 'timeline[1].at' }]);
+            fixture.detectChanges();
+
+            const rows: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.timeline-row'));
+            expect(rows.length).toBe(2);
+            expect(rows[0].classList.contains('problem-row')).toBe(false);
+            expect(rows[1].classList.contains('problem-row')).toBe(true);
+            expect(rows[1].textContent).toContain('a time is required');
+            expect(rows[0].textContent).not.toContain('a time is required');
+        });
+    });
+
+    describe('clientProblems (client-side pre-check, advisory only)', () => {
+        it('does not flag a freshly added row, which starts with both at and target empty', () => {
+            const timeline: DatedChange[] = [];
+            component.timeline = timeline;
+
+            component.addRow();
+
+            expect(component.clientProblems(timeline[0], 0)).toEqual([]);
+            expect(component.hasRowProblem(0)).toBe(false);
+        });
+
+        it('flags a later row that changes the same target at the same instant as an earlier one, but not the earlier row itself, once onFieldChange has recomputed the cache', () => {
+            const timeline: DatedChange[] = [
+                { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 1 },
+                { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 2 },
+            ];
+            component.timeline = timeline;
+
+            component.onFieldChange();
+
+            expect(component.clientProblems(timeline[0], 0)).toEqual([]);
+            expect(component.clientProblems(timeline[1], 1)).toEqual(['will be refused: already changes this target at that instant']);
+            expect(component.hasRowProblem(1)).toBe(true);
+        });
+
+        it('detects a duplicate introduced through a timeline input change, via ngOnChanges, without a field edit', () => {
+            const timeline: DatedChange[] = [
+                { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 1 },
+                { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 2 },
+            ];
+            component.timeline = timeline;
+
+            component.ngOnChanges({ timeline: { currentValue: timeline, previousValue: undefined, firstChange: true, isFirstChange: () => true } });
+
+            expect(component.clientProblems(timeline[1], 1)).toEqual(['will be refused: already changes this target at that instant']);
+        });
+
+        it('does not flag rows with different targets or different instants', () => {
+            const timeline: DatedChange[] = [
+                { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 1 },
+                { at: '2026-01-01T00:00:00Z', target: 'context.b', value: 2 },
+                { at: '2026-01-02T00:00:00Z', target: 'context.a', value: 3 },
+            ];
+            component.timeline = timeline;
+
+            component.onFieldChange();
+
+            expect(component.clientProblems(timeline[1], 1)).toEqual([]);
+            expect(component.clientProblems(timeline[2], 2)).toEqual([]);
+        });
+
+        it('never flags a row with an empty at or target, even if another row shares the other field', () => {
+            const timeline: DatedChange[] = [
+                { at: '', target: 'context.a', value: 1 },
+                { at: '', target: 'context.a', value: 2 },
+            ];
+            component.timeline = timeline;
+
+            component.onFieldChange();
+
+            expect(component.clientProblems(timeline[0], 0)).toEqual([]);
+            expect(component.clientProblems(timeline[1], 1)).toEqual([]);
+        });
     });
 });

@@ -49,3 +49,38 @@
 .timeline-row-actions {
     margin-left: auto;
 }
+
+.timeline-row.problem-row {
+    border-color: rgba(244, 67, 54, 0.6);
+}
+
+.timeline-list-problem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(244, 67, 54, 0.08);
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.timeline-row-problems {
+    flex-basis: 100%;
+    background: rgba(244, 67, 54, 0.08);
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.timeline-row-problem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.timeline-row-problem mat-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+}

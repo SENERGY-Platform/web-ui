@@ -17,9 +17,14 @@
 <p class="section-hint">
     A timeline entry is a jump: at the given time, the target switches straight to the given value, with no ramp and no effect before that time.
 </p>
+
+<p class="timeline-list-problem" *ngIf="listProblem() as msg">
+    <mat-icon color="warn">error</mat-icon> {{msg}}
+</p>
+
 <p class="empty-hint" *ngIf="!timeline?.length">No timeline entries yet.</p>
 
-<div class="timeline-row" *ngFor="let row of timeline; let i = index; trackBy: trackByRow">
+<div class="timeline-row" *ngFor="let row of timeline; let i = index; trackBy: trackByRow" [class.problem-row]="hasRowProblem(i)">
     <mat-form-field appearance="outline" color="accent" class="timeline-at-field">
         <mat-label>At</mat-label>
         <input matInput type="datetime-local" step="1" [ngModel]="localValue(row)" [ngModelOptions]="{standalone: true}"
@@ -46,6 +51,17 @@
             <mat-icon>delete</mat-icon>
         </button>
     </span>
+
+    <div class="timeline-row-problems" *ngIf="rowProblems(i).length > 0 || clientProblems(row, i).length > 0">
+        <div class="timeline-row-problem" *ngFor="let p of rowProblems(i)">
+            <mat-icon color="warn">error</mat-icon>
+            <span>{{p.field ? p.field + ': ' : ''}}{{p.message}}</span>
+        </div>
+        <div class="timeline-row-problem" *ngFor="let msg of clientProblems(row, i)">
+            <mat-icon color="warn">error</mat-icon>
+            <span>{{msg}}</span>
+        </div>
+    </div>
 </div>
 
 <button mat-stroked-button color="accent" type="button" (click)="addRow()">

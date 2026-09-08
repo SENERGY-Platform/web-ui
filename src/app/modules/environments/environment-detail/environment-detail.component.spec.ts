@@ -1353,6 +1353,73 @@ describe('EnvironmentDetailComponent', () => {
             const heading = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('h3')).find((h) => h.textContent?.includes('Timeline'));
             expect(heading).toBeTruthy();
         });
+
+        // BLOCKING-adjacent regression, same rationale as the tree-structure and faults-editor
+        // ones above: reordering or removing a timeline row shifts the server's index-based
+        // problems, so a stale one must not be left pointing at the wrong (or a vanished) row.
+        it('onTimelineRestructured clears stale index-based problems', () => {
+            loadWith(nestedEnvironment);
+            component.markDirty();
+            component.save();
+            httpMock
+                .expectOne(environmentsUrl + '/e1')
+                .flush({ problems: [{ path: 'timeline[0].at', message: 'a time is required' }] }, { status: 400, statusText: 'Bad Request' });
+            expect(component.problems.length).toBe(1);
+
+            component.onTimelineRestructured();
+
+            expect(component.problems).toEqual([]);
+        });
+
+        it('a problem at timeline[1].at reaches the timeline editor\'s second row', () => {
+            const env: Environment = {
+                ...nestedEnvironment,
+                timeline: [
+                    { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 1 },
+                    { at: '2026-01-02T00:00:00Z', target: 'context.b', value: 2 },
+                ],
+            };
+            loadWith(env);
+            component.markDirty();
+            component.save();
+            httpMock
+                .expectOne(environmentsUrl + '/e1')
+                .flush({ problems: [{ path: 'timeline[1].at', message: 'a time is required' }] }, { status: 400, statusText: 'Bad Request' });
+            fixture.detectChanges();
+
+            const editor = fixture.debugElement.query(By.directive(EnvironmentsTimelineEditorComponent))
+                .componentInstance as EnvironmentsTimelineEditorComponent;
+            expect(editor.rowProblems(1)).toEqual([{ field: 'at', message: 'a time is required' }]);
+        });
+
+        // BLOCKING-adjacent regression, same rationale as the tree-structure and faults-editor
+        // ones above: removing a timeline row shifts the server's index-based problems, so a
+        // stale one must not be left pointing at the wrong (or a vanished) row.
+        it('removing a timeline row clears stale index-based problems instead of misplacing them', () => {
+            const env: Environment = {
+                ...nestedEnvironment,
+                timeline: [
+                    { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 1 },
+                    { at: '2026-01-02T00:00:00Z', target: 'context.b', value: 2 },
+                ],
+            };
+            loadWith(env);
+            component.markDirty();
+            component.save();
+            httpMock
+                .expectOne(environmentsUrl + '/e1')
+                .flush({ problems: [{ path: 'timeline[1].at', message: 'a time is required' }] }, { status: 400, statusText: 'Bad Request' });
+            fixture.detectChanges();
+            expect(component.problems.length).toBe(1);
+
+            const editor = fixture.debugElement.query(By.directive(EnvironmentsTimelineEditorComponent))
+                .componentInstance as EnvironmentsTimelineEditorComponent;
+            editor.removeRow(0);
+            fixture.detectChanges();
+
+            expect(component.problems).toEqual([]);
+            expect(editor.rowProblems(0)).toEqual([]);
+        });
     });
 
     describe('device type / service lookups for the read-only asset and channel fields', () => {

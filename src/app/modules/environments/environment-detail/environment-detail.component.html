@@ -210,7 +210,8 @@
                         value, no interpolation. A context key targeted here becomes read-only on the Live state tab.
                     </p>
                     <senergy-environments-timeline-editor [timeline]="timelineOf(selectedEnvironment!)"
-                        [targetOptions]="timelineTargetOptions" (timelineChange)="onTimelineChange()">
+                        [targetOptions]="timelineTargetOptions" [problems]="selectedNodeProblems" (timelineChange)="onTimelineChange()"
+                        (timelineRestructured)="onTimelineRestructured()">
                     </senergy-environments-timeline-editor>
                 </ng-container>
 
