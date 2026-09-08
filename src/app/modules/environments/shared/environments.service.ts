@@ -16,8 +16,8 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, of, TimeoutError } from 'rxjs';
+import { catchError, map, timeout } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
@@ -29,12 +29,21 @@ import {
     Environment,
     EnvironmentShares,
     EnvironmentState,
+    HistoryOccupiedDevice,
+    HistoryPollResult,
+    HistoryStartRefusal,
+    HistoryStatus,
     isSharesFailure,
     isValidationError,
     SharesFailure,
     StateChange,
     ValidationError,
 } from './environments.model';
+
+const HISTORY_POLL_TIMEOUT_MS = 15000;
+// Start and abort are single requests with no poll behind them; a socket that hangs would
+// otherwise leave the tab's buttons disabled for as long as the OS keeps the connection.
+const HISTORY_REQUEST_TIMEOUT_MS = 30 * 1000;
 
 /**
  * Best-effort human message for an endpoint with no structured error body of its own.
@@ -57,6 +66,78 @@ function describeHttpError(error: HttpErrorResponse): string {
         }
     }
     return error.message || 'Request failed with status ' + error.status;
+}
+
+/**
+ * Classifies a POST .../history failure. Moses answers a 409 in two shapes that only differ in
+ * text: the occupied-window body always offers "force: true" on its first line, followed by one
+ * "device <id> (<name>)" line per device (name omitted where the asset has none); a run or
+ * backfill already in progress does not mention force at all. 503 means the occupied-window
+ * check itself did not answer in time; 400 means the window is invalid (future, too long, too
+ * dense).
+ */
+function classifyHistoryStartRefusal(error: HttpErrorResponse): HistoryStartRefusal {
+    const body = describeHttpError(error);
+    if (error.status === 409 && body.includes('force: true')) {
+        const lines = body.split('\n');
+        return { kind: 'occupied', message: lines[0], devices: parseOccupiedDevices(lines.slice(1)), status: error.status };
+    }
+    if (error.status === 409) {
+        return { kind: 'running', message: body, status: error.status };
+    }
+    if (error.status === 503) {
+        return { kind: 'timeout', message: body, status: error.status };
+    }
+    if (error.status === 400) {
+        return { kind: 'window', message: body, status: error.status };
+    }
+    return { kind: 'other', message: body || 'Could not start the history run.', status: error.status };
+}
+
+/**
+ * Parses "device <id>" / "device <id> (<name>)" lines -- see moses' OccupiedDevice.String. An
+ * asset name may itself contain a newline, which breaks its "(<name>)" across two or more of
+ * the body's lines; any line that does not start with "device " is folded into the previous
+ * device's name instead of being treated as its own entry.
+ */
+function parseOccupiedDevices(lines: string[]): HistoryOccupiedDevice[] {
+    const deviceStart = /^device (\S+)(?: \((.*))?$/;
+    const devices: HistoryOccupiedDevice[] = [];
+    let openName: { device: HistoryOccupiedDevice; parts: string[] } | undefined;
+
+    const closeOpenName = () => {
+        if (!openName) {
+            return;
+        }
+        const name = openName.parts.join('\n');
+        openName.device.name = name.endsWith(')') ? name.slice(0, -1) : name;
+        openName = undefined;
+    };
+
+    lines.forEach((rawLine) => {
+        const line = rawLine.trim();
+        const match = deviceStart.exec(line);
+        if (match) {
+            closeOpenName();
+            // name is set explicitly (even to undefined) so a nameless device's shape matches { id, name } in tests.
+            const device: HistoryOccupiedDevice = { id: match[1], name: undefined };
+            devices.push(device);
+            if (match[2] !== undefined) {
+                if (match[2].endsWith(')')) {
+                    device.name = match[2].slice(0, -1);
+                } else {
+                    openName = { device, parts: [match[2]] };
+                }
+            }
+        } else if (openName) {
+            openName.parts.push(line);
+            if (line.endsWith(')')) {
+                closeOpenName();
+            }
+        }
+    });
+    closeOpenName();
+    return devices;
 }
 
 @Injectable({
@@ -185,6 +266,75 @@ export class EnvironmentsService {
                     return of(error.error as ValidationError);
                 }
                 return of({ message: describeHttpError(error), status: error.status } as ApiError);
+            }),
+        );
+    }
+
+    /**
+     * The environment's history run, if any is known, discriminated so the poller can tell "no
+     * run known" (404) apart from a failed request -- see HistoryPollResult. A 404 is the
+     * ordinary steady state while nothing has run yet, so it is not logged as an error; every
+     * other failure, including a request stuck past HISTORY_POLL_TIMEOUT_MS, is.
+     */
+    getHistory(id: string): Observable<HistoryPollResult> {
+        return this.http.get<HistoryStatus>(this.environmentsUrl + '/' + encodeURIComponent(id) + '/history').pipe(
+            timeout(HISTORY_POLL_TIMEOUT_MS),
+            map((status) => ({ kind: 'status', status } as HistoryPollResult)),
+            catchError((error: unknown) => {
+                if (error instanceof TimeoutError) {
+                    return of({ kind: 'error', message: 'Request timed out.' } as HistoryPollResult);
+                }
+                const httpError = error as HttpErrorResponse;
+                if (httpError.status === 404) {
+                    return of({ kind: 'none' } as HistoryPollResult);
+                }
+                this.errorHandlerService.logError(EnvironmentsService.name, 'getHistory', httpError);
+                return of({ kind: 'error', message: describeHttpError(httpError), status: httpError.status } as HistoryPollResult);
+            }),
+        );
+    }
+
+    /**
+     * Starts a history run from `from` to now, replacing the live state for the duration. A
+     * refusal (already running, an occupied window, a check timeout, or an invalid window) comes
+     * back as a HistoryStartRefusal instead of throwing -- see classifyHistoryStartRefusal.
+     */
+    startHistory(id: string, from: string, force: boolean): Observable<HistoryStatus | HistoryStartRefusal> {
+        return this.http.post<HistoryStatus>(this.environmentsUrl + '/' + encodeURIComponent(id) + '/history', { from, force }).pipe(
+            timeout(HISTORY_REQUEST_TIMEOUT_MS),
+            catchError((error: unknown) => {
+                if (error instanceof TimeoutError) {
+                    return of({ kind: 'other', message: 'Request timed out.', status: 0 } as HistoryStartRefusal);
+                }
+                const httpError = error as HttpErrorResponse;
+                // 409, 503 and 400 are answers the tab explains to the user, not failures worth a console entry.
+                if (![400, 409, 503].includes(httpError.status)) {
+                    this.errorHandlerService.logError(EnvironmentsService.name, 'startHistory', httpError);
+                }
+                return of(classifyHistoryStartRefusal(httpError));
+            }),
+        );
+    }
+
+    /**
+     * Accepts the abort of a history run (202 with the run as it stood; a run moses closed itself
+     * comes back as cancelled) -- it does not wait for the run to stop. Discriminated like
+     * getHistory, so a failed DELETE is never mistaken for "no run known".
+     */
+    cancelHistory(id: string): Observable<HistoryPollResult> {
+        return this.http.delete<HistoryStatus>(this.environmentsUrl + '/' + encodeURIComponent(id) + '/history').pipe(
+            timeout(HISTORY_REQUEST_TIMEOUT_MS),
+            map((status) => ({ kind: 'status', status } as HistoryPollResult)),
+            catchError((error: unknown) => {
+                if (error instanceof TimeoutError) {
+                    return of({ kind: 'error', message: 'Request timed out.' } as HistoryPollResult);
+                }
+                const httpError = error as HttpErrorResponse;
+                if (httpError.status === 404) {
+                    return of({ kind: 'none' } as HistoryPollResult);
+                }
+                this.errorHandlerService.logError(EnvironmentsService.name, 'cancelHistory', httpError);
+                return of({ kind: 'error', message: describeHttpError(httpError), status: httpError.status } as HistoryPollResult);
             }),
         );
     }

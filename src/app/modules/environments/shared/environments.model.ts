@@ -505,6 +505,81 @@ export interface EnvironmentState extends StateChange {
     as_of: string;
 }
 
+export type HistoryState = 'running' | 'done' | 'failed' | 'cancelled';
+
+/** What became of one channel a history run drove -- see HistoryStatus.channels. */
+export interface HistoryChannelStatus {
+    channel_id?: string;
+    asset_id?: string;
+    name?: string;
+    /** False means this channel never sent a historical reading; see reason. */
+    publishable?: boolean;
+    /** Why publishable is false, e.g. its platform service has no senergy/time_path. */
+    reason?: string;
+    published?: number;
+    silent?: number;
+    failed?: number;
+    last_error?: string;
+}
+
+/**
+ * GET/POST/DELETE .../history: where a history run stands. `state` done means the live
+ * simulation is running again on the state the run arrived at; failed/cancelled mean it
+ * runs again on the partial state reached, a consistent earlier instant and not a rollback.
+ * `to` moves forward while the run chases the present; `position` is the virtual instant
+ * actually reached.
+ */
+export interface HistoryStatus {
+    environment_id?: string;
+    state?: HistoryState;
+    from?: string;
+    to?: string;
+    started_at?: string;
+    finished_at?: string;
+    position?: string;
+    published?: number;
+    failed?: number;
+    last_error?: string;
+    error?: string;
+    channels?: HistoryChannelStatus[];
+}
+
+/** One platform device an occupied-window refusal (see HistoryStartRefusal) names, id and optional asset name. */
+export interface HistoryOccupiedDevice {
+    id: string;
+    name?: string;
+}
+
+/**
+ * Why POST .../history was refused, classified from the 409/503/400 body: occupied (the
+ * window's first day already holds readings, force starts anyway), running (a run or backfill
+ * of this environment is already going -- reload the status instead of retrying), timeout (the
+ * occupied-window check did not answer in time), window (the window itself is invalid, e.g. in
+ * the future or too long) or other (anything else).
+ */
+export interface HistoryStartRefusal {
+    kind: 'occupied' | 'running' | 'timeout' | 'window' | 'other';
+    message: string;
+    devices?: HistoryOccupiedDevice[];
+    status: number;
+}
+
+/** Distinguishes a start refusal from the HistoryStatus also returned by the same POST. */
+export function isHistoryStartRefusal(value: unknown): value is HistoryStartRefusal {
+    return !!value && typeof (value as HistoryStartRefusal).kind === 'string';
+}
+
+/**
+ * GET .../history's outcome, discriminated so a transport failure can never be confused with
+ * "no run known" (404): 'none' is the 404, 'status' is a normal answer, 'error' is anything
+ * else (including a client-side timeout) -- the poller keeps the last known status on 'error'
+ * instead of blanking the view.
+ */
+export type HistoryPollResult =
+    | { kind: 'none' }
+    | { kind: 'status'; status: HistoryStatus }
+    | { kind: 'error'; message: string; status?: number };
+
 /**
  * The zone type a new environment starts with. The api refuses an environment
  * without a zone, so the create dialog has to seed one, and seeding the level a

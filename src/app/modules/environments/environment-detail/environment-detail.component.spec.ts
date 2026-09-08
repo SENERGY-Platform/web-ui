@@ -38,6 +38,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { CoreModule } from '../../../core/core.module';
@@ -49,6 +50,7 @@ import { EnvironmentsTimelineEditorComponent } from './timeline-editor/environme
 import { EnvironmentsFactorBarsComponent } from './factor-bars/environments-factor-bars.component';
 import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
+import { EnvironmentsHistoryComponent } from './history/environments-history.component';
 import { EnvironmentsService } from '../shared/environments.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsUserModel } from '../../permissions/shared/permissions-user.model';
@@ -154,6 +156,7 @@ describe('EnvironmentDetailComponent', () => {
                 EnvironmentsFactorBarsComponent,
                 EnvironmentsDatasetEditorComponent,
                 EnvironmentsLiveStateTilesComponent,
+                EnvironmentsHistoryComponent,
             ],
             imports: [
                 CommonModule,
@@ -176,6 +179,7 @@ describe('EnvironmentDetailComponent', () => {
                 MatDividerModule,
                 MatTabsModule,
                 MatExpansionModule,
+                MatProgressBarModule,
                 MtxSelectModule,
                 NgApexchartsModule,
             ],
@@ -1221,5 +1225,37 @@ describe('EnvironmentDetailComponent', () => {
 
             discardPeriodicTasks();
         }));
+    });
+
+    describe('History tab', () => {
+        function tabLabels(): string[] {
+            return Array.from(fixture.nativeElement.querySelectorAll('.mdc-tab__text-label')).map((e: any) => e.textContent.trim());
+        }
+
+        it('is hidden when the user has no update authorization', () => {
+            loadWith(nestedEnvironment);
+            expect(tabLabels()).not.toContain('History');
+        });
+
+        it('is shown when the user has update authorization', () => {
+            component.userHasUpdateAuthorization = true;
+            loadWith(nestedEnvironment);
+            expect(tabLabels()).toContain('History');
+        });
+
+        // The child manages its own polling (see EnvironmentsHistoryComponent); the parent only
+        // has to delegate start/stop at the right time, same as it does for Live state.
+        it('starts the History child polling when its tab becomes active, and stops it when left', () => {
+            component.userHasUpdateAuthorization = true;
+            loadWith(nestedEnvironment);
+            const historySpy = jasmine.createSpyObj<EnvironmentsHistoryComponent>('EnvironmentsHistoryComponent', ['start', 'stop']);
+            component.historyComponent = historySpy;
+
+            component.onTabChange({ tab: { textLabel: 'History' } } as any);
+            expect(historySpy.start).toHaveBeenCalled();
+
+            component.onTabChange({ tab: { textLabel: 'Editor' } } as any);
+            expect(historySpy.stop).toHaveBeenCalled();
+        });
     });
 });

@@ -513,5 +513,10 @@
             </ng-template>
         </div>
     </mat-tab>
+
+    <mat-tab label="History" *ngIf="userHasUpdateAuthorization">
+        <senergy-environments-history [environmentId]="environment!.id!">
+        </senergy-environments-history>
+    </mat-tab>
     </mat-tab-group>
 </div>

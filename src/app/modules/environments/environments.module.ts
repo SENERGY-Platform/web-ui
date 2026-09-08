@@ -34,6 +34,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { CoreModule } from '../../core/core.module';
@@ -53,6 +54,7 @@ import { EnvironmentsLiveStateTilesComponent } from './environment-detail/live-s
 import { EnvironmentsDatasetsComponent } from './datasets/environments-datasets.component';
 import { EnvironmentsDatasetUploadDialogComponent } from './datasets/dialogs/environments-dataset-upload-dialog.component';
 import { EnvironmentsShareDialogComponent } from './dialogs/environments-share-dialog.component';
+import { EnvironmentsHistoryComponent } from './environment-detail/history/environments-history.component';
 
 const environments: Route = {
     path: 'environments',
@@ -103,6 +105,7 @@ const formFieldDefaults = {
         EnvironmentsDatasetsComponent,
         EnvironmentsDatasetUploadDialogComponent,
         EnvironmentsShareDialogComponent,
+        EnvironmentsHistoryComponent,
     ],
     imports: [
         CommonModule,
@@ -126,6 +129,7 @@ const formFieldDefaults = {
         MatDividerModule,
         MatTabsModule,
         MatExpansionModule,
+        MatProgressBarModule,
         MtxSelectModule,
         NgApexchartsModule,
     ],

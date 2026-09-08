@@ -23,7 +23,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { EnvironmentsService } from './environments.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
-import { CatalogDeviceType, DatasetMeta, Environment, StateChange, ValidationError } from './environments.model';
+import { CatalogDeviceType, DatasetMeta, Environment, HistoryPollResult, HistoryStartRefusal, HistoryStatus, StateChange, ValidationError } from './environments.model';
 
 class MockLadonService {
     authorizations: { [key: string]: { [method: string]: boolean } } = {};
@@ -232,6 +232,170 @@ describe('EnvironmentsService', () => {
         });
         const req = httpMock.expectOne(environmentsUrl + '/e1/state');
         req.flush('environment e1 is not running', { status: 404, statusText: 'Not Found' });
+    });
+
+    it('should get the history status with a GET on /environments/{id}/history', (done) => {
+        const status: HistoryStatus = { environment_id: 'e1', state: 'running', from: '2026-07-01T00:00:00Z', to: '2026-08-01T00:00:00Z' };
+        service.getHistory('e1').subscribe(resp => {
+            expect(resp).toEqual({ kind: 'status', status } as HistoryPollResult);
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        expect(req.request.method).toBe('GET');
+        req.flush(status);
+    });
+
+    it('should report kind "none" when nothing is known about a history run (404), without logging it as an error', (done) => {
+        spyOn(console, 'error');
+        service.getHistory('e1').subscribe(resp => {
+            expect(resp).toEqual({ kind: 'none' });
+            expect(console.error).not.toHaveBeenCalled();
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        req.flush('nothing is known about a history run of this environment', { status: 404, statusText: 'Not Found' });
+    });
+
+    it('should report kind "error" (and log it) for anything other than a 404', (done) => {
+        spyOn(console, 'error');
+        service.getHistory('e1').subscribe(resp => {
+            expect(resp).toEqual({ kind: 'error', message: 'moses is down', status: 500 });
+            expect(console.error).toHaveBeenCalled();
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        req.flush('moses is down', { status: 500, statusText: 'Internal Server Error' });
+    });
+
+    it('should start a history run with a POST on /environments/{id}/history', (done) => {
+        const status: HistoryStatus = { environment_id: 'e1', state: 'running', from: '2026-07-01T00:00:00Z', to: '2026-08-01T00:00:00Z' };
+        service.startHistory('e1', '2026-07-01T00:00:00Z', false).subscribe(resp => {
+            expect(resp).toEqual(status);
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body).toEqual({ from: '2026-07-01T00:00:00Z', force: false });
+        req.flush(status, { status: 202, statusText: 'Accepted' });
+    });
+
+    // Regression target: the occupied-window 409 body names devices with and without an asset
+    // name (see moses' OccupiedDevice.String) -- both forms must parse.
+    it('should classify an occupied-window 409 and parse its devices, with and without a name', (done) => {
+        const body = [
+            'the first day of the window already holds readings for these devices, so the run would write rows a second time; send force: true to start anyway',
+            'device d1 (Meter 1)',
+            'device d2',
+        ].join('\n');
+        service.startHistory('e1', '2026-07-01T00:00:00Z', false).subscribe(resp => {
+            const refusal = resp as HistoryStartRefusal;
+            expect(refusal.kind).toBe('occupied');
+            expect(refusal.message).toBe(
+                'the first day of the window already holds readings for these devices, so the run would write rows a second time; send force: true to start anyway',
+            );
+            expect(refusal.devices).toEqual([{ id: 'd1', name: 'Meter 1' }, { id: 'd2', name: undefined }]);
+            expect(refusal.status).toBe(409);
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        req.flush(body, { status: 409, statusText: 'Conflict' });
+    });
+
+    // Regression target: an asset name can contain a newline, parentheses or non-ASCII letters,
+    // and a device can have no name at all -- all of these break across the body's lines differently.
+    it('should parse device names split across a newline, with parentheses, with umlauts, and without a name', (done) => {
+        const body = [
+            'the first day of the window already holds readings for these devices, so the run would write rows a second time; send force: true to start anyway',
+            'device d1 (Line 1',
+            'Hall A)',
+            'device d2 (Meter (main))',
+            'device d3 (Motor für Halle 3)',
+            'device d4',
+        ].join('\n');
+        service.startHistory('e1', '2026-07-01T00:00:00Z', false).subscribe(resp => {
+            const refusal = resp as HistoryStartRefusal;
+            expect(refusal.devices).toEqual([
+                { id: 'd1', name: 'Line 1\nHall A' },
+                { id: 'd2', name: 'Meter (main)' },
+                { id: 'd3', name: 'Motor für Halle 3' },
+                { id: 'd4', name: undefined },
+            ]);
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        req.flush(body, { status: 409, statusText: 'Conflict' });
+    });
+
+    it('should classify a plain "already running" 409 (no force offered) as running, not occupied', (done) => {
+        service.startHistory('e1', '2026-07-01T00:00:00Z', false).subscribe(resp => {
+            expect(resp).toEqual({ kind: 'running', message: 'a history run of this environment is in progress', status: 409 });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        req.flush('a history run of this environment is in progress', { status: 409, statusText: 'Conflict' });
+    });
+
+    it('should classify a 503 as a check timeout', (done) => {
+        service.startHistory('e1', '2026-07-01T00:00:00Z', false).subscribe(resp => {
+            expect(resp).toEqual({
+                kind: 'timeout',
+                message: 'the timescale did not answer in time, so the history window could not be checked; send force: true to start the run without the check',
+                status: 503,
+            });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        req.flush(
+            'the timescale did not answer in time, so the history window could not be checked; send force: true to start the run without the check',
+            { status: 503, statusText: 'Service Unavailable' },
+        );
+    });
+
+    it('should classify a 400 as an invalid window', (done) => {
+        service.startHistory('e1', '2026-07-01T00:00:00Z', false).subscribe(resp => {
+            expect(resp).toEqual({ kind: 'window', message: 'the window may not start in the future', status: 400 });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        req.flush('the window may not start in the future', { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should classify any other failure as "other"', (done) => {
+        service.startHistory('e1', '2026-07-01T00:00:00Z', false).subscribe(resp => {
+            expect(resp).toEqual({ kind: 'other', message: 'boom', status: 500 });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        req.flush('boom', { status: 500, statusText: 'Internal Server Error' });
+    });
+
+    it('should cancel a history run with a DELETE on /environments/{id}/history', (done) => {
+        const status: HistoryStatus = { environment_id: 'e1', state: 'cancelled' };
+        service.cancelHistory('e1').subscribe(resp => {
+            expect(resp).toEqual({ kind: 'status', status });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        expect(req.request.method).toBe('DELETE');
+        req.flush(status, { status: 202, statusText: 'Accepted' });
+    });
+
+    it('should report "none" when cancelling a history run that is not known (404)', (done) => {
+        service.cancelHistory('e1').subscribe(resp => {
+            expect(resp).toEqual({ kind: 'none' });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        req.flush('nothing is known about a history run of this environment', { status: 404, statusText: 'Not Found' });
+    });
+
+    it('should report an error, not "none", when the cancel fails for another reason', (done) => {
+        service.cancelHistory('e1').subscribe(resp => {
+            expect(resp).toEqual({ kind: 'error', message: 'unable to abort the history run', status: 500 });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/history');
+        req.flush('unable to abort the history run', { status: 500, statusText: 'Internal Server Error' });
     });
 
     it('should list datasets with a GET on /datasets', (done) => {

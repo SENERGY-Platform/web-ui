@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -84,6 +84,7 @@ import {
     pickUntouched,
 } from '../shared/environments-live-state';
 import { EnvironmentsVersionConflictDialogComponent } from './dialogs/environments-version-conflict-dialog.component';
+import { EnvironmentsHistoryComponent } from './history/environments-history.component';
 
 interface SelectedNodeProblem {
     message: string;
@@ -112,6 +113,8 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     environment: Environment | undefined;
     dataReady = false;
     isSaving = false;
+    /** Gates the History tab -- the api still decides, this only avoids offering an action a read-only user cannot take. */
+    userHasUpdateAuthorization = this.environmentsService.userHasUpdateAuthorization();
     /**
      * Set by every mutation (ngModelChange on a field, a key-value editor emit, a tree
      * structural change) and cleared by load()/a successful save. Deliberately not derived
@@ -202,6 +205,9 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     liveStateAsOf: Date | undefined;
     private liveStatePollSub: Subscription | undefined;
 
+    /** Present only while the History tab has been visited at least once (see the tab's default lazy-render behaviour). */
+    @ViewChild(EnvironmentsHistoryComponent) historyComponent: EnvironmentsHistoryComponent | undefined;
+
     private selectedNodeProblemsByKey = new Map<string, SelectedNodeProblem[]>();
 
     /** Owner id -> username, filled in lazily by loadUserNames once the environment is loaded. */
@@ -233,12 +239,17 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.stopLiveStatePolling();
     }
 
-    /** Bound to the tab group's (selectedTabChange): polling only ever runs while the Live state tab is actually visible. */
+    /** Bound to the tab group's (selectedTabChange): polling only ever runs while its tab is actually visible. */
     onTabChange(event: MatTabChangeEvent): void {
         if (event.tab.textLabel === 'Live state') {
             this.startLiveStatePolling();
         } else {
             this.stopLiveStatePolling();
+        }
+        if (event.tab.textLabel === 'History') {
+            this.historyComponent?.start();
+        } else {
+            this.historyComponent?.stop();
         }
     }
 
