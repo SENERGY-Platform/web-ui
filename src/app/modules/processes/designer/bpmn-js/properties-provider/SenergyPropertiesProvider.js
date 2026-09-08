@@ -29,8 +29,8 @@ function SenergyPropertiesProvider(eventBus, canvas, bpmnFactory, elementRegistr
     this.getTabs = function(element) {
         var camunda = new CamundaProvider(eventBus, canvas, bpmnFactory, elementRegistry, elementTemplates, translate);
         var camundaTabs = camunda.getTabs(element);
-        camundaTabs[0].groups.unshift(createDescriptionGroup(element));
-        camundaTabs[0].groups.unshift(createOrderGroup(element));
+        camundaTabs[0].groups.unshift(createDescriptionGroup());
+        camundaTabs[0].groups.unshift(createOrderGroup());
         camundaTabs[0].groups.unshift(createIotInfoGroup(element, bpmnjs));
         camundaTabs[0].groups.unshift(createIotMsgEventGroup(element, bpmnjs, eventBus, modeling));
         camundaTabs[0].groups.unshift(createIotExternalTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));

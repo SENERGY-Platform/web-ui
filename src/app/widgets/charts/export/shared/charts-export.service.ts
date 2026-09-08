@@ -544,12 +544,7 @@ export class ChartsExportService {
             offset += req.length;
         });
 
-        const maxColumns = table.reduce((p, m) => {
-            if (m.length > p.length) {
-                return m;
-            }
-            return p;
-        }).length;
+        const maxColumns = table.reduce((longest, row) => Math.max(longest, row.length), 0);
 
         table.forEach(row => {
             while (row.length < maxColumns) {
@@ -806,7 +801,7 @@ export class ChartsExportService {
         );
         if (
             widget.properties.chartType === 'ColumnChart' &&
-            dataTable.data.slice(1).findIndex((column) => column.slice(1).findIndex((val) => val || 0 < 0) !== -1) === -1 && // all values >= 0 ?
+            dataTable.data.slice(1).findIndex((column) => column.slice(1).findIndex((val) => Number(val) < 0) !== -1) === -1 && // all values >= 0 ?
             chartModel.options?.vAxis?.viewWindow !== undefined
         ) {
             chartModel.options.vAxis.viewWindow.min = 0;

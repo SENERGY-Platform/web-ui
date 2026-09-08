@@ -921,7 +921,6 @@ export class DataTableEditDialogComponent implements OnInit {
                 break;
             default:
                 throw new Error('DataTableEditDialogComponent:onExportValueSelected:Unknown type');
-                return;
         }
 
         const value = values.find((val) => val.Path === path);

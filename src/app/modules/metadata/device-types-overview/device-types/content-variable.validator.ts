@@ -114,6 +114,5 @@ export function contentVariableValidator(leafCharacteristics: DeviceTypeCharacte
         } catch (_) {
             return { errorMsg: 'invalid json' };
         }
-        return null;
     };
 }

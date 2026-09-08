@@ -259,7 +259,9 @@ export class DataTableHelperService {
         const collection: ExportValueCharacteristicModel[] = [];
         service.outputs.forEach((output) => {
             const values = this.exportService.addCharacteristicToDeviceTypeContentVariable(output.content_variable);
-            values.map((value) => (value.Type = DataTableHelperService.translateValueType(value.Type)));
+            values.forEach((value) => {
+                value.Type = DataTableHelperService.translateValueType(value.Type);
+            });
             collection.push(...values);
         });
         this.serviceExportValueCache.set(key, collection);

@@ -377,8 +377,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                 next: (newDevice) => {
                     if (newDevice != null) {
                         const index = this.dataSource.data.findIndex(element => element.id === device.id);
-                        this.dataSource.data[index] = newDevice;
-                        this.dataSource.data = this.dataSource.data;
+                        const data = this.dataSource.data.slice();
+                        data[index] = newDevice;
+                        this.dataSource.data = data;
                     }
                 }
             });
@@ -412,8 +413,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                         }
                         // do deletion on the client instead of reloading, because of caching/slow deletion
                         const index = this.dataSource.data.findIndex(element => element.id === device.id);
-                        this.dataSource.data.splice(index, 1);
-                        this.dataSource.data = this.dataSource.data;
+                        const data = this.dataSource.data.slice();
+                        data.splice(index, 1);
+                        this.dataSource.data = data;
                     });
                 }
             });

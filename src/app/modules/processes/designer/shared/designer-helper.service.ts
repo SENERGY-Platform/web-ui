@@ -69,7 +69,7 @@ export class DesignerHelperService {
             : this.getIncomingOutputs(element);
 
         const names = outputs.map((output) => output.name).filter((name) => !!name);
-        return Array.from(new Set(names)).sort();
+        return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
     }
 
     /** Output parameters declared on the element itself. */

@@ -128,7 +128,7 @@ export class DeployFlowComponent implements OnInit {
             return 'undefined';
         }
         const copy = JSON.parse(JSON.stringify(s)) as string[];
-        const key = copy.sort().join(',');
+        const key = copy.sort((a, b) => a.localeCompare(b)).join(',');
         return key;
     }
 

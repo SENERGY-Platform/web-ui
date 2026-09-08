@@ -179,10 +179,10 @@ export class TimelineComponent implements OnInit, OnChanges {
         if (xMax.length > 0 && xMin.length > 0) {
             const maxPoint = xMax.reduce(function (a, b) {
                 return a > b ? a : b;
-            });
+            }, xMax[0]);
             const minPoint = xMin.reduce(function (a, b) {
                 return a < b ? a : b;
-            });
+            }, xMin[0]);
             return [minPoint.getTime(), maxPoint.getTime()];
         } else {
             return [undefined, undefined];

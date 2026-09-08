@@ -63,7 +63,7 @@ export class ApiDocsComponent implements OnInit {
         forkJoin(obs).subscribe(_ => this.ready = true);
 
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            const insensitiveQuery = new RegExp(searchText, 'gi');
+            const insensitiveQuery = new RegExp(searchText, 'i');
             this.swaggerListShown = this.swaggerList.filter((api) => insensitiveQuery.test(api.description) || insensitiveQuery.test(api.title));
             this.asyncListShown = this.asyncList.filter((api) => insensitiveQuery.test(api.description) || insensitiveQuery.test(api.title));
         });

@@ -687,7 +687,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         }
         const markerColor = window.getComputedStyle(document.getElementsByClassName('color-lookup-warn')[0], null).getPropertyValue('color');
         // naming every gap buries the data it is meant to qualify, so past a few only the longest is named
-        const named = gaps.length <= 3 ? gaps : [gaps.reduce((longest, gap) => (gap.count > longest.count ? gap : longest))];
+        const named = gaps.length <= 3 ? gaps : [gaps.reduce((longest, gap) => (gap.count > longest.count ? gap : longest), gaps[0])];
         return gaps.map(gap => ({
             type: 'line',
             scaleID: 'x',

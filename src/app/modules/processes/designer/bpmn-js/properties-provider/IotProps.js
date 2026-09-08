@@ -226,16 +226,18 @@ function createTaskResults(bpmnjs, outputs) {
     if (!outputs || outputs == "") {
         return result;
     }
-    var paths = getOutputPaths(outputs);
-    var variables = [];
-    for (var i = 0; i < paths.length; i++) {
-        variables.push("${result." + paths[i].join(".") + "}")
-    }
-    variables.sort();
-    for (i = 0; i < variables.length; i++) {
-        var name = paths[i][paths[i].length - 1].replace(/[\[\]]/g, "_");
-        result.push(createOutputParameter(bpmnjs, name, variables[i], null));
-    }
+    // name and expression are sorted as one entry: sorting the expressions alone left them
+    // paired with the name of whichever path happened to sit at the same index
+    var variables = getOutputPaths(outputs).map(function (path) {
+        return {
+            name: path[path.length - 1].replace(/[\[\]]/g, "_"),
+            expression: "${result." + path.join(".") + "}",
+        };
+    });
+    variables.sort(function (a, b) { return a.expression.localeCompare(b.expression); });
+    variables.forEach(function (variable) {
+        result.push(createOutputParameter(bpmnjs, variable.name, variable.expression, null));
+    });
     return result;
 }
 

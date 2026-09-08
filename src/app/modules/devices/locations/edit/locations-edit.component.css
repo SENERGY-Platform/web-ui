@@ -135,7 +135,7 @@ table {
 .example-tree li {
     margin-top: 0;
     margin-bottom: 0;
-    list-style-group: none;
+    list-style-type: none;
 }
 
 .mat-mdc-card-title {

@@ -44,9 +44,10 @@ export class ThresholdComponent implements OnInit {
         this.dialog.open(AddThresholdComponent, {data: oldConfig}).afterClosed().subscribe({
             next: (rule: ValueHighlightConfig) => {
                 if(rule != null) {
-                    this.dataSource.data.splice(index, 1);
-                    this.dataSource.data.push(rule);
-                    this.dataSource.data = this.dataSource.data;
+                    const data = this.dataSource.data.slice();
+                    data.splice(index, 1);
+                    data.push(rule);
+                    this.dataSource.data = data;
                     this.emitCurrentConfig();
                 }
             },
@@ -56,8 +57,9 @@ export class ThresholdComponent implements OnInit {
     }
 
     delete(index: number) {
-        this.dataSource.data.splice(index, 1);
-        this.dataSource.data = this.dataSource.data;
+        const data = this.dataSource.data.slice();
+        data.splice(index, 1);
+        this.dataSource.data = data;
         this.emitCurrentConfig();
     }
 
@@ -65,8 +67,7 @@ export class ThresholdComponent implements OnInit {
         this.dialog.open(AddThresholdComponent).afterClosed().subscribe({
             next: (rule: ValueHighlightConfig) => {
                 if(rule != null) {
-                    this.dataSource.data.push(rule);
-                    this.dataSource.data = this.dataSource.data;
+                    this.dataSource.data = [...this.dataSource.data, rule];
                     this.emitCurrentConfig();
                 }
             },

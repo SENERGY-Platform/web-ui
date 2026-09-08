@@ -41,8 +41,9 @@ export class ListRulesComponent {
   }
 
   delete(index: number) {
-    this.dataSource.data.splice(index, 1);
-    this.dataSource.data = this.dataSource.data;
+    const data = this.dataSource.data.slice();
+    data.splice(index, 1);
+    this.dataSource.data = data;
   }
 
   edit(index: number) {
@@ -50,9 +51,10 @@ export class ListRulesComponent {
     this.dialog.open(AddRuleComponent, {data: oldRule}).afterClosed().subscribe({
       next: (rule: ChartsExportConversion) => {
         if(rule != null) {
-          this.dataSource.data.splice(index, 1);
-          this.dataSource.data.push(rule);
-          this.dataSource.data = this.dataSource.data;
+          const data = this.dataSource.data.slice();
+          data.splice(index, 1);
+          data.push(rule);
+          this.dataSource.data = data;
         }
       },
       error: (_) => {
@@ -65,8 +67,7 @@ export class ListRulesComponent {
     this.dialog.open(AddRuleComponent).afterClosed().subscribe({
       next: (rule: ChartsExportConversion) => {
         if(rule != null) {
-          this.dataSource.data.push(rule);
-          this.dataSource.data = this.dataSource.data;
+          this.dataSource.data = [...this.dataSource.data, rule];
         }
       },
       error: (_) => {

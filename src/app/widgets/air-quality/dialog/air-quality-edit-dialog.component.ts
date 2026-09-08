@@ -825,9 +825,6 @@ export class AirQualityEditDialogComponent implements OnInit {
                 }
                 this.widget.properties.ubaInfo.importInstanceId = instance.id;
                 const matchingExports = this.getExportsOfImports(ubaInstances);
-                matchingExports.filter(
-                    (e) => e.Values.filter((v) => v.Path === 'value.meta.station_id' && v.Name === 'station_id').length === 1,
-                );
                 if (matchingExports.length === 0) {
                     this.helperGenerateUbaExport(instance, obs);
                 } else {
@@ -980,13 +977,6 @@ export class AirQualityEditDialogComponent implements OnInit {
                     }
                     this.widget.properties.dwdPollenInfo.importInstanceId = instance.id;
                     const matchingExports = this.getExportsOfImports(matchingImportInstances);
-                    matchingExports.filter(
-                        (e) =>
-                            e.Values.filter(
-                                (v) =>
-                                    (v.Path === 'value.pollen' && v.Name === 'pollen') || (v.Path === 'value.today' && v.Name === 'today'),
-                            ).length === 3,
-                    );
                     if (matchingExports.length === 0) {
                         this.helperGenerateDWDExport(instance, obs);
                     } else {
@@ -1151,16 +1141,6 @@ export class AirQualityEditDialogComponent implements OnInit {
                 }
                 this.widget.properties.yrInfo.importInstanceId = instance.id;
                 const matchingExports = this.getExportsOfImports(yrInstances);
-                matchingExports.filter(
-                    (e) =>
-                        e.Values.filter(
-                            (v) =>
-                                (v.Path === 'value.instant_air_temperature' && v.Name === 'instant_air_temperature') ||
-                                (v.Path === 'value.instant_air_pressure_at_sea_level' && v.Name === 'instant_air_pressure_at_sea_level') ||
-                                (v.Path === 'value.instant_relative_humidity' && v.Name === 'instant_relative_humidity') ||
-                                (v.Path === 'value.1_hours_precipitation_amount' && v.Name === '1_hours_precipitation_amount'),
-                        ).length === 3,
-                );
                 if (matchingExports.length === 0) {
                     this.helperGenerateYrExport(instance, obs);
                 } else {

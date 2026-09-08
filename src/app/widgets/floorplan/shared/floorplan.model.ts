@@ -402,7 +402,7 @@ function warnAboutAmbiguity(
     // the same situation stays the same across redraws, a changed one is worth reporting again
     const key = [
         wantControlling, picked, criteria.function_id, criteria.aspect_id, criteria.device_class_id,
-        ...candidates.map(c => c.criteria.function_id).sort(),
+        ...candidates.map(c => c.criteria.function_id).sort((a, b) => a.localeCompare(b)),
     ].join('|');
     if (context.reportedAmbiguities.has(key)) {
         return;

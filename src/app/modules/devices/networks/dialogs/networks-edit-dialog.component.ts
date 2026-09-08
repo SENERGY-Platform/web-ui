@@ -74,7 +74,7 @@ export class NetworksEditDialogComponent implements OnInit {
             device_ids: null,
         };
         this.network.attributes?.forEach(value => {
-            if (!this.knownAttributes.includes(value.key) === false && !this.hiddenAttributes.includes(value.key)) {
+            if (this.knownAttributes.includes(value.key) && !this.hiddenAttributes.includes(value.key)) {
                 this.addAttribute()(value.key);
             }
         });

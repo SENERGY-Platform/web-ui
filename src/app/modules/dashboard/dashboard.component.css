@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-gridstack {
+/* the gridstack host element, matched by the class rather than the custom element name */
+.grid-stack {
   overflow-y: auto;
   /*overflow-x: hidden;*/
 }

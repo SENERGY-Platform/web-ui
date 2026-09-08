@@ -245,7 +245,7 @@ $my-app-theme: mat.m2-define-light-theme((
   }
   .mat-mdc-snack-bar-actions .mdc-button__label {
     color: white!important;
-    font-family: "Material Icons"!important;
+    font-family: "Material Icons", sans-serif!important;
     font-weight: bold!important;
   }
 }

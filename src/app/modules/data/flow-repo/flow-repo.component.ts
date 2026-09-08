@@ -180,7 +180,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
                     const index = this.flows.indexOf(flow);
                     if (index > -1) {
                         this.flows.splice(index, 1);
-                        this.flowEstimations.slice(index, 1);
+                        this.flowEstimations.splice(index, 1);
                     }
                     this.flowRepoService.deleteFlow(flow).subscribe({
                         next: _ => {

@@ -66,7 +66,7 @@
 :host ::ng-deep .suggest-widget .suggest-icon.codicon-symbol-operator::before,
 :host ::ng-deep .suggest-widget .suggest-icon.codicon-symbol-unit::before {
     /* the ligature font the whole app renders mat-icon with */
-    font-family: 'Material Symbols Outlined';
+    font-family: 'Material Symbols Outlined', sans-serif;
     /* Material Symbols default to 24px, which does not fit monaco's 16px icon slot */
     font-size: 16px;
     font-variation-settings: 'FILL' 1;

@@ -212,12 +212,11 @@ export class DeployFlowClassicComponent {
                 this.traverseDataStructure(pathString, out.content_variable, false);
             });
         }
-        this.paths[inputId][port] = [];
         this.paths[inputId][port] = this.vals;
     }
 
     private createMappingVars() {
-        this.inputs.map((parseModel: ParseModel, key) => {
+        this.inputs.forEach((parseModel: ParseModel, key) => {
             this.pipeReq.nodes[key] = {
                 nodeId: parseModel.id,
                 inputs: undefined,
@@ -226,7 +225,7 @@ export class DeployFlowClassicComponent {
             } as NodeModel;
             // create map for inputs
             if (parseModel.inPorts !== undefined) {
-                parseModel.inPorts.map((port: string, _) => {
+                parseModel.inPorts.forEach((port: string, _) => {
                     if (!this.selectedValues.has(parseModel.id)) {
                         this.selectedValues.set(parseModel.id, new Map());
                     }
@@ -249,7 +248,7 @@ export class DeployFlowClassicComponent {
                 if (!this.selectedValues.has(parseModel.id)) {
                     this.selectedValues.set(parseModel.id, new Map());
                 }
-                parseModel.config.map((config: ConfigModel) => {
+                parseModel.config.forEach((config: ConfigModel) => {
                     if (!this.selectedValues.get(parseModel.id).has('_config')) {
                         this.selectedValues.get(parseModel.id).set('_config', new Map());
                     }

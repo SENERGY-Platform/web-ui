@@ -203,13 +203,14 @@ export class OpenWindowEditComponent implements OnInit {
             );
 
             if (!sameExportAxisExists) {
-                this.vAxesDataSource.data.splice(i);
+                this.vAxesDataSource.data.splice(i, 1);
             }
         }
 
         // Add not yet existing
+        const data = this.vAxesDataSource.data.slice();
         vAxes.forEach((axis) => {
-            const sameExportValueExists = this.vAxesDataSource.data.some(
+            const sameExportValueExists = data.some(
                 (item: ChartsExportVAxesModel) =>
                     item.instanceId != null &&
                     item.instanceId === axis.instanceId &&
@@ -219,10 +220,10 @@ export class OpenWindowEditComponent implements OnInit {
             );
 
             if (!sameExportValueExists) {
-                this.vAxesDataSource.data.push(axis);
+                data.push(axis);
             }
         });
-        this.vAxesDataSource.data = this.vAxesDataSource.data;
+        this.vAxesDataSource.data = data;
         // console.log(this.vAxesDataSource)
     }
 

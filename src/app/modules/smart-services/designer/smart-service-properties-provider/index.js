@@ -28,7 +28,7 @@ function SmartServicePropertiesProvider(eventBus, canvas, bpmnFactory, elementFa
     this.getTabs = function(element) {
         var camunda = new CamundaProvider(eventBus, canvas, bpmnFactory, elementRegistry, elementTemplates, translate);
         var camundaTabs = camunda.getTabs(element);
-        camundaTabs[0].groups.unshift(createDescriptionGroup(element));
+        camundaTabs[0].groups.unshift(createDescriptionGroup());
         camundaTabs[0].groups.unshift(createTaskGroup(element, bpmnjs, eventBus, bpmnFactory, elementFactory, autoPlace, replace, selection));
         camundaTabs[0].groups.unshift(createSmartServiceInputsGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
         // gives the camunda script fields (sequence flow conditions in particular) the

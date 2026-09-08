@@ -358,7 +358,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         if (aspectIds.length === 0) {
             return null;
         }
-        return [...aspectIds].sort()[0];
+        return [...aspectIds].sort((a, b) => a.localeCompare(b))[0];
     }
 
     /**
