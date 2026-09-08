@@ -85,6 +85,7 @@ import {
 } from '../shared/environments-live-state';
 import { EnvironmentsVersionConflictDialogComponent } from './dialogs/environments-version-conflict-dialog.component';
 import { EnvironmentsHistoryComponent } from './history/environments-history.component';
+import { submeteredChildren, SubmeteredChild, submeteringTargets, SubmeteringOption } from '../shared/environments-submetering';
 
 interface SelectedNodeProblem {
     message: string;
@@ -142,6 +143,16 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     formulaReferenceOptions: FormulaReferenceOption[] = [];
     /** Every target the timeline's closed grammar allows; recomputed whenever the document's structure changes, same as the formula ones above. */
     timelineTargetOptions: TimelineTargetOption[] = [];
+    /**
+     * Assets the selected asset could be sub-metered by: same top level zone, not itself
+     * (docs/submetering.md). Recomputed on selection and on structural/name changes (see
+     * refreshSubmeteringData), not read as a getter -- a getter builds a fresh array on every
+     * change-detection pass, which reset ng-select's own tracked item to the first row while
+     * its panel was still open.
+     */
+    submeteringOptions: SubmeteringOption[] = [];
+    /** For an aggregate channel: every asset that sums into it. Same recompute discipline as submeteringOptions. */
+    selectedAggregateChildren: SubmeteredChild[] = [];
     /**
      * Context keys the timeline governs (its context.<key> targets) -- PATCH .../state rejects
      * an actual change to one of these, so the Live state tab locks their tile and excludes them
@@ -433,6 +444,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.selectedNode = node;
         this.refreshSelectedNodeProblems();
         this.refreshFormulaEntries();
+        this.refreshSubmeteringData();
         this.ensurePlatformDeviceLoaded(this.selectedChannel?.source?.dataset);
         this.ensureDeviceNameLoaded(this.selectedAsset?.external_ref);
     }
@@ -482,6 +494,31 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         return deviceType?.services?.find((s) => s.id === channel.external_ref)?.name || channel.external_ref;
     }
 
+    /** ngModelChange handler for the Sub-metered by select. '' is the None sentinel (see the template): ng-select would otherwise write its own wrapper object into submetered_by when an option's [value] is undefined. */
+    setSubmeteredBy(value: string): void {
+        if (!this.selectedAsset) {
+            return;
+        }
+        if (value === '') {
+            delete this.selectedAsset.submetered_by;
+        } else {
+            this.selectedAsset.submetered_by = value;
+        }
+        this.markDirty();
+    }
+
+    /** ngModelChange handler for a zone's Name field: its name can appear in another asset's submeteringOptions label. */
+    onZoneNameChange(): void {
+        this.markDirty();
+        this.refreshSubmeteringData();
+    }
+
+    /** ngModelChange handler for an asset's Name field: its name can appear in another asset's submeteringOptions label or in selectedAggregateChildren. */
+    onAssetNameChange(): void {
+        this.markDirty();
+        this.refreshSubmeteringData();
+    }
+
     addZone(node: EnvTreeNode): void {
         const zones = this.zonesOf(node);
         zones.push({ name: 'New Zone', type: 'room' });
@@ -528,12 +565,18 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         const name = (node.data as { name?: string }).name || node.name;
         const asset = node.kind === 'asset' ? (node.data as Asset) : undefined;
         const deviceId = asset?.external_ref;
+        // Every asset id this deletion removes -- a single asset, or (recursively) every asset
+        // under a deleted zone -- so a reference to any of them can be found and cleared.
+        const deletedAssetIds = this.assetIdsUnder(node);
+        // Assets elsewhere in the document naming one of those ids as their meter, so the
+        // dialog can warn before those references go stale.
+        const submeteredCount = this.countExternalSubmeteredReferences(deletedAssetIds);
         // Honest about what the checkbox would actually do: a device the simulation created
         // itself is safe to remove along with the asset, but one the user linked is a real
         // platform device that happens to still exist after the asset is gone -- offering the
         // same default-checked box for both would nudge people into deleting someone else's
         // equipment by habit.
-        const options: DeleteDialogOptions | undefined = deviceId
+        const checkboxOptions: Pick<DeleteDialogOptions, 'checkboxText' | 'checkboxDefault'> | undefined = deviceId
             ? asset?.external_managed
                 ? {
                       checkboxText: 'Also delete its platform device. It was created by the simulation when this asset was saved; timeseries already recorded for it are orphaned, not deleted.',
@@ -544,6 +587,14 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
                       checkboxDefault: false,
                   }
             : undefined;
+        const countPhrase = submeteredCount === 1 ? '1 asset is' : submeteredCount + ' assets are';
+        const note =
+            submeteredCount === 0
+                ? undefined
+                : node.kind === 'zone'
+                    ? countPhrase + ' sub-metered by assets in this zone; ' + (submeteredCount === 1 ? 'its' : 'their') + ' reference is cleared.'
+                    : countPhrase + ' sub-metered by this asset. Deleting it clears their Sub-metered by field.';
+        const options: DeleteDialogOptions | undefined = checkboxOptions || note ? { ...checkboxOptions, note } : undefined;
         this.dialogsService
             .openDeleteDialog(node.kind + ' "' + name + '"', options)
             .afterClosed()
@@ -558,6 +609,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
                 // to whatever now occupies the old key when a *different*, earlier sibling
                 // was deleted (its removal shifts every later sibling's index/key).
                 this.selectedKey = this.parentKeyOf(node);
+                this.clearSubmeteredBy(deletedAssetIds);
                 this.removeNode(node);
                 this.afterStructuralChange();
                 if (alsoDeleteDevice && deviceId) {
@@ -862,6 +914,68 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         }
     }
 
+    /** Every asset id under `node` -- itself for an asset, or (recursively) every asset in its zone and every nested zone below it for a zone. */
+    private assetIdsUnder(node: EnvTreeNode): string[] {
+        if (node.kind === 'asset') {
+            const id = (node.data as Asset).id;
+            return id ? [id] : [];
+        }
+        if (node.kind !== 'zone') {
+            return [];
+        }
+        const ids: string[] = [];
+        const walk = (zone: Zone): void => {
+            (zone.assets || []).forEach((asset) => {
+                if (asset.id) {
+                    ids.push(asset.id);
+                }
+            });
+            (zone.zones || []).forEach(walk);
+        };
+        walk(node.data as Zone);
+        return ids;
+    }
+
+    /** How many assets outside `ids` still reference one of them via submetered_by -- for the delete confirmation's warning note. */
+    private countExternalSubmeteredReferences(ids: string[]): number {
+        if (ids.length === 0) {
+            return 0;
+        }
+        const idSet = new Set(ids);
+        let count = 0;
+        const walk = (zones: Zone[] | undefined): void => {
+            (zones || []).forEach((zone) => {
+                (zone.assets || []).forEach((candidate) => {
+                    if (candidate.submetered_by && idSet.has(candidate.submetered_by) && !(candidate.id && idSet.has(candidate.id))) {
+                        count++;
+                    }
+                });
+                walk(zone.zones);
+            });
+        };
+        walk(this.environment?.zones);
+        return count;
+    }
+
+    /** Clears every asset's submetered_by that names one of `assetIds`, called right before those assets are removed so no reference survives pointing at a deleted asset. */
+    private clearSubmeteredBy(assetIds: string[]): void {
+        if (assetIds.length === 0) {
+            return;
+        }
+        const idSet = new Set(assetIds);
+        const walk = (zones: Zone[] | undefined): void => {
+            (zones || []).forEach((zone) => {
+                (zone.assets || []).forEach((candidate) => {
+                    if (candidate.submetered_by && idSet.has(candidate.submetered_by)) {
+                        candidate.submetered_by = undefined;
+                    }
+                });
+                walk(zone.zones);
+            });
+        };
+        walk(this.environment?.zones);
+    }
+
     /** Common tail of every structural edit: stale problems no longer point at the right nodes once indexes shift, so they are dropped rather than mis-displayed. */
     private afterStructuralChange(): void {
         this.problems = [];
@@ -974,6 +1088,18 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.formulaEntries = Object.entries(inputs).map(([name, ref]) => ({ name, ref }));
     }
 
+    /** (Re)computes submeteringOptions/selectedAggregateChildren for the current selection -- see their field comments for why these are stored fields, not getters. */
+    private refreshSubmeteringData(): void {
+        if (!this.environment || !this.selectedNode) {
+            this.submeteringOptions = [];
+            this.selectedAggregateChildren = [];
+            return;
+        }
+        this.submeteringOptions = submeteringTargets(this.environment, this.selectedNode.location);
+        const asset = this.assetAt(this.selectedNode.location);
+        this.selectedAggregateChildren = asset ? submeteredChildren(this.environment, asset, this.selectedChannel?.characteristic_id) : [];
+    }
+
     private rebuildTree(): void {
         if (!this.environment) {
             return;
@@ -1006,6 +1132,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         pathToKey(this.root, this.selectedKey).forEach((n) => this.treeControl.expand(n));
         this.refreshSelectedNodeProblems();
         this.refreshFormulaEntries();
+        this.refreshSubmeteringData();
         this.ensurePlatformDeviceLoaded(this.selectedChannel?.source?.dataset);
         this.ensureDeviceNameLoaded(this.selectedAsset?.external_ref);
     }

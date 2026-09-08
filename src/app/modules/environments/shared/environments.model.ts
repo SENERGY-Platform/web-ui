@@ -315,6 +315,8 @@ export interface Asset {
     external_managed?: boolean;
     initial_states?: Record<string, unknown>;
     channels?: Channel[];
+    /** Id of the asset whose meter also captures this one. Empty means this asset attaches to its zone directly (docs/submetering.md). */
+    submetered_by?: string;
 }
 
 export interface Channel {

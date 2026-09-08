@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
+import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -39,7 +40,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { MtxSelect, MtxSelectModule } from '@ng-matero/extensions/select';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { CoreModule } from '../../../core/core.module';
 import { EnvironmentDetailComponent } from './environment-detail.component';
@@ -135,6 +136,75 @@ const nestedEnvironment: Environment = {
     ],
 };
 
+// Site A carries a meter (a1) with an aggregate channel over 'kwh', a sub-meter that
+// matches that characteristic (a2) and one that does not (a3); Site B is a second top
+// level zone, used to pin that submetered_by options and the aggregate's children never
+// cross sites.
+const submeteringEnvironment: Environment = {
+    id: 'e1',
+    name: 'Plant A',
+    type: 'industrial_site',
+    seed: 1,
+    zones: [
+        {
+            id: 'z1',
+            name: 'Site A',
+            type: 'site',
+            assets: [
+                {
+                    id: 'a1',
+                    name: 'Main meter',
+                    kind: 'meter',
+                    channels: [{ id: 'c1', name: 'Total', direction: 'sensor', characteristic_id: 'kwh', source: { kind: 'aggregate' } }],
+                },
+                {
+                    id: 'a2',
+                    name: 'Sub meter',
+                    kind: 'meter',
+                    submetered_by: 'a1',
+                    channels: [
+                        {
+                            id: 'c2',
+                            name: 'Power',
+                            direction: 'sensor',
+                            characteristic_id: 'kwh',
+                            source: { kind: 'script', script: { code: 'return 1;' } },
+                        },
+                    ],
+                },
+                {
+                    id: 'a3',
+                    name: 'Sensor without kwh',
+                    kind: 'sensor',
+                    submetered_by: 'a1',
+                    channels: [
+                        {
+                            id: 'c3',
+                            name: 'Temp',
+                            direction: 'sensor',
+                            characteristic_id: 'temperature',
+                            source: { kind: 'script', script: { code: 'return 1;' } },
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            id: 'z2',
+            name: 'Site B',
+            type: 'site',
+            assets: [
+                {
+                    id: 'b1',
+                    name: 'Other site meter',
+                    kind: 'meter',
+                    channels: [{ id: 'c4', name: 'Total', direction: 'sensor', characteristic_id: 'kwh', source: { kind: 'aggregate' } }],
+                },
+            ],
+        },
+    ],
+};
+
 describe('EnvironmentDetailComponent', () => {
     let component: EnvironmentDetailComponent;
     let fixture: ComponentFixture<EnvironmentDetailComponent>;
@@ -218,6 +288,11 @@ describe('EnvironmentDetailComponent', () => {
         httpMock.expectOne(datasetsUrl).flush([]);
         httpMock.expectOne(deviceTypesUrl).flush(deviceTypes);
         fixture.detectChanges();
+    }
+
+    /** The asset form's Sub-metered by ng-select, for asserting its rendered items and driving a selection through its own value setter -- the same CVA path a real click in the dropdown goes through. */
+    function submeteredBySelect(): MtxSelect {
+        return fixture.debugElement.query(By.css('mtx-select[name="asset-submetered-by"]')).componentInstance;
     }
 
     it('should create', () => {
@@ -336,6 +411,206 @@ describe('EnvironmentDetailComponent', () => {
 
             expect(component.selectedChannel!.source!.kind).toBe('aggregate');
             expect(component.selectedChannel!.source!.script).toBeUndefined();
+        });
+    });
+
+    describe('Sub-metered by (asset form)', () => {
+        it('offers every other asset in the same top level zone, labelled with its own zone name', () => {
+            loadWith(submeteringEnvironment);
+            const mainMeterNode = component.root!.children[0].children[0]; // a1
+            component.select(mainMeterNode);
+
+            expect(component.submeteringOptions).toEqual([
+                { id: 'a2', label: 'Sub meter (Site A)' },
+                { id: 'a3', label: 'Sensor without kwh (Site A)' },
+            ]);
+        });
+
+        it('does not offer the asset itself', () => {
+            loadWith(submeteringEnvironment);
+            const subMeterNode = component.root!.children[0].children[1]; // a2
+            component.select(subMeterNode);
+
+            expect(component.submeteringOptions.some((o) => o.id === 'a2')).toBe(false);
+        });
+
+        it('does not offer an asset from a different top level zone', () => {
+            loadWith(submeteringEnvironment);
+            const mainMeterNode = component.root!.children[0].children[0]; // a1
+            component.select(mainMeterNode);
+
+            expect(component.submeteringOptions.some((o) => o.id === 'b1')).toBe(false);
+        });
+
+        it('setting the field updates the asset and marks the document dirty', () => {
+            loadWith(submeteringEnvironment);
+            const sensorNode = component.root!.children[0].children[2]; // a3
+            component.select(sensorNode);
+            expect(component.isDirty).toBe(false);
+
+            component.selectedAsset!.submetered_by = 'a2';
+            component.markDirty();
+
+            expect(component.selectedAsset!.submetered_by).toBe('a2');
+            expect(component.isDirty).toBe(true);
+        });
+    });
+
+    // HIGH regression: ng-select writes its own wrapper object ({$ngOptionValue, ...}) into
+    // the bound value when a picked option's [value] is undefined, so the None option must use
+    // a defined sentinel ('') instead -- see setSubmeteredBy.
+    describe('Sub-metered by select: the None option and picking a target through the real ng-select value path', () => {
+        it('renders the None option and every submetering option, in order, as the select\'s own items', () => {
+            loadWith(submeteringEnvironment);
+            const sensorNode = component.root!.children[0].children[2]; // a3
+            component.select(sensorNode);
+            fixture.detectChanges();
+
+            const items = submeteredBySelect().items as { $ngOptionValue: unknown; $ngOptionLabel: string }[];
+            expect(items.map((i) => i.$ngOptionLabel)).toEqual([
+                'None (attached to the zone)',
+                'Main meter (Site A)',
+                'Sub meter (Site A)',
+            ]);
+            expect(items[0].$ngOptionValue).toBe('');
+        });
+
+        // NgForm.addControl (the plain, non-standalone ngModel this field uses, like every
+        // other field in the same <form>) wires up the CVA's registerOnChange in a microtask,
+        // not synchronously -- fakeAsync/tick lets the test wait for that the same way a real
+        // click in the dropdown would.
+        it('picking None deletes submetered_by (not ng-select\'s own wrapper object), and the saved PUT body carries no submetered_by key', fakeAsync(() => {
+            loadWith(submeteringEnvironment);
+            const subMeterNode = component.root!.children[0].children[1]; // a2, submetered_by: 'a1'
+            component.select(subMeterNode);
+            fixture.detectChanges();
+            tick();
+
+            submeteredBySelect().value = '';
+
+            expect(component.selectedAsset!.submetered_by).toBeUndefined();
+            expect(component.isDirty).toBe(true);
+
+            component.save();
+            const putReq = httpMock.expectOne(environmentsUrl + '/e1');
+            const savedAsset = putReq.request.body.zones[0].assets.find((a: { id?: string }) => a.id === 'a2');
+            expect(Object.prototype.hasOwnProperty.call(savedAsset, 'submetered_by')).toBe(false);
+            putReq.flush(JSON.parse(JSON.stringify(submeteringEnvironment)));
+            httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(submeteringEnvironment))); // the reload
+            flush();
+        }));
+
+        it('picking an option writes the bare id string', fakeAsync(() => {
+            loadWith(submeteringEnvironment);
+            const sensorNode = component.root!.children[0].children[2]; // a3
+            component.select(sensorNode);
+            fixture.detectChanges();
+            tick();
+
+            submeteredBySelect().value = 'a2';
+
+            expect(component.selectedAsset!.submetered_by).toBe('a2');
+            expect(component.isDirty).toBe(true);
+        }));
+
+        it('shows the top-level-zone hint instead of the former "site" wording', () => {
+            loadWith(submeteringEnvironment);
+            const sensorNode = component.root!.children[0].children[2]; // a3
+            component.select(sensorNode);
+            fixture.detectChanges();
+
+            const hints = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('mat-hint'));
+            expect(hints.some((h) => h.textContent?.includes('same top-level zone'))).toBe(true);
+        });
+    });
+
+    describe('aggregate channel: sub-metered children', () => {
+        it('lists every asset whose submetered_by names this channel\'s asset, flagging one without a matching characteristic', () => {
+            loadWith(submeteringEnvironment);
+            const aggregateChannelNode = component.root!.children[0].children[0].children[0]; // a1 / c1
+            component.select(aggregateChannelNode);
+
+            expect(component.selectedAggregateChildren).toEqual([
+                { id: 'a2', name: 'Sub meter', hasMatchingChannel: true },
+                { id: 'a3', name: 'Sensor without kwh', hasMatchingChannel: false },
+            ]);
+        });
+
+        it('is empty when nothing is sub-metered by this asset yet', () => {
+            loadWith(submeteringEnvironment);
+            const otherSiteChannelNode = component.root!.children[1].children[0].children[0]; // b1 / c4
+            component.select(otherSiteChannelNode);
+
+            expect(component.selectedAggregateChildren).toEqual([]);
+        });
+
+        it('renders every child as a list item and flags the one without a matching characteristic', () => {
+            loadWith(submeteringEnvironment);
+            const aggregateChannelNode = component.root!.children[0].children[0].children[0]; // a1 / c1
+            component.select(aggregateChannelNode);
+            fixture.detectChanges();
+
+            const items = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.submetering-children li'));
+            expect(items.map((li) => li.textContent?.trim())).toEqual([
+                'Sub meter',
+                'Sensor without kwh -- no channel with this characteristic',
+            ]);
+        });
+
+        it('renders the empty-state text when nothing is sub-metered by this asset', () => {
+            loadWith(submeteringEnvironment);
+            const otherSiteChannelNode = component.root!.children[1].children[0].children[0]; // b1 / c4
+            component.select(otherSiteChannelNode);
+            fixture.detectChanges();
+
+            expect(fixture.nativeElement.textContent).toContain('No asset is sub-metered by this asset yet.');
+            expect(fixture.nativeElement.querySelector('.submetering-children')).toBeNull();
+        });
+    });
+
+    // MEDIUM regression: both derived lists used to be getters, rebuilding a fresh array on
+    // every change-detection pass -- which reset ng-select's own tracked item to the first row
+    // while its dropdown was open. They are now recomputed explicitly, on selection and on the
+    // same structural/name-change triggers as formulaReferenceOptions/timelineTargetOptions.
+    describe('submeteringOptions/selectedAggregateChildren: recomputed explicitly, not on every change-detection pass', () => {
+        it('keeps the same array reference across an unrelated change-detection pass on the same selection', () => {
+            loadWith(submeteringEnvironment);
+            const sensorNode = component.root!.children[0].children[2]; // a3
+            component.select(sensorNode);
+            const first = component.submeteringOptions;
+
+            fixture.detectChanges();
+            fixture.detectChanges();
+
+            expect(component.submeteringOptions).toBe(first);
+        });
+
+        it('updates submeteringOptions labels once a zone is renamed', () => {
+            loadWith(submeteringEnvironment);
+            const zoneNode = component.root!.children[0];
+            component.select(zoneNode);
+
+            component.selectedZone!.name = 'Renamed Site';
+            component.onZoneNameChange();
+
+            const mainMeterNode = component.root!.children[0].children[0]; // a1
+            component.select(mainMeterNode);
+
+            expect(component.submeteringOptions.every((o) => o.label.includes('Renamed Site'))).toBe(true);
+        });
+
+        it('updates selectedAggregateChildren once a child asset is renamed', () => {
+            loadWith(submeteringEnvironment);
+            const subMeterNode = component.root!.children[0].children[1]; // a2
+            component.select(subMeterNode);
+
+            component.selectedAsset!.name = 'Renamed sub meter';
+            component.onAssetNameChange();
+
+            const aggregateChannelNode = component.root!.children[0].children[0].children[0]; // a1 / c1
+            component.select(aggregateChannelNode);
+
+            expect(component.selectedAggregateChildren.map((c) => c.name)).toContain('Renamed sub meter');
         });
     });
 
@@ -601,6 +876,22 @@ describe('EnvironmentDetailComponent', () => {
             expect(component.problems).toEqual([]);
             expect(component.problemNodeKeys.size).toBe(0);
         });
+
+        it('indexes a submetered_by problem on the asset node, with the field name as the suffix', () => {
+            loadWith(submeteringEnvironment);
+            component.markDirty();
+
+            component.save();
+            httpMock.expectOne(environmentsUrl + '/e1').flush(
+                { problems: [{ path: 'zones[0].assets[1].submetered_by', message: 'must reference an existing asset' }] },
+                { status: 400, statusText: 'Bad Request' },
+            );
+
+            const subMeterNode = component.root!.children[0].children[1]; // a2
+            component.select(subMeterNode);
+
+            expect(component.selectedNodeProblems).toEqual([{ message: 'must reference an existing asset', suffix: 'submetered_by' }]);
+        });
     });
 
     describe('deleting a node', () => {
@@ -736,6 +1027,94 @@ describe('EnvironmentDetailComponent', () => {
 
             expect(openDeleteDialog.calls.mostRecent().args[1]).toBeUndefined();
             httpMock.expectNone(devicesUrl);
+        });
+
+        it('warns in the confirm dialog and clears submetered_by on every asset pointing at the one being deleted', () => {
+            loadWith(submeteringEnvironment);
+            const mainMeterNode = component.root!.children[0].children[0]; // a1, named by a2 and a3
+            const openDeleteDialog = spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({
+                afterClosed: () => ({ subscribe: (cb: any) => cb(true) }),
+            } as any);
+
+            component.deleteNode(mainMeterNode);
+
+            const options = openDeleteDialog.calls.mostRecent().args[1];
+            expect(options!.note).toBe('2 assets are sub-metered by this asset. Deleting it clears their Sub-metered by field.');
+            const remaining = component.root!.children[0].children.map((n) => n.data as { id?: string; submetered_by?: string });
+            expect(remaining.find((a) => a.id === 'a2')!.submetered_by).toBeUndefined();
+            expect(remaining.find((a) => a.id === 'a3')!.submetered_by).toBeUndefined();
+        });
+
+        it('adds no note when nothing is sub-metered by the deleted asset', () => {
+            loadWith(submeteringEnvironment);
+            const subMeterNode = component.root!.children[0].children[1]; // a2, nothing points at it
+            const openDeleteDialog = spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({
+                afterClosed: () => ({ subscribe: (cb: any) => cb(true) }),
+            } as any);
+
+            component.deleteNode(subMeterNode);
+
+            expect(openDeleteDialog.calls.mostRecent().args[1]).toBeUndefined();
+        });
+
+        // MEDIUM regression: deleting a zone used to remove its assets without clearing
+        // submetered_by references to them from elsewhere in the document.
+        describe('deleting a zone', () => {
+            // a1 sits directly in the top level zone and is sub-metered by a3, which is two
+            // levels deep inside the "Wing" zone about to be deleted -- pins that the id
+            // collection recurses through nested zones, not just the deleted zone's own assets.
+            const nestedZoneEnvironment: Environment = {
+                id: 'e1',
+                name: 'Plant A',
+                type: 'industrial_site',
+                seed: 1,
+                zones: [
+                    {
+                        id: 'z1',
+                        name: 'Site A',
+                        type: 'site',
+                        assets: [{ id: 'a1', name: 'Outside meter', submetered_by: 'a3' }],
+                        zones: [
+                            {
+                                id: 'z2',
+                                name: 'Wing',
+                                type: 'building',
+                                zones: [{ id: 'z3', name: 'Room', type: 'room', assets: [{ id: 'a3', name: 'Deep meter' }] }],
+                            },
+                        ],
+                    },
+                ],
+            };
+
+            it('warns with the zone-specific note and clears a reference from outside the zone to an asset nested inside it', () => {
+                loadWith(nestedZoneEnvironment);
+                const wingZoneNode = component.root!.children[0].children[0]; // Wing, nested under Site A
+                const openDeleteDialog = spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({
+                    afterClosed: () => ({ subscribe: (cb: any) => cb(true) }),
+                } as any);
+
+                component.deleteNode(wingZoneNode);
+
+                const options = openDeleteDialog.calls.mostRecent().args[1];
+                expect(options!.note).toBe('1 asset is sub-metered by assets in this zone; its reference is cleared.');
+                expect(component.environment?.zones?.[0].assets?.[0].submetered_by).toBeUndefined();
+                expect(component.environment?.zones?.[0].zones?.length).toBe(0);
+            });
+
+            it('pluralises the zone-specific note for more than one reference', () => {
+                const twoOutsideRefs: Environment = JSON.parse(JSON.stringify(nestedZoneEnvironment));
+                twoOutsideRefs.zones![0].assets!.push({ id: 'a4', name: 'Second outside meter', submetered_by: 'a3' });
+                loadWith(twoOutsideRefs);
+                const wingZoneNode = component.root!.children[0].children[0];
+                const openDeleteDialog = spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({
+                    afterClosed: () => ({ subscribe: (cb: any) => cb(true) }),
+                } as any);
+
+                component.deleteNode(wingZoneNode);
+
+                const options = openDeleteDialog.calls.mostRecent().args[1];
+                expect(options!.note).toBe('2 assets are sub-metered by assets in this zone; their reference is cleared.');
+            });
         });
     });
 

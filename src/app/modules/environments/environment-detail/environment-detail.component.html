@@ -217,7 +217,7 @@
                 <ng-container *ngSwitchCase="'zone'">
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Name</mat-label>
-                        <input matInput [(ngModel)]="selectedZone!.name" (ngModelChange)="markDirty()" name="zone-name">
+                        <input matInput [(ngModel)]="selectedZone!.name" (ngModelChange)="onZoneNameChange()" name="zone-name">
                     </mat-form-field>
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Type</mat-label>
@@ -252,7 +252,7 @@
                 <ng-container *ngSwitchCase="'asset'">
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Name</mat-label>
-                        <input matInput [(ngModel)]="selectedAsset!.name" (ngModelChange)="markDirty()" name="asset-name">
+                        <input matInput [(ngModel)]="selectedAsset!.name" (ngModelChange)="onAssetNameChange()" name="asset-name">
                     </mat-form-field>
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Kind</mat-label>
@@ -261,6 +261,15 @@
                             <mtx-option *ngFor="let k of ASSET_KINDS" [value]="k">{{assetKindLabel(k)}}</mtx-option>
                         </mtx-select>
                         <mat-hint>Descriptive only -- has no effect on the simulation.</mat-hint>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" color="accent" class="full-width">
+                        <mat-label>Sub-metered by</mat-label>
+                        <mtx-select [ngModel]="selectedAsset!.submetered_by || ''" (ngModelChange)="setSubmeteredBy($event)"
+                            name="asset-submetered-by" appendTo=".ng-select-anchor">
+                            <mtx-option [value]="''">None (attached to the zone)</mtx-option>
+                            <mtx-option *ngFor="let o of submeteringOptions" [value]="o.id">{{o.label}}</mtx-option>
+                        </mtx-select>
+                        <mat-hint>Which meter's reading already includes this asset. Only assets in the same top-level zone can be picked.</mat-hint>
                     </mat-form-field>
 
                     <h3>Platform device</h3>
@@ -420,11 +429,16 @@
                         </ng-container>
 
                         <ng-container *ngSwitchCase="'aggregate'">
+                            <p class="section-hint" *ngIf="selectedAggregateChildren.length === 0">
+                                No asset is sub-metered by this asset yet.
+                            </p>
+                            <ul class="submetering-children" *ngIf="selectedAggregateChildren.length > 0">
+                                <li *ngFor="let child of selectedAggregateChildren">
+                                    {{child.name}}<span *ngIf="!child.hasMatchingChannel"> -- no channel with this characteristic</span>
+                                </li>
+                            </ul>
                             <p class="section-hint">
-                                Sums the last values of every asset's channel carrying this channel's characteristic,
-                                for every asset whose submetered_by points at this channel's asset. Nothing to
-                                configure here -- that sub-metering relationship is not yet editable in this UI (only
-                                through a document import or the API).
+                                This set follows from every asset's own Sub-metered by field; it is not configured here.
                             </p>
                         </ng-container>
 
