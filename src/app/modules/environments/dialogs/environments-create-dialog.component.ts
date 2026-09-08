@@ -54,7 +54,9 @@ export class EnvironmentsCreateDialogComponent {
     }
 }
 
-/** An integer in [1, 999999]; Math.random is fine here, this only needs to look different per environment, not be cryptographically random. */
+/** An integer in [1, 999999]. The value only has to differ per environment; it is drawn from the platform CSPRNG because a weak generator is flagged regardless of purpose. */
 function randomSeed(): number {
-    return Math.floor(Math.random() * 999999) + 1;
+    const drawn = new Uint32Array(1);
+    crypto.getRandomValues(drawn);
+    return (drawn[0] % 999999) + 1;
 }

@@ -27,6 +27,7 @@
  */
 
 import fs from 'fs';
+import path from 'path';
 
 const [, , source, destination] = process.argv;
 if (!source || !destination) {
@@ -34,7 +35,24 @@ if (!source || !destination) {
     process.exit(1);
 }
 
-const declarations = fs.readFileSync(source, 'utf8').trimEnd();
+// Both paths come off the command line, so they are resolved and checked before any file
+// access. The source is expected outside this repository -- a checkout of the worker lib --
+// so only its shape is constrained; the destination has to stay inside the repository.
+const repoRoot = path.resolve(import.meta.dirname, '..');
+const sourcePath = path.resolve(source);
+const destinationPath = path.resolve(destination);
+const destinationInRepo = path.relative(repoRoot, destinationPath);
+
+if (!sourcePath.endsWith('.d.ts') || !fs.statSync(sourcePath, { throwIfNoEntry: false })?.isFile()) {
+    console.error(`refusing to read ${sourcePath}: not an existing .d.ts file`);
+    process.exit(1);
+}
+if (!destinationInRepo || destinationInRepo.startsWith('..') || path.isAbsolute(destinationInRepo) || !destinationInRepo.endsWith('.ts')) {
+    console.error(`refusing to write ${destinationPath}: not a .ts file inside ${repoRoot}`);
+    process.exit(1);
+}
+
+const declarations = fs.readFileSync(sourcePath, 'utf8').trimEnd();
 const escaped = declarations.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
 
 const header = `/*
@@ -61,12 +79,12 @@ const header = `/*
  * Refresh with:
  *
  *   npm run vendor:scriptenv-types -- <path-to>/doc/script-env.d.ts \\
- *     ${destination}
+ *     ${destinationInRepo}
  */
 `;
 
 fs.writeFileSync(
-    destination,
+    destinationPath,
     `${header}\n/** Declarations handed to the code editor as a TypeScript extra lib. */\nexport const smartServiceScriptEnvTypes = \`\n${escaped}\n\`;\n`,
 );
-console.error(`vendored ${declarations.split('\n').length} lines from ${source}`);
+console.error(`vendored ${declarations.split('\n').length} lines from ${sourcePath}`);
