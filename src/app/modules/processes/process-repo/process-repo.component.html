@@ -41,6 +41,11 @@
                                     <mat-icon matTooltip="Process is shared by {{userIdToName[item.value.owner]}}" *ngIf="item.value.owner !== userID" class="color-sidenav shared-icon">
                                         share
                                     </mat-icon>
+                                    <mat-icon *ngIf="item.value.metadataWarning"
+                                        matTooltip="{{item.value.metadataWarning}}" matTooltipClass="multiline-tooltip"
+                                        class="color-warn metadata-warning-icon">
+                                        report_problem
+                                    </mat-icon>
                                     <img class="widget-image" [src]="item.value.image">
                                 </div>
                                 <mat-grid-tile-footer>

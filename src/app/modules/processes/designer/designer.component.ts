@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import {
     Modeler,
@@ -43,16 +43,20 @@ import { defaultIfEmpty } from 'rxjs/operators';
 import { ConditionalEventEditModel, ScriptEditModel } from './shared/designer-dialog.model';
 import { defaultProcessIoDesignerConfig, ProcessIoDesignerConfig, ProcessIoDesignerInfo } from '../process-io/shared/process-io.model';
 import { ProcessIncidentsConfig } from '../incidents/shared/process-incidents.model';
+import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { MissingMetadataOverlays } from '../../metadata/shared/missing-metadata-overlays';
 
 @Component({
     selector: 'senergy-process-designer',
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
 })
-export class ProcessDesignerComponent implements OnInit {
+export class ProcessDesignerComponent implements OnInit, OnDestroy {
     modeler: any;
     id = '';
     ready = false;
+
+    private missingMetadataOverlays: MissingMetadataOverlays;
 
     constructor(
         private http: HttpClient,
@@ -62,7 +66,14 @@ export class ProcessDesignerComponent implements OnInit {
         protected designerService: DesignerHelperService,
         protected processRepoService: ProcessRepoService,
         private snackBar: MatSnackBar,
-    ) {}
+        private metadataExistenceService: MetadataExistenceService,
+    ) {
+        this.missingMetadataOverlays = new MissingMetadataOverlays(this.metadataExistenceService);
+    }
+
+    ngOnDestroy() {
+        this.missingMetadataOverlays.detach();
+    }
 
     ngOnInit() {
         // TODO: find better solution for appear / fade-in problem
@@ -218,6 +229,8 @@ export class ProcessDesignerComponent implements OnInit {
                     });
                 }
             };
+
+            this.missingMetadataOverlays.attach(this.modeler);
 
             if (this.id === '') {
                 this.newProcessDiagram();

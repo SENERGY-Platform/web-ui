@@ -16,7 +16,7 @@
 
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { concatMap, forkJoin, from, map, mergeMap, Observable, Subscription, toArray } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { ResponsiveService } from '../../../core/services/responsive.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -36,6 +36,7 @@ import { DeploymentsStartParameterDialogComponent } from './dialogs/deployments-
 import { DeploymentsFogFactory } from './shared/deployments-fog.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
+import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -80,6 +81,8 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     rowHeight = 282;
     hubList: HubModel[] = [];
     hub: HubModel | undefined | null;
+    metadataCheckRequested = false;
+    metadataCheckRunning = false;
 
     deploymentsService: {
         getDeployment(deploymentId: string): Observable<DeploymentsModel | null>;
@@ -95,6 +98,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable> | null>;
         startDeployment(deploymentId: string): Observable<any | null>;
         v2deleteDeployment(deploymentId: string): Observable<{ status: number }>;
+        getDeploymentDiagramXml(deploymentId: string): Observable<string>;
     };
 
     refreshSyncF: undefined | null | {refreshSync():Observable<{ status: number }>};
@@ -116,6 +120,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         private fogDeploymentsFactory: DeploymentsFogFactory,
         private _formBuilder: FormBuilder,
         private hubsService: NetworksService,
+        private metadataExistenceService: MetadataExistenceService,
     ) {
         this.deploymentsService = platformDeploymentsService;
     }
@@ -175,6 +180,11 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
             this.setRepoItemsParams(this.limitInit);
             this.getRepoItems(false);
         }
+    }
+
+    checkMissingMetadata(): void {
+        this.metadataCheckRequested = true;
+        this.markMissingMetadata(this.repoItems.value, true);
     }
 
     receiveSortingAttribute(sortAttribute: SortModel) {
@@ -475,9 +485,48 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                     image: this.provideImg(repoItem.diagram),
                     sync: repoItem.sync,
                     selected: false,
+                    metadataWarning: '',
                 }),
             );
         });
+        if (this.metadataCheckRequested) {
+            this.markMissingMetadata(repoItems);
+        }
+    }
+
+    /**
+     * The deployment list carries the svg but not the bpmn, so the diagram of every deployment has to
+     * be read separately. That is a request per tile, which is why the check is only run on demand and
+     * then kept up for the pages loaded afterwards.
+     */
+    private markMissingMetadata(repoItems: { id: string }[], notify = false): void {
+        if (repoItems.length === 0) {
+            return;
+        }
+        const service = this.deploymentsService;
+        this.metadataCheckRunning = true;
+        from(repoItems)
+            .pipe(
+                mergeMap(
+                    (repoItem) =>
+                        service.getDeploymentDiagramXml(repoItem.id).pipe(map((bpmnXml) => ({ key: repoItem.id, bpmnXml }))),
+                    4,
+                ),
+                toArray(),
+                concatMap((documents) => this.metadataExistenceService.warningsForBpmn(documents)),
+            )
+            .subscribe((warnings) => {
+                this.metadataCheckRunning = false;
+                this.repoItems.controls.forEach((control) => {
+                    const warning = warnings.get(control.value.id);
+                    if (warning) {
+                        control.patchValue({ metadataWarning: warning });
+                    }
+                });
+                if (notify && warnings.size === 0) {
+                    this.snackBar.open('No deployment references missing metadata.', undefined, { duration: 2000 });
+                }
+            });
     }
 
     private showSnackBarError(text: string): void {

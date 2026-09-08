@@ -38,6 +38,10 @@
             *ngIf="this.showGenerated" class="suffix">
             <mat-icon>visibility_off</mat-icon>
         </button>
+        <button matTooltip="Check for missing metadata" mat-icon-button color="accent"
+            (click)="checkMissingMetadata()" [disabled]="!ready || metadataCheckRunning" class="suffix">
+            <mat-icon>rule</mat-icon>
+        </button>
         <senergy-sort [sortAttributes]="sortAttributes" class="suffix-sort"
             (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         <button matTooltip="refresh fog deployment sync" mat-icon-button color="accent" (click)="refreshSync()"
@@ -62,6 +66,11 @@
                     <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems.controls, let i = index"
                         [formGroupName]="i">
                         <div fxFill>
+                            <mat-icon *ngIf="item.value.metadataWarning"
+                                matTooltip="{{item.value.metadataWarning}}" matTooltipClass="multiline-tooltip"
+                                class="color-warn metadata-warning-icon">
+                                report_problem
+                            </mat-icon>
                             <img class="widget-image" [src]="item.value.image">
                         </div>
                         <mat-grid-tile-footer>

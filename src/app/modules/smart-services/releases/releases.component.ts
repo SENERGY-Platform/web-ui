@@ -31,6 +31,7 @@ import {PermissionsDialogService} from '../../permissions/shared/permissions-dia
 import { DeleteDialogResponse } from 'src/app/core/dialogs/delete-dialog.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SmartServiceInstanceDialogService } from '../instances/shared/instance-dialog.service';
+import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -83,6 +84,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
         private activatedRoute: ActivatedRoute,
         private router: Router,
         private instanceDialogService: SmartServiceInstanceDialogService,
+        private metadataExistenceService: MetadataExistenceService,
     ) {
 
     }
@@ -202,10 +204,25 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
                     shared: repoItem.permissions_info.shared,
                     permissions: repoItem.permissions_info.permissions,
                     created_at: repoItem.created_at,
-                    error: repoItem.error
+                    error: repoItem.error,
+                    metadataWarning: '',
                 }),
             );
         });
+        this.markMissingMetadata(repoItems);
+    }
+
+    private markMissingMetadata(repoItems: SmartServiceExtendedReleaseModel[]): void {
+        this.metadataExistenceService
+            .warningsForBpmn(repoItems.map((repoItem) => ({ key: repoItem.id, bpmnXml: repoItem.bpmn_xml })))
+            .subscribe((warnings) => {
+                this.repoItems.controls.forEach((control) => {
+                    const warning = warnings.get(control.value.id);
+                    if (warning) {
+                        control.patchValue({ metadataWarning: warning });
+                    }
+                });
+            });
     }
 
     private provideImg(jsonSVG: string): SafeUrl {

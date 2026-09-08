@@ -79,3 +79,7 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
 .mat-mdc-dialog-surface {
     overflow-y: visible!important;
 }
+
+.multiline-tooltip {
+    white-space: pre-line;
+}

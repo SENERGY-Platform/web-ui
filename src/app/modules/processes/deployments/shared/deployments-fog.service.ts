@@ -101,6 +101,12 @@ export class DeploymentsFogService {
         );
     }
 
+    getDeploymentDiagramXml(deploymentId: string): Observable<string> {
+        return this.v2getDeployments(deploymentId).pipe(
+            map((deployment) => deployment?.diagram?.xml_deployed || deployment?.diagram?.xml_raw || ''),
+        );
+    }
+
     getAllFogDeployments(): Observable<DeploymentsFogMetadataModel[]> {
         const url = environment.processSyncUrl + '/metadata/' + this.hubId;
         return this.http.get<DeploymentsFogMetadataModel[] | null>(url).pipe(

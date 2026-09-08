@@ -89,3 +89,11 @@ mat-grid-list {
     position: absolute;
     margin-top: 5px;
 }
+
+.metadata-warning-icon {
+    padding-left: 5px;
+    padding-right: 5px;
+    position: absolute;
+    right: 0;
+    margin-top: 5px;
+}

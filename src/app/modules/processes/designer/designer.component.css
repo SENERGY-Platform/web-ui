@@ -60,3 +60,9 @@
     padding-bottom: 7px;
     overflow: hidden;
 }
+
+.process-designer-container ::ng-deep .missing-metadata-overlay {
+    color: #d32f2f;
+    font-size: 20px;
+    cursor: default;
+}

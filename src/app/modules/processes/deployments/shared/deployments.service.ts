@@ -280,6 +280,21 @@ export class DeploymentsService {
             .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'v2getDeployments', null)));
     }
 
+    /**
+     * The deployed bpmn of a single deployment. Selection options are left out, only the diagram is
+     * read from the response.
+     */
+    getDeploymentDiagramXml(deploymentId: string): Observable<string> {
+        return this.http
+            .get<V2DeploymentsPreparedModel>(
+                environment.processDeploymentUrl + '/v3/deployments/' + encodeURIComponent(deploymentId) + '?with_options=false',
+            )
+            .pipe(
+                map((deployment) => deployment?.diagram?.xml_deployed || deployment?.diagram?.xml_raw || ''),
+                catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeploymentDiagramXml', '')),
+            );
+    }
+
     v3getAllDeployments(): Observable<V2DeploymentsPreparedModel[]> {
         return this.http.get<V2DeploymentsPreparedModel[] | null>(environment.processDeploymentUrl + '/v3/deployments').pipe(
             map(r => r || []),

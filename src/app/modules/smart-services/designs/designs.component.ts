@@ -28,6 +28,7 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { UtilService } from '../../../core/services/util.service';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
+import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -77,6 +78,7 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
         private sanitizer: DomSanitizer,
         private utilService: UtilService,
         private _formBuilder: FormBuilder,
+        private metadataExistenceService: MetadataExistenceService,
     ) {
 
     }
@@ -181,9 +183,24 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
                     svg_xml: repoItem.svg_xml,
                     bpmn_xml: repoItem.bpmn_xml,
                     image: this.provideImg(repoItem.svg_xml),
+                    metadataWarning: '',
                 }),
             );
         });
+        this.markMissingMetadata(repoItems);
+    }
+
+    private markMissingMetadata(repoItems: SmartServiceDesignModel[]): void {
+        this.metadataExistenceService
+            .warningsForBpmn(repoItems.map((repoItem) => ({ key: repoItem.id, bpmnXml: repoItem.bpmn_xml })))
+            .subscribe((warnings) => {
+                this.repoItems.controls.forEach((control) => {
+                    const warning = warnings.get(control.value.id);
+                    if (warning) {
+                        control.patchValue({ metadataWarning: warning });
+                    }
+                });
+            });
     }
 
     private provideImg(jsonSVG: string): SafeUrl {

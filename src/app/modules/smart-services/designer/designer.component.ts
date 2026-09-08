@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 
 import { HttpClient } from '@angular/common/http';
@@ -49,19 +49,23 @@ import { SmartServiceExtendedReleaseModel } from '../releases/shared/release.mod
 import { ScriptEditModel } from '../../processes/designer/shared/designer-dialog.model';
 import { DesignerDialogService } from '../../processes/designer/shared/designer-dialog.service';
 import { DesignerHelperService } from '../../processes/designer/shared/designer-helper.service';
+import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { MissingMetadataOverlays } from '../../metadata/shared/missing-metadata-overlays';
 
 @Component({
     selector: 'senergy-smart-service-designer',
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
 })
-export class SmartServiceDesignerComponent implements OnInit {
+export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
     modeler: any;
     id = '';
     releaseId = '';
     ready = false;
     name = '';
     description = '';
+
+    private missingMetadataOverlays: MissingMetadataOverlays;
 
     constructor(
         private http: HttpClient,
@@ -74,8 +78,15 @@ export class SmartServiceDesignerComponent implements OnInit {
         private router: Router,
         private dialog: MatDialog,
         protected designerService: DesignerHelperService,
-        protected designerDialogService: DesignerDialogService
-    ) {}
+        protected designerDialogService: DesignerDialogService,
+        private metadataExistenceService: MetadataExistenceService,
+    ) {
+        this.missingMetadataOverlays = new MissingMetadataOverlays(this.metadataExistenceService);
+    }
+
+    ngOnDestroy() {
+        this.missingMetadataOverlays.detach();
+    }
 
     ngOnInit() {
         setTimeout(() => {
@@ -167,6 +178,8 @@ export class SmartServiceDesignerComponent implements OnInit {
                     });
                 }
             };
+
+            this.missingMetadataOverlays.attach(this.modeler);
 
             if (this.releaseId !== '') {
                 this.loadReleaseDiagram(this.releaseId);

@@ -34,6 +34,7 @@ import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
+import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -95,6 +96,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         private router: Router,
         private _formBuilder: FormBuilder,
         private permissionsService: PermissionsService,
+        private metadataExistenceService: MetadataExistenceService,
     ) {
         const sub = this.authorizationService.getUserId();
         if (typeof sub === 'string') {
@@ -343,9 +345,24 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                     owner: repoItem.owner,
                     image: this.provideImg(repoItem.svgXML),
                     selected: false,
+                    metadataWarning: '',
                 }),
             );
         });
+        this.markMissingMetadata(repoItems);
+    }
+
+    private markMissingMetadata(repoItems: ProcessModel[]): void {
+        this.metadataExistenceService
+            .warningsForBpmn(repoItems.map((repoItem) => ({ key: repoItem._id, bpmnXml: repoItem.bpmn_xml })))
+            .subscribe((warnings) => {
+                this.repoItems.controls.forEach((control) => {
+                    const warning = warnings.get(control.value._id);
+                    if (warning) {
+                        control.patchValue({ metadataWarning: warning });
+                    }
+                });
+            });
     }
 
     private reset() {
