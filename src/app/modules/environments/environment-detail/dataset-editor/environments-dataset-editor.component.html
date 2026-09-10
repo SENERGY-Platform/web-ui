@@ -16,11 +16,11 @@
 
 <mat-form-field appearance="outline" color="accent" class="third-width">
     <mat-label>Origin</mat-label>
-    <mtx-select [(ngModel)]="dataset!.origin" (ngModelChange)="onFieldChange()" name="dataset-origin"
+    <mtx-select [(ngModel)]="dataset!.origin" (ngModelChange)="onOriginChange()" name="dataset-origin"
         appendTo=".ng-select-anchor">
         <mtx-option *ngFor="let o of DATASET_ORIGINS" [value]="o">{{datasetOriginLabel(o)}}</mtx-option>
     </mtx-select>
-    <mat-hint>Uploaded file: a dataset uploaded on the Datasets page. Platform device: a real device's recorded timeseries.</mat-hint>
+    <mat-hint>Uploaded file: a dataset uploaded on the Datasets page. Platform device: a real device's recorded timeseries. Platform export: a column of an export already leaving the platform.</mat-hint>
 </mat-form-field>
 
 <ng-container *ngIf="dataset!.origin === 'file'">
@@ -71,12 +71,31 @@
         </mtx-select>
         <mat-hint>Which output variable of the service to replay.</mat-hint>
     </mat-form-field>
+</ng-container>
+
+<ng-container *ngIf="dataset!.origin === 'export'">
     <mat-form-field appearance="outline" color="accent" class="third-width">
-        <mat-label>Window</mat-label>
-        <input matInput [(ngModel)]="dataset!.window" (ngModelChange)="onFieldChange()" name="dataset-window">
-        <mat-hint>How much history to fetch, backwards from environment start, e.g. 36h, 7d, 4w, 1y.</mat-hint>
+        <mat-label>Export</mat-label>
+        <mtx-select [(ngModel)]="dataset!.ref" (ngModelChange)="onFieldChange()" name="dataset-export-ref"
+            appendTo=".ng-select-anchor">
+            <mtx-option *ngFor="let e of exports" [value]="e.ID">{{e.Name}}</mtx-option>
+        </mtx-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" color="accent" class="third-width">
+        <mat-label>Column</mat-label>
+        <mtx-select [(ngModel)]="dataset!.column" (ngModelChange)="onFieldChange()" name="dataset-export-column"
+            appendTo=".ng-select-anchor">
+            <mtx-option *ngFor="let c of columnsForExport(dataset!.ref)" [value]="c.Name">{{c.Name}}</mtx-option>
+        </mtx-select>
+        <mat-hint>Which column of the export to replay.</mat-hint>
     </mat-form-field>
 </ng-container>
+
+<mat-form-field appearance="outline" color="accent" class="third-width" *ngIf="isRemoteOrigin(dataset!.origin)">
+    <mat-label>Window</mat-label>
+    <input matInput [(ngModel)]="dataset!.window" (ngModelChange)="onFieldChange()" name="dataset-window">
+    <mat-hint>How much history to fetch, backwards from environment start, e.g. 36h, 7d, 4w, 1y.</mat-hint>
+</mat-form-field>
 
 <mat-form-field appearance="outline" color="accent" class="third-width">
     <mat-label>Resample</mat-label>
@@ -94,6 +113,25 @@
     </mtx-select>
     <mat-hint>{{anchorModeHint(dataset!.anchor)}}</mat-hint>
 </mat-form-field>
+
+<ng-container *ngIf="isRemoteOrigin(dataset!.origin) || dataset!.follow">
+    <div class="follow-row">
+        <mat-checkbox [(ngModel)]="dataset!.follow" (ngModelChange)="onFollowChange()" name="dataset-follow">
+            Follow
+        </mat-checkbox>
+        <mat-icon class="inline-help-icon" matTooltip="Keeps the series current after the initial fetch, refreshed on the cadence below. Needs anchor Original. A distribute resample never holds between two refreshes, so following leaves such a channel silent in between.">help_outline</mat-icon>
+    </div>
+    <mat-form-field appearance="outline" color="accent" class="third-width" *ngIf="dataset!.follow">
+        <mat-label>Follow every</mat-label>
+        <input matInput [(ngModel)]="dataset!.follow_every" (ngModelChange)="onFieldChange()" name="dataset-follow-every" placeholder="30m">
+        <mat-hint>A duration like the window, at least 1m, not shorter than the upstream's own interval.</mat-hint>
+    </mat-form-field>
+</ng-container>
+<div class="follow-problem" *ngIf="followProblem(dataset)">
+    <mat-icon color="warn">error</mat-icon>
+    <span>{{followProblem(dataset)}}</span>
+</div>
+
 <mat-form-field appearance="outline" color="accent" class="third-width">
     <mat-label>Scale</mat-label>
     <input matInput type="number" [(ngModel)]="dataset!.scale" (ngModelChange)="onFieldChange()" name="dataset-scale">

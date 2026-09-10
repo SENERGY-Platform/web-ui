@@ -31,6 +31,8 @@ import { DeviceInstancesSelectDialogComponent } from '../../devices/device-insta
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceTypeModel } from '../../metadata/device-types-overview/shared/device-type.model';
+import { ExportService } from '../../exports/shared/export.service';
+import { ExportModel } from '../../exports/shared/export.model';
 import {
     Asset,
     ASSET_KINDS,
@@ -122,6 +124,8 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     isDirty = false;
     problems: Problem[] = [];
     datasets: DatasetMeta[] = [];
+    /** Exports the current user can pick as a dataset source's export origin, loaded once (see ExportService.getAvailableExports). */
+    exports: ExportModel[] = [];
 
     treeControl = new NestedTreeControl<EnvTreeNode, string>((node) => node.children, { trackBy: (node) => node.key });
     dataSource = new MatTreeNestedDataSource<EnvTreeNode>();
@@ -230,11 +234,13 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         private dialog: MatDialog,
         private deviceInstancesService: DeviceInstancesService,
         private platformDeviceTypeService: PlatformDeviceTypeService,
+        private exportService: ExportService,
     ) {}
 
     ngOnInit(): void {
         this.id = this.route.snapshot.paramMap.get('id') || '';
         this.environmentsService.listDatasets().subscribe((datasets) => (this.datasets = datasets));
+        this.exportService.getAvailableExports().subscribe((exports) => (this.exports = exports));
         this.environmentsService.listDeviceTypes().subscribe((types) => {
             this.deviceTypes = types;
             this.deviceTypesById = new Map(types.filter((t) => t.id).map((t) => [t.id as string, t]));

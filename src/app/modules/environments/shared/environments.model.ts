@@ -170,14 +170,15 @@ export function faultKindDescription(kind: FaultKind | undefined): string {
     return faultKindDescriptions[kind] || '';
 }
 
-export type DatasetOrigin = 'platform' | 'file' | 'endpoint';
+export type DatasetOrigin = 'platform' | 'file' | 'export' | 'endpoint';
 
-// The editor only offers file and platform; 'endpoint' has no editor built for it yet.
-export const DATASET_ORIGINS: DatasetOrigin[] = ['file', 'platform'];
+// The editor only offers file, platform and export; 'endpoint' has no editor built for it yet.
+export const DATASET_ORIGINS: DatasetOrigin[] = ['file', 'platform', 'export'];
 
 const datasetOriginLabels: Record<DatasetOrigin, string> = {
     file: 'Uploaded file',
     platform: 'Platform device',
+    export: 'Platform export',
     endpoint: 'Endpoint',
 };
 
@@ -186,6 +187,11 @@ export function datasetOriginLabel(origin: DatasetOrigin | undefined): string {
         return 'Unknown';
     }
     return datasetOriginLabels[origin] || origin;
+}
+
+/** platform and export both read a live upstream (a device or an export series) that can be polled again; file and endpoint cannot. */
+export function isRemoteOrigin(origin: DatasetOrigin | undefined): boolean {
+    return origin === 'platform' || origin === 'export';
 }
 
 export type ResampleMode = 'hold' | 'linear' | 'distribute';
@@ -417,11 +423,11 @@ export interface ProfileSource {
 
 export interface DatasetSource {
     origin?: DatasetOrigin;
-    /** A platform device id, an uploaded dataset id or a url, per origin. */
+    /** A platform device id, an uploaded dataset id, an export id or a url, per origin. */
     ref?: string;
     /** Selects the service when origin is platform. */
     service_ref?: string;
-    /** The value column: dataset column name (empty means the first one), or the platform output variable path. */
+    /** The value column: dataset or export column name (empty means the first one), or the platform output variable path. */
     column?: string;
     /** Multiplies every value. Zero means unscaled. */
     scale?: number;
@@ -429,8 +435,174 @@ export interface DatasetSource {
     cumulative?: boolean;
     resample?: ResampleMode;
     anchor?: AnchorMode;
-    /** How much of a platform timeseries is fetched, backwards from environment start, e.g. "36h", "7d", "4w", "1y". */
+    /** How much of a platform or export timeseries is fetched, backwards from environment start, e.g. "36h", "7d", "4w", "1y". */
     window?: string;
+    /** Keeps a platform or export dataset current after the initial fetch, refetched on follow_every; needs anchor: original and is refused on a file origin (docs/context-and-context-sources.md, "Follow", in moses). */
+    follow?: boolean;
+    /** How often a following dataset refetches: a duration like window, default 30m, minimum 1m. */
+    follow_every?: string;
+}
+
+const REPLAY_DURATION_SUFFIX_SECONDS: Record<'d' | 'w' | 'y', number> = {
+    d: 86400,
+    w: 604800,
+    y: 31536000,
+};
+
+/** Go's time.ParseDuration units, in nanoseconds; the grammar parseGoDurationNanos below implements. */
+const GO_DURATION_UNIT_NANOSECONDS: Record<string, number> = {
+    ns: 1,
+    us: 1e3,
+    'µs': 1e3,
+    ms: 1e6,
+    s: 1e9,
+    m: 60e9,
+    h: 3600e9,
+};
+
+/** The server's clock bound: moses refuses a duration at or above 2^63 nanoseconds, about 292 years. */
+const REPLAY_DURATION_MAX_NANOSECONDS = 2 ** 63;
+
+const DECIMAL_NUMBER = /^\d+(\.\d+)?$/;
+
+/**
+ * Go's time.ParseDuration grammar: an optional sign, then one or more <number><unit> segments
+ * (units ns/us/µs/ms/s/m/h, composable like "1h30m"), or the bare string "0". Returns
+ * nanoseconds, or undefined for text the grammar does not accept.
+ */
+function parseGoDurationNanos(text: string): number | undefined {
+    let rest = text;
+    let negative = false;
+    if (rest[0] === '-' || rest[0] === '+') {
+        negative = rest[0] === '-';
+        rest = rest.slice(1);
+    }
+    if (rest === '0') {
+        return 0;
+    }
+    if (rest === '') {
+        return undefined;
+    }
+    let totalNanoseconds = 0;
+    while (rest.length > 0) {
+        const digits = /^\d*/.exec(rest)![0];
+        rest = rest.slice(digits.length);
+        let fraction = '';
+        let hasFraction = false;
+        if (rest[0] === '.') {
+            rest = rest.slice(1);
+            fraction = /^\d*/.exec(rest)![0];
+            hasFraction = true;
+            rest = rest.slice(fraction.length);
+        }
+        if (digits === '' && !hasFraction) {
+            return undefined;
+        }
+        const unit = /^[^\d.]*/.exec(rest)![0];
+        if (unit === '') {
+            return undefined;
+        }
+        rest = rest.slice(unit.length);
+        const unitNanoseconds = GO_DURATION_UNIT_NANOSECONDS[unit];
+        if (unitNanoseconds === undefined) {
+            return undefined;
+        }
+        const numberText = `${digits || '0'}${hasFraction ? '.' + (fraction || '0') : ''}`;
+        totalNanoseconds += parseFloat(numberText) * unitNanoseconds;
+    }
+    return negative ? -totalNanoseconds : totalNanoseconds;
+}
+
+function unreadableWindowMessage(text: string): string {
+    return `unreadable window "${text}", use a duration like "36h", "7d", "4w" or "1y"`;
+}
+
+function windowTooLongMessage(text: string): string {
+    return `the window "${text}" is longer than the clock can hold, about 292 years is the most`;
+}
+
+type ReplayDurationOutcome = { seconds: number } | { error: string };
+
+/**
+ * Mirrors moses's ParseWindow/ParseFollowEvery (lib/domain/environment.go): a value ending in
+ * "d", "w" or "y" is that whole number of days/weeks/years -- the suffix must cover the entire
+ * string, so "1d12h" is not a composite of days and hours. Everything else goes through Go's
+ * time.ParseDuration grammar. Also enforces the server's clock bound (2^63 nanoseconds).
+ */
+function replayDurationOutcome(text: string): ReplayDurationOutcome {
+    const trimmed = text.trim();
+    if (trimmed === '') {
+        return { error: unreadableWindowMessage(text) };
+    }
+    const suffix = trimmed[trimmed.length - 1] as 'd' | 'w' | 'y';
+    if (suffix === 'd' || suffix === 'w' || suffix === 'y') {
+        const numberText = trimmed.slice(0, -1);
+        if (!DECIMAL_NUMBER.test(numberText)) {
+            return { error: unreadableWindowMessage(text) };
+        }
+        const count = parseFloat(numberText);
+        if (!(count > 0)) {
+            return { error: unreadableWindowMessage(text) };
+        }
+        const nanoseconds = count * REPLAY_DURATION_SUFFIX_SECONDS[suffix] * 1e9;
+        if (nanoseconds >= REPLAY_DURATION_MAX_NANOSECONDS) {
+            return { error: windowTooLongMessage(text) };
+        }
+        const seconds = Math.trunc(nanoseconds) / 1e9;
+        if (seconds <= 0) {
+            return { error: unreadableWindowMessage(text) };
+        }
+        return { seconds };
+    }
+    const nanoseconds = parseGoDurationNanos(trimmed);
+    if (nanoseconds === undefined) {
+        return { error: unreadableWindowMessage(text) };
+    }
+    if (Math.abs(nanoseconds) >= REPLAY_DURATION_MAX_NANOSECONDS) {
+        return { error: windowTooLongMessage(text) };
+    }
+    if (nanoseconds <= 0) {
+        return { error: unreadableWindowMessage(text) };
+    }
+    return { seconds: nanoseconds / 1e9 };
+}
+
+/**
+ * Parses a duration the way window/follow_every accept it (see replayDurationOutcome).
+ * Returns seconds, or undefined for anything the server would also refuse.
+ */
+export function parseReplayDuration(text: string): number | undefined {
+    const outcome = replayDurationOutcome(text);
+    return 'seconds' in outcome ? outcome.seconds : undefined;
+}
+
+const REPLAY_DURATION_MINIMUM_SECONDS = 60;
+
+/**
+ * The first server-side rule a following dataset would fail, as the message shown to the
+ * user, or undefined if follow is off or every rule is satisfied. Mirrors the checks moses
+ * itself makes on save (docs/context-and-context-sources.md, "Follow").
+ */
+export function followProblem(dataset: DatasetSource | undefined): string | undefined {
+    if (!dataset?.follow) {
+        return undefined;
+    }
+    if (dataset.origin === 'file') {
+        return 'A file origin has nothing to poll again; follow needs a platform or export origin.';
+    }
+    if (dataset.anchor !== 'original') {
+        return 'Follow needs anchor Original; Loop replays the frozen window it already fetched.';
+    }
+    if (dataset.follow_every) {
+        const outcome = replayDurationOutcome(dataset.follow_every);
+        if ('error' in outcome) {
+            return outcome.error;
+        }
+        if (outcome.seconds < REPLAY_DURATION_MINIMUM_SECONDS) {
+            return 'Follow every must be at least 1m.';
+        }
+    }
+    return undefined;
 }
 
 export interface FormulaSource {

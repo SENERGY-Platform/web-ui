@@ -15,6 +15,7 @@
  */
 
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
@@ -62,6 +63,8 @@ import { environment } from '../../../../environments/environment';
 import { CatalogDeviceType, Environment } from '../shared/environments.model';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
+import { ExportService } from '../../exports/shared/export.service';
+import { ExportModel } from '../../exports/shared/export.model';
 
 class MockLadonService {
     getUserAuthorizationsForURI(_uri: string): any {
@@ -211,12 +214,18 @@ describe('EnvironmentDetailComponent', () => {
     let fixture: ComponentFixture<EnvironmentDetailComponent>;
     let httpMock: HttpTestingController;
     let permissionsService: MockPermissionsService;
+    let exportServiceSpy: Spy<ExportService>;
     const environmentsUrl = environment.mosesUrl + '/environments';
     const datasetsUrl = environment.mosesUrl + '/datasets';
     const deviceTypesUrl = environment.mosesUrl + '/device-types';
     const devicesUrl = environment.mosesUrl + '/devices';
 
     beforeEach(waitForAsync(() => {
+        // Exports are loaded through ExportService, not HttpTestingController -- it is spied
+        // rather than backed by a real request/flush, the same way it is stubbed elsewhere in
+        // this codebase (see e.g. device-status-edit-dialog.component.spec.ts).
+        exportServiceSpy = createSpyFromClass(ExportService);
+        exportServiceSpy.getAvailableExports.and.returnValue(of([]));
         TestBed.configureTestingModule({
             declarations: [
                 EnvironmentDetailComponent,
@@ -263,6 +272,7 @@ describe('EnvironmentDetailComponent', () => {
                 { provide: DeviceInstancesService, useClass: MockDeviceInstancesService },
                 { provide: PlatformDeviceTypeService, useClass: MockPlatformDeviceTypeService },
                 { provide: PermissionsService, useClass: MockPermissionsService },
+                { provide: ExportService, useValue: exportServiceSpy },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
             ],
@@ -309,6 +319,32 @@ describe('EnvironmentDetailComponent', () => {
         expect(component.root?.children.length).toBe(1);
         expect(component.selectedNode?.kind).toBe('environment');
         expect(component.selectedEnvironment?.name).toBe('Plant A');
+    });
+
+    describe('exports (dataset source export origin)', () => {
+        it('loads the available exports once and hands them to the dataset editor', () => {
+            const exports: ExportModel[] = [{ ID: 'ex-1', Name: 'Power export' } as ExportModel];
+            exportServiceSpy.getAvailableExports.and.returnValue(of(exports));
+
+            loadWith(nestedEnvironment);
+
+            expect(exportServiceSpy.getAvailableExports).toHaveBeenCalledTimes(1);
+            expect(component.exports).toEqual(exports);
+        });
+
+        it('binds the loaded exports into a channel\'s dataset editor', () => {
+            const exports: ExportModel[] = [{ ID: 'ex-1', Name: 'Power export' } as ExportModel];
+            exportServiceSpy.getAvailableExports.and.returnValue(of(exports));
+            loadWith(nestedEnvironment);
+
+            const channelNode = component.root!.children[0].children[0].children[0];
+            (channelNode.data as any).source = { kind: 'dataset', dataset: { origin: 'file' } };
+            component.select(channelNode);
+            fixture.detectChanges();
+
+            const editor = fixture.debugElement.query(By.directive(EnvironmentsDatasetEditorComponent)).componentInstance as EnvironmentsDatasetEditorComponent;
+            expect(editor.exports).toEqual(exports);
+        });
     });
 
     it('selects a clicked node and exposes it through the matching getter', () => {

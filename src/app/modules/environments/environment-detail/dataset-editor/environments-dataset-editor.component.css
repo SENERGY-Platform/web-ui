@@ -37,3 +37,15 @@
     color: rgba(0, 0, 0, 0.5);
     cursor: help;
 }
+
+.follow-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.follow-problem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

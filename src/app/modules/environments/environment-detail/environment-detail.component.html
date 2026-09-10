@@ -189,7 +189,7 @@
                                 </senergy-environments-profile-editor>
 
                                 <senergy-environments-dataset-editor *ngIf="entry.source.kind === 'dataset'" [dataset]="entry.source.dataset!"
-                                    [datasets]="datasets"
+                                    [datasets]="datasets" [exports]="exports"
                                     [platformDeviceName]="entry.source.dataset?.ref ? (platformDeviceNames.get(entry.source.dataset!.ref!) || entry.source.dataset!.ref) : ''"
                                     [serviceOptions]="platformServiceOptions(entry.source.dataset!)"
                                     [columnOptions]="platformColumnOptions(entry.source.dataset!)"
@@ -388,7 +388,7 @@
                         </ng-container>
 
                         <ng-container *ngSwitchCase="'dataset'">
-                            <senergy-environments-dataset-editor [dataset]="selectedChannel!.source!.dataset!" [datasets]="datasets"
+                            <senergy-environments-dataset-editor [dataset]="selectedChannel!.source!.dataset!" [datasets]="datasets" [exports]="exports"
                                 [platformDeviceName]="selectedChannel!.source!.dataset!.ref ? (platformDeviceNames.get(selectedChannel!.source!.dataset!.ref) || selectedChannel!.source!.dataset!.ref) : ''"
                                 [serviceOptions]="platformServiceOptions(selectedChannel!.source!.dataset!)"
                                 [columnOptions]="platformColumnOptions(selectedChannel!.source!.dataset!)"

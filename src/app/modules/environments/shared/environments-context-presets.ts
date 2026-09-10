@@ -114,7 +114,7 @@ export const CONTEXT_PRESETS: ContextPreset[] = [
     {
         id: 'replay-dataset',
         label: 'Replay a dataset',
-        description: 'Replays an uploaded dataset or a platform device\'s recorded timeseries as the context value.',
+        description: 'Replays an uploaded dataset, a platform device\'s recorded timeseries or a platform export\'s column as the context value.',
         key: '',
         source: {
             kind: 'dataset',
