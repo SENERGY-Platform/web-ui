@@ -29,6 +29,7 @@ import { ownerDisplay } from './shared/environments-format';
 import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create-dialog.component';
 import { EnvironmentsShareDialogComponent } from './dialogs/environments-share-dialog.component';
 import { PermissionsService } from '../permissions/shared/permissions.service';
+import { AuthorizationService } from '../../core/services/authorization.service';
 
 /** One row of the table: the environment plus its counts, computed once per reload. */
 export interface EnvironmentRow {
@@ -50,6 +51,10 @@ export class EnvironmentsComponent implements OnInit {
     userHasReadAuthorization = this.environmentsService.userHasReadAuthorization();
     userHasCreateAuthorization = this.environmentsService.userHasCreateAuthorization();
     userHasDeleteAuthorization = this.environmentsService.userHasDeleteAuthorization();
+    userIsAdmin = this.authorizationService.userIsAdmin();
+
+    /** Off by default -- an admin sees only their own environments until they ask for all of them. */
+    showAllEnvironments = false;
 
     /** Owner id -> username, filled in lazily by loadUserNames as rows come in. */
     userIdToName: { [key: string]: string } = {};
@@ -64,6 +69,7 @@ export class EnvironmentsComponent implements OnInit {
         private snackBar: MatSnackBar,
         private router: Router,
         private permissionsService: PermissionsService,
+        private authorizationService: AuthorizationService,
     ) {}
 
     ngOnInit(): void {
@@ -78,7 +84,7 @@ export class EnvironmentsComponent implements OnInit {
 
     reload(): void {
         this.dataReady = false;
-        this.environmentsService.listEnvironments().subscribe(envs => {
+        this.environmentsService.listEnvironments(this.showAllEnvironments).subscribe(envs => {
             this.dataSource.data = envs.map(environment => ({
                 environment,
                 counts: countEnvironmentEntities(environment),
@@ -86,6 +92,12 @@ export class EnvironmentsComponent implements OnInit {
             this.loadUserNames(envs.map(e => e.owner));
             this.dataReady = true;
         });
+    }
+
+    /** Admin-only toggle (see the header's mat-slide-toggle): reloads with or without other users' environments. */
+    toggleAllEnvironments(showAll: boolean): void {
+        this.showAllEnvironments = showAll;
+        this.reload();
     }
 
     /** Owner cell text for the template, see ownerDisplay. */

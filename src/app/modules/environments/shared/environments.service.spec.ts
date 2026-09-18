@@ -71,7 +71,7 @@ describe('EnvironmentsService', () => {
         expect(service.userHasDeleteAuthorization()).toBeFalse();
     });
 
-    it('should list environments with a GET on /environments', (done) => {
+    it('should list environments with a GET on /environments and no all param by default', (done) => {
         const envs: Environment[] = [{ id: 'e1', name: 'Plant A' }];
         service.listEnvironments().subscribe(resp => {
             expect(resp).toEqual(envs);
@@ -79,6 +79,21 @@ describe('EnvironmentsService', () => {
         });
         const req = httpMock.expectOne(environmentsUrl);
         expect(req.request.method).toBe('GET');
+        expect(req.request.params.has('all')).toBeFalse();
+        req.flush(envs);
+    });
+
+    // Admin-only: the server grants every environment, not just the caller's own, when this
+    // is set -- a non-admin's all=true gets a 403, but that is the server's job to reject.
+    it('should list every environment with all=true when requested', (done) => {
+        const envs: Environment[] = [{ id: 'e1', name: 'Plant A' }, { id: 'e2', name: 'Plant B', owner: 'user-2' }];
+        service.listEnvironments(true).subscribe(resp => {
+            expect(resp).toEqual(envs);
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '?all=true');
+        expect(req.request.method).toBe('GET');
+        expect(req.request.params.get('all')).toBe('true');
         req.flush(envs);
     });
 

@@ -17,6 +17,9 @@
 <div class="container layout-margin">
     <div class="header-actions" fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
         <input hidden type="file" accept=".json" #importInput (change)="importEnvironment($event)">
+        <mat-slide-toggle *ngIf="userIsAdmin" [checked]="showAllEnvironments" (change)="toggleAllEnvironments($event.checked)">
+            All environments
+        </mat-slide-toggle>
         <button mat-raised-button color="accent" *ngIf="userHasCreateAuthorization" (click)="triggerImport()">
             <mat-icon>upload_file</mat-icon> Import
         </button>

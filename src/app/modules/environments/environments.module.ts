@@ -35,6 +35,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { CoreModule } from '../../core/core.module';
@@ -132,6 +133,7 @@ const formFieldDefaults = {
         MatTabsModule,
         MatExpansionModule,
         MatProgressBarModule,
+        MatSlideToggleModule,
         MtxSelectModule,
         NgApexchartsModule,
     ],

@@ -23,6 +23,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -35,6 +36,7 @@ import { CoreModule } from '../../core/core.module';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { PermissionsService } from '../permissions/shared/permissions.service';
 import { PermissionsUserModel } from '../permissions/shared/permissions-user.model';
+import { AuthorizationService } from '../../core/services/authorization.service';
 
 // e1 nests a zone within a zone, so a counting implementation without a
 // recursion step (only looking at the top-level zones) would under-report it.
@@ -66,8 +68,11 @@ class MockEnvironmentsService {
     readAuthorized = true;
     created: Environment[] = [];
     createShouldFail = false;
+    /** Every `all` argument listEnvironments was called with, in call order -- see the toggle test. */
+    listCalls: boolean[] = [];
 
-    listEnvironments(): Observable<Environment[]> {
+    listEnvironments(all = false): Observable<Environment[]> {
+        this.listCalls.push(all);
         return of(environments.filter(e => this.deletedIds.indexOf(e.id || '') === -1));
     }
 
@@ -127,6 +132,14 @@ class MockDialogsService {
     }
 }
 
+class MockAuthorizationService {
+    isAdmin = false;
+
+    userIsAdmin(): boolean {
+        return this.isAdmin;
+    }
+}
+
 class RouterStub {
     navigate(_commands: unknown[]): Promise<boolean> {
         return Promise.resolve(true);
@@ -145,6 +158,7 @@ describe('EnvironmentsComponent', () => {
     let environmentsService: MockEnvironmentsService;
     let dialogsService: MockDialogsService;
     let permissionsService: MockPermissionsService;
+    let authorizationService: MockAuthorizationService;
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
@@ -160,18 +174,21 @@ describe('EnvironmentsComponent', () => {
                 MatTooltipModule,
                 MatDialogModule,
                 MatSnackBarModule,
+                MatSlideToggleModule,
             ],
             providers: [
                 { provide: EnvironmentsService, useClass: MockEnvironmentsService },
                 { provide: DialogsService, useClass: MockDialogsService },
                 { provide: Router, useClass: RouterStub },
                 { provide: PermissionsService, useClass: MockPermissionsService },
+                { provide: AuthorizationService, useClass: MockAuthorizationService },
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsComponent);
         component = fixture.componentInstance;
         environmentsService = TestBed.inject(EnvironmentsService) as unknown as MockEnvironmentsService;
         dialogsService = TestBed.inject(DialogsService) as unknown as MockDialogsService;
+        authorizationService = TestBed.inject(AuthorizationService) as unknown as MockAuthorizationService;
         permissionsService = TestBed.inject(PermissionsService) as unknown as MockPermissionsService;
     }));
 
@@ -259,6 +276,34 @@ describe('EnvironmentsComponent', () => {
         fixture.detectChanges();
 
         expect(component.displayedColumns).not.toContain('share');
+    });
+
+    it('should not render the "All environments" toggle for a non-admin', () => {
+        fixture.detectChanges();
+        const toggle = fixture.nativeElement.querySelector('mat-slide-toggle');
+        expect(toggle).toBeNull();
+    });
+
+    it('should render the "All environments" toggle for an admin', () => {
+        authorizationService.isAdmin = true;
+        fixture = TestBed.createComponent(EnvironmentsComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+
+        const toggle = fixture.nativeElement.querySelector('mat-slide-toggle');
+        expect(toggle).not.toBeNull();
+    });
+
+    it('should reload with all=true once the admin switches the toggle on', () => {
+        authorizationService.isAdmin = true;
+        fixture = TestBed.createComponent(EnvironmentsComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+
+        component.toggleAllEnvironments(true);
+
+        expect(component.showAllEnvironments).toBe(true);
+        expect(environmentsService.listCalls).toEqual([false, true]);
     });
 
     it('should open the share dialog for an environment', () => {

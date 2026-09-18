@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, of, TimeoutError } from 'rxjs';
 import { catchError, map, timeout } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -162,8 +162,13 @@ export class EnvironmentsService {
         this.datasetAuthorizations = this.ladonService.getUserAuthorizationsForURI(this.datasetsUrl);
     }
 
-    listEnvironments(): Observable<Environment[]> {
-        return this.http.get<Environment[]>(this.environmentsUrl).pipe(
+    /**
+     * `all` requests every environment instead of just the caller's own -- the server only
+     * grants that to an admin and answers a non-admin's `all=true` with 403.
+     */
+    listEnvironments(all = false): Observable<Environment[]> {
+        const params = all ? new HttpParams().set('all', true) : undefined;
+        return this.http.get<Environment[]>(this.environmentsUrl, { params }).pipe(
             catchError(this.errorHandlerService.handleError(EnvironmentsService.name, 'listEnvironments', [])),
         );
     }
