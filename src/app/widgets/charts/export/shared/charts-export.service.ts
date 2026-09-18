@@ -139,12 +139,14 @@ export class ChartsExportService {
             vAxis.tagSelection?.forEach((tagFilter) => {
                 filters.push({ column: tagFilter.split('!')[0], type: '=', value: tagFilter.split('!')[1] });
             });
+            let valueFilter: QueriesRequestFilterModel | undefined;
             if (vAxis.filterType !== undefined) {
-                filters.push({
+                valueFilter = {
                     column: vAxis.valueName,
                     type: vAxis.filterType,
                     value: vAxis.valueType === 'string' ? vAxis.filterValue : Number(vAxis.filterValue),
-                });
+                };
+                filters.push(valueFilter);
             }
             const exp = widgetProperties.exports?.find(x => x.id === vAxis.instanceId);
             if (exp !== undefined &&
@@ -163,7 +165,10 @@ export class ChartsExportService {
                 (newField as QueriesRequestElementInfluxModel).orderColumnIndex = 0;
                 newField.columns[0].name = vAxis.criteria === undefined ? (vAxis.valuePath || vAxis.valueName || '') : undefined;
                 if (filters.length > 0) {
-                    filters.forEach(f => f.column = vAxis.valuePath || vAxis.valueName || '');
+                    // only the value filter targets the value column here; tag filters keep their tag column
+                    if (valueFilter !== undefined) {
+                        valueFilter.column = vAxis.valuePath || vAxis.valueName || '';
+                    }
                     newField.filters = filters;
                 }
                 timescaleElements.push(newField);
