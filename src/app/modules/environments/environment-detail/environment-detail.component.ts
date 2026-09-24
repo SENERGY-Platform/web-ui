@@ -89,6 +89,7 @@ import {
 import { EnvironmentsVersionConflictDialogComponent } from './dialogs/environments-version-conflict-dialog.component';
 import { EnvironmentsHistoryComponent } from './history/environments-history.component';
 import { submeteredChildren, SubmeteredChild, submeteringTargets, SubmeteringOption } from '../shared/environments-submetering';
+import { TIMELINE_DEFAULT_PAGE_SIZE } from './timeline-editor/environments-timeline-editor.component';
 
 /** One zone or asset row in the Live state tab: the suggested defaults, the working draft and which keys the user actually touched. */
 interface LiveStateEntry {
@@ -144,6 +145,26 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     /** Every target the timeline's closed grammar allows; recomputed whenever the document's structure changes, same as the formula ones above. */
     timelineTargetOptions: TimelineTargetOption[] = [];
     /**
+     * context_sources as a stable array for *ngFor, recomputed only by refreshContextSourceEntries
+     * (load/add/remove) instead of on every change-detection pass. trackByContextKey means a
+     * fresh array of new {key, source} objects would not itself destroy/recreate a panel -- what
+     * the cache actually saves is allocating that array and its entries on every pass instead of
+     * once per real change (the old method ran three times per pass, for two empty-checks and the
+     * *ngFor itself).
+     */
+    contextSourceEntries: { key: string; source: Source }[] = [];
+    /**
+     * The timeline editor's current page and size, held here rather than in the child: the
+     * editor is destroyed and recreated on every load() (environment-detail.component.html's
+     * `*ngIf="dataReady && environment"`), including the reload a successful save triggers, so a
+     * page chosen there would otherwise be lost on every save. Reset to the first page/default
+     * size on a fresh load (ngOnInit, discard); kept across a save's reload (load(true), which
+     * re-reads the same document rather than starting over -- see load()), clamped there if the
+     * reloaded timeline is now shorter.
+     */
+    timelinePageIndex = 0;
+    timelinePageSize = TIMELINE_DEFAULT_PAGE_SIZE;
+    /**
      * Assets the selected asset could be sub-metered by: same top level zone, not itself
      * (docs/submetering.md). Recomputed on selection and on structural/name changes (see
      * refreshSubmeteringData), not read as a getter -- a getter builds a fresh array on every
@@ -173,6 +194,10 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     platformDeviceNames = new Map<string, string>();
     platformDeviceTypes = new Map<string, DeviceTypeModel>();
     private loadingPlatformDevices = new Set<string>();
+    /** Bumped whenever platformDeviceTypes gains an entry, so platformServiceOptions/platformColumnOptions know a cached "no services yet" answer is stale. */
+    private platformDeviceTypesVersion = 0;
+    private serviceOptionsCache = new WeakMap<DatasetSource, { ref?: string; version: number; options: DeviceTypeModel['services'] }>();
+    private columnOptionsCache = new WeakMap<DatasetSource, { ref?: string; serviceRef?: string; version: number; options: string[] }>();
 
     /** Today's weekday, for every profile editor's 24-hour preview (they all preview "today"). */
     readonly todayWeekday = mondayStartWeekday(new Date());
@@ -271,6 +296,10 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.dataReady = false;
         if (!preserveSelection) {
             this.selectedKey = undefined;
+            // A fresh load (ngOnInit, discard) starts over; only a save's reload keeps the page
+            // the user was on -- see timelinePageIndex's field comment.
+            this.timelinePageIndex = 0;
+            this.timelinePageSize = TIMELINE_DEFAULT_PAGE_SIZE;
         }
         this.environmentsService.getEnvironment(this.id).subscribe((env) => {
             if (!env) {
@@ -285,9 +314,17 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             this.rebuildTree();
             this.indexProblems();
             this.resetLiveState();
+            this.clampTimelinePage();
             this.loadUserNames([env.owner]);
             this.dataReady = true;
         });
+    }
+
+    /** Keeps timelinePageIndex in range for the just-(re)loaded document's timeline length -- a kept page can point past the end if the reloaded timeline is now shorter. */
+    private clampTimelinePage(): void {
+        const length = this.environment?.timeline?.length || 0;
+        const totalPages = Math.max(1, Math.ceil(length / this.timelinePageSize));
+        this.timelinePageIndex = Math.min(this.timelinePageIndex, totalPages - 1);
     }
 
     /** Owner cell text for the template, see ownerDisplay. */
@@ -675,9 +712,8 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         return [...Object.keys(env.context || {}), ...Object.keys(env.context_sources || {})];
     }
 
-    /** context_sources as a stable array for *ngFor; recomputed on demand, not cached -- the map is small and rarely changes. */
-    contextSourceEntries(env: Environment): { key: string; source: Source }[] {
-        return Object.entries(env.context_sources || {}).map(([key, source]) => ({ key, source }));
+    private refreshContextSourceEntries(): void {
+        this.contextSourceEntries = Object.entries(this.environment?.context_sources || {}).map(([key, source]) => ({ key, source }));
     }
 
     trackByContextKey(_index: number, entry: { key: string }): string {
@@ -696,6 +732,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
                     env.context_sources = {};
                 }
                 env.context_sources[result.key] = result.source;
+                this.refreshContextSourceEntries();
                 this.ensurePlatformDeviceLoaded(result.source.dataset);
                 this.markDirty();
             });
@@ -706,6 +743,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             return;
         }
         delete env.context_sources[key];
+        this.refreshContextSourceEntries();
         this.markDirty();
     }
 
@@ -763,19 +801,41 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             });
     }
 
-    /** Every service of the device a platform-origin dataset source points at, for the Service select. */
+    /**
+     * Every service of the device a platform-origin dataset source points at, for the Service
+     * select. Cached per dataset object (there is one per channel/context source, all bound
+     * into the same template on every change-detection pass) and revalidated against dataset.ref
+     * and platformDeviceTypesVersion rather than rebuilt on every read -- a fresh array on every
+     * call gave the Service select a fresh [items] identity on every pass.
+     */
     platformServiceOptions(dataset: DatasetSource): DeviceTypeModel['services'] {
+        const cached = this.serviceOptionsCache.get(dataset);
+        if (cached && cached.ref === dataset.ref && cached.version === this.platformDeviceTypesVersion) {
+            return cached.options;
+        }
         const deviceType = dataset.ref ? this.platformDeviceTypes.get(dataset.ref) : undefined;
-        return deviceType?.services || [];
+        const options = deviceType?.services || [];
+        this.serviceOptionsCache.set(dataset, { ref: dataset.ref, version: this.platformDeviceTypesVersion, options });
+        return options;
     }
 
-    /** Every value path of the chosen service's outputs, for the Column select. */
+    /** Every value path of the chosen service's outputs, for the Column select. Cached the same way as platformServiceOptions, keyed additionally on dataset.service_ref. */
     platformColumnOptions(dataset: DatasetSource): string[] {
+        const cached = this.columnOptionsCache.get(dataset);
+        if (
+            cached &&
+            cached.ref === dataset.ref &&
+            cached.serviceRef === dataset.service_ref &&
+            cached.version === this.platformDeviceTypesVersion
+        ) {
+            return cached.options;
+        }
         const service = this.platformServiceOptions(dataset).find((s) => s.id === dataset.service_ref);
         const paths: string[] = [];
         (service?.outputs || []).forEach((output) => {
             this.platformDeviceTypeService.getValuePathsAndContentVariables(output.content_variable).forEach((p) => paths.push(p.path));
         });
+        this.columnOptionsCache.set(dataset, { ref: dataset.ref, serviceRef: dataset.service_ref, version: this.platformDeviceTypesVersion, options: paths });
         return paths;
     }
 
@@ -810,6 +870,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             this.platformDeviceTypeService.getDeviceType(device.device_type_id).subscribe((deviceType) => {
                 if (deviceType) {
                     this.platformDeviceTypes.set(id, deviceType);
+                    this.platformDeviceTypesVersion++;
                 }
             });
         });
@@ -1145,6 +1206,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.dataSource.data = [this.root];
         this.formulaReferenceOptions = collectFormulaReferences(this.environment);
         this.timelineTargetOptions = collectTimelineTargets(this.environment);
+        this.refreshContextSourceEntries();
         this.refreshLockedContextKeys();
         this.revealSelection();
     }

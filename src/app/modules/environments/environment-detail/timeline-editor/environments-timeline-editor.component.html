@@ -24,45 +24,55 @@
 
 <p class="empty-hint" *ngIf="!timeline?.length">No timeline entries yet.</p>
 
-<div class="timeline-row" *ngFor="let row of timeline; let i = index; trackBy: trackByRow" [class.problem-row]="hasRowProblem(i)">
+<div class="timeline-problems-summary" *ngIf="problemRowIndexes.length > 0">
+    <mat-icon color="warn">error</mat-icon>
+    <span>{{problemRowIndexes.length}} row{{problemRowIndexes.length === 1 ? '' : 's'}} with a problem.</span>
+    <button mat-button type="button" color="warn" (click)="jumpToFirstProblem()">Jump to first</button>
+</div>
+
+<div class="timeline-row" *ngFor="let rv of visibleRows; trackBy: trackByRow" [class.problem-row]="rv.hasProblem">
     <mat-form-field appearance="outline" color="accent" class="timeline-at-field">
         <mat-label>At</mat-label>
-        <input matInput type="datetime-local" step="1" [ngModel]="localValue(row)" [ngModelOptions]="{standalone: true}"
-            (ngModelChange)="setAt(row, $event)">
+        <input matInput type="datetime-local" step="1" [ngModel]="rv.localAt" [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="setAt(rv.row, $event)">
     </mat-form-field>
     <mat-form-field appearance="outline" color="accent" class="timeline-target-field">
         <mat-label>Target</mat-label>
-        <mtx-select [(ngModel)]="row.target" [ngModelOptions]="{standalone: true}" [items]="targetOptions" bindLabel="label"
+        <mtx-select [(ngModel)]="rv.row.target" [ngModelOptions]="{standalone: true}" [items]="targetOptions" bindLabel="label"
             bindValue="value" groupBy="group" appendTo=".ng-select-anchor" (ngModelChange)="onFieldChange()">
         </mtx-select>
     </mat-form-field>
     <mat-form-field appearance="outline" color="accent" class="timeline-value-field">
         <mat-label>Value</mat-label>
-        <input matInput type="number" [(ngModel)]="row.value" [ngModelOptions]="{standalone: true}" (ngModelChange)="onFieldChange()">
+        <input matInput type="number" [(ngModel)]="rv.row.value" [ngModelOptions]="{standalone: true}" (ngModelChange)="onFieldChange()">
     </mat-form-field>
     <span class="timeline-row-actions">
-        <button mat-icon-button type="button" matTooltip="Move up" [disabled]="i === 0" (click)="moveRowUp(i)">
+        <button mat-icon-button type="button" matTooltip="Move up" [disabled]="rv.index === 0" (click)="moveRowUp(rv.index)">
             <mat-icon>arrow_upward</mat-icon>
         </button>
-        <button mat-icon-button type="button" matTooltip="Move down" [disabled]="i === timeline!.length - 1" (click)="moveRowDown(i)">
+        <button mat-icon-button type="button" matTooltip="Move down" [disabled]="rv.index === timeline!.length - 1" (click)="moveRowDown(rv.index)">
             <mat-icon>arrow_downward</mat-icon>
         </button>
-        <button mat-icon-button type="button" color="warn" matTooltip="Remove entry" (click)="removeRow(i)">
+        <button mat-icon-button type="button" color="warn" matTooltip="Remove entry" (click)="removeRow(rv.index)">
             <mat-icon>delete</mat-icon>
         </button>
     </span>
 
-    <div class="timeline-row-problems" *ngIf="rowProblems(i).length > 0 || clientProblems(row, i).length > 0">
-        <div class="timeline-row-problem" *ngFor="let p of rowProblems(i)">
+    <div class="timeline-row-problems" *ngIf="rv.problems.length > 0 || rv.clientProblems.length > 0">
+        <div class="timeline-row-problem" *ngFor="let p of rv.problems">
             <mat-icon color="warn">error</mat-icon>
             <span>{{p.field ? p.field + ': ' : ''}}{{p.message}}</span>
         </div>
-        <div class="timeline-row-problem" *ngFor="let msg of clientProblems(row, i)">
+        <div class="timeline-row-problem" *ngFor="let msg of rv.clientProblems">
             <mat-icon color="warn">error</mat-icon>
             <span>{{msg}}</span>
         </div>
     </div>
 </div>
+
+<mat-paginator *ngIf="timeline && timeline.length > 0" [length]="timeline!.length" [pageSize]="pageSize"
+    [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex" (page)="onPage($event)">
+</mat-paginator>
 
 <button mat-stroked-button color="accent" type="button" (click)="addRow()">
     <mat-icon>add</mat-icon> Add entry

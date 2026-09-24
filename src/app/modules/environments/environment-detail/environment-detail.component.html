@@ -160,11 +160,11 @@
                             up over the afternoon or a season replayed from a real recording. Zones and formulas read it
                             exactly like a static value.
                         </p>
-                        <p class="empty-hint" *ngIf="contextSourceEntries(selectedEnvironment!).length === 0">
+                        <p class="empty-hint" *ngIf="contextSourceEntries.length === 0">
                             No driven values yet.
                         </p>
-                        <div class="context-sources-list" *ngIf="contextSourceEntries(selectedEnvironment!).length > 0">
-                            <mat-expansion-panel *ngFor="let entry of contextSourceEntries(selectedEnvironment!); trackBy: trackByContextKey"
+                        <div class="context-sources-list" *ngIf="contextSourceEntries.length > 0">
+                            <mat-expansion-panel *ngFor="let entry of contextSourceEntries; trackBy: trackByContextKey"
                                 (opened)="ensurePlatformDeviceLoaded(entry.source.dataset)">
                                 <mat-expansion-panel-header>
                                     <mat-panel-title class="context-source-title">{{entry.key}}</mat-panel-title>
@@ -177,25 +177,30 @@
                                     </mat-panel-description>
                                 </mat-expansion-panel-header>
 
-                                <mat-form-field appearance="outline" color="accent" class="third-width">
-                                    <mat-label>Interval (seconds)</mat-label>
-                                    <input matInput type="number" step="1" [(ngModel)]="entry.source.interval_seconds"
-                                        (ngModelChange)="markDirty()" [ngModelOptions]="{standalone: true}" name="context-source-interval">
-                                    <mat-hint>How often the value advances, in seconds.</mat-hint>
-                                </mat-form-field>
+                                <!-- Deferred until first opened: with up to a few dozen driven values, building every
+                                     panel's profile/dataset editor (charts included) eagerly for the ones still
+                                     collapsed was most of the environment root's render cost (SNRGY-4739). -->
+                                <ng-template matExpansionPanelContent>
+                                    <mat-form-field appearance="outline" color="accent" class="third-width">
+                                        <mat-label>Interval (seconds)</mat-label>
+                                        <input matInput type="number" step="1" [(ngModel)]="entry.source.interval_seconds"
+                                            (ngModelChange)="markDirty()" [ngModelOptions]="{standalone: true}" name="context-source-interval">
+                                        <mat-hint>How often the value advances, in seconds.</mat-hint>
+                                    </mat-form-field>
 
-                                <senergy-environments-profile-editor *ngIf="entry.source.kind === 'profile'"
-                                    [profile]="entry.source.profile!" [todayWeekday]="todayWeekday" (profileChange)="markDirty()">
-                                </senergy-environments-profile-editor>
+                                    <senergy-environments-profile-editor *ngIf="entry.source.kind === 'profile'"
+                                        [profile]="entry.source.profile!" [todayWeekday]="todayWeekday" (profileChange)="markDirty()">
+                                    </senergy-environments-profile-editor>
 
-                                <senergy-environments-dataset-editor *ngIf="entry.source.kind === 'dataset'" [dataset]="entry.source.dataset!"
-                                    [datasets]="datasets" [exports]="exports"
-                                    [platformDeviceName]="entry.source.dataset?.ref ? (platformDeviceNames.get(entry.source.dataset!.ref!) || entry.source.dataset!.ref) : ''"
-                                    [serviceOptions]="platformServiceOptions(entry.source.dataset!)"
-                                    [columnOptions]="platformColumnOptions(entry.source.dataset!)"
-                                    (selectDevice)="selectPlatformDevice(entry.source.dataset!)" (datasetChange)="markDirty()"
-                                    (datasetRestructured)="onDatasetRestructured()">
-                                </senergy-environments-dataset-editor>
+                                    <senergy-environments-dataset-editor *ngIf="entry.source.kind === 'dataset'" [dataset]="entry.source.dataset!"
+                                        [datasets]="datasets" [exports]="exports"
+                                        [platformDeviceName]="entry.source.dataset?.ref ? (platformDeviceNames.get(entry.source.dataset!.ref!) || entry.source.dataset!.ref) : ''"
+                                        [serviceOptions]="platformServiceOptions(entry.source.dataset!)"
+                                        [columnOptions]="platformColumnOptions(entry.source.dataset!)"
+                                        (selectDevice)="selectPlatformDevice(entry.source.dataset!)" (datasetChange)="markDirty()"
+                                        (datasetRestructured)="onDatasetRestructured()">
+                                    </senergy-environments-dataset-editor>
+                                </ng-template>
                             </mat-expansion-panel>
                         </div>
 
@@ -211,7 +216,8 @@
                         value, no interpolation. A context key targeted here becomes read-only on the Live state tab.
                     </p>
                     <senergy-environments-timeline-editor [timeline]="timelineOf(selectedEnvironment!)"
-                        [targetOptions]="timelineTargetOptions" [problems]="selectedNodeProblems" (timelineChange)="onTimelineChange()"
+                        [targetOptions]="timelineTargetOptions" [problems]="selectedNodeProblems"
+                        [(pageIndex)]="timelinePageIndex" [(pageSize)]="timelinePageSize" (timelineChange)="onTimelineChange()"
                         (timelineRestructured)="onTimelineRestructured()">
                     </senergy-environments-timeline-editor>
                 </ng-container>

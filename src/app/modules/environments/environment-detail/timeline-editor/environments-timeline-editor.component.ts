@@ -15,6 +15,7 @@
  */
 
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
 import { DatedChange } from '../../shared/environments.model';
 import { TimelineTargetOption } from '../../shared/environments-timeline-targets';
 import { NodeProblem } from '../../shared/environments-path';
@@ -29,12 +30,43 @@ interface RowProblem {
 }
 
 /**
+ * One row's template-facing data, precomputed instead of calling localValue()/rowProblems()/
+ * clientProblems() from the template on every change-detection pass -- see rebuildRowViews,
+ * which is the one place that still calls them, once per actual data change. `index` is the
+ * row's position in the full (unpaginated) `timeline`, which is what moveRowUp/moveRowDown/
+ * removeRow and the server's index-based problem paths key on.
+ */
+interface RowView {
+    row: DatedChange;
+    index: number;
+    localAt: string;
+    problems: RowProblem[];
+    clientProblems: string[];
+    hasProblem: boolean;
+}
+
+export const TIMELINE_PAGE_SIZE_OPTIONS = [25, 50, 100, 200];
+export const TIMELINE_DEFAULT_PAGE_SIZE = 50;
+
+/**
  * The timeline editor: one row per DatedChange (when/target/value), add/remove/reorder like the
  * schedule editor's state list. Mutates `timeline` in place; `timelineChange` is only a
  * "something in here changed, mark dirty" signal, not a replacement value -- same convention as
  * every other source editor in this module. `timelineRestructured` is the narrower signal for
  * add/remove/move: the parent needs it to drop stale index-based problems, the same way it does
  * for the faults editor (see afterStructuralChange in environment-detail.component.ts).
+ *
+ * Paginated (SNRGY-4739): a large environment's timeline can run into the thousands of entries,
+ * and rendering every row's mtx-select/inputs/tooltips at once made the page unusably slow. Only
+ * the current page's rows reach the DOM; a row keeps its absolute `timeline` index regardless of
+ * which page it is shown on, so server problem paths (`timeline[i]`) and moveRow's splicing stay
+ * unaffected by pagination.
+ *
+ * pageIndex/pageSize are inputs, not private state: environment-detail.component.html's
+ * `*ngIf="dataReady && environment"` destroys and recreates this whole component around every
+ * load() (including the reload after a save), so a page chosen here would otherwise be lost on
+ * every save. The parent holds the values across that destroy/recreate and passes them back in;
+ * this component only proposes changes via the *Change outputs.
  */
 @Component({
     selector: 'senergy-environments-timeline-editor',
@@ -50,6 +82,20 @@ export class EnvironmentsTimelineEditorComponent implements OnChanges {
     /** Fires on add/remove/move only, not on a field edit -- see the class comment. */
     @Output() timelineRestructured = new EventEmitter<void>();
 
+    @Input() pageIndex = 0;
+    @Output() pageIndexChange = new EventEmitter<number>();
+    @Input() pageSize = TIMELINE_DEFAULT_PAGE_SIZE;
+    @Output() pageSizeChange = new EventEmitter<number>();
+    readonly pageSizeOptions = TIMELINE_PAGE_SIZE_OPTIONS;
+
+    /** The current page's rows, precomputed -- bound directly in the template instead of calling a method per row per pass. */
+    visibleRows: RowView[] = [];
+    /** Absolute (unpaginated) indexes of every row with a problem, in ascending order -- drives the "N rows have a problem, jump to first" summary. */
+    problemRowIndexes: number[] = [];
+
+    /** Every row as a precomputed view model, rebuilt in rebuildRowViews -- visibleRows is this array's current page slice. */
+    private rowViews: RowView[] = [];
+
     /** Per-row server problems, indexed by row; rebuilt in ngOnChanges instead of re-parsing every problem's suffix on every *ngIf/*ngFor read of rowProblems. */
     private rowProblemsByIndex = new Map<number, RowProblem[]>();
 
@@ -57,11 +103,20 @@ export class EnvironmentsTimelineEditorComponent implements OnChanges {
     private duplicateRowIndexes = new Set<number>();
 
     ngOnChanges(changes: SimpleChanges): void {
+        let needsRebuild = false;
         if (changes['problems']) {
             this.indexRowProblems();
+            needsRebuild = true;
         }
         if (changes['timeline']) {
             this.indexDuplicates();
+            // Not a reset to 0: pageIndex may be an input the parent restored after a reload
+            // (see the class comment), so a shorter timeline only clamps it back into range.
+            this.clampPageIndex();
+            needsRebuild = true;
+        }
+        if (needsRebuild) {
+            this.rebuildRowViews();
         }
     }
 
@@ -96,8 +151,65 @@ export class EnvironmentsTimelineEditorComponent implements OnChanges {
         });
     }
 
+    /**
+     * (Re)builds every row's view model -- via localValue/rowProblems/clientProblems/hasRowProblem,
+     * the same methods a direct caller (or a test) uses, so there is exactly one implementation of
+     * each -- then refreshes the current page's slice and the problem-row index. Called once per
+     * actual change, not per change-detection pass.
+     */
+    private rebuildRowViews(): void {
+        this.rowViews = (this.timeline || []).map((row, index) => ({
+            row,
+            index,
+            localAt: this.localValue(row),
+            problems: this.rowProblems(index),
+            clientProblems: this.clientProblems(row, index),
+            hasProblem: this.hasRowProblem(index),
+        }));
+        this.problemRowIndexes = this.rowViews.filter((rv) => rv.hasProblem).map((rv) => rv.index);
+        this.refreshVisibleRows();
+    }
+
+    private refreshVisibleRows(): void {
+        const start = this.pageIndex * this.pageSize;
+        this.visibleRows = this.rowViews.slice(start, start + this.pageSize);
+    }
+
+    /** Sets pageIndex and emits pageIndexChange when it actually moves -- the single place that changes it, so every caller's intent (jump to a row, follow a move, clamp after a shrink) reaches the parent the same way. */
+    private setPageIndex(index: number): void {
+        if (this.pageIndex !== index) {
+            this.pageIndex = index;
+            this.pageIndexChange.emit(index);
+        }
+    }
+
+    /** Keeps pageIndex in range for the current timeline length and pageSize (e.g. after removeRow empties the last page, or a shorter timeline comes back in as an input). */
+    private clampPageIndex(): void {
+        const totalPages = Math.max(1, Math.ceil((this.timeline?.length || 0) / this.pageSize));
+        this.setPageIndex(Math.min(this.pageIndex, totalPages - 1));
+    }
+
+    onPage(event: PageEvent): void {
+        if (this.pageSize !== event.pageSize) {
+            this.pageSize = event.pageSize;
+            this.pageSizeChange.emit(event.pageSize);
+        }
+        this.setPageIndex(event.pageIndex);
+        this.refreshVisibleRows();
+    }
+
+    /** Jumps to whichever page holds the earliest row with a problem -- the only way to reach a server-reported problem on a row outside the current page. */
+    jumpToFirstProblem(): void {
+        if (this.problemRowIndexes.length === 0) {
+            return;
+        }
+        this.setPageIndex(Math.floor(this.problemRowIndexes[0] / this.pageSize));
+        this.refreshVisibleRows();
+    }
+
     onFieldChange(): void {
         this.indexDuplicates();
+        this.rebuildRowViews();
         this.timelineChange.emit();
     }
 
@@ -106,6 +218,7 @@ export class EnvironmentsTimelineEditorComponent implements OnChanges {
             return;
         }
         this.timeline.push({ at: '', target: '', value: 0 });
+        this.setPageIndex(Math.floor((this.timeline.length - 1) / this.pageSize)); // the new row jumps into view
         this.onFieldChange();
         this.timelineRestructured.emit();
     }
@@ -115,6 +228,7 @@ export class EnvironmentsTimelineEditorComponent implements OnChanges {
             return;
         }
         this.timeline.splice(index, 1);
+        this.clampPageIndex();
         this.onFieldChange();
         this.timelineRestructured.emit();
     }
@@ -127,8 +241,8 @@ export class EnvironmentsTimelineEditorComponent implements OnChanges {
         this.moveRow(index, index + 1);
     }
 
-    trackByRow(_index: number, row: DatedChange): DatedChange {
-        return row;
+    trackByRow(_index: number, rv: RowView): DatedChange {
+        return rv.row;
     }
 
     localValue(row: DatedChange): string {
@@ -145,7 +259,7 @@ export class EnvironmentsTimelineEditorComponent implements OnChanges {
         return this.problems.find((p) => p.suffix === 'timeline')?.message;
     }
 
-    /** Every server-reported problem naming row `index`, from the cache built in ngOnChanges. */
+    /** Every server-reported problem naming row `index`, from the cache built in ngOnChanges -- the single implementation, used directly by tests and by rebuildRowViews alike. */
     rowProblems(index: number): RowProblem[] {
         return this.rowProblemsByIndex.get(index) || [];
     }
@@ -170,6 +284,7 @@ export class EnvironmentsTimelineEditorComponent implements OnChanges {
         }
         const [row] = rows.splice(from, 1);
         rows.splice(to, 0, row);
+        this.setPageIndex(Math.floor(to / this.pageSize)); // follow the moved row across a page boundary
         this.onFieldChange();
         this.timelineRestructured.emit();
     }

@@ -41,6 +41,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MtxSelect, MtxSelectModule } from '@ng-matero/extensions/select';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { CoreModule } from '../../../core/core.module';
@@ -48,7 +49,7 @@ import { EnvironmentDetailComponent } from './environment-detail.component';
 import { EnvironmentsKeyValueEditorComponent } from '../key-value-editor/environments-key-value-editor.component';
 import { EnvironmentsProfileEditorComponent } from './profile-editor/environments-profile-editor.component';
 import { EnvironmentsScheduleEditorComponent } from './schedule-editor/environments-schedule-editor.component';
-import { EnvironmentsTimelineEditorComponent } from './timeline-editor/environments-timeline-editor.component';
+import { EnvironmentsTimelineEditorComponent, TIMELINE_DEFAULT_PAGE_SIZE } from './timeline-editor/environments-timeline-editor.component';
 import { EnvironmentsFaultsEditorComponent } from './faults-editor/environments-faults-editor.component';
 import { EnvironmentsFactorBarsComponent } from './factor-bars/environments-factor-bars.component';
 import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
@@ -60,7 +61,7 @@ import { PermissionsUserModel } from '../../permissions/shared/permissions-user.
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
-import { CatalogDeviceType, Environment } from '../shared/environments.model';
+import { CatalogDeviceType, DatedChange, Environment } from '../shared/environments.model';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { ExportService } from '../../exports/shared/export.service';
@@ -261,6 +262,7 @@ describe('EnvironmentDetailComponent', () => {
                 MatTabsModule,
                 MatExpansionModule,
                 MatProgressBarModule,
+                MatPaginatorModule,
                 MtxSelectModule,
                 NgApexchartsModule,
             ],
@@ -1328,8 +1330,7 @@ describe('EnvironmentDetailComponent', () => {
             };
             loadWith(env);
 
-            const entries = component.contextSourceEntries(component.selectedEnvironment!);
-            expect(entries.map((e) => e.key).sort()).toEqual(['outdoor_temperature', 'replay']);
+            expect(component.contextSourceEntries.map((e) => e.key).sort()).toEqual(['outdoor_temperature', 'replay']);
         });
 
         it('existingContextKeys collects both static and driven keys, for the Add dialog\'s collision check', () => {
@@ -1376,6 +1377,60 @@ describe('EnvironmentDetailComponent', () => {
 
             expect(component.environment?.context_sources?.['outdoor_temperature']).toBeUndefined();
             expect(component.isDirty).toBe(true);
+        });
+
+        // MEDIUM regression (SNRGY-4739): a context source's panel content (profile/dataset
+        // editor, charts included) used to be built eagerly for every entry, whether or not its
+        // panel was open. matExpansionPanelContent defers that until first opened.
+        describe('panel content is lazy (matExpansionPanelContent)', () => {
+            const envWithProfileAndDataset: Environment = {
+                ...nestedEnvironment,
+                context_sources: {
+                    outdoor_temperature: { kind: 'profile', interval_seconds: 300, profile: { base: 12 } },
+                    replay: { kind: 'dataset', interval_seconds: 60, dataset: { origin: 'file', ref: 'ds-1' } },
+                },
+            };
+
+            it('instantiates neither editor while every panel stays collapsed', () => {
+                loadWith(envWithProfileAndDataset);
+                fixture.detectChanges();
+
+                expect(fixture.debugElement.query(By.directive(EnvironmentsProfileEditorComponent))).toBeNull();
+                expect(fixture.debugElement.query(By.directive(EnvironmentsDatasetEditorComponent))).toBeNull();
+            });
+
+            it('instantiates only the opened panel\'s editor, not the still-collapsed one', () => {
+                loadWith(envWithProfileAndDataset);
+                fixture.detectChanges();
+                const headers = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('mat-expansion-panel-header'));
+                expect(headers.length).toBe(2);
+
+                headers[0].click(); // outdoor_temperature (profile), first in insertion order
+                fixture.detectChanges();
+
+                expect(fixture.debugElement.query(By.directive(EnvironmentsProfileEditorComponent))).toBeTruthy();
+                expect(fixture.debugElement.query(By.directive(EnvironmentsDatasetEditorComponent))).toBeNull();
+            });
+
+            // The parent's own problem list (selectedNodeProblems, shown above the form) must
+            // not depend on the panel's content being instantiated -- otherwise a collapsed
+            // panel would silently hide a real validation problem from the user.
+            it('still shows a context-source problem above the form while its panel stays collapsed', () => {
+                loadWith(envWithProfileAndDataset);
+                component.markDirty();
+                component.save();
+                httpMock.expectOne(environmentsUrl + '/e1').flush(
+                    { problems: [{ path: 'context_sources.outdoor_temperature.profile.base', message: 'must be set' }] },
+                    { status: 400, statusText: 'Bad Request' },
+                );
+                fixture.detectChanges();
+
+                expect(fixture.debugElement.query(By.directive(EnvironmentsProfileEditorComponent))).toBeNull();
+                expect(component.selectedNodeProblems).toEqual([
+                    { message: 'must be set', suffix: 'context_sources.outdoor_temperature.profile.base' },
+                ]);
+                expect(fixture.nativeElement.querySelector('.node-problems')?.textContent).toContain('must be set');
+            });
         });
     });
 
@@ -1493,6 +1548,84 @@ describe('EnvironmentDetailComponent', () => {
 
             expect(component.problems).toEqual([]);
             expect(editor.rowProblems(0)).toEqual([]);
+        });
+
+        // Reviewer follow-up on SNRGY-4739: the timeline editor is destroyed and recreated on
+        // every load() (the *ngIf around dataReady/environment), including the reload a
+        // successful save triggers -- so the page/size have to live in the parent to survive it.
+        describe('timeline pagination survives a save', () => {
+            function buildTimeline(count: number): DatedChange[] {
+                const rows: DatedChange[] = [];
+                for (let i = 0; i < count; i++) {
+                    rows.push({ at: '2026-01-01T00:00:' + String(i % 60).padStart(2, '0') + 'Z', target: 'context.k' + i, value: i });
+                }
+                return rows;
+            }
+
+            function envWithTimeline(count: number): Environment {
+                return { ...nestedEnvironment, timeline: buildTimeline(count) };
+            }
+
+            function currentTimelineEditor(): EnvironmentsTimelineEditorComponent {
+                return fixture.debugElement.query(By.directive(EnvironmentsTimelineEditorComponent))
+                    .componentInstance as EnvironmentsTimelineEditorComponent;
+            }
+
+            /** Drives a real save + its reload, rendering the intermediate dataReady=false state so the *ngIf actually tears down and recreates the child -- see the describe's own comment. */
+            function saveAndReload(reloadedEnv: Environment): void {
+                component.markDirty();
+                component.save();
+                httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(reloadedEnv)));
+                fixture.detectChanges(); // dataReady is now false -- destroys the old child
+                httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(reloadedEnv))); // the reload
+                fixture.detectChanges(); // dataReady is true again -- creates a fresh child
+            }
+
+            it('keeps the page and size chosen before a save across its reload', () => {
+                loadWith(envWithTimeline(350));
+                fixture.detectChanges();
+                currentTimelineEditor().onPage({ pageIndex: 3, pageSize: 100, length: 350 });
+                fixture.detectChanges();
+                expect(component.timelinePageIndex).toBe(3);
+                expect(component.timelinePageSize).toBe(100);
+
+                saveAndReload(envWithTimeline(350));
+
+                expect(component.timelinePageIndex).toBe(3);
+                expect(component.timelinePageSize).toBe(100);
+                expect(currentTimelineEditor().pageIndex).toBe(3);
+                expect(currentTimelineEditor().pageSize).toBe(100);
+            });
+
+            it('clamps the kept page if the reloaded timeline is now shorter', () => {
+                loadWith(envWithTimeline(350));
+                fixture.detectChanges();
+                currentTimelineEditor().onPage({ pageIndex: 3, pageSize: 100, length: 350 });
+                fixture.detectChanges();
+
+                saveAndReload(envWithTimeline(120)); // e.g. someone else's edit landed first
+
+                expect(component.timelinePageSize).toBe(100); // size is not what went stale
+                expect(component.timelinePageIndex).toBe(1); // ceil(120/100) = 2 pages -> last valid index is 1
+                expect(currentTimelineEditor().pageIndex).toBe(1);
+            });
+
+            it('resets to the first page and the default size on discard, unlike a save reload', () => {
+                loadWith(envWithTimeline(350));
+                fixture.detectChanges();
+                currentTimelineEditor().onPage({ pageIndex: 3, pageSize: 100, length: 350 });
+                fixture.detectChanges();
+
+                component.discard();
+                fixture.detectChanges();
+                httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(envWithTimeline(350))));
+                fixture.detectChanges();
+
+                expect(component.timelinePageIndex).toBe(0);
+                expect(component.timelinePageSize).toBe(TIMELINE_DEFAULT_PAGE_SIZE);
+                expect(currentTimelineEditor().pageIndex).toBe(0);
+                expect(currentTimelineEditor().pageSize).toBe(TIMELINE_DEFAULT_PAGE_SIZE);
+            });
         });
     });
 

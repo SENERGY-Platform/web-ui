@@ -23,6 +23,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 
 import { EnvironmentsTimelineEditorComponent } from './environments-timeline-editor.component';
@@ -46,6 +47,7 @@ describe('EnvironmentsTimelineEditorComponent', () => {
                 MatIconModule,
                 MatTooltipModule,
                 MatButtonModule,
+                MatPaginatorModule,
                 MtxSelectModule,
             ],
         }).compileComponents();
@@ -57,6 +59,12 @@ describe('EnvironmentsTimelineEditorComponent', () => {
     function setProblems(problems: NodeProblem[]): void {
         component.problems = problems;
         component.ngOnChanges({ problems: { currentValue: problems, previousValue: undefined, firstChange: true, isFirstChange: () => true } });
+    }
+
+    /** Assigns `timeline` and drives ngOnChanges, same rationale as setProblems -- also what (re)builds visibleRows/rowViews for the template. */
+    function bindTimeline(rows: DatedChange[]): void {
+        component.timeline = rows;
+        component.ngOnChanges({ timeline: { currentValue: rows, previousValue: undefined, firstChange: true, isFirstChange: () => true } });
     }
 
     it('should create', () => {
@@ -206,10 +214,10 @@ describe('EnvironmentsTimelineEditorComponent', () => {
     });
 
     it('renders one row per timeline entry', () => {
-        component.timeline = [
+        bindTimeline([
             { at: '2026-01-01T00:00:00Z', target: 'context.a', value: 1 },
             { at: '2026-01-02T00:00:00Z', target: 'context.b', value: 2 },
-        ];
+        ]);
         fixture.detectChanges();
         expect(fixture.nativeElement.querySelectorAll('.timeline-row').length).toBe(2);
     });
@@ -335,6 +343,176 @@ describe('EnvironmentsTimelineEditorComponent', () => {
 
             expect(component.clientProblems(timeline[0], 0)).toEqual([]);
             expect(component.clientProblems(timeline[1], 1)).toEqual([]);
+        });
+    });
+
+    describe('pagination (SNRGY-4739: a large timeline only renders its current page)', () => {
+        /** `count` bare rows, each with a distinct at so none of them collide as duplicates. */
+        function buildRows(count: number): DatedChange[] {
+            const rows: DatedChange[] = [];
+            for (let i = 0; i < count; i++) {
+                rows.push({ at: '2026-01-01T00:00:' + String(i % 60).padStart(2, '0') + 'Z', target: 'context.k' + i, value: i });
+            }
+            return rows;
+        }
+
+        it('defaults to page size 50 and shows only the first page', () => {
+            bindTimeline(buildRows(120));
+
+            expect(component.pageSize).toBe(50);
+            expect(component.pageIndex).toBe(0);
+            expect(component.visibleRows.length).toBe(50);
+            expect(component.visibleRows[0].index).toBe(0);
+            expect(component.visibleRows[49].index).toBe(49);
+        });
+
+        it('onPage moves to the requested page and slice', () => {
+            bindTimeline(buildRows(120));
+
+            component.onPage({ pageIndex: 2, pageSize: 50, length: 120 });
+
+            expect(component.pageIndex).toBe(2);
+            expect(component.visibleRows.length).toBe(20); // 120 - 2*50
+            expect(component.visibleRows[0].index).toBe(100);
+        });
+
+        // pageIndex/pageSize are inputs the parent restores after a save reload (see the
+        // component's class comment) -- the *Change outputs are how a UI-driven page/size
+        // change reaches the parent to be kept.
+        it('emits pageIndexChange and pageSizeChange only when the value actually moves', () => {
+            bindTimeline(buildRows(120));
+            const indexEvents: number[] = [];
+            const sizeEvents: number[] = [];
+            component.pageIndexChange.subscribe((i) => indexEvents.push(i));
+            component.pageSizeChange.subscribe((s) => sizeEvents.push(s));
+
+            component.onPage({ pageIndex: 1, pageSize: 100, length: 120 });
+            component.onPage({ pageIndex: 1, pageSize: 100, length: 120 }); // same values again
+
+            expect(indexEvents).toEqual([1]);
+            expect(sizeEvents).toEqual([100]);
+        });
+
+        it('keeps the current page across a field edit', () => {
+            bindTimeline(buildRows(120));
+            component.onPage({ pageIndex: 1, pageSize: 50, length: 120 });
+
+            component.onFieldChange(); // e.g. a target/value ngModelChange elsewhere on the page
+
+            expect(component.pageIndex).toBe(1);
+            expect(component.visibleRows[0].index).toBe(50);
+        });
+
+        it('a newly added row jumps to the page it lands on', () => {
+            bindTimeline(buildRows(50)); // exactly fills page 0
+
+            component.addRow();
+
+            expect(component.timeline!.length).toBe(51);
+            expect(component.pageIndex).toBe(1); // index 50 -> page 1 at page size 50
+            expect(component.visibleRows.map((rv) => rv.index)).toEqual([50]);
+            expect(component.visibleRows[0].row.target).toBe('');
+        });
+
+        it('removing the only row on the last page clamps back to the new last page', () => {
+            bindTimeline(buildRows(51)); // page 0: 0..49, page 1: just row 50
+            component.onPage({ pageIndex: 1, pageSize: 50, length: 51 });
+
+            component.removeRow(50);
+
+            expect(component.pageIndex).toBe(0); // page 1 no longer exists
+            expect(component.visibleRows.length).toBe(50);
+        });
+
+        it('a problem on a row outside the current page is still counted and reachable via jumpToFirstProblem', () => {
+            bindTimeline(buildRows(120));
+            setProblems([{ message: 'a time is required', suffix: 'timeline[105].at' }]); // page 2
+
+            expect(component.pageIndex).toBe(0);
+            expect(component.problemRowIndexes).toEqual([105]);
+            expect(component.visibleRows.some((rv) => rv.index === 105)).toBe(false); // not visible yet
+
+            component.jumpToFirstProblem();
+
+            expect(component.pageIndex).toBe(2);
+            expect(component.visibleRows.some((rv) => rv.index === 105)).toBe(true);
+            const jumped = component.visibleRows.find((rv) => rv.index === 105)!;
+            expect(jumped.hasProblem).toBe(true);
+            expect(jumped.problems).toEqual([{ field: 'at', message: 'a time is required' }]);
+        });
+
+        it('jumpToFirstProblem does nothing when there is no problem', () => {
+            bindTimeline(buildRows(120));
+
+            component.jumpToFirstProblem();
+
+            expect(component.pageIndex).toBe(0);
+        });
+
+        // BLOCKING-adjacent regression: a row's absolute `timeline` index (what moveRow/removeRow
+        // and the server's index-based problem paths key on) must stay correct once the row has
+        // crossed from one page to the next, not just while it stays on the same page.
+        it('index paths stay correct after a move across a page boundary, and the page follows the moved row', () => {
+            const rows = buildRows(60);
+            const movedRow = rows[49]; // last row of page 0 (page size 50)
+            bindTimeline(rows);
+
+            component.moveRowDown(49); // swaps with row 50, crossing into page 1
+
+            expect(component.timeline![50]).toBe(movedRow);
+            expect(component.pageIndex).toBe(1); // the moved row's own row stays visible, not page 0
+            expect(component.visibleRows[0].row).toBe(movedRow);
+            expect(component.visibleRows[0].index).toBe(50);
+        });
+
+        // Reviewer-requested regression: without following the page, a user moving the last row
+        // of a page down would see it vanish from view instead of watching it move.
+        it('moving the last row of a page down keeps it visible on the next page', () => {
+            bindTimeline(buildRows(51)); // page 0: indexes 0..49, page 1: just index 50
+
+            component.moveRowDown(49);
+
+            expect(component.pageIndex).toBe(1);
+            expect(component.visibleRows.map((rv) => rv.index)).toEqual([50]);
+        });
+
+        it('moving a row up across a page boundary also follows it back', () => {
+            bindTimeline(buildRows(51));
+            component.onPage({ pageIndex: 1, pageSize: 50, length: 51 });
+
+            component.moveRowUp(50); // swaps with row 49, crossing back into page 0
+
+            expect(component.pageIndex).toBe(0);
+            expect(component.visibleRows.some((rv) => rv.index === 49)).toBe(true);
+        });
+
+        it('renders a mat-paginator and only the current page\'s rows in the DOM', () => {
+            bindTimeline(buildRows(120));
+            fixture.detectChanges();
+
+            expect(fixture.nativeElement.querySelectorAll('.timeline-row').length).toBe(50);
+            expect(fixture.nativeElement.querySelector('mat-paginator')).toBeTruthy();
+        });
+
+        it('shows the problem-count summary with a working jump-to-first button', () => {
+            bindTimeline(buildRows(120));
+            setProblems([{ message: 'a time is required', suffix: 'timeline[105].at' }]);
+            fixture.detectChanges();
+
+            const summary = fixture.nativeElement.querySelector('.timeline-problems-summary');
+            expect(summary?.textContent).toContain('1 row with a problem');
+
+            (summary!.querySelector('button') as HTMLButtonElement).click();
+            fixture.detectChanges();
+
+            expect(component.pageIndex).toBe(2);
+        });
+
+        it('does not show the problem-count summary when nothing has a problem', () => {
+            bindTimeline(buildRows(120));
+            fixture.detectChanges();
+
+            expect(fixture.nativeElement.querySelector('.timeline-problems-summary')).toBeFalsy();
         });
     });
 });

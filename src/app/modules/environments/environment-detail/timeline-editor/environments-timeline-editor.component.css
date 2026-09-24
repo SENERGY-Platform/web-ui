@@ -84,3 +84,10 @@
     height: 16px;
     width: 16px;
 }
+
+.timeline-problems-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
