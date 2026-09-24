@@ -96,6 +96,14 @@
     <input matInput [(ngModel)]="dataset!.window" (ngModelChange)="onFieldChange()" name="dataset-window">
     <mat-hint>How much history to fetch, backwards from environment start, e.g. 36h, 7d, 4w, 1y.</mat-hint>
 </mat-form-field>
+<div class="max-gap-row">
+    <mat-form-field appearance="outline" color="accent" class="third-width">
+        <mat-label>Max gap</mat-label>
+        <input matInput [(ngModel)]="dataset!.max_gap" (ngModelChange)="onFieldChange()" name="dataset-max-gap">
+        <mat-hint>A duration like the window, at least 1s; wider than this between two points the source plays nothing.</mat-hint>
+    </mat-form-field>
+    <mat-icon class="inline-help-icon" matTooltip="Holds for every resample mode -- hold, linear and distribute all stop at this distance rather than bridging the gap.">help_outline</mat-icon>
+</div>
 
 <mat-form-field appearance="outline" color="accent" class="third-width">
     <mat-label>Resample</mat-label>
@@ -141,3 +149,64 @@
     Cumulative
 </mat-checkbox>
 <mat-icon class="inline-help-icon" matTooltip="A meter reading that keeps counting up across a loop boundary instead of jumping back to the first value.">help_outline</mat-icon>
+
+<ng-container *ngIf="dataset!.origin === 'export' || dataset!.filters?.length">
+    <div class="filter-row" *ngFor="let filter of dataset!.filters; let i = index; trackBy: trackByFilter">
+        <mat-form-field appearance="outline" color="accent" class="filter-column-field">
+            <mat-label>Column</mat-label>
+            <input matInput [(ngModel)]="filter.column" (ngModelChange)="onFieldChange()" name="dataset-filter-column-{{i}}">
+        </mat-form-field>
+        <mat-form-field appearance="outline" color="accent" class="filter-value-field">
+            <mat-label>Value</mat-label>
+            <input matInput [(ngModel)]="filter.value" (ngModelChange)="onFieldChange()" name="dataset-filter-value-{{i}}">
+        </mat-form-field>
+        <button mat-icon-button type="button" color="warn" matTooltip="Remove filter" (click)="removeFilter(i)">
+            <mat-icon>delete</mat-icon>
+        </button>
+    </div>
+    <button mat-stroked-button color="accent" type="button" (click)="addFilter()">
+        <mat-icon>add</mat-icon> Add filter
+    </button>
+</ng-container>
+
+<ng-container *ngIf="dataset!.origin === 'export' || dataset!.fallback">
+    <div class="fallback-checkbox-row">
+        <mat-checkbox [ngModel]="!!dataset!.fallback" [ngModelOptions]="{standalone: true}" (ngModelChange)="onFallbackToggle($event)" name="dataset-fallback-enabled">
+            Fallback series
+        </mat-checkbox>
+        <mat-icon class="inline-help-icon" matTooltip="Read only inside a gap of this source wider than max_gap, never at the edges, not with cumulative.">help_outline</mat-icon>
+    </div>
+    <ng-container *ngIf="dataset!.fallback as fallback">
+        <div class="filter-row" *ngFor="let filter of fallback.filters; let i = index; trackBy: trackByFilter">
+            <mat-form-field appearance="outline" color="accent" class="filter-column-field">
+                <mat-label>Column</mat-label>
+                <input matInput [(ngModel)]="filter.column" (ngModelChange)="onFieldChange()" name="dataset-fallback-filter-column-{{i}}">
+            </mat-form-field>
+            <mat-form-field appearance="outline" color="accent" class="filter-value-field">
+                <mat-label>Value</mat-label>
+                <input matInput [(ngModel)]="filter.value" (ngModelChange)="onFieldChange()" name="dataset-fallback-filter-value-{{i}}">
+            </mat-form-field>
+            <button mat-icon-button type="button" color="warn" matTooltip="Remove filter" (click)="removeFallbackFilter(i)">
+                <mat-icon>delete</mat-icon>
+            </button>
+        </div>
+        <button mat-stroked-button color="accent" type="button" (click)="addFallbackFilter()">
+            <mat-icon>add</mat-icon> Add filter
+        </button>
+        <mat-form-field appearance="outline" color="accent" class="third-width">
+            <mat-label>Export</mat-label>
+            <input matInput [(ngModel)]="fallback.ref" (ngModelChange)="onFieldChange()" name="dataset-fallback-ref">
+            <mat-hint>Empty reads the source's own.</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline" color="accent" class="third-width">
+            <mat-label>Column</mat-label>
+            <input matInput [(ngModel)]="fallback.column" (ngModelChange)="onFieldChange()" name="dataset-fallback-column">
+            <mat-hint>Empty reads the source's own.</mat-hint>
+        </mat-form-field>
+    </ng-container>
+</ng-container>
+
+<div class="follow-problem" *ngFor="let msg of datasetGapProblems(dataset)">
+    <mat-icon color="warn">error</mat-icon>
+    <span>{{msg}}</span>
+</div>

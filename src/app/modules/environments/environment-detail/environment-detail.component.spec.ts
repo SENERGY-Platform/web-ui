@@ -347,6 +347,44 @@ describe('EnvironmentDetailComponent', () => {
         });
     });
 
+    describe('dataset', () => {
+        // BLOCKING-adjacent regression, same rationale as the tree-structure, faults-editor and
+        // timeline ones above: removing a filter row shifts the server's index-based problems
+        // (e.g. "...dataset.filters[0].value"), so a stale one must not be left pointing at the
+        // wrong (or a vanished) row. Goes through the real embedded editor and its
+        // (datasetRestructured) binding, not a direct call to the parent handler, so it also
+        // catches a missing wire-up between the two.
+        it('removing a filter row through the real editor clears stale index-based problems', () => {
+            const env: Environment = { ...nestedEnvironment };
+            loadWith(env);
+            const channelNode = component.root!.children[0].children[0].children[0];
+            (channelNode.data as any).source = {
+                kind: 'dataset',
+                dataset: { origin: 'export', filters: [{ column: 'a', value: '' }, { column: 'b', value: 'x' }] },
+            };
+            component.select(channelNode);
+            fixture.detectChanges();
+
+            component.markDirty();
+            component.save();
+            httpMock
+                .expectOne(environmentsUrl + '/e1')
+                .flush(
+                    { problems: [{ path: 'zones[0].assets[0].channels[0].source.dataset.filters[0].value', message: 'must not be empty' }] },
+                    { status: 400, statusText: 'Bad Request' },
+                );
+            fixture.detectChanges();
+            expect(component.problems.length).toBe(1);
+
+            const editor = fixture.debugElement.query(By.directive(EnvironmentsDatasetEditorComponent))
+                .componentInstance as EnvironmentsDatasetEditorComponent;
+            editor.removeFilter(0);
+            fixture.detectChanges();
+
+            expect(component.problems).toEqual([]);
+        });
+    });
+
     it('selects a clicked node and exposes it through the matching getter', () => {
         loadWith(nestedEnvironment);
 

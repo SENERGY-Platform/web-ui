@@ -441,6 +441,29 @@ export interface DatasetSource {
     follow?: boolean;
     /** How often a following dataset refetches: a duration like window, default 30m, minimum 1m. */
     follow_every?: string;
+    /** The widest distance between two neighbouring points the replay still bridges, a duration like window; empty/absent means no bound. Applies to every origin (docs/gaps-in-a-replayed-series.md in moses). */
+    max_gap?: string;
+    /** Narrows an export that carries more than one series in one table to the rows matching every entry (combined with and). Only for the export origin. */
+    filters?: DatasetFilter[];
+    /** A second series of the same export, read only inside a gap of this one wider than max_gap. Only for the export origin, needs max_gap, refused with cumulative. */
+    fallback?: DatasetFallback;
+}
+
+/** Keeps the rows whose column equals value; several entries combine with and. Equality only. */
+export interface DatasetFilter {
+    column: string;
+    value: string;
+}
+
+/**
+ * Selects the substitute series a dataset source's fallback reads inside a gap wider than
+ * max_gap. Carries the selection and nothing else: origin, resample, anchor, window, follow and
+ * max_gap are the source's and hold for both series. ref/column empty means the source's own.
+ */
+export interface DatasetFallback {
+    filters: DatasetFilter[];
+    ref?: string;
+    column?: string;
 }
 
 const REPLAY_DURATION_SUFFIX_SECONDS: Record<'d' | 'w' | 'y', number> = {
@@ -603,6 +626,124 @@ export function followProblem(dataset: DatasetSource | undefined): string | unde
         }
     }
     return undefined;
+}
+
+/** Mirrors moses's MinMaxGap: the instants of a series are whole seconds, so a bound below one second is met by no distance at all. */
+const MIN_MAX_GAP_SECONDS = 1;
+
+/** ParseMaxGap's "set" flag (lib/domain/validate.go checkMaxGap): only a non-blank max_gap is a bound, everything else -- including whitespace -- is the unset field. */
+function maxGapIsSet(maxGap: string | undefined): boolean {
+    return !!maxGap && maxGap.trim() !== '';
+}
+
+function maxGapProblem(dataset: DatasetSource): string | undefined {
+    if (!maxGapIsSet(dataset.max_gap)) {
+        return undefined;
+    }
+    const outcome = replayDurationOutcome(dataset.max_gap!);
+    if ('error' in outcome) {
+        return outcome.error;
+    }
+    if (outcome.seconds < MIN_MAX_GAP_SECONDS) {
+        return `Max gap must be at least 1s, got "${dataset.max_gap}".`;
+    }
+    return undefined;
+}
+
+/** The per-entry rules a source's own filters and its fallback's share (checkFilterEntries in validate.go): named column, no padding, a non-blank value. */
+function filterEntryProblems(filters: DatasetFilter[] | undefined, label: string): string[] {
+    if (!filters) {
+        return [];
+    }
+    const problems: string[] = [];
+    filters.forEach((filter, index) => {
+        const column = filter.column ?? '';
+        const trimmedColumn = column.trim();
+        if (trimmedColumn === '') {
+            problems.push(`${label} ${index + 1}: must name the column to filter on.`);
+        } else if (trimmedColumn !== column) {
+            problems.push(`${label} ${index + 1}: column must not be padded with whitespace, the name reaches the query as written.`);
+        }
+        if ((filter.value ?? '').trim() === '') {
+            problems.push(`${label} ${index + 1}: value must not be empty, a filter on nothing keeps nothing.`);
+        }
+    });
+    return problems;
+}
+
+function filtersProblems(dataset: DatasetSource): string[] {
+    if (!dataset.filters || dataset.filters.length === 0) {
+        return [];
+    }
+    if (dataset.origin !== 'export') {
+        return [`Filters only apply to an export, not origin "${dataset.origin}".`];
+    }
+    return filterEntryProblems(dataset.filters, 'Filter');
+}
+
+/** Whether fallback's selection reads the same rows the source itself already does (sameSeries in validate.go): same ref, same column, same filters as an unordered set. */
+function fallbackSameAsSource(dataset: DatasetSource, fallback: DatasetFallback): boolean {
+    const substituteRef = fallback.ref || dataset.ref;
+    const substituteColumn = fallback.column || dataset.column;
+    if (substituteRef !== dataset.ref || substituteColumn !== dataset.column) {
+        return false;
+    }
+    const key = (filters: DatasetFilter[] | undefined) =>
+        (filters || []).map((f) => JSON.stringify([f.column, f.value])).sort();
+    const sourceKey = key(dataset.filters);
+    const fallbackKey = key(fallback.filters);
+    return sourceKey.length === fallbackKey.length && sourceKey.every((v, i) => v === fallbackKey[i]);
+}
+
+function fallbackProblems(dataset: DatasetSource): string[] {
+    const fallback = dataset.fallback;
+    if (!fallback) {
+        return [];
+    }
+    if (dataset.origin !== 'export') {
+        return [`Fallback only applies to an export, not origin "${dataset.origin}".`];
+    }
+    const problems: string[] = [];
+    if (!maxGapIsSet(dataset.max_gap)) {
+        problems.push('Fallback needs max_gap: without a bound nothing is a gap, so the fallback series would never be read.');
+    }
+    if (!fallback.filters || fallback.filters.length === 0) {
+        problems.push('Fallback must name the filters that pick the substitute series out of the export.');
+    }
+    problems.push(...filterEntryProblems(fallback.filters, 'Fallback filter'));
+    if (fallback.ref !== undefined && fallback.ref !== '' && fallback.ref.trim() === '') {
+        problems.push("Fallback export must not be blank, empty reads the source's own.");
+    }
+    if (fallback.column !== undefined && fallback.column !== '' && fallback.column.trim() === '') {
+        problems.push("Fallback column must not be blank, empty reads the source's own.");
+    }
+    if (fallbackSameAsSource(dataset, fallback)) {
+        problems.push('Fallback must select a different series than the source itself: the same export, column and filters.');
+    }
+    if (dataset.cumulative) {
+        problems.push('Fallback must not be combined with cumulative: the substitute is a different meter, not this one\'s count.');
+    }
+    return problems;
+}
+
+/**
+ * Every server-side rule max_gap, filters and fallback would fail, as the messages shown to the
+ * user -- several can hold at once, unlike followProblem's single first-hit result. Mirrors the
+ * checks moses itself makes on save (lib/domain/validate.go checkMaxGap/checkFilters/checkFallback,
+ * docs/gaps-in-a-replayed-series.md and docs/context-and-context-sources.md "One export, several series").
+ */
+export function datasetGapProblems(dataset: DatasetSource | undefined): string[] {
+    if (!dataset) {
+        return [];
+    }
+    const problems: string[] = [];
+    const maxGap = maxGapProblem(dataset);
+    if (maxGap) {
+        problems.push(maxGap);
+    }
+    problems.push(...filtersProblems(dataset));
+    problems.push(...fallbackProblems(dataset));
+    return problems;
 }
 
 export interface FormulaSource {

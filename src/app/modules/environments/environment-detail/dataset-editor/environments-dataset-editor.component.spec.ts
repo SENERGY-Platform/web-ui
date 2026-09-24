@@ -255,6 +255,105 @@ describe('EnvironmentsDatasetEditorComponent', () => {
         });
     });
 
+    describe('filters', () => {
+        it('hides the filters block for origin file unless filters are already present', () => {
+            component.dataset = { origin: 'file' };
+            fixture.detectChanges();
+            expect(fixture.debugElement.query(By.css('.filter-row'))).toBeFalsy();
+
+            component.dataset = { origin: 'file', filters: [{ column: 'a', value: '1' }] };
+            fixture.detectChanges();
+            expect(fixture.debugElement.query(By.css('.filter-row'))).toBeTruthy();
+        });
+
+        it('shows the "Add filter" button for origin export even with no rows yet', () => {
+            component.dataset = { origin: 'export' };
+            fixture.detectChanges();
+            const addButtons = fixture.debugElement.queryAll(By.css('button')).filter((b) => b.nativeElement.textContent.includes('Add filter'));
+            expect(addButtons.length).toBe(1);
+        });
+
+        it('addFilter appends an empty row in place and emits both signals', () => {
+            const dataset: DatasetSource = { origin: 'export' };
+            component.dataset = dataset;
+            let emitted = false;
+            let restructured = false;
+            component.datasetChange.subscribe(() => (emitted = true));
+            component.datasetRestructured.subscribe(() => (restructured = true));
+
+            component.addFilter();
+
+            expect(dataset.filters).toEqual([{ column: '', value: '' }]);
+            expect(component.dataset).toBe(dataset);
+            expect(emitted).toBe(true);
+            expect(restructured).toBe(true);
+        });
+
+        // Regression: a stale index-based problem (e.g. "dataset.filters[0].value") must not
+        // keep pointing at a row that shifted or vanished -- see datasetRestructured and
+        // onDatasetRestructured/afterStructuralChange in environment-detail.component.ts.
+        it('removeFilter mutates in place, emits both signals, and drops the key once the list is empty', () => {
+            const dataset: DatasetSource = { origin: 'export', filters: [{ column: 'a', value: '1' }, { column: 'b', value: '2' }] };
+            component.dataset = dataset;
+            let emitCount = 0;
+            let restructuredCount = 0;
+            component.datasetChange.subscribe(() => emitCount++);
+            component.datasetRestructured.subscribe(() => restructuredCount++);
+
+            component.removeFilter(0);
+            expect(dataset.filters).toEqual([{ column: 'b', value: '2' }]);
+            expect(emitCount).toBe(1);
+            expect(restructuredCount).toBe(1);
+
+            component.removeFilter(0);
+            expect(dataset.filters).toBeUndefined();
+            expect(emitCount).toBe(2);
+            expect(restructuredCount).toBe(2);
+        });
+    });
+
+    describe('fallback', () => {
+        it('the checkbox creates a fallback with one empty filter row, deletes it when unchecked, and emits both signals', () => {
+            const dataset: DatasetSource = { origin: 'export' };
+            component.dataset = dataset;
+            let emitCount = 0;
+            let restructuredCount = 0;
+            component.datasetChange.subscribe(() => emitCount++);
+            component.datasetRestructured.subscribe(() => restructuredCount++);
+
+            component.onFallbackToggle(true);
+            expect(dataset.fallback).toEqual({ filters: [{ column: '', value: '' }] });
+            expect(emitCount).toBe(1);
+            expect(restructuredCount).toBe(1);
+
+            component.onFallbackToggle(false);
+            expect(dataset.fallback).toBeUndefined();
+            expect(emitCount).toBe(2);
+            expect(restructuredCount).toBe(2);
+        });
+
+        it('addFallbackFilter/removeFallbackFilter mutate in place, emit both signals, keeping an empty list rather than dropping it', () => {
+            const dataset: DatasetSource = { origin: 'export', fallback: { filters: [{ column: 'a', value: '1' }] } };
+            component.dataset = dataset;
+            let emitCount = 0;
+            let restructuredCount = 0;
+            component.datasetChange.subscribe(() => emitCount++);
+            component.datasetRestructured.subscribe(() => restructuredCount++);
+
+            component.addFallbackFilter();
+            expect(dataset.fallback?.filters).toEqual([{ column: 'a', value: '1' }, { column: '', value: '' }]);
+            expect(emitCount).toBe(1);
+            expect(restructuredCount).toBe(1);
+
+            component.removeFallbackFilter(1);
+            component.removeFallbackFilter(0);
+            expect(dataset.fallback?.filters).toEqual([]);
+            expect(dataset.fallback).toBeDefined();
+            expect(emitCount).toBe(3);
+            expect(restructuredCount).toBe(3);
+        });
+    });
+
     describe('onFollowChange', () => {
         it('clears follow_every when Follow is unchecked, and emits once: the server refuses follow_every without follow', () => {
             const dataset: DatasetSource = { origin: 'platform', anchor: 'original', follow: false, follow_every: '30m' };

@@ -193,7 +193,8 @@
                                     [platformDeviceName]="entry.source.dataset?.ref ? (platformDeviceNames.get(entry.source.dataset!.ref!) || entry.source.dataset!.ref) : ''"
                                     [serviceOptions]="platformServiceOptions(entry.source.dataset!)"
                                     [columnOptions]="platformColumnOptions(entry.source.dataset!)"
-                                    (selectDevice)="selectPlatformDevice(entry.source.dataset!)" (datasetChange)="markDirty()">
+                                    (selectDevice)="selectPlatformDevice(entry.source.dataset!)" (datasetChange)="markDirty()"
+                                    (datasetRestructured)="onDatasetRestructured()">
                                 </senergy-environments-dataset-editor>
                             </mat-expansion-panel>
                         </div>
@@ -392,7 +393,8 @@
                                 [platformDeviceName]="selectedChannel!.source!.dataset!.ref ? (platformDeviceNames.get(selectedChannel!.source!.dataset!.ref) || selectedChannel!.source!.dataset!.ref) : ''"
                                 [serviceOptions]="platformServiceOptions(selectedChannel!.source!.dataset!)"
                                 [columnOptions]="platformColumnOptions(selectedChannel!.source!.dataset!)"
-                                (selectDevice)="selectPlatformDevice(selectedChannel!.source!.dataset!)" (datasetChange)="markDirty()">
+                                (selectDevice)="selectPlatformDevice(selectedChannel!.source!.dataset!)" (datasetChange)="markDirty()"
+                                (datasetRestructured)="onDatasetRestructured()">
                             </senergy-environments-dataset-editor>
                         </ng-container>
 

@@ -740,6 +740,11 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.afterStructuralChange();
     }
 
+    /** datasetRestructured handler: adding/removing a filter or fallback row shifts the server's index-based problems (e.g. "dataset.filters[0].value"), so it needs the same stale-problem treatment as every other structural edit (see afterStructuralChange). */
+    onDatasetRestructured(): void {
+        this.afterStructuralChange();
+    }
+
     /** Opens the shared device picker and, once a device is chosen, resolves its display name, type and service catalog. */
     selectPlatformDevice(dataset: DatasetSource): void {
         this.dialog

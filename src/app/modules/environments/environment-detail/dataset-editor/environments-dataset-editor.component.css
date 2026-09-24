@@ -49,3 +49,27 @@
     align-items: center;
     gap: 8px;
 }
+
+.max-gap-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.fallback-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.filter-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.filter-column-field,
+.filter-value-field {
+    width: 200px;
+    margin-right: 8px;
+}
