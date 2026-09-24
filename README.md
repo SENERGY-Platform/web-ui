@@ -45,7 +45,9 @@ cp src/environments/environment.ts src/environments/environment.dev.ts
 ```
 
 That file is generated and gitignored, which is why a fresh clone does not have
-it. The three files a service URL actually lives in are tracked — see `docs/`.
+it. Its production counterpart `environment.prod.ts` is written from the
+tracked `environment.ts` before every `npm run build`, as `build/Dockerfile` does,
+so call `npm run build` rather than `ng build` directly. The three files a service URL actually lives in are tracked — see `docs/`.
 
 ## Verify a change
 
