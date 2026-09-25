@@ -49,7 +49,7 @@ const EFFECTS_STYLESHEET: StylesheetJsonBlock[] = [
             label: 'data(label)',
             'font-size': 9,
             'text-wrap': 'wrap',
-            'text-max-width': '90',
+            'text-max-width': '70',
             'text-valign': 'center',
             'text-halign': 'center',
             width: 34,
@@ -281,14 +281,16 @@ export class EnvironmentsEffectsComponent implements OnChanges, AfterViewInit, O
         }
         this.destroyCy();
         const elements = buildEffectsElements(graph);
-        const layout: DagreLayoutOptions = { name: 'dagre', rankDir: 'LR', nodeSep: 24, rankSep: 90, padding: 20 };
+        // top to bottom: a document has few ranks with many nodes each, so this is the orientation that comes out wide
+        const layout: DagreLayoutOptions = { name: 'dagre', rankDir: 'TB', nodeSep: 40, rankSep: 90, padding: 20 };
         this.zone.runOutsideAngular(() => {
             const cy = factory({
                 container: this.host.nativeElement,
                 elements: [...elements.nodes, ...elements.edges],
                 style: EFFECTS_STYLESHEET,
                 layout,
-                wheelSensitivity: 0.2,
+                minZoom: 0.05,
+                maxZoom: 3,
             });
             this.cy = cy;
             cy.on('tap', 'node', (evt) => {
