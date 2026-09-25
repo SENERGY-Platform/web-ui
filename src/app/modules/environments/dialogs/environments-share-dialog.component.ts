@@ -30,10 +30,10 @@ export interface ShareDialogData {
 }
 
 /**
- * Edits an environment's device-sharing set (read+execute on its managed devices, fixed --
- * not selectable here). Saving sends the whole edited set, not a diff; a 502 (some devices
- * failed) or 400 (rejected set) keeps the dialog open so the user can fix it or just retry,
- * since a repeated PUT is safe.
+ * Edits an environment's device-sharing set (read+execute on its managed devices; per entry
+ * optionally write on the graph). Saving sends the whole edited set including graph_writers, since
+ * the PUT replaces it; a 502 (some devices failed) or 400 (rejected set) keeps the dialog open so
+ * the user can fix it or just retry, since a repeated PUT is safe.
  */
 @Component({
     selector: 'senergy-environments-share-dialog',
@@ -48,6 +48,9 @@ export class EnvironmentsShareDialogComponent implements OnInit {
     saving = false;
     users: string[] = [];
     groups: string[] = [];
+    /** The shared entries that also get write on the graph; always a subset of users/groups. */
+    graphWriterUsers: string[] = [];
+    graphWriterGroups: string[] = [];
 
     /** Every sharable user, for the picker and for resolving a shared id's display name. */
     allUsers: PermissionsUserModel[] = [];
@@ -71,6 +74,8 @@ export class EnvironmentsShareDialogComponent implements OnInit {
         this.environmentsService.getShares(this.data.id).subscribe(shares => {
             this.users = shares?.users ? [...shares.users] : [];
             this.groups = shares?.groups ? [...shares.groups] : [];
+            this.graphWriterUsers = shares?.graph_writers?.users ? [...shares.graph_writers.users] : [];
+            this.graphWriterGroups = shares?.graph_writers?.groups ? [...shares.graph_writers.groups] : [];
             this.loading = false;
             this.calcAddableUsers();
             this.calcAddableGroups();
@@ -119,7 +124,19 @@ export class EnvironmentsShareDialogComponent implements OnInit {
 
     removeUser(id: string): void {
         this.users = this.users.filter(u => u !== id);
+        this.graphWriterUsers = this.graphWriterUsers.filter(u => u !== id);
         this.calcAddableUsers();
+    }
+
+    isUserGraphWriter(id: string): boolean {
+        return this.graphWriterUsers.includes(id);
+    }
+
+    setUserGraphWriter(id: string, writes: boolean): void {
+        this.graphWriterUsers = this.graphWriterUsers.filter(u => u !== id);
+        if (writes && this.users.includes(id)) {
+            this.graphWriterUsers.push(id);
+        }
     }
 
     addGroup(): void {
@@ -133,7 +150,19 @@ export class EnvironmentsShareDialogComponent implements OnInit {
 
     removeGroup(path: string): void {
         this.groups = this.groups.filter(g => g !== path);
+        this.graphWriterGroups = this.graphWriterGroups.filter(g => g !== path);
         this.calcAddableGroups();
+    }
+
+    isGroupGraphWriter(path: string): boolean {
+        return this.graphWriterGroups.includes(path);
+    }
+
+    setGroupGraphWriter(path: string, writes: boolean): void {
+        this.graphWriterGroups = this.graphWriterGroups.filter(g => g !== path);
+        if (writes && this.groups.includes(path)) {
+            this.graphWriterGroups.push(path);
+        }
     }
 
     cancel(): void {
@@ -144,7 +173,15 @@ export class EnvironmentsShareDialogComponent implements OnInit {
         this.saving = true;
         this.errorMessage = '';
         this.deviceErrors = [];
-        const shares: EnvironmentShares = { users: this.users, groups: this.groups };
+        // the server refuses a graph writer that is not shared, so the subset is enforced here too
+        const shares: EnvironmentShares = {
+            users: this.users,
+            groups: this.groups,
+            graph_writers: {
+                users: this.graphWriterUsers.filter(u => this.users.includes(u)),
+                groups: this.graphWriterGroups.filter(g => this.groups.includes(g)),
+            },
+        };
         this.environmentsService.setShares(this.data.id, shares).subscribe(result => {
             this.saving = false;
             if (isSharesFailure(result)) {

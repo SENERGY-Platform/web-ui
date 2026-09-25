@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import { MatDialogRef } from '@angular/material/dialog';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Observable, of } from 'rxjs';
 import { EnvironmentsShareDialogComponent } from './environments-share-dialog.component';
 import { EnvironmentsService } from '../shared/environments.service';
@@ -83,9 +87,18 @@ describe('EnvironmentsShareDialogComponent', () => {
     let dialogRef: MockDialogRef;
     let snackBar: MockSnackBar;
 
+    let environmentsServiceShares: EnvironmentShares | null | undefined;
+
+    beforeEach(() => {
+        environmentsServiceShares = undefined;
+    });
+
     /** Direct construction (no TestBed), same as environments-create-dialog.component.spec.ts. */
     const create = (): EnvironmentsShareDialogComponent => {
         environmentsService = new MockEnvironmentsService();
+        if (environmentsServiceShares !== undefined) {
+            environmentsService.shares = environmentsServiceShares;
+        }
         permissionsService = new MockPermissionsService();
         authorizationService = new MockAuthorizationService();
         dialogRef = new MockDialogRef();
@@ -152,7 +165,62 @@ describe('EnvironmentsShareDialogComponent', () => {
 
         component.save();
 
-        expect(environmentsService.setCalls).toEqual([{ id: 'e1', shares: { users: [], groups: ['/demo', '/other'] } }]);
+        expect(environmentsService.setCalls).toEqual([
+            { id: 'e1', shares: { users: [], groups: ['/demo', '/other'], graph_writers: { users: [], groups: [] } } },
+        ]);
+    });
+
+    // The PUT replaces graph_writers too, so a save that dropped them would take write away.
+    it('should carry the loaded graph writers through a save it did not touch them in', () => {
+        environmentsServiceShares = { users: ['u1', 'u2'], groups: ['/demo'], graph_writers: { users: ['u2'], groups: ['/demo'] }, devices: 3 };
+        const component = create();
+        component.groupFormControl.setValue('/other');
+        component.addGroup();
+
+        component.save();
+
+        expect(environmentsService.setCalls[0].shares.graph_writers).toEqual({ users: ['u2'], groups: ['/demo'] });
+        expect(component.isUserGraphWriter('u2')).toBe(true);
+        expect(component.isUserGraphWriter('u1')).toBe(false);
+    });
+
+    it('should read a set without graph_writers as one without writers', () => {
+        const component = create();
+        expect(component.graphWriterUsers).toEqual([]);
+        expect(component.graphWriterGroups).toEqual([]);
+    });
+
+    it('should make a shared user and group graph writers and take it back on uncheck', () => {
+        const component = create();
+        component.setUserGraphWriter('u1', true);
+        component.setGroupGraphWriter('/demo', true);
+        component.save();
+        expect(environmentsService.setCalls[0].shares.graph_writers).toEqual({ users: ['u1'], groups: ['/demo'] });
+
+        component.setUserGraphWriter('u1', false);
+        component.setGroupGraphWriter('/demo', false);
+        component.save();
+        expect(environmentsService.setCalls[1].shares.graph_writers).toEqual({ users: [], groups: [] });
+    });
+
+    it('should not make an entry that is not shared a graph writer', () => {
+        const component = create();
+        component.setUserGraphWriter('u2', true);
+        component.setGroupGraphWriter('/other', true);
+        component.save();
+        expect(environmentsService.setCalls[0].shares.graph_writers).toEqual({ users: [], groups: [] });
+    });
+
+    // The server refuses a graph writer that is not shared, so removing the entry removes the write.
+    it('should drop the graph writer with the entry it belongs to', () => {
+        environmentsServiceShares = { users: ['u1'], groups: ['/demo'], graph_writers: { users: ['u1'], groups: ['/demo'] } };
+        const component = create();
+        component.removeUser('u1');
+        component.removeGroup('/demo');
+
+        component.save();
+
+        expect(environmentsService.setCalls[0].shares).toEqual({ users: [], groups: [], graph_writers: { users: [], groups: [] } });
     });
 
     it('should show a confirmation with the device count and close the dialog on success', () => {
@@ -200,5 +268,59 @@ describe('EnvironmentsShareDialogComponent', () => {
         component.cancel();
         expect(dialogRef.closeCalled).toBe(true);
         expect(dialogRef.closedWith).toBeUndefined();
+    });
+});
+
+// Renders the template, which the direct construction above never compiles.
+describe('EnvironmentsShareDialogComponent graph writer checkbox', () => {
+    let environmentsService: MockEnvironmentsService;
+
+    const render = (shares: EnvironmentShares) => {
+        environmentsService = new MockEnvironmentsService();
+        environmentsService.shares = shares;
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            declarations: [EnvironmentsShareDialogComponent],
+            imports: [MatCheckboxModule, NoopAnimationsModule],
+            providers: [
+                { provide: MatDialogRef, useClass: MockDialogRef },
+                { provide: EnvironmentsService, useValue: environmentsService },
+                { provide: PermissionsService, useClass: MockPermissionsService },
+                { provide: AuthorizationService, useClass: MockAuthorizationService },
+                { provide: MatSnackBar, useClass: MockSnackBar },
+                { provide: MAT_DIALOG_DATA, useValue: { id: 'e1', name: 'Plant A' } },
+            ],
+        });
+        const fixture = TestBed.createComponent(EnvironmentsShareDialogComponent);
+        fixture.detectChanges();
+        return fixture;
+    };
+
+    const checkboxes = (element: HTMLElement): HTMLInputElement[] =>
+        Array.from(element.querySelectorAll<HTMLInputElement>('mat-checkbox.graph-writer input[type="checkbox"]'));
+
+    it('should show one checkbox per shared entry, checked for the loaded graph writers', () => {
+        const fixture = render({ users: ['u1', 'u2'], groups: ['/demo'], graph_writers: { users: ['u2'], groups: [] } });
+        const boxes = checkboxes(fixture.nativeElement);
+        expect(boxes.length).toBe(3);
+        expect(boxes.map(box => box.checked)).toEqual([false, true, false]);
+    });
+
+    it('should turn a click on the checkbox into a graph writer and a second click back', () => {
+        const fixture = render({ users: ['u1'], groups: ['/demo'] });
+        const [user, group] = checkboxes(fixture.nativeElement);
+
+        user.click();
+        group.click();
+        fixture.detectChanges();
+        expect(fixture.componentInstance.graphWriterUsers).toEqual(['u1']);
+        expect(fixture.componentInstance.graphWriterGroups).toEqual(['/demo']);
+
+        user.click();
+        fixture.detectChanges();
+        expect(fixture.componentInstance.graphWriterUsers).toEqual([]);
+
+        fixture.componentInstance.save();
+        expect(environmentsService.setCalls[0].shares.graph_writers).toEqual({ users: [], groups: ['/demo'] });
     });
 });

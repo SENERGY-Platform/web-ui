@@ -841,11 +841,21 @@ export function isApiError(value: unknown): value is ApiError {
     return !!value && typeof (value as ApiError).message === 'string';
 }
 
-/** The device-sharing set of an environment: GET/PUT .../shares. devices is response-only -- how many managed devices it applies to. */
-export interface EnvironmentShares {
+/** User ids and group paths, as the shares endpoint names accounts. */
+export interface ShareTargets {
     users: string[];
     groups: string[];
+}
+
+/**
+ * The device-sharing set of an environment: GET/PUT .../shares. graph_writers is the part of
+ * users/groups that also gets write on the graph; sent, it replaces the stored writers, omitted it
+ * keeps them. devices and graph are response-only.
+ */
+export interface EnvironmentShares extends ShareTargets {
+    graph_writers?: ShareTargets;
     devices?: number;
+    graph?: boolean;
 }
 
 /** One device permissions-v2 could not update, from a 502 PUT .../shares response. */

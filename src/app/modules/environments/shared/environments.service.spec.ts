@@ -23,7 +23,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { EnvironmentsService } from './environments.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
-import { CatalogDeviceType, DatasetMeta, EffectsGraph, Environment, HistoryPollResult, HistoryStartRefusal, HistoryStatus, StateChange, ValidationError } from './environments.model';
+import { CatalogDeviceType, DatasetMeta, EffectsGraph, Environment, EnvironmentShares, HistoryPollResult, HistoryStartRefusal, HistoryStatus, StateChange, ValidationError } from './environments.model';
 
 class MockLadonService {
     authorizations: { [key: string]: { [method: string]: boolean } } = {};
@@ -444,6 +444,29 @@ describe('EnvironmentsService', () => {
         });
         const req = httpMock.expectOne(environmentsUrl + '/e1/history');
         req.flush('unable to abort the history run', { status: 500, statusText: 'Internal Server Error' });
+    });
+
+    it('should serve the graph writers of a share set as the server sent them', (done) => {
+        const shares: EnvironmentShares = { users: ['u1'], groups: ['/demo'], graph_writers: { users: ['u1'], groups: [] }, devices: 3, graph: true };
+        service.getShares('e1').subscribe(resp => {
+            expect(resp).toEqual(shares);
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/shares');
+        expect(req.request.method).toBe('GET');
+        req.flush(shares);
+    });
+
+    it('should PUT the share set with its graph writers unchanged', (done) => {
+        const shares: EnvironmentShares = { users: ['u1'], groups: ['/demo'], graph_writers: { users: ['u1'], groups: ['/demo'] } };
+        service.setShares('e1', shares).subscribe(resp => {
+            expect(resp).toEqual({ ...shares, devices: 3, graph: true });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/shares');
+        expect(req.request.method).toBe('PUT');
+        expect(req.request.body).toEqual(shares);
+        req.flush({ ...shares, devices: 3, graph: true });
     });
 
     it('should list datasets with a GET on /datasets', (done) => {

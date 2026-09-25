@@ -20,11 +20,13 @@
     <senergy-spinner [show]="loading"></senergy-spinner>
 
     <ng-container *ngIf="!loading">
-        <p class="hint">Grants read and execute rights on the environment's managed devices. Fixed -- not selectable here.</p>
+        <p class="hint">Grants read and execute rights on the environment's managed devices and its graph. "May edit the graph" adds write on the graph only; the graph is rebuilt on every save of the environment, so such edits last until then.</p>
 
         <h3>Users</h3>
         <div class="share-row" *ngFor="let id of users">
-            <span>{{userName(id)}}</span>
+            <span class="share-name">{{userName(id)}}</span>
+            <mat-checkbox class="graph-writer" [checked]="isUserGraphWriter(id)"
+                (change)="setUserGraphWriter(id, $event.checked)">may edit the graph</mat-checkbox>
             <button mat-icon-button color="warn" (click)="removeUser(id)" matTooltip="Remove">
                 <mat-icon>close</mat-icon>
             </button>
@@ -46,7 +48,9 @@
 
         <h3>Groups</h3>
         <div class="share-row" *ngFor="let path of groups">
-            <span>{{path}}</span>
+            <span class="share-name">{{path}}</span>
+            <mat-checkbox class="graph-writer" [checked]="isGroupGraphWriter(path)"
+                (change)="setGroupGraphWriter(path, $event.checked)">may edit the graph</mat-checkbox>
             <button mat-icon-button color="warn" (click)="removeGroup(path)" matTooltip="Remove">
                 <mat-icon>close</mat-icon>
             </button>
