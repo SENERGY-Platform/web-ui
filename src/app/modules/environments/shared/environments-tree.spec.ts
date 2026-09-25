@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { buildEnvironmentTree, findNodeByKey, locationKey, pathToKey } from './environments-tree';
+import { buildEffectsLocationIndex, buildEnvironmentTree, findNodeByKey, locationKey, pathToKey } from './environments-tree';
 import { Environment } from './environments.model';
 
 // b2 nests a zone within a zone with an asset at each level, so a builder that only looks
@@ -125,5 +125,32 @@ describe('pathToKey', () => {
     it('returns an empty array for an unknown key', () => {
         const root = buildEnvironmentTree(nestedEnvironment);
         expect(pathToKey(root, 'nope')).toEqual([]);
+    });
+});
+
+describe('buildEffectsLocationIndex', () => {
+    it('maps every zone and asset id to its tree key, at every nesting depth', () => {
+        const root = buildEnvironmentTree(nestedEnvironment);
+        const building = root.children[0];
+        const floor = building.children[0];
+        const meter1 = building.children[1];
+        const meter2 = floor.children[0];
+
+        const index = buildEffectsLocationIndex(root);
+
+        expect(index.get('zone:building')).toBe(building.key);
+        expect(index.get('zone:floor')).toBe(floor.key);
+        expect(index.get('asset:a1')).toBe(meter1.key);
+        expect(index.get('asset:a2')).toBe(meter2.key);
+    });
+
+    it('leaves out a zone or asset without an id, and never indexes channels', () => {
+        const env: Environment = {
+            id: 'e1',
+            zones: [{ type: 'building', assets: [{ name: 'no id' }] }],
+        };
+        const root = buildEnvironmentTree(env);
+        const index = buildEffectsLocationIndex(root);
+        expect(index.size).toBe(0);
     });
 });

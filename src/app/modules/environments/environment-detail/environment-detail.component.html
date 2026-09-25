@@ -39,7 +39,7 @@
         </div>
     </div>
 
-    <mat-tab-group backgroundColor="accent" color="primary" (selectedTabChange)="onTabChange($event)">
+    <mat-tab-group backgroundColor="accent" color="primary" [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)">
     <mat-tab label="Editor">
     <div class="editor-body" fxLayout="column" fxLayout.gt-xs="row">
         <div class="tree-panel" [ngClass.gt-xs]="'tree-panel-large'">
@@ -473,6 +473,18 @@
             </form>
         </div>
     </div>
+    </mat-tab>
+
+    <mat-tab label="Effects">
+        <ng-template matTabContent>
+            <p class="effects-empty-hint" *ngIf="!environment!.id">
+                This environment is not saved yet, so there is no effect graph to show. Save it on the Editor tab
+                first, then come back here.
+            </p>
+            <senergy-environments-effects *ngIf="environment!.id" [result]="effectsResult" [siteNames]="effectsSiteNames"
+                (openInEditor)="onEffectsOpenInEditor($event)">
+            </senergy-environments-effects>
+        </ng-template>
     </mat-tab>
 
     <mat-tab label="Live state">

@@ -134,6 +134,43 @@ export function findNodeByKey(root: EnvTreeNode, key: string): EnvTreeNode | und
     return undefined;
 }
 
+/**
+ * Maps every zone/asset id in the tree to its node key, as "zone:<id>"/"asset:<id>" -- the
+ * same id shape the effect graph's nodes use (environments-effects.ts). Lets the Effects
+ * tab's "Open in editor" turn a graph node id straight into a selectedKey, without its own
+ * copy of the tree walk.
+ */
+export function buildEffectsLocationIndex(root: EnvTreeNode): Map<string, string> {
+    const index = new Map<string, string>();
+    const walk = (node: EnvTreeNode): void => {
+        if (node.kind === 'zone' || node.kind === 'asset') {
+            const id = (node.data as { id?: string }).id;
+            if (id) {
+                index.set(node.kind + ':' + id, node.key);
+            }
+        }
+        node.children.forEach(walk);
+    };
+    walk(root);
+    return index;
+}
+
+/**
+ * Maps every top-level zone's id to its name (falling back to the id) -- "site" in an effect
+ * graph node is exactly a top-level zone's id, but the effects endpoint mostly answers without
+ * any zone node at all (moses only emits one when that zone's own state is read or written), so
+ * a name for the site filter has to come from the document itself instead of the graph.
+ */
+export function topLevelZoneNames(env: Environment): Map<string, string> {
+    const names = new Map<string, string>();
+    (env.zones || []).forEach((zone) => {
+        if (zone.id) {
+            names.set(zone.id, zone.name || zone.id);
+        }
+    });
+    return names;
+}
+
 /** Every node from the root down to (and including) the node with the given key, root first. */
 export function pathToKey(root: EnvTreeNode, key: string): EnvTreeNode[] {
     if (root.key === key) {

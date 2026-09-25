@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTabChangeEvent } from '@angular/material/tabs';
+import { MatExpansionPanel } from '@angular/material/expansion';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { Subscription, timer } from 'rxjs';
@@ -44,6 +45,8 @@ import {
     DatedChange,
     DIRECTIONS,
     directionLabel,
+    EffectsNode,
+    EffectsResult,
     Environment,
     ENVIRONMENT_TYPES,
     environmentTypeLabel,
@@ -62,7 +65,7 @@ import {
     ZONE_TYPES,
     zoneTypeLabel,
 } from '../shared/environments.model';
-import { EnvTreeNode, buildEnvironmentTree, findNodeByKey, locationKey, pathToKey } from '../shared/environments-tree';
+import { buildEffectsLocationIndex, EnvTreeNode, buildEnvironmentTree, findNodeByKey, locationKey, pathToKey, topLevelZoneNames } from '../shared/environments-tree';
 import { locationContains, NodeProblem, ProblemPath, problemPath, sameLocation } from '../shared/environments-path';
 import { applySourceKind } from '../shared/environments-source';
 import { findNonIntegerFields } from '../shared/environments-integrity';
@@ -244,6 +247,31 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     /** Present only while the History tab has been visited at least once (see the tab's default lazy-render behaviour). */
     @ViewChild(EnvironmentsHistoryComponent) historyComponent: EnvironmentsHistoryComponent | undefined;
 
+    /**
+     * Drives the tab group's [(selectedIndex)] -- two-way bound to selectedIndexChange rather
+     * than written from (selectedTabChange) in onTabChange: selectedTabChange fires synchronously
+     * inside MatTabGroup's own ngAfterContentChecked, so assigning this field from it triggers
+     * ExpressionChangedAfterItHasBeenCheckedError (NG0100) on every manual tab click.
+     * selectedIndexChange instead fires in a microtask after change detection has finished,
+     * which is exactly why Material designed it for two-way binding. Still set directly from
+     * code (onEffectsOpenInEditor) to jump back to the Editor tab.
+     */
+    selectedTabIndex = 0;
+    /** The Effects tab's last GET .../effects answer; undefined until loadEffects's request comes back. */
+    effectsResult: EffectsResult | undefined;
+    /** Set once loadEffects has been called, so onTabChange only fires it on the tab's first opening. Cleared by every load() (fresh, discard, save's reload, 409's reload): the document may have changed, so the graph is stale until refetched -- see load(). */
+    private effectsLoaded = false;
+    /** Whether the Effects tab is the one currently on screen -- set in onTabChange, used by load() to decide whether a stale graph is refetched immediately or left for the tab's next opening. */
+    private effectsTabActive = false;
+    /** Cancels an in-flight GET .../effects when a newer one supersedes it (a fresh loadEffects call, or the component being destroyed), so an older response can never land after and overwrite a newer one. */
+    private effectsSub: Subscription | undefined;
+    /** Every zone/asset id from the last effect graph, mapped to its tree key -- see buildEffectsLocationIndex. */
+    private effectsIdToTreeKey = new Map<string, string>();
+    /** Top-level zone id -> name, for the Effects tab's site filter -- see topLevelZoneNames. */
+    effectsSiteNames = new Map<string, string>();
+    /** Every context-source panel currently in the DOM, in contextSourceEntries' order -- see openContextSourcePanel. */
+    @ViewChildren(MatExpansionPanel) private contextSourcePanels!: QueryList<MatExpansionPanel>;
+
     private selectedNodeProblemsByKey = new Map<string, NodeProblem[]>();
 
     /** Owner id -> username, filled in lazily by loadUserNames once the environment is loaded. */
@@ -260,6 +288,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         private deviceInstancesService: DeviceInstancesService,
         private platformDeviceTypeService: PlatformDeviceTypeService,
         private exportService: ExportService,
+        private changeDetectorRef: ChangeDetectorRef,
     ) {}
 
     ngOnInit(): void {
@@ -275,10 +304,12 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.stopLiveStatePolling();
+        this.effectsSub?.unsubscribe();
     }
 
-    /** Bound to the tab group's (selectedTabChange): polling only ever runs while its tab is actually visible. */
+    /** Bound to the tab group's (selectedTabChange): polling only ever runs while its tab is actually visible. selectedTabIndex itself is kept in step by [(selectedIndex)] in the template, not written here -- see that field's comment. */
     onTabChange(event: MatTabChangeEvent): void {
+        this.effectsTabActive = event.tab.textLabel === 'Effects';
         if (event.tab.textLabel === 'Live state') {
             this.startLiveStatePolling();
         } else {
@@ -289,11 +320,99 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         } else {
             this.historyComponent?.stop();
         }
+        if (this.effectsTabActive && !this.effectsLoaded && this.environment?.id) {
+            this.loadEffects();
+        }
+    }
+
+    /**
+     * Fetches the effect graph once (see effectsLoaded) -- called on the Effects tab's first
+     * opening and, from load(), immediately after a reload while that tab is the active one.
+     * Cancels any request still in flight from a previous call first (effectsSub), so a slow
+     * older response can never land after a newer one and overwrite it.
+     */
+    private loadEffects(): void {
+        const id = this.environment?.id;
+        if (!id) {
+            return;
+        }
+        this.effectsLoaded = true;
+        this.effectsSub?.unsubscribe();
+        this.effectsSub = this.environmentsService.getEffects(id).subscribe((result) => {
+            if (result.kind === 'unsupported') {
+                this.confirmEffectsUnsupported(id);
+                return;
+            }
+            this.effectsResult = result;
+        });
+    }
+
+    /**
+     * A 404 from GET .../effects is ambiguous by itself -- moses answers the same way for "no
+     * effects endpoint" and for an environment that is missing or not this user's. Re-checks the
+     * environment itself before committing to the "old moses" message, so a genuinely gone
+     * environment gets the ordinary not-found error instead of a claim about the moses version
+     * that would not even be true.
+     */
+    private confirmEffectsUnsupported(id: string): void {
+        this.environmentsService.getEnvironment(id).subscribe((env) => {
+            this.effectsResult = env ? { kind: 'unsupported' } : { kind: 'error', message: 'This environment could not be found.' };
+        });
+    }
+
+    /**
+     * "Open in editor" from the Effects tab: an asset/zone node resolves through
+     * effectsIdToTreeKey to the same tree key the Editor tab already uses; a context key or
+     * the timeline node both live on the environment root's own form, so that node is
+     * selected instead, additionally opening the matching context source panel for a context
+     * key (a no-op for a static or undeclared one, which has no such panel).
+     */
+    onEffectsOpenInEditor(node: EffectsNode): void {
+        if (node.kind === 'asset' || node.kind === 'zone') {
+            const key = this.effectsIdToTreeKey.get(node.id);
+            if (key) {
+                this.selectedKey = key;
+                this.revealSelection();
+            }
+        } else {
+            this.selectedKey = locationKey('environment', { zoneIndexes: [] });
+            this.revealSelection();
+            if (node.kind === 'context_key' && node.label) {
+                this.openContextSourcePanel(node.label);
+            }
+        }
+        this.selectedTabIndex = 0;
+    }
+
+    /**
+     * Opens one context source panel by key, without touching any other panel's own open/closed
+     * state -- a one-shot navigation action, not a bound, persistent "this one is forced open"
+     * flag: nothing here ever closes a panel the user (or an earlier call) opened, and nothing
+     * reopens one the user has since closed. Panels stay exactly as uncontrolled as before this
+     * tab existed (see removeContextSource, the (opened)-only binding in the template). Runs a
+     * synchronous change detection pass first: this is called right after switching selectedKey
+     * to the environment root, and the panel this looks for only exists in the DOM once that
+     * *ngSwitchCase has actually rendered.
+     */
+    private openContextSourcePanel(key: string): void {
+        this.changeDetectorRef.detectChanges();
+        const index = this.contextSourceEntries.findIndex((entry) => entry.key === key);
+        if (index >= 0) {
+            this.contextSourcePanels?.get(index)?.open();
+        }
     }
 
     /** @param preserveSelection Keep the current selectedKey instead of resetting to the root -- used after a successful save, so the user is not bounced out of what they were editing. */
     load(preserveSelection = false): void {
         this.dataReady = false;
+        // Every (re)load -- fresh, discard, save's, or the 409 dialog's -- may change what the
+        // effect graph looks like, so the last-loaded one is stale from here on: refetched right
+        // away below if the Effects tab happens to be the active one, otherwise left for its
+        // next opening (onTabChange). effectsSub is cancelled so a still-in-flight request from
+        // before this reload cannot land after and overwrite whatever comes next.
+        this.effectsLoaded = false;
+        this.effectsSub?.unsubscribe();
+        this.effectsSub = undefined;
         if (!preserveSelection) {
             this.selectedKey = undefined;
             // A fresh load (ngOnInit, discard) starts over; only a save's reload keeps the page
@@ -317,6 +436,9 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             this.clampTimelinePage();
             this.loadUserNames([env.owner]);
             this.dataReady = true;
+            if (this.effectsTabActive) {
+                this.loadEffects();
+            }
         });
     }
 
@@ -405,7 +527,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
                     ? ' · created ' + pendingDeviceCount + ' platform device' + (pendingDeviceCount === 1 ? '' : 's')
                     : '';
             this.snackBar.open('Environment saved successfully.' + deviceSuffix, undefined, { duration: 2000 });
-            this.load(true); // the server may have assigned ids to new nodes; keep the current selection
+            this.load(true); // the server may have assigned ids to new nodes; keep the current selection -- also marks the effect graph stale, see load()
         });
     }
 
@@ -1204,6 +1326,8 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         }
         this.root = buildEnvironmentTree(this.environment);
         this.dataSource.data = [this.root];
+        this.effectsIdToTreeKey = buildEffectsLocationIndex(this.root);
+        this.effectsSiteNames = topLevelZoneNames(this.environment);
         this.formulaReferenceOptions = collectFormulaReferences(this.environment);
         this.timelineTargetOptions = collectTimelineTargets(this.environment);
         this.refreshContextSourceEntries();

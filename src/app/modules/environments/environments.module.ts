@@ -58,6 +58,7 @@ import { EnvironmentsDatasetsComponent } from './datasets/environments-datasets.
 import { EnvironmentsDatasetUploadDialogComponent } from './datasets/dialogs/environments-dataset-upload-dialog.component';
 import { EnvironmentsShareDialogComponent } from './dialogs/environments-share-dialog.component';
 import { EnvironmentsHistoryComponent } from './environment-detail/history/environments-history.component';
+import { EnvironmentsEffectsComponent } from './environment-detail/effects/environments-effects.component';
 
 const environments: Route = {
     path: 'environments',
@@ -110,6 +111,7 @@ const formFieldDefaults = {
         EnvironmentsDatasetUploadDialogComponent,
         EnvironmentsShareDialogComponent,
         EnvironmentsHistoryComponent,
+        EnvironmentsEffectsComponent,
     ],
     imports: [
         CommonModule,

@@ -1,0 +1,103 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="effects-panel">
+    <div class="effects-toolbar" *ngIf="graph">
+        <div class="effects-filter-group">
+            <mat-checkbox *ngFor="let kind of edgeKinds" [(ngModel)]="filters.edgeKinds[kind]" (ngModelChange)="onFiltersChanged()">
+                {{effectsEdgeKindLabel(kind)}}
+            </mat-checkbox>
+        </div>
+
+        <mat-form-field appearance="outline" color="accent" class="effects-site-field" *ngIf="siteOptions.length > 1">
+            <mat-label>Site</mat-label>
+            <mtx-select [(ngModel)]="filters.site" [ngModelOptions]="{standalone: true}" [items]="siteSelectItems"
+                bindLabel="label" bindValue="id" (ngModelChange)="onFiltersChanged()" appendTo=".ng-select-anchor">
+            </mtx-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" color="accent" class="effects-search-field">
+            <mat-label>Search</mat-label>
+            <input matInput [(ngModel)]="filters.search" [ngModelOptions]="{standalone: true}" (ngModelChange)="onFiltersChanged()">
+            <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+    </div>
+
+    <div class="effects-graph-area">
+        <!-- Always in the DOM, never behind *ngIf: cytoscape mounts into this element once
+             (see renderGraph), and a #host a structural directive could remove would make
+             @ViewChild('host', {static: true}) resolve to nothing on the very run where a
+             just-arrived graph and an already-loaded cytoscape coincide. -->
+        <div class="effects-canvas" #host></div>
+
+        <div class="effects-side-panel" *ngIf="selectedNode as node">
+            <h3 class="effects-side-panel-title">{{node.label || node.id}}</h3>
+            <p class="effects-side-panel-kind">{{node.kind}}</p>
+            <button mat-stroked-button type="button" (click)="openInEditor.emit(node)">
+                <mat-icon>open_in_new</mat-icon> Open in editor
+            </button>
+
+            <div class="effects-edge-groups" *ngIf="outgoingGroups.length > 0">
+                <h4>Outgoing</h4>
+                <ng-container *ngFor="let group of outgoingGroups">
+                    <span class="effects-edge-group-kind">{{effectsEdgeKindLabel(group.kind)}}</span>
+                    <button type="button" class="effects-edge-neighbor" *ngFor="let edge of group.edges" (click)="onNeighborClick(edge, 'outgoing')">
+                        <span class="effects-edge-neighbor-label">{{nodeLabel(edge.to)}}</span>
+                        <span class="effects-edge-detail" *ngIf="edge.via">{{edge.via}}</span>
+                        <span class="effects-edge-detail" *ngIf="edge.channel">ch {{edge.channel}}</span>
+                        <span class="effects-edge-detail" *ngIf="edge.key">{{edge.key}}</span>
+                        <span class="effects-edge-detail" *ngIf="edge.count && edge.count > 1">x{{edge.count}}</span>
+                    </button>
+                </ng-container>
+            </div>
+
+            <div class="effects-edge-groups" *ngIf="incomingGroups.length > 0">
+                <h4>Incoming</h4>
+                <ng-container *ngFor="let group of incomingGroups">
+                    <span class="effects-edge-group-kind">{{effectsEdgeKindLabel(group.kind)}}</span>
+                    <button type="button" class="effects-edge-neighbor" *ngFor="let edge of group.edges" (click)="onNeighborClick(edge, 'incoming')">
+                        <span class="effects-edge-neighbor-label">{{nodeLabel(edge.from)}}</span>
+                        <span class="effects-edge-detail" *ngIf="edge.via">{{edge.via}}</span>
+                        <span class="effects-edge-detail" *ngIf="edge.channel">ch {{edge.channel}}</span>
+                        <span class="effects-edge-detail" *ngIf="edge.key">{{edge.key}}</span>
+                        <span class="effects-edge-detail" *ngIf="edge.count && edge.count > 1">x{{edge.count}}</span>
+                    </button>
+                </ng-container>
+            </div>
+
+            <p class="effects-side-panel-empty" *ngIf="incomingGroups.length === 0 && outgoingGroups.length === 0">
+                No edges of a checked kind touch this node.
+            </p>
+        </div>
+    </div>
+
+    <mat-expansion-panel class="effects-unresolved-panel" *ngIf="graph && graph.unresolved.length > 0">
+        <mat-expansion-panel-header>
+            <mat-panel-title>Unresolved ({{graph.unresolved.length}})</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="effects-unresolved-row" *ngFor="let item of graph.unresolved">
+            <span class="effects-unresolved-expression">{{item.expression}}</span>
+            <span class="effects-unresolved-channel" *ngIf="item.channel">ch {{item.channel}}</span>
+            <span class="effects-unresolved-reason">{{item.reason}}</span>
+            <button mat-button type="button" *ngIf="item.asset" (click)="selectUnresolved(item)">{{item.asset}}</button>
+        </div>
+    </mat-expansion-panel>
+
+    <p class="effects-hint" *ngIf="!graph && !result">Loading the effect graph...</p>
+    <p class="effects-hint" *ngIf="result?.kind === 'unsupported'">This MOSES version has no effects endpoint.</p>
+    <p class="effects-hint effects-hint-error" *ngIf="errorMessage">{{errorMessage}}</p>
+    <p class="effects-hint effects-hint-error" *ngIf="libraryFailed">The graph library could not be loaded.</p>
+</div>

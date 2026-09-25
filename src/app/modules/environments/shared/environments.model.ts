@@ -950,6 +950,73 @@ export type HistoryPollResult =
     | { kind: 'status'; status: HistoryStatus }
     | { kind: 'error'; message: string; status?: number };
 
+export type EffectsNodeKind = 'context_key' | 'asset' | 'zone' | 'timeline';
+
+/**
+ * One node of the effect graph (GET .../effects). id is a stable, kind-prefixed key
+ * ("context:<key>", "asset:<id>", "zone:<id>" or the constant "timeline") -- the same
+ * shape edges' from/to use to reference it.
+ */
+export interface EffectsNode {
+    id: string;
+    kind: EffectsNodeKind;
+    label?: string;
+    /**
+     * context_key only: true for a plain inline value. False together with an empty
+     * source_kind means the key is referenced (e.g. by a formula) but declared nowhere in
+     * the document -- neither a static value nor a context source.
+     */
+    static?: boolean;
+    /** context_key only: which kind of context source drives it; empty together with static:false means undeclared (see `static`), empty together with static:true means a plain value. */
+    source_kind?: SourceKind | '';
+    external_ref?: string;
+    /** asset/zone only: the zone this node sits in. */
+    zone?: string;
+    /** asset/zone only: the top-level zone (site/building) this node sits under. */
+    site?: string;
+    /** asset only. */
+    asset_kind?: AssetKind;
+}
+
+export type EffectsEdgeKind = 'reads' | 'writes' | 'gates' | 'scales' | 'submeters' | 'aggregates' | 'dated_change';
+export type EffectsEdgeVia = 'script' | 'formula' | 'schedule' | 'aggregate' | 'submetered_by' | 'timeline';
+
+/** One edge of the effect graph, direction is data flow: from the producer to the consumer. */
+export interface EffectsEdge {
+    from: string;
+    to: string;
+    kind: EffectsEdgeKind;
+    via?: EffectsEdgeVia;
+    channel?: string;
+    key?: string;
+    count?: number;
+}
+
+/** One expression the graph builder could not resolve, e.g. a formula input naming a channel that no longer exists. */
+export interface EffectsUnresolved {
+    asset?: string;
+    channel?: string;
+    expression?: string;
+    reason?: string;
+}
+
+/** GET /environments/{id}/effects: the whole effect graph for the Effects tab. */
+export interface EffectsGraph {
+    nodes: EffectsNode[];
+    edges: EffectsEdge[];
+    unresolved: EffectsUnresolved[];
+}
+
+/**
+ * GET .../effects's outcome, discriminated the same way HistoryPollResult is: 'unsupported'
+ * is a 404 (an older moses without this endpoint) rather than a genuine failure, so the tab
+ * can show a short note instead of an error.
+ */
+export type EffectsResult =
+    | { kind: 'graph'; graph: EffectsGraph }
+    | { kind: 'unsupported' }
+    | { kind: 'error'; message: string; status?: number };
+
 /**
  * The zone type a new environment starts with. The api refuses an environment
  * without a zone, so the create dialog has to seed one, and seeding the level a

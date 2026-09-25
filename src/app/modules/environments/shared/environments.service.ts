@@ -26,6 +26,8 @@ import {
     ApiError,
     CatalogDeviceType,
     DatasetMeta,
+    EffectsGraph,
+    EffectsResult,
     Environment,
     EnvironmentShares,
     EnvironmentState,
@@ -176,6 +178,25 @@ export class EnvironmentsService {
     getEnvironment(id: string): Observable<Environment | null> {
         return this.http.get<Environment>(this.environmentsUrl + '/' + encodeURIComponent(id)).pipe(
             catchError(this.errorHandlerService.handleError(EnvironmentsService.name, 'getEnvironment', null)),
+        );
+    }
+
+    /**
+     * The environment's effect graph (GET .../effects), for the Effects tab. Discriminated like
+     * getHistory: 'unsupported' is a 404 -- an older moses without this endpoint yet, not a
+     * genuine failure -- kept apart from 'error' so the tab can show a short note instead of
+     * an error message.
+     */
+    getEffects(id: string): Observable<EffectsResult> {
+        return this.http.get<EffectsGraph>(this.environmentsUrl + '/' + encodeURIComponent(id) + '/effects').pipe(
+            map((graph) => ({ kind: 'graph', graph } as EffectsResult)),
+            catchError((error: HttpErrorResponse) => {
+                if (error.status === 404) {
+                    return of({ kind: 'unsupported' } as EffectsResult);
+                }
+                this.errorHandlerService.logError(EnvironmentsService.name, 'getEffects', error);
+                return of({ kind: 'error', message: describeHttpError(error), status: error.status } as EffectsResult);
+            }),
         );
     }
 

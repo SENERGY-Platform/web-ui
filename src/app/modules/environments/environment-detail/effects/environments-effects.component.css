@@ -1,0 +1,141 @@
+.effects-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 0;
+}
+
+.effects-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+}
+
+.effects-filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+}
+
+.effects-site-field,
+.effects-search-field {
+    width: 220px;
+}
+
+.effects-graph-area {
+    display: flex;
+    gap: 12px;
+    min-height: 520px;
+}
+
+.effects-canvas {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 520px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    background-color: #fafafa;
+}
+
+.effects-side-panel {
+    flex: 0 0 280px;
+    max-height: 520px;
+    overflow-y: auto;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.effects-side-panel-title {
+    margin: 0;
+    word-break: break-word;
+}
+
+.effects-side-panel-kind {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.6);
+    text-transform: capitalize;
+}
+
+.effects-side-panel-empty {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.effects-edge-groups h4 {
+    margin: 12px 0 4px;
+}
+
+.effects-edge-group-kind {
+    display: block;
+    margin-top: 8px;
+    font-weight: 500;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.effects-edge-neighbor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 4px 0;
+    cursor: pointer;
+    font: inherit;
+}
+
+.effects-edge-neighbor:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.effects-edge-neighbor-label {
+    font-weight: 500;
+}
+
+.effects-edge-detail {
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.effects-unresolved-panel {
+    box-shadow: none;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.effects-unresolved-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.effects-unresolved-expression {
+    font-family: monospace;
+}
+
+.effects-unresolved-channel {
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.effects-unresolved-reason {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.effects-hint {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.effects-hint-error {
+    color: #c62828;
+}

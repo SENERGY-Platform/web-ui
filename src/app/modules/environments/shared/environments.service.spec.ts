@@ -23,7 +23,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { EnvironmentsService } from './environments.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
-import { CatalogDeviceType, DatasetMeta, Environment, HistoryPollResult, HistoryStartRefusal, HistoryStatus, StateChange, ValidationError } from './environments.model';
+import { CatalogDeviceType, DatasetMeta, EffectsGraph, Environment, HistoryPollResult, HistoryStartRefusal, HistoryStatus, StateChange, ValidationError } from './environments.model';
 
 class MockLadonService {
     authorizations: { [key: string]: { [method: string]: boolean } } = {};
@@ -106,6 +106,39 @@ describe('EnvironmentsService', () => {
         const req = httpMock.expectOne(environmentsUrl + '/e1');
         expect(req.request.method).toBe('GET');
         req.flush(env);
+    });
+
+    it('should get the effect graph with a GET on /environments/{id}/effects', (done) => {
+        const graph: EffectsGraph = {
+            nodes: [{ id: 'timeline', kind: 'timeline', label: 'Dated changes' }],
+            edges: [],
+            unresolved: [],
+        };
+        service.getEffects('e1').subscribe(resp => {
+            expect(resp).toEqual({ kind: 'graph', graph });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/effects');
+        expect(req.request.method).toBe('GET');
+        req.flush(graph);
+    });
+
+    it('should report kind "unsupported" (and not log it) for a 404 on /environments/{id}/effects', (done) => {
+        service.getEffects('e1').subscribe(resp => {
+            expect(resp).toEqual({ kind: 'unsupported' });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/effects');
+        req.flush('no effects endpoint', { status: 404, statusText: 'Not Found' });
+    });
+
+    it('should report kind "error" (and log it) for anything other than a 404 on /environments/{id}/effects', (done) => {
+        service.getEffects('e1').subscribe(resp => {
+            expect(resp).toEqual({ kind: 'error', message: 'boom', status: 500 });
+            done();
+        });
+        const req = httpMock.expectOne(environmentsUrl + '/e1/effects');
+        req.flush('boom', { status: 500, statusText: 'Internal Server Error' });
     });
 
     it('should create an environment with a POST on /environments', (done) => {

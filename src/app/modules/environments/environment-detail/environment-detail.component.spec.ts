@@ -39,7 +39,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MtxSelect, MtxSelectModule } from '@ng-matero/extensions/select';
@@ -55,13 +55,14 @@ import { EnvironmentsFactorBarsComponent } from './factor-bars/environments-fact
 import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
 import { EnvironmentsHistoryComponent } from './history/environments-history.component';
+import { EnvironmentsEffectsComponent } from './effects/environments-effects.component';
 import { EnvironmentsService } from '../shared/environments.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsUserModel } from '../../permissions/shared/permissions-user.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
-import { CatalogDeviceType, DatedChange, Environment } from '../shared/environments.model';
+import { CatalogDeviceType, DatedChange, EffectsGraph, EffectsNode, Environment } from '../shared/environments.model';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { ExportService } from '../../exports/shared/export.service';
@@ -239,6 +240,7 @@ describe('EnvironmentDetailComponent', () => {
                 EnvironmentsDatasetEditorComponent,
                 EnvironmentsLiveStateTilesComponent,
                 EnvironmentsHistoryComponent,
+                EnvironmentsEffectsComponent,
             ],
             imports: [
                 CommonModule,
@@ -1993,6 +1995,261 @@ describe('EnvironmentDetailComponent', () => {
 
             component.onTabChange({ tab: { textLabel: 'Editor' } } as any);
             expect(historySpy.stop).toHaveBeenCalled();
+        });
+    });
+
+    describe('Effects tab', () => {
+        const effectsUrl = environmentsUrl + '/e1/effects';
+        const emptyGraph: EffectsGraph = { nodes: [], edges: [], unresolved: [] };
+
+        /** Flushes load()'s own GET .../e1 (fresh load, discard, save's reload or the 409 dialog's) with the given environment. */
+        function flushEnvironmentGet(env: Environment): void {
+            httpMock.expectOne({ method: 'GET', url: environmentsUrl + '/e1' }).flush(JSON.parse(JSON.stringify(env)));
+        }
+
+        it('loads the effect graph on the tab\'s first opening, not again on a later one', () => {
+            loadWith(nestedEnvironment);
+
+            component.onTabChange({ tab: { textLabel: 'Effects' } } as any);
+            httpMock.expectOne(effectsUrl).flush(emptyGraph);
+            expect(component.effectsResult).toEqual({ kind: 'graph', graph: emptyGraph });
+
+            component.onTabChange({ tab: { textLabel: 'Editor' } } as any);
+            component.onTabChange({ tab: { textLabel: 'Effects' } } as any);
+            httpMock.expectNone(effectsUrl);
+        });
+
+        it('shows the "no effects endpoint" note for a 404 once a re-check confirms the environment itself still loads', () => {
+            loadWith(nestedEnvironment);
+
+            component.onTabChange({ tab: { textLabel: 'Effects' } } as any);
+            httpMock.expectOne(effectsUrl).flush('not found', { status: 404, statusText: 'Not Found' });
+            // confirmEffectsUnsupported's re-check
+            httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(nestedEnvironment)));
+
+            expect(component.effectsResult).toEqual({ kind: 'unsupported' });
+        });
+
+        it('shows the ordinary not-found error instead when the re-check finds the environment itself gone -- moses answers both cases with the same 404', () => {
+            loadWith(nestedEnvironment);
+
+            component.onTabChange({ tab: { textLabel: 'Effects' } } as any);
+            httpMock.expectOne(effectsUrl).flush('not found', { status: 404, statusText: 'Not Found' });
+            // confirmEffectsUnsupported's re-check finds nothing -- the environment itself is gone/foreign, not "no effects endpoint".
+            httpMock.expectOne(environmentsUrl + '/e1').flush(null, { status: 404, statusText: 'Not Found' });
+
+            expect(component.effectsResult).toEqual({ kind: 'error', message: 'This environment could not be found.' });
+        });
+
+        it('refetches immediately after a successful save if the Effects tab is still the active one', () => {
+            loadWith(nestedEnvironment);
+            component.onTabChange({ tab: { textLabel: 'Effects' } } as any);
+            httpMock.expectOne(effectsUrl).flush(emptyGraph);
+
+            component.markDirty();
+            component.save();
+            httpMock.expectOne({ method: 'PUT', url: environmentsUrl + '/e1' }).flush(JSON.parse(JSON.stringify(nestedEnvironment)));
+            flushEnvironmentGet(nestedEnvironment);
+            httpMock.expectOne(effectsUrl).flush(emptyGraph);
+            expect(component.effectsResult).toEqual({ kind: 'graph', graph: emptyGraph });
+        });
+
+        it('does not refetch immediately after a save if the tab had been opened but is no longer the active one -- only marks it stale for its next opening', () => {
+            loadWith(nestedEnvironment);
+            component.onTabChange({ tab: { textLabel: 'Effects' } } as any);
+            httpMock.expectOne(effectsUrl).flush(emptyGraph);
+            component.onTabChange({ tab: { textLabel: 'Editor' } } as any);
+
+            component.markDirty();
+            component.save();
+            httpMock.expectOne({ method: 'PUT', url: environmentsUrl + '/e1' }).flush(JSON.parse(JSON.stringify(nestedEnvironment)));
+            flushEnvironmentGet(nestedEnvironment);
+            httpMock.expectNone(effectsUrl);
+
+            // reopening it now fetches a fresh graph rather than showing the stale one.
+            component.onTabChange({ tab: { textLabel: 'Effects' } } as any);
+            httpMock.expectOne(effectsUrl).flush(emptyGraph);
+            expect(component.effectsResult).toEqual({ kind: 'graph', graph: emptyGraph });
+        });
+
+        it('does not fetch the effect graph after a save if the tab was never opened', () => {
+            loadWith(nestedEnvironment);
+
+            component.markDirty();
+            component.save();
+            httpMock.expectOne({ method: 'PUT', url: environmentsUrl + '/e1' }).flush(JSON.parse(JSON.stringify(nestedEnvironment)));
+            flushEnvironmentGet(nestedEnvironment);
+            httpMock.expectNone(effectsUrl);
+            expect(component.effectsResult).toBeUndefined();
+        });
+
+        it('marks a loaded graph stale on discard while the tab is active, and refetches right away', () => {
+            loadWith(nestedEnvironment);
+            component.onTabChange({ tab: { textLabel: 'Effects' } } as any);
+            httpMock.expectOne(effectsUrl).flush(emptyGraph);
+            expect(component.effectsResult).toEqual({ kind: 'graph', graph: emptyGraph });
+
+            component.discard();
+            flushEnvironmentGet(nestedEnvironment); // discard()'s load() only re-fetches the environment itself, not datasets/device types (those are loaded once, in ngOnInit)
+            const secondGraph: EffectsGraph = { nodes: [], edges: [], unresolved: [{ expression: 'x' }] };
+            httpMock.expectOne(effectsUrl).flush(secondGraph);
+
+            expect(component.effectsResult).toEqual({ kind: 'graph', graph: secondGraph });
+        });
+
+        it('cancels an in-flight request on reload, so an older response can never overwrite a newer one', () => {
+            loadWith(nestedEnvironment);
+            component.onTabChange({ tab: { textLabel: 'Effects' } } as any);
+            const firstReq = httpMock.expectOne(effectsUrl);
+
+            // a discard (or any other reload) fires while the first request is still in flight
+            component.discard();
+            flushEnvironmentGet(nestedEnvironment);
+
+            // load()'s unsubscribe cancels it -- HttpTestingController itself refuses to flush a
+            // cancelled request, which is the real, load-bearing proof that it was cancelled.
+            expect(firstReq.cancelled).toBeTrue();
+
+            const freshGraph: EffectsGraph = { nodes: [], edges: [], unresolved: [] };
+            httpMock.expectOne(effectsUrl).flush(freshGraph);
+            expect(component.effectsResult).toEqual({ kind: 'graph', graph: freshGraph });
+        });
+
+        it('"Open in editor" for an asset node selects it in the tree and switches to the Editor tab', () => {
+            loadWith(nestedEnvironment);
+            component.selectedTabIndex = 1;
+
+            component.onEffectsOpenInEditor({ id: 'asset:a1', kind: 'asset', label: 'Meter 1' } as EffectsNode);
+
+            expect(component.selectedTabIndex).toBe(0);
+            expect(component.selectedAsset?.id).toBe('a1');
+        });
+
+        it('"Open in editor" for a zone node selects it in the tree', () => {
+            loadWith(nestedEnvironment);
+
+            component.onEffectsOpenInEditor({ id: 'zone:z1', kind: 'zone', label: 'Building' } as EffectsNode);
+
+            expect(component.selectedZone?.id).toBe('z1');
+        });
+
+        it('"Open in editor" for a context key selects the environment root', () => {
+            loadWith(nestedEnvironment);
+
+            component.onEffectsOpenInEditor({ id: 'context:outdoor_temp', kind: 'context_key', label: 'outdoor_temp' } as EffectsNode);
+
+            expect(component.selectedEnvironment).toBeTruthy();
+            expect(component.selectedTabIndex).toBe(0);
+        });
+
+        it('"Open in editor" for the timeline node selects the environment root', () => {
+            loadWith(nestedEnvironment);
+
+            component.onEffectsOpenInEditor({ id: 'timeline', kind: 'timeline', label: 'Dated changes' } as EffectsNode);
+
+            expect(component.selectedEnvironment).toBeTruthy();
+        });
+
+        describe('site names for the site filter', () => {
+            it('maps every top-level zone\'s id to its name, for a document with two sites', () => {
+                const twoSites: Environment = {
+                    ...nestedEnvironment,
+                    zones: [
+                        { id: 'z-standort-a', name: 'Standort A', type: 'site', assets: [] },
+                        { id: 'z-standort-b', name: 'Standort B', type: 'site', assets: [] },
+                    ],
+                };
+                loadWith(twoSites);
+
+                expect(component.effectsSiteNames.get('z-standort-a')).toBe('Standort A');
+                expect(component.effectsSiteNames.get('z-standort-b')).toBe('Standort B');
+            });
+        });
+
+        // Musterwerke's real GET .../effects answers with 51 assets across two sites, 21 context
+        // keys and one timeline node -- and no zone node at all: moses only emits one when that
+        // zone's own state is read or written. context_sources carries two driven values, so
+        // "Open in editor" has real panels to open.
+        describe('context source panel independence ("Open in editor")', () => {
+            const envWithContextSources: Environment = {
+                ...nestedEnvironment,
+                context_sources: {
+                    irradiance: { kind: 'profile', interval_seconds: 300, profile: {} },
+                    price: { kind: 'profile', interval_seconds: 300, profile: {} },
+                },
+            };
+
+            function panelInstances(): MatExpansionPanel[] {
+                return fixture.debugElement.queryAll(By.directive(MatExpansionPanel)).map((de) => de.componentInstance);
+            }
+
+            function panelFor(key: string): MatExpansionPanel {
+                const index = component.contextSourceEntries.findIndex((e) => e.key === key);
+                return panelInstances()[index];
+            }
+
+            it('opening a second context key\'s panel does not close an already-open one', () => {
+                loadWith(envWithContextSources);
+
+                component.onEffectsOpenInEditor({ id: 'context:irradiance', kind: 'context_key', label: 'irradiance' } as EffectsNode);
+                fixture.detectChanges();
+                component.onEffectsOpenInEditor({ id: 'context:price', kind: 'context_key', label: 'price' } as EffectsNode);
+                fixture.detectChanges();
+
+                expect(panelFor('irradiance').expanded).toBeTrue();
+                expect(panelFor('price').expanded).toBeTrue();
+            });
+
+            it('does not reopen a panel the user has since closed just because the environment root is reselected', () => {
+                loadWith(envWithContextSources);
+
+                component.onEffectsOpenInEditor({ id: 'context:irradiance', kind: 'context_key', label: 'irradiance' } as EffectsNode);
+                fixture.detectChanges();
+                expect(panelFor('irradiance').expanded).toBeTrue();
+
+                panelFor('irradiance').close();
+                fixture.detectChanges();
+                expect(panelFor('irradiance').expanded).toBeFalse();
+
+                // Navigate away and back to the environment root without a fresh "Open in editor" call.
+                const assetNode = component.root!.children[0].children[0];
+                component.select(assetNode);
+                fixture.detectChanges();
+                component.select(component.root!);
+                fixture.detectChanges();
+
+                expect(panelFor('irradiance').expanded).toBeFalse();
+            });
+        });
+
+        // Exercises the real MatTabGroup, not just onTabChange() called directly -- this is the
+        // one path that can actually reproduce ExpressionChangedAfterItHasBeenCheckedError
+        // (NG0100), since selectedTabChange fires synchronously from inside MatTabGroup's own
+        // ngAfterContentChecked while [(selectedIndex)] is still being checked.
+        it('switches tabs via a real click without ExpressionChangedAfterItHasBeenCheckedError (NG0100)', async () => {
+            loadWith(nestedEnvironment);
+            const tabLabels = () => fixture.debugElement.queryAll(By.css('.mdc-tab__text-label')).map((de) => de.nativeElement.textContent.trim());
+            const effectsTabIndex = tabLabels().indexOf('Effects');
+
+            // triggerEventHandler invokes MatTab's own bound (click) handler directly, the same
+            // one a real pointer click reaches, without depending on ripple/ink-bar animation
+            // timing to see it through in a headless run.
+            // fixture.detectChanges() runs a real pass and then Angular's own checkNoChanges
+            // pass in the same call -- exactly what used to throw NG0100 here, since the old
+            // onTabChange wrote selectedTabIndex synchronously from inside MatTabGroup's own
+            // ngAfterContentChecked (see selectedTabIndex's field comment).
+            expect(() => {
+                const tabElements = fixture.debugElement.queryAll(By.css('.mdc-tab'));
+                tabElements[effectsTabIndex].triggerEventHandler('click', {});
+                fixture.detectChanges();
+            }).not.toThrow();
+
+            // selectedIndexChange (driving [(selectedIndex)]) fires a microtask later than the click.
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            httpMock.expectOne(effectsUrl).flush(emptyGraph);
+            expect(component.selectedTabIndex).toBe(effectsTabIndex);
         });
     });
 });
