@@ -864,7 +864,7 @@ export interface SharesDeviceError {
     error: string;
 }
 
-/** The 502 PUT .../shares body: some devices failed and nothing was saved -- retrying the same PUT is safe (idempotent). */
+/** The 400/502 PUT .../shares body: these resources failed, the others are already changed -- repeating the PUT completes it. */
 export interface SharesFailure {
     devices: SharesDeviceError[];
 }

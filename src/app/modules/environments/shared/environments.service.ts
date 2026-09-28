@@ -254,8 +254,9 @@ export class EnvironmentsService {
 
     /**
      * PUT with a three-way result like updateEnvironmentChecked: the saved EnvironmentShares, a
-     * SharesFailure (502, some devices could not be updated -- nothing was saved, retrying the
-     * same PUT is safe), or an ApiError for anything else, including a 400's plain-text body.
+     * SharesFailure (400 or 502 with the resources that failed -- the rest already carry the
+     * rights, and repeating the PUT completes or withdraws them), or an ApiError for anything else,
+     * including a 400's plain-text body.
      */
     setShares(id: string, shares: EnvironmentShares): Observable<EnvironmentShares | SharesFailure | ApiError> {
         return this.http.put<EnvironmentShares>(this.environmentsUrl + '/' + encodeURIComponent(id) + '/shares', shares).pipe(

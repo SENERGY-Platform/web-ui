@@ -32,8 +32,9 @@ export interface ShareDialogData {
 /**
  * Edits an environment's device-sharing set (read+execute on its managed devices; per entry
  * optionally write on the graph). Saving sends the whole edited set including graph_writers, since
- * the PUT replaces it; a 502 (some devices failed) or 400 (rejected set) keeps the dialog open so
- * the user can fix it or just retry, since a repeated PUT is safe.
+ * the PUT replaces it; a set that failed to load therefore blocks saving, which would withdraw every
+ * share. A failed save keeps the dialog open so the user can fix it or just retry, since a repeated
+ * PUT is safe.
  */
 @Component({
     selector: 'senergy-environments-share-dialog',
@@ -45,6 +46,7 @@ export class EnvironmentsShareDialogComponent implements OnInit {
     groupFormControl = new UntypedFormControl('');
 
     loading = true;
+    loadFailed = false;
     saving = false;
     users: string[] = [];
     groups: string[] = [];
@@ -71,21 +73,32 @@ export class EnvironmentsShareDialogComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.environmentsService.getShares(this.data.id).subscribe(shares => {
-            this.users = shares?.users ? [...shares.users] : [];
-            this.groups = shares?.groups ? [...shares.groups] : [];
-            this.graphWriterUsers = shares?.graph_writers?.users ? [...shares.graph_writers.users] : [];
-            this.graphWriterGroups = shares?.graph_writers?.groups ? [...shares.graph_writers.groups] : [];
-            this.loading = false;
-            this.calcAddableUsers();
-            this.calcAddableGroups();
-        });
+        this.loadShares();
         this.permissionsService.getSharableUsers().subscribe(res => {
             this.allUsers = res || [];
             this.calcAddableUsers();
         });
         this.authorizationService.loadAllGroups().subscribe(groups => {
             this.allGroupPaths = Array.isArray(groups) ? groups.map((g: { path: any }) => g.path) : [];
+            this.calcAddableGroups();
+        });
+    }
+
+    /** A successful GET always carries a set, so null means the request failed. */
+    loadShares(): void {
+        this.loading = true;
+        this.loadFailed = false;
+        this.environmentsService.getShares(this.data.id).subscribe(shares => {
+            this.loading = false;
+            if (shares === null) {
+                this.loadFailed = true;
+                return;
+            }
+            this.users = shares.users ? [...shares.users] : [];
+            this.groups = shares.groups ? [...shares.groups] : [];
+            this.graphWriterUsers = shares.graph_writers?.users ? [...shares.graph_writers.users] : [];
+            this.graphWriterGroups = shares.graph_writers?.groups ? [...shares.graph_writers.groups] : [];
+            this.calcAddableUsers();
             this.calcAddableGroups();
         });
     }
@@ -170,6 +183,9 @@ export class EnvironmentsShareDialogComponent implements OnInit {
     }
 
     save(): void {
+        if (this.loadFailed) {
+            return;
+        }
         this.saving = true;
         this.errorMessage = '';
         this.deviceErrors = [];

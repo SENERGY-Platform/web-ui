@@ -263,6 +263,31 @@ describe('EnvironmentsShareDialogComponent', () => {
         expect(dialogRef.closeCalled).toBe(false);
     });
 
+    // The PUT replaces the whole set, so saving an empty-looking set after a failed load withdraws every share.
+    it('should block saving when the share set failed to load', () => {
+        environmentsServiceShares = null;
+        const component = create();
+        expect(component.loading).toBe(false);
+        expect(component.loadFailed).toBe(true);
+
+        component.save();
+
+        expect(environmentsService.setCalls).toEqual([]);
+    });
+
+    it('should load the set again on retry and allow saving once it arrived', () => {
+        environmentsServiceShares = null;
+        const component = create();
+        environmentsService.shares = { users: ['u1'], groups: ['/demo'] };
+
+        component.loadShares();
+        component.save();
+
+        expect(component.loadFailed).toBe(false);
+        expect(component.users).toEqual(['u1']);
+        expect(environmentsService.setCalls.length).toBe(1);
+    });
+
     it('should close without a value on cancel', () => {
         const component = create();
         component.cancel();
@@ -275,7 +300,7 @@ describe('EnvironmentsShareDialogComponent', () => {
 describe('EnvironmentsShareDialogComponent graph writer checkbox', () => {
     let environmentsService: MockEnvironmentsService;
 
-    const render = (shares: EnvironmentShares) => {
+    const render = (shares: EnvironmentShares | null) => {
         environmentsService = new MockEnvironmentsService();
         environmentsService.shares = shares;
         TestBed.configureTestingModule({
@@ -295,6 +320,9 @@ describe('EnvironmentsShareDialogComponent graph writer checkbox', () => {
         fixture.detectChanges();
         return fixture;
     };
+
+    const saveButton = (element: HTMLElement): HTMLButtonElement =>
+        Array.from(element.querySelectorAll<HTMLButtonElement>('mat-dialog-actions button')).find(b => b.textContent?.trim() === 'Save')!;
 
     const checkboxes = (element: HTMLElement): HTMLInputElement[] =>
         Array.from(element.querySelectorAll<HTMLInputElement>('mat-checkbox.graph-writer input[type="checkbox"]'));
@@ -322,5 +350,27 @@ describe('EnvironmentsShareDialogComponent graph writer checkbox', () => {
 
         fixture.componentInstance.save();
         expect(environmentsService.setCalls[0].shares.graph_writers).toEqual({ users: [], groups: ['/demo'] });
+    });
+
+    it('should show the load error instead of an empty set and disable Save', () => {
+        const fixture = render(null);
+        const element: HTMLElement = fixture.nativeElement;
+        expect(element.textContent).toContain('Could not load the current sharing');
+        expect(element.querySelectorAll('.share-row').length).toBe(0);
+        expect(saveButton(element).disabled).toBe(true);
+    });
+
+    // The server writes the union of the stored and the requested set first, so a failure leaves the rest applied.
+    it('should say that a failed save is partly applied, not that nothing was saved', () => {
+        const fixture = render({ users: ['u1'], groups: [] });
+        environmentsService.setResult = { devices: [{ id: 'd1', error: 'timeout' }] };
+
+        fixture.componentInstance.save();
+        fixture.detectChanges();
+
+        const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+        expect(text).toContain('Could not update 1 resource(s), so the sharing is only partly applied.');
+        expect(text).not.toContain('nothing was saved');
+        expect(saveButton(fixture.nativeElement).disabled).toBe(false);
     });
 });
