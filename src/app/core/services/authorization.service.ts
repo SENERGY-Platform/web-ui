@@ -111,6 +111,14 @@ export class AuthorizationService implements HttpInterceptor {
         this.keycloakService.logout();
     }
 
+    /**
+     * Keycloak's own password form. Started through keycloak-js so the app recognises the callback on
+     * return; a hand-built link comes back with ?code=&iss=, which Keycloak refuses as the next redirect_uri.
+     */
+    changePassword(redirectUri: string): Promise<void> {
+        return this.keycloakService.login({ action: 'UPDATE_PASSWORD', redirectUri });
+    }
+
     changeUserProfile(userProfile: AuthorizationUserProfileModel): Observable<null | { error: string }> {
         return this.http
             .post<null>(environment.keycloakUrl + '/auth/realms/master/account/', userProfile)

@@ -49,7 +49,7 @@
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <a mat-raised-button color="accent" href="{{environment.keycloakUrl}}/auth/realms/master/protocol/openid-connect/auth?client_id=frontend&redirect_uri={{href}}&kc_action=UPDATE_PASSWORD&response_type=code" >Change Password</a>
+    <button mat-raised-button color="accent" *ngIf="canChangePassword" (click)="changePassword()">Change Password</button>
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="save()">Save</button>
 </mat-dialog-actions>

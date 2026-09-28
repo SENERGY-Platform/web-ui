@@ -24,7 +24,6 @@ import {
 } from '@angular/forms';
 import {MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {environment} from '../../../../environments/environment';
 import {DOCUMENT} from '@angular/common';
 
 @Component({
@@ -38,8 +37,8 @@ export class SettingsChangeDialogComponent implements OnInit {
         firstName: [''],
         email: ['', [Validators.email]]
     });
-    public href: string = '';
-    protected readonly environment = environment;
+    /** The confidential client logs in without a browser session of the user's own, so there is none to change. */
+    readonly canChangePassword = !AuthorizationService.usingConfidentialClient();
 
     constructor(
         @Inject(DOCUMENT) private document: Document,
@@ -50,8 +49,6 @@ export class SettingsChangeDialogComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        const port = this.document.location.port !== '443' && this.document.location.port !== '80' ? ':'+this.document.location.port : '';
-        this.href = this.document.location.protocol+'//'+this.document.location.hostname+port+this.document.location.pathname;
         this.authorizationService.getProfile().then((profile) => {
             this.profile = profile;
             this.firstFormGroup.patchValue({
@@ -60,6 +57,11 @@ export class SettingsChangeDialogComponent implements OnInit {
                 email: this.profile.email
             });
         });
+    }
+
+    changePassword(): void {
+        // origin omits a default port; Keycloak refuses a redirect_uri with an empty one ("host:/path")
+        this.authorizationService.changePassword(this.document.location.origin + this.document.location.pathname);
     }
 
     close(): void {
