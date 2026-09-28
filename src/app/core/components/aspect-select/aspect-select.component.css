@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 InfAI (CC SES)
+ * Copyright 2026 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-.form {
-    min-width: 600px;
-    max-width: 700px;
-    width: 100%;
-}
-
 .full-width {
     width: 100%;
 }
 
-.textarea-size {
-    min-height: 200px;
+/* The picker names the aspect class in the group header, the chip has no header to fall back on and
+   names it in front of the aspect. */
+.aspect-class-name {
+    opacity: 0.7;
 }
 
-
-.mat-mdc-radio-button {
-    margin-top: 8px;
-}
-
-.mat-mdc-radio-button~.mat-radio-button {
-    margin-left: 16px;
+.aspect-class-name::after {
+    content: " / ";
 }

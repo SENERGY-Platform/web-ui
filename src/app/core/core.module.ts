@@ -63,6 +63,7 @@ import { NotificationsComponent } from './components/notifications/notifications
 import { FilterDialogComponent } from './components/filter-dialog/filter-dialog.component';
 import { keycloakServiceToken } from './services/keycloak-service.token';
 import { CodeEditorComponent } from './components/code-editor/code-editor.component';
+import { AspectSelectComponent } from './components/aspect-select/aspect-select.component';
 
 export { keycloakServiceToken };
 
@@ -122,6 +123,7 @@ export { keycloakServiceToken };
         NotificationsComponent,
         FilterDialogComponent,
         CodeEditorComponent,
+        AspectSelectComponent,
     ],
     exports: [
         SidenavComponent,
@@ -139,6 +141,7 @@ export { keycloakServiceToken };
         MatErrorMessagesDirective,
         FilterDialogComponent,
         CodeEditorComponent,
+        AspectSelectComponent,
     ],
     providers: [
         {

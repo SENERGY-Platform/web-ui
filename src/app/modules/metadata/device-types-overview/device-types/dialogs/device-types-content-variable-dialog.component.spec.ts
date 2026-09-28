@@ -17,6 +17,7 @@
 import {ComponentFixture, fakeAsync, flush, TestBed, tick} from '@angular/core/testing';
 import {DeviceTypesContentVariableDialogComponent} from './device-types-content-variable-dialog.component';
 import {CoreModule} from '../../../../../core/core.module';
+import {AspectSelectComponent} from '../../../../../core/components/aspect-select/aspect-select.component';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {
@@ -31,8 +32,10 @@ import {MatInputModule} from '@angular/material/input';
 import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DeviceTypesContentVariableDialog', () => {
     let component: DeviceTypesContentVariableDialogComponent;
@@ -57,6 +60,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                         prohibitedNames: [],
                     },
                 },
+                provideHttpClient(withInterceptorsFromDi()),
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(DeviceTypesContentVariableDialogComponent);
@@ -65,6 +69,10 @@ describe('DeviceTypesContentVariableDialog', () => {
     }
 
     beforeEach(fakeAsync(() => {}));
+
+    function aspectSelect(): AspectSelectComponent {
+        return fixture.debugElement.query(By.directive(AspectSelectComponent)).componentInstance;
+    }
 
     it(
         'should create the app',
@@ -233,6 +241,9 @@ describe('DeviceTypesContentVariableDialog', () => {
     );
 
     it(
+        // aspectOptions/aspectClassGroup moved to the shared AspectSelectComponent with the extraction
+        // to core/components/aspect-select; this checks the dialog wires its real aspect data through
+        // to it, the grouping logic itself is covered by that component's own spec.
         'names the aspect class of a classified aspect and sorts the unclassified ones in front',
         fakeAsync(() => {
             const aspects: DeviceTypeAspectModel[] = [
@@ -255,18 +266,21 @@ describe('DeviceTypesContentVariableDialog', () => {
             fixture.detectChanges();
             flush();
 
-            expect(component.aspectOptions.map(a => [a.name, a.aspect_class_name])).toEqual([
+            const select = aspectSelect();
+            expect(select.aspectOptions.map(a => [a.name, a.aspect_class_name])).toEqual([
                 ['device', undefined],
+                ['air', 'Environment'],
                 ['air.inside_air', 'Environment'],
                 ['air.outside_air', 'Environment'],
             ]);
             // the picker groups by it, so an aspect without a class has to end up without a group
-            expect(component.aspectClassGroup(component.aspectOptions[0])).toBeUndefined();
-            expect(component.aspectClassGroup(component.aspectOptions[1])).toBe('Environment');
+            expect(select.aspectClassGroup(select.aspectOptions[0])).toBeUndefined();
+            expect(select.aspectClassGroup(select.aspectOptions[1])).toBe('Environment');
         }),
     );
 
     it(
+        // see the note on the previous test
         'leaves the aspect class out when the aspect-classes are not readable',
         fakeAsync(() => {
             const aspects: DeviceTypeAspectModel[] = [
@@ -284,7 +298,44 @@ describe('DeviceTypesContentVariableDialog', () => {
             fixture.detectChanges();
             flush();
 
-            expect(component.aspectOptions.map(a => a.aspect_class_name)).toEqual([undefined]);
+            expect(aspectSelect().aspectOptions.map(a => a.aspect_class_name)).toEqual([undefined, undefined]);
+        }),
+    );
+
+    it(
+        // scope addition SNRGY-4617: the device-repository now accepts non-leaf aspects on device
+        // types (allow_none_leaf_aspect_nodes_in_device_types_default=true in prod), so the dialog no
+        // longer restricts the picker to leaves.
+        'offers and saves a non-leaf aspect',
+        fakeAsync(() => {
+            const aspects: DeviceTypeAspectModel[] = [
+                {
+                    id: 'urn:infai:ses:aspect:air',
+                    name: 'air',
+                    sub_aspects: [
+                        {id: 'urn:infai:ses:aspect:inside_air', name: 'inside_air', sub_aspects: []},
+                    ],
+                },
+            ];
+            const contentVariable: DeviceTypeContentVariableModel = {
+                id: 'id1',
+                name: 'testName',
+                type: 'https://schema.org/Text',
+            } as DeviceTypeContentVariableModel;
+            init(contentVariable, [], [], aspects);
+
+            fixture.detectChanges();
+            flush();
+
+            expect(aspectSelect().aspectOptions.map(a => a.id)).toContain('urn:infai:ses:aspect:air');
+
+            component.firstFormGroup.patchValue({aspect_ids: ['urn:infai:ses:aspect:air']});
+            component.save();
+            flush();
+
+            const saved = matDialogRefSpy.close.calls.mostRecent().args[0] as DeviceTypeContentVariableModel;
+            expect(saved.aspect_ids).toEqual(['urn:infai:ses:aspect:air']);
+            expect(saved.aspect_id).toBe('urn:infai:ses:aspect:air');
         }),
     );
 

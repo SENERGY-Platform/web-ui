@@ -33,6 +33,7 @@ import {
 import { ConceptsCharacteristicsModel } from '../../../concepts/shared/concepts-characteristics.model';
 import { DeviceTypeHelperService } from '../shared/device-type-helper.service';
 import { convertPunctuation, typeValueValidator } from '../../../../imports/validators/type-value-validator';
+import { classifyAspects, collidingAspectNames } from '../../../../../core/components/aspect-select/aspect-select.model';
 
 interface DeviceTypeCharacteristicsClassModel extends DeviceTypeCharacteristicsModel {
     class: string;
@@ -40,12 +41,6 @@ interface DeviceTypeCharacteristicsClassModel extends DeviceTypeCharacteristicsM
 
 interface DeviceTypeFunctionClassModel extends DeviceTypeFunctionModel {
     class: string;
-}
-
-
-interface DeviceTypeAspectModelWithRootName extends DeviceTypeAspectModel {
-    root_name?: string;
-    aspect_class_name?: string;
 }
 
 @Component({
@@ -63,9 +58,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     characteristics: DeviceTypeCharacteristicsClassModel[] = [];
     concepts: ConceptsCharacteristicsModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
-    aspectOptions: DeviceTypeAspectModelWithRootName[] = [];
+    aspectClasses: DeviceTypeAspectClassModel[] = [];
     private classifiedAspects = new Map<string, { classId: string; name: string }>();
-    private aspectClassNames = new Map<string, string>();
     allowVoid = false;
     prohibitedNames: string[] = [];
 
@@ -94,8 +88,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         });
         this.concepts = data.concepts;
         this.aspects = data.aspects;
-        this.classifiedAspects = this.collectClassifiedAspects(this.aspects);
-        this.aspectClassNames = new Map((data.aspectClasses || []).map(c => [c.id, c.name]));
+        this.aspectClasses = data.aspectClasses || [];
+        this.classifiedAspects = classifyAspects(this.aspects);
         this.allowVoid = data.allowVoid;
         this.prohibitedNames = data.prohibitedNames;
     }
@@ -115,11 +109,6 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             this.characteristics.push(...([] as DeviceTypeCharacteristicsClassModel[]).concat(...toAdd));
         }
         this.initTypeOptionControl();
-        this.aspects.forEach(a => {
-            this.aspectOptions.push(...this.getAllAspectsOnTree(a, '', a.name));
-        });
-        this.aspectOptions = this.aspectOptions.filter(a => !this.aspectDisabled(a));
-        this.nameAspectClasses();
         this.highlightCharacteristics();
         this.highlightFunctions();
     }
@@ -367,91 +356,12 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
      */
     private aspectClassValidator(): ValidatorFn {
         return (control) => {
-            const colliding = this.collidingAspectNames(control.value);
+            const colliding = collidingAspectNames(this.classifiedAspects, control.value);
             if (colliding.length === 0) {
                 return null;
             }
             return {aspectClassCollision: {aspects: colliding}};
         };
-    }
-
-    private collidingAspectNames(aspectIds: unknown): string[] {
-        if (!Array.isArray(aspectIds)) {
-            return [];
-        }
-        const namesByClass = new Map<string, string[]>();
-        aspectIds.forEach((id) => {
-            const classified = this.classifiedAspects.get(id);
-            if (classified === undefined) {
-                return;
-            }
-            namesByClass.set(classified.classId, (namesByClass.get(classified.classId) || []).concat(classified.name));
-        });
-        const colliding: string[] = [];
-        namesByClass.forEach((names) => {
-            if (names.length > 1) {
-                colliding.push(...names);
-            }
-        });
-        return colliding;
-    }
-
-    /** The root of a hierarchy assigns its class, so every aspect below it shares that one. */
-    private collectClassifiedAspects(roots: DeviceTypeAspectModel[]): Map<string, { classId: string; name: string }> {
-        const result = new Map<string, { classId: string; name: string }>();
-        const collect = (node: DeviceTypeAspectModel, classId: string) => {
-            result.set(node.id, {classId, name: node.name});
-            node.sub_aspects?.forEach((sub) => collect(sub, classId));
-        };
-        roots.forEach((root) => {
-            if (root.aspect_class_id) {
-                collect(root, root.aspect_class_id);
-            }
-        });
-        return result;
-    }
-
-    /**
-     * The aspect name alone does not say which class an aspect belongs to, and two classes may hold
-     * aspects of the same name. The class therefore rides along with every option: the picker groups
-     * by it, the chip carries it as a prefix. An aspect without a class carries neither, and a class
-     * whose name is unknown - the aspect-classes are not readable for every user - counts as none.
-     */
-    private nameAspectClasses(): void {
-        this.aspectOptions.forEach((option) => {
-            const classId = this.classifiedAspects.get(option.id)?.classId;
-            option.aspect_class_name = classId === undefined ? undefined : this.aspectClassNames.get(classId);
-        });
-        // Aspects without a class keep the order of the tree and render without a header; the class
-        // groups follow them, so every header stands directly above the aspects it covers.
-        this.aspectOptions.sort((a, b) => (a.aspect_class_name || '').localeCompare(b.aspect_class_name || ''));
-    }
-
-    /** ng-select renders no header for an undefined group, which is what an aspect without a class needs. */
-    aspectClassGroup = (option: DeviceTypeAspectModelWithRootName): string | undefined => option.aspect_class_name;
-
-    aspectDisabled(aspect: DeviceTypeAspectModel): boolean {
-        return !(aspect.sub_aspects === null || aspect.sub_aspects === undefined || aspect.sub_aspects.length == 0);
-    }
-
-    copyAspect(aspect: DeviceTypeAspectModel): DeviceTypeAspectModelWithRootName {
-        const result: DeviceTypeAspectModelWithRootName = {
-            id: aspect.id,
-            name: aspect.name,
-            sub_aspects: [],
-        };
-        aspect.sub_aspects?.forEach((a:DeviceTypeAspectModel) => result.sub_aspects?.push(this.copyAspect(a)));
-        return result;
-    }
-
-    private getAllAspectsOnTree(a: DeviceTypeAspectModelWithRootName, prefix: string='', rootName: string=''): DeviceTypeAspectModelWithRootName[] {
-        const res: DeviceTypeAspectModelWithRootName[] = [];
-        const element = this.copyAspect(a);
-        element.name = prefix+element.name;
-        element.root_name = rootName;
-        res.push(element);
-        element.sub_aspects?.forEach(sub => res.push(...this.getAllAspectsOnTree(sub, element.name+'.', rootName)));
-        return res;
     }
 
     getCharacteristicError(control: AbstractControl | null): string | undefined {
