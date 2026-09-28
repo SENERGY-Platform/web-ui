@@ -39,6 +39,25 @@ import { PermissionsRightsModel } from '../permissions/shared/permissions-rights
 import { PermissionsV2RightsAndIdModel } from '../permissions/shared/permissions-resource.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 
+/** The bulk DELETE deletes one export after the other and keeps going after a gateway timeout. */
+export function bulkDeleteOutcome(status: number, count: number): { message: string; failed: boolean; pending: boolean } {
+    const exports = count === 1 ? 'export' : 'exports';
+    if (status === 200 || status === 204) {
+        return { message: count + ' ' + exports + ' deleted', failed: false, pending: false };
+    }
+    if (status === 207) {
+        return { message: 'Not all ' + exports + ' could be deleted', failed: true, pending: false };
+    }
+    if (status === 504 || status === 0) {
+        return {
+            message: 'Deleting takes longer than expected and continues in the background. Reload later to see the result.',
+            failed: false,
+            pending: true,
+        };
+    }
+    return { message: 'The ' + exports + ' could not be deleted', failed: true, pending: false };
+}
+
 @Component({
     selector: 'senergy-export',
     templateUrl: './export.component.html',
@@ -343,7 +362,13 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     const obs = this.brokerMode
                         ? this.brokerExportService.stopPipelines(exportIDs)
                         : this.exportService.stopPipelines(exportIDs);
-                    obs.subscribe(() => {
+                    obs.subscribe((response) => {
+                        const outcome = bulkDeleteOutcome(response.status, exportIDs.length);
+                        if (outcome.failed) {
+                            this.snackBar.open(outcome.message, 'close', { panelClass: 'snack-bar-error' });
+                        } else {
+                            this.snackBar.open(outcome.message, 'close', { duration: outcome.pending ? undefined : 2000 });
+                        }
                         this.paginator.pageIndex = 0;
                         this.selectionClear();
                         this.getExports().subscribe(_ => this.ready = true);

@@ -15,11 +15,11 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { environment } from '../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import {
     ExportDatabaseModel,
     ExportModel,
@@ -146,7 +146,11 @@ export class ExportService {
             .request('DELETE', environment.exportService + '/instances', { body: exp, responseType: 'text', observe: 'response' })
             .pipe(
                 map((resp) => ({ status: resp.status })),
-                catchError(this.errorHandlerService.handleError(ExportService.name, 'stopPipelines: Error', { status: 404 })),
+                // the real status, so a gateway timeout (504, or 0 without CORS headers) can be told apart
+                catchError((error: HttpErrorResponse) => {
+                    this.errorHandlerService.logError(ExportService.name, 'stopPipelines: Error', error);
+                    return of({ status: error.status });
+                }),
             );
     }
 

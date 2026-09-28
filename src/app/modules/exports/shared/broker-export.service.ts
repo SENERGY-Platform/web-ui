@@ -15,11 +15,11 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { environment } from '../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { ExportModel, ExportResponseModel } from './export.model';
 import { PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
@@ -121,7 +121,11 @@ export class BrokerExportService {
             })
             .pipe(
                 map((resp) => ({ status: resp.status })),
-                catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'stopPipelines: Error', { status: 404 })),
+                // the real status, so a gateway timeout (504, or 0 without CORS headers) can be told apart
+                catchError((error: HttpErrorResponse) => {
+                    this.errorHandlerService.logError(BrokerExportService.name, 'stopPipelines: Error', error);
+                    return of({ status: error.status });
+                }),
             );
     }
 
