@@ -33,6 +33,8 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {convertPunctuation, typeValueValidator} from '../validators/type-value-validator';
 import {ConceptsService} from '../../metadata/concepts/shared/concepts.service';
 import {
+    contentVariableAspectIds,
+    deprecatedAspectAlias,
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel
@@ -162,7 +164,9 @@ export class ImportTypesCreateEditComponent implements OnInit {
                         );
                         if (type.output.name === 'root' && type.output.sub_content_variables?.length === 3 && value !== undefined) {
                             this.dataSource.data = value.sub_content_variables || [];
-                            this.timeAspect.setValue(type.output.sub_content_variables[1].aspect_id);
+                            // list-first with a fallback to the deprecated aspect_id, so a type stored
+                            // before the list existed still opens with its time aspect selected.
+                            this.timeAspect.setValue(deprecatedAspectAlias(contentVariableAspectIds(type.output.sub_content_variables[1])));
                         } else {
                             this.usesDefaultOutput = false;
                             this.dataSource.data = [type.output];
@@ -237,7 +241,9 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 return;
             }
             this.defaultOutput.sub_content_variables[2].sub_content_variables = this.dataSource.data;
-            this.defaultOutput.sub_content_variables[1].aspect_id = this.timeAspect.value;
+            const timeAspectId: string | null = this.timeAspect.value;
+            this.defaultOutput.sub_content_variables[1].aspect_id = timeAspectId ?? undefined;
+            this.defaultOutput.sub_content_variables[1].aspect_ids = timeAspectId ? [timeAspectId] : [];
             this.defaultOutput.sub_content_variables[1].function_id = environment.getTimestampFunctionId;
             val.output = this.defaultOutput;
         } else {

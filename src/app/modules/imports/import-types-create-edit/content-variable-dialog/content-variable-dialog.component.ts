@@ -21,15 +21,12 @@ import {
 import { ImportTypeContentVariableModel } from '../../import-types/shared/import-types.model';
 import { AbstractControl, UntypedFormBuilder, ValidationErrors, Validators } from '@angular/forms';
 import {
+    contentVariableAspectIds,
+    deprecatedAspectAlias,
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel
 } from '../../../metadata/device-types-overview/shared/device-type.model';
-import { CompareWithFn, GroupValueFn, TrackByFn } from '@ng-matero/extensions/select';
-
-interface DeviceTypeAspectModelWithRootName extends DeviceTypeAspectModel {
-    root_name?: string;
-}
 
 interface DeviceTypeCharacteristicsModelWithGroup extends DeviceTypeCharacteristicsModel {
     group?: string;
@@ -62,7 +59,7 @@ export class ContentVariableDialogComponent implements OnInit {
         type: [undefined, Validators.required],
         characteristic_id: null,
         use_as_tag: false,
-        aspect_id: undefined,
+        aspect_ids: [[] as string[]],
         function_id: undefined,
     });
 
@@ -81,9 +78,6 @@ export class ContentVariableDialogComponent implements OnInit {
         { id: this.STRUCTURE, name: 'Structure' },
         { id: this.LIST, name: 'List' },
     ];
-
-    aspectOptions: DeviceTypeAspectModelWithRootName[] = [];
-    rootAspects = new Map<string, string>();
 
     constructor(
         @Inject(MAT_DIALOG_DATA)
@@ -106,6 +100,9 @@ export class ContentVariableDialogComponent implements OnInit {
         }
         if (this.data.content !== undefined) {
             this.form.patchValue(this.data.content);
+            // aspect_ids reads list-first with a fallback to the deprecated aspect_id, so a type
+            // stored before the list existed still opens with its one aspect selected.
+            this.form.patchValue({ aspect_ids: contentVariableAspectIds(this.data.content) });
         } else {
             this.data.content = {} as ImportTypeContentVariableModel;
         }
@@ -115,15 +112,6 @@ export class ContentVariableDialogComponent implements OnInit {
         this.form.get('type')?.valueChanges.subscribe((_) => {
             this.form.patchValue({ characteristic_id: null });
         });
-        const tmp: DeviceTypeAspectModelWithRootName[] = [];
-        this.data.aspects?.forEach(a => {
-            a.sub_aspects?.forEach(sub => {
-                this.rootAspects.set(sub.id, a.id);
-                (sub as DeviceTypeAspectModelWithRootName).root_name = a.name;
-                tmp.push(sub);
-            });
-        });
-        this.aspectOptions = tmp;
     }
 
     save() {
@@ -131,11 +119,15 @@ export class ContentVariableDialogComponent implements OnInit {
             console.error('undefined content');
             return;
         }
+        const aspectIds: string[] = this.form.get('aspect_ids')?.value || [];
         this.data.content.name = this.form.get('name')?.value;
         this.data.content.type = this.form.get('type')?.value;
         this.data.content.characteristic_id = this.form.get('characteristic_id')?.value;
         this.data.content.use_as_tag = this.form.get('use_as_tag')?.value;
-        this.data.content.aspect_id = this.form.get('aspect_id')?.value;
+        this.data.content.aspect_ids = aspectIds;
+        // Derived fresh from the current selection rather than carried over, so an aspect removed
+        // here is not resurrected by a stale aspect_id when the import-repository folds it back in.
+        this.data.content.aspect_id = deprecatedAspectAlias(aspectIds);
         this.data.content.function_id = this.form.get('function_id')?.value;
         this.dialogRef.close(this.data.content);
     }
@@ -164,35 +156,4 @@ export class ContentVariableDialogComponent implements OnInit {
         return errors['notNamedTimeAndNotEmpty'];
     }
 
-    getRootAspect(): GroupValueFn {
-        const that = this;
-        return (_, children): any => {
-            children = children as DeviceTypeAspectModel[];
-            const id = that.rootAspects.get(children[0].id);
-            if (id !== undefined) {
-                return { id };
-            }
-            return null;
-        };
-    }
-
-    trackby: TrackByFn = (a: DeviceTypeAspectModel) => {
-        return a.id;
-    };
-
-    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectModel | string, b: DeviceTypeAspectModel | string) => {
-        const aIsStr = typeof a === 'string' || a instanceof String;
-        const bIsStr = typeof b === 'string' || b instanceof String;
-
-        if (aIsStr && bIsStr) {
-            return a === b;
-        }
-        if (!aIsStr && !bIsStr) {
-            return a.id === b.id;
-        }
-        if (aIsStr) {
-            return a === (b as DeviceTypeAspectModel).id;
-        }
-        return a.id === b;
-    };
 }

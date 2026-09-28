@@ -37,7 +37,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTreeModule } from '@angular/material/tree';
 import { ImportTypesService } from '../import-types/shared/import-types.service';
 import { environment } from '../../../../environments/environment';
-import { ImportTypeModel } from '../import-types/shared/import-types.model';
+import { ImportTypeContentVariableModel, ImportTypeModel } from '../import-types/shared/import-types.model';
 import { ImportTypesComponent } from '../import-types/import-types.component';
 import { ConceptsService } from '../../metadata/concepts/shared/concepts.service';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
@@ -93,6 +93,7 @@ describe('ImportTypesCreateEditComponent', () => {
                     sub_content_variables: [],
                     use_as_tag: false,
                     aspect_id: undefined,
+                    aspect_ids: [],
                 },
                 {
                     name: 'value',
@@ -202,6 +203,50 @@ describe('ImportTypesCreateEditComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
+
+    afterEach(() => {
+        // some tests below point getImportType at a variant of testType; restore the default so
+        // later tests' shared beforeEach (which always loads through getImportType) is unaffected.
+        importTypesServiceSpy.getImportType.and.returnValue(of(testType));
+    });
+
+    /** Loads a fresh component whose time sub_content_variable is testType's with the given overrides. */
+    function loadWithTimeAspect(overrides: Partial<ImportTypeContentVariableModel>) {
+        const type: ImportTypeModel = JSON.parse(JSON.stringify(testType));
+        Object.assign(type.output.sub_content_variables![1], overrides);
+        importTypesServiceSpy.getImportType.and.returnValue(of(type));
+        const localFixture = TestBed.createComponent(ImportTypesCreateEditComponent);
+        localFixture.detectChanges();
+        return localFixture.componentInstance;
+    }
+
+    it('reads the time aspect list-first, ahead of the deprecated aspect_id', () => {
+        const loaded = loadWithTimeAspect({
+            aspect_id: 'urn:infai:ses:aspect:stale',
+            aspect_ids: ['urn:infai:ses:aspect:current'],
+        });
+
+        expect(loaded.timeAspect.value).toBe('urn:infai:ses:aspect:current');
+    });
+
+    it('falls back to the deprecated aspect_id for the time aspect when aspect_ids is absent', () => {
+        const loaded = loadWithTimeAspect({ aspect_id: 'urn:infai:ses:aspect:legacy', aspect_ids: undefined });
+
+        expect(loaded.timeAspect.value).toBe('urn:infai:ses:aspect:legacy');
+    });
+
+    it('writes both aspect_ids and aspect_id for the time aspect on save', fakeAsync(() => {
+        component.timeAspect.setValue('urn:infai:ses:aspect:time');
+        importTypesServiceSpy.saveImportType.calls.reset();
+
+        component.save();
+        fixture.detectChanges();
+        flush();
+
+        const saved = importTypesServiceSpy.saveImportType.calls.mostRecent().args[0];
+        expect(saved.output.sub_content_variables[1].aspect_ids).toEqual(['urn:infai:ses:aspect:time']);
+        expect(saved.output.sub_content_variables[1].aspect_id).toBe('urn:infai:ses:aspect:time');
+    }));
 
     it('should create and load import type', () => {
         expect(component).toBeTruthy();

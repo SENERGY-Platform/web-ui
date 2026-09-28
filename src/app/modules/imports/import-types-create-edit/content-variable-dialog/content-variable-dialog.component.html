@@ -27,13 +27,7 @@
         </div>
 
         <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Aspect</mat-label>
-                <mtx-select [items]="aspectOptions" bindValue="id" bindLabel="name" formControlName="aspect_id"
-                    groupBy="root_name" selectableGroup [groupValue]="getRootAspect()" appendTo=".ng-select-anchor"
-                    [compareWith]="compareAspectsWith"></mtx-select>
-                <mat-error senergyError label="Aspect"></mat-error>
-            </mat-form-field>
+            <senergy-aspect-select formControlName="aspect_ids" [aspects]="data.aspects" label="Aspect"></senergy-aspect-select>
         </div>
 
         <div>
