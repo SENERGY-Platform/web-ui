@@ -73,6 +73,22 @@ expect(tagsBefore(groupField)).toEqual(tagsBefore(aspectField));
 
 Anything genuinely visual needs the app.
 
+## A fresh worktree cannot run the specs
+
+`src/assets/env.js` is gitignored and generated, but the test target lists it as
+a root file. A `git worktree add` — the cheap way to check a commit without the
+uncommitted changes around it — therefore has none, and `npm test` stops before
+the first spec:
+
+```
+error TS6053: File '.../src/assets/env.js' not found.
+ERROR [karma-server]: Error: Found 1 load error
+```
+
+`tsc --noEmit` and `ngc --noEmit` do not read it and run normally there, with
+`node_modules` linked from the main checkout. For the specs, copy `env.js` over
+from the main checkout first.
+
 ## The full suite is the CI's job, not necessarily yours
 
 `npm test` bundles all ~101 spec files into one Chrome renderer, and that bundle
