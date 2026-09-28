@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subject, map, of, switchMap, takeUntil } from 'rxjs';
@@ -49,7 +49,7 @@ const ADVANCED_FIELDS = [
     templateUrl: './query-editor.component.html',
     styleUrls: ['./query-editor.component.css'],
 })
-export class QueryEditorComponent implements OnInit, OnDestroy {
+export class QueryEditorComponent implements OnInit, OnChanges, OnDestroy {
 
     @Input() form!: DynamicFormGroup;
     @Input() allDevices: DeviceInstanceModel[] = [];
@@ -73,7 +73,7 @@ export class QueryEditorComponent implements OnInit, OnDestroy {
         { unit: 'y', desc: 'Years' },
     ];
 
-    private destroy = new Subject<void>();
+    private formChange = new Subject<void>();
 
     constructor(
         private deviceTypeService: DeviceTypeService,
@@ -83,27 +83,41 @@ export class QueryEditorComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.bindForm();
+    }
+
+    // Selecting another report object keeps this component and only swaps the form, so it has to be watched anew.
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['form'] !== undefined && !changes['form'].firstChange) {
+            this.bindForm();
+        }
+    }
+
+    ngOnDestroy() {
+        this.formChange.next();
+        this.formChange.complete();
+    }
+
+    private bindForm() {
+        this.formChange.next();
+        this.deviceType = EMPTY_DEVICE_TYPE;
+        this.servicePaths = [];
+        // takeUntil comes last so that a device type still loading for the previous form is cancelled too
         this.control('device').valueChanges.pipe(
-            takeUntil(this.destroy),
             switchMap((deviceId: string | null) => {
                 this.deviceType = EMPTY_DEVICE_TYPE;
                 this.control('service').setValue(null);
                 return this.loadDeviceType(deviceId);
-            })
+            }),
+            takeUntil(this.formChange)
         ).subscribe(() => this.updateServicePaths(true));
 
-        this.control('service').valueChanges.pipe(takeUntil(this.destroy))
+        this.control('service').valueChanges.pipe(takeUntil(this.formChange))
             .subscribe(() => this.updateServicePaths(true));
 
         this.loadDeviceType(this.control('device').value)
-            .pipe(takeUntil(this.destroy))
+            .pipe(takeUntil(this.formChange))
             .subscribe(() => this.updateServicePaths(false));
-
-    }
-
-    ngOnDestroy() {
-        this.destroy.next();
-        this.destroy.complete();
     }
 
     control(name: string): AbstractControl {

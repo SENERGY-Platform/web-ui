@@ -16,7 +16,7 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, SimpleChange } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -28,7 +28,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
-import { Observable, of } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 
 import { QueryEditorComponent } from './query-editor.component';
 import { CoreModule } from '../../../../../core/core.module';
@@ -73,10 +73,12 @@ const deviceType = {
 
 class MockDeviceTypeService {
     requested: string[] = [];
+    /** Answers for single device types; any other id gets deviceType right away. */
+    responses = new Map<string, Observable<DeviceTypeModel | null>>();
 
     getDeviceType(id: string): Observable<DeviceTypeModel | null> {
         this.requested.push(id);
-        return of(deviceType);
+        return this.responses.get(id) ?? of(deviceType);
     }
 }
 
@@ -166,6 +168,56 @@ describe('QueryEditorComponent', () => {
 
         expect(component.servicePaths).toEqual(['root.other']);
         expect(component.control('path').value).toBeNull();
+    });
+
+    const swapForm = (form: DynamicFormGroup) => {
+        const previous = component.form;
+        component.form = form;
+        component.ngOnChanges({ form: new SimpleChange(previous, form, false) });
+    };
+
+    // The report object view keeps this component when another object is selected, e.g. a fresh copy.
+    it('should follow the form that replaced the previous one', () => {
+        const original = queryFormOf({ deviceId: 'd1', serviceId: 's1', columns: [{ name: 'root.value' }] });
+        const copy = queryFormOf({ deviceId: 'd1', serviceId: 's1', columns: [{ name: 'root.value' }] });
+        component.form = original;
+        component.ngOnInit();
+        swapForm(copy);
+
+        copy.controls['device'].setValue('d2');
+        expect(copy.controls['service'].value).toBeNull();
+        expect(copy.controls['path'].value).toBeNull();
+
+        copy.controls['service'].setValue('s2');
+        original.controls['device'].setValue('d2');
+        expect(copy.controls['service'].value).toBe('s2');
+        expect(component.servicePaths).toEqual(['root.other']);
+    });
+
+    it('should not show the device type of the previous form once it arrives late', () => {
+        const pending = new Subject<DeviceTypeModel | null>();
+        (TestBed.inject(DeviceTypeService) as unknown as MockDeviceTypeService).responses.set('dt1', pending);
+        component.form = queryFormOf({ deviceId: 'd1', serviceId: 's1' });
+        component.ngOnInit();
+        swapForm(queryFormOf({ deviceId: 'unknown' }));
+
+        pending.next(deviceType);
+
+        expect(component.deviceType.services).toEqual([]);
+        expect(component.servicePaths).toEqual([]);
+    });
+
+    it('should not show a device type requested by a device change of the previous form', () => {
+        const pending = new Subject<DeviceTypeModel | null>();
+        (TestBed.inject(DeviceTypeService) as unknown as MockDeviceTypeService).responses.set('dt2', pending);
+        component.form = queryFormOf({ deviceId: 'd1', serviceId: 's1' });
+        component.ngOnInit();
+        component.control('device').setValue('d2');
+        swapForm(queryFormOf({ deviceId: 'unknown' }));
+
+        pending.next(deviceType);
+
+        expect(component.deviceType.services).toEqual([]);
     });
 
     it('should not load a device type for an unknown device', () => {
