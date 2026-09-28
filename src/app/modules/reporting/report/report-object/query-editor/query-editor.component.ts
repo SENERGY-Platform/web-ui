@@ -176,6 +176,9 @@ export class QueryEditorComponent implements OnInit, OnChanges, OnDestroy {
     servicePaths: string[] = [];
     /** Criteria of the selected device group, in the order the group defines them. */
     groupCriteria: DeviceGroupCriteriaModel[] = [];
+    /** The groups offered for selection; a field rather than a getter, so the select does not get a new array per check. */
+    deviceGroupOptions: DeviceGroupDisplayModel[] = [];
+    showGeneratedGroups = false;
     previewRunning = false;
     showAdvanced = false;
 
@@ -230,7 +233,23 @@ export class QueryEditorComponent implements OnInit, OnChanges, OnDestroy {
         } else if (changes['allDeviceGroups'] !== undefined && !changes['allDeviceGroups'].firstChange) {
             // the groups load asynchronously, so a restored group may only find its criteria now
             this.updateGroupCriteria(false);
+            this.updateDeviceGroupOptions();
         }
+    }
+
+    setShowGeneratedGroups(show: boolean) {
+        this.showGeneratedGroups = show;
+        this.updateDeviceGroupOptions();
+    }
+
+    /**
+     * Groups a device generated for itself are listed only on request, like device-repository's ignore-generated
+     * filter. The selected group is always listed, so a loaded report still shows it.
+     */
+    private updateDeviceGroupOptions() {
+        const selected = this.control('deviceGroupId').value;
+        this.deviceGroupOptions = this.allDeviceGroups.filter((g: DeviceGroupDisplayModel) =>
+            this.showGeneratedGroups || !g.auto_generated_by_device || g.id === selected);
     }
 
     ngOnDestroy() {
@@ -243,6 +262,7 @@ export class QueryEditorComponent implements OnInit, OnChanges, OnDestroy {
         this.deviceType = EMPTY_DEVICE_TYPE;
         this.servicePaths = [];
         this.groupCriteria = [];
+        this.updateDeviceGroupOptions();
         // takeUntil comes last so that a device type still loading for the previous form is cancelled too
         this.control('device').valueChanges.pipe(
             switchMap((deviceId: string | null) => {

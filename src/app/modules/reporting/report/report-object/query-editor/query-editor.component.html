@@ -52,10 +52,12 @@
     <div *ngIf="source === 'group'" fxLayout="column">
         <mat-form-field fxFlex color="accent" appearance="outline">
             <mat-label>Device Group</mat-label>
-            <mtx-select formControlName="deviceGroupId" [items]="allDeviceGroups" bindLabel="name" bindValue="id"
+            <mtx-select formControlName="deviceGroupId" [items]="deviceGroupOptions" bindLabel="name" bindValue="id"
                 virtualScroll="true" placeholder="Type to search" appendTo=".ng-select-anchor"></mtx-select>
             <mat-error senergyError label="Device Group"></mat-error>
         </mat-form-field>
+        <mat-checkbox class="generated-groups" [checked]="showGeneratedGroups"
+            (change)="setShowGeneratedGroups($event.checked)">Include groups generated for single devices</mat-checkbox>
 
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Criteria</mat-label>

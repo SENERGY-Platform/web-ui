@@ -444,6 +444,52 @@ describe('QueryEditorComponent', () => {
             expect(component.advancedCount).toBe(0);
         });
 
+        describe('generated device groups', () => {
+            const generatedGroup = {
+                id: 'g-dev', name: 'Device 1', image: '', device_ids: ['d1'], criteria: [criterion2], auto_generated_by_device: 'd1',
+            } as DeviceGroupDisplayModel;
+
+            it('should hide groups generated for single devices by default', () => {
+                component.allDeviceGroups = [deviceGroup, generatedGroup];
+                component.form = queryFormOf({ source: 'group' });
+                component.ngOnInit();
+
+                expect(component.deviceGroupOptions.map(g => g.id)).toEqual(['g1']);
+            });
+
+            it('should list them once asked for, and hide them again', () => {
+                component.allDeviceGroups = [deviceGroup, generatedGroup];
+                component.form = queryFormOf({});
+                component.ngOnInit();
+
+                component.setShowGeneratedGroups(true);
+                expect(component.deviceGroupOptions.map(g => g.id)).toEqual(['g1', 'g-dev']);
+
+                component.setShowGeneratedGroups(false);
+                expect(component.deviceGroupOptions.map(g => g.id)).toEqual(['g1']);
+            });
+
+            // A saved report may use a generated group; hiding it would make the select look empty.
+            it('should keep a selected generated group listed', () => {
+                component.allDeviceGroups = [deviceGroup, generatedGroup];
+                component.form = queryFormOf({ deviceGroupId: 'g-dev', columns: [{ criteria: criterion2 }] });
+                component.ngOnInit();
+
+                expect(component.deviceGroupOptions.map(g => g.id)).toEqual(['g1', 'g-dev']);
+            });
+
+            it('should filter groups that arrive after the form', () => {
+                component.allDeviceGroups = [];
+                component.form = queryFormOf({});
+                component.ngOnInit();
+
+                component.allDeviceGroups = [deviceGroup, generatedGroup];
+                component.ngOnChanges({ allDeviceGroups: new SimpleChange([], component.allDeviceGroups, false) });
+
+                expect(component.deviceGroupOptions.map(g => g.id)).toEqual(['g1']);
+            });
+        });
+
         it('should reset the criteria when the device group changes', () => {
             const otherGroup =
                 { id: 'g2', name: 'Group 2', image: '', device_ids: [], criteria: [] } as DeviceGroupDisplayModel;
