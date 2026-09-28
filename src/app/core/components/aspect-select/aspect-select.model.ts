@@ -86,3 +86,18 @@ export function aspectTreeFromAspectNodes(nodes: DeviceTypeAspectNodeModel[]): D
     });
     return nodes.filter((n) => n.parent_id === n.id || !byId.has(n.parent_id)).map(build);
 }
+
+/**
+ * Extends an aspect tree by stored ids it does not contain, each as an unclassified root named by its id,
+ * so a stored selection stays visible and removable instead of rendering as a blank chip.
+ */
+export function withStoredAspects(tree: DeviceTypeAspectModel[], storedIds: readonly string[]): DeviceTypeAspectModel[] {
+    const known = new Set<string>();
+    const collect = (aspect: DeviceTypeAspectModel) => {
+        known.add(aspect.id);
+        aspect.sub_aspects?.forEach(collect);
+    };
+    tree.forEach(collect);
+    const missing = [...new Set(storedIds)].filter((id) => id !== '' && !known.has(id));
+    return missing.length === 0 ? tree : tree.concat(missing.map((id) => ({ id, name: id, sub_aspects: [] })));
+}

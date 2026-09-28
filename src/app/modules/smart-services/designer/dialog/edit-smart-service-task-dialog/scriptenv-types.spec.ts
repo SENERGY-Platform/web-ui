@@ -38,6 +38,11 @@ describe('vendored smart-service scriptenv declarations', () => {
         expect(smartServiceScriptEnvTypes).not.toContain('Map<string,');
     });
 
+    it('declares the aspect lists next to the deprecated single fields', () => {
+        expect(smartServiceScriptEnvTypes).toMatch(/interface FilterCriteria \{[^}]*@deprecated[^}]*aspect_id: string;\s*aspect_ids: string\[\];/);
+        expect(smartServiceScriptEnvTypes).toMatch(/interface ServicePathOption \{[^}]*aspect_nodes: AspectNode\[\];/);
+    });
+
     /*
      * Declaring nothing would disable diagnostics' usefulness rather than break the
      * build, so assert there is real content here.

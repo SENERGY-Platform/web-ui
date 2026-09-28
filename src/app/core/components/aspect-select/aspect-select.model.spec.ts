@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { aspectTreeFromAspectNodes } from './aspect-select.model';
+import { aspectTreeFromAspectNodes, withStoredAspects } from './aspect-select.model';
 import { DeviceTypeAspectNodeModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 
 const node = (id: string, parentId: string, rootId: string, childIds: string[]): DeviceTypeAspectNodeModel => ({
@@ -47,5 +47,17 @@ describe('aspectTreeFromAspectNodes', () => {
     it('treats a missing child list as a leaf', () => {
         const leaf = { ...node('air', '', 'air', []), child_ids: null as unknown as string[] };
         expect(aspectTreeFromAspectNodes([leaf])).toEqual([{ id: 'air', name: 'AIR', sub_aspects: [] }]);
+    });
+});
+
+describe('withStoredAspects', () => {
+    const tree = [{ id: 'inside', name: 'Inside', sub_aspects: [{ id: 'air', name: 'Air', sub_aspects: [] }] }];
+
+    it('returns the tree itself when it holds every stored id, at any depth', () => {
+        expect(withStoredAspects(tree, ['air', 'inside'])).toBe(tree);
+    });
+
+    it('appends a stored id the tree lacks once, named by its id', () => {
+        expect(withStoredAspects(tree, ['gone', 'air', 'gone', ''])).toEqual([...tree, { id: 'gone', name: 'gone', sub_aspects: [] }]);
     });
 });

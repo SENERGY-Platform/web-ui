@@ -53,6 +53,13 @@ describe('smartServiceCompletions', () => {
         expect(captionOf(midStatement)).toContain('outputs.set');
     });
 
+    it('offers each completion once', () => {
+        [smartServiceCompletions({ lines: [''], row: 0, column: 0 }), smartServiceCompletions({ lines: ['var x = '], row: 0, column: 8 })].forEach((completions) => {
+            const captions = captionOf(completions);
+            expect(captions.filter((caption, index) => captions.indexOf(caption) !== index)).toEqual([]);
+        });
+    });
+
     it('returns completions instead of throwing when the cursor row is past the last line', () => {
         expect(() => smartServiceCompletions({ lines: [], row: 3, column: 0 })).not.toThrow();
         expect(smartServiceCompletions({ lines: [], row: 3, column: 0 }).length).toBeGreaterThan(0);

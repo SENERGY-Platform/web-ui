@@ -54,12 +54,14 @@ export const smartServiceScriptEnvTypes = `
 interface Aspect {
     id: string;
     name: string;
+    aspect_class_id: string;
     sub_aspects: Aspect[];
 }
 
 interface AspectNode {
     id: string;
     name: string;
+    aspect_class_id: string;
     root_id: string;
     parent_id: string;
     child_ids: string[];
@@ -104,7 +106,9 @@ interface ConceptWithCharacteristics {
 interface Configurable {
     path: string;
     characteristic_id: string;
+    /** @deprecated alias for a single element AspectNodes; holds the node with the alphabetically first id */
     aspect_node: AspectNode;
+    aspect_nodes: AspectNode[];
     function_id: string;
     value: any;
     type: string;
@@ -129,7 +133,9 @@ interface ContentVariable {
     serialization_options: string[];
     unit_reference: string;
     function_id: string;
+    /** @deprecated please use AspectIds */
     aspect_id: string;
+    aspect_ids: string[];
 }
 
 interface ConverterExtension {
@@ -169,7 +175,9 @@ interface DeviceGroup {
 interface DeviceGroupFilterCriteria {
     interaction: string;
     function_id: string;
+    /** @deprecated please use AspectIds */
     aspect_id: string;
+    aspect_ids: string[];
     device_class_id: string;
 }
 
@@ -204,7 +212,9 @@ interface FilterCriteria {
     interaction: string;
     function_id: string;
     device_class_id: string;
+    /** @deprecated alias for a single element AspectIds; normalized into AspectIds at the controller boundary */
     aspect_id: string;
+    aspect_ids: string[];
 }
 
 interface FunctionType {
@@ -231,6 +241,7 @@ interface Hub {
     device_local_ids: string[];
     device_ids: string[];
     owner_id: string;
+    attributes: Attribute[];
 }
 
 interface ImportSelection {
@@ -278,7 +289,9 @@ interface ServicePathOption {
     service_id: string;
     path: string;
     characteristic_id: string;
+    /** @deprecated alias for a single element AspectNodes; holds the node with the alphabetically first id */
     aspect_node: AspectNode;
+    aspect_nodes: AspectNode[];
     function_id: string;
     is_void: boolean;
     value: any;

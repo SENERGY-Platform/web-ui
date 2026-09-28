@@ -16,7 +16,7 @@
 
 /*
  * generated in github.com/SENERGY-Platform/smart-service-module-worker-lib with a command like:
- * go generate ./... > ace-code-completer.ts
+ * go generate ./...
 */
 
 const completer = {
@@ -199,11 +199,6 @@ const completer = {
 {
     caption: 'util.getDevicesWithServiceFromEntityString',
     value: 'var result_as_IotOption_list = util.getDevicesWithServiceFromEntityString(entityStr_as_string, criteria_as_FilterCriteria_list);',
-    meta: 'static'
-},
-{
-    caption: 'util.getDevicesWithServiceFromIotOption',
-    value: 'var result_as_IotOption_list = util.getDevicesWithServiceFromIotOption(entity_as_IotOption, criteria_as_FilterCriteria_list);',
     meta: 'static'
 },
 {
@@ -482,11 +477,6 @@ const completer = {
 {
     caption: 'util.getDevicesWithServiceFromEntityString',
     value: 'util.getDevicesWithServiceFromEntityString(entityStr_as_string, criteria_as_FilterCriteria_list)',
-    meta: 'static'
-},
-{
-    caption: 'util.getDevicesWithServiceFromIotOption',
-    value: 'util.getDevicesWithServiceFromIotOption(entity_as_IotOption, criteria_as_FilterCriteria_list)',
     meta: 'static'
 },
 {

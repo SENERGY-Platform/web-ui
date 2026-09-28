@@ -17,23 +17,23 @@
 
 
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeAspectNodeModel,
+    DeviceTypeDeviceClassModel,
+} from '../../../../metadata/device-types-overview/shared/device-type.model';
 import { FunctionsService } from '../../../../metadata/functions/shared/functions.service';
 import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceClassesService } from '../../../../metadata/device-classes/shared/device-classes.service';
 import { FunctionsPermSearchModel } from '../../../../metadata/functions/shared/functions-perm-search.model';
-import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
-
-interface Criteria {
-    interaction?: string;
-    function_id?: string;
-    device_class_id?: string;
-    aspect_id?: string;
-}
-
-interface DeviceTypeAspectNodeModelWithRootName extends DeviceTypeAspectNodeModel {
-    root_name?: string;
-}
+import { aspectTreeFromAspectNodes, withStoredAspects } from '../../../../../core/components/aspect-select/aspect-select.model';
+import {
+    criteriaAspectsLabel,
+    editableCriteria,
+    setCriteriaAspects,
+    SmartServiceCriteria,
+    storableCriteria,
+} from '../../shared/smart-service-criteria';
 
 @Component({
     selector: 'senergy-criteria-list',
@@ -47,9 +47,12 @@ export class CriteriaListComponent implements OnInit {
 
     functions: (FunctionsPermSearchModel | { id?: string; name: string })[] = [];
     deviceClasses: (DeviceTypeDeviceClassModel | { id?: string; name: string })[] = [];
-    aspects: DeviceTypeAspectNodeModelWithRootName[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
 
-    criteriaList: Criteria[] = [];
+    criteriaList: SmartServiceCriteria[] = [];
+
+    private aspectNodes: DeviceTypeAspectNodeModel[] | null = null;
+    private aspectNames = new Map<string, string>();
 
     constructor(private functionsService: FunctionsService,
         private deviceTypesService: DeviceTypeService,
@@ -60,36 +63,39 @@ export class CriteriaListComponent implements OnInit {
         this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.deviceClasses = value.result;
         });
-        this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
-            const tmp: DeviceTypeAspectNodeModelWithRootName[] = [];
-            aspects.forEach(a => {
-                const t = a as DeviceTypeAspectNodeModelWithRootName;
-                t.root_name = aspects.find(x => x.id === t.root_id)?.name;
-                tmp.push(t);
-            });
-            this.aspects = tmp;
+        this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
+            this.aspectNodes = nodes;
+            this.aspectNames = new Map(nodes.map((node) => [node.id, node.name]));
+            this.rebuildAspects();
         });
     }
 
     ngOnInit(): void {
-        this.criteriaList = JSON.parse(this.criteria_json);
+        const parsed = JSON.parse(this.criteria_json);
+        this.criteriaList = Array.isArray(parsed) ? parsed.map(editableCriteria) : parsed;
+        this.rebuildAspects();
     }
 
     emitUpdate() {
-        this.changed.emit(JSON.stringify(this.criteriaList));
+        this.changed.emit(JSON.stringify(this.criteriaList.map(storableCriteria)));
     }
 
-    removeCriteria(list: Criteria[], index: number): Criteria[] {
+    setAspects(criteria: SmartServiceCriteria, aspectIds: string[] | null) {
+        setCriteriaAspects(criteria, aspectIds);
+        this.emitUpdate();
+    }
+
+    removeCriteria(list: SmartServiceCriteria[], index: number): SmartServiceCriteria[] {
         list.splice(index, 1);
         return list;
     }
 
-    addCriteria(list: Criteria[]): Criteria[] {
+    addCriteria(list: SmartServiceCriteria[]): SmartServiceCriteria[] {
         list.push({ interaction: 'request', aspect_id: '', device_class_id: '', function_id: '' });
         return list;
     }
 
-    criteriaToLabel(criteria: { interaction?: string; function_id?: string; device_class_id?: string; aspect_id?: string }): string {
+    criteriaToLabel(criteria: SmartServiceCriteria): string {
         let functionName = '';
         if (criteria.function_id) {
             functionName = this.functions.find(v => v.id === criteria.function_id)?.name || criteria.function_id;
@@ -98,15 +104,7 @@ export class CriteriaListComponent implements OnInit {
         if (criteria.device_class_id) {
             deviceClassName = this.deviceClasses.find(v => v.id === criteria.device_class_id)?.name || criteria.device_class_id;
         }
-        let aspectName = '';
-        if (criteria.aspect_id) {
-            const temp = this.aspects.find(v => v.id === criteria.aspect_id);
-            if (temp) {
-                aspectName = temp.name;
-            } else {
-                aspectName = criteria.aspect_id;
-            }
-        }
+        const aspectName = criteriaAspectsLabel(criteria, this.aspectNames);
 
         const parts: string[] = [];
         if (criteria.interaction) {
@@ -124,30 +122,16 @@ export class CriteriaListComponent implements OnInit {
         return parts.join(' | ');
     }
 
-    getRootAspect(): GroupValueFn {
-        return (_, children): any => {
-            children = children as DeviceTypeAspectNodeModelWithRootName[];
-            const id = children[0].root_id;
-            if (id !== undefined) {
-                return { id };
-            }
-            return null;
-        };
+    /**
+     * The listing only holds aspects used with measuring functions, so a stored aspect it lacks (a controlling
+     * criteria's, or a deleted one) is offered under its id: this list is re-emitted whole on every edit, and
+     * opening it empty would drop that aspect on an unrelated change.
+     */
+    private rebuildAspects() {
+        if (this.aspectNodes === null) {
+            return;
+        }
+        const stored = Array.isArray(this.criteriaList) ? this.criteriaList.flatMap((c) => c?.aspect_ids || []) : [];
+        this.aspects = withStoredAspects(aspectTreeFromAspectNodes(this.aspectNodes), stored);
     }
-
-    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectNodeModelWithRootName | string, b: DeviceTypeAspectNodeModelWithRootName | string) => {
-        const aIsStr = typeof a === 'string' || a instanceof String;
-        const bIsStr = typeof b === 'string' || b instanceof String;
-
-        if (aIsStr && bIsStr) {
-            return a === b;
-        }
-        if (!aIsStr && !bIsStr) {
-            return a.id === b.id;
-        }
-        if (aIsStr) {
-            return a === (b as DeviceTypeAspectNodeModelWithRootName).id;
-        }
-        return a.id === b;
-    };
 }

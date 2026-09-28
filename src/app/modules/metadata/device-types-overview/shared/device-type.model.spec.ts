@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { deprecatedAspectAlias } from './device-type.model';
+import { criteriaAspectFields, deprecatedAspectAlias } from './device-type.model';
 
 describe('deprecatedAspectAlias', () => {
     it('is undefined for an empty list', () => {
@@ -28,5 +28,29 @@ describe('deprecatedAspectAlias', () => {
     it('orders by code unit like the Go services, not by locale', () => {
         // Go's sort.Strings puts 'B' (0x42) before 'a' (0x61); localeCompare would pick 'urn:a1'
         expect(deprecatedAspectAlias(['urn:a1', 'urn:B2'])).toBe('urn:B2');
+    });
+});
+
+describe('criteriaAspectFields', () => {
+    it('writes no field for no aspect', () => {
+        expect(criteriaAspectFields([])).toEqual({});
+        expect(criteriaAspectFields([''])).toEqual({});
+    });
+
+    it('writes a single aspect in both spellings', () => {
+        expect(criteriaAspectFields(['urn:infai:ses:aspect:air'])).toEqual({
+            aspect_id: 'urn:infai:ses:aspect:air',
+            aspect_ids: ['urn:infai:ses:aspect:air'],
+        });
+    });
+
+    it('sorts and deduplicates the list and names its first id as the alias', () => {
+        expect(criteriaAspectFields(['urn:a1', 'urn:B2', 'urn:a1'])).toEqual({ aspect_id: 'urn:B2', aspect_ids: ['urn:B2', 'urn:a1'] });
+    });
+
+    it('leaves the list it was given untouched', () => {
+        const ids = ['urn:b', 'urn:a'];
+        criteriaAspectFields(ids);
+        expect(ids).toEqual(['urn:b', 'urn:a']);
     });
 });

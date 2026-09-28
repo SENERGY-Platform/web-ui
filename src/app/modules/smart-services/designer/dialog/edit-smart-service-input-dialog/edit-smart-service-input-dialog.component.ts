@@ -25,14 +25,22 @@ import { FunctionsPermSearchModel } from '../../../../metadata/functions/shared/
 import { FunctionsService } from '../../../../metadata/functions/shared/functions.service';
 import { DeviceClassesService } from '../../../../metadata/device-classes/shared/device-classes.service';
 import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
-import { DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel, DeviceTypeDeviceClassModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeAspectNodeModel,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeDeviceClassModel,
+} from '../../../../metadata/device-types-overview/shared/device-type.model';
 import { CharacteristicsService } from '../../../../metadata/characteristics/shared/characteristics.service';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
-import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
-
-interface DeviceTypeAspectNodeModelWithRootName extends DeviceTypeAspectNodeModel {
-    root_name?: string;
-}
+import { aspectTreeFromAspectNodes, withStoredAspects } from '../../../../../core/components/aspect-select/aspect-select.model';
+import {
+    criteriaAspectsLabel,
+    editableCriteria,
+    setCriteriaAspects,
+    SmartServiceCriteria,
+    storableCriteria,
+} from '../../shared/smart-service-criteria';
 
 @Component({
     templateUrl: './edit-smart-service-input-dialog.component.html',
@@ -43,7 +51,8 @@ export class EditSmartServiceInputDialogComponent {
 
     functions: (FunctionsPermSearchModel | { id?: string; name: string })[] = [];
     deviceClasses: (DeviceTypeDeviceClassModel | { id?: string; name: string })[] = [];
-    aspects: DeviceTypeAspectNodeModelWithRootName[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
+    private aspectNames = new Map<string, string>();
 
     characteristics: DeviceTypeCharacteristicsModel[] = [];
 
@@ -64,16 +73,14 @@ export class EditSmartServiceInputDialogComponent {
         this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.deviceClasses = value.result;
         });
-        this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
-            const tmp: DeviceTypeAspectNodeModelWithRootName[] = [];
-            aspects.forEach(a => {
-                const t = a as DeviceTypeAspectNodeModelWithRootName;
-                t.root_name = aspects.find(x => x.id === t.root_id)?.name;
-                tmp.push(t);
-            });
-            this.aspects = tmp;
-        });
         this.setAbstractByDescription(dialogParams.info);
+        this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
+            this.aspectNames = new Map(nodes.map((node) => [node.id, node.name]));
+            // offered under its id rather than dropped: ok() writes every criteria back, edited or not
+            const stored = this.abstract.flatMap((input) => (Array.isArray(input.criteria_list) ? input.criteria_list : []))
+                .flatMap((criteria) => criteria?.aspect_ids || []);
+            this.aspects = withStoredAspects(aspectTreeFromAspectNodes(nodes), stored);
+        });
     }
 
     isValidCamundaVariableNameValidator(c: AbstractControl): ValidationErrors | null {
@@ -184,7 +191,11 @@ export class EditSmartServiceInputDialogComponent {
         return a && b && a.id === b.id;
     }
 
-    criteriaToLabel(criteria: { interaction?: string; function_id?: string; device_class_id?: string; aspect_id?: string }): string {
+    setAspects(criteria: SmartServiceCriteria, aspectIds: string[] | null) {
+        setCriteriaAspects(criteria, aspectIds);
+    }
+
+    criteriaToLabel(criteria: SmartServiceCriteria): string {
         let functionName = '';
         if (criteria.function_id) {
             functionName = this.functions.find(v => v.id === criteria.function_id)?.name || criteria.function_id;
@@ -193,15 +204,7 @@ export class EditSmartServiceInputDialogComponent {
         if (criteria.device_class_id) {
             deviceClassName = this.deviceClasses.find(v => v.id === criteria.device_class_id)?.name || criteria.device_class_id;
         }
-        let aspectName = '';
-        if (criteria.aspect_id) {
-            const temp = this.aspects.find(v => v.id === criteria.aspect_id);
-                if (temp) {
-                    aspectName = temp.name;
-                } else {
-                    aspectName = criteria.aspect_id;
-                }
-        }
+        const aspectName = criteriaAspectsLabel(criteria, this.aspectNames);
 
         const parts: string[] = [];
         if (criteria.interaction) {
@@ -230,33 +233,6 @@ export class EditSmartServiceInputDialogComponent {
     isValid() {
         return !this.abstract.some(value => !isValidCamundaVariableName(value.id));
     }
-
-    getRootAspect(): GroupValueFn {
-        return (_, children): any => {
-            children = children as DeviceTypeAspectNodeModelWithRootName[];
-            const id = children[0].root_id;
-            if (id !== undefined) {
-                return { id };
-            }
-            return null;
-        };
-    }
-
-    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectNodeModelWithRootName | string, b: DeviceTypeAspectNodeModelWithRootName | string) => {
-        const aIsStr = typeof a === 'string' || a instanceof String;
-        const bIsStr = typeof b === 'string' || b instanceof String;
-
-        if (aIsStr && bIsStr) {
-            return a === b;
-        }
-        if (!aIsStr && !bIsStr) {
-            return a.id === b.id;
-        }
-        if (aIsStr) {
-            return a === (b as DeviceTypeAspectNodeModelWithRootName).id;
-        }
-        return a.id === b;
-    };
 }
 
 export interface AbstractSmartServiceInput {
@@ -268,12 +244,7 @@ export interface AbstractSmartServiceInput {
     description?: string;
 
     iot_selectors?: string[];
-    criteria_list?: {
-        interaction?: string;
-        function_id?: string;
-        device_class_id?: string;
-        aspect_id?: string;
-    }[];
+    criteria_list?: SmartServiceCriteria[];
     entity_only?: boolean;
     same_entity?: string;
     options?: { key: string; value: any }[];
@@ -294,7 +265,7 @@ export function abstractSmartServiceInputToSmartServiceInputsDescription(abstrac
             properties.push({ id: 'iot', value: input.iot_selectors.join(',') });
         }
         if (input.criteria_list && input.criteria_list.length > 0) {
-            input.criteria_list = input.criteria_list.map(criteria => {
+            input.criteria_list = input.criteria_list.map(storableCriteria).map(criteria => {
                 criteria.function_id = criteria.function_id || undefined;
                 criteria.aspect_id = criteria.aspect_id || undefined;
                 criteria.device_class_id = criteria.device_class_id || undefined;
@@ -379,10 +350,11 @@ export function smartServiceInputsDescriptionToAbstractSmartServiceInput(value: 
                     result.iot_selectors = property.value.split(',').map(value2 => value2.trim());
                 }
                 if (property.id === 'criteria' && property.value !== '') {
-                    result.criteria_list = [JSON.parse(property.value)];
+                    result.criteria_list = [editableCriteria(JSON.parse(property.value))];
                 }
                 if (property.id === 'criteria_list' && property.value !== '') {
-                    result.criteria_list = JSON.parse(property.value);
+                    const criteriaList = JSON.parse(property.value);
+                    result.criteria_list = Array.isArray(criteriaList) ? criteriaList.map(editableCriteria) : criteriaList;
                 }
                 if (property.id === 'entity_only' && property.value !== '') {
                     result.entity_only = JSON.parse(property.value);

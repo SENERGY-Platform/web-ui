@@ -50,7 +50,11 @@ import {
     smartServiceInputsDescriptionToAbstractSmartServiceInput
 } from '../edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
 import { FunctionsPermSearchModel } from '../../../../metadata/functions/shared/functions-perm-search.model';
-import { DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeAspectNodeModel,
+    DeviceTypeDeviceClassModel,
+} from '../../../../metadata/device-types-overview/shared/device-type.model';
 import { FunctionsService } from '../../../../metadata/functions/shared/functions.service';
 import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceClassesService } from '../../../../metadata/device-classes/shared/device-classes.service';
@@ -61,14 +65,14 @@ import {
     CodeEditorScriptEnvironment,
     gojaScriptEnvironment,
 } from '../../../../../core/components/code-editor/code-editor-environment';
-import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
-
-interface Criteria {
-    interaction?: string;
-    function_id?: string;
-    device_class_id?: string;
-    aspect_id?: string;
-}
+import { aspectTreeFromAspectNodes, withStoredAspects } from '../../../../../core/components/aspect-select/aspect-select.model';
+import {
+    criteriaAspectsLabel,
+    editableCriteria,
+    setCriteriaAspects,
+    SmartServiceCriteria,
+    storableCriteria,
+} from '../../shared/smart-service-criteria';
 
 interface GenericWatcherRequest {
     method: string;
@@ -76,10 +80,6 @@ interface GenericWatcherRequest {
     body?: string; // base64 encoded byte array
     add_auth_token: boolean;
     header?: { [index: string]: string[] };
-}
-
-interface DeviceTypeAspectNodeModelWithRootName extends DeviceTypeAspectNodeModel {
-    root_name?: string;
 }
 
 @Component({
@@ -144,7 +144,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         hash_type: string;
         maintenance_procedure_inputs: { key: string; value: string }[];
         devices_by_criteria: {
-            criteria: Criteria[];
+            criteria: SmartServiceCriteria[];
         };
         request: GenericWatcherRequest;
     } = {
@@ -220,14 +220,13 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.deviceClasses = value.result;
         });
-        this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
-            const tmp: DeviceTypeAspectNodeModelWithRootName[] = [];
-            aspects.forEach(a => {
-                const t = a as DeviceTypeAspectNodeModelWithRootName;
-                t.root_name = aspects.find(x => x.id === t.root_id)?.name;
-                tmp.push(t);
-            });
-            this.aspects = tmp;
+        this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
+            this.aspectNodes = nodes;
+            this.aspectNames = new Map(nodes.map((node) => [node.id, node.name]));
+            // offered under its id rather than dropped: the watcher criteria are written back whole on save
+            const watched = this.watcherWorkerInfo.devices_by_criteria.criteria;
+            const stored = Array.isArray(watched) ? watched.flatMap((c) => c?.aspect_ids || []) : [];
+            this.aspects = withStoredAspects(aspectTreeFromAspectNodes(nodes), stored);
         });
         const processModelId = this.result.inputs.find(value => value.name === 'process_deployment.process_model_id')?.value || '';
         if (processModelId !== '') {
@@ -267,11 +266,12 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         completions.push({
             caption: 'filter criteria struct',
             value: 'var criteria = ' + JSON.stringify({
+                aspect_ids: [],
                 aspect_id: '',
                 device_class_id: '',
                 function_id: '',
                 interaction: ''
-            } as Criteria) + '/*remove unused fields*/',
+            } as SmartServiceCriteria) + '/*remove unused fields; aspect_id is the deprecated alias of aspect_ids*/',
             meta: 'static'
         });
 
@@ -293,7 +293,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             });
         });
 
-        this.aspects.forEach(value => {
+        this.aspectNodes.forEach(value => {
             completions.push({
                 caption: 'aspect: ' + value.name,
                 value: `"${value.id}"/*${value.name}*/`,
@@ -638,12 +638,13 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 auto_select_all: false,
                 optional: false,
                 iot_selectors: ['device', 'group', 'import', 'device_service_group'],
-                criteria_list: [{
+                criteria_list: [storableCriteria({
                     aspect_id: criteria.aspect_id || undefined,
+                    aspect_ids: criteria.aspect_ids,
                     device_class_id: criteria.device_class_id || undefined,
                     function_id: criteria.function_id || undefined,
                     interaction
-                }],
+                })],
             };
 
             if (!this.smartServiceInputs.find(v => v.id === newField.id) && !current.find(v => v.name === newField.id)) {
@@ -1309,19 +1310,25 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     functions: (FunctionsPermSearchModel | { id?: string; name: string })[] = [];
     deviceClasses: (DeviceTypeDeviceClassModel | { id?: string; name: string })[] = [];
-    aspects: DeviceTypeAspectNodeModelWithRootName[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
+    aspectNodes: DeviceTypeAspectNodeModel[] = [];
+    private aspectNames = new Map<string, string>();
 
-    removeCriteria(list: Criteria[], index: number): Criteria[] {
+    removeCriteria(list: SmartServiceCriteria[], index: number): SmartServiceCriteria[] {
         list.splice(index, 1);
         return list;
     }
 
-    addCriteria(list: Criteria[]): Criteria[] {
+    addCriteria(list: SmartServiceCriteria[]): SmartServiceCriteria[] {
         list.push({ interaction: 'request', aspect_id: '', device_class_id: '', function_id: '' });
         return list;
     }
 
-    criteriaToLabel(criteria: { interaction?: string; function_id?: string; device_class_id?: string; aspect_id?: string }): string {
+    setAspects(criteria: SmartServiceCriteria, aspectIds: string[] | null) {
+        setCriteriaAspects(criteria, aspectIds);
+    }
+
+    criteriaToLabel(criteria: SmartServiceCriteria): string {
         let functionName = '';
         if (criteria.function_id) {
             functionName = this.functions.find(v => v.id === criteria.function_id)?.name || criteria.function_id;
@@ -1330,15 +1337,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         if (criteria.device_class_id) {
             deviceClassName = this.deviceClasses.find(v => v.id === criteria.device_class_id)?.name || criteria.device_class_id;
         }
-        let aspectName = '';
-        if (criteria.aspect_id) {
-            const temp = this.aspects.find(v => v.id === criteria.aspect_id);
-            if (temp) {
-                aspectName = temp.name;
-            } else {
-                aspectName = criteria.aspect_id;
-            }
-        }
+        const aspectName = criteriaAspectsLabel(criteria, this.aspectNames);
 
         const parts: string[] = [];
         if (criteria.interaction) {
@@ -1355,33 +1354,6 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         }
         return parts.join(' | ');
     }
-
-    getRootAspect(): GroupValueFn {
-        return (_, children): any => {
-            children = children as DeviceTypeAspectNodeModelWithRootName[];
-            const id = children[0].root_id;
-            if (id !== undefined) {
-                return { id };
-            }
-            return null;
-        };
-    }
-
-    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectNodeModelWithRootName | string, b: DeviceTypeAspectNodeModelWithRootName | string) => {
-        const aIsStr = typeof a === 'string' || a instanceof String;
-        const bIsStr = typeof b === 'string' || b instanceof String;
-
-        if (aIsStr && bIsStr) {
-            return a === b;
-        }
-        if (!aIsStr && !bIsStr) {
-            return a.id === b.id;
-        }
-        if (aIsStr) {
-            return a === (b as DeviceTypeAspectNodeModelWithRootName).id;
-        }
-        return a.id === b;
-    };
 
     watcherMaintenanceProducerFieldKey = 'watcher.maintenance_procedure';
     watcherWatchIntervalFieldKey = 'watcher.watch_interval';
@@ -1402,7 +1374,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 this.watcherWorkerInfo.hash_type = input.value;
             }
             if (input.name === this.watcherDevicesByCriteriaFieldKey) {
-                this.watcherWorkerInfo.devices_by_criteria.criteria = JSON.parse(input.value);
+                const criteria = JSON.parse(input.value);
+                this.watcherWorkerInfo.devices_by_criteria.criteria = Array.isArray(criteria) ? criteria.map(editableCriteria) : criteria;
                 this.watcherWorkerInfo.operation = 'devices_by_criteria';
             }
             if (input.name.startsWith(this.watcherMaintenanceProducerInputsPrefix)) {
@@ -1439,7 +1412,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         }
         switch (this.watcherWorkerInfo.operation) {
             case 'devices_by_criteria': {
-                result.push({ name: this.watcherDevicesByCriteriaFieldKey, type: 'text', value: JSON.stringify(this.watcherWorkerInfo.devices_by_criteria.criteria) });
+                result.push({ name: this.watcherDevicesByCriteriaFieldKey, type: 'text', value: JSON.stringify(this.storableWatcherCriteria()) });
                 break;
             }
             case 'watch_request': {
@@ -1452,6 +1425,11 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             }
         }
         return result;
+    }
+
+    private storableWatcherCriteria(): unknown {
+        const criteria = this.watcherWorkerInfo.devices_by_criteria.criteria;
+        return Array.isArray(criteria) ? criteria.map(storableCriteria) : criteria;
     }
 
     watcherWorkerInfoRequestHeaderValue = '';

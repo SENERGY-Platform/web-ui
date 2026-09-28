@@ -174,6 +174,15 @@ export function deprecatedAspectAlias(aspectIds: string[]): string | undefined {
     return [...aspectIds].sort(compareAspectIds)[0];
 }
 
+/**
+ * Both spellings of a criteria's aspects, for writers: aspect_ids deduplicated and sorted as the Go services
+ * sort it, aspect_id as its alias. Empty for no aspect, so each writer keeps its own spelling of "no aspect".
+ */
+export function criteriaAspectFields(aspectIds: readonly string[]): { aspect_id?: string; aspect_ids?: string[] } {
+    const ids = [...new Set(aspectIds.filter((id) => typeof id === 'string' && id !== ''))].sort(compareAspectIds);
+    return ids.length === 0 ? {} : { aspect_id: ids[0], aspect_ids: ids };
+}
+
 export interface DeviceTypeConceptModel {
     id: string;
     name: string;

@@ -45,14 +45,9 @@
                     </mat-form-field>
                 </div>
                 <div>
-                    <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                        <mat-label>Aspect</mat-label>
-                        <mtx-select [(ngModel)]="criteria.aspect_id" [items]="aspects" bindLabel="name" bindValue="id"
-                            appendTo=".ng-select-anchor" groupBy="root_name" selectableGroup
-                            [groupValue]="getRootAspect()" [compareWith]="compareAspectsWith" (change)="emitUpdate()">
-                        </mtx-select>
-                        <mat-error senergyError label="Aspect"></mat-error>
-                    </mat-form-field>
+                    <senergy-aspect-select [ngModel]="criteria.aspect_ids" (ngModelChange)="setAspects(criteria, $event)"
+                        [aspects]="aspects" [aspectClasses]="[]" label="Aspects">
+                    </senergy-aspect-select>
                 </div>
                 <div>
                     <mat-form-field appearance="outline" class="form-field full-width" color="accent">
