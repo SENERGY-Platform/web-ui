@@ -21,6 +21,11 @@ import { ParseModel } from '../shared/parse.model';
 import { DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel, DeviceSelectablesFullModel } from '../../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import {
+    compareAspectIds,
+    criteriaAspectFields,
+    criteriaAspectIds,
+    deprecatedAspectAlias,
+    DeviceTypeAspectClassModel,
     DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
@@ -30,8 +35,8 @@ import { DeviceTypeService } from '../../../metadata/device-types-overview/share
 import { FlowEngineService } from '../shared/flow-engine.service';
 import { NodeConfig, NodeModel, NodeValue, PipelineInputSelectionModel, PipelineRequestModel } from './shared/pipeline-request.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { concatMap, first, map } from 'rxjs/operators';
-import { forkJoin, Observable, of } from 'rxjs';
+import { concatMap, first, map, tap } from 'rxjs/operators';
+import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
 import { PathOptionsService } from '../shared/path-options.service';
 import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
@@ -44,7 +49,7 @@ import { OperatorModel } from '../../operator-repo/shared/operator.model';
 import { OperatorRepoService } from '../../operator-repo/shared/operator-repo.service';
 import { ImportInstancesService } from '../../../imports/import-instances/shared/import-instances.service';
 import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
-import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
+import { AspectClassesService } from '../../../metadata/aspects/shared/aspect-classes.service';
 
 interface CustomSelectable {
     id: string;
@@ -56,10 +61,6 @@ interface DeviceServicePath {
     devicesOrImports: string[];
     values: NodeValue[];
     topic: string;
-}
-
-interface DeviceTypeAspectModelWithRootName extends DeviceTypeAspectModel {
-    root_name?: string;
 }
 
 @Component({
@@ -84,6 +85,7 @@ export class DeployFlowComponent implements OnInit {
         private operatorRepoService: OperatorRepoService,
         private importInstancesService: ImportInstancesService,
         private flowEngineService: FlowEngineService,
+        private aspectClassesService: AspectClassesService,
     ) { }
 
     static DEVICE_KEY = 'Devices';
@@ -98,8 +100,9 @@ export class DeployFlowComponent implements OnInit {
     editMode = false;
     allDevices: DeviceInstanceWithDeviceTypeModel[] = [];
     pipelines: PipelineModel[] = [];
-    aspects: DeviceTypeAspectModelWithRootName[] = [];
-    rootAspects = new Map<string, string>();
+    aspects: DeviceTypeAspectModel[] = [];
+    aspectClasses: DeviceTypeAspectClassModel[] = [];
+    /** Functions by aspectsKey: the list of a single aspect, or the intersection over several. */
     aspectFunctions = new Map<string, DeviceTypeFunctionModel[]>();
     selectables = new Map<string, DeviceSelectablesFullModel[]>();
     selectablesCharacteristics = new Map<string, Map<string, CustomSelectable[]>>();
@@ -132,29 +135,20 @@ export class DeployFlowComponent implements OnInit {
         return key;
     }
 
+    /** Cache key of an aspect selection; the order of selection does not change which devices match. */
+    static aspectsKey(aspectIds: string[] | null | undefined): string {
+        return DeployFlowComponent.sortedAspectIds(aspectIds).join(',');
+    }
+
+    private static sortedAspectIds(aspectIds: string[] | null | undefined): string[] {
+        return [...new Set(aspectIds || [])].sort(compareAspectIds);
+    }
+
     ngOnInit() {
         const obs: Observable<unknown>[] = [];
-        obs.push(this.deviceTypeService.getAspects().pipe(map(aspects => {
-            const tmp: DeviceTypeAspectModelWithRootName[] = [];
-            aspects.forEach(root => {
-                const rootWithName = root as DeviceTypeAspectModelWithRootName;
-                if (rootWithName.sub_aspects !== undefined && rootWithName.sub_aspects !== null && rootWithName.sub_aspects.length > 0) {
-                    const addSubs = (a: DeviceTypeAspectModel) => {
-                        a.sub_aspects?.forEach(sub => {
-                            const subn = sub as DeviceTypeAspectModelWithRootName;
-                            subn.root_name = rootWithName.name;
-                            tmp.push(sub);
-                            addSubs(sub);
-                            this.rootAspects.set(sub.id, rootWithName.id);
-                        });
-                    };
-                    addSubs(rootWithName);
-                } else {
-                    tmp.push(rootWithName);
-                }
-            });
-            this.aspects = tmp;
-        })));
+        obs.push(this.deviceTypeService.getAspects().pipe(map(aspects => (this.aspects = aspects))));
+        // loaded once here, so the aspect select of every input does not request them itself
+        obs.push(this.aspectClassesService.getAspectClasses(9999, 0).pipe(map(classes => (this.aspectClasses = classes))));
         obs.push(this.pipelineRegistryService.getPipelines().pipe(map(pipelines => (this.pipelines = pipelines))));
         obs.push(this.importInstancesService
             .listImportInstances('', undefined, undefined, 'name.asc')
@@ -266,7 +260,7 @@ export class DeployFlowComponent implements OnInit {
         });
         newNode.inPorts?.forEach((input) => {
             const inputGroup = this.fb.group({
-                aspectId: null,
+                aspectIds: [[] as string[]],
                 functionId: null,
                 characteristics: [],
                 selectableId: null,
@@ -276,19 +270,17 @@ export class DeployFlowComponent implements OnInit {
                 name: input,
                 pipelines: this.fb.array([]),
             });
-            inputGroup.get('aspectId')?.valueChanges.subscribe((aspectId) => {
-                if (aspectId === null) {
-                    return;
-                }
-                this.loadAspectFunctions(aspectId).subscribe();
+            let aspectFunctionsSubscription: Subscription | undefined;
+            inputGroup.get('aspectIds')?.valueChanges.subscribe((aspectIds: string[] | null) => {
+                aspectFunctionsSubscription?.unsubscribe();
+                aspectFunctionsSubscription = this.loadAspectFunctions(aspectIds || []).subscribe();
                 inputGroup.patchValue({
                     functionId: null,
                 });
             });
             inputGroup.get('functionId')?.valueChanges.subscribe((functionId) => {
                 this.prepareSelectables(inputGroup).subscribe();
-                const aspectId = inputGroup.get('aspectId')?.value;
-                const func = this.aspectFunctions.get(aspectId)?.find((f) => f.id === functionId);
+                const func = this.getAspectFunctions(inputGroup.get('aspectIds')?.value).find((f) => f.id === functionId);
                 if (func !== undefined) {
                     this.loadFunctionCharacteristics(func).subscribe(chars => {
                         inputGroup.patchValue({
@@ -356,14 +348,18 @@ export class DeployFlowComponent implements OnInit {
 
             const inputSelection = inputSelections?.find((s) => s.inputName === input);
             if (inputSelection !== undefined) {
+                // the union of both spellings, as device-selection folds them for the running pipeline
+                const aspectIds = DeployFlowComponent.sortedAspectIds(
+                    criteriaAspectIds({ aspect_id: inputSelection.aspectId, aspect_ids: inputSelection.aspectIds ?? undefined }),
+                );
                 observables.push(
                     new Observable<null>((obs) => {
-                        this.loadAspectFunctions(inputSelection.aspectId).subscribe((functions) => {
+                        this.loadAspectFunctions(aspectIds).subscribe((functions) => {
                             const selectedFunction = functions.find((f) => f.id === inputSelection.functionId);
                             if (selectedFunction !== undefined) {
                                 return this.loadFunctionCharacteristics(selectedFunction).subscribe((_) => {
                                     inputGroup.patchValue({
-                                        aspectId: inputSelection.aspectId,
+                                        aspectIds,
                                         functionId: inputSelection.functionId,
                                         characteristics: inputSelection.characteristicIds,
                                         selectableId: inputSelection.selectableId,
@@ -377,7 +373,7 @@ export class DeployFlowComponent implements OnInit {
                                         }
                                         return o.subscribe((_2) => {
                                             inputGroup.patchValue({
-                                                aspectId: inputSelection.aspectId,
+                                                aspectIds,
                                                 functionId: inputSelection.functionId,
                                                 characteristics: inputSelection.characteristicIds,
                                                 selectableId: inputSelection.selectableId,
@@ -446,57 +442,75 @@ export class DeployFlowComponent implements OnInit {
         return observables.length > 0 ? forkJoin(observables) : of([null]);
     }
 
-    getAspectFunctions(aspectId: string): DeviceTypeFunctionModel[] {
-        return this.aspectFunctions.get(aspectId) || [];
+    getAspectFunctions(aspectIds: string[] | null | undefined): DeviceTypeFunctionModel[] {
+        return this.aspectFunctions.get(DeployFlowComponent.aspectsKey(aspectIds)) || [];
     }
 
-    loadAspectFunctions(aspectId: string): Observable<DeviceTypeFunctionModel[]> {
-        if (this.aspectFunctions.has(aspectId)) {
-            return of(this.aspectFunctions.get(aspectId) || []);
+    /**
+     * Several aspects on one input are an AND on one content variable, so only a function offered for every
+     * selected aspect can match. Each aspect's list is cached on its own and the intersection under the key.
+     */
+    loadAspectFunctions(aspectIds: string[]): Observable<DeviceTypeFunctionModel[]> {
+        const ids = DeployFlowComponent.sortedAspectIds(aspectIds);
+        const key = ids.join(',');
+        if (this.aspectFunctions.has(key)) {
+            return of(this.aspectFunctions.get(key) || []);
         }
-        return this.deviceTypeService.getAspectsMeasuringFunctionsWithImports(aspectId).pipe(
-            map((functions) => {
-                this.aspectFunctions.set(aspectId, functions);
+        if (ids.length === 0) {
+            return of([]);
+        }
+        const perAspect = ids.map((id) =>
+            this.aspectFunctions.has(id)
+                ? of(this.aspectFunctions.get(id) || [])
+                : this.deviceTypeService.getAspectsMeasuringFunctionsWithImports(id).pipe(tap((functions) => this.aspectFunctions.set(id, functions))),
+        );
+        return forkJoin(perAspect).pipe(
+            map(([firstList, ...rest]) => {
+                const functions = firstList.filter((f) => rest.every((list) => list.some((other) => other.id === f.id)));
+                this.aspectFunctions.set(key, functions);
                 return functions;
             }),
         );
     }
 
-    private loadSelectables(aspectId: string, functionId: string): Observable<DeviceSelectablesFullModel[]> {
-        if (this.selectables.has(aspectId + functionId)) {
-            return of(this.selectables.get(aspectId + functionId) || []);
+    private loadSelectables(aspectIds: string[], functionId: string): Observable<DeviceSelectablesFullModel[]> {
+        const key = DeployFlowComponent.aspectsKey(aspectIds) + functionId;
+        if (this.selectables.has(key)) {
+            return of(this.selectables.get(key) || []);
         }
         return this.deviceInstanceService
             .getDeviceSelectionsFull(
                 [
                     {
                         function_id: functionId,
-                        aspect_id: aspectId,
+                        ...criteriaAspectFields(aspectIds),
                     },
                 ],
                 true,
             )
             .pipe(
                 map((selectables) => {
-                    this.selectables.set(aspectId + functionId, selectables);
+                    this.selectables.set(key, selectables);
                     return selectables;
                 }),
             );
     }
 
     prepareSelectables(inputGroup: FormGroup): Observable<null> {
-        const aspectId = inputGroup.get('aspectId')?.value;
+        const aspectIds: string[] = inputGroup.get('aspectIds')?.value || [];
+        const aspectsKey = DeployFlowComponent.aspectsKey(aspectIds);
         const functionId = inputGroup.get('functionId')?.value;
         const characteristicIds = inputGroup.get('characteristics')?.value;
         const currentlySelected = inputGroup.get('selectableId')?.value;
 
-        if (functionId.length === 0 || characteristicIds === null || characteristicIds === undefined) {
+        // functionId is null right after an aspect change resets it
+        if (!functionId || characteristicIds === null || characteristicIds === undefined) {
             inputGroup.patchValue({ selectableId: null });
             return of(null);
         }
         const characteristicKey = DeployFlowComponent.stringArrayKey(characteristicIds);
-        if (this.selectablesCharacteristics.has(aspectId + functionId + characteristicKey)) {
-            for (const selectable of this.selectablesCharacteristics.get(aspectId + functionId + characteristicKey)?.values() || []) {
+        if (this.selectablesCharacteristics.has(aspectsKey + functionId + characteristicKey)) {
+            for (const selectable of this.selectablesCharacteristics.get(aspectsKey + functionId + characteristicKey)?.values() || []) {
                 if (selectable === currentlySelected) {
                     return of(null);
                 }
@@ -506,22 +520,22 @@ export class DeployFlowComponent implements OnInit {
             return of(null);
         }
         if (characteristicIds.length === 0) {
-            this.selectablesCharacteristics.set(aspectId + functionId + characteristicKey, new Map());
+            this.selectablesCharacteristics.set(aspectsKey + functionId + characteristicKey, new Map());
             inputGroup.patchValue({ selectableId: null });
             return of(null);
         }
         // prepare serviceOptions
         const characteristicsKey = DeployFlowComponent.stringArrayKey(characteristicIds);
-        if (!this.serviceOptions.has(aspectId)) {
-            this.serviceOptions.set(aspectId, new Map());
+        if (!this.serviceOptions.has(aspectsKey)) {
+            this.serviceOptions.set(aspectsKey, new Map());
         }
-        if (!this.serviceOptions.get(aspectId)?.get(functionId)) {
-            this.serviceOptions.get(aspectId)?.set(functionId, new Map());
+        if (!this.serviceOptions.get(aspectsKey)?.get(functionId)) {
+            this.serviceOptions.get(aspectsKey)?.set(functionId, new Map());
         }
-        if (!this.serviceOptions.get(aspectId)?.get(functionId)?.get(characteristicsKey)) {
-            this.serviceOptions.get(aspectId)?.get(functionId)?.set(characteristicsKey, new Map());
+        if (!this.serviceOptions.get(aspectsKey)?.get(functionId)?.get(characteristicsKey)) {
+            this.serviceOptions.get(aspectsKey)?.get(functionId)?.set(characteristicsKey, new Map());
         }
-        return this.loadSelectables(aspectId, functionId).pipe(
+        return this.loadSelectables(aspectIds, functionId).pipe(
             map((selectables) => {
                 const m: Map<string, CustomSelectable[]> = new Map();
                 m.set(DeployFlowComponent.DEVICE_KEY, []);
@@ -550,13 +564,13 @@ export class DeployFlowComponent implements OnInit {
                         }
                         if (
                             !this.serviceOptions
-                                .get(aspectId)
+                                .get(aspectsKey)
                                 ?.get(functionId)
                                 ?.get(characteristicsKey)
                                 ?.get(selectable.device?.device_type_id || '')
                         ) {
                             this.serviceOptions
-                                .get(aspectId)
+                                .get(aspectsKey)
                                 ?.get(functionId)
                                 ?.get(characteristicsKey)
                                 ?.set(selectable.device?.device_type_id || '', new Map());
@@ -565,7 +579,7 @@ export class DeployFlowComponent implements OnInit {
                             const options: { path: string; service_id: string }[] = [];
                             pathOption.json_path.forEach((path) => options.push({ path, service_id: pathOption.service_id }));
                             this.serviceOptions
-                                .get(aspectId)
+                                .get(aspectsKey)
                                 ?.get(functionId)
                                 ?.get(characteristicsKey)
                                 ?.get(selectable.device?.device_type_id || '')
@@ -618,13 +632,13 @@ export class DeployFlowComponent implements OnInit {
 
                         if (
                             !this.serviceOptions
-                                .get(aspectId)
+                                .get(aspectsKey)
                                 ?.get(functionId)
                                 ?.get(characteristicsKey)
                                 ?.get(selectable.import.kafka_topic)
                         ) {
                             this.serviceOptions
-                                .get(aspectId)
+                                .get(aspectsKey)
                                 ?.get(functionId)
                                 ?.get(characteristicsKey)
                                 ?.set(selectable.import.kafka_topic, new Map());
@@ -632,22 +646,22 @@ export class DeployFlowComponent implements OnInit {
                         const options: { path: string; service_id: string }[] = [];
                         pathOption.json_path.forEach((path) => options.push({ path, service_id: pathOption.service_id }));
                         this.serviceOptions
-                            .get(aspectId)
+                            .get(aspectsKey)
                             ?.get(functionId)
                             ?.get(characteristicsKey)
                             ?.get(selectable.import.kafka_topic)
                             ?.set(selectable.importType.name, options);
                     }
                 });
-                this.selectablesCharacteristics.set(aspectId + functionId + characteristicKey, m);
+                this.selectablesCharacteristics.set(aspectsKey + functionId + characteristicKey, m);
                 return null;
             }),
         );
     }
 
-    getSelectables(aspectId: string, functionId: string, characteristicIds: string[]): CustomSelectable[] {
+    getSelectables(aspectIds: string[] | null | undefined, functionId: string, characteristicIds: string[]): CustomSelectable[] {
         const characteristicKey = DeployFlowComponent.stringArrayKey(characteristicIds);
-        const values = this.selectablesCharacteristics.get(aspectId + functionId + characteristicKey);
+        const values = this.selectablesCharacteristics.get(DeployFlowComponent.aspectsKey(aspectIds) + functionId + characteristicKey);
         const res: CustomSelectable[] = [];
         values?.forEach((v, k) => {
             v.forEach(v2 => {
@@ -757,9 +771,12 @@ export class DeployFlowComponent implements OnInit {
                         });
                     });
 
+                    const aspectIds = DeployFlowComponent.sortedAspectIds(input.get('aspectIds')?.value);
                     nodeModel.inputSelections?.push({
                         inputName: input.get('name')?.value,
-                        aspectId: input.get('aspectId')?.value,
+                        // an input without aspect keeps the null it was saved with before the list existed
+                        aspectId: deprecatedAspectAlias(aspectIds) ?? null,
+                        ...(aspectIds.length > 0 ? { aspectIds } : {}),
                         characteristicIds: input.get('characteristics')?.value,
                         functionId: input.get('functionId')?.value,
                         selectableId: input.get('selectableId')?.value,
@@ -983,13 +1000,13 @@ export class DeployFlowComponent implements OnInit {
 
     getServiceOptions(input: FormGroup, id: string): {group?: string; path: string; service_id: string }[] {
         const functionId = input.get('functionId')?.value;
-        const aspectId = input.get('aspectId')?.value;
+        const aspectsKey = DeployFlowComponent.aspectsKey(input.get('aspectIds')?.value);
         const characteristicsKey = DeployFlowComponent.stringArrayKey(input.get('characteristics')?.value);
         let key = id;
         if (key.startsWith(DeployFlowComponent.IMPORT_PREFIX)) {
             key = this.importInstances.find((i) => i.id === id)?.kafka_topic || '';
         }
-        const preparedOptions = this.serviceOptions.get(aspectId)?.get(functionId)?.get(characteristicsKey)?.get(key);
+        const preparedOptions = this.serviceOptions.get(aspectsKey)?.get(functionId)?.get(characteristicsKey)?.get(key);
         const result: {group?: string; path: string; service_id: string }[] = [];;
         preparedOptions?.forEach((v, k) => {
             v.forEach(e => {
@@ -1197,32 +1214,4 @@ export class DeployFlowComponent implements OnInit {
             }
         }
     }
-
-    getRootAspect(): GroupValueFn {
-        const that = this;
-        return (_, children): any => {
-            children = children as DeviceTypeAspectModel[];
-            const id = that.rootAspects.get(children[0].id);
-            if (id !== undefined) {
-                return { id };
-            }
-            return null;
-        };
-    }
-
-    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectModel | string, b: DeviceTypeAspectModel | string) => {
-            const aIsStr = typeof a === 'string' || a instanceof String;
-            const bIsStr = typeof b === 'string' || b instanceof String;
-    
-            if (aIsStr && bIsStr) {
-                return a === b;
-            }
-            if (!aIsStr && !bIsStr) {
-                return a.id === b.id;
-            }
-            if (aIsStr) {
-                return a === (b as DeviceTypeAspectModel).id;
-            }
-            return a.id === b;
-        };
 }

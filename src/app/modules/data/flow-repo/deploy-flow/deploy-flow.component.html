@@ -115,17 +115,12 @@
                             </div>
                             <mat-divider class="post-pipeline-divider"></mat-divider>
                         </div>
-                        <mat-form-field fxFlex color="accent" appearance="outline">
-                            <mat-label>Aspect</mat-label>
-                            <mtx-select [items]="this.aspects" bindLabel="name" bindValue="id" groupBy="root_name"
-                                selectableGroup [groupValue]="getRootAspect()" formControlName="aspectId"
-                                appendTo=".ng-select-anchor" [compareWith]="compareAspectsWith">
-                            </mtx-select>
-                            <mat-error senergyError label="Aspect"></mat-error>
-                        </mat-form-field>
+                        <senergy-aspect-select formControlName="aspectIds" [aspects]="aspects"
+                            [aspectClasses]="aspectClasses" label="Aspects">
+                        </senergy-aspect-select>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Function</mat-label>
-                            <mtx-select [items]="getAspectFunctions(input.get('aspectId')?.value)" bindLabel="name"
+                            <mtx-select [items]="getAspectFunctions(input.get('aspectIds')?.value)" bindLabel="name"
                                 bindValue="id" formControlName="functionId" appendTo=".ng-select-anchor">
                             </mtx-select>
                             <mat-error senergyError label="Function"></mat-error>
@@ -141,7 +136,7 @@
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Device/group/import</mat-label>
                             <mtx-select
-                                [items]="getSelectables(input.get('aspectId')?.value, input.get('functionId')?.value, input.get('characteristics')?.value)"
+                                [items]="getSelectables(input.get('aspectIds')?.value, input.get('functionId')?.value, input.get('characteristics')?.value)"
                                 bindLabel="name" bindValue="id" placeholder="Device/Group"
                                 formControlName="selectableId" groupBy="groupName" appendTo=".ng-select-anchor">
                             </mtx-select>

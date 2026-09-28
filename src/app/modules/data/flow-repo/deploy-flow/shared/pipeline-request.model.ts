@@ -54,7 +54,10 @@ export interface NodeConfig {
 
 export interface PipelineInputSelectionModel {
     inputName: string;
-    aspectId: string;
+    /** @deprecated alias of aspectIds, written for readers that predate the list; null for an input without aspect */
+    aspectId: string | null;
+    /** absent or null on a selection saved before the list existed */
+    aspectIds?: string[] | null;
     functionId: string;
     characteristicIds: string[];
     selectableId: string;

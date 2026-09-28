@@ -24,7 +24,12 @@ import { DatePipe } from '@angular/common';
 import { catchError, concatMap, forkJoin, map, Observable, of, throwError } from 'rxjs';
 import { DeviceGroupsService } from '../../../device-groups/shared/device-groups.service';
 import { DeviceGroupModel } from '../../../device-groups/shared/device-groups.model';
-import { DeviceTypeInteractionEnum, DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import {
+  criteriaAspectFields,
+  criteriaAspectIds,
+  DeviceTypeInteractionEnum,
+  DeviceTypeModel,
+} from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
 import { PipelineRegistryService } from 'src/app/modules/data/pipeline-registry/shared/pipeline-registry.service';
 import { DeviceGroupsPipelineHelperDialogComponent } from '../../../device-groups/edit/device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
@@ -33,8 +38,30 @@ import { SmartServiceReleasesService } from 'src/app/modules/smart-services/rele
 import { NetworksService } from '../../../networks/shared/networks.service';
 import { DeploymentsFogFactory } from 'src/app/modules/processes/deployments/shared/deployments-fog.service';
 import { DeploymentsService } from 'src/app/modules/processes/deployments/shared/deployments.service';
-import { V2DeploymentsPreparedModel } from 'src/app/modules/processes/deployments/shared/deployments-prepared-v2.model';
+import {
+  V2DeploymentsPreparedFilterCriteriaModel,
+  V2DeploymentsPreparedModel,
+} from 'src/app/modules/processes/deployments/shared/deployments-prepared-v2.model';
 import { PipelineModel } from 'src/app/modules/data/pipeline-registry/shared/pipeline.model';
+import { PipelineInputSelectionModel } from 'src/app/modules/data/flow-repo/deploy-flow/shared/pipeline-request.model';
+
+/** The device-selection criteria of a pipeline input: its aspects as the union of both spellings, written in both. */
+export function pipelineInputCriteria(input: PipelineInputSelectionModel): DeviceFilterCriteriaModel {
+  return {
+    ...criteriaAspectFields(criteriaAspectIds({ aspect_id: input.aspectId, aspect_ids: input.aspectIds ?? undefined })),
+    function_id: input.functionId,
+  };
+}
+
+/** The device-selection criteria of a process deployment element, with its aspects handled as in pipelineInputCriteria. */
+export function deploymentElementCriteria(filterCriteria: V2DeploymentsPreparedFilterCriteriaModel, interaction: string): DeviceFilterCriteriaModel {
+  return {
+    interaction,
+    function_id: filterCriteria.function_id || undefined,
+    ...criteriaAspectFields(criteriaAspectIds({ aspect_id: filterCriteria.aspect_id, aspect_ids: filterCriteria.aspect_ids ?? undefined })),
+    device_class_id: filterCriteria.device_class_id || undefined,
+  };
+}
 
 @Component({
   selector: 'app-device-instances-replace-dialog',
@@ -260,10 +287,7 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
         const obs: Observable<unknown>[] = [of(null)];
         deviceGroups.forEach(dg => {
           obs.push(this.pipelineRegistryService.getPipelinesWithSelectable(dg.id).pipe(map(pipelines =>
-            pipelines.forEach(pipeline => pipeline.operators.forEach(operator => operator.inputSelections?.forEach(input => criteria.push({
-              aspect_id: input.aspectId,
-              function_id: input.functionId,
-            }))))
+            pipelines.forEach(pipeline => pipeline.operators.forEach(operator => operator.inputSelections?.forEach(input => criteria.push(pipelineInputCriteria(input)))))
           )));
         });
         return forkJoin(obs);
@@ -315,28 +339,13 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
       map(arr => arr.flat()),
       map(deployments => deployments.forEach(deployment => deployment.elements.forEach(element => {
         if (element.message_event?.selection.selected_device_group_id !== undefined && element.message_event?.selection.selected_device_group_id !== null && deviceGroupIds.includes(element.message_event.selection.selected_device_group_id)) {
-          criteria.push({
-            interaction: DeviceTypeInteractionEnum.Event,
-            function_id: element.message_event.selection.filter_criteria.function_id || undefined,
-            aspect_id: element.message_event.selection.filter_criteria.aspect_id || undefined,
-            device_class_id: element.message_event.selection.filter_criteria.device_class_id || undefined,
-          });
+          criteria.push(deploymentElementCriteria(element.message_event.selection.filter_criteria, DeviceTypeInteractionEnum.Event));
         }
         if (element.conditional_event?.selection.selected_device_group_id !== undefined && element.conditional_event?.selection.selected_device_group_id !== null && deviceGroupIds.includes(element.conditional_event.selection.selected_device_group_id)) {
-          criteria.push({
-            interaction: DeviceTypeInteractionEnum.Event,
-            function_id: element.conditional_event.selection.filter_criteria.function_id || undefined,
-            aspect_id: element.conditional_event.selection.filter_criteria.aspect_id || undefined,
-            device_class_id: element.conditional_event.selection.filter_criteria.device_class_id || undefined,
-          });
+          criteria.push(deploymentElementCriteria(element.conditional_event.selection.filter_criteria, DeviceTypeInteractionEnum.Event));
         }
         if (element.task?.selection.selected_device_group_id !== undefined && element.task?.selection.selected_device_group_id !== null && deviceGroupIds.includes(element.task.selection.selected_device_group_id)) {
-          criteria.push({
-            interaction: '',
-            function_id: element.task.selection.filter_criteria.function_id || undefined,
-            aspect_id: element.task.selection.filter_criteria.aspect_id || undefined,
-            device_class_id: element.task.selection.filter_criteria.device_class_id || undefined,
-          });
+          criteria.push(deploymentElementCriteria(element.task.selection.filter_criteria, ''));
         }
       }))),
 
