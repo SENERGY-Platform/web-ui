@@ -278,12 +278,15 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 value: null,
                 characteristicId: '',
                 aspectNode: {} as DeviceTypeAspectNodeModel,
+                aspectNodes: [],
                 isVoid: false,
                 path: '',
                 type: '',
             } as DeploymentsSelectionPathOptionModel;
         }
-        selectedPathOptionFormCtrl?.patchValue(pathOption);
+        // patchValue leaves a control untouched when its key is missing from the patched value, so an
+        // option without aspectNodes would otherwise keep the previously selected option's list
+        selectedPathOptionFormCtrl?.patchValue({ ...pathOption, aspectNodes: pathOption.aspectNodes ?? [] });
         const configurables = selectedPathOptionFormCtrl?.get('configurables') as FormArray;
         if (configurables) {
             configurables.clear();

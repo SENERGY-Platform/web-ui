@@ -138,7 +138,9 @@ export interface V2DeploymentsPreparedSelectionOptionModel {
 export interface DeploymentsSelectionPathOptionModel {
     path: string;
     characteristicId: string;
+    /** @deprecated use aspectNodes */
     aspectNode: DeviceTypeAspectNodeModel;
+    aspectNodes?: DeviceTypeAspectNodeModel[];
     functionId: string;
     isVoid: boolean;
     value: any;
@@ -149,7 +151,9 @@ export interface DeploymentsSelectionPathOptionModel {
 export interface DeploymentsSelectionConfigurableModel {
     path: string;
     characteristic_id: string;
+    /** @deprecated use aspect_nodes */
     aspect_node: DeviceTypeAspectNodeModel;
+    aspect_nodes?: DeviceTypeAspectNodeModel[];
     function_id: string;
     value: any;
     type: string;
@@ -174,5 +178,7 @@ export interface V2DeploymentsPreparedFilterCriteriaModel {
     characteristic_id: string | null;
     function_id: string | null;
     device_class_id: string | null;
+    /** @deprecated use aspect_ids */
     aspect_id: string | null;
+    aspect_ids?: string[];
 }

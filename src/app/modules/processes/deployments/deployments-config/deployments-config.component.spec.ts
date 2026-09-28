@@ -38,8 +38,13 @@ import { ProcessesModule } from '../../processes.module';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { FormGroup } from '@angular/forms';
+import { DeploymentsConfigInitializerService } from './shared/deployments-config-initializer.service';
+import { DeploymentsSelectionPathOptionModel } from '../shared/deployments-prepared-v2.model';
 
-const nullPath = { path: '', characteristicId: '', aspectNode: Object({}), functionId: '', isVoid: false, value: null, type: '', configurables: [] };
+const nullPath = { path: '', characteristicId: '', aspectNode: Object({}), aspectNodes: undefined, functionId: '', isVoid: false, value: null, type: '', configurables: [] };
+// setSelectedPathOption(ctrl, null) writes aspectNodes as [] rather than leaving it undefined, unlike the pristine form init above.
+const nullPathReset = { ...nullPath, aspectNodes: [] };
 
 describe('ProcessDeploymentsConfigComponent', () => {
     let component: ProcessDeploymentsConfigComponent;
@@ -226,6 +231,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                 path: 'value.root.value',
                                 characteristicId: 'testCharacteristic',
                                 aspectNode: Object({}),
+                                aspectNodes: [],
                                 functionId: '',
                                 isVoid: false,
                                 value: null,
@@ -332,7 +338,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selection_options_index: 1,
                             selected_import_id: null,
 
-                            selected_path: nullPath,
+                            selected_path: nullPathReset,
                             selected_path_option: undefined,
                             selection_options: [
                                 {
@@ -749,7 +755,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_device_group_id: null,
                             selected_import_id: null,
 
-                            selected_path: nullPath,
+                            selected_path: nullPathReset,
                             selected_path_option: undefined,
                             show: false,
                             selection_options_index: 2,
@@ -849,7 +855,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_device_group_id: null,
                             selected_import_id: null,
 
-                            selected_path: nullPath,
+                            selected_path: nullPathReset,
                             selected_path_option: undefined,
                             show: false,
                             selection_options_index: 2,
@@ -946,7 +952,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_device_group_id: null,
                             selected_import_id: null,
 
-                            selected_path: nullPath,
+                            selected_path: nullPathReset,
                             selected_path_option: undefined,
                             show: false,
                             selection_options_index: 2,
@@ -1359,7 +1365,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                             selected_import_id: null,
 
-                            selected_path: nullPath,
+                            selected_path: nullPathReset,
                             selected_path_option: undefined,
                             show: false,
                             selection_options_index: 3,
@@ -1470,7 +1476,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                             selected_import_id: null,
 
-                            selected_path: nullPath,
+                            selected_path: nullPathReset,
                             selected_path_option: undefined,
                             show: false,
                             selection_options_index: 3,
@@ -1578,7 +1584,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                             selected_import_id: null,
 
-                            selected_path: nullPath,
+                            selected_path: nullPathReset,
                             selected_path_option: undefined,
                             show: false,
                             selection_options_index: 3,
@@ -1590,5 +1596,27 @@ describe('ProcessDeploymentsConfigComponent', () => {
             id: '',
             name: 'Lamp_in_Lane',
         });
+    });
+
+    it('clears aspectNodes when the newly selected option does not carry the key, instead of keeping the previous list', () => {
+        deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(null));
+        deploymentsServiceSpy.getConfigurables.and.returnValue(of(null));
+        initSpies();
+
+        const initializer = TestBed.inject(DeploymentsConfigInitializerService);
+        const ctrl = initializer.iniPathOptionFormControl(null, false) as FormGroup;
+
+        const withAspectNodes: DeploymentsSelectionPathOptionModel = {
+            path: 'value.a', characteristicId: 'char1', aspectNode: { id: 'urn:infai:ses:aspect:x' } as any,
+            aspectNodes: [{ id: 'urn:infai:ses:aspect:x' } as any], functionId: 'func1', isVoid: false,
+            value: null, type: 'string', configurables: [],
+        };
+        component.setSelectedPathOption(ctrl, withAspectNodes);
+        expect(ctrl.getRawValue().aspectNodes).toEqual([{ id: 'urn:infai:ses:aspect:x' }]);
+
+        const withoutAspectNodesKey = { ...withAspectNodes };
+        delete (withoutAspectNodesKey as any).aspectNodes;
+        component.setSelectedPathOption(ctrl, withoutAspectNodesKey);
+        expect(ctrl.getRawValue().aspectNodes).toEqual([]);
     });
 });

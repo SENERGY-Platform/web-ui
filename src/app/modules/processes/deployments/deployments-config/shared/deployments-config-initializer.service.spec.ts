@@ -22,7 +22,7 @@ import { FormBuilder, FormControl } from '@angular/forms';
 import { V2DeploymentsPreparedModel } from '../../shared/deployments-prepared-v2.model';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
-const nullPath = { path: '', characteristicId: '', aspectNode: Object({  }), functionId: '', isVoid: false, value: null, type: '', configurables: [  ] };
+const nullPath = { path: '', characteristicId: '', aspectNode: Object({  }), aspectNodes: undefined, functionId: '', isVoid: false, value: null, type: '', configurables: [  ] };
 
 describe('DeploymentsConfigInitializerService', () => {
     beforeEach(() => {
@@ -766,6 +766,80 @@ describe('DeploymentsConfigInitializerService', () => {
             const formGroup = service.initFormGroup(deployment);
             expect(formGroup.getRawValue()).toEqual(initValues);
             expect((formGroup.get('description') as FormControl).disabled).toBe(true);
+        },
+    ));
+
+    it('round-trips aspectNodes, aspect_nodes and aspect_ids unchanged', inject(
+        [DeploymentsConfigInitializerService],
+        (service: DeploymentsConfigInitializerService) => {
+            const aspectNodeA = { id: 'urn:infai:ses:aspect:aaa', name: 'A' };
+            const aspectNodeB = { id: 'urn:infai:ses:aspect:bbb', name: 'B' };
+            const selectedPath = {
+                path: 'value',
+                characteristicId: 'urn:infai:ses:characteristic:c',
+                aspectNode: aspectNodeA,
+                aspectNodes: [aspectNodeA, aspectNodeB],
+                functionId: 'urn:infai:ses:controlling-function:f',
+                isVoid: false,
+                value: null,
+                type: 'string',
+                configurables: [
+                    {
+                        path: 'value',
+                        characteristic_id: 'urn:infai:ses:characteristic:c',
+                        aspect_node: aspectNodeA,
+                        aspect_nodes: [aspectNodeA, aspectNodeB],
+                        function_id: 'urn:infai:ses:controlling-function:f',
+                        value: null,
+                        type: 'string',
+                    },
+                ],
+            };
+            const filterCriteria = {
+                characteristic_id: '',
+                function_id: 'urn:infai:ses:controlling-function:f',
+                device_class_id: 'urn:infai:ses:device-class:c',
+                aspect_id: aspectNodeA.id,
+                aspect_ids: [aspectNodeA.id, aspectNodeB.id],
+            };
+            const deployment: any = {
+                version: 3,
+                id: '',
+                name: 'aspect_list_round_trip',
+                description: 'test_description',
+                diagram: { svg: '', xml_deployed: '', xml_raw: '' },
+                elements: [
+                    {
+                        bpmn_id: 'Task_1',
+                        group: null,
+                        name: '',
+                        order: 0,
+                        time_event: null,
+                        notification: null,
+                        message_event: null,
+                        conditional_event: null,
+                        task: {
+                            retries: 0,
+                            parameter: {},
+                            selection: {
+                                filter_criteria: filterCriteria,
+                                selection_options: [],
+                                selected_device_id: null,
+                                selected_service_id: null,
+                                selected_device_group_id: null,
+                                selected_import_id: null,
+                                selected_path: selectedPath,
+                                selected_path_option: undefined,
+                            },
+                        },
+                    },
+                ],
+                executable: true,
+            };
+            const formGroup = service.initFormGroup(deployment);
+            const rawSelection = formGroup.getRawValue().elements[0].task.selection;
+            expect(rawSelection.filter_criteria).toEqual(filterCriteria);
+            expect(rawSelection.selected_path).toEqual(selectedPath);
         },
     ));
 });
