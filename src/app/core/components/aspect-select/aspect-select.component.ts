@@ -14,26 +14,35 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges, forwardRef } from '@angular/core';
+import { Component, Injector, Input, OnChanges, OnInit, SimpleChanges, forwardRef } from '@angular/core';
 import {
     AbstractControl,
     ControlValueAccessor,
     NG_VALIDATORS,
     NG_VALUE_ACCESSOR,
+    NgControl,
     UntypedFormControl,
     ValidationErrors,
     Validator,
 } from '@angular/forms';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { AspectClassesService } from '../../../modules/metadata/aspects/shared/aspect-classes.service';
 import { DeviceTypeAspectClassModel, DeviceTypeAspectModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
-import { AspectClassification, AspectSelectOption, classifyAspects, collidingAspectNames } from './aspect-select.model';
+import {
+    AspectClassification,
+    AspectSelectOption,
+    aspectClassCollisionMessage,
+    classifyAspects,
+    collidingAspectNames,
+} from './aspect-select.model';
 
 /**
  * Multi-aspect picker, used wherever a content variable or criteria selects one or more aspects.
  * Value is always string[] of aspect ids, never null. `aspects` takes the tree(s) to offer, grouped
  * and labelled by aspect class; a flat DeviceTypeAspectNodeModel[] source (device-instance/deployment
  * pickers) is converted to that shape first with aspectTreeFromAspectNodes. Aspect classes are loaded
- * via AspectClassesService unless the caller already has them and passes aspectClasses.
+ * via AspectClassesService unless the caller already has them and passes aspectClasses; a user
+ * without the right to read them gets the aspects without class names.
  */
 @Component({
     selector: 'senergy-aspect-select',
@@ -60,14 +69,26 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
     private aspectClassNames = new Map<string, string>();
     private onChange: (value: string[]) => void = () => {};
     private onTouched: () => void = () => {};
+    private onValidatorChange: () => void = () => {};
+    // undefined until first looked up; injected lazily because NgControl depends on the NG_VALIDATORS provided above.
+    private outerNgControl?: NgControl | null;
 
-    constructor(private aspectClassesService: AspectClassesService) {
+    /** The inner control is never touched by a parent form, so the error state follows the outer control instead. */
+    errorStateMatcher: ErrorStateMatcher = {
+        isErrorState: (inner, form) => this.defaultErrorStateMatcher.isErrorState(this.outerControl() ?? inner, form),
+    };
+
+    constructor(
+        private aspectClassesService: AspectClassesService,
+        private injector: Injector,
+        private defaultErrorStateMatcher: ErrorStateMatcher,
+    ) {
         this.control.setValidators(() => this.validate(this.control));
         this.control.valueChanges.subscribe((value: string[]) => this.onChange(value || []));
     }
 
     ngOnInit(): void {
-        if (this.aspectClasses === undefined) {
+        if (this.aspectClasses === undefined && this.aspectClassesService.userHasReadAuthorization()) {
             this.aspectClassesService.getAspectClasses(9999, 0).subscribe((classes) => {
                 this.aspectClassNames = new Map(classes.map((c) => [c.id, c.name]));
                 this.rebuildOptions();
@@ -96,6 +117,10 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
         this.onTouched = fn;
     }
 
+    registerOnValidatorChange(fn: () => void): void {
+        this.onValidatorChange = fn;
+    }
+
     setDisabledState(isDisabled: boolean): void {
         if (isDisabled) {
             this.control.disable({ emitEvent: false });
@@ -107,6 +132,15 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
     validate(control: AbstractControl): ValidationErrors | null {
         const colliding = collidingAspectNames(this.classified, control.value);
         return colliding.length === 0 ? null : { aspectClassCollision: { aspects: colliding } };
+    }
+
+    /** Read from the outer control, which also carries errors of validators the parent adds. */
+    get collidingAspects(): string[] {
+        return (this.outerControl() ?? this.control).errors?.['aspectClassCollision']?.aspects ?? [];
+    }
+
+    get collisionMessage(): string {
+        return aspectClassCollisionMessage(this.collidingAspects);
     }
 
     /** The class an aspect belongs to, if any -- lets a caller judge a stored value on its own, without waiting on this control. */
@@ -137,6 +171,14 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
         options.sort((a, b) => (a.aspect_class_name || '').localeCompare(b.aspect_class_name || ''));
         this.aspectOptions = options;
         this.control.updateValueAndValidity({ emitEvent: false });
+        this.onValidatorChange();
+    }
+
+    private outerControl(): AbstractControl | null {
+        if (this.outerNgControl === undefined) {
+            this.outerNgControl = this.injector.get(NgControl, null, { self: true, optional: true });
+        }
+        return this.outerNgControl?.control ?? null;
     }
 
     private isLeaf(aspect: DeviceTypeAspectModel): boolean {

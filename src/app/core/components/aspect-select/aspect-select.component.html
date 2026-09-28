@@ -17,12 +17,13 @@
 <mat-form-field appearance="outline" class="full-width" color="accent">
     <mat-label>{{label}}</mat-label>
     <mtx-select [items]="aspectOptions" bindValue="id" bindLabel="name" [formControl]="control" multiple
-        closeOnSelect="false" [groupBy]="aspectClassGroup" [appendTo]="appendTo" (blur)="onBlur()">
+        closeOnSelect="false" [groupBy]="aspectClassGroup" [appendTo]="appendTo" [errorStateMatcher]="errorStateMatcher"
+        (blur)="onBlur()">
         <ng-template ng-label-tmp let-item="item" let-clear="clear">
             <span class="ng-value-icon left" (click)="clear(item)" aria-hidden="true">&times;</span>
             <span class="ng-value-label"><span class="aspect-class-name"
                     *ngIf="item.aspect_class_name">{{item.aspect_class_name}}</span>{{item.name}}</span>
         </ng-template>
     </mtx-select>
-    <mat-error senergyError [label]="label"></mat-error>
+    <mat-error *ngIf="collidingAspects.length > 0">{{ collisionMessage }}</mat-error>
 </mat-form-field>

@@ -35,6 +35,9 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DeviceTypeAspectModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { ImportTypeContentVariableModel } from '../../import-types/shared/import-types.model';
+import { AspectClassesService } from '../../../metadata/aspects/shared/aspect-classes.service';
+import { createSpyFromClass } from 'jasmine-auto-spies';
+import { of } from 'rxjs';
 
 describe('ContentVariableDialogComponent', () => {
     let component: ContentVariableDialogComponent;
@@ -59,6 +62,9 @@ describe('ContentVariableDialogComponent', () => {
     let r: any;
 
     function init(content: ImportTypeContentVariableModel | undefined) {
+        const aspectClassesService = createSpyFromClass(AspectClassesService);
+        aspectClassesService.userHasReadAuthorization.and.returnValue(true);
+        aspectClassesService.getAspectClasses.and.returnValue(of([]));
         dialogData = {
             typeConceptCharacteristics,
             content,
@@ -93,6 +99,7 @@ describe('ContentVariableDialogComponent', () => {
                         },
                     },
                 },
+                { provide: AspectClassesService, useValue: aspectClassesService },
                 provideHttpClient(withInterceptorsFromDi()),
             ],
         }).compileComponents();

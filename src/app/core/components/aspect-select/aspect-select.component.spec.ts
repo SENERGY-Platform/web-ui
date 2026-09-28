@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { of } from 'rxjs';
@@ -47,6 +48,7 @@ describe('AspectSelectComponent', () => {
 
     beforeEach(async () => {
         aspectClassesServiceSpy.getAspectClasses.calls.reset();
+        aspectClassesServiceSpy.userHasReadAuthorization.and.returnValue(true);
         aspectClassesServiceSpy.getAspectClasses.and.returnValue(of(environmentClass));
         await TestBed.configureTestingModule({
             imports: [CoreModule, ReactiveFormsModule, NoopAnimationsModule],
@@ -130,6 +132,15 @@ describe('AspectSelectComponent', () => {
         expect(airOption?.aspect_class_name).toBe('Environment');
     });
 
+    it('does not request the aspect classes without the right to read them, and offers the aspects without class names', () => {
+        aspectClassesServiceSpy.userHasReadAuthorization.and.returnValue(false);
+        applyInputs(classifiedAspects, undefined);
+        component.ngOnInit();
+
+        expect(aspectClassesServiceSpy.getAspectClasses).not.toHaveBeenCalled();
+        expect(component.aspectOptions.map((a) => a.aspect_class_name)).toEqual([undefined, undefined, undefined, undefined]);
+    });
+
     it('skips the aspect-classes call when the caller already supplied them', () => {
         applyInputs(classifiedAspects, environmentClass);
         component.ngOnInit();
@@ -153,5 +164,84 @@ describe('AspectSelectComponent', () => {
 
         expect(component.aspectClass('urn:infai:ses:aspect:inside_air')?.classId).toBe('urn:infai:ses:aspect-class:environment');
         expect(component.aspectClass('urn:infai:ses:aspect:device')).toBeUndefined();
+    });
+
+    describe('inside a parent form', () => {
+        const inside = 'urn:infai:ses:aspect:inside_air';
+        const outside = 'urn:infai:ses:aspect:outside_air';
+
+        @Component({
+            template: `<form [formGroup]="form">
+                <senergy-aspect-select formControlName="aspect_ids" [aspects]="aspects" [aspectClasses]="classes"></senergy-aspect-select>
+            </form>`,
+        })
+        class HostComponent {
+            form = new FormGroup({ aspect_ids: new FormControl<string[]>([inside, outside]) });
+            aspects: DeviceTypeAspectModel[] = classifiedAspects;
+            classes: DeviceTypeAspectClassModel[] = environmentClass;
+        }
+
+        let host: ComponentFixture<HostComponent>;
+
+        beforeEach(() => {
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({
+                imports: [CoreModule, ReactiveFormsModule, NoopAnimationsModule],
+                declarations: [HostComponent],
+                providers: [{ provide: AspectClassesService, useValue: aspectClassesServiceSpy }],
+            });
+            host = TestBed.createComponent(HostComponent);
+        });
+
+        const render = () => {
+            host.detectChanges();
+            host.detectChanges();
+        };
+        const renderedErrors = (): string[] =>
+            Array.from<HTMLElement>(host.nativeElement.querySelectorAll('mat-error')).map((e) => e.textContent?.trim() ?? '');
+        const outer = () => host.componentInstance.form.controls.aspect_ids;
+
+        it('renders no mat-error for a collision while the outer control is untouched', () => {
+            render();
+
+            expect(outer().invalid).toBeTrue();
+            expect(renderedErrors()).toEqual([]);
+        });
+
+        it('renders the collision as soon as the outer control is marked touched', () => {
+            render();
+            outer().markAsTouched();
+            render();
+
+            expect(renderedErrors()).toEqual(['Only one aspect per aspect class is allowed: inside_air, outside_air']);
+        });
+
+        it('renders the collision when the parent form marks all its controls touched', () => {
+            render();
+            host.componentInstance.form.markAllAsTouched();
+            render();
+
+            expect(renderedErrors()).toEqual(['Only one aspect per aspect class is allowed: inside_air, outside_air']);
+        });
+
+        it('renders no mat-error for a touched outer control without a collision', () => {
+            outer().setValue([inside]);
+            render();
+            outer().markAsTouched();
+            render();
+
+            expect(renderedErrors()).toEqual([]);
+        });
+
+        it('re-validates the outer control when the classified aspects arrive after the value', () => {
+            host.componentInstance.aspects = [];
+            render();
+            expect(outer().valid).toBeTrue();
+
+            host.componentInstance.aspects = classifiedAspects;
+            render();
+
+            expect(outer().errors?.['aspectClassCollision'].aspects).toEqual(['inside_air', 'outside_air']);
+        });
     });
 });

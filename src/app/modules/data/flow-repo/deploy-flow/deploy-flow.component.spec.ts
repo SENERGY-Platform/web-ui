@@ -64,6 +64,7 @@ describe('DeployFlowComponent', () => {
     providers: [
         provideRouter([]),
         { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+        { provide: AspectClassesService, useValue: createSpyFromClass(AspectClassesService) },
         DialogsService,
         {
             provide: ActivatedRoute,
@@ -108,6 +109,12 @@ describe('DeployFlowComponent aspects', () => {
     let deviceTypeService: Spy<DeviceTypeService>;
     let deviceInstancesService: Spy<DeviceInstancesService>;
     let flowEngineService: Spy<FlowEngineService>;
+    let aspectClassesService: Spy<AspectClassesService>;
+    let mayReadAspectClasses: boolean;
+
+    beforeEach(() => {
+        mayReadAspectClasses = true;
+    });
 
     /** Opens the deploy form for a new pipeline, or for editing one whose single input was saved with the given selection. */
     function init(
@@ -136,8 +143,9 @@ describe('DeployFlowComponent aspects', () => {
         conceptsService.getConceptWithCharacteristics.and.returnValue(of({ characteristics: [{ id: 'c1', name: 'Celsius' }] } as any));
         const importInstancesService = createSpyFromClass(ImportInstancesService);
         importInstancesService.listImportInstances.and.returnValue(of([]));
-        const aspectClassesService = createSpyFromClass(AspectClassesService);
-        aspectClassesService.getAspectClasses.and.returnValue(of([]));
+        aspectClassesService = createSpyFromClass(AspectClassesService);
+        aspectClassesService.userHasReadAuthorization.and.returnValue(mayReadAspectClasses);
+        aspectClassesService.getAspectClasses.and.returnValue(of([{ id: 'urn:infai:ses:aspect-class:environment', name: 'Environment' }]));
         flowEngineService = createSpyFromClass(FlowEngineService);
         flowEngineService.startPipeline.and.returnValue(of({}));
         flowEngineService.updatePipeline.and.returnValue(of(undefined));
@@ -186,6 +194,20 @@ describe('DeployFlowComponent aspects', () => {
         const spy = component.editMode ? flowEngineService.updatePipeline : flowEngineService.startPipeline;
         return (spy.calls.mostRecent().args[0] as PipelineRequestModel).nodes[0].inputSelections;
     };
+
+    it('loads the aspect classes for the aspect selects when the user may read them', () => {
+        init({});
+        expect(aspectClassesService.getAspectClasses).toHaveBeenCalledTimes(1);
+        expect(component.aspectClasses.map((c) => c.name)).toEqual(['Environment']);
+    });
+
+    it('requests no aspect classes and deploys with none when the user may not read them', () => {
+        mayReadAspectClasses = false;
+        init({});
+        expect(aspectClassesService.getAspectClasses).not.toHaveBeenCalled();
+        expect(component.aspectClasses).toEqual([]);
+        expect(component.ready).toBeTrue();
+    });
 
     it('offers only the functions every selected aspect offers', () => {
         init({ [air]: [temperature, humidity, pressure], [water]: [pressure, temperature] });

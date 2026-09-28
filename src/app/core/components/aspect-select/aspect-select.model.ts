@@ -67,6 +67,10 @@ export function collidingAspectNames(classified: Map<string, AspectClassificatio
     return colliding;
 }
 
+export function aspectClassCollisionMessage(aspectNames: string[]): string {
+    return 'Only one aspect per aspect class is allowed: ' + aspectNames.join(', ');
+}
+
 /**
  * Converts a flat aspect NODE list (root_id/parent_id/child_ids, as used by device-instance and
  * deployment pickers) into the aspect-select's tree input. Aspect nodes carry no aspect_class_id,

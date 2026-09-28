@@ -241,6 +241,37 @@ describe('DeviceTypesContentVariableDialog', () => {
     );
 
     it(
+        'renders the collision of a stored device-type without the user touching the aspect select',
+        fakeAsync(() => {
+            const classified: DeviceTypeAspectModel[] = [
+                {
+                    id: 'urn:infai:ses:aspect:air',
+                    name: 'air',
+                    aspect_class_id: 'urn:infai:ses:aspect-class:environment',
+                    sub_aspects: [
+                        {id: 'urn:infai:ses:aspect:inside_air', name: 'inside_air', sub_aspects: []},
+                        {id: 'urn:infai:ses:aspect:outside_air', name: 'outside_air', sub_aspects: []},
+                    ],
+                },
+            ];
+            init({
+                id: 'id1',
+                name: 'testName',
+                type: 'https://schema.org/Text',
+                aspect_ids: ['urn:infai:ses:aspect:inside_air', 'urn:infai:ses:aspect:outside_air'],
+            } as DeviceTypeContentVariableModel, [], [], classified);
+
+            fixture.detectChanges();
+            flush();
+            fixture.detectChanges();
+
+            const errors: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('senergy-aspect-select mat-error'));
+            expect(errors.map((e) => e.textContent?.trim()))
+                .toEqual(['Only one aspect per aspect class is allowed: inside_air, outside_air']);
+        }),
+    );
+
+    it(
         // aspectOptions/aspectClassGroup moved to the shared AspectSelectComponent with the extraction
         // to core/components/aspect-select; this checks the dialog wires its real aspect data through
         // to it, the grouping logic itself is covered by that component's own spec.

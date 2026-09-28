@@ -147,8 +147,14 @@ export class DeployFlowComponent implements OnInit {
     ngOnInit() {
         const obs: Observable<unknown>[] = [];
         obs.push(this.deviceTypeService.getAspects().pipe(map(aspects => (this.aspects = aspects))));
-        // loaded once here, so the aspect select of every input does not request them itself
-        obs.push(this.aspectClassesService.getAspectClasses(9999, 0).pipe(map(classes => (this.aspectClasses = classes))));
+        // loaded once here, so the aspect select of every input does not request them itself; reading them
+        // is a right of its own, and a user without it deploys with unnamed classes
+        obs.push(
+            (this.aspectClassesService.userHasReadAuthorization()
+                ? this.aspectClassesService.getAspectClasses(9999, 0)
+                : of([] as DeviceTypeAspectClassModel[])
+            ).pipe(map(classes => (this.aspectClasses = classes))),
+        );
         obs.push(this.pipelineRegistryService.getPipelines().pipe(map(pipelines => (this.pipelines = pipelines))));
         obs.push(this.importInstancesService
             .listImportInstances('', undefined, undefined, 'name.asc')

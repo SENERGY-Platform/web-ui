@@ -18,6 +18,7 @@ import {Component, AfterViewInit, Injector, Input, OnDestroy} from '@angular/cor
 import { MatFormFieldControl, MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import {FormControl} from '@angular/forms';
+import {aspectClassCollisionMessage} from '../components/aspect-select/aspect-select.model';
 
 interface errorMsg {errorCode: string; errorInfo: any}
 
@@ -215,7 +216,7 @@ export class MatErrorMessagesDirective implements AfterViewInit, OnDestroy {
     }
 
     private pushAspectClassCollisionError(errInfo: aspectClassCollisionError) {
-        this.error = 'Only one aspect per aspect class is allowed: ' + errInfo.aspects.join(', ');
+        this.error = aspectClassCollisionMessage(errInfo.aspects);
     }
 
     // private pushNewError(errorInf: newErrorInterface) {}   // 4. add new error message generation here
