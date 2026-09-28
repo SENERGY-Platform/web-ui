@@ -15,7 +15,9 @@
  */
 
 export interface FilterCriteriaDialogResultModel {
+    /** @deprecated use aspects; the alphabetically first id of aspects, '' without any */
     aspect: string;
+    aspects: string[];
     iotfunction: string;
     characteristic: string;
     label: string;
@@ -33,7 +35,10 @@ export interface ScriptEditModel {
 }
 
 export interface ConditionalEventEditModel {
+    /** @deprecated use aspects; the alphabetically first id of aspects, '' without any */
     aspect: string;
+    /** Sorted by id in a dialog result; on input it may be absent for an element written before the list. */
+    aspects?: string[];
     iotfunction: string;
     characteristic: string;
     script: string;

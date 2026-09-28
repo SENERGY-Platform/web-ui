@@ -156,6 +156,14 @@ export function criteriaAspectIds(criteria: { aspect_id?: string | null; aspect_
 }
 
 /**
+ * Orders aspect ids the way the Go services sort them (code unit order, not locale collation), so
+ * the web-ui picks the same alias and list order as the device-repository and process-deployment.
+ */
+export function compareAspectIds(a: string, b: string): number {
+    return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/**
  * The alias the device-repository derives for a deprecated singular aspect field from its list
  * counterpart: the alphabetically first id, or undefined for an empty list.
  */
@@ -163,7 +171,7 @@ export function deprecatedAspectAlias(aspectIds: string[]): string | undefined {
     if (aspectIds.length === 0) {
         return undefined;
     }
-    return [...aspectIds].sort((a, b) => a.localeCompare(b))[0];
+    return [...aspectIds].sort(compareAspectIds)[0];
 }
 
 export interface DeviceTypeConceptModel {

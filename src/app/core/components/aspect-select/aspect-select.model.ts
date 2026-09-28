@@ -70,17 +70,19 @@ export function collidingAspectNames(classified: Map<string, AspectClassificatio
 /**
  * Converts a flat aspect NODE list (root_id/parent_id/child_ids, as used by device-instance and
  * deployment pickers) into the aspect-select's tree input. Aspect nodes carry no aspect_class_id,
- * so a tree built this way offers no aspect-class grouping or collision validation.
+ * so a tree built this way offers no aspect-class grouping or collision validation. A node whose
+ * parent is missing from the list becomes a root of its own: filtered listings such as
+ * /aspect-nodes?function=measuring-function omit the ancestors of the aspects they return.
  */
 export function aspectTreeFromAspectNodes(nodes: DeviceTypeAspectNodeModel[]): DeviceTypeAspectModel[] {
     const byId = new Map(nodes.map((n) => [n.id, n]));
     const build = (node: DeviceTypeAspectNodeModel): DeviceTypeAspectModel => ({
         id: node.id,
         name: node.name,
-        sub_aspects: node.child_ids
+        sub_aspects: (node.child_ids ?? [])
             .map((id) => byId.get(id))
             .filter((n): n is DeviceTypeAspectNodeModel => n !== undefined)
             .map(build),
     });
-    return nodes.filter((n) => n.root_id === n.id).map(build);
+    return nodes.filter((n) => n.parent_id === n.id || !byId.has(n.parent_id)).map(build);
 }

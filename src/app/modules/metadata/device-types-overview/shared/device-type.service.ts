@@ -97,7 +97,7 @@ export class DeviceTypeService {
         );
     }
 
-    getDeviceTypeFiltered(filter: { function_id: string; device_class_id?: string; aspect_id?: string }[]): Observable<DeviceTypeModel[]> {
+    getDeviceTypeFiltered(filter: { function_id: string; device_class_id?: string; aspect_id?: string; aspect_ids?: string[] }[]): Observable<DeviceTypeModel[]> {
         return this.http
             .get<DeviceTypeModel[]>(environment.deviceRepoUrl + '/device-types?filter=' + JSON.stringify(filter))
             .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null)))
@@ -107,7 +107,7 @@ export class DeviceTypeService {
     /**
      * Joins filters with an OR condition and returns an array with unique device types
      */
-    getDeviceTypeFilteredOr(filters: { function_id: string; device_class_id: string; aspect_id: string }[]): Observable<DeviceTypeModel[]> {
+    getDeviceTypeFilteredOr(filters: { function_id: string; device_class_id: string; aspect_id: string; aspect_ids?: string[] }[]): Observable<DeviceTypeModel[]> {
         const deviceTypesObservables = filters.map((f) => this.getDeviceTypeFiltered([f]));
         return forkJoin(deviceTypesObservables).pipe(
             flatMap((deviceTypes) => {

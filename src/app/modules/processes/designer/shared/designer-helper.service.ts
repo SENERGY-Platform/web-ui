@@ -27,6 +27,9 @@ import {
 } from './designer-element.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { forkJoin, Observable } from 'rxjs';
+import { selectedAspectNodes } from '../bpmn-js/properties-provider/aspects';
+
+type DeviceTypeFilter = { function_id: string; device_class_id: string; aspect_id: string; aspect_ids?: string[] };
 
 @Injectable({
     providedIn: 'root',
@@ -114,13 +117,13 @@ export class DesignerHelperService {
     }
 
     private checkFlowNodeElements(flowNode: DesignerElementFlowNodeRefModel[], errorText: string): Observable<DesignerErrorModel> {
-        const filterArray: { function_id: string; device_class_id: string; aspect_id: string }[] = [];
+        const filterArray: DeviceTypeFilter[] = [];
         const response: DesignerErrorModel = { error: false, errorType: null, laneName: '' };
         let meta: DeviceTypeSelectionResultModel | null = null;
         if (flowNode) {
             flowNode.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
                 const newMeta = this.getMeta(flowElement);
-                const filter: { function_id: string; device_class_id: string; aspect_id: string } = {
+                const filter: DeviceTypeFilter = {
                     function_id: '',
                     device_class_id: '',
                     aspect_id: '',
@@ -139,7 +142,9 @@ export class DesignerHelperService {
                     }
 
                     if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/MeasuringFunction') {
-                        filter.aspect_id = newMeta.aspect.id;
+                        // the device-repository folds aspect_id into aspect_ids, as the deployment of this task will
+                        filter.aspect_id = newMeta.aspect?.id || '';
+                        filter.aspect_ids = selectedAspectNodes(newMeta).map((node) => node.id);
                     }
                     filter.function_id = newMeta.function.id;
                     filterArray.push(filter);

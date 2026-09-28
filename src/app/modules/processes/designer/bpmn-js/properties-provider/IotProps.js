@@ -18,6 +18,7 @@
 import { textBox, selectBox } from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import { getOutputPaths, toServiceTask, toExternalServiceTask } from './helper';
+import { aspectsLabel, eventAspectAttributes, eventAspectIds, payloadAspectFields, selectedAspectNodes } from './aspects';
 const typeString = "https://schema.org/Text";
 const typeInteger = "https://schema.org/Integer";
 const typeFloat = "https://schema.org/Float";
@@ -97,12 +98,14 @@ var createConnector = function (bpmnjs, connectorId, inputs, outputs) {
     });
 };
 
-function getPayload(connectorInfo, input) {
+export function getPayload(connectorInfo, input) {
+    var aspectFields = payloadAspectFields(connectorInfo);
     return JSON.stringify({
         version: 2,
         function: connectorInfo.function,
         device_class: connectorInfo.device_class || null,
-        aspect: connectorInfo.aspect || null,
+        aspect: aspectFields.aspect,
+        aspects: aspectFields.aspects,
         label: connectorInfo.function.name,
         input: input ? generateStructure(connectorInfo.characteristic, true) : {},
         characteristic_id: connectorInfo.characteristic.id,
@@ -242,7 +245,20 @@ function createTaskResults(bpmnjs, outputs) {
 }
 
 
-function getDeviceTypeServiceFromServiceElement(element) {
+export function getTaskName(connectorInfo, currentName) {
+    var name = currentName;
+    if (connectorInfo.device_class !== null) {
+        name = connectorInfo.device_class.name;
+    } else {
+        var label = aspectsLabel(connectorInfo);
+        if (label !== undefined) {
+            name = label;
+        }
+    }
+    return name + " " + connectorInfo.function.name;
+}
+
+export function getDeviceTypeServiceFromServiceElement(element) {
     var bo = getBusinessObject(element);
     var extentionElements = bo.extensionElements;
     if (extentionElements && extentionElements.values && extentionElements.values[0]) {
@@ -254,6 +270,7 @@ function getDeviceTypeServiceFromServiceElement(element) {
                 function: payload.function,
                 device_class: payload.device_class,
                 aspect: payload.aspect,
+                aspects: selectedAspectNodes(payload),
                 completionStrategy: bo.get('camunda:topic'),
                 retries: payload.retries,
                 prefer_events: payload.prefer_event
@@ -546,14 +563,7 @@ export function external(group, element, bpmnjs, eventBus, bpmnFactory, replace,
             bpmnjs.designerCallbacks.findIotDeviceType(getDeviceTypeServiceFromServiceElement(element), function (connectorInfo) {
                 toExternalServiceTask(bpmnFactory, replace, selection, element, function (serviceTask, element) {
                     serviceTask.topic = connectorInfo.completionStrategy;
-                    if (connectorInfo.device_class !== null) {
-                        serviceTask.name = connectorInfo.device_class.name;
-                    } else {
-                        if (connectorInfo.aspect !== null) {
-                            serviceTask.name = connectorInfo.aspect.name;
-                        }
-                    }
-                    serviceTask.name = serviceTask.name + " " + connectorInfo.function.name;
+                    serviceTask.name = getTaskName(connectorInfo, serviceTask.name);
 
                     var script;
                     var inputs;
@@ -646,6 +656,12 @@ export function msgevent(group, element, bpmnjs, eventBus, modeling) {
         modelProperty: 'senergy:aspect'
     });
 
+    var aspects = textBox({
+        id: 'aspects-field',
+        label: 'Aspects',
+        modelProperty: 'senergy:aspects'
+    });
+
     var iotfunction = textBox({
         id: 'function-field',
         label: 'Function',
@@ -694,6 +710,7 @@ export function msgevent(group, element, bpmnjs, eventBus, modeling) {
             f(
                 {
                     aspect: aspect.get(element)["senergy:aspect"],
+                    aspects: eventAspectIds(aspects.get(element)["senergy:aspects"], aspect.get(element)["senergy:aspect"]),
                     iotfunction: iotfunction.get(element)["senergy:function"],
                     characteristic: characteristic.get(element)["senergy:characteristic"],
                     script: script.get(element)["senergy:script"],
@@ -702,8 +719,10 @@ export function msgevent(group, element, bpmnjs, eventBus, modeling) {
                     qos: qos.get(element)["senergy:qos"],
                 },
                 function (response) {
+                    var aspectAttributes = eventAspectAttributes(Array.isArray(response.aspects) ? response.aspects : [response.aspect]);
                     var update = {
-                        "senergy:aspect": response.aspect,
+                        "senergy:aspects": aspectAttributes["senergy:aspects"],
+                        "senergy:aspect": aspectAttributes["senergy:aspect"],
                         "senergy:function": response.iotfunction,
                         "senergy:characteristic": response.characteristic,
                         "senergy:script": response.script,
@@ -724,6 +743,7 @@ export function msgevent(group, element, bpmnjs, eventBus, modeling) {
     });
 
     group.entries.push(aspect);
+    group.entries.push(aspects);
     group.entries.push(iotfunction);
     group.entries.push(characteristic);
     group.entries.push(script);

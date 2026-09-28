@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { of } from 'rxjs';
 import { DesignerHelperService } from './designer-helper.service';
 import { BpmnElement } from './designer.model';
 
@@ -151,5 +152,75 @@ describe('DesignerHelperService.getAvailableVariables', () => {
         ];
 
         expect(service.getAvailableVariables(task('Task_2', [], [broken]))).toEqual([]);
+    });
+});
+
+describe('DesignerHelperService.checkConstraints device-type filter', () => {
+    const MEASURING = 'https://senergy.infai.org/ontology/MeasuringFunction';
+    const CONTROLLING = 'https://senergy.infai.org/ontology/ControllingFunction';
+    const air = { id: 'urn:infai:ses:aspect:air', name: 'Air' };
+    const water = { id: 'urn:infai:ses:aspect:water', name: 'Water' };
+    const temperature = { id: 'urn:infai:ses:measuring-function:temperature', rdf_type: MEASURING };
+    const on = { id: 'urn:infai:ses:controlling-function:on', rdf_type: CONTROLLING };
+    const lamp = { id: 'urn:infai:ses:device-class:lamp' };
+
+    const externalTask = (payload: any) => ({
+        $type: 'bpmn:ServiceTask',
+        type: 'external',
+        extensionElements: { values: [{ inputParameters: [{ name: 'payload', value: JSON.stringify(payload) }] }] },
+    });
+
+    const modelerWith = (...tasks: any[]) => ({
+        injector: {
+            get: () => [
+                {
+                    type: 'bpmn:Collaboration',
+                    businessObject: { participants: [{ id: 'Participant_1', name: 'Pool', processRef: { flowElements: tasks } }] },
+                },
+            ],
+        },
+    });
+
+    /** The filter the existence check sends to the device-repository for the given tasks. */
+    function filterFor(...tasks: any[]): any[] {
+        const deviceTypeService = jasmine.createSpyObj('DeviceTypeService', ['getDeviceTypeFiltered']);
+        deviceTypeService.getDeviceTypeFiltered.and.returnValue(of([{ id: 'device-type' }]));
+        new DesignerHelperService(deviceTypeService).checkConstraints(modelerWith(...tasks)).subscribe();
+        expect(deviceTypeService.getDeviceTypeFiltered).toHaveBeenCalledTimes(1);
+        return deviceTypeService.getDeviceTypeFiltered.calls.mostRecent().args[0];
+    }
+
+    it('asks for every aspect of a measuring task, with the deprecated aspect kept as the alias', () => {
+        expect(filterFor(externalTask({ function: temperature, device_class: null, aspect: air, aspects: [air, water] }))).toEqual([
+            { function_id: temperature.id, device_class_id: '', aspect_id: air.id, aspect_ids: [air.id, water.id] },
+        ]);
+    });
+
+    it('asks for the single aspect of a task written before the list', () => {
+        expect(filterFor(externalTask({ function: temperature, device_class: null, aspect: air }))).toEqual([
+            { function_id: temperature.id, device_class_id: '', aspect_id: air.id, aspect_ids: [air.id] },
+        ]);
+    });
+
+    it('folds a deprecated aspect missing from the list into it, as the deployment of the task does', () => {
+        expect(filterFor(externalTask({ function: temperature, device_class: null, aspect: water, aspects: [air] }))).toEqual([
+            { function_id: temperature.id, device_class_id: '', aspect_id: water.id, aspect_ids: [air.id, water.id] },
+        ]);
+    });
+
+    it('sends a controlling task without aspects, as before', () => {
+        expect(filterFor(externalTask({ function: on, device_class: lamp, aspect: null }))).toEqual([
+            { function_id: on.id, device_class_id: lamp.id, aspect_id: '' },
+        ]);
+    });
+
+    it('reports a missing device type for a measuring task', () => {
+        const deviceTypeService = jasmine.createSpyObj('DeviceTypeService', ['getDeviceTypeFiltered']);
+        deviceTypeService.getDeviceTypeFiltered.and.returnValue(of([]));
+        let errors: any;
+        new DesignerHelperService(deviceTypeService)
+            .checkConstraints(modelerWith(externalTask({ function: temperature, device_class: null, aspect: air, aspects: [air, water] })))
+            .subscribe((result) => (errors = result));
+        expect(errors).toEqual([[{ error: true, errorType: 'deviceType', laneName: 'Pool' }]]);
     });
 });

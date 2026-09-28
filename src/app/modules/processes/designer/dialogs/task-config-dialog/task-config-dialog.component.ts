@@ -20,7 +20,9 @@ import {
     MatDialogRef
 } from '@angular/material/dialog';
 import { UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
+import { forkJoin, Subscription } from 'rxjs';
 import {
+    compareAspectIds,
     DeviceTypeAspectModel,
     DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
@@ -37,11 +39,8 @@ import { DeviceTypeService } from '../../../../metadata/device-types-overview/sh
 import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
 import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
 import { rangeValidator } from '../../../../../core/validators/range.validator';
-import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
-
-interface DeviceTypeAspectNodeModelWithRootName extends DeviceTypeAspectNodeModel {
-    root_name?: string;
-}
+import { aspectTreeFromAspectNodes } from '../../../../../core/components/aspect-select/aspect-select.model';
+import { selectedAspectNodes } from '../../bpmn-js/properties-provider/aspects';
 
 @Component({
     templateUrl: './task-config-dialog.component.html',
@@ -50,7 +49,7 @@ interface DeviceTypeAspectNodeModelWithRootName extends DeviceTypeAspectNodeMode
 export class TaskConfigDialogComponent implements OnInit {
     optionsFormControl = new UntypedFormControl('');
     deviceClassFormControl = new UntypedFormControl('');
-    aspectFormControl = new UntypedFormControl('');
+    aspectFormControl = new UntypedFormControl([]);
     functionFormControl = new UntypedFormControl({ value: '', disabled: true });
     completionStrategyFormControl = new UntypedFormControl('');
     retriesFormControl = new UntypedFormControl({ value: 0, disabled: true }, [rangeValidator(-1, 100)]);
@@ -59,7 +58,7 @@ export class TaskConfigDialogComponent implements OnInit {
 
 
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
-    aspects: DeviceTypeAspectNodeModelWithRootName[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
     functions: DeviceTypeFunctionModel[] = [];
     characteristic: DeviceTypeCharacteristicsModel = {} as DeviceTypeCharacteristicsModel;
     limit = 20;
@@ -67,6 +66,10 @@ export class TaskConfigDialogComponent implements OnInit {
     result!: DeviceTypeSelectionResultModel;
     selection: DeviceTypeSelectionRefModel | null;
     functionTypes: DeviceTypeFunctionType[] = functionTypes;
+
+    /** Selectable aspect nodes by id, including the nodes of the initial selection the listing may miss. */
+    private aspectNodes = new Map<string, DeviceTypeAspectNodeModel>();
+    private aspectFunctionsSubscription?: Subscription;
 
     constructor(
         private dialogRef: MatDialogRef<TaskConfigDialogComponent>,
@@ -93,8 +96,13 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     save(): void {
+        const aspects = this.selectedAspectIds()
+            .map((id) => this.aspectNodes.get(id))
+            .filter((node): node is DeviceTypeAspectNodeModel => node !== undefined)
+            .sort((a, b) => compareAspectIds(a.id, b.id));
         this.result = {
-            aspect: this.aspectFormControl.value || null,
+            aspect: (aspects[0] || null) as DeviceTypeAspectModel,
+            aspects,
             function: this.functionFormControl.value,
             device_class: this.deviceClassFormControl.value || null,
             characteristic: this.characteristic,
@@ -109,37 +117,10 @@ export class TaskConfigDialogComponent implements OnInit {
         return a && b && a.id === b.id && a.name === b.name;
     }
 
-    getRootAspect(): GroupValueFn {
-        return (_, children): any => {
-            children = children as DeviceTypeAspectNodeModelWithRootName[];
-            const id = children[0].root_id;
-            if (id !== undefined) {
-                return { id };
-            }
-            return null;
-        };
-    }
-
-    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectNodeModelWithRootName | string, b: DeviceTypeAspectNodeModelWithRootName | string) => {
-        const aIsStr = typeof a === 'string' || a instanceof String;
-        const bIsStr = typeof b === 'string' || b instanceof String;
-
-        if (aIsStr && bIsStr) {
-            return a === b;
-        }
-        if (!aIsStr && !bIsStr) {
-            return a.id === b.id;
-        }
-        if (aIsStr) {
-            return a === (b as DeviceTypeAspectNodeModelWithRootName).id;
-        }
-        return a.id === b;
-    };
-
     private initOptions(): void {
         this.optionsFormControl.valueChanges.subscribe((options) => {
             this.deviceClassFormControl.setValue('');
-            this.aspectFormControl.setValue('');
+            this.aspectFormControl.setValue([]);
             this.functionFormControl.setValue('');
             this.functionFormControl.disable();
             if (options === 'Measuring') {
@@ -178,14 +159,9 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private getAspects(): void {
-        this.deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
-            const tmp: DeviceTypeAspectNodeModelWithRootName[] = [];
-            aspects.forEach(a => {
-                const t = a as DeviceTypeAspectNodeModelWithRootName;
-                t.root_name = aspects.find(x => x.id === t.root_id)?.name;
-                tmp.push(t);
-            });
-            this.aspects = tmp;
+        this.deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
+            nodes.forEach((node) => this.aspectNodes.set(node.id, node));
+            this.aspects = aspectTreeFromAspectNodes([...this.aspectNodes.values()]);
         });
     }
 
@@ -198,16 +174,34 @@ export class TaskConfigDialogComponent implements OnInit {
             this.getDeviceClassFunctions(deviceClass);
         });
 
-        this.aspectFormControl.valueChanges.subscribe((aspect: DeviceTypeAspectModel) => {
+        this.aspectFormControl.valueChanges.subscribe(() => {
             this.resetFunctions();
-            this.getAspectFunctions(aspect);
+            this.getAspectFunctions(this.selectedAspectIds());
         });
     }
 
-    private getAspectFunctions(aspect: DeviceTypeAspectModel) {
-        this.deviceTypeService.getAspectsMeasuringFunctions(aspect.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
-            this.functions = functions;
-        });
+    /**
+     * Several aspects in one criteria are an AND, so only a function offered for every selected aspect
+     * can match. A newer selection cancels the requests of the previous one, which could otherwise
+     * answer last and overwrite its function list.
+     */
+    private getAspectFunctions(aspectIds: string[]) {
+        this.aspectFunctionsSubscription?.unsubscribe();
+        if (aspectIds.length === 0) {
+            this.functions = [];
+            this.functionFormControl.disable();
+            return;
+        }
+        this.aspectFunctionsSubscription = forkJoin(aspectIds.map((id) => this.deviceTypeService.getAspectsMeasuringFunctions(id))).subscribe(
+            (functionLists: DeviceTypeFunctionModel[][]) => {
+                const [first, ...rest] = functionLists;
+                this.functions = first.filter((f) => rest.every((list) => list.some((other) => other.id === f.id)));
+            },
+        );
+    }
+
+    private selectedAspectIds(): string[] {
+        return this.aspectFormControl.value || [];
     }
 
     private getDeviceClassFunctions(deviceClass: DeviceTypeDeviceClassModel) {
@@ -255,7 +249,10 @@ export class TaskConfigDialogComponent implements OnInit {
     private initSelection() {
         if (this.selection !== null) {
             this.deviceClassFormControl.setValue(this.selection.device_class);
-            this.aspectFormControl.setValue(this.selection.aspect);
+            const selectedNodes = selectedAspectNodes(this.selection) as DeviceTypeAspectNodeModel[];
+            selectedNodes.forEach((node) => this.aspectNodes.set(node.id, node));
+            this.aspects = aspectTreeFromAspectNodes([...this.aspectNodes.values()]);
+            this.aspectFormControl.setValue(selectedNodes.map((node) => node.id));
             this.functionTypes.forEach((functionType: DeviceTypeFunctionType) => {
                 if (this.selection !== null && functionType.rdf_type === this.selection.function.rdf_type) {
                     this.optionsFormControl.setValue(functionType.text);
@@ -264,7 +261,7 @@ export class TaskConfigDialogComponent implements OnInit {
                     }
                     if (functionType.text === 'Measuring') {
                         this.completionStrategyFormControl.disable();
-                        this.getAspectFunctions(this.selection.aspect);
+                        this.getAspectFunctions(this.selectedAspectIds());
                     }
                 }
             });

@@ -1,0 +1,220 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatInputModule } from '@angular/material/input';
+import { ReactiveFormsModule } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { MtxSelectModule } from '@ng-matero/extensions/select';
+import { By } from '@angular/platform-browser';
+import { Observable, of, Subject } from 'rxjs';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { TaskConfigDialogComponent } from './task-config-dialog.component';
+import { CoreModule } from '../../../../../core/core.module';
+import { AspectSelectComponent } from '../../../../../core/components/aspect-select/aspect-select.component';
+import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
+import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
+import { DeviceTypeAspectNodeModel, DeviceTypeFunctionModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeSelectionRefModel } from '../../../../metadata/device-types-overview/shared/device-type-selection.model';
+
+const MEASURING = 'https://senergy.infai.org/ontology/MeasuringFunction';
+
+const node = (id: string, name: string, parentId = ''): DeviceTypeAspectNodeModel => ({
+    id,
+    name,
+    root_id: parentId || id,
+    parent_id: parentId,
+    child_ids: [],
+    ancestor_ids: parentId ? [parentId] : [],
+    descendent_ids: [],
+});
+
+const air = node('urn:infai:ses:aspect:air', 'Air');
+const water = node('urn:infai:ses:aspect:water', 'Water');
+const fn = (id: string, name: string): DeviceTypeFunctionModel => ({ id, name, rdf_type: MEASURING, concept_id: '' }) as DeviceTypeFunctionModel;
+const temperature = fn('urn:infai:ses:measuring-function:temperature', 'Get Temperature');
+const humidity = fn('urn:infai:ses:measuring-function:humidity', 'Get Humidity');
+const pressure = fn('urn:infai:ses:measuring-function:pressure', 'Get Pressure');
+
+describe('TaskConfigDialogComponent', () => {
+    let fixture: ComponentFixture<TaskConfigDialogComponent>;
+    let component: TaskConfigDialogComponent;
+    let dialogRef: Spy<MatDialogRef<TaskConfigDialogComponent>>;
+    let deviceTypeService: Spy<DeviceTypeService>;
+
+    function init(
+        selection: DeviceTypeSelectionRefModel | null,
+        functionsByAspect: { [id: string]: DeviceTypeFunctionModel[] | Observable<DeviceTypeFunctionModel[]> },
+        listing: DeviceTypeAspectNodeModel[] = [air, water],
+    ) {
+        dialogRef = createSpyFromClass<MatDialogRef<TaskConfigDialogComponent>>(MatDialogRef);
+        deviceTypeService = createSpyFromClass(DeviceTypeService);
+        deviceTypeService.getDeviceClassesWithControllingFunction.and.returnValue(of([]));
+        deviceTypeService.getDeviceClassesControllingFunctions.and.returnValue(of([]));
+        deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly.and.returnValue(of(listing));
+        deviceTypeService.getAspectsMeasuringFunctions.and.callFake((id: string) => {
+            const functions = functionsByAspect[id] || [];
+            return Array.isArray(functions) ? of(functions) : functions;
+        });
+        const conceptsService = createSpyFromClass(ConceptsService);
+        conceptsService.getConceptWithCharacteristics.and.returnValue(of(null));
+
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule, MtxSelectModule, NoopAnimationsModule],
+            declarations: [TaskConfigDialogComponent],
+            providers: [
+                { provide: MatDialogRef, useValue: dialogRef },
+                { provide: MAT_DIALOG_DATA, useValue: { selection } },
+                { provide: DeviceTypeService, useValue: deviceTypeService },
+                { provide: ConceptsService, useValue: conceptsService },
+                provideHttpClient(withInterceptorsFromDi()),
+            ],
+        }).compileComponents();
+        fixture = TestBed.createComponent(TaskConfigDialogComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    }
+
+    const measuringSelection = (overrides: Partial<DeviceTypeSelectionRefModel>): DeviceTypeSelectionRefModel =>
+        ({
+            function: temperature,
+            device_class: null,
+            aspect: null,
+            completionStrategy: 'pessimistic',
+            retries: 0,
+            prefer_events: false,
+            ...overrides,
+        }) as unknown as DeviceTypeSelectionRefModel;
+
+    const functionIds = () => component.functions.map((f) => f.id);
+    const savedResult = () => {
+        component.save();
+        return dialogRef.close.calls.mostRecent().args[0];
+    };
+
+    function selectMeasuring(aspectIds: string[]) {
+        component.optionsFormControl.setValue('Measuring');
+        fixture.detectChanges();
+        component.aspectFormControl.setValue(aspectIds);
+        fixture.detectChanges();
+    }
+
+    it('uses the shared aspect select for the measuring branch, offering aspects with sub-aspects too', () => {
+        init(null, {});
+        selectMeasuring([]);
+        const select: AspectSelectComponent = fixture.debugElement.query(By.directive(AspectSelectComponent)).componentInstance;
+        expect(select.leafOnly).toBe(false);
+        expect(select.aspectOptions.map((o) => o.id)).toEqual([air.id, water.id]);
+    });
+
+    it('offers only the functions every selected aspect offers', () => {
+        init(null, { [air.id]: [temperature, humidity, pressure], [water.id]: [pressure, temperature] });
+        selectMeasuring([air.id, water.id]);
+        expect(deviceTypeService.getAspectsMeasuringFunctions).toHaveBeenCalledWith(air.id);
+        expect(deviceTypeService.getAspectsMeasuringFunctions).toHaveBeenCalledWith(water.id);
+        expect(functionIds()).toEqual([temperature.id, pressure.id]);
+    });
+
+    it('offers the functions of a single aspect unchanged', () => {
+        init(null, { [air.id]: [temperature, humidity] });
+        selectMeasuring([air.id]);
+        expect(functionIds()).toEqual([temperature.id, humidity.id]);
+    });
+
+    it('offers no function and keeps the function field disabled without an aspect', () => {
+        init(null, { [air.id]: [temperature] });
+        selectMeasuring([air.id]);
+        component.aspectFormControl.setValue([]);
+        expect(functionIds()).toEqual([]);
+        expect(component.functionFormControl.disabled).toBe(true);
+    });
+
+    it('ignores the answer for a selection that has since been replaced', () => {
+        const slowAir = new Subject<DeviceTypeFunctionModel[]>();
+        init(null, { [air.id]: slowAir, [water.id]: [pressure] });
+        selectMeasuring([air.id]);
+        component.aspectFormControl.setValue([water.id]);
+        slowAir.next([temperature]);
+        slowAir.complete();
+        expect(functionIds()).toEqual([pressure.id]);
+    });
+
+    it('returns the selected aspect nodes sorted by id and the first of them as the deprecated aspect', () => {
+        init(null, { [air.id]: [temperature], [water.id]: [temperature] });
+        selectMeasuring([water.id, air.id]);
+        component.functionFormControl.setValue(temperature);
+        const result = savedResult();
+        expect(result.aspects).toEqual([air, water]);
+        expect(result.aspect).toEqual(air);
+        expect(result.function).toEqual(temperature);
+    });
+
+    it('returns a single aspect in both fields', () => {
+        init(null, { [water.id]: [temperature] });
+        selectMeasuring([water.id]);
+        component.functionFormControl.setValue(temperature);
+        const result = savedResult();
+        expect(result.aspects).toEqual([water]);
+        expect(result.aspect).toEqual(water);
+    });
+
+    it('returns no aspect for a controlling task', () => {
+        init(null, {});
+        const result = savedResult();
+        expect(result.aspect).toBeNull();
+        expect(result.aspects).toEqual([]);
+    });
+
+    it('opens a selection written before the list with its single aspect selected', () => {
+        init(measuringSelection({ aspect: air }), { [air.id]: [temperature, humidity] });
+        expect(component.optionsFormControl.value).toBe('Measuring');
+        expect(component.aspectFormControl.value).toEqual([air.id]);
+        expect(functionIds()).toEqual([temperature.id, humidity.id]);
+        expect(component.functionFormControl.value).toEqual(temperature);
+        const result = savedResult();
+        expect(result.aspects).toEqual([air]);
+        expect(result.aspect).toEqual(air);
+    });
+
+    it('opens a selection with every aspect of its list selected and their common functions offered', () => {
+        init(measuringSelection({ aspect: air, aspects: [air, water] }), { [air.id]: [temperature, humidity], [water.id]: [temperature] });
+        expect(component.aspectFormControl.value).toEqual([air.id, water.id]);
+        expect(functionIds()).toEqual([temperature.id]);
+    });
+
+    it('keeps a selected aspect that the listing no longer offers', () => {
+        const gone = node('urn:infai:ses:aspect:gone', 'Gone');
+        init(measuringSelection({ aspect: gone, aspects: [gone] }), { [gone.id]: [temperature] });
+        const select: AspectSelectComponent = fixture.debugElement.query(By.directive(AspectSelectComponent)).componentInstance;
+        expect(select.aspectOptions.map((o) => o.name)).toContain('Gone');
+        expect(savedResult().aspects).toEqual([gone]);
+    });
+
+    it('offers an aspect whose ancestors the listing leaves out', () => {
+        const inside = node('urn:infai:ses:aspect:inside', 'Inside');
+        const insideAir = node('urn:infai:ses:aspect:inside-air', 'Inside Air', inside.id);
+        init(null, {}, [insideAir]);
+        selectMeasuring([]);
+        const select: AspectSelectComponent = fixture.debugElement.query(By.directive(AspectSelectComponent)).componentInstance;
+        expect(select.aspectOptions.map((o) => o.id)).toEqual([insideAir.id]);
+    });
+});

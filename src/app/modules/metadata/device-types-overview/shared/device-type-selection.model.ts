@@ -16,13 +16,17 @@
 
 import {
     DeviceTypeAspectModel,
+    DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
 } from './device-type.model';
 
 export interface DeviceTypeSelectionRefModel {
+    /** @deprecated use aspects; the node with the alphabetically first id of aspects, null without any */
     aspect: DeviceTypeAspectModel;
+    /** Sorted by id; absent in payloads written before the list existed. */
+    aspects?: DeviceTypeAspectNodeModel[];
     function: DeviceTypeFunctionModel;
     device_class: DeviceTypeDeviceClassModel;
     completionStrategy: string;

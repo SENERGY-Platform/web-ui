@@ -20,7 +20,12 @@ import {
     MatDialogRef
 } from '@angular/material/dialog';
 import { UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
+import { forkJoin, Subscription } from 'rxjs';
 import {
+    compareAspectIds,
+    criteriaAspectIds,
+    deprecatedAspectAlias,
+    DeviceTypeAspectModel,
     DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
@@ -29,27 +34,27 @@ import { DeviceTypeService } from '../../../../metadata/device-types-overview/sh
 import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
 import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
 import { ConditionalEventEditModel } from '../../shared/designer-dialog.model';
-import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
-
-interface DeviceTypeAspectNodeModelWithRootName extends DeviceTypeAspectNodeModel {
-    root_name?: string;
-}
+import { aspectTreeFromAspectNodes } from '../../../../../core/components/aspect-select/aspect-select.model';
 
 @Component({
     templateUrl: './conditional-event-dialog.component.html',
     styleUrls: ['./conditional-event-dialog.component.css'],
 })
 export class ConditionalEventDialogComponent implements OnInit {
-    aspectFormControl = new UntypedFormControl('');
+    aspectFormControl = new UntypedFormControl([]);
     functionFormControl = new UntypedFormControl({ value: '', disabled: true });
 
-    aspects: DeviceTypeAspectNodeModelWithRootName[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
     functions: DeviceTypeFunctionModel[] = [];
     characteristic: DeviceTypeCharacteristicsModel = {} as DeviceTypeCharacteristicsModel;
 
     limit = 20;
 
     result!: ConditionalEventEditModel;
+
+    /** Aspect ids of the edited element, applied once the selectable aspects are known. */
+    private initialAspectIds: string[];
+    private aspectFunctionsSubscription?: Subscription;
 
     constructor(
         private dialogRef: MatDialogRef<ConditionalEventDialogComponent>,
@@ -66,6 +71,7 @@ export class ConditionalEventDialogComponent implements OnInit {
             script: 'value == 42',
             label: '',
             aspect: '',
+            aspects: [],
             iotfunction: '',
             qos: '0',
             valueVariableName: 'value',
@@ -74,6 +80,7 @@ export class ConditionalEventDialogComponent implements OnInit {
         this.result.qos = this.result.qos || '0';
         this.result.valueVariableName = this.result.valueVariableName || 'value';
         this.result.script = this.result.script || 'value == 42';
+        this.initialAspectIds = criteriaAspectIds({ aspect_ids: this.result.aspects, aspect_id: this.result.aspect });
     }
 
     ngOnInit() {
@@ -87,7 +94,9 @@ export class ConditionalEventDialogComponent implements OnInit {
     }
 
     save(): void {
-        this.result.aspect = this.aspectFormControl.value || '';
+        const aspectIds = [...this.selectedAspectIds()].sort(compareAspectIds);
+        this.result.aspects = aspectIds;
+        this.result.aspect = deprecatedAspectAlias(aspectIds) || '';
         this.result.iotfunction = this.functionFormControl.value?.id || '';
         this.result.characteristic = this.characteristic?.id || '';
         this.result.label = this.functionFormControl.value.name + ' ' + this.characteristic.name + '\n' + this.result.script;
@@ -98,35 +107,8 @@ export class ConditionalEventDialogComponent implements OnInit {
         return a && b && a.id === b.id && a.name === b.name;
     }
 
-    getRootAspect(): GroupValueFn {
-        return (_, children): any => {
-            children = children as DeviceTypeAspectNodeModelWithRootName[];
-            const id = children[0].root_id;
-            if (id !== undefined) {
-                return { id };
-            }
-            return null;
-        };
-    }
-
-    compareAspectsWith: CompareWithFn = (a: DeviceTypeAspectNodeModelWithRootName | string, b: DeviceTypeAspectNodeModelWithRootName | string) => {
-        const aIsStr = typeof a === 'string' || a instanceof String;
-        const bIsStr = typeof b === 'string' || b instanceof String;
-
-        if (aIsStr && bIsStr) {
-            return a === b;
-        }
-        if (!aIsStr && !bIsStr) {
-            return a.id === b.id;
-        }
-        if (aIsStr) {
-            return a === (b as DeviceTypeAspectNodeModelWithRootName).id;
-        }
-        return a.id === b;
-    };
-
     private initOptions(): void {
-        this.aspectFormControl.setValue(undefined);
+        this.aspectFormControl.setValue([]);
         this.functionFormControl.setValue(undefined);
         this.functionFormControl.disable();
     }
@@ -136,14 +118,29 @@ export class ConditionalEventDialogComponent implements OnInit {
             this.getBaseCharacteristics(func);
         });
 
-        this.aspectFormControl.valueChanges.subscribe((aspectId: string) => {
+        this.aspectFormControl.valueChanges.subscribe(() => {
             this.resetFunctions();
-            this.getAspectFunctions(aspectId);
+            this.getAspectFunctions(this.selectedAspectIds());
         });
     }
 
-    private getAspectFunctions(aspectId: string) {
-        this.deviceTypeService.getAspectsMeasuringFunctionsWithImports(aspectId).subscribe((functions: DeviceTypeFunctionModel[]) => {
+    /**
+     * Several aspects in one criteria are an AND, so only a function offered for every selected aspect
+     * can match. A newer selection cancels the requests of the previous one, which could otherwise
+     * answer last and overwrite its function list.
+     */
+    private getAspectFunctions(aspectIds: string[]) {
+        this.aspectFunctionsSubscription?.unsubscribe();
+        if (aspectIds.length === 0) {
+            this.functions = [];
+            this.functionFormControl.disable();
+            return;
+        }
+        this.aspectFunctionsSubscription = forkJoin(
+            aspectIds.map((id) => this.deviceTypeService.getAspectsMeasuringFunctionsWithImports(id)),
+        ).subscribe((functionLists: DeviceTypeFunctionModel[][]) => {
+            const [first, ...rest] = functionLists;
+            const functions = first.filter((f) => rest.every((list) => list.some((other) => other.id === f.id)));
             this.functions = functions;
 
             // handle init value
@@ -158,22 +155,19 @@ export class ConditionalEventDialogComponent implements OnInit {
         });
     }
 
+    private selectedAspectIds(): string[] {
+        return this.aspectFormControl.value || [];
+    }
+
     private getAspects() {
-        this.deviceTypeService.getAspectNodesWithMeasuringFunction().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
-            const tmp: DeviceTypeAspectNodeModelWithRootName[] = [];
-            aspects.forEach(a => {
-                const t = a as DeviceTypeAspectNodeModelWithRootName;
-                t.root_name = aspects.find(x => x.id === t.root_id)?.name;
-                tmp.push(t);
-            });
-            this.aspects = tmp;
-            // handle init value
-            if (this.result.aspect) {
-                const sel = aspects.find(value => value.id === this.result.aspect);
-                if (sel !== undefined) {
-                    this.aspectFormControl.setValue(sel.id);
-                    this.result.aspect = '';
-                }
+        this.deviceTypeService.getAspectNodesWithMeasuringFunction().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
+            this.aspects = aspectTreeFromAspectNodes(nodes);
+            // handle init value; a selection naming an aspect that is no longer offered opens empty, as the
+            // single select did, rather than narrowed to the remaining aspects without the user noticing
+            const initial = this.initialAspectIds;
+            this.initialAspectIds = [];
+            if (initial.length > 0 && initial.every((id) => nodes.some((node) => node.id === id))) {
+                this.aspectFormControl.setValue(initial);
             }
         });
     }
