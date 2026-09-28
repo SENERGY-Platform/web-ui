@@ -37,6 +37,7 @@ import {
     ExportValueTypes
 } from '../shared/data-table.model';
 import {
+    criteriaAspectIds,
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeDeviceClassModel,
@@ -1321,10 +1322,15 @@ export class DataTableEditDialogComponent implements OnInit {
             this.deviceGroups.forEach(dg => {
                 const criteria: DeviceGroupCriteriaModel[] = [];
                 dg.criteria?.forEach(c => {
-                    ascpectIds.set(c.aspect_id, null);
+                    criteriaAspectIds(c).forEach(id => ascpectIds.set(id, null));
                     functionIds.set(c.function_id, null);
                     deviceClassids.set(c.device_class_id, null);
 
+                    // this picker offers single-aspect choices only; the backend also generates one
+                    // criterion per single aspect (with ancestors), so no aspect is lost by dropping these
+                    if (criteriaAspectIds(c).length > 1) {
+                        return;
+                    }
                     if (criteria.findIndex(c2 => c.aspect_id === c2.aspect_id && c.function_id === c2.function_id && c.device_class_id === c2.device_class_id) === -1) {
                         // filters interaction, irrelevant for widget
                         c.interaction = '';

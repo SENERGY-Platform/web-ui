@@ -136,11 +136,34 @@ export interface DeviceTypeContentVariableModel {
  * added to aspect_ids. Reading through this function keeps the web-ui working against a
  * device-repository that predates the change and still sends aspect_id alone.
  */
-export function contentVariableAspectIds(contentVariable: DeviceTypeContentVariableModel): string[] {
+export function contentVariableAspectIds(contentVariable: { aspect_id?: string | null; aspect_ids?: string[] }): string[] {
     if (contentVariable.aspect_ids !== undefined && contentVariable.aspect_ids !== null) {
         return contentVariable.aspect_ids;
     }
     return contentVariable.aspect_id ? [contentVariable.aspect_id] : [];
+}
+
+/**
+ * Unlike contentVariableAspectIds (what a variable carries, list-first), a criteria states what is demanded,
+ * so both fields count: the union of aspect_ids and the deprecated aspect_id, deduplicated.
+ */
+export function criteriaAspectIds(criteria: { aspect_id?: string | null; aspect_ids?: string[] }): string[] {
+    const ids = criteria.aspect_ids !== undefined && criteria.aspect_ids !== null ? [...criteria.aspect_ids] : [];
+    if (criteria.aspect_id && ids.indexOf(criteria.aspect_id) === -1) {
+        ids.push(criteria.aspect_id);
+    }
+    return ids;
+}
+
+/**
+ * The alias the device-repository derives for a deprecated singular aspect field from its list
+ * counterpart: the alphabetically first id, or undefined for an empty list.
+ */
+export function deprecatedAspectAlias(aspectIds: string[]): string | undefined {
+    if (aspectIds.length === 0) {
+        return undefined;
+    }
+    return [...aspectIds].sort((a, b) => a.localeCompare(b))[0];
 }
 
 export interface DeviceTypeConceptModel {

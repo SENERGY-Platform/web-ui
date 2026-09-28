@@ -34,7 +34,9 @@ export interface DeviceGroupDisplayModel extends DeviceGroupModel{
 export interface DeviceGroupCriteriaModel {
     interaction: string;
     function_id: string;
+    /** @deprecated use aspect_ids */
     aspect_id: string;
+    aspect_ids?: string[];
     device_class_id: string;
 }
 

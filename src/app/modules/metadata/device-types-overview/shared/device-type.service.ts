@@ -21,6 +21,7 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, concatMap, map } from 'rxjs/operators';
 import { forkJoin, Observable, of } from 'rxjs';
 import {
+    contentVariableAspectIds,
     DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel,
     DeviceTypeDeviceClassModel,
@@ -331,9 +332,10 @@ export class DeviceTypeService {
         if (!contentVariable) {
             return [];
         }
-        const criteria: { function_id?: string; aspect_id?: string }[] = [
-            { function_id: contentVariable.function_id, aspect_id: contentVariable.aspect_id },
-        ];
+        // one entry per aspect, since each entry here carries a single aspect_id
+        const aspectIds = contentVariableAspectIds(contentVariable);
+        const criteria: { function_id?: string; aspect_id?: string }[] = (aspectIds.length > 0 ? aspectIds : [undefined])
+            .map((aspect_id) => ({ function_id: contentVariable.function_id, aspect_id }));
         return criteria.concat((contentVariable.sub_content_variables || []).flatMap((sub) => this.contentVariableCriteria(sub)));
     }
 

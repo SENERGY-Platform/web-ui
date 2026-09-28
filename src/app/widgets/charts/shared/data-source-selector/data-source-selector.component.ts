@@ -22,7 +22,7 @@ import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/sh
 import { ExportModel, ExportResponseModel, ExportValueModel } from 'src/app/modules/exports/shared/export.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
-import { DeviceTypeAspectModel, DeviceTypeContentVariableModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { contentVariableAspectIds, criteriaAspectIds, deprecatedAspectAlias, DeviceTypeAspectModel, DeviceTypeContentVariableModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
 import { ChartsExportMeasurementDisplayModel, ChartsExportVAxesModel } from '../../export/shared/charts-export-properties.model';
 import { environment } from 'src/environments/environment';
@@ -430,8 +430,12 @@ export class DataSourceSelectorComponent implements OnInit {
                         for (let i = 0; i < pathParts.length; i++) {
                             contentVariable = contentVariable?.sub_content_variables?.find(s => s.name === pathParts[i]);
                         }
+                        // single aspect only: adding aspect_ids here would AND every aspect of the variable
+                        // into the query and drop devices carrying only one of them
+                        const aspectId = contentVariable?.aspect_id ||
+                            deprecatedAspectAlias(contentVariable !== undefined ? contentVariableAspectIds(contentVariable) : []) || '';
                         f.criteria = {
-                            aspect_id: contentVariable?.aspect_id || '',
+                            aspect_id: aspectId,
                             device_class_id: deviceType.device_class_id,
                             function_id: contentVariable?.function_id || '',
                             interaction: service?.interaction || '',
@@ -672,14 +676,18 @@ export class DataSourceSelectorComponent implements OnInit {
                 const deviceGroups = deviceGroupsResult.result;
                 deviceGroups.forEach(dg => {
                     const criteria: DeviceGroupCriteriaModel[] = [];
-                    dg.criteria?.forEach(c => {
-                        if (criteria.findIndex(c2 => c.aspect_id === c2.aspect_id && c.function_id === c2.function_id) === -1) {
-                            // filters interaction and device class, irrelevant for widget
-                            c.interaction = '';
-                            c.device_class_id = '';
-                            criteria.push(c);
-                        }
-                    });
+                    dg.criteria
+                        // this widget offers single-aspect choices only; the backend also generates one
+                        // criterion per single aspect (with ancestors), so no aspect is lost by dropping these
+                        ?.filter(c => criteriaAspectIds(c).length <= 1)
+                        .forEach(c => {
+                            if (criteria.findIndex(c2 => c.aspect_id === c2.aspect_id && c.function_id === c2.function_id) === -1) {
+                                // filters interaction and device class, irrelevant for widget
+                                c.interaction = '';
+                                c.device_class_id = '';
+                                criteria.push(c);
+                            }
+                        });
                     dg.criteria = criteria;
                 });
 
@@ -1165,7 +1173,7 @@ export class DataSourceSelectorComponent implements OnInit {
             const deviceClassIds: string[] = [];
             selectedDeviceGroups.forEach((deviceGroup: DeviceGroupDisplayModel) => {
                 deviceGroup.criteria?.forEach(criteria => {
-                    if (criteria.aspect_id !== '') aspectIds.push(criteria.aspect_id);
+                    aspectIds.push(...criteriaAspectIds(criteria));
                     if (criteria.device_class_id !== '') deviceClassIds.push(criteria.device_class_id);
                 });
             });

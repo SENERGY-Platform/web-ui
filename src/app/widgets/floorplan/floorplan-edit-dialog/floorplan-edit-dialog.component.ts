@@ -25,7 +25,7 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
-import { DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { criteriaAspectIds, DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
 import {
@@ -516,10 +516,16 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     this.draw();
   }
 
-  /** Drops the interaction, which the widget does not distinguish, and the duplicates that creates */
+  /**
+   * Drops the interaction, which the widget does not distinguish, and the duplicates that creates. Also
+   * drops criteria combining more than one aspect: this dialog offers single-aspect choices only, and the
+   * backend also generates one criterion per single aspect (with ancestors), so no aspect is lost.
+   */
   private filterCriteria(d: DeviceGroupModel) {
     d.criteria?.forEach(c => c.interaction = '');
-    d.criteria = d.criteria?.filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i);
+    d.criteria = d.criteria
+      ?.filter(c => criteriaAspectIds(c).length <= 1)
+      .filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i);
   }
 
   criteriaIsNumeric(tab: FormGroup): boolean {

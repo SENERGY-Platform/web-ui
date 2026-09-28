@@ -18,6 +18,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     contentVariableAspectIds,
+    deprecatedAspectAlias,
     DeviceTypeAspectClassModel,
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel,
@@ -354,11 +355,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     // aspect_id is derived the same way the device-repository derives it on read, so that an aspect
     // the user removed here is not added back to aspect_ids when the device-type is written.
     private deprecatedAspectId(): string | null {
-        const aspectIds: string[] = this.firstFormGroup.get('aspect_ids')?.value || [];
-        if (aspectIds.length === 0) {
-            return null;
-        }
-        return [...aspectIds].sort((a, b) => a.localeCompare(b))[0];
+        return deprecatedAspectAlias(this.firstFormGroup.get('aspect_ids')?.value || []) || null;
     }
 
     /**

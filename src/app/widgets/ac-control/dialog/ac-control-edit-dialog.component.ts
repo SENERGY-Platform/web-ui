@@ -24,7 +24,7 @@ import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.mo
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import {DeviceSelectablesFullModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
-import {DeviceTypeContentVariableModel} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+import {contentVariableAspectIds, criteriaAspectIds, deprecatedAspectAlias, DeviceTypeContentVariableModel} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import {environment} from '../../../../environments/environment';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 import {map} from 'rxjs/operators';
@@ -151,15 +151,19 @@ export class AcControlEditDialogComponent implements OnInit {
             this.widget.properties.acControl.deviceGroupId = selectable.device_group.id;
             observableMappings = this.deviceGroupsService.getDeviceGroup(selectable.device_group.id).pipe(map(group => {
                 const mappings: Map<string, { aspectId: string }[]> = new Map();
-                group?.criteria?.forEach(c => {
-                    if (!mappings.has(c.function_id)) {
-                        mappings.set(c.function_id, []);
-                    }
-                    if (mappings.get(c.function_id)?.findIndex(m => m.aspectId === c.aspect_id) !== -1) {
-                        return; // no duplicates based on interaction
-                    }
-                    mappings.get(c.function_id)?.push({aspectId: c.aspect_id});
-                });
+                group?.criteria
+                    // this widget offers single-aspect choices only; the backend also generates one
+                    // criterion per single aspect (with ancestors), so no aspect is lost by dropping these
+                    ?.filter(c => criteriaAspectIds(c).length <= 1)
+                    .forEach(c => {
+                        if (!mappings.has(c.function_id)) {
+                            mappings.set(c.function_id, []);
+                        }
+                        if (mappings.get(c.function_id)?.findIndex(m => m.aspectId === c.aspect_id) !== -1) {
+                            return; // no duplicates based on interaction
+                        }
+                        mappings.get(c.function_id)?.push({aspectId: c.aspect_id});
+                    });
                 return mappings;
             }));
         }
@@ -278,14 +282,16 @@ export class AcControlEditDialogComponent implements OnInit {
         }
         const functionId = functionIds.find(f => f === field.function_id);
         if (functionId !== undefined) {
-            const f = {serviceId, aspectId: field.aspect_id || ''};
-             
+            // one entry per content variable: each entry becomes one device command, and this widget
+            // sends it against a single aspect, the alias the device-repository derives on read
+            const f = {serviceId, aspectId: field.aspect_id || deprecatedAspectAlias(contentVariableAspectIds(field)) || ''};
+
             if (results.has(field.function_id!)) {
-                 
+
                 results.get(field.function_id!)?.push(f);
             } else {
                 if (field.function_id != null) {
-                     
+
                     results.set(field.function_id!, [f]);
                 }
             }

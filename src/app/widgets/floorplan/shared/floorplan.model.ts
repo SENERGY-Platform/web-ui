@@ -18,6 +18,7 @@ import { DeviceCommandModel, DeviceCommandResponseModel } from 'src/app/core/ser
 import { environment } from 'src/environments/environment';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import {
+    contentVariableAspectIds,
     DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeContentVariableModel,
@@ -183,20 +184,26 @@ export function serviceGroupFunctions(deviceType: DeviceTypeModel): ServiceGroup
         }
         const path = parentPath === '' ? variable.name || '' : parentPath + '.' + (variable.name || '');
         if (variable.function_id !== undefined && variable.function_id !== null) {
-            const entry: ServiceGroupFunctionModel = {
-                deviceTypeId: deviceType.id,
-                deviceTypeName: deviceType.name,
-                serviceGroupKey: service.service_group_key || '',
-                serviceId: service.id,
-                serviceName: service.name,
-                path,
-                isInput,
-                functionId: variable.function_id,
-                aspectId: variable.aspect_id || '',
-            };
-            if (!result.some(r => r.serviceId === entry.serviceId && r.path === entry.path && r.functionId === entry.functionId)) {
-                result.push(entry);
-            }
+            // ServiceGroupFunctionModel carries one aspect per entry, so a variable with several aspects
+            // becomes several entries instead of silently keeping only the first.
+            const aspectIds = contentVariableAspectIds(variable);
+            (aspectIds.length > 0 ? aspectIds : ['']).forEach(aspectId => {
+                const entry: ServiceGroupFunctionModel = {
+                    deviceTypeId: deviceType.id,
+                    deviceTypeName: deviceType.name,
+                    serviceGroupKey: service.service_group_key || '',
+                    serviceId: service.id,
+                    serviceName: service.name,
+                    path,
+                    isInput,
+                    functionId: variable.function_id as string,
+                    aspectId,
+                };
+                if (!result.some(r => r.serviceId === entry.serviceId && r.path === entry.path &&
+                    r.functionId === entry.functionId && r.aspectId === entry.aspectId)) {
+                    result.push(entry);
+                }
+            });
         }
         variable.sub_content_variables?.forEach(sub => collect(service, isInput, path, sub));
     };

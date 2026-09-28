@@ -27,7 +27,7 @@ import {
 } from '../shared/device-groups.model';
 import { Attribute, DeviceInstancesBaseModel } from '../../device-instances/shared/device-instances.model';
 import { debounceTime, delay } from 'rxjs/operators';
-import { DeviceTypeAspectModel, DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { criteriaAspectIds, DeviceTypeAspectModel, DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
 import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/pipeline-registry.service';
@@ -308,6 +308,9 @@ export class DeviceGroupsEditComponent implements OnInit {
 
     private updateCapabilities(criteria: DeviceGroupCriteriaModel[]) {
         const that = this;
+        // one capability per aspect only; a criteria combining several is dropped, the backend also
+        // generates one criterion per single aspect (with ancestors), so no aspect is lost by dropping these
+        criteria = criteria.filter((c) => criteriaAspectIds(c).length <= 1);
         const functionIds = [];
         const aspectIds = [];
         const deviceClassIds = [];

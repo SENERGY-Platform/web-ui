@@ -57,7 +57,7 @@ import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
-import { DeviceTypeAspectNodeModel, DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeCharacteristicsModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { criteriaAspectIds, DeviceTypeAspectNodeModel, DeviceTypeFunctionModel, DeviceTypeDeviceClassModel, DeviceTypeCharacteristicsModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { ConnectionHistoryDialogComponent } from '../shared/connection-history-dialog/connection-history-dialog.component';
@@ -709,7 +709,11 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
     const deviceGroupIds = this.widget.properties.floorplan?.placements.map(p => p.deviceGroupId).filter(dId => dId !== null).filter(dId => this.deviceGroups.find(dg => dg.id === dId) === undefined).filter((v, i, a) => a.indexOf(v) === i);
     if (deviceGroupIds !== undefined && deviceGroupIds?.length > 0) {
       return this.deviceGroupsService.getDeviceGroupListByIds(deviceGroupIds as string[], true).pipe(map(dgs => {
-        dgs.forEach(dg => dg.criteria = dg.criteria?.filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i));
+        dgs.forEach(dg => dg.criteria = dg.criteria
+          // the backend also generates one criterion per single aspect (with ancestors), so dropping the
+          // combined ones here loses no aspect - it only drops the choice this single-aspect UI cannot offer
+          ?.filter(c => criteriaAspectIds(c).length <= 1)
+          .filter((v, i, a) => a.findIndex(v2 => this.compareCriteria(v, v2)) === i));
         this.deviceGroups.push(...(dgs as DeviceGroupWithValueModel[]));
         return null;
       }));

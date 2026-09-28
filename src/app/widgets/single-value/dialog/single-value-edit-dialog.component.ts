@@ -25,7 +25,7 @@ import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DeviceInstanceModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
-import { DeviceTypeAspectModel, DeviceTypeCharacteristicsModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeServiceModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+import { criteriaAspectIds, DeviceTypeAspectModel, DeviceTypeCharacteristicsModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeServiceModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { ChartsExportRequestPayloadGroupModel } from '../../charts/export/shared/charts-export-request-payload.model';
@@ -401,7 +401,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             const obs: Observable<any>[] = [];
             this.deviceGroups.forEach(dg => {
                 dg.criteria?.forEach(c => {
-                    ascpectIds.set(c.aspect_id, null);
+                    criteriaAspectIds(c).forEach(id => ascpectIds.set(id, null));
                     functionIds.set(c.function_id, null);
                     deviceClassids.set(c.device_class_id, null);
                     c.interaction = '';
@@ -505,7 +505,10 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     getCriteria(): DeviceGroupCriteriaModel[] {
         const id = this.form.get('deviceGroupId')?.value;
-        return this.deviceGroups.find(dg => dg.id === id)?.criteria || [];
+        const criteria = this.deviceGroups.find(dg => dg.id === id)?.criteria || [];
+        // this picker offers single-aspect choices only; the backend also generates one criterion per
+        // single aspect (with ancestors), so no aspect is lost by dropping the combined ones here
+        return criteria.filter(c => criteriaAspectIds(c).length <= 1);
     }
 
     describeCriteria(): (criteria: DeviceGroupCriteriaModel) => string {

@@ -59,7 +59,9 @@ export interface DeviceInstanceWithDeviceTypeModel extends DeviceInstanceModel {
 export interface DeviceFilterCriteriaModel {
     function_id?: string;
     device_class_id?: string;
+    /** @deprecated use aspect_ids */
     aspect_id?: string;
+    aspect_ids?: string[];
     interaction?: string;
 }
 

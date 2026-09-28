@@ -41,7 +41,9 @@ export interface ImportTypeContentVariableModel {
     characteristic_id?: string;
     sub_content_variables: ImportTypeContentVariableModel[] | null;
     use_as_tag: boolean;
+    /** @deprecated use aspect_ids */
     aspect_id?: string;
+    aspect_ids?: string[];
     function_id?: string;
 }
 
