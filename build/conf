@@ -4,7 +4,17 @@ server {
   index index.html;
   root /usr/share/nginx/html;
 
-  location / {    
-    try_files $uri $uri/ /index.html =404;
+  location / {
+    # /index.html as a URI, not a file, so deep links end up in the location below
+    try_files $uri $uri/ /index.html;
+  }
+
+  # not content-hashed, so a browser has to revalidate them to pick up a release
+  location = /index.html {
+    add_header Cache-Control "no-cache";
+  }
+
+  location = /assets/env.js {
+    add_header Cache-Control "no-cache";
   }
 }
