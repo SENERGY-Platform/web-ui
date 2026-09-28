@@ -19,10 +19,11 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {Router} from '@angular/router';
 import {ConceptsService} from './shared/concepts.service';
-import {forkJoin, Observable, Subscription, map} from 'rxjs';
+import {forkJoin, Observable, of, Subscription, map} from 'rxjs';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ConceptsEditDialogComponent} from './dialogs/concepts-edit-dialog.component';
-import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
+import {DeviceTypeConceptModel, DeviceTypeFunctionModel} from '../device-types-overview/shared/device-type.model';
+import {FunctionsService} from '../functions/shared/functions.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
 import {Sort, SortDirection} from '@angular/material/sort';
@@ -59,6 +60,7 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
         private router: Router,
         private searchbarService: SearchbarService,
         private conceptsService: ConceptsService,
+        private functionsService: FunctionsService,
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
         private preferencesService: PreferencesService,
@@ -167,23 +169,69 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     deleteConcept(concept: DeviceTypeConceptModel): void {
-        this.dialogsService
-            .openDeleteDialog('concept ' + concept.name)
-            .afterClosed()
-            .subscribe((deleteConcept: boolean) => {
-                if (deleteConcept) {
-                    this.ready = false;
-                    this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
-                        if (resp === true) {
-                            this.concepts.splice(this.concepts.indexOf(concept), 1);
-                            this.snackBar.open('Concept deleted successfully.', undefined, { duration: 2000 });
-                        } else {
-                            this.snackBar.open('Error while deleting the concept!', 'close', { panelClass: 'snack-bar-error' });
-                        }
-                        this.reload();
-                    });
-                }
-            });
+        this.functionsByConceptId([concept.id]).subscribe((byConcept) => {
+            const functions = byConcept.get(concept.id) || [];
+            if (functions.length > 0) {
+                this.reportBlockedDeletes([{ concept, functions }]);
+                return;
+            }
+            this.dialogsService
+                .openDeleteDialog('concept ' + concept.name)
+                .afterClosed()
+                .subscribe((deleteConcept: boolean) => {
+                    if (deleteConcept) {
+                        this.ready = false;
+                        this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
+                            if (resp === true) {
+                                this.concepts.splice(this.concepts.indexOf(concept), 1);
+                                this.snackBar.open('Concept deleted successfully.', undefined, { duration: 2000 });
+                            } else {
+                                this.snackBar.open('Error while deleting the concept!', 'close', { panelClass: 'snack-bar-error' });
+                            }
+                            this.reload();
+                        });
+                    }
+                });
+        });
+    }
+
+    /**
+     * The device-repository refuses to delete a concept while a function still references it, grouped by
+     * concept_id from one request rather than one request per concept.
+     */
+    private functionsByConceptId(conceptIds: string[]): Observable<Map<string, DeviceTypeFunctionModel[]>> {
+        return this.functionsService.getFunctionsByConceptIds(conceptIds).pipe(
+            map((functions) => {
+                const byConcept = new Map<string, DeviceTypeFunctionModel[]>();
+                functions.forEach((f) => {
+                    const list = byConcept.get(f.concept_id) || [];
+                    list.push(f);
+                    byConcept.set(f.concept_id, list);
+                });
+                return byConcept;
+            }),
+        );
+    }
+
+    /**
+     * Names the functions blocking each concept and, if some deletions failed outright, says how many -
+     * both can happen in the same bulk delete. Offers to jump to the functions page to clean the blockers up.
+     */
+    private reportBlockedDeletes(blocked: { concept: DeviceTypeConceptModel; functions: DeviceTypeFunctionModel[] }[], failedCount = 0): void {
+        const parts: string[] = [];
+        if (blocked.length > 0) {
+            const detail = blocked
+                .map((b) => b.concept.name + ' (used by ' + b.functions.map((f) => f.display_name || f.name).join(', ') + ')')
+                .join('; ');
+            parts.push('Still in use, not deleted: ' + detail);
+        }
+        if (failedCount > 0) {
+            parts.push(failedCount + (failedCount > 1 ? ' concepts' : ' concept') + ' could not be deleted.');
+        }
+        this.snackBar
+            .open(parts.join(' '), 'View functions', { panelClass: 'snack-bar-error' })
+            .onAction()
+            .subscribe(() => this.router.navigateByUrl('/metadata/functions'));
     }
 
     showCharacteristics(concept: DeviceTypeConceptModel) {
@@ -237,27 +285,32 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     deleteMultipleItems() {
-        const deletionJobs: Observable<any>[] = [];
+        const selected = [...this.selection.selected];
 
         this.dialogsService
-            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' concepts' : ' concept'))
+            .openDeleteDialog(selected.length + (selected.length > 1 ? ' concepts' : ' concept'))
             .afterClosed()
             .subscribe((deleteConcepts: boolean) => {
-                if (deleteConcepts) {
-                    this.ready = false;
-                    this.selection.selected.forEach((concept: DeviceTypeConceptModel) => {
-                        deletionJobs.push(this.conceptsService.deleteConcept(concept.id));
-                    });
+                if (!deleteConcepts) {
+                    return;
                 }
+                this.ready = false;
+                this.functionsByConceptId(selected.map((concept) => concept.id)).subscribe((byConcept) => {
+                    const blocked = selected
+                        .map((concept) => ({ concept, functions: byConcept.get(concept.id) || [] }))
+                        .filter((c) => c.functions.length > 0);
+                    const unblocked = selected.filter((concept) => (byConcept.get(concept.id) || []).length === 0);
+                    const deletionJobs: Observable<boolean>[] = unblocked.map((concept) => this.conceptsService.deleteConcept(concept.id));
 
-                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                    const ok = deletionJobResults.every((r: boolean) => r === true);
-                    if (ok) {
-                        this.snackBar.open('Concepts deleted successfully.', undefined, {duration: 2000});
-                    } else {
-                        this.snackBar.open('Error while deleting concepts!', 'close', {panelClass: 'snack-bar-error'});
-                    }
-                    this.reload();
+                    (deletionJobs.length > 0 ? forkJoin(deletionJobs) : of([])).subscribe((deletionJobResults) => {
+                        const failedCount = deletionJobResults.filter((r) => r !== true).length;
+                        if (blocked.length > 0 || failedCount > 0) {
+                            this.reportBlockedDeletes(blocked, failedCount);
+                        } else {
+                            this.snackBar.open('Concepts deleted successfully.', undefined, {duration: 2000});
+                        }
+                        this.reload();
+                    });
                 });
             });
     }

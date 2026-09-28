@@ -76,6 +76,17 @@ export class FunctionsService {
             .pipe(catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunction', null)));
     }
 
+    /** The functions referencing any of the given concepts, e.g. to explain a concept delete the device-repository refused. */
+    getFunctionsByConceptIds(conceptIds: string[]): Observable<DeviceTypeFunctionModel[]> {
+        return this.http
+            .get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/functions?concept_ids=' +
+                conceptIds.map(encodeURIComponent).join(',') + '&limit=9999')
+            .pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctionsByConceptIds', [])),
+            );
+    }
+
     updateFunction(func: DeviceTypeFunctionModel): Observable<DeviceTypeFunctionModel | null> {
         return this.http
             .put<DeviceTypeFunctionModel>(environment.deviceRepoUrl + '/functions/' + func.id , func)

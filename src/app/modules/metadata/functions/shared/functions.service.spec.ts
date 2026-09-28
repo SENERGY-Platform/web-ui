@@ -84,3 +84,50 @@ describe('FunctionsService delete', () => {
         httpMock.expectOne(deleteUrl).flush('still in use', { status: 400, statusText: 'Bad Request' });
     });
 });
+
+describe('FunctionsService getFunctionsByConceptIds', () => {
+    let service: FunctionsService;
+    let httpMock: HttpTestingController;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [MatDialogModule, MatSnackBarModule],
+            providers: [
+                FunctionsService,
+                { provide: LadonService, useClass: MockLadonService },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        });
+        service = TestBed.inject(FunctionsService);
+        httpMock = TestBed.inject(HttpTestingController);
+    });
+
+    afterEach(() => {
+        httpMock.verify();
+    });
+
+    it('requests the functions of every given concept in one call, comma-joined', (done) => {
+        const conceptIds = ['urn:infai:ses:concept:temp', 'urn:infai:ses:concept:humidity'];
+        service.getFunctionsByConceptIds(conceptIds).subscribe(resp => {
+            expect(resp.length).toBe(1);
+            done();
+        });
+        const req = httpMock.expectOne(environment.deviceRepoUrl + '/functions?concept_ids=' +
+            conceptIds.map(encodeURIComponent).join(',') + '&limit=9999');
+        expect(req.request.method).toBe('GET');
+        req.flush([{ id: 'f1', name: 'Get-Temperature', display_name: '', description: '', rdf_type: '', concept_id: conceptIds[0] }]);
+    });
+
+    it('falls back to an empty list when the request fails', (done) => {
+        const conceptIds = ['urn:infai:ses:concept:temp'];
+        service.getFunctionsByConceptIds(conceptIds).subscribe(resp => {
+            expect(resp).toEqual([]);
+            done();
+        });
+        httpMock.expectOne(environment.deviceRepoUrl + '/functions?concept_ids=' +
+            conceptIds.map(encodeURIComponent).join(',') + '&limit=9999')
+            .flush('error', { status: 500, statusText: 'Internal Server Error' });
+    });
+});
