@@ -63,7 +63,6 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
 
     topics = notificationTopicInfos;
     channels = notificationChannelInfos;
-    docsUrl = 'https://bitnify.atlassian.net/wiki/spaces/SES/pages/194084879/Notifications';
 
     settingsReady = false;
     loadFailed = false;

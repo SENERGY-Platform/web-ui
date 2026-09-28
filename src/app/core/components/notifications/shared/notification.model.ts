@@ -80,10 +80,6 @@ export interface NotificationTopicInfo {
     legacy?: boolean;
 }
 
-/**
- * Descriptions and usage taken from the platform documentation:
- * https://bitnify.atlassian.net/wiki/spaces/SES/pages/194084879/Notifications
- */
 export const notificationTopicInfos: NotificationTopicInfo[] = [
     {
         topic: notificationTopicProcesses,
@@ -168,10 +164,6 @@ export interface NotificationChannelInfo {
     caveat?: string;
 }
 
-/**
- * Channel behaviour taken from the platform documentation:
- * https://bitnify.atlassian.net/wiki/spaces/SES/pages/194084879/Notifications
- */
 export const notificationChannelInfos: NotificationChannelInfo[] = [
     {
         channel: 'websoket',
