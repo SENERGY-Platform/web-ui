@@ -63,6 +63,10 @@ export interface ReportObjectModelQueryOptions {
     endOffset: number | undefined;
     resultObject: string | undefined;
     resultKey: number | undefined;
+    /** Only set for a device group query, where the result is either one aggregated value or one per device. */
+    deviceGroupMode?: 'aggregate' | 'per_device';
+    /** Only set for a device group query in aggregate mode. */
+    aggregation?: 'sum' | 'mean';
 }
 
 export interface ReportListResponseModel {

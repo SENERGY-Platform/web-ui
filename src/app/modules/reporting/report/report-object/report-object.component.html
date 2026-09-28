@@ -45,7 +45,7 @@
     </div>
 
     <senergy-reporting-query-editor *ngIf="inputType === 'query' && queryForm !== undefined" [form]="queryForm!"
-        [allDevices]="allDevices">
+        [allDevices]="allDevices" [allDeviceGroups]="allDeviceGroups" [valueType]="node.data.valueType">
     </senergy-reporting-query-editor>
 
     <div *ngIf="inputType === 'devices'" formGroupName="deviceQuery" fxLayout="column">

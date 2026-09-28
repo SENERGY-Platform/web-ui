@@ -42,6 +42,7 @@ import {
 } from '../shared/reporting.model';
 import { CoreModule } from '../../../core/core.module';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
+import { DeviceGroupsService } from '../../devices/device-groups/shared/device-groups.service';
 import { ReportObjectViewService } from '../shared/report-object-view.service';
 import { findNode } from '../shared/report-object-node';
 
@@ -137,6 +138,12 @@ class MockDeviceInstancesService {
     }
 }
 
+class MockDeviceGroupsService {
+    getDeviceGroups(): Observable<{ result: any[]; total: number }> {
+        return of({ result: [], total: 0 });
+    }
+}
+
 describe('ReportComponent', () => {
     let component: ReportComponent;
     let fixture: ComponentFixture<ReportComponent>;
@@ -164,6 +171,7 @@ describe('ReportComponent', () => {
             providers: [
                 { provide: ReportingService, useClass: MockReportingService },
                 { provide: DeviceInstancesService, useClass: MockDeviceInstancesService },
+                { provide: DeviceGroupsService, useClass: MockDeviceGroupsService },
                 { provide: Router, useValue: router },
                 { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap(params) } } },
             ]

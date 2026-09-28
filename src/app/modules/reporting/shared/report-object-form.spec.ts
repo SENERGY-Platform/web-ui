@@ -19,6 +19,7 @@ import {
     DynamicFormGroup,
     ReportValidationError,
     applyInputType,
+    applyQuerySource,
     buildReportObjectForm,
     buildReportObjectsForm,
     collectValidationErrors,
@@ -31,6 +32,7 @@ import {
     splitDuration,
     supportsQuery
 } from './report-object-form';
+import { DeviceGroupCriteriaModel } from '../../devices/device-groups/shared/device-groups.model';
 
 const completeQuery = () => ({
     columns: [{ name: 'root.value', groupType: 'mean' }],
@@ -57,6 +59,44 @@ const queryObject = (query: any = completeQuery()): ReportObjectModel => ({
         endOffset: undefined,
         resultObject: 'key',
         resultKey: 2,
+    },
+});
+
+const groupCriteria: DeviceGroupCriteriaModel = {
+    function_id: 'f1', aspect_id: 'a1', device_class_id: '', interaction: 'event',
+};
+
+const completeGroupQuery = () => ({
+    columns: [{ criteria: groupCriteria, groupType: 'mean' }],
+    deviceGroupId: 'g1',
+    groupTime: '30months',
+    orderColumnIndex: 1,
+    orderDirection: 'asc' as const,
+    time: { last: '7d' },
+});
+
+const aggregateQueryNoGrouping = () => ({
+    columns: [{ criteria: groupCriteria }],
+    deviceGroupId: 'g1',
+});
+
+const groupQueryObject = (query: any = completeGroupQuery(), valueType = 'array'): ReportObjectModel => ({
+    name: 'consumption',
+    valueType,
+    value: undefined,
+    fields: undefined,
+    children: undefined,
+    length: undefined,
+    query,
+    queryOptions: {
+        rollingStartDate: undefined,
+        rollingEndDate: undefined,
+        startOffset: undefined,
+        endOffset: undefined,
+        resultObject: undefined,
+        resultKey: undefined,
+        deviceGroupMode: 'per_device',
+        aggregation: 'mean',
     },
 });
 
@@ -105,6 +145,27 @@ describe('report object form', () => {
             expect(query?.controls['timeframeUnit'].value).toBe('d');
         });
 
+        it('should detect the device group source of the query and disable the device fields', () => {
+            const query = groupOf(buildReportObjectForm(groupQueryObject()), 'query');
+
+            expect(query?.controls['source'].value).toBe('group');
+            expect(query?.controls['deviceGroupId'].enabled).toBe(true);
+            expect(query?.controls['criteria'].value).toEqual(groupCriteria);
+            expect(query?.controls['device'].enabled).toBe(false);
+        });
+
+        it('should keep the per-device mode of a saved query for an array object', () => {
+            const query = groupOf(buildReportObjectForm(groupQueryObject()), 'query');
+
+            expect(query?.controls['deviceGroupMode'].value).toBe('per_device');
+        });
+
+        it('should fix the device group mode to aggregate for a non-array object', () => {
+            const query = groupOf(buildReportObjectForm(groupQueryObject(completeGroupQuery(), 'float64')), 'query');
+
+            expect(query?.controls['deviceGroupMode'].value).toBe('aggregate');
+        });
+
         it('should build nested forms for fields and children', () => {
             const object = {
                 name: 'table', valueType: 'array', length: 1,
@@ -128,6 +189,55 @@ describe('report object form', () => {
             expect(form.valid).toBe(false);
             expect(fields(collectValidationErrors(buildReportObjectsForm({ a: queryObject({}) }))))
                 .toEqual(['Device', 'Service', 'Path']);
+        });
+
+        it('should require the device group and criteria in group mode', () => {
+            const incomplete = groupQueryObject({ ...completeGroupQuery(), deviceGroupId: '', columns: [{}] });
+            const form = buildReportObjectForm(incomplete);
+
+            expect(form.valid).toBe(false);
+            expect(fields(collectValidationErrors(buildReportObjectsForm({ a: incomplete }))))
+                .toEqual(['Device Group', 'Criteria']);
+        });
+
+        it('should not require the device fields in group mode', () => {
+            expect(buildReportObjectForm(groupQueryObject()).valid).toBe(true);
+        });
+
+        it('should reject a group query in aggregate mode without a grouping time or a limit of 1', () => {
+            const object = groupQueryObject(aggregateQueryNoGrouping(), 'float64');
+
+            const form = buildReportObjectForm(object);
+
+            expect(form.valid).toBe(false);
+            const errors = collectValidationErrors(buildReportObjectsForm({ a: object }));
+            expect(fields(errors)).toEqual(['Grouping Time']);
+            expect(errors[0].message)
+                .toBe('Aggregating a device group needs a grouping time, or a limit of 1 for the latest value');
+        });
+
+        it('should accept a group query in aggregate mode with a grouping time', () => {
+            const object = groupQueryObject({ ...aggregateQueryNoGrouping(), groupTime: '1h' }, 'float64');
+
+            expect(buildReportObjectForm(object).valid).toBe(true);
+        });
+
+        it('should accept a group query in aggregate mode with a limit of 1 and no grouping time', () => {
+            const object = groupQueryObject({ ...aggregateQueryNoGrouping(), limit: 1 }, 'float64');
+
+            expect(buildReportObjectForm(object).valid).toBe(true);
+        });
+
+        it('should not apply the aggregate-grouping rule to a per-device group query', () => {
+            const object = groupQueryObject(aggregateQueryNoGrouping());
+
+            expect(buildReportObjectForm(object).valid).toBe(true);
+        });
+
+        it('should not apply the aggregate-grouping rule to a single-device query', () => {
+            const object = queryObject({ ...completeQuery(), groupTime: undefined });
+
+            expect(buildReportObjectForm(object).valid).toBe(true);
         });
 
         it('should report the message and the path of every missing input', () => {
@@ -223,6 +333,98 @@ describe('report object form', () => {
             expect(result.query?.orderDirection).toBe('asc');
             expect(result.queryOptions?.resultObject).toBe('key');
             expect(result.queryOptions?.resultKey).toBe(2);
+        });
+
+        it('should build a device group query from the form', () => {
+            const object = groupQueryObject();
+            const form = buildReportObjectForm(object);
+
+            const result = reportObjectFromForm(object, form);
+
+            expect(result.query?.deviceGroupId).toBe('g1');
+            expect(result.query?.deviceId).toBeUndefined();
+            expect(result.query?.serviceId).toBeUndefined();
+            expect(result.query?.columns[0].criteria).toEqual(groupCriteria);
+            expect(result.query?.columns[0].name).toBeUndefined();
+            expect(result.query?.columns[0].groupType).toBe('mean');
+            expect(result.queryOptions?.deviceGroupMode).toBe('per_device');
+            expect(result.queryOptions?.aggregation).toBe('mean');
+        });
+
+        it('should not send the device group options for a single-device query', () => {
+            const object = queryObject();
+
+            const result = reportObjectFromForm(object, buildReportObjectForm(object));
+
+            expect(result.query?.deviceGroupId).toBeUndefined();
+            expect(result.queryOptions?.deviceGroupMode).toBeUndefined();
+            expect(result.queryOptions?.aggregation).toBeUndefined();
+        });
+
+        it('should not send the sorting index for a device group query in aggregate mode, even if one was ' +
+            'set before switching the source', () => {
+            const object = queryObject({ ...completeQuery(), orderColumnIndex: 2 });
+            const form = buildReportObjectForm(object);
+            const query = groupOf(form, 'query')!;
+
+            query.controls['source'].setValue('group');
+            applyQuerySource(query);
+            query.controls['deviceGroupId'].setValue('g1');
+            query.controls['criteria'].setValue(groupCriteria);
+            query.controls['deviceGroupMode'].setValue('aggregate');
+
+            const result = reportObjectFromForm(object, form);
+
+            expect(result.query?.orderColumnIndex).toBeUndefined();
+            expect(result.query?.deviceGroupId).toBe('g1');
+        });
+
+        it('should not send the sorting index for a group query saved in aggregate mode', () => {
+            const object = groupQueryObject({ ...completeGroupQuery(), orderColumnIndex: 4 }, 'float64');
+
+            const result = reportObjectFromForm(object, buildReportObjectForm(object));
+
+            expect(result.query?.orderColumnIndex).toBeUndefined();
+            expect(result.queryOptions?.deviceGroupMode).toBe('aggregate');
+        });
+
+        it('should keep the sorting index for a per-device group query', () => {
+            const object = groupQueryObject();
+
+            const result = reportObjectFromForm(object, buildReportObjectForm(object));
+
+            expect(result.query?.orderColumnIndex).toBe(1);
+            expect(result.queryOptions?.deviceGroupMode).toBe('per_device');
+        });
+
+        it('should include the limit in the query when set', () => {
+            const object = groupQueryObject({ ...aggregateQueryNoGrouping(), limit: 1 }, 'float64');
+
+            const result = reportObjectFromForm(object, buildReportObjectForm(object));
+
+            expect(result.query?.limit).toBe(1);
+        });
+
+        it('should leave out the limit when it is not set', () => {
+            const object = queryObject();
+
+            const result = reportObjectFromForm(object, buildReportObjectForm(object));
+
+            expect(result.query?.limit).toBeUndefined();
+        });
+
+        it('should keep the query source disablement consistent when the input type toggles away and back', () => {
+            const object = groupQueryObject();
+            const form = buildReportObjectForm(object);
+            const query = groupOf(form, 'query')!;
+
+            form.controls['inputType'].setValue('value');
+            applyInputType(form);
+            form.controls['inputType'].setValue('query');
+            applyInputType(form);
+
+            expect(query.controls['device'].disabled).toBe(true);
+            expect(query.controls['deviceGroupId'].enabled).toBe(true);
         });
 
         it('should not change the report objects before they are applied', () => {

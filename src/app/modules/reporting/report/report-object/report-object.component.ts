@@ -27,6 +27,7 @@ import {
 import { ReportObjectNode, inputTypeOfNode, isContainer } from '../../shared/report-object-node';
 import { ReportObjectViewService } from '../../shared/report-object-view.service';
 import { DeviceInstanceModel } from '../../../devices/device-instances/shared/device-instances.model';
+import { DeviceGroupDisplayModel } from '../../../devices/device-groups/shared/device-groups.model';
 import { AddTagFn } from '@ng-matero/extensions/select';
 
 const INPUT_TYPES: { value: InputType; label: string }[] = [
@@ -44,6 +45,7 @@ export class ReportObjectComponent implements OnChanges, OnDestroy {
 
     @Input() node!: ReportObjectNode;
     @Input() allDevices: DeviceInstanceModel[] = [];
+    @Input() allDeviceGroups: DeviceGroupDisplayModel[] = [];
 
     inputTypes = INPUT_TYPES;
     deviceQueryLastValues = ['2d', '7d', '30d'];

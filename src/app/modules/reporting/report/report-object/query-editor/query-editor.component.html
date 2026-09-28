@@ -21,26 +21,67 @@
         </button>
     </div>
 
-    <mat-form-field fxFlex color="accent" appearance="outline">
-        <mat-label>Device</mat-label>
-        <mtx-select formControlName="device" [items]="allDevices" bindLabel="display_name" bindValue="id"
-            virtualScroll="true" placeholder="Type to search" appendTo=".ng-select-anchor"></mtx-select>
-        <mat-error senergyError label="Device"></mat-error>
-    </mat-form-field>
+    <mat-button-toggle-group formControlName="source" class="query-source" aria-label="Query Source">
+        <mat-button-toggle value="device">Device</mat-button-toggle>
+        <mat-button-toggle value="group">Device Group</mat-button-toggle>
+    </mat-button-toggle-group>
 
-    <mat-form-field fxFlex color="accent" appearance="outline">
-        <mat-label>Service</mat-label>
-        <mtx-select formControlName="service" [items]="deviceType.services" bindLabel="name" bindValue="id"
-            placeholder="Type to search" appendTo=".ng-select-anchor" hideSelected="false"></mtx-select>
-        <mat-error senergyError label="Service"></mat-error>
-    </mat-form-field>
+    <div *ngIf="source === 'device'" fxLayout="column">
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>Device</mat-label>
+            <mtx-select formControlName="device" [items]="allDevices" bindLabel="display_name" bindValue="id"
+                virtualScroll="true" placeholder="Type to search" appendTo=".ng-select-anchor"></mtx-select>
+            <mat-error senergyError label="Device"></mat-error>
+        </mat-form-field>
 
-    <mat-form-field fxFill color="accent" appearance="outline">
-        <mat-label>Path</mat-label>
-        <mtx-select formControlName="path" [items]="servicePaths" [addTag]="true"
-            placeholder="Choose or write yourself" appendTo=".ng-select-anchor"></mtx-select>
-        <mat-error senergyError label="Path"></mat-error>
-    </mat-form-field>
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>Service</mat-label>
+            <mtx-select formControlName="service" [items]="deviceType.services" bindLabel="name" bindValue="id"
+                placeholder="Type to search" appendTo=".ng-select-anchor" hideSelected="false"></mtx-select>
+            <mat-error senergyError label="Service"></mat-error>
+        </mat-form-field>
+
+        <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-label>Path</mat-label>
+            <mtx-select formControlName="path" [items]="servicePaths" [addTag]="true"
+                placeholder="Choose or write yourself" appendTo=".ng-select-anchor"></mtx-select>
+            <mat-error senergyError label="Path"></mat-error>
+        </mat-form-field>
+    </div>
+
+    <div *ngIf="source === 'group'" fxLayout="column">
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>Device Group</mat-label>
+            <mtx-select formControlName="deviceGroupId" [items]="allDeviceGroups" bindLabel="name" bindValue="id"
+                virtualScroll="true" placeholder="Type to search" appendTo=".ng-select-anchor"></mtx-select>
+            <mat-error senergyError label="Device Group"></mat-error>
+        </mat-form-field>
+
+        <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-label>Criteria</mat-label>
+            <mtx-select formControlName="criteria" [compareWith]="compareCriteria" appendTo=".ng-select-anchor">
+                <mtx-option *ngFor="let c of groupCriteria" [value]="c">{{describeCriteria(c)}}</mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="Criteria"></mat-error>
+        </mat-form-field>
+
+        <div role="group" class="form-grouping">
+            <mat-form-field *ngIf="supportsPerDevice" fxFlex color="accent" appearance="outline">
+                <mat-label>Mode</mat-label>
+                <mtx-select formControlName="deviceGroupMode" appendTo=".ng-select-anchor">
+                    <mtx-option *ngFor="let mode of deviceGroupModes" [value]="mode.value">{{mode.label}}</mtx-option>
+                </mtx-select>
+                <mat-error senergyError label="Mode"></mat-error>
+            </mat-form-field>
+            <mat-form-field *ngIf="control('deviceGroupMode').value === 'aggregate'" fxFlex color="accent" appearance="outline">
+                <mat-label>Aggregation</mat-label>
+                <mtx-select formControlName="aggregation" appendTo=".ng-select-anchor">
+                    <mtx-option *ngFor="let agg of aggregationTypes" [value]="agg.value">{{agg.label}}</mtx-option>
+                </mtx-select>
+                <mat-error senergyError label="Aggregation"></mat-error>
+            </mat-form-field>
+        </div>
+    </div>
 
     <div role="group" class="form-grouping">
         <mat-form-field fxFlex color="accent" appearance="outline">
@@ -127,10 +168,17 @@
                 </mtx-select>
                 <mat-error senergyError label="Grouping Time Unit"></mat-error>
             </mat-form-field>
+            <mat-form-field fxFlex color="accent" appearance="outline">
+                <mat-label>Limit</mat-label>
+                <input matInput type="number" formControlName="limit">
+                <mat-hint>Number of rows; 1 for the latest value</mat-hint>
+                <mat-error senergyError label="Limit"></mat-error>
+            </mat-form-field>
         </div>
 
         <div role="group" class="form-grouping">
-            <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-form-field *ngIf="!orderColumnIndexHidden"
+                fxFlex color="accent" appearance="outline">
                 <mat-label>Sorting Index</mat-label>
                 <input matInput type="number" formControlName="orderColumnIndex">
                 <mat-hint>Column to sort by</mat-hint>

@@ -18,6 +18,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA, SimpleChange } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -30,11 +31,14 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { Observable, Subject, of } from 'rxjs';
 
-import { QueryEditorComponent } from './query-editor.component';
+import { QueryEditorComponent, combineAggregatedRows, foldSingleAspectCriteria } from './query-editor.component';
 import { CoreModule } from '../../../../../core/core.module';
 import { DeviceInstanceModel } from '../../../../devices/device-instances/shared/device-instances.model';
-import { DeviceTypeModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
+import { DeviceGroupCriteriaModel, DeviceGroupDisplayModel } from '../../../../devices/device-groups/shared/device-groups.model';
+import { DeviceGroupsService } from '../../../../devices/device-groups/shared/device-groups.service';
+import { FunctionsService } from '../../../../metadata/functions/shared/functions.service';
 import { ErrorHandlerService } from '../../../../../core/services/error-handler.service';
 import { ExportDataService } from '../../../../../widgets/shared/export-data.service';
 import { ReportObjectModel } from '../../../shared/reporting.model';
@@ -92,8 +96,34 @@ class MockExportDataService {
     }
 }
 
-const queryFormOf = (query: any, options: any = {}): DynamicFormGroup =>
-    buildQueryForm({ query, queryOptions: options } as ReportObjectModel);
+class MockFunctionsService {
+    getFunctions(): Observable<{ result: DeviceTypeFunctionModel[]; total: number }> {
+        return of({ result: [{ id: 'f1', name: 'getTemperature', display_name: 'Temperature' }] as DeviceTypeFunctionModel[], total: 1 });
+    }
+}
+
+class MockDeviceGroupsService {
+    getAspectListByIds(): Observable<DeviceTypeAspectNodeModel[]> {
+        return of([]);
+    }
+
+    getDeviceClassListByIds(): Observable<DeviceTypeDeviceClassModel[]> {
+        return of([]);
+    }
+}
+
+const criterion1 = { function_id: 'f1', aspect_id: 'a0', device_class_id: '', interaction: 'event' };
+const criterion2 = { function_id: 'f1', aspect_id: 'a1', device_class_id: '', interaction: 'event' };
+
+const T1 = '2024-01-01T00:00:00.000Z';
+const T2 = '2024-01-01T00:01:00.000Z';
+
+const deviceGroup = {
+    id: 'g1', name: 'Group 1', image: '', device_ids: [], criteria: [criterion1, criterion2],
+} as DeviceGroupDisplayModel;
+
+const queryFormOf = (query: any, options: any = {}, valueType = 'float64'): DynamicFormGroup =>
+    buildQueryForm({ query, queryOptions: options, valueType } as ReportObjectModel);
 
 describe('QueryEditorComponent', () => {
     let component: QueryEditorComponent;
@@ -111,6 +141,7 @@ describe('QueryEditorComponent', () => {
                 CoreModule,
                 ReactiveFormsModule,
                 NoopAnimationsModule,
+                MatButtonToggleModule,
                 MatIconModule,
                 MatFormFieldModule,
                 MatInputModule,
@@ -124,11 +155,14 @@ describe('QueryEditorComponent', () => {
             providers: [
                 { provide: DeviceTypeService, useClass: MockDeviceTypeService },
                 { provide: ExportDataService, useClass: MockExportDataService },
+                { provide: FunctionsService, useClass: MockFunctionsService },
+                { provide: DeviceGroupsService, useClass: MockDeviceGroupsService },
             ]
         }).compileComponents();
         fixture = TestBed.createComponent(QueryEditorComponent);
         component = fixture.componentInstance;
         component.allDevices = [device, otherDevice];
+        component.allDeviceGroups = [deviceGroup];
         exportDataService = TestBed.inject(ExportDataService) as unknown as MockExportDataService;
         errorHandlerService = TestBed.inject(ErrorHandlerService);
         dialog = TestBed.inject(MatDialog);
@@ -311,5 +345,240 @@ describe('QueryEditorComponent', () => {
         expect(open).not.toHaveBeenCalled();
         expect(error).toHaveBeenCalled();
         expect(component.previewRunning).toBe(false);
+    });
+
+    it('should prepend the device to every row of a per-device group preview', () => {
+        component.form = queryFormOf(
+            { deviceGroupId: 'g1', columns: [{ criteria: criterion1 }] },
+            { deviceGroupMode: 'per_device' },
+            'array'
+        );
+        component.ngOnInit();
+        exportDataService.response = [
+            { deviceId: 'd1', data: [[[1, 'a']]] },
+            { deviceId: 'd2', data: [[[2, 'b'], [3, 'c']]] },
+        ];
+        const open = spyOn(dialog, 'open');
+
+        component.previewQuery();
+
+        const config = open.calls.mostRecent().args[1] as any;
+        expect(config.data.rows).toEqual([
+            ['Device 1', 1, 'a'],
+            ['Device 2', 2, 'b'],
+            ['Device 2', 3, 'c'],
+        ]);
+    });
+
+    it('should combine the response into one series for an aggregate group preview', () => {
+        component.form = queryFormOf(
+            { deviceGroupId: 'g1', columns: [{ criteria: criterion1 }], groupTime: '1h' },
+            { aggregation: 'sum' }
+        );
+        component.ngOnInit();
+        exportDataService.response = [
+            { deviceId: 'd1', data: [[[T1, 2], [T2, 3]]] },
+            { deviceId: 'd2', data: [[[T1, 4], [T2, 5]]] },
+        ];
+        const open = spyOn(dialog, 'open');
+
+        component.previewQuery();
+
+        const config = open.calls.mostRecent().args[1] as any;
+        expect(config.data.rows).toEqual([[T1, 6], [T2, 8]]);
+    });
+
+    describe('device group source', () => {
+        it('should clear the device fields when switching to a device group', () => {
+            component.form = queryFormOf({ deviceId: 'd1', serviceId: 's1', columns: [{ name: 'root.value' }] });
+            component.ngOnInit();
+
+            component.control('source').setValue('group');
+
+            expect(component.control('device').value).toBeNull();
+            expect(component.control('service').value).toBeNull();
+            expect(component.control('path').value).toBeNull();
+        });
+
+        it('should clear the device group fields when switching to a device', () => {
+            component.form = queryFormOf({ deviceGroupId: 'g1', columns: [{ criteria: criterion1 }] });
+            component.ngOnInit();
+
+            component.control('source').setValue('device');
+
+            expect(component.control('deviceGroupId').value).toBeNull();
+            expect(component.control('criteria').value).toBeNull();
+        });
+
+        it('should restore the criteria list and selection of a loaded group query', () => {
+            component.form = queryFormOf({ deviceGroupId: 'g1', columns: [{ criteria: criterion2 }] });
+
+            component.ngOnInit();
+
+            expect(component.groupCriteria).toEqual([criterion1, criterion2]);
+            expect(component.control('criteria').value).toEqual(criterion2);
+        });
+
+        // The report component loads the device groups asynchronously, possibly after the object was selected.
+        it('should restore the criteria once the device groups arrive after the form', () => {
+            component.allDeviceGroups = [];
+            component.form = queryFormOf({ deviceGroupId: 'g1', columns: [{ criteria: criterion2 }] });
+            component.ngOnInit();
+            expect(component.groupCriteria).toEqual([]);
+
+            component.allDeviceGroups = [deviceGroup];
+            component.ngOnChanges({ allDeviceGroups: new SimpleChange([], [deviceGroup], false) });
+
+            expect(component.groupCriteria).toEqual([criterion1, criterion2]);
+            expect(component.control('criteria').value).toEqual(criterion2);
+        });
+
+        it('should not count the hidden sorting index of a group aggregate as an advanced field in use', () => {
+            component.form = queryFormOf(
+                { deviceGroupId: 'g1', columns: [{ criteria: criterion2 }], orderColumnIndex: 1 },
+                { deviceGroupMode: 'aggregate' }
+            );
+            component.ngOnInit();
+
+            expect(component.orderColumnIndexHidden).toBe(true);
+            expect(component.advancedCount).toBe(0);
+        });
+
+        it('should reset the criteria when the device group changes', () => {
+            const otherGroup =
+                { id: 'g2', name: 'Group 2', image: '', device_ids: [], criteria: [] } as DeviceGroupDisplayModel;
+            component.allDeviceGroups = [deviceGroup, otherGroup];
+            component.form = queryFormOf({ deviceGroupId: 'g1', columns: [{ criteria: criterion2 }] });
+            component.ngOnInit();
+
+            component.control('deviceGroupId').setValue('g2');
+
+            expect(component.groupCriteria).toEqual([]);
+            expect(component.control('criteria').value).toBeNull();
+        });
+
+        it('should offer the per-device mode only for array objects', () => {
+            component.form = queryFormOf({}, {}, 'array');
+            component.valueType = 'array';
+            expect(component.supportsPerDevice).toBe(true);
+
+            component.form = queryFormOf({}, {}, 'float64');
+            component.valueType = 'float64';
+            expect(component.supportsPerDevice).toBe(false);
+            expect(component.control('deviceGroupMode').value).toBe('aggregate');
+        });
+
+        it('should expand the advanced section when an aggregate query has neither a grouping time nor a limit of 1', () => {
+            component.form = queryFormOf({ deviceGroupId: 'g1', columns: [{ criteria: criterion2 }] });
+
+            component.ngOnInit();
+
+            expect(component.form.errors?.['aggregateGrouping']).toBeDefined();
+            expect(component.showAdvanced).toBe(true);
+        });
+
+        it('should not expand the advanced section once a grouping time or a limit of 1 makes the query valid', () => {
+            component.form = queryFormOf({ deviceGroupId: 'g1', columns: [{ criteria: criterion2 }], limit: 1 });
+
+            component.ngOnInit();
+
+            expect(component.form.errors?.['aggregateGrouping']).toBeUndefined();
+            expect(component.showAdvanced).toBe(false);
+        });
+    });
+});
+
+describe('foldSingleAspectCriteria', () => {
+    it('should skip criteria with more than one aspect and fold a lone aspect into aspect_id', () => {
+        const criteria = [
+            // aspect_id not set yet, exactly one aspect_ids entry -> folded
+            { function_id: 'f1', aspect_id: '', aspect_ids: ['a1'], device_class_id: '', interaction: 'event' },
+            // several aspects -> the reporting-service cannot act on this, so it is skipped entirely
+            { function_id: 'f2', aspect_id: 'a2', aspect_ids: ['a2', 'a3'], device_class_id: '', interaction: 'event' },
+            { function_id: 'f3', aspect_id: '', aspect_ids: ['a4', 'a5'], device_class_id: '', interaction: 'event' },
+            // no aspect_ids at all (older group) -> kept unchanged
+            { function_id: 'f4', aspect_id: 'a6', device_class_id: '', interaction: 'event' },
+        ] as unknown as DeviceGroupCriteriaModel[];
+
+        const result = foldSingleAspectCriteria(criteria);
+
+        expect(result).toEqual([
+            { function_id: 'f1', aspect_id: 'a1', device_class_id: '', interaction: 'event' },
+            { function_id: 'f4', aspect_id: 'a6', device_class_id: '', interaction: 'event' },
+        ]);
+    });
+
+    // DeviceGroupFilterCriteriaValid in the timescale-wrapper requires an aspect, so such a report could never run.
+    it('should skip criteria without any aspect', () => {
+        const criteria = [
+            { function_id: 'f1', aspect_id: '', device_class_id: 'dc1', interaction: 'request' },
+            { function_id: 'f2', aspect_id: '', aspect_ids: [], device_class_id: '', interaction: 'event' },
+        ] as unknown as DeviceGroupCriteriaModel[];
+
+        expect(foldSingleAspectCriteria(criteria)).toEqual([]);
+    });
+
+    it('should offer criteria that fold into the same one only once', () => {
+        const criteria = [
+            { function_id: 'f1', aspect_id: 'a1', device_class_id: '', interaction: 'event' },
+            { function_id: 'f1', aspect_id: '', aspect_ids: ['a1'], device_class_id: '', interaction: 'event' },
+        ] as unknown as DeviceGroupCriteriaModel[];
+
+        expect(foldSingleAspectCriteria(criteria)).toEqual([
+            { function_id: 'f1', aspect_id: 'a1', device_class_id: '', interaction: 'event' },
+        ]);
+    });
+});
+
+describe('combineAggregatedRows', () => {
+    it('should sum the values of every element by timestamp', () => {
+        const elementRows = [[[T1, 2], [T2, 3]], [[T1, 4], [T2, 5]]];
+
+        expect(combineAggregatedRows(elementRows, 'sum', true, undefined, undefined))
+            .toEqual([[T1, 6], [T2, 8]]);
+    });
+
+    it('should average the values of every element by timestamp', () => {
+        const elementRows = [[[T1, 2], [T2, 3]], [[T1, 4], [T2, 5]]];
+
+        expect(combineAggregatedRows(elementRows, 'mean', true, undefined, undefined))
+            .toEqual([[T1, 3], [T2, 4]]);
+    });
+
+    it('should union rows from all elements regardless of their input order', () => {
+        // device A reports T2 before T1, device B only has T1 - the union still comes out sorted by time
+        const elementRows = [[[T2, 1], [T1, 2]], [[T1, 3]]];
+
+        expect(combineAggregatedRows(elementRows, 'sum', true, undefined, undefined))
+            .toEqual([[T1, 5], [T2, 1]]);
+    });
+
+    it('should sort descending when orderDirection is desc', () => {
+        const elementRows = [[[T1, 2], [T2, 3]], [[T1, 4], [T2, 5]]];
+
+        expect(combineAggregatedRows(elementRows, 'sum', true, undefined, 'desc'))
+            .toEqual([[T2, 8], [T1, 6]]);
+    });
+
+    it('should re-apply the limit to the combined union', () => {
+        const elementRows = [[[T1, 2], [T2, 3]], [[T1, 4], [T2, 5]]];
+
+        expect(combineAggregatedRows(elementRows, 'sum', true, 1, undefined))
+            .toEqual([[T1, 6]]);
+    });
+
+    it('should merge by row position when there is no grouping time', () => {
+        // each device answers with its single latest row (limit 1), reported at its own timestamp
+        const elementRows = [[[T1, 10]], [[T2, 20]]];
+
+        expect(combineAggregatedRows(elementRows, 'mean', false, 1, undefined))
+            .toEqual([[T1, 15]]);
+    });
+
+    it('should ignore nil values and leave a row null when every element is nil', () => {
+        const elementRows = [[[T1, 5], [T2, null]], [[T1, null], [T2, null]]];
+
+        expect(combineAggregatedRows(elementRows, 'sum', true, undefined, undefined))
+            .toEqual([[T1, 5], [T2, null]]);
     });
 });

@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ReportObjectModel, ReportObjectModelQueryOptions } from './reporting.model';
 import {
+    QueriesRequestColumnModel,
     QueriesRequestTimeModel,
     QueriesRequestV2ElementTimescaleModel
 } from '../../../widgets/shared/export-data.model';
+import { DeviceGroupCriteriaModel } from '../../devices/device-groups/shared/device-groups.model';
 
 /** Form group with a dynamic set of controls, as needed for the recursive structure of a report. */
 export type DynamicFormGroup = FormGroup<{ [key: string]: AbstractControl }>;
 
 export type InputType = 'value' | 'query' | 'devices';
+
+/** Whether a query targets a single device or a device group and one of its criteria. */
+export type QuerySource = 'device' | 'group';
 
 export interface ReportValidationError {
     /** Dot separated keys of the report object the error belongs to, e.g. 'table.0.consumption'. */
@@ -41,7 +46,10 @@ export const FIELD_LABELS: { [key: string]: string } = {
     device: 'Device',
     service: 'Service',
     path: 'Path',
+    deviceGroupId: 'Device Group',
+    criteria: 'Criteria',
     groupType: 'Field Group Type',
+    limit: 'Limit',
     orderColumnIndex: 'Sorting Index',
     orderDirection: 'Sorting',
     resultObject: 'ResultObject',
@@ -59,6 +67,9 @@ export const FIELD_LABELS: { [key: string]: string } = {
 
 const VALUE_INPUT_TYPES = ['string', 'float64'];
 const QUERY_VALUE_TYPES = ['string', 'float64', 'array'];
+
+const AGGREGATE_GROUPING_MESSAGE =
+    'Aggregating a device group needs a grouping time, or a limit of 1 for the latest value';
 
 /**
  * Whether the report object can be filled by a query or by devices instead of a plain value.
@@ -119,11 +130,23 @@ export function buildQueryForm(object: ReportObjectModel): DynamicFormGroup {
     const options = object.queryOptions;
     const groupingTime = splitDuration(query?.groupTime);
     const timeframe = splitDuration(query?.time?.last);
-    return dynamicGroup({
+    // Per-device results only make sense for an array object; a scalar one is fixed to an aggregate.
+    const deviceGroupMode = object.valueType === 'array' ? (options?.deviceGroupMode ?? 'aggregate') : 'aggregate';
+    const form = dynamicGroup({
+        source: new FormControl<QuerySource>(
+            query?.deviceGroupId !== undefined ? 'group' : 'device', { nonNullable: true }
+        ),
         device: new FormControl<string | null>(emptyToNull(query?.deviceId), Validators.required),
         service: new FormControl<string | null>(emptyToNull(query?.serviceId), Validators.required),
         path: new FormControl<string | null>(emptyToNull(query?.columns?.[0]?.name), Validators.required),
+        deviceGroupId: new FormControl<string | null>(emptyToNull(query?.deviceGroupId), Validators.required),
+        criteria: new FormControl<DeviceGroupCriteriaModel | null>(
+            query?.columns?.[0]?.criteria ?? null, Validators.required
+        ),
+        deviceGroupMode: new FormControl<'aggregate' | 'per_device'>(deviceGroupMode, { nonNullable: true }),
+        aggregation: new FormControl<'sum' | 'mean'>(options?.aggregation ?? 'sum', { nonNullable: true }),
         groupType: new FormControl<string | null>(query?.columns?.[0]?.groupType ?? null),
+        limit: new FormControl<number | null>(query?.limit ?? null),
         orderColumnIndex: new FormControl<number | null>(query?.orderColumnIndex ?? null),
         orderDirection: new FormControl<string | null>(query?.orderDirection ?? null),
         resultObject: new FormControl<string | null>(options?.resultObject ?? null),
@@ -136,7 +159,28 @@ export function buildQueryForm(object: ReportObjectModel): DynamicFormGroup {
         rollingStartDate: new FormControl<string | null>(options?.rollingStartDate ?? null),
         end: new FormControl<Date | string | null>(query?.time?.end ?? null),
         rollingEndDate: new FormControl<string | null>(options?.rollingEndDate ?? null),
-    });
+    }, validateAggregateGrouping);
+    applyQuerySource(form);
+    return form;
+}
+
+/**
+ * The reporting-service rejects a device group query in aggregate mode that has neither a grouping time nor a
+ * limit of exactly one - a row-position merge across devices is only meaningful for the latest value. per_device
+ * and single-device queries are unaffected.
+ */
+function validateAggregateGrouping(control: AbstractControl): { [key: string]: any } | null {
+    const form = control as DynamicFormGroup;
+    const isGroupAggregate = form.controls['source']?.value === 'group'
+        && form.controls['deviceGroupMode']?.value === 'aggregate';
+    if (!isGroupAggregate) {
+        return null;
+    }
+    const groupTime = joinDuration(form.controls['groupingTimeNumber']?.value, form.controls['groupingTimeUnit']?.value);
+    if (groupTime !== undefined || form.controls['limit']?.value === 1) {
+        return null;
+    }
+    return { aggregateGrouping: true };
 }
 
 export function buildDeviceQueryForm(object: ReportObjectModel): DynamicFormGroup {
@@ -150,11 +194,33 @@ export function buildDeviceQueryForm(object: ReportObjectModel): DynamicFormGrou
  */
 export function applyInputType(form: DynamicFormGroup) {
     const inputType = inputTypeValue(form);
-    setEnabled(form.controls['query'], inputType === 'query');
+    const queryEnabled = inputType === 'query';
+    setEnabled(form.controls['query'], queryEnabled);
+    if (queryEnabled) {
+        // Enabling the query group also enables the controls of its inactive source, so the source has to be
+        // applied again - the same reason setNestedEnabled re-applies the input type of fields and children.
+        const query = groupOf(form, 'query');
+        if (query !== undefined) {
+            applyQuerySource(query);
+        }
+    }
     setEnabled(form.controls['deviceQuery'], inputType === 'devices');
     setEnabled(form.controls['value'], inputType === 'value');
     setNestedEnabled(groupOf(form, 'fields'), inputType === 'value');
     setNestedEnabled(groupOf(form, 'children'), inputType === 'value');
+}
+
+/**
+ * Enables the controls of the selected query source (a single device, or a device group and one of its criteria)
+ * and disables the others, so switching the source neither loses inputs nor influences the validity of the form.
+ */
+export function applyQuerySource(form: DynamicFormGroup) {
+    const source = form.controls['source']?.value as QuerySource;
+    setEnabled(form.controls['device'], source === 'device');
+    setEnabled(form.controls['service'], source === 'device');
+    setEnabled(form.controls['path'], source === 'device');
+    setEnabled(form.controls['deviceGroupId'], source === 'group');
+    setEnabled(form.controls['criteria'], source === 'group');
 }
 
 /**
@@ -239,6 +305,7 @@ export function reportObjectFromForm(
 
 export function queryFromForm(form: DynamicFormGroup | undefined): QueriesRequestV2ElementTimescaleModel {
     const value = form?.getRawValue() as { [key: string]: any } || {};
+    const isGroup = value['source'] === 'group';
     const time: QueriesRequestTimeModel = {};
     const last = joinDuration(value['timeframeNumber'], value['timeframeUnit']);
     if (last !== undefined) {
@@ -252,17 +319,30 @@ export function queryFromForm(form: DynamicFormGroup | undefined): QueriesReques
     if (end !== undefined) {
         time.end = end;
     }
+    const column: QueriesRequestColumnModel = { groupType: emptyToUndefined(value['groupType']) };
+    if (isGroup) {
+        // The timescale-wrapper rejects a column that has both a name and criteria.
+        column.criteria = value['criteria'] ?? undefined;
+    } else {
+        column.name = emptyToUndefined(value['path']);
+    }
     const query: QueriesRequestV2ElementTimescaleModel = {
-        columns: [{
-            name: emptyToUndefined(value['path']),
-            groupType: emptyToUndefined(value['groupType']),
-        }],
-        deviceId: value['device'] || '',
-        serviceId: value['service'] || '',
+        columns: [column],
         groupTime: joinDuration(value['groupingTimeNumber'], value['groupingTimeUnit']),
         time,
     };
-    if (value['orderColumnIndex'] !== null && value['orderColumnIndex'] !== undefined) {
+    if (isGroup) {
+        query.deviceGroupId = value['deviceGroupId'] || '';
+    } else {
+        query.deviceId = value['device'] || '';
+        query.serviceId = value['service'] || '';
+    }
+    if (value['limit'] !== null && value['limit'] !== undefined) {
+        query.limit = value['limit'];
+    }
+    // The reporting-service rejects a device group query in aggregate mode that sets orderColumnIndex.
+    const suppressOrderColumnIndex = isGroup && value['deviceGroupMode'] === 'aggregate';
+    if (!suppressOrderColumnIndex && value['orderColumnIndex'] !== null && value['orderColumnIndex'] !== undefined) {
         query.orderColumnIndex = value['orderColumnIndex'];
     }
     if (value['orderDirection'] === 'asc' || value['orderDirection'] === 'desc') {
@@ -273,7 +353,7 @@ export function queryFromForm(form: DynamicFormGroup | undefined): QueriesReques
 
 export function queryOptionsFromForm(form: DynamicFormGroup | undefined): ReportObjectModelQueryOptions {
     const value = form?.getRawValue() as { [key: string]: any } || {};
-    return {
+    const options: ReportObjectModelQueryOptions = {
         rollingStartDate: emptyToUndefined(value['rollingStartDate']),
         rollingEndDate: emptyToUndefined(value['rollingEndDate']),
         startOffset: timezoneOffsetOf(value['start']),
@@ -281,6 +361,11 @@ export function queryOptionsFromForm(form: DynamicFormGroup | undefined): Report
         resultObject: emptyToUndefined(value['resultObject']),
         resultKey: value['resultKey'] ?? undefined,
     };
+    if (value['source'] === 'group') {
+        options.deviceGroupMode = value['deviceGroupMode'] || 'aggregate';
+        options.aggregation = value['aggregation'] || 'sum';
+    }
+    return options;
 }
 
 /**
@@ -306,9 +391,21 @@ export function collectObjectErrors(
     }
     return errorsOfControl(form.controls['value'], 'value', path)
         .concat(errorsOfGroup(groupOf(form, 'query'), path))
+        .concat(errorsOfQueryForm(groupOf(form, 'query'), path))
         .concat(errorsOfGroup(groupOf(form, 'deviceQuery'), path))
         .concat(collectValidationErrors(groupOf(form, 'fields'), path))
         .concat(collectValidationErrors(groupOf(form, 'children'), path));
+}
+
+/**
+ * Errors attached to the query form group itself, as opposed to one of its controls - currently only the
+ * aggregate-grouping rule, which depends on several controls together.
+ */
+function errorsOfQueryForm(form: DynamicFormGroup | undefined, path: string): ReportValidationError[] {
+    if (form?.errors?.['aggregateGrouping'] === undefined) {
+        return [];
+    }
+    return [{ path, field: 'Grouping Time', message: AGGREGATE_GROUPING_MESSAGE }];
 }
 
 export function splitDuration(value: string | undefined): { number: string; unit: string } {
@@ -394,8 +491,8 @@ function setEnabled(control: AbstractControl | undefined, enabled: boolean) {
     }
 }
 
-function dynamicGroup(controls: { [key: string]: AbstractControl }): DynamicFormGroup {
-    return new FormGroup<{ [key: string]: AbstractControl }>(controls);
+function dynamicGroup(controls: { [key: string]: AbstractControl }, validator?: ValidatorFn): DynamicFormGroup {
+    return new FormGroup<{ [key: string]: AbstractControl }>(controls, validator ? { validators: validator } : undefined);
 }
 
 function emptyToNull(value: string | undefined): string | null {

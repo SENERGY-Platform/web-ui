@@ -30,6 +30,8 @@ import { ReportingService } from '../shared/reporting.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
+import { DeviceGroupsService } from '../../devices/device-groups/shared/device-groups.service';
+import { DeviceGroupDisplayModel } from '../../devices/device-groups/shared/device-groups.model';
 import { HttpResponse } from '@angular/common/http';
 import { Subject, switchMap, of, takeUntil } from 'rxjs';
 import {
@@ -67,6 +69,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     reportJob: ReportJobModel | null = null;
     templateId: string | null = null;
     allDevices: DeviceInstanceModel[] = [];
+    allDeviceGroups: DeviceGroupDisplayModel[] = [];
     validationErrors: ReportValidationError[] = [];
     errorCounts: Map<string, number> = new Map<string, number>();
     nodes: ReportObjectNode[] = [];
@@ -91,6 +94,7 @@ export class ReportComponent implements OnInit, OnDestroy {
         public utilsService: UtilService,
         private reportingService: ReportingService,
         private deviceInstanceService: DeviceInstancesService,
+        private deviceGroupsService: DeviceGroupsService,
         private router: Router,
         private viewService: ReportObjectViewService
     ) {
@@ -105,6 +109,9 @@ export class ReportComponent implements OnInit, OnDestroy {
         this.updateValidation();
         this.deviceInstanceService.getDeviceInstances({ limit: 9999, offset: 0 }).subscribe((devices) => {
             this.allDevices = devices.result;
+        });
+        this.deviceGroupsService.getDeviceGroups('', 9999, 0, 'name', 'asc').subscribe((groups) => {
+            this.allDeviceGroups = groups.result;
         });
         if (this.reportId !== null) {
             this.loadReport(this.reportId);

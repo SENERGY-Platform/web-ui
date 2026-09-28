@@ -130,7 +130,8 @@
 
                 <mat-card *ngIf="!settingsSelected && selectedNode !== undefined">
                     <mat-card-content>
-                        <senergy-reporting-object [node]="selectedNode!" [allDevices]="allDevices">
+                        <senergy-reporting-object [node]="selectedNode!" [allDevices]="allDevices"
+                            [allDeviceGroups]="allDeviceGroups">
                         </senergy-reporting-object>
                     </mat-card-content>
                 </mat-card>
