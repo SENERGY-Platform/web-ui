@@ -99,6 +99,8 @@ describe('DeviceTypeService import-type criteria', () => {
     const variable = (fields: Partial<ImportTypeContentVariableModel>): ImportTypeContentVariableModel =>
         ({ name: 'v', type: 'float', sub_content_variables: null, use_as_tag: false, ...fields });
 
+    let listImportTypes: jasmine.Spy;
+
     // aspect_id outside aspect_ids is what the import-repository would fold into the list
     const importOutput = variable({
         sub_content_variables: [
@@ -108,7 +110,8 @@ describe('DeviceTypeService import-type criteria', () => {
     });
 
     beforeEach(() => {
-        const importTypesService = { listImportTypes: () => of({ result: [{ output: importOutput } as ImportTypeModel], total: 1 }) };
+        listImportTypes = jasmine.createSpy('listImportTypes').and.callFake(() => of({ result: [{ output: importOutput } as ImportTypeModel], total: 1 }));
+        const importTypesService = { listImportTypes };
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
             imports: [MatDialogModule, MatSnackBarModule],
@@ -137,13 +140,33 @@ describe('DeviceTypeService import-type criteria', () => {
     });
 
     it('offers the import functions of an aspect named only in the deprecated field', () => {
-        let functionIds: string[] = [];
-        service.getAspectsMeasuringFunctionsWithImports(water).subscribe((functions) => (functionIds = functions.map((f) => f.id)));
+        let functionIds: string[][] = [];
+        service.getMeasuringFunctionsPerAspectWithImports([water]).subscribe((lists) => (functionIds = lists.map((l) => l.map((f) => f.id))));
         httpMock.expectOne(environment.deviceRepoUrl + '/aspects/' + water + '/measuring-functions').flush([]);
         httpMock.expectOne(environment.deviceRepoUrl + '/query/aspect-nodes').flush([]);
         const functionsRequest = httpMock.expectOne((req) => req.url.startsWith(environment.deviceRepoUrl + '/functions?ids='));
         expect(functionsRequest.request.url).toBe(environment.deviceRepoUrl + '/functions?ids=' + encodeURIComponent(temperature));
         functionsRequest.flush([{ id: temperature, name: 'Temperature' }]);
-        expect(functionIds).toEqual([temperature]);
+        expect(functionIds).toEqual([[temperature]]);
+    });
+
+    it('lists the import types once for several aspects and answers one list per aspect, in order', () => {
+        let functionIds: string[][] = [];
+        service.getMeasuringFunctionsPerAspectWithImports([air, water]).subscribe((lists) => (functionIds = lists.map((l) => l.map((f) => f.id))));
+        expect(listImportTypes).toHaveBeenCalledTimes(1);
+        httpMock.expectOne(environment.deviceRepoUrl + '/aspects/' + air + '/measuring-functions').flush([]);
+        httpMock.expectOne(environment.deviceRepoUrl + '/aspects/' + water + '/measuring-functions').flush([]);
+        httpMock.match(environment.deviceRepoUrl + '/query/aspect-nodes').forEach((req) => req.flush([]));
+        // air is named by both variables (humidity, and temperature through aspect_ids), water only by the deprecated field
+        const requests = httpMock.match((req) => req.url.startsWith(environment.deviceRepoUrl + '/functions?ids='));
+        requests.forEach((req) => req.flush(decodeURIComponent(req.request.url.split('ids=')[1]).split(',').map((id) => ({ id, name: id }))));
+        expect(functionIds.map((ids) => [...ids].sort())).toEqual([[humidity, temperature].sort(), [temperature]]);
+    });
+
+    it('answers an empty list per aspect, and requests nothing, without aspects', () => {
+        let lists: unknown[] | undefined;
+        service.getMeasuringFunctionsPerAspectWithImports([]).subscribe((result) => (lists = result));
+        expect(lists).toEqual([]);
+        expect(listImportTypes).not.toHaveBeenCalled();
     });
 });

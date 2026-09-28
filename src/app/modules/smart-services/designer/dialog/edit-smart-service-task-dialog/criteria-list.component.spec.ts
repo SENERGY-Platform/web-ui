@@ -46,6 +46,10 @@ const node = (id: string, name: string): DeviceTypeAspectNodeModel => ({
 const air = node('urn:infai:ses:aspect:air', 'Air');
 const water = node('urn:infai:ses:aspect:water', 'Water');
 
+const environmentClass = 'urn:infai:ses:aspect-class:environment';
+const classifiedAir = { ...air, aspect_class_id: environmentClass };
+const classifiedWater = { ...water, aspect_class_id: environmentClass };
+
 describe('CriteriaListComponent', () => {
     let fixture: ComponentFixture<CriteriaListComponent>;
     let component: CriteriaListComponent;
@@ -137,5 +141,33 @@ describe('CriteriaListComponent', () => {
         expect(selects()[0].aspectOptions.map((o) => o.name)).toContain(gone);
         pick(1, [air.id]);
         expect(JSON.parse(emitted.pop() as string)[0]).toEqual({ aspect_id: gone, aspect_ids: [gone] });
+    });
+
+    describe('aspect-class collision', () => {
+        const hints = (): string[] =>
+            Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('mat-panel-description')).map((e) => e.textContent?.trim() ?? '');
+        const renderedErrors = (): string[] =>
+            Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('mat-error')).map((e) => e.textContent?.trim() ?? '');
+        const collision = 'Only one aspect per aspect class is allowed: Air, Water';
+
+        it('marks a picked selection of two aspects of one class and shows the select error at once', async () => {
+            await init('[{"interaction":"request","aspect_id":""}]', [classifiedAir, classifiedWater]);
+            expect(hints()).toEqual([]);
+            pick(0, [air.id, water.id]);
+            expect(component.hasAspectClassCollision(component.criteriaList[0])).toBeTrue();
+            expect(hints()).toEqual(['Aspect class collision']);
+            expect(renderedErrors()).toContain(collision);
+        });
+
+        it('marks a stored criteria that already collides, and only that one', async () => {
+            await init(`[{"aspect_ids":["${air.id}","${water.id}"]},{"aspect_ids":["${air.id}"]}]`, [classifiedAir, classifiedWater]);
+            expect(hints()).toEqual(['Aspect class collision']);
+            expect(renderedErrors()).toContain(collision);
+        });
+
+        it('marks nothing for aspects without a class', async () => {
+            await init(`[{"aspect_ids":["${air.id}","${water.id}"]}]`);
+            expect(hints()).toEqual([]);
+        });
     });
 });

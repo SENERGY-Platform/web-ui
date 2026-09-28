@@ -97,6 +97,11 @@ export class ImportTypesCreateEditComponent implements OnInit {
     });
 
     timeAspect = this.fb.control(null);
+    /**
+     * The time variable's aspects as read on open. The select shows only the alias, so a list of several
+     * (possible through the API) is written back unchanged while the alias is still selected.
+     */
+    private openedTimeAspectIds: string[] = [];
 
     usesDefaultOutput = true;
     defaultOutput: ImportTypeContentVariableModel = {
@@ -166,7 +171,8 @@ export class ImportTypesCreateEditComponent implements OnInit {
                             this.dataSource.data = value.sub_content_variables || [];
                             // list-first with a fallback to the deprecated aspect_id, so a type stored
                             // before the list existed still opens with its time aspect selected.
-                            this.timeAspect.setValue(deprecatedAspectAlias(contentVariableAspectIds(type.output.sub_content_variables[1])));
+                            this.openedTimeAspectIds = [...contentVariableAspectIds(type.output.sub_content_variables[1])];
+                            this.timeAspect.setValue(deprecatedAspectAlias(this.openedTimeAspectIds));
                         } else {
                             this.usesDefaultOutput = false;
                             this.dataSource.data = [type.output];
@@ -243,7 +249,8 @@ export class ImportTypesCreateEditComponent implements OnInit {
             this.defaultOutput.sub_content_variables[2].sub_content_variables = this.dataSource.data;
             const timeAspectId: string | null = this.timeAspect.value;
             this.defaultOutput.sub_content_variables[1].aspect_id = timeAspectId ?? undefined;
-            this.defaultOutput.sub_content_variables[1].aspect_ids = timeAspectId ? [timeAspectId] : [];
+            const keepOpenedAspects = !!timeAspectId && timeAspectId === deprecatedAspectAlias(this.openedTimeAspectIds);
+            this.defaultOutput.sub_content_variables[1].aspect_ids = keepOpenedAspects ? [...this.openedTimeAspectIds] : timeAspectId ? [timeAspectId] : [];
             this.defaultOutput.sub_content_variables[1].function_id = environment.getTimestampFunctionId;
             val.output = this.defaultOutput;
         } else {

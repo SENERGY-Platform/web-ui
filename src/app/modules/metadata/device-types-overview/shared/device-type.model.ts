@@ -90,6 +90,8 @@ export interface DeviceTypeAspectModel {
 export interface DeviceTypeAspectNodeModel {
     id: string;
     name: string;
+    // Copied from the root of the hierarchy to every node by the device-repository.
+    aspect_class_id?: string | null;
     root_id: string;
     parent_id: string;
     child_ids: string[];

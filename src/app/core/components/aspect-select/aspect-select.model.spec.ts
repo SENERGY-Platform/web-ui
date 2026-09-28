@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { aspectTreeFromAspectNodes, withStoredAspects } from './aspect-select.model';
+import { aspectTreeFromAspectNodes, classifyAspects, collidingAspectNames, withStoredAspects } from './aspect-select.model';
 import { DeviceTypeAspectNodeModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 
 const node = (id: string, parentId: string, rootId: string, childIds: string[]): DeviceTypeAspectNodeModel => ({
@@ -47,6 +47,45 @@ describe('aspectTreeFromAspectNodes', () => {
     it('treats a missing child list as a leaf', () => {
         const leaf = { ...node('air', '', 'air', []), child_ids: null as unknown as string[] };
         expect(aspectTreeFromAspectNodes([leaf])).toEqual([{ id: 'air', name: 'AIR', sub_aspects: [] }]);
+    });
+});
+
+describe('aspectTreeFromAspectNodes classification', () => {
+    const environment = 'urn:infai:ses:aspect-class:environment';
+    const withClass = (n: DeviceTypeAspectNodeModel, classId: string): DeviceTypeAspectNodeModel => ({ ...n, aspect_class_id: classId });
+    // the device-repository copies the class of a root to every node of its hierarchy
+    const inside = withClass(node('inside', '', 'inside', ['air', 'water']), environment);
+    const air = withClass(node('air', 'inside', 'inside', []), environment);
+    const water = withClass(node('water', 'inside', 'inside', []), environment);
+    const outside = withClass(node('outside', '', 'outside', []), 'urn:infai:ses:aspect-class:other');
+
+    const collisions = (nodes: DeviceTypeAspectNodeModel[], selected: string[]) =>
+        collidingAspectNames(classifyAspects(aspectTreeFromAspectNodes(nodes)), selected);
+
+    it('carries the class of a node onto its tree node', () => {
+        const [root] = aspectTreeFromAspectNodes([inside, air]);
+        expect(root.aspect_class_id).toBe(environment);
+    });
+
+    it('rejects two siblings of one classified hierarchy', () => {
+        expect(collisions([inside, air, water], ['air', 'water'])).toEqual(['AIR', 'WATER']);
+    });
+
+    it('rejects a parent together with its child', () => {
+        expect(collisions([inside, air, water], ['inside', 'air'])).toEqual(['INSIDE', 'AIR']);
+    });
+
+    it('accepts aspects of different classified hierarchies', () => {
+        expect(collisions([inside, air, outside], ['air', 'outside'])).toEqual([]);
+    });
+
+    it('rejects siblings whose common ancestor the list leaves out, as the listing of measuring aspects does', () => {
+        expect(collisions([air, water], ['air', 'water'])).toEqual(['AIR', 'WATER']);
+    });
+
+    it('accepts nodes without a class, as before', () => {
+        expect(collisions([node('air', '', 'air', []), node('water', '', 'water', [])], ['air', 'water'])).toEqual([]);
+        expect(collisions([{ ...air, aspect_class_id: null }, { ...water, aspect_class_id: null }], ['air', 'water'])).toEqual([]);
     });
 });
 

@@ -23,7 +23,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { By } from '@angular/platform-browser';
-import { Observable, of, Subject } from 'rxjs';
+import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { ConditionalEventDialogComponent } from './conditional-event-dialog.component';
 import { CoreModule } from '../../../../../core/core.module';
@@ -47,10 +47,13 @@ const node = (id: string, name: string): DeviceTypeAspectNodeModel => ({
 
 const air = node('urn:infai:ses:aspect:air', 'Air');
 const water = node('urn:infai:ses:aspect:water', 'Water');
+const environmentClass = 'urn:infai:ses:aspect-class:environment';
+const classifiedAir = { ...air, aspect_class_id: environmentClass };
+const classifiedWater = { ...water, aspect_class_id: environmentClass };
 const fn = (id: string, name: string): DeviceTypeFunctionModel => ({ id, name, rdf_type: MEASURING, concept_id: 'urn:infai:ses:concept:c' }) as DeviceTypeFunctionModel;
 const temperature = fn('urn:infai:ses:measuring-function:temperature', 'Get Temperature');
 const humidity = fn('urn:infai:ses:measuring-function:humidity', 'Get Humidity');
-// offered for an aspect only through an import type, which getAspectsMeasuringFunctionsWithImports adds
+// offered for an aspect only through an import type, which getMeasuringFunctionsPerAspectWithImports adds
 const imported = fn('urn:infai:ses:measuring-function:imported', 'Imported');
 
 describe('ConditionalEventDialogComponent', () => {
@@ -67,10 +70,14 @@ describe('ConditionalEventDialogComponent', () => {
         dialogRef = createSpyFromClass<MatDialogRef<ConditionalEventDialogComponent>>(MatDialogRef);
         deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getAspectNodesWithMeasuringFunction.and.returnValue(of(listing));
-        deviceTypeService.getAspectsMeasuringFunctionsWithImports.and.callFake((id: string) => {
-            const functions = functionsByAspect[id] || [];
-            return Array.isArray(functions) ? of(functions) : functions;
-        });
+        deviceTypeService.getMeasuringFunctionsPerAspectWithImports.and.callFake((ids: string[]) =>
+            forkJoin(
+                ids.map((id) => {
+                    const functions = functionsByAspect[id] || [];
+                    return Array.isArray(functions) ? of(functions) : functions;
+                }),
+            ),
+        );
         const conceptsService = createSpyFromClass(ConceptsService);
         conceptsService.getConceptWithCharacteristics.and.returnValue(
             of({ id: 'urn:infai:ses:concept:c', name: 'c', base_characteristic_id: 'celsius', characteristic_ids: [], characteristics: [{ id: 'celsius', name: 'Celsius' }] } as any),
@@ -121,8 +128,7 @@ describe('ConditionalEventDialogComponent', () => {
     it('offers only the functions every selected aspect offers, import-derived ones included', () => {
         init(null, { [air.id]: [temperature, imported, humidity], [water.id]: [imported, temperature] });
         component.aspectFormControl.setValue([air.id, water.id]);
-        expect(deviceTypeService.getAspectsMeasuringFunctionsWithImports).toHaveBeenCalledWith(air.id);
-        expect(deviceTypeService.getAspectsMeasuringFunctionsWithImports).toHaveBeenCalledWith(water.id);
+        expect(deviceTypeService.getMeasuringFunctionsPerAspectWithImports).toHaveBeenCalledOnceWith([air.id, water.id]);
         expect(functionIds()).toEqual([temperature.id, imported.id]);
     });
 
@@ -160,7 +166,7 @@ describe('ConditionalEventDialogComponent', () => {
     it('opens empty when the element names an aspect that is no longer offered', () => {
         init(existing({ aspect: air.id, aspects: [air.id, 'urn:infai:ses:aspect:gone'] }), { [air.id]: [temperature] });
         expect(component.aspectFormControl.value).toEqual([]);
-        expect(deviceTypeService.getAspectsMeasuringFunctionsWithImports).not.toHaveBeenCalled();
+        expect(deviceTypeService.getMeasuringFunctionsPerAspectWithImports).not.toHaveBeenCalled();
     });
 
     it('returns the selected ids sorted and the first of them as the deprecated aspect', () => {
@@ -190,5 +196,52 @@ describe('ConditionalEventDialogComponent', () => {
         const result = savedResult();
         expect(result.aspects).toEqual([]);
         expect(result.aspect).toBe('');
+    });
+
+    describe('aspect-class collision', () => {
+        const saveButton = (): HTMLButtonElement =>
+            fixture.nativeElement.querySelector('mat-dialog-actions button[color="accent"]');
+        const renderedErrors = (): string[] =>
+            Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('mat-error')).map((e) => e.textContent?.trim() ?? '');
+
+        function selectCollidingAspects() {
+            init(null, { [air.id]: [temperature], [water.id]: [temperature] }, [classifiedAir, classifiedWater]);
+            component.aspectFormControl.setValue([air.id, water.id]);
+            component.functionFormControl.setValue(temperature);
+            fixture.detectChanges();
+        }
+
+        it('blocks Save for two aspects of one class and shows why, without the user touching the select', () => {
+            selectCollidingAspects();
+            expect(component.aspectFormControl.invalid).toBeTrue();
+            expect(saveButton().disabled).toBeTrue();
+            expect(renderedErrors()).toContain('Only one aspect per aspect class is allowed: Air, Water');
+            component.save();
+            expect(dialogRef.close).not.toHaveBeenCalled();
+        });
+
+        it('saves again once one of the aspects is removed', () => {
+            selectCollidingAspects();
+            component.aspectFormControl.setValue([air.id]);
+            component.functionFormControl.setValue(temperature);
+            fixture.detectChanges();
+            expect(saveButton().disabled).toBeFalse();
+            expect(savedResult().aspects).toEqual([air.id]);
+        });
+
+        it('blocks Save for a stored element whose aspects collide', () => {
+            init(existing({ aspect: air.id, aspects: [air.id, water.id] }), { [air.id]: [temperature], [water.id]: [temperature] }, [classifiedAir, classifiedWater]);
+            fixture.detectChanges();
+            expect(saveButton().disabled).toBeTrue();
+            expect(renderedErrors()).toContain('Only one aspect per aspect class is allowed: Air, Water');
+        });
+
+        it('accepts aspects without a class, as before', () => {
+            init(null, { [air.id]: [temperature], [water.id]: [temperature] });
+            component.aspectFormControl.setValue([air.id, water.id]);
+            component.functionFormControl.setValue(temperature);
+            fixture.detectChanges();
+            expect(saveButton().disabled).toBeFalse();
+        });
     });
 });

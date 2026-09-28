@@ -26,7 +26,7 @@ import { AuthorizationService } from '../../../../core/services/authorization.se
 import { AuthorizationServiceMock } from '../../../../core/services/authorization.service.mock';
 import { DialogsService } from '../../../../core/services/dialogs.service';
 import {ActivatedRoute, provideRouter} from '@angular/router';
-import { Observable, of, Subject } from 'rxjs';
+import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -123,10 +123,14 @@ describe('DeployFlowComponent aspects', () => {
     ) {
         deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getAspects.and.returnValue(of([{ id: air, name: 'Air', sub_aspects: [] }, { id: water, name: 'Water', sub_aspects: [] }]));
-        deviceTypeService.getAspectsMeasuringFunctionsWithImports.and.callFake((id: string) => {
-            const functions = functionsByAspect[id] || [];
-            return Array.isArray(functions) ? of(functions) : functions;
-        });
+        deviceTypeService.getMeasuringFunctionsPerAspectWithImports.and.callFake((ids: string[]) =>
+            forkJoin(
+                ids.map((id) => {
+                    const functions = functionsByAspect[id] || [];
+                    return Array.isArray(functions) ? of(functions) : functions;
+                }),
+            ),
+        );
         deviceInstancesService = createSpyFromClass(DeviceInstancesService);
         deviceInstancesService.getDeviceInstancesWithDeviceType.and.returnValue(of({ result: [], total: 0 }));
         deviceInstancesService.getDeviceSelectionsFull.and.returnValue(of([]));
@@ -213,6 +217,21 @@ describe('DeployFlowComponent aspects', () => {
         init({ [air]: [temperature, humidity, pressure], [water]: [pressure, temperature] });
         input().patchValue({ aspectIds: [water, air] });
         expect(functionIds()).toEqual([temperature.id, pressure.id]);
+    });
+
+    it('fetches the functions of several aspects in one call', () => {
+        init({ [air]: [temperature], [water]: [temperature] });
+        input().patchValue({ aspectIds: [water, air] });
+        expect(deviceTypeService.getMeasuringFunctionsPerAspectWithImports).toHaveBeenCalledOnceWith([air, water]);
+    });
+
+    it('fetches only the aspects it has no functions for yet', () => {
+        init({ [air]: [temperature], [water]: [temperature] });
+        input().patchValue({ aspectIds: [air] });
+        input().patchValue({ aspectIds: [water, air] });
+        expect(deviceTypeService.getMeasuringFunctionsPerAspectWithImports.calls.allArgs()).toEqual([[[air]], [[water]]]);
+        input().patchValue({ aspectIds: [air] });
+        expect(deviceTypeService.getMeasuringFunctionsPerAspectWithImports).toHaveBeenCalledTimes(2);
     });
 
     it('offers the functions of a single aspect unchanged, and none without an aspect', () => {

@@ -33,9 +33,11 @@ import {
 } from '../../../../metadata/device-types-overview/shared/device-type.model';
 import { CharacteristicsService } from '../../../../metadata/characteristics/shared/characteristics.service';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
-import { aspectTreeFromAspectNodes, withStoredAspects } from '../../../../../core/components/aspect-select/aspect-select.model';
+import { AspectClassification, aspectTreeFromAspectNodes, classifyAspects, withStoredAspects } from '../../../../../core/components/aspect-select/aspect-select.model';
 import {
     criteriaAspectsLabel,
+    criteriaHasAspectClassCollision,
+    criteriaListHasAspectClassCollision,
     editableCriteria,
     setCriteriaAspects,
     SmartServiceCriteria,
@@ -53,6 +55,7 @@ export class EditSmartServiceInputDialogComponent {
     deviceClasses: (DeviceTypeDeviceClassModel | { id?: string; name: string })[] = [];
     aspects: DeviceTypeAspectModel[] = [];
     private aspectNames = new Map<string, string>();
+    private classified = new Map<string, AspectClassification>();
 
     characteristics: DeviceTypeCharacteristicsModel[] = [];
 
@@ -80,6 +83,7 @@ export class EditSmartServiceInputDialogComponent {
             const stored = this.abstract.flatMap((input) => (Array.isArray(input.criteria_list) ? input.criteria_list : []))
                 .flatMap((criteria) => criteria?.aspect_ids || []);
             this.aspects = withStoredAspects(aspectTreeFromAspectNodes(nodes), stored);
+            this.classified = classifyAspects(this.aspects);
         });
     }
 
@@ -227,11 +231,20 @@ export class EditSmartServiceInputDialogComponent {
     }
 
     ok(): void {
+        if (this.hasAspectClassCollision()) {
+            return;
+        }
         this.dialogRef.close(this.readAbstractAsDescription());
     }
 
     isValid() {
-        return !this.abstract.some(value => !isValidCamundaVariableName(value.id));
+        return !this.abstract.some(value => !isValidCamundaVariableName(value.id)) && !this.hasAspectClassCollision();
+    }
+
+    hasAspectClassCollision(criteria?: SmartServiceCriteria): boolean {
+        return criteria === undefined
+            ? this.abstract.some((input) => criteriaListHasAspectClassCollision(input.criteria_list, this.classified))
+            : criteriaHasAspectClassCollision(criteria, this.classified);
     }
 }
 

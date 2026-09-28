@@ -284,14 +284,35 @@ export class DeviceTypeService {
         );
     }
 
-    /** Returns measuring-functions used with the aspect (or its descendants) by devices or imports. */
-    getAspectsMeasuringFunctionsWithImports(aspectId: string): Observable<DeviceTypeFunctionModel[]> {
+    /**
+     * Returns, per aspect id and in the order given, the measuring-functions used with the aspect (or its
+     * descendants) by devices or imports. The import types are listed once for all aspects.
+     */
+    getMeasuringFunctionsPerAspectWithImports(aspectIds: string[]): Observable<DeviceTypeFunctionModel[][]> {
+        if (aspectIds.length === 0) {
+            return of([]);
+        }
+        return this.listImportTypeCriteria().pipe(
+            concatMap((importCriteria) => forkJoin(aspectIds.map((aspectId) => this.measuringFunctionsWithImports(aspectId, importCriteria)))),
+            catchError(
+                this.errorHandlerService.handleError(
+                    DeviceTypeService.name,
+                    'getMeasuringFunctionsPerAspectWithImports',
+                    aspectIds.map((): DeviceTypeFunctionModel[] => []),
+                ),
+            ),
+        );
+    }
+
+    private measuringFunctionsWithImports(
+        aspectId: string,
+        importCriteria: { function_id?: string; aspect_id?: string }[],
+    ): Observable<DeviceTypeFunctionModel[]> {
         return forkJoin({
             deviceFunctions: this.getAspectsMeasuringFunctions(aspectId),
             aspectNodes: this.getAspectNodesByIds([aspectId]),
-            importCriteria: this.listImportTypeCriteria(),
         }).pipe(
-            concatMap(({ deviceFunctions, aspectNodes, importCriteria }) => {
+            concatMap(({ deviceFunctions, aspectNodes }) => {
                 const aspectIds = [aspectId].concat(aspectNodes[0]?.descendent_ids || []);
                 const knownFunctionIds = deviceFunctions.map((f) => f.id);
                 const additionalFunctionIds = importCriteria
@@ -306,7 +327,7 @@ export class DeviceTypeService {
                     map((importFunctions) => deviceFunctions.concat(importFunctions)),
                 );
             }),
-            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectsMeasuringFunctionsWithImports', [])),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'measuringFunctionsWithImports', [] as DeviceTypeFunctionModel[])),
         );
     }
 

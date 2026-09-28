@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import { classifyAspects } from '../../../../core/components/aspect-select/aspect-select.model';
 import {
     criteriaAspectsLabel,
+    criteriaHasAspectClassCollision,
+    criteriaListHasAspectClassCollision,
     editableCriteria,
     setCriteriaAspects,
     SmartServiceCriteria,
@@ -72,5 +75,31 @@ describe('smart-service criteria', () => {
         const names = new Map([[air, 'Air']]);
         expect(criteriaAspectsLabel({ aspect_ids: [water, air] }, names)).toBe('Air, ' + water);
         expect(criteriaAspectsLabel({ aspect_id: '' }, names)).toBe('');
+    });
+
+    describe('aspect-class collision', () => {
+        const environment = 'urn:infai:ses:aspect-class:environment';
+        const classified = classifyAspects([
+            { id: air, name: 'Air', aspect_class_id: environment },
+            { id: water, name: 'Water', aspect_class_id: environment },
+            { id: 'urn:infai:ses:aspect:free', name: 'Free' },
+        ]);
+
+        it('finds two aspects of one class in either spelling', () => {
+            expect(criteriaHasAspectClassCollision({ aspect_ids: [air, water] }, classified)).toBeTrue();
+            expect(criteriaHasAspectClassCollision({ aspect_id: air, aspect_ids: [water] }, classified)).toBeTrue();
+        });
+
+        it('accepts one classified aspect, unclassified aspects, and none', () => {
+            expect(criteriaHasAspectClassCollision({ aspect_ids: [air] }, classified)).toBeFalse();
+            expect(criteriaHasAspectClassCollision({ aspect_ids: [air, 'urn:infai:ses:aspect:free'] }, classified)).toBeFalse();
+            expect(criteriaHasAspectClassCollision({}, classified)).toBeFalse();
+        });
+
+        it('judges a list by its worst criteria, and anything but a list as free of collisions', () => {
+            expect(criteriaListHasAspectClassCollision([{ aspect_ids: [air] }, { aspect_ids: [air, water] }], classified)).toBeTrue();
+            expect(criteriaListHasAspectClassCollision([null, 'x', { aspect_ids: [air] }], classified)).toBeFalse();
+            expect(criteriaListHasAspectClassCollision({ aspect_ids: [air, water] }, classified)).toBeFalse();
+        });
     });
 });

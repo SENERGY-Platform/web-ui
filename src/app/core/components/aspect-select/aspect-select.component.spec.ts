@@ -172,13 +172,15 @@ describe('AspectSelectComponent', () => {
 
         @Component({
             template: `<form [formGroup]="form">
-                <senergy-aspect-select formControlName="aspect_ids" [aspects]="aspects" [aspectClasses]="classes"></senergy-aspect-select>
+                <senergy-aspect-select formControlName="aspect_ids" [aspects]="aspects" [aspectClasses]="classes"
+                    [showCollisionUntouched]="showCollisionUntouched"></senergy-aspect-select>
             </form>`,
         })
         class HostComponent {
             form = new FormGroup({ aspect_ids: new FormControl<string[]>([inside, outside]) });
             aspects: DeviceTypeAspectModel[] = classifiedAspects;
             classes: DeviceTypeAspectClassModel[] = environmentClass;
+            showCollisionUntouched = false;
         }
 
         let host: ComponentFixture<HostComponent>;
@@ -205,6 +207,22 @@ describe('AspectSelectComponent', () => {
             render();
 
             expect(outer().invalid).toBeTrue();
+            expect(renderedErrors()).toEqual([]);
+        });
+
+        it('renders the collision of an untouched control when showCollisionUntouched is set', () => {
+            host.componentInstance.showCollisionUntouched = true;
+            render();
+
+            expect(outer().touched).toBeFalse();
+            expect(renderedErrors()).toEqual(['Only one aspect per aspect class is allowed: inside_air, outside_air']);
+        });
+
+        it('renders nothing for an untouched control without a collision when showCollisionUntouched is set', () => {
+            host.componentInstance.showCollisionUntouched = true;
+            outer().setValue([inside]);
+            render();
+
             expect(renderedErrors()).toEqual([]);
         });
 

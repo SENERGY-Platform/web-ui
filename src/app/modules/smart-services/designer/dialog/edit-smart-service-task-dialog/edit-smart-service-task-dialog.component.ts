@@ -65,9 +65,11 @@ import {
     CodeEditorScriptEnvironment,
     gojaScriptEnvironment,
 } from '../../../../../core/components/code-editor/code-editor-environment';
-import { aspectTreeFromAspectNodes, withStoredAspects } from '../../../../../core/components/aspect-select/aspect-select.model';
+import { AspectClassification, aspectTreeFromAspectNodes, classifyAspects, withStoredAspects } from '../../../../../core/components/aspect-select/aspect-select.model';
 import {
     criteriaAspectsLabel,
+    criteriaHasAspectClassCollision,
+    criteriaListHasAspectClassCollision,
     editableCriteria,
     setCriteriaAspects,
     SmartServiceCriteria,
@@ -227,6 +229,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             const watched = this.watcherWorkerInfo.devices_by_criteria.criteria;
             const stored = Array.isArray(watched) ? watched.flatMap((c) => c?.aspect_ids || []) : [];
             this.aspects = withStoredAspects(aspectTreeFromAspectNodes(nodes), stored);
+            this.classified = classifyAspects(this.aspects);
         });
         const processModelId = this.result.inputs.find(value => value.name === 'process_deployment.process_model_id')?.value || '';
         if (processModelId !== '') {
@@ -1313,6 +1316,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     aspects: DeviceTypeAspectModel[] = [];
     aspectNodes: DeviceTypeAspectNodeModel[] = [];
     private aspectNames = new Map<string, string>();
+    private classified = new Map<string, AspectClassification>();
 
     removeCriteria(list: SmartServiceCriteria[], index: number): SmartServiceCriteria[] {
         list.splice(index, 1);
@@ -1489,7 +1493,35 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         return s;
     }
 
+    hasAspectClassCollision(criteria: SmartServiceCriteria): boolean {
+        return criteriaHasAspectClassCollision(criteria, this.classified);
+    }
+
+    /** Only the criteria the topic writes count: the watcher's own, or those of the analytics inputs (stored as JSON text). */
+    private hasAspectClassCollisionInTopic(): boolean {
+        switch (this.result.topic) {
+            case 'watcher':
+                return this.watcherWorkerInfo.operation === 'devices_by_criteria'
+                    && criteriaListHasAspectClassCollision(this.watcherWorkerInfo.devices_by_criteria.criteria, this.classified);
+            case 'analytics':
+                return this.result.inputs
+                    .filter(input => input.name.startsWith('analytics.criteria.') || input.name.startsWith('analytics.service_criteria.'))
+                    .some(input => {
+                        try {
+                            return criteriaListHasAspectClassCollision(JSON.parse(input.value), this.classified);
+                        } catch (_) {
+                            return false;
+                        }
+                    });
+            default:
+                return false;
+        }
+    }
+
     isInvalid(): boolean {
+        if (this.hasAspectClassCollisionInTopic()) {
+            return true;
+        }
         switch (this.result.topic) {
             case 'export':
                 if (!this.exportRequest.Name) {
@@ -1545,6 +1577,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     ok(): void {
+        if (this.hasAspectClassCollisionInTopic()) {
+            return;
+        }
         const result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; // prevent changes to the result after filtering
         let temp = result.inputs.filter(e => e.name.startsWith(result.topic + '.') &&
             !e.name.startsWith('info.') &&

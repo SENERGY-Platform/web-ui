@@ -49,6 +49,9 @@ const node = (id: string, name: string, parentId = ''): DeviceTypeAspectNodeMode
 
 const air = node('urn:infai:ses:aspect:air', 'Air');
 const water = node('urn:infai:ses:aspect:water', 'Water');
+const environmentClass = 'urn:infai:ses:aspect-class:environment';
+const classifiedAir = { ...air, aspect_class_id: environmentClass };
+const classifiedWater = { ...water, aspect_class_id: environmentClass };
 const fn = (id: string, name: string): DeviceTypeFunctionModel => ({ id, name, rdf_type: MEASURING, concept_id: '' }) as DeviceTypeFunctionModel;
 const temperature = fn('urn:infai:ses:measuring-function:temperature', 'Get Temperature');
 const humidity = fn('urn:infai:ses:measuring-function:humidity', 'Get Humidity');
@@ -216,5 +219,65 @@ describe('TaskConfigDialogComponent', () => {
         selectMeasuring([]);
         const select: AspectSelectComponent = fixture.debugElement.query(By.directive(AspectSelectComponent)).componentInstance;
         expect(select.aspectOptions.map((o) => o.id)).toEqual([insideAir.id]);
+    });
+
+    describe('aspect-class collision', () => {
+        const saveButton = (): HTMLButtonElement =>
+            fixture.nativeElement.querySelector('mat-dialog-actions button[color="accent"]');
+        const renderedErrors = (): string[] =>
+            Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('mat-error')).map((e) => e.textContent?.trim() ?? '');
+
+        function selectCollidingAspects() {
+            init(null, { [air.id]: [temperature], [water.id]: [temperature] }, [classifiedAir, classifiedWater]);
+            selectMeasuring([air.id, water.id]);
+            component.functionFormControl.setValue(temperature);
+            fixture.detectChanges();
+        }
+
+        it('blocks Save for two aspects of one class and shows why, without the user touching the select', () => {
+            selectCollidingAspects();
+            expect(component.aspectFormControl.invalid).toBeTrue();
+            expect(saveButton().disabled).toBeTrue();
+            expect(renderedErrors()).toContain('Only one aspect per aspect class is allowed: Air, Water');
+            component.save();
+            expect(dialogRef.close).not.toHaveBeenCalled();
+        });
+
+        it('saves again once one of the aspects is removed', () => {
+            selectCollidingAspects();
+            component.aspectFormControl.setValue([air.id]);
+            component.functionFormControl.setValue(temperature);
+            fixture.detectChanges();
+            expect(saveButton().disabled).toBeFalse();
+            expect(renderedErrors()).not.toContain('Only one aspect per aspect class is allowed: Air, Water');
+            expect(savedResult().aspects).toEqual([classifiedAir]);
+        });
+
+        it('blocks Save for a stored selection that already collides', () => {
+            init(measuringSelection({ aspect: classifiedAir, aspects: [classifiedAir, classifiedWater] }), { [air.id]: [temperature], [water.id]: [temperature] }, [
+                classifiedAir,
+                classifiedWater,
+            ]);
+            fixture.detectChanges();
+            expect(saveButton().disabled).toBeTrue();
+            expect(renderedErrors()).toContain('Only one aspect per aspect class is allowed: Air, Water');
+        });
+
+        it('accepts aspects without a class, as before', () => {
+            init(null, { [air.id]: [temperature], [water.id]: [temperature] });
+            selectMeasuring([air.id, water.id]);
+            component.functionFormControl.setValue(temperature);
+            fixture.detectChanges();
+            expect(saveButton().disabled).toBeFalse();
+        });
+
+        it('hands the aspect_class_id of the node on to the task payload, where the process-deployment reads it as part of its aspect node', () => {
+            init(null, { [air.id]: [temperature] }, [classifiedAir]);
+            selectMeasuring([air.id]);
+            component.functionFormControl.setValue(temperature);
+            const result = savedResult();
+            expect(result.aspects[0].aspect_class_id).toBe(environmentClass);
+            expect(result.aspect.aspect_class_id).toBe(environmentClass);
+        });
     });
 });

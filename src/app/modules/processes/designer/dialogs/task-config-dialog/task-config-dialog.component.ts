@@ -39,7 +39,12 @@ import { DeviceTypeService } from '../../../../metadata/device-types-overview/sh
 import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
 import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
 import { rangeValidator } from '../../../../../core/validators/range.validator';
-import { aspectTreeFromAspectNodes } from '../../../../../core/components/aspect-select/aspect-select.model';
+import {
+    AspectClassification,
+    aspectTreeFromAspectNodes,
+    classifyAspects,
+    collidingAspectNames,
+} from '../../../../../core/components/aspect-select/aspect-select.model';
 import { selectedAspectNodes } from '../../bpmn-js/properties-provider/aspects';
 
 @Component({
@@ -69,6 +74,7 @@ export class TaskConfigDialogComponent implements OnInit {
 
     /** Selectable aspect nodes by id, including the nodes of the initial selection the listing may miss. */
     private aspectNodes = new Map<string, DeviceTypeAspectNodeModel>();
+    private classified = new Map<string, AspectClassification>();
     private aspectFunctionsSubscription?: Subscription;
 
     constructor(
@@ -96,6 +102,9 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     save(): void {
+        if (this.aspectClassCollision) {
+            return;
+        }
         const aspects = this.selectedAspectIds()
             .map((id) => this.aspectNodes.get(id))
             .filter((node): node is DeviceTypeAspectNodeModel => node !== undefined)
@@ -111,6 +120,14 @@ export class TaskConfigDialogComponent implements OnInit {
             prefer_events: this.preferEventsFormControl.value
         };
         this.dialogRef.close(this.result);
+    }
+
+    /**
+     * Judged here, not read from the select's control: the select sits behind an ngIf, so its control
+     * is not yet validated when the Save button is bound for the first time.
+     */
+    get aspectClassCollision(): boolean {
+        return collidingAspectNames(this.classified, this.selectedAspectIds()).length > 0;
     }
 
     compare(a: any, b: any): boolean {
@@ -161,8 +178,13 @@ export class TaskConfigDialogComponent implements OnInit {
     private getAspects(): void {
         this.deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
             nodes.forEach((node) => this.aspectNodes.set(node.id, node));
-            this.aspects = aspectTreeFromAspectNodes([...this.aspectNodes.values()]);
+            this.setAspects();
         });
+    }
+
+    private setAspects(): void {
+        this.aspects = aspectTreeFromAspectNodes([...this.aspectNodes.values()]);
+        this.classified = classifyAspects(this.aspects);
     }
 
     private initFunctions(): void {
@@ -251,7 +273,7 @@ export class TaskConfigDialogComponent implements OnInit {
             this.deviceClassFormControl.setValue(this.selection.device_class);
             const selectedNodes = selectedAspectNodes(this.selection) as DeviceTypeAspectNodeModel[];
             selectedNodes.forEach((node) => this.aspectNodes.set(node.id, node));
-            this.aspects = aspectTreeFromAspectNodes([...this.aspectNodes.values()]);
+            this.setAspects();
             this.aspectFormControl.setValue(selectedNodes.map((node) => node.id));
             this.functionTypes.forEach((functionType: DeviceTypeFunctionType) => {
                 if (this.selection !== null && functionType.rdf_type === this.selection.function.rdf_type) {

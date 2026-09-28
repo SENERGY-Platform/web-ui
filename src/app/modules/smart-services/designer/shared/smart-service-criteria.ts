@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { AspectClassification, collidingAspectNames } from '../../../../core/components/aspect-select/aspect-select.model';
 import {
     criteriaAspectFields,
     criteriaAspectIds,
@@ -74,4 +75,17 @@ export function criteriaAspectsLabel(criteria: SmartServiceCriteria, aspectNames
     return smartServiceCriteriaAspectIds(criteria)
         .map((id) => aspectNames.get(id) || id)
         .join(', ');
+}
+
+/** Whether a criteria names two aspects out of one classified hierarchy, which no content variable can match. */
+export function criteriaHasAspectClassCollision(criteria: SmartServiceCriteria, classified: Map<string, AspectClassification>): boolean {
+    if (criteria === null || typeof criteria !== 'object') {
+        return false;
+    }
+    return collidingAspectNames(classified, smartServiceCriteriaAspectIds(criteria)).length > 0;
+}
+
+/** As criteriaHasAspectClassCollision for a stored list; anything but a list holds no criteria. */
+export function criteriaListHasAspectClassCollision(criteriaList: unknown, classified: Map<string, AspectClassification>): boolean {
+    return Array.isArray(criteriaList) && criteriaList.some((criteria) => criteriaHasAspectClassCollision(criteria, classified));
 }

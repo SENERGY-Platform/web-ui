@@ -20,7 +20,7 @@ import {
     MatDialogRef
 } from '@angular/material/dialog';
 import { UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
-import { forkJoin, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import {
     compareAspectIds,
     criteriaAspectIds,
@@ -34,7 +34,12 @@ import { DeviceTypeService } from '../../../../metadata/device-types-overview/sh
 import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
 import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
 import { ConditionalEventEditModel } from '../../shared/designer-dialog.model';
-import { aspectTreeFromAspectNodes } from '../../../../../core/components/aspect-select/aspect-select.model';
+import {
+    AspectClassification,
+    aspectTreeFromAspectNodes,
+    classifyAspects,
+    collidingAspectNames,
+} from '../../../../../core/components/aspect-select/aspect-select.model';
 
 @Component({
     templateUrl: './conditional-event-dialog.component.html',
@@ -55,6 +60,7 @@ export class ConditionalEventDialogComponent implements OnInit {
     /** Aspect ids of the edited element, applied once the selectable aspects are known. */
     private initialAspectIds: string[];
     private aspectFunctionsSubscription?: Subscription;
+    private classified = new Map<string, AspectClassification>();
 
     constructor(
         private dialogRef: MatDialogRef<ConditionalEventDialogComponent>,
@@ -94,6 +100,9 @@ export class ConditionalEventDialogComponent implements OnInit {
     }
 
     save(): void {
+        if (this.aspectClassCollision) {
+            return;
+        }
         const aspectIds = [...this.selectedAspectIds()].sort(compareAspectIds);
         this.result.aspects = aspectIds;
         this.result.aspect = deprecatedAspectAlias(aspectIds) || '';
@@ -101,6 +110,10 @@ export class ConditionalEventDialogComponent implements OnInit {
         this.result.characteristic = this.characteristic?.id || '';
         this.result.label = this.functionFormControl.value.name + ' ' + this.characteristic.name + '\n' + this.result.script;
         this.dialogRef.close(this.result);
+    }
+
+    get aspectClassCollision(): boolean {
+        return collidingAspectNames(this.classified, this.selectedAspectIds()).length > 0;
     }
 
     compare(a: any, b: any): boolean {
@@ -136,23 +149,23 @@ export class ConditionalEventDialogComponent implements OnInit {
             this.functionFormControl.disable();
             return;
         }
-        this.aspectFunctionsSubscription = forkJoin(
-            aspectIds.map((id) => this.deviceTypeService.getAspectsMeasuringFunctionsWithImports(id)),
-        ).subscribe((functionLists: DeviceTypeFunctionModel[][]) => {
-            const [first, ...rest] = functionLists;
-            const functions = first.filter((f) => rest.every((list) => list.some((other) => other.id === f.id)));
-            this.functions = functions;
+        this.aspectFunctionsSubscription = this.deviceTypeService
+            .getMeasuringFunctionsPerAspectWithImports(aspectIds)
+            .subscribe((functionLists: DeviceTypeFunctionModel[][]) => {
+                const [first, ...rest] = functionLists;
+                const functions = first.filter((f) => rest.every((list) => list.some((other) => other.id === f.id)));
+                this.functions = functions;
 
-            // handle init value
-            if (this.result.iotfunction) {
-                functions.forEach((value) => {
-                    if (value.id === this.result.iotfunction) {
-                        this.functionFormControl.setValue(value);
-                        this.result.iotfunction = '';
-                    }
-                });
-            }
-        });
+                // handle init value
+                if (this.result.iotfunction) {
+                    functions.forEach((value) => {
+                        if (value.id === this.result.iotfunction) {
+                            this.functionFormControl.setValue(value);
+                            this.result.iotfunction = '';
+                        }
+                    });
+                }
+            });
     }
 
     private selectedAspectIds(): string[] {
@@ -162,6 +175,7 @@ export class ConditionalEventDialogComponent implements OnInit {
     private getAspects() {
         this.deviceTypeService.getAspectNodesWithMeasuringFunction().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
             this.aspects = aspectTreeFromAspectNodes(nodes);
+            this.classified = classifyAspects(this.aspects);
             // handle init value; a selection naming an aspect that is no longer offered opens empty, as the
             // single select did, rather than narrowed to the remaining aspects without the user noticing
             const initial = this.initialAspectIds;

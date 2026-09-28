@@ -26,9 +26,10 @@ import { FunctionsService } from '../../../../metadata/functions/shared/function
 import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceClassesService } from '../../../../metadata/device-classes/shared/device-classes.service';
 import { FunctionsPermSearchModel } from '../../../../metadata/functions/shared/functions-perm-search.model';
-import { aspectTreeFromAspectNodes, withStoredAspects } from '../../../../../core/components/aspect-select/aspect-select.model';
+import { AspectClassification, aspectTreeFromAspectNodes, classifyAspects, withStoredAspects } from '../../../../../core/components/aspect-select/aspect-select.model';
 import {
     criteriaAspectsLabel,
+    criteriaHasAspectClassCollision,
     editableCriteria,
     setCriteriaAspects,
     SmartServiceCriteria,
@@ -53,6 +54,7 @@ export class CriteriaListComponent implements OnInit {
 
     private aspectNodes: DeviceTypeAspectNodeModel[] | null = null;
     private aspectNames = new Map<string, string>();
+    private classified = new Map<string, AspectClassification>();
 
     constructor(private functionsService: FunctionsService,
         private deviceTypesService: DeviceTypeService,
@@ -83,6 +85,10 @@ export class CriteriaListComponent implements OnInit {
     setAspects(criteria: SmartServiceCriteria, aspectIds: string[] | null) {
         setCriteriaAspects(criteria, aspectIds);
         this.emitUpdate();
+    }
+
+    hasAspectClassCollision(criteria: SmartServiceCriteria): boolean {
+        return criteriaHasAspectClassCollision(criteria, this.classified);
     }
 
     removeCriteria(list: SmartServiceCriteria[], index: number): SmartServiceCriteria[] {
@@ -133,5 +139,6 @@ export class CriteriaListComponent implements OnInit {
         }
         const stored = Array.isArray(this.criteriaList) ? this.criteriaList.flatMap((c) => c?.aspect_ids || []) : [];
         this.aspects = withStoredAspects(aspectTreeFromAspectNodes(this.aspectNodes), stored);
+        this.classified = classifyAspects(this.aspects);
     }
 }

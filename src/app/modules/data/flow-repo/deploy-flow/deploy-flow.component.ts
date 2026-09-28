@@ -465,13 +465,15 @@ export class DeployFlowComponent implements OnInit {
         if (ids.length === 0) {
             return of([]);
         }
-        const perAspect = ids.map((id) =>
-            this.aspectFunctions.has(id)
-                ? of(this.aspectFunctions.get(id) || [])
-                : this.deviceTypeService.getAspectsMeasuringFunctionsWithImports(id).pipe(tap((functions) => this.aspectFunctions.set(id, functions))),
-        );
-        return forkJoin(perAspect).pipe(
-            map(([firstList, ...rest]) => {
+        const missing = ids.filter((id) => !this.aspectFunctions.has(id));
+        const fetched: Observable<unknown> = missing.length === 0
+            ? of([])
+            : this.deviceTypeService.getMeasuringFunctionsPerAspectWithImports(missing).pipe(
+                tap((lists) => missing.forEach((id, index) => this.aspectFunctions.set(id, lists[index]))),
+            );
+        return fetched.pipe(
+            map(() => {
+                const [firstList, ...rest] = ids.map((id) => this.aspectFunctions.get(id) || []);
                 const functions = firstList.filter((f) => rest.every((list) => list.some((other) => other.id === f.id)));
                 this.aspectFunctions.set(key, functions);
                 return functions;

@@ -49,12 +49,15 @@ const node = (id: string, name: string): DeviceTypeAspectNodeModel => ({
 const air = node('urn:infai:ses:aspect:air', 'Air');
 const water = node('urn:infai:ses:aspect:water', 'Water');
 const watchKey = 'watcher.watch_devices_by_criteria';
+const environmentClass = 'urn:infai:ses:aspect-class:environment';
+const classifiedAir = { ...air, aspect_class_id: environmentClass };
+const classifiedWater = { ...water, aspect_class_id: environmentClass };
 
 describe('EditSmartServiceTaskDialogComponent criteria', () => {
     let component: EditSmartServiceTaskDialogComponent;
     let dialogRef: Spy<MatDialogRef<EditSmartServiceTaskDialogComponent>>;
 
-    function init(inputs: SmartServiceTaskInputDescription[], listing: DeviceTypeAspectNodeModel[] = [air, water]) {
+    function init(inputs: SmartServiceTaskInputDescription[], listing: DeviceTypeAspectNodeModel[] = [air, water], topic = 'watcher') {
         dialogRef = createSpyFromClass<MatDialogRef<EditSmartServiceTaskDialogComponent>>(MatDialogRef);
         const deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly.and.returnValue(of(listing));
@@ -67,7 +70,7 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
         const importTypesService = createSpyFromClass(ImportTypesService);
         importTypesService.listImportTypes.and.returnValue(of({ result: [], total: 0 }));
 
-        const info: SmartServiceTaskDescription = { name: 'task', topic: 'watcher', inputs, outputs: [], smartServiceInputs: { inputs: [] } };
+        const info: SmartServiceTaskDescription = { name: 'task', topic, inputs, outputs: [], smartServiceInputs: { inputs: [] } };
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
             declarations: [EditSmartServiceTaskDialogComponent],
@@ -124,6 +127,54 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
         init([{ name: watchKey, type: 'text', value: `[{"aspect_ids":["${gone}"]}]` }]);
         expect(component.aspects.map((a) => a.name)).toEqual(['Air', 'Water', gone]);
         expect(JSON.parse(savedWatcherCriteria() as string)).toEqual([{ aspect_id: gone, aspect_ids: [gone] }]);
+    });
+
+    describe('aspect-class collision', () => {
+        const collidingJson = JSON.stringify([{ aspect_ids: [air.id, water.id] }]);
+
+        it('blocks Save and OK for watcher criteria naming two aspects of one class, until one is removed', () => {
+            init([{ name: watchKey, type: 'text', value: '[]' }], [classifiedAir, classifiedWater]);
+            component.addCriteria(watched());
+            component.setAspects(watched()[0], [air.id, water.id]);
+            expect(component.isInvalid()).toBeTrue();
+            expect(component.hasAspectClassCollision(watched()[0])).toBeTrue();
+            component.ok();
+            expect(dialogRef.close).not.toHaveBeenCalled();
+
+            component.setAspects(watched()[0], [air.id]);
+            expect(component.isInvalid()).toBeFalse();
+            expect(component.hasAspectClassCollision(watched()[0])).toBeFalse();
+            expect(JSON.parse(savedWatcherCriteria() as string)).toEqual([jasmine.objectContaining({ aspect_ids: [air.id] })]);
+        });
+
+        it('blocks a stored watcher criteria that already collides', () => {
+            init([{ name: watchKey, type: 'text', value: collidingJson }], [classifiedAir, classifiedWater]);
+            expect(component.isInvalid()).toBeTrue();
+        });
+
+        it('accepts two aspects without a class, as before', () => {
+            init([{ name: watchKey, type: 'text', value: collidingJson }]);
+            expect(component.isInvalid()).toBeFalse();
+        });
+
+        it('blocks the criteria of an analytics input', () => {
+            init(
+                [
+                    { name: 'analytics.criteria.flow.port', type: 'text', value: '[]' },
+                    { name: 'analytics.service_criteria.flow.port', type: 'text', value: collidingJson },
+                ],
+                [classifiedAir, classifiedWater],
+                'analytics',
+            );
+            expect(component.isInvalid()).toBeTrue();
+            component.ok();
+            expect(dialogRef.close).not.toHaveBeenCalled();
+        });
+
+        it('ignores an analytics input whose text is no criteria list', () => {
+            init([{ name: 'analytics.criteria.flow.port', type: 'text', value: 'not json' }], [classifiedAir, classifiedWater], 'analytics');
+            expect(component.isInvalid()).toBeFalse();
+        });
     });
 
     it('documents the aspect list in the criteria struct completion', () => {

@@ -18,7 +18,7 @@ import { TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of } from 'rxjs';
-import { createSpyFromClass } from 'jasmine-auto-spies';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import {
     AbstractSmartServiceInput,
     abstractSmartServiceInputToSmartServiceInputsDescription,
@@ -88,9 +88,17 @@ describe('EditSmartServiceInputDialogComponent criteria', () => {
     const node = (id: string, name: string): DeviceTypeAspectNodeModel =>
         ({ id, name, root_id: id, parent_id: '', child_ids: [], ancestor_ids: [], descendent_ids: [] });
 
-    function init(properties: { id: string; value: string }[]): EditSmartServiceInputDialogComponent {
+    const environmentClass = 'urn:infai:ses:aspect-class:environment';
+    const classified = [
+        { ...node(air, 'Air'), aspect_class_id: environmentClass },
+        { ...node(water, 'Water'), aspect_class_id: environmentClass },
+    ];
+    let dialogRef: Spy<MatDialogRef<EditSmartServiceInputDialogComponent>>;
+
+    function init(properties: { id: string; value: string }[], listing = [node(air, 'Air'), node(water, 'Water')]): EditSmartServiceInputDialogComponent {
+        dialogRef = createSpyFromClass<MatDialogRef<EditSmartServiceInputDialogComponent>>(MatDialogRef);
         const deviceTypeService = createSpyFromClass(DeviceTypeService);
-        deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly.and.returnValue(of([node(air, 'Air'), node(water, 'Water')]));
+        deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly.and.returnValue(of(listing));
         const functionsService = createSpyFromClass(FunctionsService);
         functionsService.getFunctions.and.returnValue(of({ result: [], total: 0 }));
         const deviceClassesService = createSpyFromClass(DeviceClassesService);
@@ -101,7 +109,7 @@ describe('EditSmartServiceInputDialogComponent criteria', () => {
             schemas: [NO_ERRORS_SCHEMA],
             declarations: [EditSmartServiceInputDialogComponent],
             providers: [
-                { provide: MatDialogRef, useValue: createSpyFromClass(MatDialogRef) },
+                { provide: MatDialogRef, useValue: dialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: { info: description(properties), element: {} } },
                 { provide: DeviceTypeService, useValue: deviceTypeService },
                 { provide: FunctionsService, useValue: functionsService },
@@ -127,5 +135,34 @@ describe('EditSmartServiceInputDialogComponent criteria', () => {
             { aspect_id: gone, aspect_ids: [gone] },
             { aspect_id: air, aspect_ids: [air, water] },
         ]);
+    });
+
+    describe('aspect-class collision', () => {
+        it('blocks OK for a criteria naming two aspects of one class, until one is removed', () => {
+            const component = init([{ id: 'criteria_list', value: '[{}]' }], classified);
+            const criteria = component.abstract[0].criteria_list![0];
+            expect(component.isValid()).toBeTrue();
+
+            component.setAspects(criteria, [air, water]);
+            expect(component.hasAspectClassCollision(criteria)).toBeTrue();
+            expect(component.isValid()).toBeFalse();
+            component.ok();
+            expect(dialogRef.close).not.toHaveBeenCalled();
+
+            component.setAspects(criteria, [air]);
+            expect(component.isValid()).toBeTrue();
+            component.ok();
+            expect(dialogRef.close).toHaveBeenCalledTimes(1);
+        });
+
+        it('blocks OK for a stored criteria that already collides', () => {
+            const component = init([{ id: 'criteria_list', value: `[{"aspect_ids":["${air}","${water}"]}]` }], classified);
+            expect(component.isValid()).toBeFalse();
+        });
+
+        it('accepts two aspects without a class, as before', () => {
+            const component = init([{ id: 'criteria_list', value: `[{"aspect_ids":["${air}","${water}"]}]` }]);
+            expect(component.isValid()).toBeTrue();
+        });
     });
 });

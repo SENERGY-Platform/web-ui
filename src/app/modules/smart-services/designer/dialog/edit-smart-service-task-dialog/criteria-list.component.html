@@ -20,6 +20,7 @@
             <mat-panel-title>
                 {{criteriaToLabel(criteria)}}
             </mat-panel-title>
+            <mat-panel-description *ngIf="hasAspectClassCollision(criteria)" style="color: var(--warn-color, #f44336)">Aspect class collision</mat-panel-description>
         </mat-expansion-panel-header>
         <div>
             <div>
@@ -46,7 +47,7 @@
                 </div>
                 <div>
                     <senergy-aspect-select [ngModel]="criteria.aspect_ids" (ngModelChange)="setAspects(criteria, $event)"
-                        [aspects]="aspects" [aspectClasses]="[]" label="Aspects">
+                        [aspects]="aspects" [aspectClasses]="[]" label="Aspects" [showCollisionUntouched]="true">
                     </senergy-aspect-select>
                 </div>
                 <div>

@@ -34,7 +34,8 @@
         </mat-form-field>
 
         <senergy-aspect-select *ngIf="optionsFormControl.value === 'Measuring'"
-            [formControl]="aspectFormControl" [aspects]="aspects" [aspectClasses]="[]" label="Aspects">
+            [formControl]="aspectFormControl" [aspects]="aspects" [aspectClasses]="[]" label="Aspects"
+            [showCollisionUntouched]="true">
         </senergy-aspect-select>
 
         <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value !== ''">
@@ -68,6 +69,6 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="functionFormControl.value === ''" (click)="save()">Save
+    <button mat-raised-button color="accent" [disabled]="functionFormControl.value === '' || aspectClassCollision" (click)="save()">Save
     </button>
 </mat-dialog-actions>

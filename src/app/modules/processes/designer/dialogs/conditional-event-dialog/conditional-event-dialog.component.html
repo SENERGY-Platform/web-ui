@@ -21,7 +21,7 @@
 <mat-dialog-content>
     <form class="form">
         <senergy-aspect-select [formControl]="aspectFormControl" [aspects]="aspects" [aspectClasses]="[]"
-            label="Aspects">
+            label="Aspects" [showCollisionUntouched]="true">
         </senergy-aspect-select>
 
         <mat-form-field appearance="outline" class="form-field" color="accent">
@@ -52,5 +52,5 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="!functionFormControl.value" (click)="save()">Save</button>
+    <button mat-raised-button color="accent" [disabled]="!functionFormControl.value || aspectClassCollision" (click)="save()">Save</button>
 </mat-dialog-actions>

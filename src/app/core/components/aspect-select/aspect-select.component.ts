@@ -60,6 +60,11 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
     /** Excludes aspects that have sub-aspects, for callers where only a leaf aspect makes sense. */
     @Input() leafOnly = false;
     @Input() label = 'Aspects';
+    /**
+     * Renders a collision without waiting for the control to be touched, for dialogs that block Save on it:
+     * a stored collision would otherwise leave a disabled Save without any visible reason.
+     */
+    @Input() showCollisionUntouched = false;
     @Input() appendTo = '.ng-select-anchor';
 
     aspectOptions: AspectSelectOption[] = [];
@@ -75,7 +80,10 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
 
     /** The inner control is never touched by a parent form, so the error state follows the outer control instead. */
     errorStateMatcher: ErrorStateMatcher = {
-        isErrorState: (inner, form) => this.defaultErrorStateMatcher.isErrorState(this.outerControl() ?? inner, form),
+        isErrorState: (inner, form) => {
+            const control = this.outerControl() ?? inner;
+            return (this.showCollisionUntouched && control?.hasError('aspectClassCollision') === true) || this.defaultErrorStateMatcher.isErrorState(control, form);
+        },
     };
 
     constructor(

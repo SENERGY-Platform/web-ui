@@ -248,6 +248,43 @@ describe('ImportTypesCreateEditComponent', () => {
         expect(saved.output.sub_content_variables[1].aspect_id).toBe('urn:infai:ses:aspect:time');
     }));
 
+    describe('a time variable stored with several aspects', () => {
+        const stored = ['urn:infai:ses:aspect:b', 'urn:infai:ses:aspect:a', 'urn:infai:ses:aspect:c'];
+
+        function savedTimeVariable(loaded: ImportTypesCreateEditComponent) {
+            importTypesServiceSpy.saveImportType.calls.reset();
+            loaded.save();
+            return importTypesServiceSpy.saveImportType.calls.mostRecent().args[0].output.sub_content_variables![1];
+        }
+
+        it('opens with the alias selected and writes the stored list back when the user leaves it alone', () => {
+            const loaded = loadWithTimeAspect({ aspect_id: 'urn:infai:ses:aspect:a', aspect_ids: stored });
+
+            expect(loaded.timeAspect.value).toBe('urn:infai:ses:aspect:a');
+            const saved = savedTimeVariable(loaded);
+            expect(saved.aspect_ids).toEqual(stored);
+            expect(saved.aspect_id).toBe('urn:infai:ses:aspect:a');
+        });
+
+        it('writes only the chosen aspect once the user picked another', () => {
+            const loaded = loadWithTimeAspect({ aspect_id: 'urn:infai:ses:aspect:a', aspect_ids: stored });
+            loaded.timeAspect.setValue('urn:infai:ses:aspect:z');
+
+            const saved = savedTimeVariable(loaded);
+            expect(saved.aspect_ids).toEqual(['urn:infai:ses:aspect:z']);
+            expect(saved.aspect_id).toBe('urn:infai:ses:aspect:z');
+        });
+
+        it('writes no aspect once the user cleared the selection', () => {
+            const loaded = loadWithTimeAspect({ aspect_id: 'urn:infai:ses:aspect:a', aspect_ids: stored });
+            loaded.timeAspect.setValue(null);
+
+            const saved = savedTimeVariable(loaded);
+            expect(saved.aspect_ids).toEqual([]);
+            expect(saved.aspect_id).toBeUndefined();
+        });
+    });
+
     it('should create and load import type', () => {
         expect(component).toBeTruthy();
     });

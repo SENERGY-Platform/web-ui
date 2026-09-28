@@ -18,7 +18,6 @@ import {Component, AfterViewInit, Injector, Input, OnDestroy} from '@angular/cor
 import { MatFormFieldControl, MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import {FormControl} from '@angular/forms';
-import {aspectClassCollisionMessage} from '../components/aspect-select/aspect-select.model';
 
 interface errorMsg {errorCode: string; errorInfo: any}
 
@@ -29,7 +28,6 @@ interface maxError {max: number; actual: number}
 interface rangeError {actual: string; min: number; max: number}
 
 interface patternError {requiredPattern: string; actual: string}
-interface aspectClassCollisionError {aspects: string[]}
 // interface newErrorInterface {}                1. add your new error interface here
 
 
@@ -55,8 +53,7 @@ export class MatErrorMessagesDirective implements AfterViewInit, OnDestroy {
         'max',
         'numberOutOfRange',
         'forbiddenName',
-        'pattern',
-        'aspectClassCollision'
+        'pattern'
         // 'newErrorCode'                                   2. add new error code here
     ]);
 
@@ -163,9 +160,6 @@ export class MatErrorMessagesDirective implements AfterViewInit, OnDestroy {
                 case 'pattern':
                     this.pushPatternError(err.errorInfo);
                     break;
-                case 'aspectClassCollision':
-                    this.pushAspectClassCollisionError(err.errorInfo);
-                    break;
                     // case: 'newErrorCode': ... // 3. add new error reference here
                 }
             }
@@ -213,10 +207,6 @@ export class MatErrorMessagesDirective implements AfterViewInit, OnDestroy {
             this.error = 'You must enter at least one special character: ?, !, #, %, $';
         }
         // else if (other pattern) {}
-    }
-
-    private pushAspectClassCollisionError(errInfo: aspectClassCollisionError) {
-        this.error = aspectClassCollisionMessage(errInfo.aspects);
     }
 
     // private pushNewError(errorInf: newErrorInterface) {}   // 4. add new error message generation here
