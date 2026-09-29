@@ -215,7 +215,7 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     /**
      * Names the functions blocking each concept and, if some deletions failed outright, says how many -
-     * both can happen in the same bulk delete. Offers to jump to the functions page to clean the blockers up.
+     * both can happen in the same bulk delete. Offers to jump to the functions page, filtered to the blocking concepts, to clean the blockers up.
      */
     private reportBlockedDeletes(blocked: { concept: DeviceTypeConceptModel; functions: DeviceTypeFunctionModel[] }[], failedCount = 0): void {
         const parts: string[] = [];
@@ -231,7 +231,11 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.snackBar
             .open(parts.join(' '), 'View functions', { panelClass: 'snack-bar-error' })
             .onAction()
-            .subscribe(() => this.router.navigateByUrl('/metadata/functions'));
+            .subscribe(() =>
+                this.router.navigate(['/metadata/functions'], {
+                    queryParams: blocked.length > 0 ? {concept_ids: blocked.map((b) => b.concept.id).join(',')} : undefined,
+                }),
+            );
     }
 
     showCharacteristics(concept: DeviceTypeConceptModel) {

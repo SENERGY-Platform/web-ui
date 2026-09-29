@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
@@ -45,12 +45,16 @@ export class FunctionsService {
         offset: number,
         sortBy: string,
         sortDirection: string,
+        conceptIds: string[] = [],
     ): Observable<{result: DeviceTypeFunctionModel[]; total: number}> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
             sortDirection = 'asc';
         }
         if (sortBy === '' || sortBy === null || sortBy === undefined) {
             sortBy = 'name';
+        }
+        if (conceptIds.length > 0) {
+            return this.getFunctionsOfConcepts(query, limit, offset, sortBy + '.' + sortDirection, conceptIds);
         }
         const params: any = {limit, offset, sort: sortBy + '.' + sortDirection};
         if (query) {
@@ -67,6 +71,32 @@ export class FunctionsService {
                     };
                 }),
                 catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctions(search)', {result: [], total: 0})),
+            );
+    }
+
+    /** Only the GET listing takes a concept filter; it pages, sorts and searches like the query endpoint. */
+    private getFunctionsOfConcepts(
+        query: string,
+        limit: number,
+        offset: number,
+        sort: string,
+        conceptIds: string[],
+    ): Observable<{result: DeviceTypeFunctionModel[]; total: number}> {
+        let params = new HttpParams()
+            .set('limit', limit)
+            .set('offset', offset)
+            .set('sort', sort)
+            .set('concept_ids', conceptIds.join(','));
+        if (query) {
+            params = params.set('search', query);
+        }
+        return this.http
+            .get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/functions', { observe: 'response', params }).pipe(
+                map(resp => ({
+                    result: resp.body || [],
+                    total: parseInt(resp.headers.get('X-Total-Count') || '0', 10),
+                })),
+                catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctions(concepts)', {result: [], total: 0})),
             );
     }
 

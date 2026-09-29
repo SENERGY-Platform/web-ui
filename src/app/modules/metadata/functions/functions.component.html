@@ -18,6 +18,17 @@
     <span class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
     </span>
+    <div *ngIf="conceptIds.length > 0" class="filter-chips">
+        <mat-chip-set>
+            <mat-chip>
+                <mat-icon matChipAvatar>filter_alt</mat-icon>
+                Concept: {{conceptNames.join(', ')}}
+                <button matChipRemove (click)="clearConceptFilter()" matTooltip="Show all functions">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip>
+        </mat-chip-set>
+    </div>
     <div *ngIf="dataSource.data.length === 0 && ready">No functions found.</div>
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 

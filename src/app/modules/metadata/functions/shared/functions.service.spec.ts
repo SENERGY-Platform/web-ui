@@ -131,3 +131,51 @@ describe('FunctionsService getFunctionsByConceptIds', () => {
             .flush('error', { status: 500, statusText: 'Internal Server Error' });
     });
 });
+
+describe('FunctionsService getFunctions with a concept filter', () => {
+    let service: FunctionsService;
+    let httpMock: HttpTestingController;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [MatDialogModule, MatSnackBarModule],
+            providers: [
+                FunctionsService,
+                { provide: LadonService, useClass: MockLadonService },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        });
+        service = TestBed.inject(FunctionsService);
+        httpMock = TestBed.inject(HttpTestingController);
+    });
+
+    afterEach(() => {
+        httpMock.verify();
+    });
+
+    it('lists through GET /functions with paging, sort, search and the concepts, and reads the total from the header', (done) => {
+        service.getFunctions('temp', 20, 40, 'name', 'desc', ['c1', 'c2']).subscribe(resp => {
+            expect(resp.total).toBe(42);
+            expect(resp.result.length).toBe(1);
+            done();
+        });
+        const req = httpMock.expectOne(r => r.url === environment.deviceRepoUrl + '/functions');
+        expect(req.request.method).toBe('GET');
+        expect(req.request.params.get('concept_ids')).toBe('c1,c2');
+        expect(req.request.params.get('limit')).toBe('20');
+        expect(req.request.params.get('offset')).toBe('40');
+        expect(req.request.params.get('sort')).toBe('name.desc');
+        expect(req.request.params.get('search')).toBe('temp');
+        req.flush([{ id: 'f1', name: 'Get-Temperature', display_name: '', description: '', rdf_type: '', concept_id: 'c1' }],
+            { headers: { 'X-Total-Count': '42' } });
+    });
+
+    it('keeps using the query endpoint without a concept filter', () => {
+        service.getFunctions('', 20, 0, 'name', 'asc').subscribe();
+        const req = httpMock.expectOne(environment.deviceRepoUrl + '/query/functions');
+        expect(req.request.method).toBe('POST');
+        req.flush([]);
+    });
+});

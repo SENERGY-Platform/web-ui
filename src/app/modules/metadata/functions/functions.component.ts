@@ -15,7 +15,8 @@
  */
 
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {forkJoin, Observable, Subscription, map} from 'rxjs';
+import {forkJoin, Observable, Subscription, map, skip} from 'rxjs';
+import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {MatDialogConfig} from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -30,6 +31,7 @@ import {Sort, SortDirection} from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import {ConceptsService} from '../concepts/shared/concepts.service';
 import {DeviceTypeService} from '../device-types-overview/shared/device-type.service';
 import {
     UsedInDeviceTypeQuery,
@@ -53,6 +55,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     ready = false;
     userIsAdmin = false;
     private searchSub: Subscription = new Subscription();
+    private routeSub: Subscription = new Subscription();
     searchText = '';
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
@@ -61,6 +64,8 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     userHasCreateAuthorization = false;
     userHasUsedInAuthorization = false;
     usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>();
+    conceptIds: string[] = [];
+    conceptNames: string[] = [];
 
     constructor(
         private dialog: MatDialog,
@@ -71,11 +76,20 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
         private authService: AuthorizationService,
         private deviceTypeService: DeviceTypeService,
         private preferencesService: PreferencesService,
+        private route: ActivatedRoute,
+        private router: Router,
+        private conceptsService: ConceptsService,
     ) {}
 
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
+        this.readConceptFilter(this.route.snapshot.queryParamMap);
         this.initSearch();
+        this.routeSub = this.route.queryParamMap.pipe(skip(1)).subscribe((params) => {
+            if (this.readConceptFilter(params)) {
+                this.reload();
+            }
+        });
         this.checkAuthorization();
     }
 
@@ -90,6 +104,34 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+        this.routeSub.unsubscribe();
+    }
+
+    /** Takes the `concept_ids` query parameter as the active filter and reports whether it changed. */
+    private readConceptFilter(params: ParamMap): boolean {
+        const ids = (params.get('concept_ids') || '').split(',').filter((id) => id !== '');
+        if (ids.join(',') === this.conceptIds.join(',')) {
+            return false;
+        }
+        this.conceptIds = ids;
+        this.conceptNames = ids;
+        if (ids.length > 0) {
+            forkJoin(ids.map((id) => this.conceptsService.getConceptWithoutCharacteristics(id))).subscribe((concepts) => {
+                // a newer filter may have replaced this one while the names were loading
+                if (this.conceptIds === ids) {
+                    this.conceptNames = concepts.map((c, i) => c?.name || ids[i]);
+                }
+            });
+        }
+        return true;
+    }
+
+    clearConceptFilter(): void {
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {concept_ids: null},
+            queryParamsHandling: 'merge',
+        });
     }
 
     checkAuthorization() {
@@ -192,7 +234,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private getFunctions(): Observable<DeviceTypeFunctionModel[]> {
         return this.functionsService
-            .getFunctions(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
+            .getFunctions(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection, this.conceptIds)
             .pipe(
                 map(functions => {
                     this.totalCount = functions.total;

@@ -60,3 +60,7 @@
     cursor: pointer;
     font-size: larger;
 }
+
+.filter-chips {
+    padding-bottom: 1em;
+}

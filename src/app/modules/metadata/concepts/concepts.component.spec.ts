@@ -17,6 +17,7 @@
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { RouterTestingModule } from '@angular/router/testing';
+import { Router } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -162,6 +163,35 @@ describe('ConceptsComponent', () => {
             const message = openSpy.calls.mostRecent().args[0] as string;
             expect(message).toContain(blocked.name);
             expect(message).toContain('1 concept could not be deleted');
+        }),
+    );
+
+    it(
+        'opens the functions page filtered to the blocking concepts when the snackbar action is used',
+        fakeAsync(() => {
+            init();
+            const blocked = concept('urn:infai:ses:concept:temp', 'Temperature');
+            const free = concept('urn:infai:ses:concept:humidity', 'Humidity');
+            const alsoBlocked = concept('urn:infai:ses:concept:pressure', 'Pressure');
+            functionsServiceSpy.getFunctionsByConceptIds.and.returnValue(
+                of([
+                    func('urn:infai:ses:function:get', 'Get-Temperature', blocked.id),
+                    func('urn:infai:ses:function:get-p', 'Get-Pressure', alsoBlocked.id),
+                ]),
+            );
+            conceptsServiceSpy.deleteConcept.and.returnValue(of(true));
+            dialogReturns(true);
+            spyOn(TestBed.inject(MatSnackBar), 'open').and.returnValue({onAction: () => of(undefined)} as any);
+            const navigateSpy = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+            component.selection.select(blocked, free, alsoBlocked);
+            component.deleteMultipleItems();
+            flush();
+            discardPeriodicTasks();
+
+            expect(navigateSpy).toHaveBeenCalledOnceWith(['/metadata/functions'], {
+                queryParams: {concept_ids: blocked.id + ',' + alsoBlocked.id},
+            });
         }),
     );
 });
