@@ -56,6 +56,8 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     userIsAdmin = false;
     private searchSub: Subscription = new Subscription();
     private routeSub: Subscription = new Subscription();
+    // one listing in flight at a time: a slower, superseded answer must not overwrite a newer one
+    private loadSub: Subscription = new Subscription();
     searchText = '';
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
@@ -98,13 +100,14 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getFunctions().subscribe();
+            this.load();
         });
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
         this.routeSub.unsubscribe();
+        this.loadSub.unsubscribe();
     }
 
     /** Takes the `concept_ids` query parameter as the active filter and reports whether it changed. */
@@ -248,10 +251,19 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     reload() {
         this.ready = false;
         this.offset = 0;
+        // reload starts at the first page, so the paginator has to say so too
+        if (this.paginator) {
+            this.paginator.pageIndex = 0;
+        }
         this.selectionClear();
-        this.getFunctions().subscribe(_ => {
+        this.load(() => {
             this.ready = true;
         });
+    }
+
+    private load(done?: () => void): void {
+        this.loadSub.unsubscribe();
+        this.loadSub = this.getFunctions().subscribe(() => done?.());
     }
 
     matSortChange($event: Sort) {

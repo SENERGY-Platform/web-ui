@@ -24,7 +24,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import { FunctionsComponent } from './functions.component';
 import { FunctionsService } from './shared/functions.service';
@@ -124,5 +124,43 @@ describe('FunctionsComponent concept filter', () => {
         expect(functionsServiceSpy.getFunctions).toHaveBeenCalledTimes(1);
         expect(lastConceptIds()).toEqual([]);
         expect(harness.routeNativeElement?.querySelector('.filter-chips')).toBeNull();
+    }));
+
+    it('returns the paginator to the first page when the filter changes', fakeAsync(() => {
+        open('/metadata/functions?concept_ids=' + temperature.id);
+        tick(400);
+        flush();
+        harness.detectChanges();
+        component.paginator.pageIndex = 2;
+
+        component.clearConceptFilter();
+        tick(400);
+        flush();
+        harness.detectChanges();
+        discardPeriodicTasks();
+
+        expect(component.paginator.pageIndex).toBe(0);
+        expect(component.offset).toBe(0);
+    }));
+
+    it('ignores the answer of a listing that a newer one has superseded', fakeAsync(() => {
+        open('/metadata/functions?concept_ids=' + temperature.id);
+        tick(400);
+        flush();
+        harness.detectChanges();
+        const filtered = new Subject<{result: DeviceTypeFunctionModel[]; total: number}>();
+        const getPressure: DeviceTypeFunctionModel = {...getTemperature, id: 'urn:infai:ses:function:all', name: 'Get-Pressure'};
+        functionsServiceSpy.getFunctions.and.returnValues(filtered, of({result: [getPressure], total: 7}));
+
+        component.reload();
+        component.clearConceptFilter();
+        tick(400);
+        flush();
+        filtered.next({result: [getTemperature], total: 1});
+        harness.detectChanges();
+        discardPeriodicTasks();
+
+        expect(component.dataSource.data).toEqual([getPressure]);
+        expect(component.totalCount).toBe(7);
     }));
 });
