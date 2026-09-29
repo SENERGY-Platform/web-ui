@@ -22,6 +22,7 @@
                 <mat-panel-title>
                     {{input.label || input.id || "new-input"}}
                 </mat-panel-title>
+                <mat-panel-description *ngIf="inputHasAspectClassCollision(input)" style="color: var(--warn-color, #f44336)">Aspect class collision</mat-panel-description>
             </mat-expansion-panel-header>
             <div>
                 <div>
@@ -257,6 +258,7 @@
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
+    <span *ngIf="aspectClassCollisionHint() as hint" style="color: var(--warn-color, #f44336); margin-right: 16px">{{hint}}</span>
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="ok()" [disabled]="!isValid()">Save</button>
 </mat-dialog-actions>

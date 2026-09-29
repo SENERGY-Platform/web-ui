@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { MatMenuModule } from '@angular/material/menu';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of } from 'rxjs';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
@@ -30,6 +31,7 @@ import { DeviceTypeService } from '../../../../metadata/device-types-overview/sh
 import { DeviceClassesService } from '../../../../metadata/device-classes/shared/device-classes.service';
 import { DeviceTypeAspectNodeModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
 import { SmartServiceTaskDescription, SmartServiceTaskInputDescription } from '../../shared/designer.model';
+import { ParseModel } from '../../../../data/flow-repo/shared/parse.model';
 import { BpmnElement } from '../../../../processes/designer/shared/designer.model';
 import {
     V2DeploymentsPreparedFilterCriteriaModel,
@@ -56,8 +58,9 @@ const classifiedWater = { ...water, aspect_class_id: environmentClass };
 describe('EditSmartServiceTaskDialogComponent criteria', () => {
     let component: EditSmartServiceTaskDialogComponent;
     let dialogRef: Spy<MatDialogRef<EditSmartServiceTaskDialogComponent>>;
+    let fixture: ComponentFixture<EditSmartServiceTaskDialogComponent>;
 
-    function init(inputs: SmartServiceTaskInputDescription[], listing: DeviceTypeAspectNodeModel[] = [air, water], topic = 'watcher') {
+    function init(inputs: SmartServiceTaskInputDescription[], listing: DeviceTypeAspectNodeModel[] = [air, water], topic = 'watcher', render = false) {
         dialogRef = createSpyFromClass<MatDialogRef<EditSmartServiceTaskDialogComponent>>(MatDialogRef);
         const deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly.and.returnValue(of(listing));
@@ -73,6 +76,7 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
         const info: SmartServiceTaskDescription = { name: 'task', topic, inputs, outputs: [], smartServiceInputs: { inputs: [] } };
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
+            imports: [MatMenuModule],
             declarations: [EditSmartServiceTaskDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: dialogRef },
@@ -87,8 +91,11 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
                 { provide: DeviceClassesService, useValue: deviceClassesService },
             ],
         });
-        TestBed.overrideTemplate(EditSmartServiceTaskDialogComponent, '');
-        component = TestBed.createComponent(EditSmartServiceTaskDialogComponent).componentInstance;
+        if (!render) {
+            TestBed.overrideTemplate(EditSmartServiceTaskDialogComponent, '');
+        }
+        fixture = TestBed.createComponent(EditSmartServiceTaskDialogComponent);
+        component = fixture.componentInstance;
     }
 
     const savedWatcherCriteria = () => {
@@ -169,6 +176,52 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
             expect(component.isInvalid()).toBeTrue();
             component.ok();
             expect(dialogRef.close).not.toHaveBeenCalled();
+        });
+
+        describe('reason visible without expanding a panel', () => {
+            const operator = (id: string, name: string) => ({ id, name, inPorts: ['port'] } as ParseModel);
+            const render = (inputs: SmartServiceTaskInputDescription[], topic: string) => {
+                init(inputs, [classifiedAir, classifiedWater], topic, true);
+                component.currentParsedFlows = [operator('opA', 'Operator A'), operator('opB', 'Operator B')];
+                component.currentFlowInputId = 'opA';
+                fixture.detectChanges();
+            };
+            const operatorHints = () =>
+                Array.from(fixture.nativeElement.querySelectorAll('mat-card > mat-accordion > mat-expansion-panel') as NodeListOf<HTMLElement>)
+                    .filter((panel) => panel.querySelector(':scope > mat-expansion-panel-header > mat-panel-title')?.textContent?.trim().startsWith('Operator'))
+                    .map((panel) => panel.querySelector(':scope > mat-expansion-panel-header > mat-panel-description')?.textContent?.trim());
+            const saveLine = () => (fixture.nativeElement.querySelector('mat-dialog-actions > span') as HTMLElement | null)?.textContent?.trim();
+            const saveButton = () => fixture.nativeElement.querySelector('mat-dialog-actions > button[color=accent]') as HTMLButtonElement;
+            const analyticsInputs = (a: string, b: string): SmartServiceTaskInputDescription[] => [
+                { name: 'analytics.criteria.opA.port', type: 'text', value: a },
+                { name: 'analytics.service_criteria.opB.port', type: 'text', value: b },
+            ];
+
+            it('marks the header of the collapsed operator and names it next to Save', () => {
+                render(analyticsInputs('[]', collidingJson), 'analytics');
+                expect(operatorHints()).toEqual([undefined, 'Aspect class collision']);
+                expect(saveLine()).toBe('Save is disabled, aspect class collision in operator Operator B');
+                expect(saveButton().disabled).toBeTrue();
+            });
+
+            it('names every colliding operator', () => {
+                render(analyticsInputs(collidingJson, collidingJson), 'analytics');
+                expect(operatorHints()).toEqual(['Aspect class collision', 'Aspect class collision']);
+                expect(saveLine()).toBe('Save is disabled, aspect class collision in operators Operator A, Operator B');
+            });
+
+            it('names the watcher criteria', () => {
+                render([{ name: watchKey, type: 'text', value: collidingJson }], 'watcher');
+                expect(saveLine()).toBe('Save is disabled, aspect class collision in the watcher criteria');
+                expect(saveButton().disabled).toBeTrue();
+            });
+
+            it('shows neither without a collision', () => {
+                render(analyticsInputs('[]', '[]'), 'analytics');
+                expect(operatorHints()).toEqual([undefined, undefined]);
+                expect(saveLine()).toBeUndefined();
+                expect(saveButton().disabled).toBeFalse();
+            });
         });
 
         it('ignores an analytics input whose text is no criteria list', () => {

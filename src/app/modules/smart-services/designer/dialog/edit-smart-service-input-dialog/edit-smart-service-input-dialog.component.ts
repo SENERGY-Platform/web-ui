@@ -243,8 +243,23 @@ export class EditSmartServiceInputDialogComponent {
 
     hasAspectClassCollision(criteria?: SmartServiceCriteria): boolean {
         return criteria === undefined
-            ? this.abstract.some((input) => criteriaListHasAspectClassCollision(input.criteria_list, this.classified))
+            ? this.abstract.some((input) => this.inputHasAspectClassCollision(input))
             : criteriaHasAspectClassCollision(criteria, this.classified);
+    }
+
+    /** For the header of a collapsed input panel. */
+    inputHasAspectClassCollision(input: AbstractSmartServiceInput): boolean {
+        return criteriaListHasAspectClassCollision(input.criteria_list, this.classified);
+    }
+
+    /** Names the inputs that block Save, so the reason is visible without opening any panel; empty if there is none. */
+    aspectClassCollisionHint(): string {
+        const inputs = this.abstract.filter((input) => this.inputHasAspectClassCollision(input));
+        if (inputs.length === 0) {
+            return '';
+        }
+        return 'Save is disabled, aspect class collision in ' + (inputs.length > 1 ? 'inputs ' : 'input ')
+            + inputs.map((input) => input.label || input.id || 'new-input').join(', ');
     }
 }
 
@@ -400,6 +415,11 @@ export function smartServiceInputsDescriptionToAbstractSmartServiceInput(value: 
         });
         if (result.characteristic_id) {
             result.options = undefined;
+        }
+        // smart-service-repository reads criteria only next to an iot property, and the dialog shows them only with
+        // iot selectors; dropping them here keeps unreachable criteria from blocking Save.
+        if (!result.iot_selectors) {
+            result.criteria_list = undefined;
         }
         return result;
     });

@@ -338,6 +338,7 @@
                       <mat-panel-title>
                         {{flowInput.name}}
                       </mat-panel-title>
+                      <mat-panel-description *ngIf="analyticsOperatorHasAspectClassCollision(flowInput)" style="color: var(--warn-color, #f44336)">Aspect class collision</mat-panel-description>
                     </mat-expansion-panel-header>
                     <div>
                       <div *ngFor="let port of flowInput.inPorts">
@@ -868,6 +869,7 @@
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
+  <span *ngIf="aspectClassCollisionHint() as hint" style="color: var(--warn-color, #f44336); margin-right: 16px">{{hint}}</span>
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   <button mat-raised-button color="accent" (click)="ok()" [disabled]="isInvalid()">Save</button>
 </mat-dialog-actions>

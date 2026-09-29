@@ -1497,6 +1497,19 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         return criteriaHasAspectClassCollision(criteria, this.classified);
     }
 
+    /** Criteria of an analytics input are stored as JSON text; text that is no list holds no criteria. */
+    private isAnalyticsCriteriaInput(input: SmartServiceTaskInputDescription): boolean {
+        return input.name.startsWith('analytics.criteria.') || input.name.startsWith('analytics.service_criteria.');
+    }
+
+    private analyticsCriteriaInputHasCollision(input: SmartServiceTaskInputDescription): boolean {
+        try {
+            return criteriaListHasAspectClassCollision(JSON.parse(input.value), this.classified);
+        } catch (_) {
+            return false;
+        }
+    }
+
     /** Only the criteria the topic writes count: the watcher's own, or those of the analytics inputs (stored as JSON text). */
     private hasAspectClassCollisionInTopic(): boolean {
         switch (this.result.topic) {
@@ -1505,17 +1518,34 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                     && criteriaListHasAspectClassCollision(this.watcherWorkerInfo.devices_by_criteria.criteria, this.classified);
             case 'analytics':
                 return this.result.inputs
-                    .filter(input => input.name.startsWith('analytics.criteria.') || input.name.startsWith('analytics.service_criteria.'))
-                    .some(input => {
-                        try {
-                            return criteriaListHasAspectClassCollision(JSON.parse(input.value), this.classified);
-                        } catch (_) {
-                            return false;
-                        }
-                    });
+                    .filter(input => this.isAnalyticsCriteriaInput(input))
+                    .some(input => this.analyticsCriteriaInputHasCollision(input));
             default:
                 return false;
         }
+    }
+
+    /** For the header of a collapsed operator panel: whether any criteria of its in-ports collides. */
+    analyticsOperatorHasAspectClassCollision(flowInput: ParseModel): boolean {
+        return (flowInput.inPorts || []).some(port => this.result.inputs.some(input =>
+            (this.analyticsInputMatchesIotCriteria(input, flowInput.id, port) || this.analyticsInputMatchesIotServiceCriteria(input, flowInput.id, port))
+            && this.analyticsCriteriaInputHasCollision(input)));
+    }
+
+    /** Names where Save is blocked by a collision, so the reason is visible without opening any panel; empty if there is none. */
+    aspectClassCollisionHint(): string {
+        if (!this.hasAspectClassCollisionInTopic()) {
+            return '';
+        }
+        const prefix = 'Save is disabled, aspect class collision in ';
+        if (this.result.topic === 'watcher') {
+            return prefix + 'the watcher criteria';
+        }
+        const operators = this.currentParsedFlows.filter(flowInput => this.analyticsOperatorHasAspectClassCollision(flowInput));
+        if (operators.length === 0) {
+            return prefix + 'the analytics criteria';
+        }
+        return prefix + (operators.length > 1 ? 'operators ' : 'operator ') + operators.map(flowInput => flowInput.name).join(', ');
     }
 
     isInvalid(): boolean {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of } from 'rxjs';
@@ -51,6 +51,8 @@ const description = (properties: { id: string; value: string }[]): SmartServiceI
     inputs: [{ id: 'device', label: 'Device', type: 'string', default_value: '', properties }],
 });
 
+const iot = { id: 'iot', value: 'device' };
+
 const writtenCriteria = (input: AbstractSmartServiceInput) =>
     abstractSmartServiceInputToSmartServiceInputsDescription([input]).inputs[0].properties.find((p) => p.id === 'criteria_list')?.value;
 
@@ -72,13 +74,13 @@ describe('smart-service input criteria', () => {
     });
 
     it('opens a legacy single criteria property with its aspect selected', () => {
-        const [input] = smartServiceInputsDescriptionToAbstractSmartServiceInput(description([{ id: 'criteria', value: `{"aspect_id":"${air}"}` }]));
+        const [input] = smartServiceInputsDescriptionToAbstractSmartServiceInput(description([iot, { id: 'criteria', value: `{"aspect_id":"${air}"}` }]));
         expect(input.criteria_list).toEqual([{ aspect_id: air, aspect_ids: [air] }]);
     });
 
     it('opens a criteria list with the union of inconsistent fields', () => {
         const [input] = smartServiceInputsDescriptionToAbstractSmartServiceInput(
-            description([{ id: 'criteria_list', value: `[{"aspect_id":"${water}","aspect_ids":["${air}"]}]` }]),
+            description([iot, { id: 'criteria_list', value: `[{"aspect_id":"${water}","aspect_ids":["${air}"]}]` }]),
         );
         expect(input.criteria_list?.[0].aspect_ids).toEqual([air, water]);
     });
@@ -94,8 +96,14 @@ describe('EditSmartServiceInputDialogComponent criteria', () => {
         { ...node(water, 'Water'), aspect_class_id: environmentClass },
     ];
     let dialogRef: Spy<MatDialogRef<EditSmartServiceInputDialogComponent>>;
+    let fixture: ComponentFixture<EditSmartServiceInputDialogComponent>;
 
-    function init(properties: { id: string; value: string }[], listing = [node(air, 'Air'), node(water, 'Water')]): EditSmartServiceInputDialogComponent {
+    function init(
+        properties: { id: string; value: string }[],
+        listing = [node(air, 'Air'), node(water, 'Water')],
+        render = false,
+        inputs: SmartServiceInputsDescription['inputs'] = description(properties).inputs,
+    ): EditSmartServiceInputDialogComponent {
         dialogRef = createSpyFromClass<MatDialogRef<EditSmartServiceInputDialogComponent>>(MatDialogRef);
         const deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly.and.returnValue(of(listing));
@@ -110,25 +118,28 @@ describe('EditSmartServiceInputDialogComponent criteria', () => {
             declarations: [EditSmartServiceInputDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: dialogRef },
-                { provide: MAT_DIALOG_DATA, useValue: { info: description(properties), element: {} } },
+                { provide: MAT_DIALOG_DATA, useValue: { info: { inputs }, element: {} } },
                 { provide: DeviceTypeService, useValue: deviceTypeService },
                 { provide: FunctionsService, useValue: functionsService },
                 { provide: DeviceClassesService, useValue: deviceClassesService },
                 { provide: CharacteristicsService, useValue: characteristicsService },
             ],
         });
-        TestBed.overrideTemplate(EditSmartServiceInputDialogComponent, '');
-        return TestBed.createComponent(EditSmartServiceInputDialogComponent).componentInstance;
+        if (!render) {
+            TestBed.overrideTemplate(EditSmartServiceInputDialogComponent, '');
+        }
+        fixture = TestBed.createComponent(EditSmartServiceInputDialogComponent);
+        return fixture.componentInstance;
     }
 
     it('names every aspect of a criteria', () => {
-        const component = init([{ id: 'criteria_list', value: `[{"interaction":"event","aspect_ids":["${water}","${air}"]}]` }]);
+        const component = init([iot, { id: 'criteria_list', value: `[{"interaction":"event","aspect_ids":["${water}","${air}"]}]` }]);
         expect(component.criteriaToLabel(component.abstract[0].criteria_list![0])).toBe('event | Air, Water');
     });
 
     it('keeps a picked selection on the alias and offers a stored aspect the listing lacks under its id', () => {
         const gone = 'urn:infai:ses:aspect:gone';
-        const component = init([{ id: 'criteria_list', value: `[{"aspect_ids":["${gone}"]},{}]` }]);
+        const component = init([iot, { id: 'criteria_list', value: `[{"aspect_ids":["${gone}"]},{}]` }]);
         expect(component.aspects.map((a) => a.name)).toEqual(['Air', 'Water', gone]);
         component.setAspects(component.abstract[0].criteria_list![1], [water, air]);
         expect(JSON.parse(writtenCriteria(component.abstract[0]) as string)).toEqual([
@@ -139,7 +150,7 @@ describe('EditSmartServiceInputDialogComponent criteria', () => {
 
     describe('aspect-class collision', () => {
         it('blocks OK for a criteria naming two aspects of one class, until one is removed', () => {
-            const component = init([{ id: 'criteria_list', value: '[{}]' }], classified);
+            const component = init([iot, { id: 'criteria_list', value: '[{}]' }], classified);
             const criteria = component.abstract[0].criteria_list![0];
             expect(component.isValid()).toBeTrue();
 
@@ -156,13 +167,63 @@ describe('EditSmartServiceInputDialogComponent criteria', () => {
         });
 
         it('blocks OK for a stored criteria that already collides', () => {
-            const component = init([{ id: 'criteria_list', value: `[{"aspect_ids":["${air}","${water}"]}]` }], classified);
+            const component = init([iot, { id: 'criteria_list', value: `[{"aspect_ids":["${air}","${water}"]}]` }], classified);
             expect(component.isValid()).toBeFalse();
         });
 
         it('accepts two aspects without a class, as before', () => {
-            const component = init([{ id: 'criteria_list', value: `[{"aspect_ids":["${air}","${water}"]}]` }]);
+            const component = init([iot, { id: 'criteria_list', value: `[{"aspect_ids":["${air}","${water}"]}]` }]);
             expect(component.isValid()).toBeTrue();
+        });
+
+        describe('reason visible without expanding a panel', () => {
+            const collidingList = `[{"aspect_ids":["${air}","${water}"]}]`;
+            const input = (id: string, label: string, properties: { id: string; value: string }[]) =>
+                ({ id, label, type: 'string', default_value: '', properties });
+            const headerHints = () =>
+                Array.from(fixture.nativeElement.querySelectorAll('mat-dialog-content > mat-accordion > mat-expansion-panel'))
+                    .map((panel) => (panel as HTMLElement).querySelector(':scope > mat-expansion-panel-header > mat-panel-description')?.textContent?.trim());
+            const saveLine = () => (fixture.nativeElement.querySelector('mat-dialog-actions > span') as HTMLElement | null)?.textContent?.trim();
+            const saveButton = () => fixture.nativeElement.querySelector('mat-dialog-actions > button[color=accent]') as HTMLButtonElement;
+
+            it('marks the header of a collapsed input and names it next to Save', () => {
+                init([], classified, true, [
+                    input('fine', 'Fine', [iot, { id: 'criteria_list', value: '[{}]' }]),
+                    input('broken', 'Broken', [iot, { id: 'criteria_list', value: collidingList }]),
+                ]);
+                fixture.detectChanges();
+                expect(headerHints()).toEqual([undefined, 'Aspect class collision']);
+                expect(saveLine()).toBe('Save is disabled, aspect class collision in input Broken');
+                expect(saveButton().disabled).toBeTrue();
+            });
+
+            it('names every colliding input', () => {
+                init([], classified, true, [
+                    input('a', 'A', [iot, { id: 'criteria_list', value: collidingList }]),
+                    input('b', '', [iot, { id: 'criteria_list', value: collidingList }]),
+                ]);
+                fixture.detectChanges();
+                expect(saveLine()).toBe('Save is disabled, aspect class collision in inputs A, b');
+            });
+
+            it('shows neither without a collision', () => {
+                init([iot, { id: 'criteria_list', value: collidingList }], [node(air, 'Air'), node(water, 'Water')], true);
+                fixture.detectChanges();
+                expect(headerHints()).toEqual([undefined]);
+                expect(saveLine()).toBeUndefined();
+                expect(saveButton().disabled).toBeFalse();
+            });
+
+            it('does not let criteria that the dialog does not show block Save or get written', () => {
+                const component = init([{ id: 'criteria_list', value: collidingList }], classified, true);
+                fixture.detectChanges();
+                expect(component.abstract[0].criteria_list).toBeUndefined();
+                expect(component.isValid()).toBeTrue();
+                expect(saveLine()).toBeUndefined();
+                component.ok();
+                const written = dialogRef.close.calls.mostRecent().args[0] as SmartServiceInputsDescription;
+                expect(written.inputs[0].properties.find((p) => p.id === 'criteria_list')).toBeUndefined();
+            });
         });
     });
 });
