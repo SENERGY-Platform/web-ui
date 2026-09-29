@@ -258,6 +258,117 @@ describe('TaskConfigDialogComponent', () => {
         });
     });
 
+    describe('stored function or device class the listing no longer offers', () => {
+        const luminescence = fn('urn:infai:ses:measuring-function:luminescence', 'Get Luminiscence');
+        const heater = { id: 'urn:infai:ses:device-class:heater', name: 'Heater' } as DeviceTypeDeviceClassModel;
+        const lamp = { id: 'urn:infai:ses:device-class:lamp', name: 'Lamp' } as DeviceTypeDeviceClassModel;
+        const setTemperature = { ...fn('urn:infai:ses:controlling-function:set-temperature', 'Set-Temperature'), rdf_type: CONTROLLING };
+        const setColor = { ...fn('urn:infai:ses:controlling-function:set-color', 'Set-Color'), rdf_type: CONTROLLING };
+
+        const label = (index: number): string | undefined =>
+            fixture.nativeElement.querySelectorAll('mtx-select')[index]?.querySelector('.ng-value-label')?.textContent?.trim();
+        const hints = (): string[] => Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('mat-hint')).map((h) => h.textContent?.trim() ?? '');
+        async function settle() {
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+        }
+
+        describe('measuring', () => {
+            beforeEach(async () => {
+                init(measuringSelection({ function: luminescence, aspect: air }), { [air.id]: [temperature, humidity], [water.id]: [pressure] });
+                await settle();
+            });
+
+            it('opens with the function selected, marked and explained', () => {
+                expect(component.functionFormControl.value).toBe(luminescence);
+                expect(functionIds()).toEqual([temperature.id, humidity.id, luminescence.id]);
+                expect(label(1)).toBe('Get Luminiscence (no longer offered for this aspect)');
+                expect(hints()).toEqual(['A deployment will probably find no devices for this combination.']);
+            });
+
+            it('writes the stored function back unchanged', () => {
+                expect(savedResult().function).toBe(luminescence);
+            });
+
+            it('drops the marked entry once another function is picked', async () => {
+                component.functionFormControl.setValue(humidity);
+                await settle();
+                expect(functionIds()).toEqual([temperature.id, humidity.id]);
+                expect(hints()).toEqual([]);
+                expect(label(1)).toBe('Get Humidity');
+                expect(savedResult().function).toBe(humidity);
+            });
+
+            it('resets the function when the aspect changes and does not offer the marked entry again', async () => {
+                component.aspectFormControl.setValue([water.id]);
+                await settle();
+                expect(component.functionFormControl.value).toBe('');
+                expect(functionIds()).toEqual([pressure.id]);
+                component.aspectFormControl.setValue([air.id]);
+                await settle();
+                expect(functionIds()).toEqual([temperature.id, humidity.id]);
+                expect(hints()).toEqual([]);
+            });
+        });
+
+        it('adds no marked entry when the stored function is listed, even under an old name', async () => {
+            init(measuringSelection({ function: { ...temperature, name: 'Old Name' }, aspect: air }), { [air.id]: [temperature, humidity] });
+            await settle();
+            expect(functionIds()).toEqual([temperature.id, humidity.id]);
+            expect(component.unlistedFunction).toBeNull();
+            expect(label(1)).toBe('Get Temperature');
+            expect(hints()).toEqual([]);
+        });
+
+        it('adds no marked entry to a new task', async () => {
+            init(null, { [air.id]: [temperature] });
+            selectMeasuring([air.id]);
+            await settle();
+            expect(functionIds()).toEqual([temperature.id]);
+            expect(component.unlistedFunction).toBeNull();
+        });
+
+        describe('controlling', () => {
+            it('marks a stored function its device class no longer offers', async () => {
+                init(
+                    measuringSelection({ function: { ...setColor, rdf_type: CONTROLLING }, device_class: heater }),
+                    {},
+                    [air, water],
+                    [heater],
+                    [setTemperature],
+                );
+                await settle();
+                expect(component.functionFormControl.value.id).toBe(setColor.id);
+                expect(functionIds()).toEqual([setTemperature.id, setColor.id]);
+                expect(label(1)).toBe('Set-Color (no longer offered for this device class)');
+                expect(hints()).toEqual(['A deployment will probably find no devices for this combination.']);
+                expect(savedResult().function.id).toBe(setColor.id);
+            });
+
+            it('marks a stored device class the listing no longer offers and keeps its functions', async () => {
+                init(measuringSelection({ function: setTemperature, device_class: lamp }), {}, [air, water], [heater], [setTemperature]);
+                await settle();
+                expect(component.deviceClasses.map((c) => c.id)).toEqual([heater.id, lamp.id]);
+                expect(label(0)).toBe('Lamp (no longer offered)');
+                expect(hints()).toEqual(['A deployment will probably find no devices for this device class.']);
+                expect(savedResult().device_class).toBe(lamp);
+            });
+
+            it('drops the marked device class and its function once another device class is picked', async () => {
+                init(measuringSelection({ function: setColor, device_class: lamp }), {}, [air, water], [heater], [setTemperature]);
+                await settle();
+                expect(label(1)).toBe('Set-Color (no longer offered for this device class)');
+                component.deviceClassFormControl.setValue(heater);
+                await settle();
+                expect(component.deviceClasses.map((c) => c.id)).toEqual([heater.id]);
+                expect(component.functionFormControl.value).toBe('');
+                expect(functionIds()).toEqual([setTemperature.id]);
+                expect(hints()).toEqual([]);
+            });
+        });
+    });
+
     describe('aspect-class collision', () => {
         const saveButton = (): HTMLButtonElement =>
             fixture.nativeElement.querySelector('mat-dialog-actions button[color="accent"]');

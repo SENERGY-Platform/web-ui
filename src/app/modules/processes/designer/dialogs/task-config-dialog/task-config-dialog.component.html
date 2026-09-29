@@ -29,7 +29,15 @@
             <mat-label>Device Class</mat-label>
             <mtx-select [compareWith]="compare" [formControl]="deviceClassFormControl" required [items]="deviceClasses"
                 bindLabel="name" appendTo=".ng-select-anchor">
+                <ng-template ng-label-tmp let-item="item">
+                    <span class="ng-value-label">{{item.name}}<span class="not-offered"
+                            *ngIf="item.id === unlistedDeviceClass?.id"> (no longer offered)</span></span>
+                </ng-template>
+                <ng-template ng-option-tmp let-item="item">
+                    {{item.name}}<span class="not-offered" *ngIf="item.id === unlistedDeviceClass?.id"> (no longer offered)</span>
+                </ng-template>
             </mtx-select>
+            <mat-hint *ngIf="unlistedDeviceClass">A deployment will probably find no devices for this device class.</mat-hint>
             <mat-error senergyError label="Device Class"></mat-error>
         </mat-form-field>
 
@@ -42,7 +50,16 @@
             <mat-label>Function</mat-label>
             <mtx-select [compareWith]="compare" [formControl]="functionFormControl" required [items]="functions"
                 bindLabel="name" appendTo=".ng-select-anchor">
+                <ng-template ng-label-tmp let-item="item">
+                    <span class="ng-value-label">{{item.name}}<span class="not-offered"
+                            *ngIf="item.id === unlistedFunction?.id"> (no longer offered for this {{unlistedFor}})</span></span>
+                </ng-template>
+                <ng-template ng-option-tmp let-item="item">
+                    {{item.name}}<span class="not-offered"
+                        *ngIf="item.id === unlistedFunction?.id"> (no longer offered for this {{unlistedFor}})</span>
+                </ng-template>
             </mtx-select>
+            <mat-hint *ngIf="unlistedFunction">A deployment will probably find no devices for this combination.</mat-hint>
             <mat-error senergyError label="Function"></mat-error>
         </mat-form-field>
     </form>

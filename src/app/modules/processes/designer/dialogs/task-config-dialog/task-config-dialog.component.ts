@@ -65,6 +65,12 @@ export class TaskConfigDialogComponent implements OnInit {
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
     functions: DeviceTypeFunctionModel[] = [];
+    /**
+     * The stored device class or function while the listing leaves it out. It is appended to the options, marked
+     * as no longer offered, and dropped again once another one is picked; it is never offered for a new selection.
+     */
+    unlistedDeviceClass: DeviceTypeDeviceClassModel | null = null;
+    unlistedFunction: DeviceTypeFunctionModel | null = null;
     characteristic: DeviceTypeCharacteristicsModel = {} as DeviceTypeCharacteristicsModel;
     limit = 20;
 
@@ -130,6 +136,11 @@ export class TaskConfigDialogComponent implements OnInit {
         return collidingAspectNames(this.classified, this.selectedAspectIds()).length > 0;
     }
 
+    /** What the function was chosen for, as the marker of an unlisted function names it. */
+    get unlistedFor(): string {
+        return this.optionsFormControl.value === 'Controlling' ? 'device class' : 'aspect';
+    }
+
     /** By id only: functions and device classes get renamed while their ids stay, and stored selections carry the old name. */
     compare(a: any, b: any): boolean {
         return a && b && a.id === b.id;
@@ -144,6 +155,18 @@ export class TaskConfigDialogComponent implements OnInit {
         const current = selected?.id ? options.find((o) => o.id === selected.id) : undefined;
         if (current && current !== selected) {
             control.setValue(current, { emitEvent: false });
+        }
+    }
+
+    /** The stored selection if the control still holds it although the options leave it out. */
+    private unlistedOf<T extends { id: string }>(control: UntypedFormControl, stored: T | null | undefined, options: T[]): T | null {
+        return stored && control.value === stored && !options.some((o) => o.id === stored.id) ? stored : null;
+    }
+
+    private offerStoredFunction(): void {
+        this.unlistedFunction = this.unlistedOf(this.functionFormControl, this.selection?.function, this.functions);
+        if (this.unlistedFunction) {
+            this.functions = [...this.functions, this.unlistedFunction];
         }
     }
 
@@ -186,6 +209,10 @@ export class TaskConfigDialogComponent implements OnInit {
             .subscribe((deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
                 this.deviceClasses = deviceTypeDeviceClasses;
                 this.refreshSelected(this.deviceClassFormControl, this.deviceClasses);
+                this.unlistedDeviceClass = this.unlistedOf(this.deviceClassFormControl, this.selection?.device_class, this.deviceClasses);
+                if (this.unlistedDeviceClass) {
+                    this.deviceClasses = [...this.deviceClasses, this.unlistedDeviceClass];
+                }
             });
     }
 
@@ -204,8 +231,16 @@ export class TaskConfigDialogComponent implements OnInit {
     private initFunctions(): void {
         this.functionFormControl.valueChanges.subscribe((func: DeviceTypeFunctionModel) => {
             this.getBaseCharacteristics(func);
+            if (this.unlistedFunction && func !== this.unlistedFunction) {
+                this.functions = this.functions.filter((f) => f !== this.unlistedFunction);
+                this.unlistedFunction = null;
+            }
         });
         this.deviceClassFormControl.valueChanges.subscribe((deviceClass: DeviceTypeDeviceClassModel) => {
+            if (this.unlistedDeviceClass && deviceClass !== this.unlistedDeviceClass) {
+                this.deviceClasses = this.deviceClasses.filter((c) => c !== this.unlistedDeviceClass);
+                this.unlistedDeviceClass = null;
+            }
             this.resetFunctions();
             this.getDeviceClassFunctions(deviceClass);
         });
@@ -233,6 +268,7 @@ export class TaskConfigDialogComponent implements OnInit {
                 const [first, ...rest] = functionLists;
                 this.functions = first.filter((f) => rest.every((list) => list.some((other) => other.id === f.id)));
                 this.refreshSelected(this.functionFormControl, this.functions);
+                this.offerStoredFunction();
             },
         );
     }
@@ -245,6 +281,7 @@ export class TaskConfigDialogComponent implements OnInit {
         this.deviceTypeService.getDeviceClassesControllingFunctions(deviceClass.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
             this.functions = functions;
             this.refreshSelected(this.functionFormControl, this.functions);
+            this.offerStoredFunction();
         });
     }
 
@@ -287,6 +324,7 @@ export class TaskConfigDialogComponent implements OnInit {
     private initSelection() {
         if (this.selection !== null) {
             this.deviceClassFormControl.setValue(this.selection.device_class);
+            this.functionFormControl.setValue(this.selection.function);
             const selectedNodes = selectedAspectNodes(this.selection) as DeviceTypeAspectNodeModel[];
             selectedNodes.forEach((node) => this.aspectNodes.set(node.id, node));
             this.setAspects();
@@ -303,8 +341,6 @@ export class TaskConfigDialogComponent implements OnInit {
                     }
                 }
             });
-            this.functionFormControl.setValue(this.selection.function);
-            this.refreshSelected(this.functionFormControl, this.functions);
             this.functionFormControl.enable();
             this.getBaseCharacteristics(this.selection.function);
             this.completionStrategyFormControl.setValue(this.selection.completionStrategy);
