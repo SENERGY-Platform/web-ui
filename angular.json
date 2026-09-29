@@ -91,6 +91,11 @@
                 "input": "node_modules/jointjs/dist/joint.min.css",
                 "bundleName": "joint",
                 "inject": false
+              },
+              {
+                "input": "node_modules/monaco-editor/min/vs/editor/editor.main.css",
+                "bundleName": "monaco",
+                "inject": false
               }
             ],
             "scripts": [

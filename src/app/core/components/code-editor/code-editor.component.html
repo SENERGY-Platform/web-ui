@@ -14,6 +14,9 @@
   ~ limitations under the License.
   -->
 
+<!-- monaco's own stylesheet: the production build does not carry the CSS its ESM modules import; export defined in angular.json -->
+<link rel="stylesheet" href="/monaco.css" />
+
 <div class="code-editor" [style.height]="height">
     <div class="code-editor-host" #host></div>
     <div class="code-editor-loading" *ngIf="loading">
