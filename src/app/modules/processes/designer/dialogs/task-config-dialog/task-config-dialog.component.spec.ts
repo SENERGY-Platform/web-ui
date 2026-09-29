@@ -32,10 +32,11 @@ import { CoreModule } from '../../../../../core/core.module';
 import { AspectSelectComponent } from '../../../../../core/components/aspect-select/aspect-select.component';
 import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
 import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
-import { DeviceTypeAspectNodeModel, DeviceTypeFunctionModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeSelectionRefModel } from '../../../../metadata/device-types-overview/shared/device-type-selection.model';
 
 const MEASURING = 'https://senergy.infai.org/ontology/MeasuringFunction';
+const CONTROLLING = 'https://senergy.infai.org/ontology/ControllingFunction';
 
 const node = (id: string, name: string, parentId = ''): DeviceTypeAspectNodeModel => ({
     id,
@@ -67,11 +68,13 @@ describe('TaskConfigDialogComponent', () => {
         selection: DeviceTypeSelectionRefModel | null,
         functionsByAspect: { [id: string]: DeviceTypeFunctionModel[] | Observable<DeviceTypeFunctionModel[]> },
         listing: DeviceTypeAspectNodeModel[] = [air, water],
+        deviceClasses: DeviceTypeDeviceClassModel[] = [],
+        controllingFunctions: DeviceTypeFunctionModel[] = [],
     ) {
         dialogRef = createSpyFromClass<MatDialogRef<TaskConfigDialogComponent>>(MatDialogRef);
         deviceTypeService = createSpyFromClass(DeviceTypeService);
-        deviceTypeService.getDeviceClassesWithControllingFunction.and.returnValue(of([]));
-        deviceTypeService.getDeviceClassesControllingFunctions.and.returnValue(of([]));
+        deviceTypeService.getDeviceClassesWithControllingFunction.and.returnValue(of(deviceClasses));
+        deviceTypeService.getDeviceClassesControllingFunctions.and.returnValue(of(controllingFunctions));
         deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly.and.returnValue(of(listing));
         deviceTypeService.getAspectsMeasuringFunctions.and.callFake((id: string) => {
             const functions = functionsByAspect[id] || [];
@@ -219,6 +222,40 @@ describe('TaskConfigDialogComponent', () => {
         selectMeasuring([]);
         const select: AspectSelectComponent = fixture.debugElement.query(By.directive(AspectSelectComponent)).componentInstance;
         expect(select.aspectOptions.map((o) => o.id)).toEqual([insideAir.id]);
+    });
+
+    describe('selection stored before functions and device classes were renamed', () => {
+        const selectLabel = (index: number): string | undefined =>
+            fixture.nativeElement.querySelectorAll('mtx-select')[index]?.querySelector('.ng-value-label')?.textContent?.trim();
+
+        it('opens with the function selected by id and saves the current one', async () => {
+            const stored = { ...temperature, name: 'Old Name' };
+            init(measuringSelection({ function: stored, aspect: air }), { [air.id]: [temperature, humidity] });
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+            expect(component.compare(stored, temperature)).toBeTrue();
+            expect(selectLabel(1)).toBe(temperature.name);
+            expect(savedResult().function).toBe(temperature);
+        });
+
+        it('opens with the device class selected by id and saves the current one', async () => {
+            const heater = { id: 'urn:infai:ses:device-class:heater', name: 'Heater' } as DeviceTypeDeviceClassModel;
+            const setTemperature = { ...fn('urn:infai:ses:controlling-function:set-temperature', 'Set-Temperature'), rdf_type: CONTROLLING };
+            const stored = { ...heater, name: 'Old Heater' };
+            init(
+                measuringSelection({ function: { ...setTemperature, name: 'Old Set' }, device_class: stored }),
+                {},
+                [air, water],
+                [heater],
+                [setTemperature],
+            );
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+            expect(selectLabel(0)).toBe('Heater');
+            expect(savedResult().device_class).toBe(heater);
+        });
     });
 
     describe('aspect-class collision', () => {

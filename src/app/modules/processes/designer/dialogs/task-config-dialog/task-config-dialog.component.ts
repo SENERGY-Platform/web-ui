@@ -130,8 +130,21 @@ export class TaskConfigDialogComponent implements OnInit {
         return collidingAspectNames(this.classified, this.selectedAspectIds()).length > 0;
     }
 
+    /** By id only: functions and device classes get renamed while their ids stay, and stored selections carry the old name. */
     compare(a: any, b: any): boolean {
-        return a && b && a.id === b.id && a.name === b.name;
+        return a && b && a.id === b.id;
+    }
+
+    /**
+     * Swaps a stored selection for the current object of the same id once the options are loaded, so a save
+     * writes the current name. Silent: a device class change would otherwise reset the function.
+     */
+    private refreshSelected(control: UntypedFormControl, options: { id: string }[]): void {
+        const selected = control.value;
+        const current = selected?.id ? options.find((o) => o.id === selected.id) : undefined;
+        if (current && current !== selected) {
+            control.setValue(current, { emitEvent: false });
+        }
     }
 
     private initOptions(): void {
@@ -172,6 +185,7 @@ export class TaskConfigDialogComponent implements OnInit {
             .getDeviceClassesWithControllingFunction()
             .subscribe((deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
                 this.deviceClasses = deviceTypeDeviceClasses;
+                this.refreshSelected(this.deviceClassFormControl, this.deviceClasses);
             });
     }
 
@@ -218,6 +232,7 @@ export class TaskConfigDialogComponent implements OnInit {
             (functionLists: DeviceTypeFunctionModel[][]) => {
                 const [first, ...rest] = functionLists;
                 this.functions = first.filter((f) => rest.every((list) => list.some((other) => other.id === f.id)));
+                this.refreshSelected(this.functionFormControl, this.functions);
             },
         );
     }
@@ -229,6 +244,7 @@ export class TaskConfigDialogComponent implements OnInit {
     private getDeviceClassFunctions(deviceClass: DeviceTypeDeviceClassModel) {
         this.deviceTypeService.getDeviceClassesControllingFunctions(deviceClass.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
             this.functions = functions;
+            this.refreshSelected(this.functionFormControl, this.functions);
         });
     }
 
@@ -288,6 +304,7 @@ export class TaskConfigDialogComponent implements OnInit {
                 }
             });
             this.functionFormControl.setValue(this.selection.function);
+            this.refreshSelected(this.functionFormControl, this.functions);
             this.functionFormControl.enable();
             this.getBaseCharacteristics(this.selection.function);
             this.completionStrategyFormControl.setValue(this.selection.completionStrategy);

@@ -150,6 +150,12 @@ describe('ConditionalEventDialogComponent', () => {
         expect(functionIds()).toEqual([humidity.id]);
     });
 
+    it('matches the function select by id, so a renamed function stays selected', () => {
+        init(null, {});
+        expect(component.compare({ ...temperature, name: 'Old Name' }, temperature)).toBeTrue();
+        expect(component.compare(humidity, temperature)).toBeFalse();
+    });
+
     it('opens an element written before the list with its single aspect and its function selected', () => {
         init(existing({ aspect: air.id }), { [air.id]: [temperature, humidity] });
         expect(component.aspectFormControl.value).toEqual([air.id]);

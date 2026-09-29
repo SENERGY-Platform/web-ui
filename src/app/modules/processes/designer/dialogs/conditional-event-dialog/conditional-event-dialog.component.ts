@@ -116,8 +116,9 @@ export class ConditionalEventDialogComponent implements OnInit {
         return collidingAspectNames(this.classified, this.selectedAspectIds()).length > 0;
     }
 
+    /** By id only: functions get renamed while their ids stay. */
     compare(a: any, b: any): boolean {
-        return a && b && a.id === b.id && a.name === b.name;
+        return a && b && a.id === b.id;
     }
 
     private initOptions(): void {
