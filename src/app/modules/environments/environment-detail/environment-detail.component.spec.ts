@@ -68,6 +68,10 @@ import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/d
 import { ExportService } from '../../exports/shared/export.service';
 import { ExportModel } from '../../exports/shared/export.model';
 
+// zone.js 0.15 drains all timers after a fakeAsync test, and discardPeriodicTasks() leaves the poll's interval in that
+// queue, so it would fire one more GET after the test; the polling specs keep the 0.14 end-of-test behaviour.
+const pollingFakeAsync = (fn: () => void) => fakeAsync(fn, { flush: false });
+
 class MockLadonService {
     getUserAuthorizationsForURI(_uri: string): any {
         return undefined;
@@ -1855,7 +1859,7 @@ describe('EnvironmentDetailComponent', () => {
             httpMock.expectNone(environmentsUrl + '/e1/state');
         });
 
-        it('polls GET .../state immediately on activating the Live state tab, and again every 10s while it stays active', fakeAsync(() => {
+        it('polls GET .../state immediately on activating the Live state tab, and again every 10s while it stays active', pollingFakeAsync(() => {
             loadWith(envWithState);
             activateLiveStateTab();
             tick(); // flushes timer(0, ...)'s immediate (0ms due) first emission
@@ -1872,7 +1876,7 @@ describe('EnvironmentDetailComponent', () => {
             discardPeriodicTasks();
         }));
 
-        it('stops polling once the tab is left, and does not resume on its own', fakeAsync(() => {
+        it('stops polling once the tab is left, and does not resume on its own', pollingFakeAsync(() => {
             loadWith(envWithState);
             activateLiveStateTab();
             tick();
@@ -1885,7 +1889,7 @@ describe('EnvironmentDetailComponent', () => {
             discardPeriodicTasks();
         }));
 
-        it('stops polling on destroy', fakeAsync(() => {
+        it('stops polling on destroy', pollingFakeAsync(() => {
             loadWith(envWithState);
             activateLiveStateTab();
             tick();
@@ -1897,7 +1901,7 @@ describe('EnvironmentDetailComponent', () => {
             httpMock.expectNone(environmentsUrl + '/e1/state');
         }));
 
-        it('shows the real runtime values when running, updating liveStateRunning/liveStateAsOf', fakeAsync(() => {
+        it('shows the real runtime values when running, updating liveStateRunning/liveStateAsOf', pollingFakeAsync(() => {
             loadWith(envWithState);
             activateLiveStateTab();
             tick(); // flushes timer(0, ...)'s immediate (0ms due) first emission
@@ -1918,7 +1922,7 @@ describe('EnvironmentDetailComponent', () => {
             discardPeriodicTasks();
         }));
 
-        it('falls back to the reference values and flags not-running when the simulation is not running', fakeAsync(() => {
+        it('falls back to the reference values and flags not-running when the simulation is not running', pollingFakeAsync(() => {
             loadWith(envWithState);
             activateLiveStateTab();
             tick(); // flushes timer(0, ...)'s immediate (0ms due) first emission
@@ -1933,7 +1937,7 @@ describe('EnvironmentDetailComponent', () => {
             discardPeriodicTasks();
         }));
 
-        it('does not overwrite a touched (edited but not yet applied) key with a poll update, but does refresh untouched ones', fakeAsync(() => {
+        it('does not overwrite a touched (edited but not yet applied) key with a poll update, but does refresh untouched ones', pollingFakeAsync(() => {
             loadWith(envWithState);
             component.onZoneStateChange(component.zoneStates[0], { occupied: false }); // user edit, not yet applied
             activateLiveStateTab();
@@ -1953,7 +1957,7 @@ describe('EnvironmentDetailComponent', () => {
             discardPeriodicTasks();
         }));
 
-        it('leaves the drafts alone on a failed poll (null from the service) instead of clearing them', fakeAsync(() => {
+        it('leaves the drafts alone on a failed poll (null from the service) instead of clearing them', pollingFakeAsync(() => {
             loadWith(envWithState);
             activateLiveStateTab();
             tick();

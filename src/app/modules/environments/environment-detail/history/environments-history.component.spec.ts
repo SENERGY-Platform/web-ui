@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, discardPeriodicTasks, fakeAsync as ngFakeAsync, TestBed, tick } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -37,6 +37,10 @@ import { EnvironmentsHistoryComponent } from './environments-history.component';
 import { EnvironmentsService } from '../../shared/environments.service';
 import { LadonService } from '../../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../../environments/environment';
+
+// zone.js 0.15 drains all timers after a fakeAsync test, and discardPeriodicTasks() leaves the polls' intervals in that
+// queue, so each would fire one more GET after the test; keep the 0.14 end-of-test behaviour these specs were written for.
+const fakeAsync = (fn: () => void) => ngFakeAsync(fn, { flush: false });
 
 class MockLadonService {
     getUserAuthorizationsForURI(_uri: string): any {

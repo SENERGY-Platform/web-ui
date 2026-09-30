@@ -67,6 +67,7 @@ interface DeviceServicePath {
     selector: 'senergy-deploy-flow',
     templateUrl: './deploy-flow.component.html',
     styleUrls: ['./deploy-flow.component.css'],
+    standalone: false
 })
 export class DeployFlowComponent implements OnInit {
     constructor(
@@ -1069,7 +1070,7 @@ export class DeployFlowComponent implements OnInit {
             if (r.length > 0) {
                 r += ', ';
             }
-            r += s.group.label + ': ' + s.value.path;
+            r += s.group?.label + ': ' + s.value.path;
         });
         return r;
     }
