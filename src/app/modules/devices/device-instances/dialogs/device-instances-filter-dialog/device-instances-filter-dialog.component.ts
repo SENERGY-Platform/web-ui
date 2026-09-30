@@ -29,6 +29,7 @@ import { DeviceInstancesService } from '../../shared/device-instances.service';
 @Component({
     selector: 'app-device-instances-filter-dialog',
     templateUrl: './device-instances-filter-dialog.component.html',
+    standalone: false
 })
 export class DeviceInstancesFilterDialogComponent implements OnInit {
     sortDirection: SortDirection = 'asc';

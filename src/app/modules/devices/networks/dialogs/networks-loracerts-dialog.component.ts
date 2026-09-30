@@ -21,6 +21,7 @@ import { HubModel, LoraCertsModel } from '../shared/networks.model';
 @Component({
     templateUrl: './networks-loracerts-dialog.component.html',
     styleUrls: ['./networks-loracerts-dialog.component.css'],
+    standalone: false
 })
 export class NetworksLoraCertsDialogComponent {
     network: HubModel;

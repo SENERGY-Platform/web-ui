@@ -34,6 +34,7 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
     selector: 'senergy-locations',
     templateUrl: './locations.component.html',
     styleUrls: ['./locations.component.css'],
+    standalone: false
 })
 export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'show'];

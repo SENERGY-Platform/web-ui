@@ -22,6 +22,7 @@ import { DeploymentsOfflineReasonsModel } from '../shared/deployments.model';
 @Component({
     templateUrl: './deployments-missing-dependencies-dialog.component.html',
     styleUrls: ['./deployments-missing-dependencies-dialog.component.css'],
+    standalone: false
 })
 export class DeploymentsMissingDependenciesDialogComponent {
     displayedColumns: string[] = ['description', 'id'];

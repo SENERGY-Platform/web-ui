@@ -171,11 +171,12 @@ describe('AspectSelectComponent', () => {
         const outside = 'urn:infai:ses:aspect:outside_air';
 
         @Component({
-            template: `<form [formGroup]="form">
+    template: `<form [formGroup]="form">
                 <senergy-aspect-select formControlName="aspect_ids" [aspects]="aspects" [aspectClasses]="classes"
                     [showCollisionUntouched]="showCollisionUntouched"></senergy-aspect-select>
             </form>`,
-        })
+    standalone: false
+})
         class HostComponent {
             form = new FormGroup({ aspect_ids: new FormControl<string[]>([inside, outside]) });
             aspects: DeviceTypeAspectModel[] = classifiedAspects;

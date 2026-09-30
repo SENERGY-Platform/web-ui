@@ -29,7 +29,8 @@ import {NodeFactory, NodePosition} from './shared/node-factory.service';
     selector: 'senergy-diagram-editor',
     templateUrl: './diagram-editor.component.html',
     styleUrls: ['./diagram-editor.component.css'],
-    providers: [PaperService]
+    providers: [PaperService],
+    standalone: false
 })
 export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     private graph: any;

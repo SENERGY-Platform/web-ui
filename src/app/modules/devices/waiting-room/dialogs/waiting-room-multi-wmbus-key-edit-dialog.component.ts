@@ -23,6 +23,7 @@ import { FormBuilder } from '@angular/forms';
 @Component({
     templateUrl: './waiting-room-multi-wmbus-key-edit-dialog.component.html',
     styleUrls: ['./waiting-room-multi-wmbus-key-edit-dialog.component.css'],
+    standalone: false
 })
 export class WaitingRoomMultiWmbusKeyEditDialogComponent {
     static wmbusKeyAttributeKey = 'wmbus/key';

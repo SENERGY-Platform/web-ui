@@ -38,6 +38,7 @@ import { AddTagFn } from '@ng-matero/extensions/select';
     selector: 'senergy-device-groups-edit',
     templateUrl: './device-groups-edit.component.html',
     styleUrls: ['./device-groups-edit.component.css'],
+    standalone: false
 })
 export class DeviceGroupsEditComponent implements OnInit {
     id = '';

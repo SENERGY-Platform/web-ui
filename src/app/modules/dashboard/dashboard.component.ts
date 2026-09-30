@@ -50,6 +50,7 @@ import {
     selector: 'senergy-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css'],
+    standalone: false
 })
 export class DashboardComponent implements OnInit, OnDestroy {
     dashboards: DashboardModel[] = [];

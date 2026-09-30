@@ -20,9 +20,10 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ChartsExportConversion } from '../../shared/charts-export-properties.model';
 
 @Component({
-  selector: 'app-add-rule',
-  templateUrl: './add-rule.component.html',
-  styleUrls: ['./add-rule.component.css']
+    selector: 'app-add-rule',
+    templateUrl: './add-rule.component.html',
+    styleUrls: ['./add-rule.component.css'],
+    standalone: false
 })
 export class AddRuleComponent {
   form = new FormGroup({

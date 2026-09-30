@@ -28,6 +28,7 @@ import { forkJoin } from 'rxjs';
 @Component({
     templateUrl: './devices-state-edit-dialog.component.html',
     styleUrls: ['./devices-state-edit-dialog.component.css'],
+    standalone: false
 })
 export class DevicesStateEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

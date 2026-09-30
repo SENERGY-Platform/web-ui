@@ -37,6 +37,7 @@ import { getCenter } from 'ol/extent';
 @Component({
     templateUrl: './networks-edit-dialog.component.html',
     styleUrls: ['./networks-edit-dialog.component.css'],
+    standalone: false
 })
 export class NetworksEditDialogComponent implements OnInit {
     network: HubModel;

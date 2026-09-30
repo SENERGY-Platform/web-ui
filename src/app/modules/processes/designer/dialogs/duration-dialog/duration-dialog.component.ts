@@ -22,6 +22,7 @@ import { duration, Duration } from 'moment';
 @Component({
     templateUrl: './duration-dialog.component.html',
     styleUrls: ['./duration-dialog.component.css'],
+    standalone: false
 })
 export class DurationDialogComponent {
     initial: string;

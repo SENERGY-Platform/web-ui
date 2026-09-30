@@ -49,6 +49,7 @@ import { DeviceTypeService } from '../../../modules/metadata/device-types-overvi
 @Component({
     templateUrl: './air-quality-edit-dialog.component.html',
     styleUrls: ['./air-quality-edit-dialog.component.css'],
+    standalone: false
 })
 export class AirQualityEditDialogComponent implements OnInit {
     constructor(

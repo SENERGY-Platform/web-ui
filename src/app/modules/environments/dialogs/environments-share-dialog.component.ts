@@ -40,6 +40,7 @@ export interface ShareDialogData {
     selector: 'senergy-environments-share-dialog',
     templateUrl: './environments-share-dialog.component.html',
     styleUrls: ['./environments-share-dialog.component.css'],
+    standalone: false
 })
 export class EnvironmentsShareDialogComponent implements OnInit {
     userFormControl = new UntypedFormControl('');

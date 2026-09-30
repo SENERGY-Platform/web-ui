@@ -26,6 +26,7 @@ import { MatTable } from '@angular/material/table';
 @Component({
     templateUrl: './device-gateway-edit-dialog.component.html',
     styleUrls: ['./device-gateway-edit-dialog.component.css'],
+    standalone: false
 })
 export class DeviceGatewayEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

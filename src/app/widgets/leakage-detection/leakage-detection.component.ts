@@ -25,7 +25,8 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 @Component({
     selector: 'senergy-leakage-detection-widget',
     templateUrl: './leakage-detection.component.html',
-    styleUrls: ['./leakage-detection.component.css']
+    styleUrls: ['./leakage-detection.component.css'],
+    standalone: false
 })
 export class LeakageDetectionComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';

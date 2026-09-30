@@ -22,7 +22,8 @@ import { ValueHighlightConfig } from '../../shared/single-value.model';
 @Component({
     selector: 'single-value-add-threshold',
     templateUrl: './add-threshold.component.html',
-    styleUrls: ['./add-threshold.component.css']
+    styleUrls: ['./add-threshold.component.css'],
+    standalone: false
 })
 export class AddThresholdComponent {
     form = new FormGroup({

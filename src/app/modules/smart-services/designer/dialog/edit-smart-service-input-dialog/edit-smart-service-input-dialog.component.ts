@@ -47,6 +47,7 @@ import {
 @Component({
     templateUrl: './edit-smart-service-input-dialog.component.html',
     styleUrls: ['./edit-smart-service-input-dialog.component.css'],
+    standalone: false
 })
 export class EditSmartServiceInputDialogComponent {
     abstract: AbstractSmartServiceInput[] = [];

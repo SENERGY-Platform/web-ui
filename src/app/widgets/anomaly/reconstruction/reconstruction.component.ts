@@ -23,7 +23,8 @@ import { AnomalyResultModel } from '../shared/anomaly.model';
 @Component({
     selector: 'anomaly-reconstruction',
     templateUrl: './reconstruction.component.html',
-    styleUrls: ['./reconstruction.component.css']
+    styleUrls: ['./reconstruction.component.css'],
+    standalone: false
 })
 export class AnomalyReconstructionComponent implements OnInit {
     chartData: any;

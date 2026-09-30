@@ -28,6 +28,7 @@ import { ChartsService } from '../../shared/charts.service';
     selector: 'senergy-charts-process-deployments',
     templateUrl: './charts-process-deployments.component.html',
     styleUrls: ['./charts-process-deployments.component.css'],
+    standalone: false
 })
 export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy, AfterViewInit {
     processDeploymentsHistory = {} as ChartsModel;

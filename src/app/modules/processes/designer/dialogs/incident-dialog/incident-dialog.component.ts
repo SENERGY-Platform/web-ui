@@ -22,7 +22,8 @@ import { ProcessIncidentsConfig } from '../../../incidents/shared/process-incide
 @Component({
     selector: 'app-incident-dialog',
     templateUrl: './incident-dialog.component.html',
-    styleUrls: ['./incident-dialog.component.css']
+    styleUrls: ['./incident-dialog.component.css'],
+    standalone: false
 })
 export class IncidentDialogComponent {
     form = new FormGroup({

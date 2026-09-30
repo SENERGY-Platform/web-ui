@@ -22,6 +22,7 @@ import {UntypedFormControl, Validators} from '@angular/forms';
 @Component({
     templateUrl: './concepts-new-dialog.component.html',
     styleUrls: ['./concepts-new-dialog.component.css'],
+    standalone: false
 })
 export class ConceptsNewDialogComponent {
     nameControl = new UntypedFormControl('', [Validators.required]);

@@ -25,6 +25,7 @@ import { Subscription } from 'rxjs';
     selector: 'senergy-event-list',
     templateUrl: './event-list.component.html',
     styleUrls: ['./event-list.component.css'],
+    standalone: false
 })
 export class EventListComponent implements OnInit, OnDestroy {
     events: EventListModel[] = [];

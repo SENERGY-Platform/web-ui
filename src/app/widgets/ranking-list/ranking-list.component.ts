@@ -25,6 +25,7 @@ import { RankingListService } from './shared/ranking-list.service';
     selector: 'senergy-ranking-list',
     templateUrl: './ranking-list.component.html',
     styleUrls: ['./ranking-list.component.css'],
+    standalone: false
 })
 export class RankingListComponent implements OnInit, OnDestroy {
     rankings: RankingListModel[] = [];

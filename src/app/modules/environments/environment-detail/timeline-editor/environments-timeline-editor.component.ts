@@ -72,6 +72,7 @@ export const TIMELINE_DEFAULT_PAGE_SIZE = 50;
     selector: 'senergy-environments-timeline-editor',
     templateUrl: './environments-timeline-editor.component.html',
     styleUrls: ['./environments-timeline-editor.component.css'],
+    standalone: false
 })
 export class EnvironmentsTimelineEditorComponent implements OnChanges {
     @Input() timeline: DatedChange[] | undefined;

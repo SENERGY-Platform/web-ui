@@ -33,7 +33,8 @@ const normalWaitingPointSize = 5;
 @Component({
     selector: 'anomaly-line',
     templateUrl: './line.component.html',
-    styleUrls: ['./line.component.css']
+    styleUrls: ['./line.component.css'],
+    standalone: false
 })
 export class LineComponent implements OnInit, OnChanges {
     chartsReady = false;

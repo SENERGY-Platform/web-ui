@@ -27,6 +27,7 @@ import { DatasetMeta, isApiError } from '../../shared/environments.model';
     selector: 'senergy-environments-dataset-upload-dialog',
     templateUrl: './environments-dataset-upload-dialog.component.html',
     styleUrls: ['./environments-dataset-upload-dialog.component.css'],
+    standalone: false
 })
 export class EnvironmentsDatasetUploadDialogComponent {
     fileName = '';

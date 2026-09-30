@@ -28,6 +28,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 @Component({
     templateUrl: './ranking-list-edit-dialog.component.html',
     styleUrls: ['./ranking-list-edit-dialog.component.css'],
+    standalone: false
 })
 export class RankingListEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

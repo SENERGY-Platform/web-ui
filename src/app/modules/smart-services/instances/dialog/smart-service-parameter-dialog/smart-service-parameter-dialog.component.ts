@@ -94,6 +94,7 @@ const virtualScrollFrom = 50;
     selector: 'senergy-smart-service-parameter-dialog',
     templateUrl: './smart-service-parameter-dialog.component.html',
     styleUrls: ['./smart-service-parameter-dialog.component.css'],
+    standalone: false
 })
 export class SmartServiceParameterDialogComponent implements OnInit, OnDestroy {
     name: string;

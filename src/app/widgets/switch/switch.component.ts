@@ -25,6 +25,7 @@ import { Subscription } from 'rxjs';
     selector: 'senergy-switch',
     templateUrl: './switch.component.html',
     styleUrls: ['./switch.component.css'],
+    standalone: false
 })
 export class SwitchComponent implements OnInit, OnDestroy {
     ready = false;

@@ -26,6 +26,7 @@ import { MatTable } from '@angular/material/table';
 @Component({
     templateUrl: './charts-process-deployments-edit-dialog.component.html',
     styleUrls: ['./charts-process-deployments-edit-dialog.component.css'],
+    standalone: false
 })
 export class ChartsProcessDeploymentsEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

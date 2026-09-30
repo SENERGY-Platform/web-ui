@@ -31,6 +31,7 @@ import { EnergyPredictionRequirementsService } from '../shared/energy-prediction
 @Component({
     templateUrl: './energy-prediction-edit-dialog.component.html',
     styleUrls: ['./energy-prediction-edit-dialog.component.css'],
+    standalone: false
 })
 export class EnergyPredictionEditDialogComponent implements OnInit {
     exports: ChartsExportMeasurementModel[] = [];

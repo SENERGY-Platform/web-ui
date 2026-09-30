@@ -40,6 +40,7 @@ import {
     selector: 'senergy-criteria-list',
     templateUrl: './criteria-list.component.html',
     styleUrls: ['./criteria-list.component.css'],
+    standalone: false
 })
 export class CriteriaListComponent implements OnInit {
 

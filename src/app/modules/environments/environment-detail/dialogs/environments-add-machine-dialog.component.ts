@@ -34,6 +34,7 @@ export interface AddMachineDialogResult {
     selector: 'senergy-environments-add-machine-dialog',
     templateUrl: './environments-add-machine-dialog.component.html',
     styleUrls: ['./environments-add-machine-dialog.component.css'],
+    standalone: false
 })
 export class EnvironmentsAddMachineDialogComponent implements OnInit {
     name = '';

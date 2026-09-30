@@ -36,6 +36,7 @@ interface DeviceTypeCharacteristicsModelWithGroup extends DeviceTypeCharacterist
     selector: 'senergy-import-content-variable-dialog',
     templateUrl: './content-variable-dialog.component.html',
     styleUrls: ['./content-variable-dialog.component.css'],
+    standalone: false
 })
 export class ContentVariableDialogComponent implements OnInit {
     static notNamedTimeAndNotEmpty(control: AbstractControl): ValidationErrors | null {

@@ -36,7 +36,8 @@ interface InitCheck {
 @Component({
     selector: 'senergy-open-window',
     templateUrl: './open-window.component.html',
-    styleUrls: ['./open-window.component.css']
+    styleUrls: ['./open-window.component.css'],
+    standalone: false
 })
 export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
     ready = false;

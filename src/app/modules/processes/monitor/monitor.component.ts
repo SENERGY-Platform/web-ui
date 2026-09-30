@@ -39,6 +39,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-process-monitor',
     templateUrl: './monitor.component.html',
     styleUrls: ['./monitor.component.css'],
+    standalone: false
 })
 export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit {
     dataSourceFinished = new MatTableDataSource<MonitorProcessModel>();

@@ -26,6 +26,7 @@ import jsQR from 'jsqr';
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',
     styleUrls: ['./device-instances-edit-dialog.component.css'],
+    standalone: false
 })
 export class DeviceInstancesEditDialogComponent implements OnDestroy {
     @ViewChild('qrVideo') qrVideo?: ElementRef<HTMLVideoElement>;

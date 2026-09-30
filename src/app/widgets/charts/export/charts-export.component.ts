@@ -53,6 +53,7 @@ enum DetailLevel {
     selector: 'senergy-charts-export',
     templateUrl: './charts-export.component.html',
     styleUrls: ['./charts-export.component.css'],
+    standalone: false
 })
 export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     chartExportData = {} as ChartsModel;

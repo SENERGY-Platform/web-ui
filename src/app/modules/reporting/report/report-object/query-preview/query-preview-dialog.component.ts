@@ -35,6 +35,7 @@ const MAX_ROWS = 200;
     selector: 'senergy-reporting-query-preview-dialog',
     templateUrl: './query-preview-dialog.component.html',
     styleUrls: ['./query-preview-dialog.component.css'],
+    standalone: false
 })
 export class QueryPreviewDialogComponent {
 

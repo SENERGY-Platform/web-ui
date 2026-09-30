@@ -45,6 +45,7 @@ const grids = new Map([
     selector: 'senergy-smart-service-releases',
     templateUrl: './releases.component.html',
     styleUrls: ['./releases.component.css'],
+    standalone: false
 })
 export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnDestroy {
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });

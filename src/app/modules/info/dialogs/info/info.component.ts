@@ -21,7 +21,8 @@ import { environment } from 'src/environments/environment';
 @Component({
     selector: 'app-info',
     templateUrl: './info.component.html',
-    styleUrls: ['./info.component.css']
+    styleUrls: ['./info.component.css'],
+    standalone: false
 })
 export class InfoDialogComponent {
     commit = '';

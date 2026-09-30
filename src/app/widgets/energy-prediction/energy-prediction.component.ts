@@ -27,6 +27,7 @@ import { Subscription } from 'rxjs';
     selector: 'senergy-energy-prediction',
     templateUrl: './energy-prediction.component.html',
     styleUrls: ['./energy-prediction.component.css'],
+    standalone: false
 })
 export class EnergyPredictionComponent implements OnInit, OnDestroy {
     predictionModel: EnergyPredictionModel = { prediction: 0, predictionTotal: 0, timestamp: '' };

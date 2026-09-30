@@ -19,9 +19,9 @@ import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@an
 import { jsonValidator } from './json.validator';
 
 @Directive({
-     
     selector: '[isValidJson]',
-    providers: [{provide: NG_VALIDATORS, useExisting: IsJsonValidatorDirective, multi: true}]
+    providers: [{ provide: NG_VALIDATORS, useExisting: IsJsonValidatorDirective, multi: true }],
+    standalone: false
 })
 export class IsJsonValidatorDirective implements Validator {
     validate(control: AbstractControl): ValidationErrors | null {

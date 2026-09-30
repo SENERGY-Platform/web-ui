@@ -39,6 +39,7 @@ import { detectAndMergeFlapping } from '../shared/flapping.function';
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',
     styleUrls: ['./device-instances-service-dialog.component.css'],
+    standalone: false
 })
 export class DeviceInstancesServiceDialogComponent implements OnInit {
     services: DeviceTypeServiceModel[] = [];

@@ -25,6 +25,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 @Component({
     templateUrl: './process-model-list-edit-dialog.component.html',
     styleUrls: ['./process-model-list-edit-dialog.component.css'],
+    standalone: false
 })
 export class ProcessModelListEditDialogComponent implements OnInit {
     dashboardId: string;

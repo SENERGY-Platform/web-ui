@@ -23,6 +23,7 @@ import { ExportService } from '../../../../exports/shared/export.service';
 @Component({
     templateUrl: './historic-data-config-dialog.component.html',
     styleUrls: ['./historic-data-config-dialog.component.css'],
+    standalone: false
 })
 export class HistoricDataConfigDialogComponent {
     config: HistoricDataConfig;

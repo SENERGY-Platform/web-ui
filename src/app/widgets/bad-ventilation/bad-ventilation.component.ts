@@ -26,7 +26,8 @@ import { VentilationResult } from './shared/model';
 @Component({
     selector: 'senergy-bad-ventilation',
     templateUrl: './bad-ventilation.component.html',
-    styleUrls: ['./bad-ventilation.component.css']
+    styleUrls: ['./bad-ventilation.component.css'],
+    standalone: false
 })
 export class BadVentilationComponent implements OnInit {
     ready = false;

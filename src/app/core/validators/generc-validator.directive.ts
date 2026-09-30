@@ -18,9 +18,9 @@ import { Directive, Input } from '@angular/core';
 import { AbstractControl, ValidationErrors, NG_VALIDATORS, Validator } from '@angular/forms';
 
 @Directive({
-     
     selector: '[generic_validator]',
     providers: [{ provide: NG_VALIDATORS, useExisting: GenericValidator, multi: true }],
+    standalone: false
 })
 export class GenericValidator implements Validator {
 

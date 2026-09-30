@@ -62,6 +62,7 @@ export enum DeviceInstancesRouterStateTypesEnum {
     selector: 'senergy-device-instances',
     templateUrl: './device-instances.component.html',
     styleUrls: ['./device-instances.component.css'],
+    standalone: false
 })
 export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestroy {
 

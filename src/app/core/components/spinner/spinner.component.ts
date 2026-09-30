@@ -20,6 +20,7 @@ import { Component, Input } from '@angular/core';
     selector: 'senergy-spinner',
     templateUrl: './spinner.component.html',
     styleUrls: ['./spinner.component.css'],
+    standalone: false
 })
 export class SpinnerComponent {
     @Input() show = false;

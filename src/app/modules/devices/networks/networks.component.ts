@@ -38,6 +38,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-networks',
     templateUrl: './networks.component.html',
     styleUrls: ['./networks.component.css'],
+    standalone: false
 })
 export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'connection', 'shared', 'name', 'number_devices', 'show', 'clear'];

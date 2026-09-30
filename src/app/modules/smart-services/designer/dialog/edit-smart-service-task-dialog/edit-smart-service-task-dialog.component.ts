@@ -87,6 +87,7 @@ interface GenericWatcherRequest {
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
     styleUrls: ['./edit-smart-service-task-dialog.component.css'],
+    standalone: false
 })
 export class EditSmartServiceTaskDialogComponent implements OnInit {
     init: SmartServiceTaskDescription;

@@ -21,6 +21,7 @@ import { BpmnParameter } from '../../shared/designer.model';
 @Component({
     templateUrl: './edit-output-dialog.component.html',
     styleUrls: ['./edit-output-dialog.component.css'],
+    standalone: false
 })
 export class EditOutputDialogComponent {
     outputs: BpmnParameter[];

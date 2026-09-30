@@ -30,6 +30,7 @@ import {CellModel} from '../diagram-editor/shared/diagram.model';
     selector: 'senergy-flow-designer',
     templateUrl: './flow-designer.component.html',
     styleUrls: ['./flow-designer.component.css'],
+    standalone: false
 })
 export class FlowDesignerComponent implements AfterViewInit {
 

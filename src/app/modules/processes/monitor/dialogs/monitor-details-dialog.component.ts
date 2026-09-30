@@ -21,6 +21,7 @@ import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.
 @Component({
     templateUrl: './monitor-details-dialog.component.html',
     styleUrls: ['./monitor-details-dialog.component.css'],
+    standalone: false
 })
 export class MonitorDetailsDialogComponent {
     incidents: ProcessIncidentsModel[] = [];

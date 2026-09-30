@@ -26,6 +26,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 @Component({
     templateUrl: './process-scheduler-schedule-edit-dialog.component.html',
     styleUrls: ['./process-scheduler-schedule-edit-dialog.component.css'],
+    standalone: false
 })
 export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
     dashboardId: string;

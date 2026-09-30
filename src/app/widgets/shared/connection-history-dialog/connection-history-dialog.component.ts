@@ -22,9 +22,10 @@ import { concatMap, map } from 'rxjs';
 import { detectAndMergeFlapping } from 'src/app/modules/devices/device-instances/shared/flapping.function';
 
 @Component({
-  selector: 'senergy-connection-history-dialog',
-  templateUrl: './connection-history-dialog.component.html',
-  styleUrl: './connection-history-dialog.component.css'
+    selector: 'senergy-connection-history-dialog',
+    templateUrl: './connection-history-dialog.component.html',
+    styleUrl: './connection-history-dialog.component.css',
+    standalone: false
 })
 export class ConnectionHistoryDialogComponent implements AfterViewInit {
     ready = false;

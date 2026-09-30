@@ -39,6 +39,7 @@ import { SingleValueAggregations, ValueHighlightConfig } from '../shared/single-
 @Component({
     templateUrl: './single-value-edit-dialog.component.html',
     styleUrls: ['./single-value-edit-dialog.component.css'],
+    standalone: false
 })
 export class SingleValueEditDialogComponent implements OnInit {
     formIsReady = false;

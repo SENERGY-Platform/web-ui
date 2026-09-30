@@ -37,6 +37,7 @@ const routePrefix = '/dev/api/playground';
     selector: 'senergy-openapi-docs',
     templateUrl: './api-playground.component.html',
     styleUrls: ['./api-playground.component.css'],
+    standalone: false
 })
 export class ApiPlaygroundComponent implements OnInit, OnDestroy {
     ready = false;

@@ -27,6 +27,7 @@ import { MatDialogRef } from '@angular/material/dialog';
     selector: 'senergy-environments-version-conflict-dialog',
     templateUrl: './environments-version-conflict-dialog.component.html',
     styleUrls: ['./environments-version-conflict-dialog.component.css'],
+    standalone: false
 })
 export class EnvironmentsVersionConflictDialogComponent {
     constructor(private dialogRef: MatDialogRef<EnvironmentsVersionConflictDialogComponent>) {}

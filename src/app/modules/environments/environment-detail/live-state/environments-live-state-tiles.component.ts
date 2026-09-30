@@ -50,6 +50,7 @@ interface Tile {
     selector: 'senergy-environments-live-state-tiles',
     templateUrl: './environments-live-state-tiles.component.html',
     styleUrls: ['./environments-live-state-tiles.component.css'],
+    standalone: false
 })
 export class EnvironmentsLiveStateTilesComponent implements OnChanges {
     @Input() record: Record<string, unknown> | undefined;

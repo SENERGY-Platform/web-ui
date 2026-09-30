@@ -43,6 +43,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-functions',
     templateUrl: './functions.component.html',
     styleUrls: ['./functions.component.css'],
+    standalone: false
 })
 export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];

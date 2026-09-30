@@ -22,6 +22,7 @@ import {rangeValidator} from '../../../../../core/validators/range.validator';
     selector: 'senergy-date-time-event-config',
     templateUrl: './date-time-event-config.component.html',
     styleUrls: ['./date-time-event-config.component.css'],
+    standalone: false
 })
 export class DateTimeEventConfigComponent implements OnInit {
     @Input() initial = '';

@@ -41,6 +41,7 @@ export interface EnvironmentRow {
     selector: 'senergy-environments',
     templateUrl: './environments.component.html',
     styleUrls: ['./environments.component.css'],
+    standalone: false
 })
 export class EnvironmentsComponent implements OnInit {
     displayedColumns = ['name', 'type', 'owner', 'zones', 'assets', 'channels'];

@@ -40,7 +40,8 @@ import { ReportingService } from '../../reporting/shared/reporting.service';
 @Component({
     selector: 'senergy-cost-overview',
     templateUrl: './cost-overview.component.html',
-    styleUrls: ['./cost-overview.component.css']
+    styleUrls: ['./cost-overview.component.css'],
+    standalone: false
 })
 export class CostOverviewComponent implements OnInit {
     dataReady = false;

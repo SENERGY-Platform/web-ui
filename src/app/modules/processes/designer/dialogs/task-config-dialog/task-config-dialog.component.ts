@@ -50,6 +50,7 @@ import { selectedAspectNodes } from '../../bpmn-js/properties-provider/aspects';
 @Component({
     templateUrl: './task-config-dialog.component.html',
     styleUrls: ['./task-config-dialog.component.css'],
+    standalone: false
 })
 export class TaskConfigDialogComponent implements OnInit {
     optionsFormControl = new UntypedFormControl('');

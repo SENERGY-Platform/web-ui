@@ -20,6 +20,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 @Component({
     templateUrl: './networks-clear-dialog.component.html',
     styleUrls: ['./networks-clear-dialog.component.css'],
+    standalone: false
 })
 export class NetworksClearDialogComponent {
     constructor(private dialogRef: MatDialogRef<NetworksClearDialogComponent>) {}

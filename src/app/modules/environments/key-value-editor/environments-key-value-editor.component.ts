@@ -51,6 +51,7 @@ interface Row {
     selector: 'senergy-environments-key-value-editor',
     templateUrl: './environments-key-value-editor.component.html',
     styleUrls: ['./environments-key-value-editor.component.css'],
+    standalone: false
 })
 export class EnvironmentsKeyValueEditorComponent implements OnChanges {
     @Input() record: Record<string, unknown> | undefined;

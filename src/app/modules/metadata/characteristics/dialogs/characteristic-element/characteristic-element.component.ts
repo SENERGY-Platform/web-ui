@@ -24,6 +24,7 @@ import {MatTreeNestedDataSource} from '@angular/material/tree';
     selector: 'senergy-characteristic-element',
     templateUrl: './characteristic-element.component.html',
     styleUrls: ['./characteristic-element.component.css'],
+    standalone: false
 })
 export class CharacteristicElementComponent implements OnInit {
     constructor(private fb: UntypedFormBuilder) {}

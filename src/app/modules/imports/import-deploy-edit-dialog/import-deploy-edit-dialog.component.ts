@@ -27,6 +27,7 @@ import { typeValueValidator } from '../validators/type-value-validator';
     selector: 'senergy-import-deploy-dialog',
     templateUrl: './import-deploy-edit-dialog.component.html',
     styleUrls: ['./import-deploy-edit-dialog.component.css'],
+    standalone: false
 })
 export class ImportDeployEditDialogComponent implements OnInit {
     form = this.fb.group({

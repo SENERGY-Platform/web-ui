@@ -110,6 +110,7 @@ interface LiveStateEntry {
     selector: 'senergy-environment-detail',
     templateUrl: './environment-detail.component.html',
     styleUrls: ['./environment-detail.component.css'],
+    standalone: false
 })
 export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     id = '';

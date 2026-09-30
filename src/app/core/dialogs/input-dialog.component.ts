@@ -20,6 +20,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 @Component({
     templateUrl: './input-dialog.component.html',
     styleUrls: ['./input-dialog.component.css'],
+    standalone: false
 })
 export class InputDialogComponent {
     fields: {[key: string]: string};

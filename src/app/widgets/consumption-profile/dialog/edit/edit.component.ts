@@ -28,7 +28,8 @@ import { ConsumptionProfileProperties } from '../../shared/consumption-profile.m
 @Component({
     selector: 'app-edit',
     templateUrl: './edit.component.html',
-    styleUrls: ['./edit.component.css']
+    styleUrls: ['./edit.component.css'],
+    standalone: false
 })
 export class ConsumptionProfileEditComponent implements OnInit {
     userHasUpdateNameAuthorization = false;

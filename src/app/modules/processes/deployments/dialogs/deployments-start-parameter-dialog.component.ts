@@ -23,6 +23,7 @@ import { Observable } from 'rxjs';
 @Component({
     templateUrl: './deployments-start-parameter-dialog.component.html',
     styleUrls: ['./deployments-start-parameter-dialog.component.css'],
+    standalone: false
 })
 export class DeploymentsStartParameterDialogComponent {
     deploymentId: string;

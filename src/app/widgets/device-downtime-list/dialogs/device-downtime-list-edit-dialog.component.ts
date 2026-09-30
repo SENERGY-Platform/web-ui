@@ -26,6 +26,7 @@ import { forkJoin } from 'rxjs';
 @Component({
     templateUrl: './device-downtime-list-edit-dialog.component.html',
     styleUrls: ['./device-downtime-list-edit-dialog.component.css'],
+    standalone: false
 })
 export class DeviceDowntimeListEditDialogComponent implements OnInit {
     dashboardId: string;

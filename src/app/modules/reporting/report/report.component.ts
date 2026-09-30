@@ -58,6 +58,7 @@ import { REPORT_SETTINGS_PATH, ReportObjectViewService } from '../shared/report-
     templateUrl: './report.component.html',
     styleUrls: ['./report.component.css'],
     providers: [ReportObjectViewService],
+    standalone: false
 })
 export class ReportComponent implements OnInit, OnDestroy {
 

@@ -27,6 +27,7 @@ import '@asyncapi/web-component/lib/asyncapi-web-component';
     selector: 'senergy-single-service-doc',
     templateUrl: './single-service-doc.component.html',
     styleUrls: ['./single-service-doc.component.css'],
+    standalone: false
 })
 export class SingleServiceDocComponent implements OnInit {
     public id: any;

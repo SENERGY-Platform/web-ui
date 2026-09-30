@@ -26,7 +26,8 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
 @Component({
     selector: 'anomaly-phases',
     templateUrl: './anomaly-phases.component.html',
-    styleUrls: ['./anomaly-phases.component.css']
+    styleUrls: ['./anomaly-phases.component.css'],
+    standalone: false
 })
 export class AnomalyPhasesComponent implements OnInit, OnChanges {
     @Input() anomalies: AnomaliesPerDevice = {};

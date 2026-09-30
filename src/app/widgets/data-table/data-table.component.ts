@@ -53,6 +53,7 @@ interface DataTableComponentItem {
     selector: 'senergy-data-table',
     templateUrl: './data-table.component.html',
     styleUrls: ['./data-table.component.css'],
+    standalone: false
 })
 export class DataTableComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';

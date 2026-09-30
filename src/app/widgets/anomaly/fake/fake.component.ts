@@ -24,7 +24,8 @@ import { ChartsExportService } from '../../charts/export/shared/charts-export.se
 @Component({
     selector: 'fake-senergy-anomaly-detection',
     templateUrl: './fake.component.html',
-    styleUrls: ['./fake.component.css']
+    styleUrls: ['./fake.component.css'],
+    standalone: false
 })
 export class FakeAnomalyComponent implements AfterViewInit, AfterViewChecked {
     type = 'curve_anomaly'; // time, schema, curve_anomaly

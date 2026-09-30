@@ -28,6 +28,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
     selector: 'senergy-device-downtime-list',
     templateUrl: './device-downtime-list.component.html',
     styleUrls: ['./device-downtime-list.component.css'],
+    standalone: false
 })
 export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     offlineSinceList: OfflineSinceModel[] = [];

@@ -26,7 +26,8 @@ import { ReportModel } from '../../reporting/shared/reporting.model';
 @Component({
     selector: 'senergy-cost-element',
     templateUrl: './cost-element.component.html',
-    styleUrls: ['./cost-element.component.css']
+    styleUrls: ['./cost-element.component.css'],
+    standalone: false
 })
 export class CostElementComponent {
     private _element: CostModel = {} as CostModel;

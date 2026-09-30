@@ -25,6 +25,7 @@ import { Router } from '@angular/router';
     selector: 'senergy-device-groups-pipeline-helper-dialog',
     templateUrl: './device-groups-pipeline-helper-dialog.component.html',
     styleUrls: ['./device-groups-pipeline-helper-dialog.component.css'],
+    standalone: false
 })
 export class DeviceGroupsPipelineHelperDialogComponent implements OnInit {
     pipelineSelection = new SelectionModel<PipelineModel>(true, []);

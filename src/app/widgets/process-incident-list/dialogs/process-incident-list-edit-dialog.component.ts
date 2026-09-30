@@ -26,6 +26,7 @@ import {FormBuilder, FormGroup,  Validators} from '@angular/forms';
 @Component({
     templateUrl: './process-incident-list-edit-dialog.component.html',
     styleUrls: ['./process-incident-list-edit-dialog.component.css'],
+    standalone: false
 })
 export class ProcessIncidentListEditDialogComponent implements OnInit {
     dashboardId: string;

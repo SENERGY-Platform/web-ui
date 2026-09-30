@@ -40,6 +40,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-import-instances',
     templateUrl: './import-instances.component.html',
     styleUrls: ['./import-instances.component.css'],
+    standalone: false
 })
 export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestroy {
     displayedColumns = ['select', 'status', 'name', 'image', 'created_at', 'updated_at', 'export'];

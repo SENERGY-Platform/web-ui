@@ -22,6 +22,7 @@ import { DashboardModel } from '../shared/dashboard.model';
 @Component({
     templateUrl: './dashboard-edit-dialog.component.html',
     styleUrls: ['./dashboard-edit-dialog.component.css'],
+    standalone: false
 })
 export class DashboardEditDialogComponent {
     dashboard: DashboardModel;

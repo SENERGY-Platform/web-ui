@@ -28,6 +28,7 @@ import { EnvironmentsDatasetUploadDialogComponent } from './dialogs/environments
     selector: 'senergy-environments-datasets',
     templateUrl: './environments-datasets.component.html',
     styleUrls: ['./environments-datasets.component.css'],
+    standalone: false
 })
 export class EnvironmentsDatasetsComponent implements OnInit {
     displayedColumns = ['name', 'timezone', 'columns', 'size', 'created'];

@@ -45,6 +45,7 @@ import {DeviceTypeService} from '../../metadata/device-types-overview/shared/dev
     selector: 'senergy-import-types-create-edit',
     templateUrl: './import-types-create-edit.component.html',
     styleUrls: ['./import-types-create-edit.component.css'],
+    standalone: false
 })
 export class ImportTypesCreateEditComponent implements OnInit {
     constructor(

@@ -21,6 +21,7 @@ import { ProcessIoVariable } from '../shared/process-io.model';
 @Component({
     templateUrl: './process-io-variable-edit-dialog.component.html',
     styleUrls: ['./process-io-variable-edit-dialog.component.css'],
+    standalone: false
 })
 export class ProcessIoVariableEditDialogComponent {
     variable: ProcessIoVariable;

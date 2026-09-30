@@ -28,7 +28,8 @@ import {BudgetCreateEditComponent} from './budget-create-edit/budget-create-edit
 @Component({
     selector: 'senergy-budget',
     templateUrl: './budget.component.html',
-    styleUrls: ['./budget.component.css']
+    styleUrls: ['./budget.component.css'],
+    standalone: false
 })
 export class BudgetComponent implements OnInit {
     @ViewChild(MatTable, {static: false}) table!: MatTable<BudgetModel>;

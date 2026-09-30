@@ -36,6 +36,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-process-io-variables',
     templateUrl: './variables.component.html',
     styleUrls: ['./variables.component.css'],
+    standalone: false
 })
 export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, OnInit {
     pageSize = this.preferencesService.pageSize;

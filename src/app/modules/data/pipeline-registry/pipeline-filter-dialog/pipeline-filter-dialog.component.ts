@@ -9,6 +9,7 @@ import {FlowRepoService} from '../../flow-repo/shared/flow-repo.service';
 @Component({
     selector: 'app-pipeline-filter-dialog',
     templateUrl: './pipeline-filter-dialog.component.html',
+    standalone: false
 })
 export class PipelineFilterDialogComponent implements OnInit {
     config: FilterDialogConfigModel = { fields: [] };

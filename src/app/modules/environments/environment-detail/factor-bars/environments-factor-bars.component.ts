@@ -33,6 +33,7 @@ import { withFactorSet } from '../../shared/environments-source';
     selector: 'senergy-environments-factor-bars',
     templateUrl: './environments-factor-bars.component.html',
     styleUrls: ['./environments-factor-bars.component.css'],
+    standalone: false
 })
 export class EnvironmentsFactorBarsComponent implements OnChanges {
     @Input() values: number[] | undefined;

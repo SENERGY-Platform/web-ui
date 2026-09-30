@@ -29,6 +29,7 @@ import { MatTable } from '@angular/material/table';
     selector: 'senergy-multi-value',
     templateUrl: './multi-value.component.html',
     styleUrls: ['./multi-value.component.css'],
+    standalone: false
 })
 export class MultiValueComponent implements OnInit, OnDestroy {
     configured = false;

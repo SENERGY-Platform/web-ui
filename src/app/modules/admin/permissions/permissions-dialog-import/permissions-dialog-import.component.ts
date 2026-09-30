@@ -27,6 +27,7 @@ import { PermissionModel } from '../shared/permission.model';
     selector: 'senergy-permissions-dialog-import',
     templateUrl: './permissions-dialog-import.component.html',
     styleUrls: ['./permissions-dialog-import.component.css'],
+    standalone: false
 })
 export class PermissionsDialogImportComponent {
 

@@ -40,6 +40,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-permissions-list',
     templateUrl: './permissions-list.component.html',
     styleUrls: ['./permissions-list.component.css'],
+    standalone: false
 })
 export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestroy {
 

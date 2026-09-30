@@ -28,9 +28,10 @@ export interface CapabilityCommandModel {
  * characteristic of the function's concept, see @link resolveControlInput.
  */
 @Component({
-  selector: 'senergy-capability-control',
-  templateUrl: './capability-control.component.html',
-  styleUrl: './capability-control.component.css'
+    selector: 'senergy-capability-control',
+    templateUrl: './capability-control.component.html',
+    styleUrl: './capability-control.component.css',
+    standalone: false
 })
 export class CapabilityControlComponent implements OnInit {
   @Input() control: FloorplanControlModel = {} as FloorplanControlModel;

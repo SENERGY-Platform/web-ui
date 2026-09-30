@@ -163,6 +163,7 @@ function combine(values: number[], aggregation: 'sum' | 'mean'): number | null {
     selector: 'senergy-reporting-query-editor',
     templateUrl: './query-editor.component.html',
     styleUrls: ['./query-editor.component.css'],
+    standalone: false
 })
 export class QueryEditorComponent implements OnInit, OnChanges, OnDestroy {
 

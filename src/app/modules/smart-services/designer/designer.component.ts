@@ -56,6 +56,7 @@ import { MissingMetadataOverlays } from '../../metadata/shared/missing-metadata-
     selector: 'senergy-smart-service-designer',
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
+    standalone: false
 })
 export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
     modeler: any;

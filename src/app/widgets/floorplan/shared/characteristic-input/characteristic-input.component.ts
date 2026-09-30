@@ -31,9 +31,10 @@ import {
  * component into itself, so every leaf gets the input its own type asks for.
  */
 @Component({
-  selector: 'senergy-characteristic-input',
-  templateUrl: './characteristic-input.component.html',
-  styleUrl: './characteristic-input.component.css'
+    selector: 'senergy-characteristic-input',
+    templateUrl: './characteristic-input.component.html',
+    styleUrl: './characteristic-input.component.css',
+    standalone: false
 })
 export class CharacteristicInputComponent implements OnInit {
   @Input() characteristic: DeviceTypeCharacteristicsModel | undefined;

@@ -36,6 +36,7 @@ export interface TableElement {
 @Component({
     templateUrl: './switch-edit-dialog.component.html',
     styleUrls: ['./switch-edit-dialog.component.css'],
+    standalone: false
 })
 export class SwitchEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

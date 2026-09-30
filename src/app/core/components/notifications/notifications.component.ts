@@ -40,9 +40,10 @@ interface NotificationDisplayModel extends NotificationModel {
 }
 
 @Component({
-  selector: 'app-notifications',
-  templateUrl: './notifications.component.html',
-  styleUrl: './notifications.component.css'
+    selector: 'app-notifications',
+    templateUrl: './notifications.component.html',
+    styleUrl: './notifications.component.css',
+    standalone: false
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
   @ViewChild('paginator', { static: false })

@@ -25,6 +25,7 @@ import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../pr
 @Component({
     templateUrl: './edit-smart-service-json-extraction-dialog.component.html',
     styleUrls: ['./edit-smart-service-json-extraction-dialog.component.css'],
+    standalone: false
 })
 export class EditSmartServiceJsonExtractionDialogComponent {
     exports: JsonExtract[] = [];

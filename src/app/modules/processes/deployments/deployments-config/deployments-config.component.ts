@@ -48,6 +48,7 @@ interface V2DeploymentsPreparedSelectionOptionModelWithGroup extends V2Deploymen
     selector: 'senergy-process-deployments-config',
     templateUrl: './deployments-config.component.html',
     styleUrls: ['./deployments-config.component.css'],
+    standalone: false
 })
 export class ProcessDeploymentsConfigComponent implements OnInit {
     @ViewChild('autosize', { static: false }) autosize!: CdkTextareaAutosize;

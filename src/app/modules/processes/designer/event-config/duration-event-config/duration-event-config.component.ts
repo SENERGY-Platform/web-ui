@@ -23,6 +23,7 @@ import * as moment from 'moment';
     selector: 'senergy-duration-event-config',
     templateUrl: './duration-event-config.component.html',
     styleUrls: ['./duration-event-config.component.css'],
+    standalone: false
 })
 export class DurationEventConfigComponent implements OnInit {
     @Input() initial = '';

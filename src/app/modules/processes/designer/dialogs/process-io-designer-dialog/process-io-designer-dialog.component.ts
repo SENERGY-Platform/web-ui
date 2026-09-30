@@ -21,6 +21,7 @@ import { ProcessIoDesignerInfo, ProcessIoDesignerInfoGet, ProcessIoDesignerInfoS
 @Component({
     templateUrl: './process-io-designer-dialog.component.html',
     styleUrls: ['./process-io-designer-dialog.component.css'],
+    standalone: false
 })
 export class ProcessIoDesignerDialogComponent {
     info: ProcessIoDesignerInfoWithBinding;

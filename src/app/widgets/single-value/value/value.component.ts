@@ -22,7 +22,8 @@ import {SingleValueModel} from '../shared/single-value.model';
 @Component({
     selector: 'senergy-single-value-value',
     templateUrl: './value.component.html',
-    styleUrls: ['./value.component.css']
+    styleUrls: ['./value.component.css'],
+    standalone: false
 })
 export class ValueComponent {
     @Input() widget: WidgetModel | undefined;

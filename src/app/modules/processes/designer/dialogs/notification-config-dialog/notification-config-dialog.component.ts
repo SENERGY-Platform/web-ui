@@ -22,6 +22,7 @@ import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-erro
 @Component({
     templateUrl: './notification-config-dialog.component.html',
     styleUrls: ['./notification-config-dialog.component.css'],
+    standalone: false
 })
 export class NotificationConfigDialogComponent {
     subjectFormGroup: FormGroup;

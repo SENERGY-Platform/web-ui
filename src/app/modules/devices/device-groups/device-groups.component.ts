@@ -36,6 +36,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-device-groups',
     templateUrl: './device-groups.component.html',
     styleUrls: ['./device-groups.component.css'],
+    standalone: false
 })
 export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'show'];

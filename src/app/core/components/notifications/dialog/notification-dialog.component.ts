@@ -51,6 +51,7 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 @Component({
     templateUrl: './notification-dialog.component.html',
     styleUrls: ['./notification-dialog.component.css'],
+    standalone: false
 })
 export class NotificationDialogComponent implements OnInit, OnDestroy {
     modes = Modes;

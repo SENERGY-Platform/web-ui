@@ -73,6 +73,7 @@ function isNumericExportColumn(value: ExportValueModel): boolean {
     selector: 'senergy-environments-dataset-editor',
     templateUrl: './environments-dataset-editor.component.html',
     styleUrls: ['./environments-dataset-editor.component.css'],
+    standalone: false
 })
 export class EnvironmentsDatasetEditorComponent {
     @Input() dataset: DatasetSource | undefined;

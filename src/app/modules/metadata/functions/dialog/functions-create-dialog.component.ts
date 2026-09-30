@@ -24,6 +24,7 @@ import {v4 as uuid} from 'uuid';
 @Component({
     templateUrl: './functions-create-dialog.component.html',
     styleUrls: ['./functions-create-dialog.component.css'],
+    standalone: false
 })
 export class FunctionsCreateDialogComponent implements OnInit {
     optionsFormControl = new UntypedFormControl('Controlling');

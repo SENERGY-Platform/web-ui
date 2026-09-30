@@ -26,6 +26,7 @@ import { ProcessRepoService } from 'src/app/modules/processes/process-repo/share
     selector: 'senergy-process-model-list',
     templateUrl: './process-model-list.component.html',
     styleUrls: ['./process-model-list.component.css'],
+    standalone: false
 })
 export class ProcessModelListComponent implements OnInit, OnDestroy {
     processes: ProcessModelListModel[] = [];

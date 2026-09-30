@@ -44,6 +44,7 @@ import { TableRowAnimations } from 'src/app/core/animations/table-animation';
     templateUrl: './waiting-room.component.html',
     styleUrls: ['./waiting-room.component.css'],
     animations: [TableRowAnimations.getRowAnimation()],
+    standalone: false
 })
 export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     static wmbusKeyAttributeKey = 'wmbus/key';

@@ -28,6 +28,7 @@ import { InfoService } from 'src/app/modules/info/shared/info.service';
     selector: 'senergy-toolbar',
     templateUrl: './toolbar.component.html',
     styleUrls: ['./toolbar.component.css'],
+    standalone: false
 })
 export class ToolbarComponent implements OnInit {
     userName = '';

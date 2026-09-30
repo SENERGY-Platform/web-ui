@@ -38,6 +38,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-characteristic',
     templateUrl: './characteristics.component.html',
     styleUrls: ['./characteristics.component.css'],
+    standalone: false
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];

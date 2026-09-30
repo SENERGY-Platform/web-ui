@@ -43,6 +43,7 @@ const MIN_PAST_MARGIN_MS = 2 * 60 * 1000;
     selector: 'senergy-environments-history',
     templateUrl: './environments-history.component.html',
     styleUrls: ['./environments-history.component.css'],
+    standalone: false
 })
 export class EnvironmentsHistoryComponent implements OnInit, OnDestroy {
     @Input() environmentId = '';

@@ -14,6 +14,7 @@ import { PermissionTestResponse } from '../app/modules/admin/permissions/shared/
 @Component({
     selector: 'senergy-root',
     template: '<div style="height:100vh;display:flex;flex-direction:column"><router-outlet></router-outlet></div>',
+    standalone: false
 })
 export class PreviewRootComponent {
     constructor() {

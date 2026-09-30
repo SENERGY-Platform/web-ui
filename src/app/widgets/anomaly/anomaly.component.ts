@@ -31,7 +31,8 @@ import { AnomalyService } from './shared/anomaly.service';
 @Component({
     selector: 'senergy-anomaly-detection',
     templateUrl: './anomaly.component.html',
-    styleUrls: ['./anomaly.component.css']
+    styleUrls: ['./anomaly.component.css'],
+    standalone: false
 })
 export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
     ready = false;

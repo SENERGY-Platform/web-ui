@@ -66,7 +66,9 @@ import {MatDialog} from '@angular/material/dialog';
             useClass: environment.mockPermissionsV2 ? PermissionsMockService : PermissionsService
         }, {
             provide: CostService, useClass: environment.mockCostService ? CostMockService : CostService
-        }]
+        }
+    ],
+    standalone: false
 })
 export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;

@@ -24,7 +24,8 @@ import {BudgetService} from '../shared/budget.service';
 @Component({
     selector: 'senergy-budget-create-edit',
     templateUrl: './budget-create-edit.component.html',
-    styleUrls: ['./budget-create-edit.component.css']
+    styleUrls: ['./budget-create-edit.component.css'],
+    standalone: false
 })
 export class BudgetCreateEditComponent {
     budget?: BudgetModel;

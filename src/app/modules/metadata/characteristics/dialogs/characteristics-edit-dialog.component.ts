@@ -25,6 +25,7 @@ import { CharacteristicElementComponent } from './characteristic-element/charact
 @Component({
     templateUrl: './characteristics-edit-dialog.component.html',
     styleUrls: ['./characteristics-edit-dialog.component.css'],
+    standalone: false
 })
 export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('characteristicElementComponent', { static: false }) characteristicElementComponent!: CharacteristicElementComponent;

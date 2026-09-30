@@ -100,7 +100,8 @@ const dateDiff = {
                 animate('100ms')
             ]),
         ]),
-    ]
+    ],
+    standalone: false
 })
 export class SingleValueComponent implements OnInit, OnDestroy {
     svList: SingleValueModel[] = [];

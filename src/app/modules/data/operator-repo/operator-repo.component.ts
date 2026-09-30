@@ -40,6 +40,7 @@ import {FlowOperatorUsage} from '../flow-repo/shared/flow.model';
     selector: 'senergy-operator-repo',
     templateUrl: './operator-repo.component.html',
     styleUrls: ['./operator-repo.component.css'],
+    standalone: false
 })
 export class OperatorRepoComponent implements OnInit, OnDestroy {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;

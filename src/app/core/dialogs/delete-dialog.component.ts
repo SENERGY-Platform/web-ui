@@ -33,6 +33,7 @@ export interface DeleteDialogResponse {
 @Component({
     templateUrl: './delete-dialog.component.html',
     styleUrls: ['./delete-dialog.component.css'],
+    standalone: false
 })
 export class DeleteDialogComponent {
     text: string;

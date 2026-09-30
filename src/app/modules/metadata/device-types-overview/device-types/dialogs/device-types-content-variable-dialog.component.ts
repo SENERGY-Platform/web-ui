@@ -46,6 +46,7 @@ interface DeviceTypeFunctionClassModel extends DeviceTypeFunctionModel {
 @Component({
     templateUrl: './device-types-content-variable-dialog.component.html',
     styleUrls: ['./device-types-content-variable-dialog.component.css'],
+    standalone: false
 })
 export class DeviceTypesContentVariableDialogComponent implements OnInit {
     disabled: boolean;

@@ -32,6 +32,7 @@ import { CronConverterService } from './shared/cron-converter.service';
     selector: 'senergy-process-scheduler',
     templateUrl: './process-scheduler.component.html',
     styleUrls: ['./process-scheduler.component.css'],
+    standalone: false
 })
 export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     schedules: ProcessSchedulerWidgetModel[] = [];

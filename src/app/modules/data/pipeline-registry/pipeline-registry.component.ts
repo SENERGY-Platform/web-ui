@@ -42,6 +42,7 @@ import {switchMap} from 'rxjs/operators';
     selector: 'senergy-pipeline-registry',
     templateUrl: './pipeline-registry.component.html',
     styleUrls: ['./pipeline-registry.component.css'],
+    standalone: false
 })
 export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestroy {
     pageSize = this.preferencesService.pageSize;

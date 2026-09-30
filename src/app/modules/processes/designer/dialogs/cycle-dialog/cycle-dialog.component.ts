@@ -21,6 +21,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
     templateUrl: './cycle-dialog.component.html',
     styleUrls: ['./cycle-dialog.component.css'],
     selector: 'senergy-cycle-dialog',
+    standalone: false
 })
 export class CycleDialogComponent {
     initial: string;

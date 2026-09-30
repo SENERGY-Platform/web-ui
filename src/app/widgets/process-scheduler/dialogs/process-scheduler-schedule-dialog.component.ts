@@ -27,6 +27,7 @@ import { CronConverterService } from '../shared/cron-converter.service';
 @Component({
     templateUrl: './process-scheduler-schedule-dialog.component.html',
     styleUrls: ['./process-scheduler-schedule-dialog.component.css'],
+    standalone: false
 })
 export class ProcessSchedulerScheduleDialogComponent implements OnInit {
     form = new FormGroup({

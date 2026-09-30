@@ -21,6 +21,7 @@ import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar'
     selector: 'senergy-closable-snack-bar',
     templateUrl: './closable-snack-bar.component.html',
     styleUrls: ['./closable-snack-bar.component.css'],
+    standalone: false
 })
 export class ClosableSnackBarComponent {
     constructor(public snackBarRef: MatSnackBarRef<ClosableSnackBarComponent>,

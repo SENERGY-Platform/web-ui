@@ -50,6 +50,7 @@ import { MissingMetadataOverlays } from '../../metadata/shared/missing-metadata-
     selector: 'senergy-process-designer',
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
+    standalone: false
 })
 export class ProcessDesignerComponent implements OnInit, OnDestroy {
     modeler: any;

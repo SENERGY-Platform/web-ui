@@ -26,6 +26,7 @@ import { MatTable } from '@angular/material/table';
 @Component({
     templateUrl: './device-total-downtime-edit-dialog.component.html',
     styleUrls: ['./device-total-downtime-edit-dialog.component.css'],
+    standalone: false
 })
 export class DeviceTotalDowntimeEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

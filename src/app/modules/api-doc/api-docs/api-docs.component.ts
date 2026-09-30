@@ -26,6 +26,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     selector: 'senergy-api-docs',
     templateUrl: './api-docs.component.html',
     styleUrls: ['./api-docs.component.css'],
+    standalone: false
 })
 export class ApiDocsComponent implements OnInit {
     public title = 'SEPL API Documentation';

@@ -24,7 +24,8 @@ import { PVLoadRecommendationResult } from './shared/recommendation.model';
 @Component({
     selector: 'senergy-pv-load-recommendation',
     templateUrl: './pv-load-recommendation.component.html',
-    styleUrls: ['./pv-load-recommendation.component.css']
+    styleUrls: ['./pv-load-recommendation.component.css'],
+    standalone: false
 })
 export class PvLoadRecommendationComponent implements OnInit, OnDestroy {
     ready = false;

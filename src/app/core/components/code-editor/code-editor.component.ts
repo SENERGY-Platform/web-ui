@@ -56,6 +56,7 @@ export type CodeEditorLanguage = 'javascript' | 'json' | 'plaintext';
     selector: 'senergy-code-editor',
     templateUrl: './code-editor.component.html',
     styleUrls: ['./code-editor.component.css'],
+    standalone: false
 })
 export class CodeEditorComponent implements AfterViewInit, OnChanges, OnDestroy {
     @Input() value = '';

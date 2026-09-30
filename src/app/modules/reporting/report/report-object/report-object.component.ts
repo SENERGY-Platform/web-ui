@@ -40,6 +40,7 @@ const INPUT_TYPES: { value: InputType; label: string }[] = [
     selector: 'senergy-reporting-object',
     templateUrl: './report-object.component.html',
     styleUrls: ['./report-object.component.css'],
+    standalone: false
 })
 export class ReportObjectComponent implements OnChanges, OnDestroy {
 

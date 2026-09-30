@@ -50,6 +50,7 @@ const sortingAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel(
     selector: 'senergy-process-repo',
     templateUrl: './process-repo.component.html',
     styleUrls: ['./process-repo.component.css'],
+    standalone: false
 })
 export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });

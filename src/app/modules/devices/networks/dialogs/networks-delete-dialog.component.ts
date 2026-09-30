@@ -28,6 +28,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     selector: 'senergy-device-groups-pipeline-helper-dialog',
     templateUrl: './networks-delete-dialog.component.html',
     styleUrls: ['./networks-delete-dialog.component.css'],
+    standalone: false
 })
 export class NetworksDeleteDialogComponent implements OnInit {
     deviceSelection = new SelectionModel<DeviceInstanceModel>(true, []);

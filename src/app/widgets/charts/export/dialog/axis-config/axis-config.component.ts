@@ -26,7 +26,8 @@ import { hashCode } from 'src/app/core/services/util.service';
 @Component({
     selector: 'senergy-axis-config',
     templateUrl: './axis-config.component.html',
-    styleUrls: ['./axis-config.component.css']
+    styleUrls: ['./axis-config.component.css'],
+    standalone: false
 })
 export class AxisConfigComponent {
     @Input() groupTypeIsDifference = false;

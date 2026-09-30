@@ -28,6 +28,7 @@ import { FilterDialogConfigModel, FilterDialogFieldModel, FilterDialogResultMode
     selector: 'senergy-filter-dialog',
     templateUrl: './filter-dialog.component.html',
     styleUrls: ['./filter-dialog.component.css'],
+    standalone: false
 })
 export class FilterDialogComponent implements OnInit {
     @Input() config: FilterDialogConfigModel = { fields: [] };

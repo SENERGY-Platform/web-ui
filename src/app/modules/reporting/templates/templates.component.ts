@@ -32,6 +32,7 @@ import { reportFileName } from '../shared/report-file-name';
     selector: 'senergy-reporting-templates',
     templateUrl: './templates.component.html',
     styleUrls: ['./templates.component.css'],
+    standalone: false
 })
 export class TemplatesComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;

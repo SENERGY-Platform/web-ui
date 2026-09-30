@@ -27,6 +27,7 @@ import {Router} from '@angular/router';
 @Component({
     templateUrl: './used-in-device-types-dialog.component.html',
     styleUrls: ['./used-in-device-types-dialog.component.css'],
+    standalone: false
 })
 export class UsedInDeviceTypesDialogComponent implements OnInit {
     dataSource = new MatTableDataSource<UsedInDeviceTypeResponseDeviceTypeRef>();

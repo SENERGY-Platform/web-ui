@@ -62,7 +62,8 @@ interface ChartsExportVAxesModelWithGroup extends ChartsExportVAxesModel {
 @Component({
     selector: 'data-source-selector',
     templateUrl: './data-source-selector.component.html',
-    styleUrls: ['./data-source-selector.component.css']
+    styleUrls: ['./data-source-selector.component.css'],
+    standalone: false
 })
 export class DataSourceSelectorComponent implements OnInit {
     form: UntypedFormGroup = new UntypedFormGroup({});

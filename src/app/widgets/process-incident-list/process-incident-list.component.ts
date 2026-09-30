@@ -28,6 +28,7 @@ import { Router } from '@angular/router';
     selector: 'senergy-process-incident-list',
     templateUrl: './process-incident-list.component.html',
     styleUrls: ['./process-incident-list.component.css'],
+    standalone: false
 })
 export class ProcessIncidentListComponent implements OnInit, OnDestroy {
     incidents: ProcessIncidentsModel[] = [];

@@ -27,6 +27,7 @@ import { forkJoin, Observable } from 'rxjs';
 @Component({
     templateUrl: './device-downtime-gateway-edit-dialog.component.html',
     styleUrls: ['./device-downtime-gateway-edit-dialog.component.css'],
+    standalone: false
 })
 export class DeviceDowntimeGatewayEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

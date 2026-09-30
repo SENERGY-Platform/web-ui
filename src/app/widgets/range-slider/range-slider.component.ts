@@ -27,6 +27,7 @@ import { CamundaVariable } from '../../modules/processes/deployments/shared/depl
     selector: 'senergy-range-slider',
     templateUrl: './range-slider.component.html',
     styleUrls: ['./range-slider.component.css'],
+    standalone: false
 })
 export class RangeSliderComponent implements OnInit, OnDestroy {
     ready = false;

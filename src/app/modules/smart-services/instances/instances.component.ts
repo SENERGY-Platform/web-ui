@@ -48,6 +48,7 @@ import { smartServiceLogsUrl } from './shared/opensearch';
             transition('expanded <=> collapsed', animate('220ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
         ]),
     ],
+    standalone: false
 })
 export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });

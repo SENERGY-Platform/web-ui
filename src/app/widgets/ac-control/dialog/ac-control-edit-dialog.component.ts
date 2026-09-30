@@ -40,7 +40,8 @@ const FLOAT = 'https://schema.org/Float';
 @Component({
     selector: 'senergy-ac-control-edit-dialog',
     templateUrl: './ac-control-edit-dialog.component.html',
-    styleUrls: ['./ac-control-edit-dialog.component.css']
+    styleUrls: ['./ac-control-edit-dialog.component.css'],
+    standalone: false
 })
 export class AcControlEditDialogComponent implements OnInit {
 

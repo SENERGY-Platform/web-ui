@@ -31,6 +31,7 @@ export interface AttributeKeyWithDescription {
 @Component({
     templateUrl: './device-instances-default-attributes-dialog.component.html',
     styleUrls: ['./device-instances-default-attributes-dialog.component.css'],
+    standalone: false
 })
 export class DeviceInstancesDefaultAttributesDialogComponent implements OnInit {
     knownAttributes: AttributeKeyWithDescription[] = [

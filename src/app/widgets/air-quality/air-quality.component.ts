@@ -29,6 +29,7 @@ import { map } from 'rxjs/operators';
     selector: 'senergy-air-quality',
     templateUrl: './air-quality.component.html',
     styleUrls: ['./air-quality.component.css'],
+    standalone: false
 })
 export class AirQualityComponent implements OnInit, OnDestroy {
     ready = false;

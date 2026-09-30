@@ -46,6 +46,7 @@ import { V2DeploymentsPreparedModel } from '../../../modules/processes/deploymen
 @Component({
     templateUrl: './device-status-edit-dialog.component.html',
     styleUrls: ['./device-status-edit-dialog.component.css'],
+    standalone: false
 })
 export class DeviceStatusEditDialogComponent implements OnInit {
     aspects:  DeviceTypeAspectNodeModel[] = [];

@@ -60,6 +60,7 @@ export interface AspectClassGroupNode extends DeviceTypeAspectModel {
     selector: 'senergy-aspects',
     templateUrl: './aspects.component.html',
     styleUrls: ['./aspects.component.css'],
+    standalone: false
 })
 export class AspectsComponent implements OnInit {
     ready = false;

@@ -31,6 +31,7 @@ import { scheduleChartOptions, ScheduleChartOptions } from '../../shared/environ
     selector: 'senergy-environments-schedule-editor',
     templateUrl: './environments-schedule-editor.component.html',
     styleUrls: ['./environments-schedule-editor.component.css'],
+    standalone: false
 })
 export class EnvironmentsScheduleEditorComponent implements OnChanges {
     @Input() schedule: ScheduleSource | undefined;

@@ -21,9 +21,10 @@ import { ChartsExportConversion } from '../../shared/charts-export-properties.mo
 import { AddRuleComponent } from '../add-rule/add-rule.component';
 
 @Component({
-  selector: 'app-list-rules',
-  templateUrl: './list-rules.component.html',
-  styleUrls: ['./list-rules.component.css']
+    selector: 'app-list-rules',
+    templateUrl: './list-rules.component.html',
+    styleUrls: ['./list-rules.component.css'],
+    standalone: false
 })
 export class ListRulesComponent {
   displayedColumns: string[] = [

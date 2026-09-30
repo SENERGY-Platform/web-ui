@@ -25,6 +25,7 @@ import { Attribute } from '../../device-instances/shared/device-instances.model'
 @Component({
     templateUrl: './waiting-room-device-edit-dialog.component.html',
     styleUrls: ['./waiting-room-device-edit-dialog.component.css'],
+    standalone: false
 })
 export class WaitingRoomDeviceEditDialogComponent {
     device: WaitingDeviceModel;

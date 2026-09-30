@@ -24,6 +24,7 @@ import { WidgetFooterService } from './shared/widget-footer.service';
     selector: 'senergy-widget-footer',
     templateUrl: './widget-footer.component.html',
     styleUrls: ['./widget-footer.component.css'],
+    standalone: false
 })
 export class WidgetFooterComponent {
     @Input() dashboardId = '';

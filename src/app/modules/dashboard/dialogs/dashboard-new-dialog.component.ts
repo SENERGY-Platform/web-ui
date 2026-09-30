@@ -20,6 +20,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 @Component({
     templateUrl: './dashboard-new-dialog.component.html',
     styleUrls: ['./dashboard-new-dialog.component.css'],
+    standalone: false
 })
 export class DashboardNewDialogComponent {
     constructor(private dialogRef: MatDialogRef<DashboardNewDialogComponent>) {}

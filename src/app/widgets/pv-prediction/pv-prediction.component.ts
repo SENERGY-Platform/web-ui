@@ -27,7 +27,8 @@ import { SingleValueModel } from '../single-value/shared/single-value.model';
 @Component({
     selector: 'senergy-pv-prediction',
     templateUrl: './pv-prediction.component.html',
-    styleUrls: ['./pv-prediction.component.css']
+    styleUrls: ['./pv-prediction.component.css'],
+    standalone: false
 })
 export class PvPredictionComponent implements OnInit, OnDestroy {
     ready = false;

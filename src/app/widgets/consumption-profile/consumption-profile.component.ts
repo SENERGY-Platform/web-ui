@@ -25,7 +25,8 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 @Component({
     selector: 'senergy-consumption-profile-widget',
     templateUrl: './consumption-profile.component.html',
-    styleUrls: ['./consumption-profile.component.css']
+    styleUrls: ['./consumption-profile.component.css'],
+    standalone: false
 })
 export class ConsumptionProfileComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';

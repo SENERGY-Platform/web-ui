@@ -39,6 +39,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-device-classes',
     templateUrl: './device-classes.component.html',
     styleUrls: ['./device-classes.component.css'],
+    standalone: false
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];

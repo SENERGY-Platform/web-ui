@@ -28,6 +28,7 @@ import { ChartsService } from '../../shared/charts.service';
     selector: 'senergy-charts-process-instances',
     templateUrl: './charts-process-instances.component.html',
     styleUrls: ['./charts-process-instances.component.css'],
+    standalone: false
 })
 export class ChartsProcessInstancesComponent implements OnInit, OnDestroy, AfterViewInit {
     processInstancesStatus = {} as ChartsModel;

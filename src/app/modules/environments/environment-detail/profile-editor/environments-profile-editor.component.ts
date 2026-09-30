@@ -32,6 +32,7 @@ import { profileChartOptions, ProfileChartOptions } from '../../shared/environme
     selector: 'senergy-environments-profile-editor',
     templateUrl: './environments-profile-editor.component.html',
     styleUrls: ['./environments-profile-editor.component.css'],
+    standalone: false
 })
 export class EnvironmentsProfileEditorComponent implements OnChanges {
     @Input() profile: ProfileSource | undefined;

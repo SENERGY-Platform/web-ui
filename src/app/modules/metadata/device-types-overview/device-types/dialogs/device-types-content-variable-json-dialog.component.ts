@@ -25,6 +25,7 @@ import {
 @Component({
     templateUrl: './device-types-content-variable-json-dialog.component.html',
     styleUrls: ['./device-types-content-variable-json-dialog.component.css'],
+    standalone: false
 })
 export class DeviceTypesContentVariableJsonDialogComponent {
     name = '';

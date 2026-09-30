@@ -24,6 +24,7 @@ import { DeviceTypeConceptModel } from '../../device-types-overview/shared/devic
 @Component({
     templateUrl: './functions-edit-dialog.component.html',
     styleUrls: ['./functions-edit-dialog.component.css'],
+    standalone: false
 })
 export class FunctionsEditDialogComponent implements OnInit {
     functionFormGroup!: FormGroup;

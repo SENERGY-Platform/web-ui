@@ -37,6 +37,7 @@ export interface PermissionDialogComponentData {
 @Component({
     templateUrl: './permission-dialog.component.html',
     styleUrls: ['./permission-dialog.component.css'],
+    standalone: false
 })
 export class PermissionDialogComponent implements OnInit {
     @ViewChild('userTable', { static: false }) userTable?: TableComponent;

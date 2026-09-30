@@ -28,6 +28,7 @@ import { ChartsService } from '../../shared/charts.service';
     selector: 'senergy-device-downtime-gateway',
     templateUrl: './device-downtime-gateway.component.html',
     styleUrls: ['./device-downtime-gateway.component.css'],
+    standalone: false
 })
 export class DeviceDowntimeGatewayComponent implements OnInit, AfterViewInit, OnDestroy {
     deviceDowntimeGateway = {} as ChartsModel;

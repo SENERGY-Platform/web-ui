@@ -21,6 +21,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
     templateUrl: './date-time-dialog.component.html',
     styleUrls: ['./date-time-dialog.component.css'],
     selector: 'senergy-date-time-dialog',
+    standalone: false
 })
 export class DateTimeDialogComponent {
     initial: string;

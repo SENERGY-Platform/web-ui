@@ -27,9 +27,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { CertificateRevokeDialogComponent } from './certificate-revoke-dialog/certificate-revoke-dialog.component';
 
 @Component({
-  selector: 'app-certificates',
-  templateUrl: './certificates.component.html',
-  styleUrl: './certificates.component.css'
+    selector: 'app-certificates',
+    templateUrl: './certificates.component.html',
+    styleUrl: './certificates.component.css',
+    standalone: false
 })
 export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
 

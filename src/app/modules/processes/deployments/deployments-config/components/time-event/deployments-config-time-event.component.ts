@@ -22,6 +22,7 @@ import * as moment from 'moment';
     selector: 'senergy-process-deployments-config-time-event',
     templateUrl: './deployments-config-time-event.component.html',
     styleUrls: ['./deployments-config-time-event.component.css'],
+    standalone: false
 })
 export class DeploymentsConfigTimeEventComponent {
     @Input() time_event: FormGroup = new FormGroup({});

@@ -117,6 +117,7 @@ const EFFECTS_STYLESHEET: StylesheetJsonBlock[] = [
     selector: 'senergy-environments-effects',
     templateUrl: './environments-effects.component.html',
     styleUrls: ['./environments-effects.component.css'],
+    standalone: false
 })
 export class EnvironmentsEffectsComponent implements OnChanges, AfterViewInit, OnDestroy {
     @Input() result: EffectsResult | undefined;

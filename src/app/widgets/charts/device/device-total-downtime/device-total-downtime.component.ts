@@ -28,6 +28,7 @@ import { ChartsService } from '../../shared/charts.service';
     selector: 'senergy-device-total-downtime',
     templateUrl: './device-total-downtime.component.html',
     styleUrls: ['./device-total-downtime.component.css'],
+    standalone: false
 })
 export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy, AfterViewInit {
     deviceTotalDowntime: ChartsModel | undefined;

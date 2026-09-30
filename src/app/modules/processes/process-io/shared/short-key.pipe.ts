@@ -18,7 +18,10 @@
 
 import {Pipe, PipeTransform} from '@angular/core';
 
-@Pipe({ name: 'short_process_io_key' })
+@Pipe({
+    name: 'short_process_io_key',
+    standalone: false
+})
 export class ShortKeyPipe implements PipeTransform {
     transform(key: string, definitionId: string, instanceId: string) {
         let result = key;

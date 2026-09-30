@@ -52,6 +52,7 @@ import {
         { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => AspectSelectComponent), multi: true },
         { provide: NG_VALIDATORS, useExisting: forwardRef(() => AspectSelectComponent), multi: true },
     ],
+    standalone: false
 })
 export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAccessor, Validator {
     @Input() aspects: DeviceTypeAspectModel[] = [];

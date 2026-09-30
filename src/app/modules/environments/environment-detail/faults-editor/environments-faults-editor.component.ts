@@ -54,6 +54,7 @@ interface RowProblem {
     selector: 'senergy-environments-faults-editor',
     templateUrl: './environments-faults-editor.component.html',
     styleUrls: ['./environments-faults-editor.component.css'],
+    standalone: false
 })
 export class EnvironmentsFaultsEditorComponent implements OnChanges {
     @Input() faults: Fault[] | undefined;

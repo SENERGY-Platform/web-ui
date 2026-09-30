@@ -29,6 +29,7 @@ import {DOCUMENT} from '@angular/common';
 @Component({
     templateUrl: './settings-change-dialog.component.html',
     styleUrls: ['./settings-change-dialog.component.css'],
+    standalone: false
 })
 export class SettingsChangeDialogComponent implements OnInit {
     profile: AuthorizationProfileModel = { email: '', firstName: '', lastName: '', username: '' };

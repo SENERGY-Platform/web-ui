@@ -31,6 +31,7 @@ import { ScriptEditModel } from '../../shared/designer-dialog.model';
 @Component({
     templateUrl: './script-editor-dialog.component.html',
     styleUrls: ['./script-editor-dialog.component.css'],
+    standalone: false
 })
 export class ScriptEditorDialogComponent {
     script: string;

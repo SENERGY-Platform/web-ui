@@ -38,6 +38,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-import-types',
     templateUrl: './import-types.component.html',
     styleUrls: ['./import-types.component.css'],
+    standalone: false
 })
 export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
     displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share'];

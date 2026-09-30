@@ -32,7 +32,8 @@ import {
 @Component({
     selector: 'senergy-timescale-rules',
     templateUrl: './timescale-rules.component.html',
-    styleUrls: ['./timescale-rules.component.css']
+    styleUrls: ['./timescale-rules.component.css'],
+    standalone: false
 })
 export class TimescaleRulesComponent implements OnInit {
     @ViewChild(MatTable, {static: false}) table!: MatTable<ImportTypeModel>;

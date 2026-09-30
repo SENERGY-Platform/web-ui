@@ -27,7 +27,8 @@ import { DataSourceConfig } from 'src/app/widgets/charts/shared/data-source-sele
 @Component({
     selector: 'senergy-edit-ventilation',
     templateUrl: './edit.component.html',
-    styleUrls: ['./edit.component.css']
+    styleUrls: ['./edit.component.css'],
+    standalone: false
 })
 export class EditVentilationWidgetComponent implements OnInit {
     form = this.formBuilder.group({

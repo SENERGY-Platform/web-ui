@@ -34,9 +34,10 @@ export enum PermissionTypes {
 
 
 @Component({
-  selector: 'senergy-permission-table',
-  templateUrl: './table.component.html',
-  styleUrls: ['./table.component.css']
+    selector: 'senergy-permission-table',
+    templateUrl: './table.component.html',
+    styleUrls: ['./table.component.css'],
+    standalone: false
 })
 export class TableComponent implements AfterContentInit {
 

@@ -21,7 +21,8 @@ import { AnomalyResultModel } from '../../shared/anomaly.model';
 @Component({
     selector: 'last-anomaly',
     templateUrl: './last-anomaly.component.html',
-    styleUrls: ['./last-anomaly.component.css']
+    styleUrls: ['./last-anomaly.component.css'],
+    standalone: false
 })
 export class LastAnomalyComponent implements OnInit {
   @Input() anomaly?: AnomalyResultModel;

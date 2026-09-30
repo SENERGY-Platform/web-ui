@@ -62,6 +62,7 @@ export function bulkDeleteOutcome(status: number, count: number): { message: str
     selector: 'senergy-export',
     templateUrl: './export.component.html',
     styleUrls: ['./export.component.css'],
+    standalone: false
 })
 export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;

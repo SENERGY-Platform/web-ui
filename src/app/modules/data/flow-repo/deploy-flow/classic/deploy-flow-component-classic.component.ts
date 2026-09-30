@@ -35,6 +35,7 @@ import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/sh
     selector: 'senergy-deploy-flow-classic',
     templateUrl: './deploy-flow-component-classic.component.html',
     styleUrls: ['./deploy-flow-component-classic.component.css'],
+    standalone: false
 })
 export class DeployFlowClassicComponent {
     ready = false;

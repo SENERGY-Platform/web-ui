@@ -20,6 +20,7 @@ import { Component, Input } from '@angular/core';
     selector: 'senergy-no-data',
     templateUrl: './widget-no-data.component.html',
     styleUrls: ['./widget-no-data.component.css'],
+    standalone: false
 })
 export class WidgetNoDataComponent {
     @Input() showIf = false;

@@ -32,6 +32,7 @@ import { PermissionModel } from '../shared/permission.model';
     selector: 'senergy-permissions-edit',
     templateUrl: './permissions-edit.component.html',
     styleUrls: ['./permissions-edit.component.css'],
+    standalone: false
 })
 export class PermissionsEditComponent implements OnInit {
     public isEditMode = false;

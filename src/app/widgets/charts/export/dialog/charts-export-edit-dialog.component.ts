@@ -46,6 +46,7 @@ import { hashCode } from 'src/app/core/services/util.service';
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
     styleUrls: ['./charts-export-edit-dialog.component.css'],
+    standalone: false
 })
 export class ChartsExportEditDialogComponent implements OnInit {
     typeString = 'https://schema.org/Text';

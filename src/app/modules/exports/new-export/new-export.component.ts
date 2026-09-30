@@ -58,6 +58,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-new-export',
     templateUrl: './new-export.component.html',
     styleUrls: ['./new-export.component.css'],
+    standalone: false
 })
 export class NewExportComponent implements OnInit {
     targetDb = 'db';

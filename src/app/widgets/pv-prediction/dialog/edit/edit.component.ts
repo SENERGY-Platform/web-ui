@@ -29,7 +29,8 @@ import { PVPredictionProperties } from '../../shared/prediction.model';
 @Component({
     selector: 'app-edit',
     templateUrl: './edit.component.html',
-    styleUrls: ['./edit.component.css']
+    styleUrls: ['./edit.component.css'],
+    standalone: false
 })
 export class PVPredictionEditComponent implements OnInit {
     userHasUpdateNameAuthorization = false;

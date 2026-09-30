@@ -22,6 +22,7 @@ import { ENVIRONMENT_TYPES, Environment, EnvironmentType, defaultZoneTypeFor, en
     selector: 'senergy-environments-create-dialog',
     templateUrl: './environments-create-dialog.component.html',
     styleUrls: ['./environments-create-dialog.component.css'],
+    standalone: false
 })
 export class EnvironmentsCreateDialogComponent {
     name = '';

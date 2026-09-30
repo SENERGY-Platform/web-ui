@@ -23,6 +23,7 @@ import { AddTagFn } from '@ng-matero/extensions/select';
 @Component({
     templateUrl: './edit-input-dialog.component.html',
     styleUrls: ['./edit-input-dialog.component.css'],
+    standalone: false
 })
 export class EditInputDialogComponent {
     inputs: BpmnParameter[];

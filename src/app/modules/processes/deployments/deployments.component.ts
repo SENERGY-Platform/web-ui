@@ -50,6 +50,7 @@ const grids = new Map([
     selector: 'senergy-process-deployments',
     templateUrl: './deployments.component.html',
     styleUrls: ['./deployments.component.css'],
+    standalone: false
 })
 export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDestroy {
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });

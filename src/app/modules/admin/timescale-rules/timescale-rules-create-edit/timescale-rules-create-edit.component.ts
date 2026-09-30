@@ -23,7 +23,8 @@ import { TimescaleRulesService } from '../shared/timescale-rules.service';
 @Component({
     selector: 'senergy-timescale-rules-create-edit',
     templateUrl: './timescale-rules-create-edit.component.html',
-    styleUrls: ['./timescale-rules-create-edit.component.css']
+    styleUrls: ['./timescale-rules-create-edit.component.css'],
+    standalone: false
 })
 export class TimescaleRulesCreateEditComponent {
 

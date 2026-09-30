@@ -37,6 +37,7 @@ export interface SwitchCategories extends Types {
 @Component({
     templateUrl: './dashboard-new-widget-dialog.component.html',
     styleUrls: ['./dashboard-new-widget-dialog.component.css'],
+    standalone: false
 })
 export class DashboardNewWidgetDialogComponent implements OnInit{
     selectedType: Types = { value: '', viewValue: '', tooltip: '', disabled: false };

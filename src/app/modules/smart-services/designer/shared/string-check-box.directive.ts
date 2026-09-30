@@ -20,7 +20,8 @@ import {ControlValueAccessor, NgControl} from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 @Directive({
-    selector: 'mat-checkbox[appStringCheckboxValue]'
+    selector: 'mat-checkbox[appStringCheckboxValue]',
+    standalone: false
 })
 export class CheckboxValueDirective implements ControlValueAccessor {
     @Input() trueValue: any = true;

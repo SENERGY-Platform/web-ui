@@ -30,6 +30,7 @@ import {map} from 'rxjs/operators';
 @Component({
     templateUrl: './concepts-edit-dialog.component.html',
     styleUrls: ['./concepts-edit-dialog.component.css'],
+    standalone: false
 })
 export class ConceptsEditDialogComponent implements OnInit {
     conceptId: string;

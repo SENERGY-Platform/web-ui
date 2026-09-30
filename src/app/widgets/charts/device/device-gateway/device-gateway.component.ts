@@ -28,6 +28,7 @@ import { ChartsService } from '../../shared/charts.service';
     selector: 'senergy-device-gateway',
     templateUrl: './device-gateway.component.html',
     styleUrls: ['./device-gateway.component.css'],
+    standalone: false
 })
 export class DeviceGatewayComponent implements OnInit, OnDestroy, AfterViewInit {
     deviceGateway = {} as ChartsModel;

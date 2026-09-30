@@ -21,6 +21,7 @@ import { WidgetModel } from '../modules/dashboard/shared/dashboard-widget.model'
     selector: 'senergy-widget',
     templateUrl: './widget.component.html',
     styleUrls: ['./widget.component.css'],
+    standalone: false
 })
 export class WidgetComponent {
     @Input() dashboardId = '';

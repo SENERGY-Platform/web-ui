@@ -47,9 +47,10 @@ import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concep
 import { ImageCroppedEvent } from 'ngx-image-cropper';
 
 @Component({
-  selector: 'senergy-floorplan-edit-dialog',
-  templateUrl: './floorplan-edit-dialog.component.html',
-  styleUrl: './floorplan-edit-dialog.component.css'
+    selector: 'senergy-floorplan-edit-dialog',
+    templateUrl: './floorplan-edit-dialog.component.html',
+    styleUrl: './floorplan-edit-dialog.component.css',
+    standalone: false
 })
 export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   dashboardId = '';

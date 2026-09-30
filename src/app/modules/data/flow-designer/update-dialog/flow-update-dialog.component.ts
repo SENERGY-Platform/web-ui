@@ -27,6 +27,7 @@ export interface DialogData {
     selector: 'flow-update-dialog',
     templateUrl: './flow-update-dialog.component.html',
     styleUrls: ['./flow-update-dialog.component.css'],
+    standalone: false
 })
 export class FlowUpdateDialogComponent {
 

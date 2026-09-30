@@ -21,6 +21,7 @@ import { FormControl } from '@angular/forms';
     selector: 'senergy-cycle-event-config',
     templateUrl: './cycle-event-config.component.html',
     styleUrls: ['./cycle-event-config.component.css'],
+    standalone: false
 })
 export class CycleEventConfigComponent implements OnInit {
     @Input() initial = '';

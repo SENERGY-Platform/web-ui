@@ -44,6 +44,7 @@ import {
 @Component({
     templateUrl: './conditional-event-dialog.component.html',
     styleUrls: ['./conditional-event-dialog.component.css'],
+    standalone: false
 })
 export class ConditionalEventDialogComponent implements OnInit {
     aspectFormControl = new UntypedFormControl([]);

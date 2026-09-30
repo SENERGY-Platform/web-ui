@@ -66,6 +66,7 @@ interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     selector: 'senergy-device-types',
     templateUrl: './device-types.component.html',
     styleUrls: ['./device-types.component.css'],
+    standalone: false
 })
 export class DeviceTypesComponent implements OnInit {
     deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[] = [];

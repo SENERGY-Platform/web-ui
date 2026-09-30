@@ -64,10 +64,11 @@ export function deploymentElementCriteria(filterCriteria: V2DeploymentsPreparedF
 }
 
 @Component({
-  selector: 'app-device-instances-replace-dialog',
-  templateUrl: './device-instances-replace-dialog.component.html',
-  styleUrls: ['./device-instances-replace-dialog.component.css'],
-  providers: [DatePipe]
+    selector: 'app-device-instances-replace-dialog',
+    templateUrl: './device-instances-replace-dialog.component.html',
+    styleUrls: ['./device-instances-replace-dialog.component.css'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class DeviceInstancesReplaceDialogComponent implements OnInit {
   DeviceInstancesReplaceDialogComponent = DeviceInstancesReplaceDialogComponent;

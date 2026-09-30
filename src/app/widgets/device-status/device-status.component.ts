@@ -34,6 +34,7 @@ import { DeviceStatusItemModel } from './shared/device-status-item.model';
     selector: 'senergy-device-status',
     templateUrl: './device-status.component.html',
     styleUrls: ['./device-status.component.css'],
+    standalone: false
 })
 export class DeviceStatusComponent implements OnInit, OnDestroy {
     configured = false;

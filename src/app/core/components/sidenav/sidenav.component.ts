@@ -30,6 +30,7 @@ import { fadeInAnimation } from '../../../animations/fade-in.animation';
     templateUrl: './sidenav.component.html',
     styleUrls: ['./sidenav.component.css'],
     animations: [fadeInAnimation],
+    standalone: false
 })
 export class SidenavComponent implements OnInit, AfterViewInit {
     @ViewChild('sidenav', { static: false }) sidenav!: MatSidenav;

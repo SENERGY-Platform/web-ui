@@ -21,6 +21,7 @@ import { SortModel } from './shared/sort.model';
     selector: 'senergy-sort',
     templateUrl: './sort.component.html',
     styleUrls: ['./sort.component.css'],
+    standalone: false
 })
 export class SortComponent implements OnChanges {
     @Input() sortAttributes: SortModel[] = [];

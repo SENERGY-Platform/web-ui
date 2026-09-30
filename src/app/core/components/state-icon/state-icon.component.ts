@@ -20,6 +20,7 @@ import { Component, Input } from '@angular/core';
     selector: 'senergy-state-icon',
     templateUrl: './state-icon.component.html',
     styleUrls: ['./state-icon.component.css'],
+    standalone: false
 })
 export class StateIconComponent {
     @Input() state: '' | 'online' | 'offline' | 'inactive' = '';

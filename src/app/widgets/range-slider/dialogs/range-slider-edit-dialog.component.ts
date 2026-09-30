@@ -34,6 +34,7 @@ import {rangeValidator} from '../../../core/validators/range.validator';
 @Component({
     templateUrl: './range-slider-edit-dialog.component.html',
     styleUrls: ['./range-slider-edit-dialog.component.css'],
+    standalone: false
 })
 export class RangeSliderEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

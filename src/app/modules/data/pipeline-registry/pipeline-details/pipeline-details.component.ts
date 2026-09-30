@@ -29,6 +29,7 @@ import {Location} from '@angular/common';
     selector: 'senergy-pipeline-details',
     templateUrl: './pipeline-details.component.html',
     styleUrls: ['./pipeline-details.component.css'],
+    standalone: false
 })
 export class PipelineDetailsComponent implements OnInit {
     ready = false;

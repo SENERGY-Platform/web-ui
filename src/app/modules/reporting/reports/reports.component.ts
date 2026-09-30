@@ -34,6 +34,7 @@ import { PreferencesService } from '../../../core/services/preferences.service';
     selector: 'senergy-reporting-reports',
     templateUrl: './reports.component.html',
     styleUrls: ['./reports.component.css'],
+    standalone: false
 })
 export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;

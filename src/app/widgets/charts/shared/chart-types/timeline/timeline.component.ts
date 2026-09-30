@@ -27,7 +27,8 @@ import ApexCharts from 'apexcharts';
 @Component({
     selector: 'timeline-chart',
     templateUrl: './timeline.component.html',
-    styleUrls: ['./timeline.component.css']
+    styleUrls: ['./timeline.component.css'],
+    standalone: false
 })
 export class TimelineComponent implements OnInit, OnChanges {
     /*

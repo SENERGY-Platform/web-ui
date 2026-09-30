@@ -68,6 +68,7 @@ import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
     styleUrls: ['./data-table-edit-dialog.component.css'],
+    standalone: false
 })
 export class DataTableEditDialogComponent implements OnInit {
     dashboardId: string;

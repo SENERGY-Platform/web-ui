@@ -22,6 +22,7 @@ import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-erro
 @Component({
     templateUrl: './email-config-dialog.component.html',
     styleUrls: ['./email-config-dialog.component.css'],
+    standalone: false
 })
 export class EmailConfigDialogComponent {
     toFormGroup: FormGroup;

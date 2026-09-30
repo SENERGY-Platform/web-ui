@@ -29,6 +29,7 @@ import { HttpClient } from '@angular/common/http';
     templateUrl: './process-state.component.html',
     styleUrls: ['./process-statecomponent.css'],
     providers: [HttpClient],
+    standalone: false
 })
 export class ProcessStateComponent implements OnInit, OnDestroy {
     processStatus: ProcessStateModel = { available: 0, executable: 0 };

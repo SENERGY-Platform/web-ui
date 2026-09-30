@@ -65,9 +65,10 @@ import { FloorplanControlDialogComponent, FloorplanControlDialogData } from './f
 import { CapabilityCommandModel } from './shared/capability-control/capability-control.component';
 
 @Component({
-  selector: 'senergy-floorplan',
-  templateUrl: './floorplan.component.html',
-  styleUrl: './floorplan.component.css'
+    selector: 'senergy-floorplan',
+    templateUrl: './floorplan.component.html',
+    styleUrl: './floorplan.component.css',
+    standalone: false
 })
 export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() dashboardId = '';

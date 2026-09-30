@@ -27,6 +27,7 @@ import { Sort } from '@angular/material/sort';
     templateUrl: './device-instances-select-dialog.component.html',
     styleUrls: ['./device-instances-select-dialog.component.css'],
     selector: 'senergy-device-instances-select-dialog',
+    standalone: false
 })
 export class DeviceInstancesSelectDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeviceInstanceModel>;

@@ -28,9 +28,10 @@ import { DataSourceConfig } from '../../../shared/data-source-selector/data-sour
 import { DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 
 @Component({
-  selector: 'app-edit',
-  templateUrl: './edit.component.html',
-  styleUrls: ['./edit.component.css']
+    selector: 'app-edit',
+    templateUrl: './edit.component.html',
+    styleUrls: ['./edit.component.css'],
+    standalone: false
 })
 export class OpenWindowEditComponent implements OnInit {
     form: any;

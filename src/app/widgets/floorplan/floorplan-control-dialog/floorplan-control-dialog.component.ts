@@ -30,7 +30,8 @@ export interface FloorplanControlDialogData {
 @Component({
     selector: 'senergy-floorplan-control-dialog',
     templateUrl: './floorplan-control-dialog.component.html',
-    styleUrl: './floorplan-control-dialog.component.css'
+    styleUrl: './floorplan-control-dialog.component.css',
+    standalone: false
 })
 export class FloorplanControlDialogComponent {
     alias = '';

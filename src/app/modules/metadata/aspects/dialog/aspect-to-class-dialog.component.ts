@@ -45,6 +45,7 @@ export interface AspectToClassDialogResult {
 @Component({
     templateUrl: './aspect-to-class-dialog.component.html',
     styleUrls: ['./aspect-to-class-dialog.component.css'],
+    standalone: false
 })
 export class AspectToClassDialogComponent {
     formGroup!: FormGroup;

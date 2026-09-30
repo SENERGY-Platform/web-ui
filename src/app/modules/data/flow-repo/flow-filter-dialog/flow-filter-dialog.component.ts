@@ -8,6 +8,7 @@ import {FilterSelection} from '../shared/flow.model';
 @Component({
     selector: 'app-flow-filter-dialog',
     templateUrl: './flow-filter-dialog.component.html',
+    standalone: false
 })
 export class FlowFilterDialogComponent implements OnInit {
     config: FilterDialogConfigModel = { fields: [] };

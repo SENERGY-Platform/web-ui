@@ -28,6 +28,7 @@ const TYPE_ICONS: { [key: string]: string } = {
     selector: 'senergy-reporting-tree',
     templateUrl: './report-tree.component.html',
     styleUrls: ['./report-tree.component.css'],
+    standalone: false
 })
 export class ReportTreeComponent {
 

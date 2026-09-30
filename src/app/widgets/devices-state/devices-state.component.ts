@@ -27,6 +27,7 @@ import { DeviceInstancesRouterStateTabEnum } from 'src/app/modules/devices/devic
     selector: 'senergy-devices-state',
     templateUrl: './devices-state.component.html',
     styleUrls: ['./devices-state.component.css'],
+    standalone: false
 })
 export class DevicesStateComponent implements OnInit, OnDestroy {
     devicesStatus: DevicesStateModel = { count: 0, connected: 0, disconnected: 0, unknown: 0 };

@@ -31,6 +31,7 @@ import { forkJoin, Observable } from 'rxjs';
 @Component({
     templateUrl: './multi-value-edit-dialog.component.html',
     styleUrls: ['./multi-value-edit-dialog.component.css'],
+    standalone: false
 })
 export class MultiValueEditDialogComponent implements OnInit {
     exports: ChartsExportMeasurementModel[] = [];

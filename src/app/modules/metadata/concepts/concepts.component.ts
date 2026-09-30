@@ -36,6 +36,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-concepts',
     templateUrl: './concepts.component.html',
     styleUrls: ['./concepts.component.css'],
+    standalone: false
 })
 export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'info', 'characteristic'];

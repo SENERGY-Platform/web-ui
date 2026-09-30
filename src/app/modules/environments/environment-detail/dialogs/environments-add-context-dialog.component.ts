@@ -39,6 +39,7 @@ export interface AddContextDialogResult {
     selector: 'senergy-environments-add-context-dialog',
     templateUrl: './environments-add-context-dialog.component.html',
     styleUrls: ['./environments-add-context-dialog.component.css'],
+    standalone: false
 })
 export class EnvironmentsAddContextDialogComponent implements OnInit {
     presets = CONTEXT_PRESETS;

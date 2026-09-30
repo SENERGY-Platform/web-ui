@@ -23,7 +23,8 @@ import { AddThresholdComponent } from '../add-threshold/add-threshold.component'
 @Component({
     selector: 'single-value-threshold',
     templateUrl: './threshold.component.html',
-    styleUrls: ['./threshold.component.css']
+    styleUrls: ['./threshold.component.css'],
+    standalone: false
 })
 export class ThresholdComponent implements OnInit {
     displayedColumns = ['threshold', 'direction', 'color', 'edit', 'delete'];

@@ -34,6 +34,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-device-types',
     templateUrl: './device-types-overview.component.html',
     styleUrls: ['./device-types-overview.component.css'],
+    standalone: false
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'info', 'copy', 'new', 'show'];

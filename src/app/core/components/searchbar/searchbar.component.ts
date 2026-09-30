@@ -22,6 +22,7 @@ import {SearchbarService} from './shared/searchbar.service';
     selector: 'senergy-searchbar',
     templateUrl: './searchbar.component.html',
     styleUrls: ['./searchbar.component.css'],
+    standalone: false
 })
 export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     @Input() searchTextIn = '';

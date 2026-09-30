@@ -23,6 +23,7 @@ import { DeviceTypeDeviceClassModel } from '../../device-types-overview/shared/d
 @Component({
     templateUrl: './device-classes-edit-dialog.component.html',
     styleUrls: ['./device-classes-edit-dialog.component.css'],
+    standalone: false
 })
 export class DeviceClassesEditDialogComponent {
     deviceClassFormGroup!: FormGroup;

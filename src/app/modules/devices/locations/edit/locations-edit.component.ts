@@ -32,6 +32,7 @@ import { DeviceGroupsDialogService } from '../../device-groups/shared/device-gro
     selector: 'senergy-locations-edit',
     templateUrl: './locations-edit.component.html',
     styleUrls: ['./locations-edit.component.css'],
+    standalone: false
 })
 export class LocationsEditComponent implements OnInit {
     id = '';

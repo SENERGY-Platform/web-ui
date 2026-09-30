@@ -28,7 +28,8 @@ import { environment } from '../../../environments/environment';
 @Component({
     selector: 'senergy-ac-control',
     templateUrl: './ac-control.component.html',
-    styleUrls: ['./ac-control.component.css']
+    styleUrls: ['./ac-control.component.css'],
+    standalone: false
 })
 export class AcControlComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';

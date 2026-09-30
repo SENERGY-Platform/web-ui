@@ -20,9 +20,10 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { getRfc5280ReasonStrings, Rfc5280Reason, rfc5280ReasonCode } from '../shared/certificates.model';
 
 @Component({
-  selector: 'app-certificate-revoke-dialog',
-  templateUrl: './certificate-revoke-dialog.component.html',
-  styleUrl: './certificate-revoke-dialog.component.css'
+    selector: 'app-certificate-revoke-dialog',
+    templateUrl: './certificate-revoke-dialog.component.html',
+    styleUrl: './certificate-revoke-dialog.component.css',
+    standalone: false
 })
 export class CertificateRevokeDialogComponent {
   constructor(

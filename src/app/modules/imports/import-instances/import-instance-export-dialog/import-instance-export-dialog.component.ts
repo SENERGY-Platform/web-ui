@@ -31,6 +31,7 @@ import {environment} from '../../../../../environments/environment';
     selector: 'senergy-import-instance-export-dialog',
     templateUrl: './import-instance-export-dialog.component.html',
     styleUrls: ['./import-instance-export-dialog.component.css'],
+    standalone: false
 })
 export class ImportInstanceExportDialogComponent implements OnInit {
     type: ImportTypeModel | undefined = undefined;

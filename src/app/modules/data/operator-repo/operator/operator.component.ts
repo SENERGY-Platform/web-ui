@@ -28,6 +28,7 @@ import {PermissionsV2RightsAndIdModel} from '../../../permissions/shared/permiss
     selector: 'senergy-operator',
     templateUrl: './operator.component.html',
     styleUrls: ['./operator.component.css'],
+    standalone: false
 })
 export class OperatorComponent implements OnInit {
     operator = {} as OperatorModel;

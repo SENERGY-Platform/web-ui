@@ -37,6 +37,7 @@ import {ClipboardService} from 'ngx-clipboard';
     selector: 'senergy-export-details',
     templateUrl: './export-details.component.html',
     styleUrls: ['./export-details.component.css'],
+    standalone: false
 })
 export class ExportDetailsComponent implements OnInit {
     id: string | null = null;
