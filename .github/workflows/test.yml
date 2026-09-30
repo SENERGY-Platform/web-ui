@@ -18,6 +18,12 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci --force --ignore-scripts
+      # Lint has a backlog (25 errors, 3 warnings); make this blocking once it is cleared.
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
+      - name: Production build
+        run: NODE_OPTIONS="--max-old-space-size=6144" npm run build
       - run: ./build-env.sh src . && NODE_OPTIONS="--max-old-space-size=8192" npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI --code-coverage --reporters=mocha,coverage
       - name: Report Status
         if: always()
