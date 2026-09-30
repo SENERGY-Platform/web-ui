@@ -93,6 +93,9 @@ export default [{
             }
           ],
           "@typescript-eslint/no-this-alias": "off",
+        // Off until the standalone/inject() migration of SNRGY-4821, which brings them back.
+        "@angular-eslint/prefer-inject": "off",
+        "@angular-eslint/prefer-standalone": "off",
     },
 }, ...compat.extends("plugin:@angular-eslint/template/recommended").map(config => ({
     ...config,
