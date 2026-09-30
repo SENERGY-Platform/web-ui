@@ -87,6 +87,7 @@
     "@types/swagger-ui": "^3.52.0",
     "@typescript-eslint/eslint-plugin": "^8.33.1",
     "@typescript-eslint/parser": "^8.33.1",
+    "angular-eslint": "^22.5.0",
     "env-cmd": "^10.1.0",
     "envsub": "^4.0.7",
     "eslint": "^9.28.0",

@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import { FlatCompat } from "@eslint/eslintrc";
+import angular from "angular-eslint";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,11 +14,10 @@ const compat = new FlatCompat({
 
 export default [{
     ignores: ["projects/**/*"],
-}, ...compat.extends(
-    "plugin:@angular-eslint/recommended",
+}, ...[...angular.configs.tsRecommended, ...compat.extends(
     "plugin:@typescript-eslint/recommended",
     "prettier"
-).map(config => ({
+)].map(config => ({
     ...config,
     files: ["**/*.ts"],
 })), {
@@ -93,11 +93,12 @@ export default [{
             }
           ],
           "@typescript-eslint/no-this-alias": "off",
-        // Off until the standalone/inject() migration of SNRGY-4821, which brings them back.
+        // Off until the standalone/inject() and OnPush migrations of SNRGY-4821, which bring them back.
         "@angular-eslint/prefer-inject": "off",
         "@angular-eslint/prefer-standalone": "off",
+        "@angular-eslint/prefer-on-push-component-change-detection": "off",
     },
-}, ...compat.extends("plugin:@angular-eslint/template/recommended").map(config => ({
+}, ...angular.configs.templateRecommended.map(config => ({
     ...config,
     files: ["**/*.html"],
 })), {
