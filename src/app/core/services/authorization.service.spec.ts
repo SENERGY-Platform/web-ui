@@ -56,7 +56,12 @@ describe('AuthorizationService', () => {
 
         beforeAll(async () => {
             const captured: KeycloakOptions[] = [];
-            const authorization = { init: (o: KeycloakOptions) => { captured.push(o); return Promise.reject(new Error('stop')); } };
+            const authorization = {
+                init: (o: KeycloakOptions) => {
+                    captured.push(o);
+                    return Promise.reject(new Error('stop'));
+                },
+            };
             spyOn(console, 'log');
             await initializerService(authorization as unknown as AuthorizationService, {} as LadonService)();
             initOptions = captured[0];
@@ -66,7 +71,9 @@ describe('AuthorizationService', () => {
             sent = [];
             instance = { token: 'tok', expired: false, updates: [] };
             const fake = {
-                get token() { return instance.token; },
+                get token() {
+                    return instance.token;
+                },
                 isTokenExpired: () => instance.expired,
                 updateToken: (minValidity?: number) => {
                     instance.updates.push(minValidity);
