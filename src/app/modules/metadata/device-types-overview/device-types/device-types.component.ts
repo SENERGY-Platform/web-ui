@@ -54,7 +54,7 @@ import {
     DeviceTypesContentVariableJsonDialogComponent
 } from './dialogs/device-types-content-variable-json-dialog.component';
 import { Attribute } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
-import { AddTagFn } from '@ng-matero/extensions/select';
+import { AddTagFn } from '../../../../core/model/mtx-select.model';
 import { AspectClassesService } from '../../aspects/shared/aspect-classes.service';
 
 interface DeviceTypeContentEditModel extends DeviceTypeContentModel {

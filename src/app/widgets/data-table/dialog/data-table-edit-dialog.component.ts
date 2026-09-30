@@ -63,7 +63,7 @@ import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devi
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
-import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
+import { CompareWithFn, GroupValueFn } from '../../../core/model/mtx-select.model';
 
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',

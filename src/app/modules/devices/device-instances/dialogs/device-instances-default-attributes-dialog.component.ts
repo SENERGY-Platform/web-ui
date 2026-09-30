@@ -16,7 +16,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { AddTagFn } from '@ng-matero/extensions/select';
+import { AddTagFn } from '../../../../core/model/mtx-select.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import { catchError } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';

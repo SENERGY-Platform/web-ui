@@ -18,7 +18,7 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BpmnElement, BpmnParameter } from '../../shared/designer.model';
 import { DesignerHelperService } from '../../shared/designer-helper.service';
-import { AddTagFn } from '@ng-matero/extensions/select';
+import { AddTagFn } from '../../../../../core/model/mtx-select.model';
 
 @Component({
     templateUrl: './edit-input-dialog.component.html',

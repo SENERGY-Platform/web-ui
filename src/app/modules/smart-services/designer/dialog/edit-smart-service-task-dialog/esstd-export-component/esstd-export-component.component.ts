@@ -19,7 +19,7 @@ import {ServingRequest, ServingRequestValue, SmartServiceTaskDescription} from '
 import {BpmnElement, BpmnParameterWithLabel} from '../../../../../processes/designer/shared/designer.model';
 import {ExportDatabaseModel, IMPORT_ID, OPERATOR_ID} from '../../../../../exports/shared/export.model';
 import {ExportService} from '../../../../../exports/shared/export.service';
-import {AddTagFn} from '@ng-matero/extensions/select';
+import {AddTagFn} from '../../../../../../core/model/mtx-select.model';
 import {FlowRepoService} from '../../../../../data/flow-repo/shared/flow-repo.service';
 import {OperatorRepoService} from '../../../../../data/operator-repo/shared/operator-repo.service';
 import {OperatorModel} from '../../../../../data/operator-repo/shared/operator.model';

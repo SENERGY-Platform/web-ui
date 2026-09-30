@@ -28,7 +28,7 @@ import { ReportObjectNode, inputTypeOfNode, isContainer } from '../../shared/rep
 import { ReportObjectViewService } from '../../shared/report-object-view.service';
 import { DeviceInstanceModel } from '../../../devices/device-instances/shared/device-instances.model';
 import { DeviceGroupDisplayModel } from '../../../devices/device-groups/shared/device-groups.model';
-import { AddTagFn } from '@ng-matero/extensions/select';
+import { AddTagFn } from '../../../../core/model/mtx-select.model';
 
 const INPUT_TYPES: { value: InputType; label: string }[] = [
     { value: 'value', label: 'Value' },

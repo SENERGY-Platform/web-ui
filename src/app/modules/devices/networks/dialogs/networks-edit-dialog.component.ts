@@ -18,7 +18,7 @@ import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } f
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { HubModel } from '../shared/networks.model';
 import { Attribute } from '../../device-instances/shared/device-instances.model';
-import { AddTagFn } from '@ng-matero/extensions/select';
+import { AddTagFn } from '../../../../core/model/mtx-select.model';
 import { Feature, Map as OlMap, View } from 'ol';
 import Collection from 'ol/Collection';
 import Translate from 'ol/interaction/Translate';

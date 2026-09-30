@@ -20,7 +20,7 @@ import { Attribute, DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel } fro
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { senergyConnectorLocalIdConstraint } from '../../../metadata/device-types-overview/shared/device-type.model';
-import { AddTagFn } from '@ng-matero/extensions/select';
+import { AddTagFn } from '../../../../core/model/mtx-select.model';
 import jsQR from 'jsqr';
 
 @Component({

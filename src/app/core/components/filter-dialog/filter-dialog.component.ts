@@ -16,7 +16,7 @@
 
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormRecord } from '@angular/forms';
-import { AddTagFn } from '@ng-matero/extensions/select';
+import { AddTagFn } from '../../model/mtx-select.model';
 import { forkJoin, map, Observable } from 'rxjs';
 import { FilterDialogConfigModel, FilterDialogFieldModel, FilterDialogResultModel } from './shared/filter-dialog.model';
 

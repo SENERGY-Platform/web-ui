@@ -51,7 +51,7 @@ import {
 import * as _ from 'lodash';
 import { BrokerExportService } from '../shared/broker-export.service';
 import { PageEvent } from '@angular/material/paginator';
-import { AddTagFn } from '@ng-matero/extensions/select';
+import { AddTagFn } from '../../../core/model/mtx-select.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 
 @Component({

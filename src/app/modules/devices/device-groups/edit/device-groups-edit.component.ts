@@ -32,7 +32,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
 import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/pipeline-registry.service';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
-import { AddTagFn } from '@ng-matero/extensions/select';
+import { AddTagFn } from '../../../../core/model/mtx-select.model';
 
 @Component({
     selector: 'senergy-device-groups-edit',
