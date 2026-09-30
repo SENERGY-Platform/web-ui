@@ -23,7 +23,7 @@ import { MtxSelect } from '@ng-matero/extensions/select';
 })
 export class CloseMtxSelectOnScrollDirective {
   @ContentChildren(MtxSelect, {descendants: true}) private selects: QueryList<MtxSelect> | undefined;
-  @HostListener('scroll') private _(_: Event): void {
+  @HostListener('scroll', ['$event']) protected _(_: Event): void {
     this.selects?.forEach(s => s.close());
   };
 }

@@ -68,7 +68,7 @@
                 starts</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>
-                @for (param of start_parameter; track trackByFn(paramIndex, param); let paramIndex = $index) {
+                @for (param of start_parameter; track trackByFn($index); let paramIndex = $index) {
                   <div [formGroupName]="paramIndex"
                     >
                     <mat-form-field appearance="outline" class="full-width" color="accent">
@@ -85,7 +85,7 @@
             <mat-card appearance="outlined" formArrayName="elements"
               class="deployment-elements">
               <mat-card-content>
-                @for (element of elements; track trackByFn(elementIndex, element); let elementIndex = $index) {
+                @for (element of elements; track trackByFn($index); let elementIndex = $index) {
                   <div [formGroupName]="elementIndex"
                     >
                     @if (element.conditional_event !== null) {
@@ -125,13 +125,13 @@
                           </mat-form-field>
                         </div>
                         <div formGroupName="variables">
-                          @for (item of element.conditional_event.variables | keyvalue; track trackByFn($index, item)) {
+                          @for (item of element.conditional_event.variables | keyvalue; track trackByFn($index)) {
                             <td
                               >
                               <mat-form-field appearance="outline" class="full-width" color="accent">
                                 <mat-label>{{item.key}}</mat-label>
-                                <input type="text" matInput [formControlName]="'' + item.key">
-                                <mat-error senergyError label="{{item.key}}"></mat-error>
+                                <input type="text" matInput [formControlName]="'' + item.key.toString()">
+                                <mat-error senergyError label="{{item.key.toString()}}"></mat-error>
                               </mat-form-field>
                             </td>
                           }
@@ -176,20 +176,20 @@
                                 </mtx-select>
                               </mat-form-field>
                             </td>
-                            @for (item of element.task.parameter | keyvalue; track trackByFn($index, item)) {
+                            @for (item of element.task.parameter | keyvalue; track trackByFn($index)) {
                               <td formGroupName="parameter"
                                 >
                                 @if (displayParameter(item.value)) {
                                   <mat-form-field appearance="outline" class="full-width" color="accent"
                                     >
                                     <mat-label>{{item.key}}</mat-label>
-                                    <input type="text" matInput [formControlName]="'' + item.key">
-                                    <mat-error senergyError label="{{item.key}}"></mat-error>
+                                    <input type="text" matInput [formControlName]="'' + item.key.toString()">
+                                    <mat-error senergyError label="{{item.key.toString()}}"></mat-error>
                                   </mat-form-field>
                                 }
                               </td>
                             }
-                            @for (configurable of element.task.selection.selected_path?.configurables; track trackByFn(configurableIndex, configurable); let configurableIndex = $index) {
+                            @for (configurable of element.task.selection.selected_path?.configurables; track trackByFn($index); let configurableIndex = $index) {
                               <td formGroupName="selection"
                                 >
                                 <ng-container formGroupName="selected_path">

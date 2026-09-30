@@ -14,6 +14,7 @@
   ~ limitations under the License.
   -->
 
+<!-- Kept on *ngFor/*ngIf: getters bound here add inputs during change detection, which @for would render in the dev-mode check pass (NG0100). -->
 <h2 mat-dialog-title>Smart-Service Task</h2>
 <mat-dialog-content class="edit-smart-service-task-dialog" >
     <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true" [(selectedIndex)]="activeIndex">

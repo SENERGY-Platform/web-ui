@@ -15,7 +15,7 @@
   -->
 
 <div class="key-value-editor">
-  @for (row of rows; track trackByIndex(i, row); let i = $index) {
+  @for (row of rows; track trackByIndex($index); let i = $index) {
     <div class="key-value-row">
       <mat-form-field appearance="outline" color="accent" class="key-field">
         <mat-label>{{keyLabel}}</mat-label>

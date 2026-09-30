@@ -95,7 +95,7 @@
                   <mat-icon>add</mat-icon>
                 </button>
               </div>
-              @for (entry of entriesOf(view.param); track trackByIndex(i, entry); let i = $index) {
+              @for (entry of entriesOf(view.param); track trackByIndex($index); let i = $index) {
                 <div class="list-entry"
                   >
                   @if (view.input === inputs.Boolean) {

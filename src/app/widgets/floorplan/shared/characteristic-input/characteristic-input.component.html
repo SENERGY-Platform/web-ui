@@ -84,7 +84,7 @@
           }
         }
         @if (isList) {
-          @for (entry of entries; track trackByIndex(i, entry); let i = $index) {
+          @for (entry of entries; track trackByIndex($index); let i = $index) {
             <div class="list-entry">
               <senergy-characteristic-input [characteristic]="entryCharacteristic" [label]="entryCharacteristic?.name || ''"
                 [disabled]="disabled" [value]="entry" (valueChange)="setEntry(i, $event)"

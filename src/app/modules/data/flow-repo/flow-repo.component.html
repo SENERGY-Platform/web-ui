@@ -224,9 +224,8 @@
     <div>No flow instances found.</div>
   }
 </div>
-@if (userHasWritePermission) {
-  <button mat-fab class="fab" routerLink="/data/designer" matTooltip="Design new Flow">
-    <mat-icon>add</mat-icon>
-  </button>
-}
+<!-- The former *ngIf tested the method reference userHasWritePermission, which is always truthy. -->
+<button mat-fab class="fab" routerLink="/data/designer" matTooltip="Design new Flow">
+  <mat-icon>add</mat-icon>
+</button>
 <senergy-spinner [show]="!ready"></senergy-spinner>
