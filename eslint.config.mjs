@@ -106,4 +106,10 @@ export default [{
     rules: {
         "@angular-eslint/template/eqeqeq": "off",
     },
+}, {
+    // Stays on *ngFor/*ngIf: its getters add inputs during change detection, which @for rejects (NG0100).
+    files: ["**/edit-smart-service-task-dialog.component.html"],
+    rules: {
+        "@angular-eslint/template/prefer-control-flow": "off",
+    },
 }];
