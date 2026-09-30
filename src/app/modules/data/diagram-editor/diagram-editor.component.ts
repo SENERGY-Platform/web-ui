@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, HostListener, OnDestroy} from '@angular/core';
+import {AfterViewInit, Component, HostListener, OnDestroy, ChangeDetectionStrategy} from '@angular/core';
 import {dia, shapes, util, Vectorizer} from 'jointjs';
 import {DiagramModel, LinkIOModel} from './shared/diagram.model';
 import {IOModel} from '../operator-repo/shared/operator.model';
@@ -30,6 +30,7 @@ import {NodeFactory, NodePosition} from './shared/node-factory.service';
     templateUrl: './diagram-editor.component.html',
     styleUrls: ['./diagram-editor.component.css'],
     providers: [PaperService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DiagramEditorComponent implements AfterViewInit, OnDestroy {

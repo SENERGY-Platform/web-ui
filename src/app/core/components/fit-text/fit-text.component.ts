@@ -23,7 +23,8 @@ import {
     OnChanges,
     OnDestroy,
     SimpleChanges,
-    ViewChild
+    ViewChild,
+    ChangeDetectionStrategy
 } from '@angular/core';
 import {ResponsiveService} from '../../services/responsive.service';
 import {Subscription} from 'rxjs';
@@ -32,6 +33,7 @@ import {Subscription} from 'rxjs';
     selector: 'senergy-fit-text',
     templateUrl: './fit-text.component.html',
     styleUrls: ['./fit-text.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FitTextComponent implements AfterViewInit, OnChanges, OnDestroy, AfterViewChecked {

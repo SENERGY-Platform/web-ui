@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { ENVIRONMENT_TYPES, Environment, EnvironmentType, defaultZoneTypeFor, environmentTypeLabel } from '../shared/environments.model';
 
@@ -22,6 +22,7 @@ import { ENVIRONMENT_TYPES, Environment, EnvironmentType, defaultZoneTypeFor, en
     selector: 'senergy-environments-create-dialog',
     templateUrl: './environments-create-dialog.component.html',
     styleUrls: ['./environments-create-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsCreateDialogComponent {

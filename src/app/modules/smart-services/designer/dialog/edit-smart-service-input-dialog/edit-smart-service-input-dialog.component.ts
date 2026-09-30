@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     SmartServiceInputsDescription,
@@ -47,6 +47,7 @@ import {
 @Component({
     templateUrl: './edit-smart-service-input-dialog.component.html',
     styleUrls: ['./edit-smart-service-input-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EditSmartServiceInputDialogComponent {

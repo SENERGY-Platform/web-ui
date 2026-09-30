@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -28,6 +28,7 @@ import { EnvironmentsDatasetUploadDialogComponent } from './dialogs/environments
     selector: 'senergy-environments-datasets',
     templateUrl: './environments-datasets.component.html',
     styleUrls: ['./environments-datasets.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsDatasetsComponent implements OnInit {

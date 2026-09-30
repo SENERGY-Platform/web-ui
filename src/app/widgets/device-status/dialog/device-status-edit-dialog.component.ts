@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -46,6 +46,7 @@ import { V2DeploymentsPreparedModel } from '../../../modules/processes/deploymen
 @Component({
     templateUrl: './device-status-edit-dialog.component.html',
     styleUrls: ['./device-status-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceStatusEditDialogComponent implements OnInit {

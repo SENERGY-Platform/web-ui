@@ -92,7 +92,7 @@
                 <mat-icon matListItemIcon class="icon">vpn_key</mat-icon>
                 <h4 matListItemLine>Credentials</h4>
                 <div matListItemLine>
-                  <div>Username: {{export?.CustomMqttUser !== undefined ? export?.CustomMqttUser : userName}}</div>
+                  <div>Username: {{$safeNavigationMigration(export?.CustomMqttUser) !== undefined ? export?.CustomMqttUser : userName}}</div>
                   <div class="pw" (mouseenter)="togglePasswordVisibility()" (mouseleave)="togglePasswordVisibility()">
                     Password: {{password}}
                   </div>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { map, Subscription } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ApexChartOptions } from '../charts/export/shared/charts-export-properties.model';
@@ -26,6 +26,7 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
     selector: 'senergy-leakage-detection-widget',
     templateUrl: './leakage-detection.component.html',
     styleUrls: ['./leakage-detection.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class LeakageDetectionComponent implements OnInit, OnDestroy {

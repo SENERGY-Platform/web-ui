@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {TimescaleRuleModel, TimescaleRuleTemplateModel} from '../shared/timescale-rule.model';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
@@ -24,6 +24,7 @@ import {TimescaleRulesService} from '../shared/timescale-rules.service';
     selector: 'senergy-timescale-rules-create-edit-template',
     templateUrl: './timescale-rules-create-edit-template.component.html',
     styleUrls: ['./timescale-rules-create-edit-template.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class TimescaleRulesCreateEditTemplateComponent {

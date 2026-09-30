@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {map} from 'rxjs';
 import {FilterDialogConfigModel, FilterDialogResultModel} from 'src/app/core/components/filter-dialog/shared/filter-dialog.model';
@@ -8,6 +8,7 @@ import {FilterSelection} from '../shared/flow.model';
 @Component({
     selector: 'app-flow-filter-dialog',
     templateUrl: './flow-filter-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FlowFilterDialogComponent implements OnInit {

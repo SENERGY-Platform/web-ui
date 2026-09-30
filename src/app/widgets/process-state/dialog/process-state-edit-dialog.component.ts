@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -28,6 +28,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
     templateUrl: './process-state-edit-dialog.component.html',
     styleUrls: ['./process-state-edit-dialog.component.css'],
     selector: 'senergy-process-state-edit-dialog',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessStateEditDialogComponent implements OnInit {

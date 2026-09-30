@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import {
     MAT_DIALOG_DATA,
     MatDialogRef
@@ -37,6 +37,7 @@ export interface PermissionDialogComponentData {
 @Component({
     templateUrl: './permission-dialog.component.html',
     styleUrls: ['./permission-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PermissionDialogComponent implements OnInit {

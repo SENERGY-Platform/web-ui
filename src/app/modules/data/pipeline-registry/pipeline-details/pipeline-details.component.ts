@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { PipelineRegistryService } from '../shared/pipeline-registry.service';
 import { OperatorInputTopic, PipelineModel } from '../shared/pipeline.model';
 import { ActivatedRoute } from '@angular/router';
@@ -29,6 +29,7 @@ import {Location} from '@angular/common';
     selector: 'senergy-pipeline-details',
     templateUrl: './pipeline-details.component.html',
     styleUrls: ['./pipeline-details.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PipelineDetailsComponent implements OnInit {

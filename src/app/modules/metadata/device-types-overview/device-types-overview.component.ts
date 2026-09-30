@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { DeviceTypeService } from './shared/device-type.service';
@@ -34,6 +34,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-device-types',
     templateUrl: './device-types-overview.component.html',
     styleUrls: ['./device-types-overview.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterViewInit {

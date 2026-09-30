@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subject, map, of, switchMap, takeUntil } from 'rxjs';
@@ -163,6 +163,7 @@ function combine(values: number[], aggregation: 'sum' | 'mean'): number | null {
     selector: 'senergy-reporting-query-editor',
     templateUrl: './query-editor.component.html',
     styleUrls: ['./query-editor.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class QueryEditorComponent implements OnInit, OnChanges, OnDestroy {

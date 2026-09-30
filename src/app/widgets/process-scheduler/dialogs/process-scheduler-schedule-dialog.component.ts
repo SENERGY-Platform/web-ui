@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -27,6 +27,7 @@ import { CronConverterService } from '../shared/cron-converter.service';
 @Component({
     templateUrl: './process-scheduler-schedule-dialog.component.html',
     styleUrls: ['./process-scheduler-schedule-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessSchedulerScheduleDialogComponent implements OnInit {

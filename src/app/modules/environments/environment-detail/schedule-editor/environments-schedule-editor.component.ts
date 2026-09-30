@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ScheduleSource, ScheduleState } from '../../shared/environments.model';
 import { scheduleChartOptions, ScheduleChartOptions } from '../../shared/environments-schedule-preview';
 
@@ -31,6 +31,7 @@ import { scheduleChartOptions, ScheduleChartOptions } from '../../shared/environ
     selector: 'senergy-environments-schedule-editor',
     templateUrl: './environments-schedule-editor.component.html',
     styleUrls: ['./environments-schedule-editor.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsScheduleEditorComponent implements OnChanges {

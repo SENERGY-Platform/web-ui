@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {
     MAT_DIALOG_DATA,
@@ -41,6 +41,7 @@ const FLOAT = 'https://schema.org/Float';
     selector: 'senergy-ac-control-edit-dialog',
     templateUrl: './ac-control-edit-dialog.component.html',
     styleUrls: ['./ac-control-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AcControlEditDialogComponent implements OnInit {

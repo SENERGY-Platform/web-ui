@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { concatMap, Subscription, of } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
@@ -25,6 +25,7 @@ import { PVLoadRecommendationResult } from './shared/recommendation.model';
     selector: 'senergy-pv-load-recommendation',
     templateUrl: './pv-load-recommendation.component.html',
     styleUrls: ['./pv-load-recommendation.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PvLoadRecommendationComponent implements OnInit, OnDestroy {

@@ -15,7 +15,7 @@
  */
 
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { getRfc5280ReasonStrings, Rfc5280Reason, rfc5280ReasonCode } from '../shared/certificates.model';
 
@@ -23,6 +23,7 @@ import { getRfc5280ReasonStrings, Rfc5280Reason, rfc5280ReasonCode } from '../sh
     selector: 'app-certificate-revoke-dialog',
     templateUrl: './certificate-revoke-dialog.component.html',
     styleUrl: './certificate-revoke-dialog.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CertificateRevokeDialogComponent {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
@@ -58,6 +58,7 @@ import { REPORT_SETTINGS_PATH, ReportObjectViewService } from '../shared/report-
     templateUrl: './report.component.html',
     styleUrls: ['./report.component.css'],
     providers: [ReportObjectViewService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ReportComponent implements OnInit, OnDestroy {

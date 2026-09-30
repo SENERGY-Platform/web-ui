@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
     MAT_DIALOG_DATA,
     MatDialogRef
@@ -50,6 +50,7 @@ import { selectedAspectNodes } from '../../bpmn-js/properties-provider/aspects';
 @Component({
     templateUrl: './task-config-dialog.component.html',
     styleUrls: ['./task-config-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class TaskConfigDialogComponent implements OnInit {

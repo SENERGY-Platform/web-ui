@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel, WidgetPropertiesModels } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { SwitchService } from './shared/switch.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
@@ -25,6 +25,7 @@ import { Subscription } from 'rxjs';
     selector: 'senergy-switch',
     templateUrl: './switch.component.html',
     styleUrls: ['./switch.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SwitchComponent implements OnInit, OnDestroy {

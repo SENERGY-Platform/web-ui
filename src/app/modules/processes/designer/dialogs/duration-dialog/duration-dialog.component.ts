@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DurationResult } from '../../shared/designer.model';
 import { duration, Duration } from 'moment';
@@ -22,6 +22,7 @@ import { duration, Duration } from 'moment';
 @Component({
     templateUrl: './duration-dialog.component.html',
     styleUrls: ['./duration-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DurationDialogComponent {

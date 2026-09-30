@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ParserService } from '../shared/parser.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ParseModel } from '../shared/parse.model';
@@ -67,6 +67,7 @@ interface DeviceServicePath {
     selector: 'senergy-deploy-flow',
     templateUrl: './deploy-flow.component.html',
     styleUrls: ['./deploy-flow.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeployFlowComponent implements OnInit {

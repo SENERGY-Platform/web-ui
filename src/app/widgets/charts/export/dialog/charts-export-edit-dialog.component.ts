@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
 import { DashboardResponseMessageModel } from '../../../../modules/dashboard/shared/dashboard-response-message.model';
@@ -46,6 +46,7 @@ import { hashCode } from 'src/app/core/services/util.service';
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
     styleUrls: ['./charts-export-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ChartsExportEditDialogComponent implements OnInit {

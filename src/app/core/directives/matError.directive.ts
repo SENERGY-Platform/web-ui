@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, AfterViewInit, Injector, Input, OnDestroy} from '@angular/core';
+import {Component, AfterViewInit, Injector, Input, OnDestroy, ChangeDetectionStrategy} from '@angular/core';
 import { MatFormFieldControl, MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import {FormControl} from '@angular/forms';
@@ -34,6 +34,7 @@ interface patternError {requiredPattern: string; actual: string}
 @Component({
     selector: '[senergyError]',
     template: '{{ error }}',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class MatErrorMessagesDirective implements AfterViewInit, OnDestroy {

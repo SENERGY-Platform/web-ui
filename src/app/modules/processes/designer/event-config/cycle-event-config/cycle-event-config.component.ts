@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
 @Component({
     selector: 'senergy-cycle-event-config',
     templateUrl: './cycle-event-config.component.html',
     styleUrls: ['./cycle-event-config.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CycleEventConfigComponent implements OnInit {

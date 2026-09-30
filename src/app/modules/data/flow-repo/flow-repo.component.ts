@@ -22,7 +22,8 @@ import {
     OnInit,
     TemplateRef,
     ViewChild,
-    ViewContainerRef
+    ViewContainerRef,
+    ChangeDetectionStrategy
 } from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FilterSelection, FlowModel} from './shared/flow.model';
@@ -68,6 +69,7 @@ import {MatDialog} from '@angular/material/dialog';
             provide: CostService, useClass: environment.mockCostService ? CostMockService : CostService
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {

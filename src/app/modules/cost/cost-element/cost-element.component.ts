@@ -15,7 +15,7 @@
  */
 
 import { KeyValue } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CostEntryModel, CostModel, } from '../shared/cost.model';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
 import { OperatorModel } from '../../data/operator-repo/shared/operator.model';
@@ -27,6 +27,7 @@ import { ReportModel } from '../../reporting/shared/reporting.model';
     selector: 'senergy-cost-element',
     templateUrl: './cost-element.component.html',
     styleUrls: ['./cost-element.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CostElementComponent {

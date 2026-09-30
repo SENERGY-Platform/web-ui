@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ChartType } from 'ng-apexcharts';
 import { forkJoin, map, Observable, of } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -34,6 +34,7 @@ const normalWaitingPointSize = 5;
     selector: 'anomaly-line',
     templateUrl: './line.component.html',
     styleUrls: ['./line.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class LineComponent implements OnInit, OnChanges {

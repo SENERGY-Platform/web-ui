@@ -65,7 +65,7 @@
       <ng-container matColumnDef="type">
         <th mat-header-cell *matHeaderCellDef>Type</th>
         <td mat-cell *matCellDef="let m" [formGroup]="m">
-          {{types.get(m.get('type')?.value) || 'unknown'}}
+          {{types.get($safeNavigationMigration(m.get('type')?.value)) || 'unknown'}}
         </td>
       </ng-container>
       <ng-container matColumnDef="description">

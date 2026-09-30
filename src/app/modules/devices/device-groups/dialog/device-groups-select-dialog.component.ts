@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { MatTable } from '@angular/material/table';
@@ -27,6 +27,7 @@ import { DeviceGroupModel } from '../shared/device-groups.model';
     templateUrl: './device-groups-select-dialog.component.html',
     styleUrls: ['./device-groups-select-dialog.component.css'],
     selector: 'senergy-device-groups-select-dialog',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceGroupsSelectDialogComponent implements OnInit {

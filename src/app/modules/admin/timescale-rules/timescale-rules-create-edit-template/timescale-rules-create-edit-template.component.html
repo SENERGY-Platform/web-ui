@@ -75,7 +75,7 @@
       </mat-form-field>
     </div>
 
-    @if (rule?.errors !== null && rule?.errors !== undefined && (rule?.errors?.length || 0) > 0) {
+    @if ($safeNavigationMigration(rule?.errors) !== null && $safeNavigationMigration(rule?.errors) !== undefined && (rule?.errors?.length || 0) > 0) {
       <div>
         <mat-form-field color="accent" appearance="outline" fxFill disabled="">
           <mat-label>Errors</mat-label>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { CapabilityCommandModel } from '../shared/capability-control/capability-control.component';
@@ -31,6 +31,7 @@ export interface FloorplanControlDialogData {
     selector: 'senergy-floorplan-control-dialog',
     templateUrl: './floorplan-control-dialog.component.html',
     styleUrl: './floorplan-control-dialog.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FloorplanControlDialogComponent {

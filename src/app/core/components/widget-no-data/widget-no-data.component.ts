@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'senergy-no-data',
     templateUrl: './widget-no-data.component.html',
     styleUrls: ['./widget-no-data.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class WidgetNoDataComponent {

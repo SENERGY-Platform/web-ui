@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ImportTypeModel, ImportTypeModelWithCostEstimation } from './shared/import-types.model';
 import { ImportTypesService } from './shared/import-types.service';
 import { Sort } from '@angular/material/sort';
@@ -38,6 +38,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-import-types',
     templateUrl: './import-types.component.html',
     styleUrls: ['./import-types.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {

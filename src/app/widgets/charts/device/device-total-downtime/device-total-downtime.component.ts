@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { GoogleChartComponent } from 'ng2-google-charts';
 import { ChartsModel } from '../../shared/charts.model';
@@ -28,6 +28,7 @@ import { ChartsService } from '../../shared/charts.service';
     selector: 'senergy-device-total-downtime',
     templateUrl: './device-total-downtime.component.html',
     styleUrls: ['./device-total-downtime.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy, AfterViewInit {

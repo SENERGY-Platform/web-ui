@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ProcessIncidentsConfig } from '../../../incidents/shared/process-incidents.model';
@@ -23,6 +23,7 @@ import { ProcessIncidentsConfig } from '../../../incidents/shared/process-incide
     selector: 'app-incident-dialog',
     templateUrl: './incident-dialog.component.html',
     styleUrls: ['./incident-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class IncidentDialogComponent {

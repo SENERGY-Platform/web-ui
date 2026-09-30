@@ -32,7 +32,7 @@ import { DeviceInstancesService } from './shared/device-instances.service';
 import { of } from 'rxjs';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { DeviceInstanceModel } from './shared/device-instances.model';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -81,7 +81,7 @@ describe('DeviceInstancesComponent', () => {
         { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
         { provide: ExportDataService, useValue: exportDataServiceSpy },
         { provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
     ]
 }).compileComponents();

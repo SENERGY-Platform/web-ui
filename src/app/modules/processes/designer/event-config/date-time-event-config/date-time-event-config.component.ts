@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
 import {UntypedFormControl, Validators} from '@angular/forms';
 import {rangeValidator} from '../../../../../core/validators/range.validator';
 
@@ -22,6 +22,7 @@ import {rangeValidator} from '../../../../../core/validators/range.validator';
     selector: 'senergy-date-time-event-config',
     templateUrl: './date-time-event-config.component.html',
     styleUrls: ['./date-time-event-config.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DateTimeEventConfigComponent implements OnInit {

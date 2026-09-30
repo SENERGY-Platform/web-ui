@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
@@ -29,6 +29,7 @@ import { environment } from '../../../environments/environment';
     selector: 'senergy-ac-control',
     templateUrl: './ac-control.component.html',
     styleUrls: ['./ac-control.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AcControlComponent implements OnInit, OnDestroy {

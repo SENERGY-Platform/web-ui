@@ -284,7 +284,7 @@
                           <mat-form-field appearance="outline" color="accent" formGroupName="import">
                             <mat-label>Instance</mat-label>
                             <mtx-select formControlName="instanceId" required placeholder="Choose Instance"
-                              [items]="dataTableHelperService.getImportInstancesOfType(tab.get('elementDetails.import.typeId')?.value)"
+                              [items]="dataTableHelperService.getImportInstancesOfType($safeNavigationMigration(tab.get('elementDetails.import.typeId')?.value))"
                               bindValue="id" bindLabel="name" appendTo=".ng-select-anchor">
                             </mtx-select>
                             <mat-error senergyError label="Instance"></mat-error>
@@ -295,7 +295,7 @@
                             <mat-label>Value</mat-label>
                             <mtx-select formControlName="exportValuePath" required
                               placeholder="Choose Value"
-                              [items]="dataTableHelperService.getImportTypeValues(tab.get('elementDetails.import.typeId')?.value)"
+                              [items]="dataTableHelperService.getImportTypeValues($safeNavigationMigration(tab.get('elementDetails.import.typeId')?.value))"
                               bindValue="Path" bindLabel="Name" appendTo=".ng-select-anchor">
                             </mtx-select>
                             <mat-error senergyError label="Value"></mat-error>
@@ -368,7 +368,7 @@
                           </mat-form-field>
                         </td>
                       }
-                      @if (!isDevice(tab) && tab.get('exportId')?.value !== undefined && getTags(tab).length > 0) {
+                      @if (!isDevice(tab) && $safeNavigationMigration(tab.get('exportId')?.value) !== undefined && getTags(tab).length > 0) {
                         <td
                           >
                           <mat-form-field appearance="outline" color="accent">

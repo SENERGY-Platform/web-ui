@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { SwaggerService } from '../shared/swagger/swagger.service';
@@ -27,6 +27,7 @@ import '@asyncapi/web-component/lib/asyncapi-web-component';
     selector: 'senergy-single-service-doc',
     templateUrl: './single-service-doc.component.html',
     styleUrls: ['./single-service-doc.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SingleServiceDocComponent implements OnInit {

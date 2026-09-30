@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -38,6 +38,7 @@ import { AddTagFn } from '../../../../core/model/mtx-select.model';
     selector: 'senergy-device-groups-edit',
     templateUrl: './device-groups-edit.component.html',
     styleUrls: ['./device-groups-edit.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceGroupsEditComponent implements OnInit {

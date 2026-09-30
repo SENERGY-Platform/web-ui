@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     templateUrl: './date-time-dialog.component.html',
     styleUrls: ['./date-time-dialog.component.css'],
     selector: 'senergy-date-time-dialog',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DateTimeDialogComponent {

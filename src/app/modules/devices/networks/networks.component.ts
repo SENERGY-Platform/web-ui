@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { NetworksService } from './shared/networks.service';
 import { ExtendedHubModel, ExtendedHubTotalModel, HubModel } from './shared/networks.model';
@@ -38,6 +38,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-networks',
     templateUrl: './networks.component.html',
     styleUrls: ['./networks.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {

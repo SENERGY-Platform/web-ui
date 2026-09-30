@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit, DOCUMENT} from '@angular/core';
+import {Component, Inject, OnInit, DOCUMENT, ChangeDetectionStrategy} from '@angular/core';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {AuthorizationProfileModel} from '../../../core/model/authorization/authorization-profile.model';
 import {
@@ -29,6 +29,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 @Component({
     templateUrl: './settings-change-dialog.component.html',
     styleUrls: ['./settings-change-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SettingsChangeDialogComponent implements OnInit {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     SmartServiceTaskInputDescription,
@@ -87,6 +87,7 @@ interface GenericWatcherRequest {
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
     styleUrls: ['./edit-smart-service-task-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EditSmartServiceTaskDialogComponent implements OnInit {

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, Inject, } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { HubModel, LoraCertsModel } from '../shared/networks.model';
 
 @Component({
     templateUrl: './networks-loracerts-dialog.component.html',
     styleUrls: ['./networks-loracerts-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class NetworksLoraCertsDialogComponent {

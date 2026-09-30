@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { PipelineModel } from '../../../../data/pipeline-registry/shared/pipeline.model';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -25,6 +25,7 @@ import { Router } from '@angular/router';
     selector: 'senergy-device-groups-pipeline-helper-dialog',
     templateUrl: './device-groups-pipeline-helper-dialog.component.html',
     styleUrls: ['./device-groups-pipeline-helper-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceGroupsPipelineHelperDialogComponent implements OnInit {

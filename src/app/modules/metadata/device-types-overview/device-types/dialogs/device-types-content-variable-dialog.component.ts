@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     contentVariableAspectIds,
@@ -46,6 +46,7 @@ interface DeviceTypeFunctionClassModel extends DeviceTypeFunctionModel {
 @Component({
     templateUrl: './device-types-content-variable-dialog.component.html',
     styleUrls: ['./device-types-content-variable-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceTypesContentVariableDialogComponent implements OnInit {

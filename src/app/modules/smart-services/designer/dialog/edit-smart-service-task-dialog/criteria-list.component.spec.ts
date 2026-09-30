@@ -21,7 +21,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatInputModule } from '@angular/material/input';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { createSpyFromClass } from 'jasmine-auto-spies';
@@ -72,7 +72,7 @@ describe('CriteriaListComponent', () => {
                 { provide: DeviceTypeService, useValue: deviceTypeService },
                 { provide: FunctionsService, useValue: functionsService },
                 { provide: DeviceClassesService, useValue: deviceClassesService },
-                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(CriteriaListComponent);

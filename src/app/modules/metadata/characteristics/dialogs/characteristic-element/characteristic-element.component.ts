@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
 import {DeviceTypeCharacteristicsModel} from '../../../device-types-overview/shared/device-type.model';
 import {UntypedFormBuilder} from '@angular/forms';
 import {NestedTreeControl} from '@angular/cdk/tree';
@@ -24,6 +24,7 @@ import {MatTreeNestedDataSource} from '@angular/material/tree';
     selector: 'senergy-characteristic-element',
     templateUrl: './characteristic-element.component.html',
     styleUrls: ['./characteristic-element.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CharacteristicElementComponent implements OnInit {

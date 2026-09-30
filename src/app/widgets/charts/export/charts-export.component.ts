@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { GoogleChartComponent, } from 'ng2-google-charts';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../core/services/element-size.service';
@@ -53,6 +53,7 @@ enum DetailLevel {
     selector: 'senergy-charts-export',
     templateUrl: './charts-export.component.html',
     styleUrls: ['./charts-export.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {

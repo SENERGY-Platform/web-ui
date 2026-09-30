@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ReportObjectNode, inputTypeOfNode, isContainer } from '../../shared/report-object-node';
 import { ReportObjectViewService } from '../../shared/report-object-view.service';
 
@@ -28,6 +28,7 @@ const TYPE_ICONS: { [key: string]: string } = {
     selector: 'senergy-reporting-tree',
     templateUrl: './report-tree.component.html',
     styleUrls: ['./report-tree.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ReportTreeComponent {

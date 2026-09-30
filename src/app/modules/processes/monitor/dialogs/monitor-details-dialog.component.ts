@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.model';
 
 @Component({
     templateUrl: './monitor-details-dialog.component.html',
     styleUrls: ['./monitor-details-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class MonitorDetailsDialogComponent {

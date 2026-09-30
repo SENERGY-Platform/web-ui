@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 export type KeyValueEditorMode = 'mixed' | 'number';
 
@@ -51,6 +51,7 @@ interface Row {
     selector: 'senergy-environments-key-value-editor',
     templateUrl: './environments-key-value-editor.component.html',
     styleUrls: ['./environments-key-value-editor.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsKeyValueEditorComponent implements OnChanges {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, Inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {UntypedFormControl, Validators} from '@angular/forms';
 import {
@@ -30,6 +30,7 @@ import {map} from 'rxjs/operators';
 @Component({
     templateUrl: './concepts-edit-dialog.component.html',
     styleUrls: ['./concepts-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ConceptsEditDialogComponent implements OnInit {

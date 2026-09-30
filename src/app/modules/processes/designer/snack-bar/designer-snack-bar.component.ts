@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
 import { DesignerErrorModel } from '../shared/designer-error.model';
 
@@ -24,6 +24,7 @@ import { DesignerErrorModel } from '../shared/designer-error.model';
     selector: 'senergy-process-designer-snack-bar',
     templateUrl: 'designer-snack-bar.component.html',
     styles: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DesignerSnackBarComponent {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CamundaVariable } from '../shared/deployments-definition.model';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -23,6 +23,7 @@ import { Observable } from 'rxjs';
 @Component({
     templateUrl: './deployments-start-parameter-dialog.component.html',
     styleUrls: ['./deployments-start-parameter-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeploymentsStartParameterDialogComponent {

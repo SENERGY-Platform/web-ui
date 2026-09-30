@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { DatedChange } from '../../shared/environments.model';
 import { TimelineTargetOption } from '../../shared/environments-timeline-targets';
@@ -72,6 +72,7 @@ export const TIMELINE_DEFAULT_PAGE_SIZE = 50;
     selector: 'senergy-environments-timeline-editor',
     templateUrl: './environments-timeline-editor.component.html',
     styleUrls: ['./environments-timeline-editor.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsTimelineEditorComponent implements OnChanges {

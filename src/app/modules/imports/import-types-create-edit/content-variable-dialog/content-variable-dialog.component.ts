@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
     MAT_DIALOG_DATA,
     MatDialogRef
@@ -36,6 +36,7 @@ interface DeviceTypeCharacteristicsModelWithGroup extends DeviceTypeCharacterist
     selector: 'senergy-import-content-variable-dialog',
     templateUrl: './content-variable-dialog.component.html',
     styleUrls: ['./content-variable-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ContentVariableDialogComponent implements OnInit {

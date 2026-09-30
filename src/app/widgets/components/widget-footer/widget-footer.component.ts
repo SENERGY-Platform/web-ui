@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
@@ -24,6 +24,7 @@ import { WidgetFooterService } from './shared/widget-footer.service';
     selector: 'senergy-widget-footer',
     templateUrl: './widget-footer.component.html',
     styleUrls: ['./widget-footer.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class WidgetFooterComponent {

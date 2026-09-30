@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
 import {ServingRequest, ServingRequestValue, SmartServiceTaskDescription} from '../../../shared/designer.model';
 import {BpmnElement, BpmnParameterWithLabel} from '../../../../../processes/designer/shared/designer.model';
 import {ExportDatabaseModel, IMPORT_ID, OPERATOR_ID} from '../../../../../exports/shared/export.model';
@@ -29,6 +29,7 @@ import {ImportTypesService} from '../../../../../imports/import-types/shared/imp
     selector: 'esstd-export-component',
     standalone: false,
     templateUrl: './esstd-export-component.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './esstd-export-component.component.css'
 })
 export class EsstdExportComponentComponent implements OnInit {

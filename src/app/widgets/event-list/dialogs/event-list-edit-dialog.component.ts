@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -28,6 +28,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
     templateUrl: './event-list-edit-dialog.component.html',
     styleUrls: ['./event-list-edit-dialog.component.css'],
     selector: 'senergy-event-list-edit-dialog',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EventListEditDialogComponent implements OnInit {

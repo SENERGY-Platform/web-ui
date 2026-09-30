@@ -48,7 +48,7 @@
           <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
         @if (userHasUsedInAuthorization) {
-          <button (click)="showUsedInDialog(usedIn?.get(node.id))" class="linkbutton tree-inline" matTooltip="uses of aspect in device-types">
+          <button (click)="showUsedInDialog($safeNavigationMigration(usedIn?.get(node.id)))" class="linkbutton tree-inline" matTooltip="uses of aspect in device-types">
             {{usedIn?.get(node.id)?.count || 0}}
           </button>
         }
@@ -183,7 +183,7 @@
               <mat-error senergyError label="Name"></mat-error>
             </mat-form-field>
             @if (userHasUsedInAuthorization) {
-              <button (click)="showUsedInDialog(usedIn?.get(node.id))" class="linkbutton nested-tree-inline" matTooltip="uses of aspect in device-types">
+              <button (click)="showUsedInDialog($safeNavigationMigration(usedIn?.get(node.id)))" class="linkbutton nested-tree-inline" matTooltip="uses of aspect in device-types">
                 {{usedIn?.get(node.id)?.count || 0}}
               </button>
             }

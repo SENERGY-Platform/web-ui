@@ -17,7 +17,7 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { DeploymentsService } from './deployments.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CamundaVariable } from './deployments-definition.model';
 import { environment } from '../../../../../environments/environment';
@@ -29,7 +29,7 @@ describe('DeploymentsService', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     imports: [MatDialogModule],
-    providers: [DeploymentsService, MatSnackBar, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+    providers: [DeploymentsService, MatSnackBar, provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()]
 });
     });
 

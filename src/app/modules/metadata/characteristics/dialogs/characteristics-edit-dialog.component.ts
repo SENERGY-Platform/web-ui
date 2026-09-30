@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
 import { CharacteristicsPermSearchModel } from '../shared/characteristics-perm-search.model';
@@ -25,6 +25,7 @@ import { CharacteristicElementComponent } from './characteristic-element/charact
 @Component({
     templateUrl: './characteristics-edit-dialog.component.html',
     styleUrls: ['./characteristics-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {TimescaleRulesService} from './shared/timescale-rules.service';
 import {TimescaleRuleModel, TimescaleRuleTemplateModel} from './shared/timescale-rule.model';
 import {MatTable} from '@angular/material/table';
@@ -33,6 +33,7 @@ import {
     selector: 'senergy-timescale-rules',
     templateUrl: './timescale-rules.component.html',
     styleUrls: ['./timescale-rules.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class TimescaleRulesComponent implements OnInit {

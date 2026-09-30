@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AddTagFn } from '../../../../core/model/mtx-select.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
@@ -31,6 +31,7 @@ export interface AttributeKeyWithDescription {
 @Component({
     templateUrl: './device-instances-default-attributes-dialog.component.html',
     styleUrls: ['./device-instances-default-attributes-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceInstancesDefaultAttributesDialogComponent implements OnInit {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
 import { AnomaliesPerDevice } from '../../shared/anomaly.model';
@@ -27,6 +27,7 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
     selector: 'anomaly-phases',
     templateUrl: './anomaly-phases.component.html',
     styleUrls: ['./anomaly-phases.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AnomalyPhasesComponent implements OnInit, OnChanges {

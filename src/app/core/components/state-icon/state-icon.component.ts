@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'senergy-state-icon',
     templateUrl: './state-icon.component.html',
     styleUrls: ['./state-icon.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class StateIconComponent {

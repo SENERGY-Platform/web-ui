@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { EventListService } from './shared/event-list.service';
 import { EventListModel } from './shared/event-list.model';
@@ -25,6 +25,7 @@ import { Subscription } from 'rxjs';
     selector: 'senergy-event-list',
     templateUrl: './event-list.component.html',
     styleUrls: ['./event-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EventListComponent implements OnInit, OnDestroy {

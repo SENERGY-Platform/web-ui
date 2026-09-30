@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {BudgetService} from './shared/budget.service';
 import {BudgetModel} from './shared/budget.model';
 import {forkJoin, Observable} from 'rxjs';
@@ -29,6 +29,7 @@ import {BudgetCreateEditComponent} from './budget-create-edit/budget-create-edit
     selector: 'senergy-budget',
     templateUrl: './budget.component.html',
     styleUrls: ['./budget.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class BudgetComponent implements OnInit {

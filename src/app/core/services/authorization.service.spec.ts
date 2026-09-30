@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { HttpClient, HttpEvent, HttpHandler, HttpRequest, HttpResponse, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpHandler, HttpRequest, HttpResponse, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { KeycloakAngularModule, KeycloakOptions, KeycloakService } from 'keycloak-angular';
@@ -128,7 +128,7 @@ describe('AuthorizationService', () => {
     it('lets the uninitialised KeycloakAngularModule interceptor pass requests unchanged', () => {
         TestBed.configureTestingModule({
             imports: [KeycloakAngularModule],
-            providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
+            providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
         });
         const http = TestBed.inject(HttpClient);
         const controller = TestBed.inject(HttpTestingController);

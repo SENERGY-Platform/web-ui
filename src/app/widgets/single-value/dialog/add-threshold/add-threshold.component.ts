@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ValueHighlightConfig } from '../../shared/single-value.model';
@@ -23,6 +23,7 @@ import { ValueHighlightConfig } from '../../shared/single-value.model';
     selector: 'single-value-add-threshold',
     templateUrl: './add-threshold.component.html',
     styleUrls: ['./add-threshold.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AddThresholdComponent {

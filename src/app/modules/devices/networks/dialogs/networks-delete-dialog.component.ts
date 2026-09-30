@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatCheckboxChange } from '@angular/material/checkbox';
@@ -28,6 +28,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     selector: 'senergy-device-groups-pipeline-helper-dialog',
     templateUrl: './networks-delete-dialog.component.html',
     styleUrls: ['./networks-delete-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class NetworksDeleteDialogComponent implements OnInit {

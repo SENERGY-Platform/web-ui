@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {Location} from '@angular/common';
 import {ExportModel, ExportValueBaseModel} from '../shared/export.model';
 import {ActivatedRoute} from '@angular/router';
@@ -37,6 +37,7 @@ import {ClipboardService} from 'ngx-clipboard';
     selector: 'senergy-export-details',
     templateUrl: './export-details.component.html',
     styleUrls: ['./export-details.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ExportDetailsComponent implements OnInit {

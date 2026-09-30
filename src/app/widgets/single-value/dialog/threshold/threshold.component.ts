@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { ValueHighlightConfig } from '../../shared/single-value.model';
@@ -24,6 +24,7 @@ import { AddThresholdComponent } from '../add-threshold/add-threshold.component'
     selector: 'single-value-threshold',
     templateUrl: './threshold.component.html',
     styleUrls: ['./threshold.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ThresholdComponent implements OnInit {

@@ -18,7 +18,8 @@ import {
     AfterContentChecked, Component,
     Input,
     OnDestroy,
-    OnInit
+    OnInit,
+    ChangeDetectionStrategy
 } from '@angular/core';
 import moment from 'moment';
 import { Subscription, concatMap, map, of, throwError } from 'rxjs';
@@ -32,6 +33,7 @@ import { AnomalyService } from './shared/anomaly.service';
     selector: 'senergy-anomaly-detection',
     templateUrl: './anomaly.component.html',
     styleUrls: ['./anomaly.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {

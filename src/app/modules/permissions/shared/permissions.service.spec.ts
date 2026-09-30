@@ -17,7 +17,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { PermissionsService } from './permissions.service';
@@ -40,7 +40,7 @@ describe('PermissionsService', () => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
             imports: [MatSnackBarModule],
-            providers: [PermissionsService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
+            providers: [PermissionsService, provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
         });
         service = TestBed.inject(PermissionsService);
         http = TestBed.inject(HttpTestingController);

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'senergy-widget-spinner',
     templateUrl: './widget-spinner.component.html',
     styleUrls: ['./widget-spinner.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class WidgetSpinnerComponent {

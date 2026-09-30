@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
@@ -38,6 +38,7 @@ import { reportFileName } from '../shared/report-file-name';
     selector: 'senergy-reporting-report-files',
     templateUrl: './reportFiles.component.html',
     styleUrls: ['./reportFiles.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {

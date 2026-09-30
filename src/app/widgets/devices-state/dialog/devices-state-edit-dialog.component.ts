@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -28,6 +28,7 @@ import { forkJoin } from 'rxjs';
 @Component({
     templateUrl: './devices-state-edit-dialog.component.html',
     styleUrls: ['./devices-state-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DevicesStateEditDialogComponent implements OnInit {

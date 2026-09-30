@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {Router} from '@angular/router';
@@ -36,6 +36,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-concepts',
     templateUrl: './concepts.component.html',
     styleUrls: ['./concepts.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {

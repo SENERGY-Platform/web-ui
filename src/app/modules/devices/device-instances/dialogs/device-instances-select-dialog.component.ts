@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
@@ -27,6 +27,7 @@ import { Sort } from '@angular/material/sort';
     templateUrl: './device-instances-select-dialog.component.html',
     styleUrls: ['./device-instances-select-dialog.component.css'],
     selector: 'senergy-device-instances-select-dialog',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceInstancesSelectDialogComponent implements OnInit {

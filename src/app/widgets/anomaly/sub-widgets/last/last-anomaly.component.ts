@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { AnomalyResultModel } from '../../shared/anomaly.model';
 
@@ -22,6 +22,7 @@ import { AnomalyResultModel } from '../../shared/anomaly.model';
     selector: 'last-anomaly',
     templateUrl: './last-anomaly.component.html',
     styleUrls: ['./last-anomaly.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class LastAnomalyComponent implements OnInit {

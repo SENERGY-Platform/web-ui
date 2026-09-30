@@ -16,7 +16,7 @@
 
 import { map, startWith, switchMap } from 'rxjs/operators';
 
-import { AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { merge, Observable, Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { MonitorService } from './shared/monitor.service';
@@ -39,6 +39,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-process-monitor',
     templateUrl: './monitor.component.html',
     styleUrls: ['./monitor.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit {

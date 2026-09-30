@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import * as moment from 'moment';
 
@@ -22,6 +22,7 @@ import * as moment from 'moment';
     selector: 'senergy-process-deployments-config-time-event',
     templateUrl: './deployments-config-time-event.component.html',
     styleUrls: ['./deployments-config-time-event.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeploymentsConfigTimeEventComponent {

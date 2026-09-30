@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DeploymentsModel } from '../../../../../modules/processes/deployments/shared/deployments.model';
 import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
@@ -26,6 +26,7 @@ import { MatTable } from '@angular/material/table';
 @Component({
     templateUrl: './device-total-downtime-edit-dialog.component.html',
     styleUrls: ['./device-total-downtime-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceTotalDowntimeEditDialogComponent implements OnInit {

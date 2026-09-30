@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { ChartsExportConversion } from '../../shared/charts-export-properties.model';
@@ -24,6 +24,7 @@ import { AddRuleComponent } from '../add-rule/add-rule.component';
     selector: 'app-list-rules',
     templateUrl: './list-rules.component.html',
     styleUrls: ['./list-rules.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ListRulesComponent {

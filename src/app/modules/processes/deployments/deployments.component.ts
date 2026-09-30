@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { concatMap, forkJoin, from, map, mergeMap, Observable, Subscription, toArray } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
@@ -50,6 +50,7 @@ const grids = new Map([
     selector: 'senergy-process-deployments',
     templateUrl: './deployments.component.html',
     styleUrls: ['./deployments.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDestroy {

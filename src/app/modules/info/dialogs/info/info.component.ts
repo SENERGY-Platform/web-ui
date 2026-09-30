@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { environment } from 'src/environments/environment';
 
@@ -22,6 +22,7 @@ import { environment } from 'src/environments/environment';
     selector: 'app-info',
     templateUrl: './info.component.html',
     styleUrls: ['./info.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class InfoDialogComponent {

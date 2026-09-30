@@ -19,5 +19,13 @@
     "./src/app/core/validators/json.validator.ts",
     "./src/app/modules/metadata/device-types-overview/device-types/content-variable.validator.ts",
     "./src/assets/env.template.js"
-  ]
+  ],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { DocInfo } from '../shared/swagger/swagger.model';
 import { SwaggerService } from '../shared/swagger/swagger.service';
 import { forkJoin, map, Observable, of } from 'rxjs';
@@ -26,6 +26,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     selector: 'senergy-api-docs',
     templateUrl: './api-docs.component.html',
     styleUrls: ['./api-docs.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ApiDocsComponent implements OnInit {

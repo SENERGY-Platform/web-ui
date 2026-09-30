@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Attribute, DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel } from '../shared/device-instances.model';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
@@ -26,6 +26,7 @@ import jsQR from 'jsqr';
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',
     styleUrls: ['./device-instances-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceInstancesEditDialogComponent implements OnDestroy {

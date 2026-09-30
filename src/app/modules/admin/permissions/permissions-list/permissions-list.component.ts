@@ -17,7 +17,7 @@
  */
 
 import {SelectionModel} from '@angular/cdk/collections';
-import {AfterViewInit, Component, isDevMode, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, isDevMode, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSort, Sort} from '@angular/material/sort';
@@ -40,6 +40,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-permissions-list',
     templateUrl: './permissions-list.component.html',
     styleUrls: ['./permissions-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestroy {

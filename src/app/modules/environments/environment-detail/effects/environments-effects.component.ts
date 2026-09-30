@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import type { Core, StylesheetJsonBlock } from 'cytoscape';
 import type { DagreLayoutOptions } from 'cytoscape-dagre';
 import type { CytoscapeFactory } from './environments-effects-cytoscape-loader';
@@ -117,6 +117,7 @@ const EFFECTS_STYLESHEET: StylesheetJsonBlock[] = [
     selector: 'senergy-environments-effects',
     templateUrl: './environments-effects.component.html',
     styleUrls: ['./environments-effects.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsEffectsComponent implements OnChanges, AfterViewInit, OnDestroy {

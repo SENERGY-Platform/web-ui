@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { ChartsExportVAxesModel } from '../../charts/export/shared/charts-export-properties.model';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
@@ -25,6 +25,7 @@ import { detectAndMergeFlapping } from 'src/app/modules/devices/device-instances
     selector: 'senergy-connection-history-dialog',
     templateUrl: './connection-history-dialog.component.html',
     styleUrl: './connection-history-dialog.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ConnectionHistoryDialogComponent implements AfterViewInit {

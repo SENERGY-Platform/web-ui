@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AbstractControl, UntypedFormBuilder, ValidatorFn, Validators } from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
@@ -31,6 +31,7 @@ import { EnergyPredictionRequirementsService } from '../shared/energy-prediction
 @Component({
     templateUrl: './energy-prediction-edit-dialog.component.html',
     styleUrls: ['./energy-prediction-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnergyPredictionEditDialogComponent implements OnInit {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {ProcessIoService} from '../shared/process-io.service';
 import {ProcessIoVariable} from '../shared/process-io.model';
 import {MatTableDataSource} from '@angular/material/table';
@@ -36,6 +36,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-process-io-variables',
     templateUrl: './variables.component.html',
     styleUrls: ['./variables.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, OnInit {

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BpmnParameter } from '../../shared/designer.model';
 
 @Component({
     templateUrl: './edit-output-dialog.component.html',
     styleUrls: ['./edit-output-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EditOutputDialogComponent {

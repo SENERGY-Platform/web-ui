@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormControl, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -27,6 +27,7 @@ import { PermissionModel } from '../shared/permission.model';
     selector: 'senergy-permissions-dialog-import',
     templateUrl: './permissions-dialog-import.component.html',
     styleUrls: ['./permissions-dialog-import.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PermissionsDialogImportComponent {

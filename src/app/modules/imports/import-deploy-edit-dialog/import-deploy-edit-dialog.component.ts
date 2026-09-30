@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ImportInstanceConfigModel, ImportInstancesModel } from '../import-instances/shared/import-instances.model';
 import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
@@ -27,6 +27,7 @@ import { typeValueValidator } from '../validators/type-value-validator';
     selector: 'senergy-import-deploy-dialog',
     templateUrl: './import-deploy-edit-dialog.component.html',
     styleUrls: ['./import-deploy-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ImportDeployEditDialogComponent implements OnInit {

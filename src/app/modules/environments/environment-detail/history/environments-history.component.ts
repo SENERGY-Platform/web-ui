@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription, timer } from 'rxjs';
 import { exhaustMap, map } from 'rxjs/operators';
@@ -43,6 +43,7 @@ const MIN_PAST_MARGIN_MS = 2 * 60 * 1000;
     selector: 'senergy-environments-history',
     templateUrl: './environments-history.component.html',
     styleUrls: ['./environments-history.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsHistoryComponent implements OnInit, OnDestroy {

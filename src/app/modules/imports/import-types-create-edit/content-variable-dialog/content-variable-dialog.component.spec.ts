@@ -32,7 +32,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { DeviceTypeAspectModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { ImportTypeContentVariableModel } from '../../import-types/shared/import-types.model';
 import { AspectClassesService } from '../../../metadata/aspects/shared/aspect-classes.service';
@@ -100,7 +100,7 @@ describe('ContentVariableDialogComponent', () => {
                     },
                 },
                 { provide: AspectClassesService, useValue: aspectClassesService },
-                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(ContentVariableDialogComponent);

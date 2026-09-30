@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import moment from 'moment';
 import { concatMap, map, of, Subscription, throwError } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -27,6 +27,7 @@ import { VentilationResult } from './shared/model';
     selector: 'senergy-bad-ventilation',
     templateUrl: './bad-ventilation.component.html',
     styleUrls: ['./bad-ventilation.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class BadVentilationComponent implements OnInit {

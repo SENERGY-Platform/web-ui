@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 
 @Component({
     selector: 'senergy-closable-snack-bar',
     templateUrl: './closable-snack-bar.component.html',
     styleUrls: ['./closable-snack-bar.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ClosableSnackBarComponent {

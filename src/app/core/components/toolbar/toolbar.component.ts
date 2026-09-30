@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { SidenavService } from '../sidenav/shared/sidenav.service';
 import { Router } from '@angular/router';
 import { AuthorizationService } from '../../services/authorization.service';
@@ -28,6 +28,7 @@ import { InfoService } from 'src/app/modules/info/shared/info.service';
     selector: 'senergy-toolbar',
     templateUrl: './toolbar.component.html',
     styleUrls: ['./toolbar.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ToolbarComponent implements OnInit {

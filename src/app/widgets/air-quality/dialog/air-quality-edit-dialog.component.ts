@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, NgZone, OnInit } from '@angular/core';
+import { Component, Inject, NgZone, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
@@ -49,6 +49,7 @@ import { DeviceTypeService } from '../../../modules/metadata/device-types-overvi
 @Component({
     templateUrl: './air-quality-edit-dialog.component.html',
     styleUrls: ['./air-quality-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AirQualityEditDialogComponent implements OnInit {

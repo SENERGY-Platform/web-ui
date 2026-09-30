@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel, WidgetPropertiesModels } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { RangeSliderService } from './shared/range-slider.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
@@ -27,6 +27,7 @@ import { CamundaVariable } from '../../modules/processes/deployments/shared/depl
     selector: 'senergy-range-slider',
     templateUrl: './range-slider.component.html',
     styleUrls: ['./range-slider.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class RangeSliderComponent implements OnInit, OnDestroy {

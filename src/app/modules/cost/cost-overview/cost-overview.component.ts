@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CostService } from '../shared/cost.service';
 import { CostEntryModel, CostModel } from '../shared/cost.model';
 import { KeyValue } from '@angular/common';
@@ -41,6 +41,7 @@ import { ReportingService } from '../../reporting/shared/reporting.service';
     selector: 'senergy-cost-overview',
     templateUrl: './cost-overview.component.html',
     styleUrls: ['./cost-overview.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CostOverviewComponent implements OnInit {

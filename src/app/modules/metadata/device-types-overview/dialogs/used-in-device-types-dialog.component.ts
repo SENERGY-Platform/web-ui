@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     UsedInDeviceTypeResponseDeviceTypeRef,
@@ -27,6 +27,7 @@ import {Router} from '@angular/router';
 @Component({
     templateUrl: './used-in-device-types-dialog.component.html',
     styleUrls: ['./used-in-device-types-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class UsedInDeviceTypesDialogComponent implements OnInit {

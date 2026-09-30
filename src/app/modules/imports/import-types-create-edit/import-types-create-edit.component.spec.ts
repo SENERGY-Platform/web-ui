@@ -18,7 +18,7 @@ import {ComponentFixture, TestBed, fakeAsync, flush} from '@angular/core/testing
 import { ImportTypesCreateEditComponent } from './import-types-create-edit.component';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
@@ -193,7 +193,7 @@ describe('ImportTypesCreateEditComponent', () => {
                 snapshot: { paramMap },
             },
         },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
     ]
 }).compileComponents();
     });

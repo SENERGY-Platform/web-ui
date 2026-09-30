@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CertificateInfo, Rfc5280Reason, rfc5280ReasonString } from './shared/certificates.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { MatPaginator } from '@angular/material/paginator';
@@ -30,6 +30,7 @@ import { CertificateRevokeDialogComponent } from './certificate-revoke-dialog/ce
     selector: 'app-certificates',
     templateUrl: './certificates.component.html',
     styleUrl: './certificates.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {

@@ -26,7 +26,7 @@ import { AuthorizationService } from '../../../../../core/services/authorization
 import { AuthorizationServiceMock } from '../../../../../core/services/authorization.service.mock';
 import { DialogsService } from '../../../../../core/services/dialogs.service';
 import {ActivatedRoute, provideRouter} from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeployFlowClassicComponent', () => {
@@ -57,7 +57,7 @@ describe('DeployFlowClassicComponent', () => {
                 },
             },
         },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
     ]
 }).compileComponents();

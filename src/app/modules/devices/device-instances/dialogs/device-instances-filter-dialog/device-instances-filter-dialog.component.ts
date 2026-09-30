@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SortDirection } from '@angular/material/sort';
 import { concatMap, map, shareReplay } from 'rxjs';
@@ -29,6 +29,7 @@ import { DeviceInstancesService } from '../../shared/device-instances.service';
 @Component({
     selector: 'app-device-instances-filter-dialog',
     templateUrl: './device-instances-filter-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceInstancesFilterDialogComponent implements OnInit {

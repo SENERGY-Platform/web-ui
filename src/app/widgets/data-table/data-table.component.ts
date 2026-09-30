@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
@@ -53,6 +53,7 @@ interface DataTableComponentItem {
     selector: 'senergy-data-table',
     templateUrl: './data-table.component.html',
     styleUrls: ['./data-table.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DataTableComponent implements OnInit, OnDestroy {

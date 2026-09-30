@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../shared/dashboard-widget.model';
 import { DashboardTypesEnum } from '../shared/dashboard-types.enum';
@@ -37,6 +37,7 @@ export interface SwitchCategories extends Types {
 @Component({
     templateUrl: './dashboard-new-widget-dialog.component.html',
     styleUrls: ['./dashboard-new-widget-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DashboardNewWidgetDialogComponent implements OnInit{

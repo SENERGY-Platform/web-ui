@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { ProcessModelListService } from './shared/process-model-list.service';
 import { ProcessModelListModel } from './shared/process-model-list.model';
@@ -26,6 +26,7 @@ import { ProcessRepoService } from 'src/app/modules/processes/process-repo/share
     selector: 'senergy-process-model-list',
     templateUrl: './process-model-list.component.html',
     styleUrls: ['./process-model-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessModelListComponent implements OnInit, OnDestroy {

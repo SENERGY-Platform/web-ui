@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {
@@ -44,6 +44,7 @@ import { TableRowAnimations } from 'src/app/core/animations/table-animation';
     templateUrl: './waiting-room.component.html',
     styleUrls: ['./waiting-room.component.css'],
     animations: [TableRowAnimations.getRowAnimation()],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {

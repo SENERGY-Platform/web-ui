@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
     MAT_DIALOG_DATA,
     MatDialogRef
@@ -68,6 +68,7 @@ import { CompareWithFn, GroupValueFn } from '../../../core/model/mtx-select.mode
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
     styleUrls: ['./data-table-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DataTableEditDialogComponent implements OnInit {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormControl } from '@angular/forms';
@@ -40,6 +40,7 @@ export interface ShareDialogData {
     selector: 'senergy-environments-share-dialog',
     templateUrl: './environments-share-dialog.component.html',
     styleUrls: ['./environments-share-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsShareDialogComponent implements OnInit {

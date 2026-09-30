@@ -15,7 +15,7 @@
  */
 
 import { SelectionModel } from '@angular/cdk/collections';
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { SearchbarService } from '../searchbar/shared/searchbar.service';
@@ -43,6 +43,7 @@ interface NotificationDisplayModel extends NotificationModel {
     selector: 'app-notifications',
     templateUrl: './notifications.component.html',
     styleUrl: './notifications.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class NotificationsComponent implements OnInit, OnDestroy {

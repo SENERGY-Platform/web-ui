@@ -20,7 +20,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { By } from '@angular/platform-browser';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
@@ -92,7 +92,7 @@ describe('ConditionalEventDialogComponent', () => {
                 { provide: MAT_DIALOG_DATA, useValue: { msg } },
                 { provide: DeviceTypeService, useValue: deviceTypeService },
                 { provide: ConceptsService, useValue: conceptsService },
-                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(ConditionalEventDialogComponent);

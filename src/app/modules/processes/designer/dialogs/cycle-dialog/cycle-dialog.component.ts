@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     templateUrl: './cycle-dialog.component.html',
     styleUrls: ['./cycle-dialog.component.css'],
     selector: 'senergy-cycle-dialog',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CycleDialogComponent {

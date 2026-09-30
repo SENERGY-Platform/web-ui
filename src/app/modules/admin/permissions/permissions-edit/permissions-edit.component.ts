@@ -16,7 +16,7 @@
  *
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -32,6 +32,7 @@ import { PermissionModel } from '../shared/permission.model';
     selector: 'senergy-permissions-edit',
     templateUrl: './permissions-edit.component.html',
     styleUrls: ['./permissions-edit.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PermissionsEditComponent implements OnInit {

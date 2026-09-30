@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-error-state-matcher';
@@ -22,6 +22,7 @@ import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-erro
 @Component({
     templateUrl: './email-config-dialog.component.html',
     styleUrls: ['./email-config-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EmailConfigDialogComponent {

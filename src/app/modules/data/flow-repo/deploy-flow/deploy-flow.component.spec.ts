@@ -28,7 +28,7 @@ import { DialogsService } from '../../../../core/services/dialogs.service';
 import {ActivatedRoute, provideRouter} from '@angular/router';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -79,7 +79,7 @@ describe('DeployFlowComponent', () => {
                 },
             },
         },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
     ]
 }).compileComponents();

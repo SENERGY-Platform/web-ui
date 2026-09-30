@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import {
     ANCHOR_MODES,
     anchorModeHint,
@@ -73,6 +73,7 @@ function isNumericExportColumn(value: ExportValueModel): boolean {
     selector: 'senergy-environments-dataset-editor',
     templateUrl: './environments-dataset-editor.component.html',
     styleUrls: ['./environments-dataset-editor.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsDatasetEditorComponent {

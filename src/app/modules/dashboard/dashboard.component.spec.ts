@@ -36,7 +36,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { Gridster, GridsterItem } from 'angular-gridster2';
 import { MatButtonModule } from '@angular/material/button';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
@@ -97,7 +97,7 @@ describe('DashboardComponent', () => {
         { provide: DashboardService, useValue: dashboardServiceSpy },
         { provide: ResponsiveService, useValue: responsiveServiceSpy },
         { provide: DeviceStatusService, useValue: deviceStatusServiceSpy },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
     ]
 }).compileComponents();

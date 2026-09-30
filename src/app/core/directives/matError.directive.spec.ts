@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -30,6 +30,7 @@ import { MatErrorMessagesDirective } from './matError.directive';
             <mtx-select [formControl]="control" [items]="['a', 'b']"></mtx-select>
             <mat-error senergyError label="User"></mat-error>
         </mat-form-field>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 class ReactiveSelectHostComponent {
@@ -44,6 +45,7 @@ class ReactiveSelectHostComponent {
             <mtx-select [(ngModel)]="value" [items]="['a', 'b']" required></mtx-select>
             <mat-error senergyError label="Role"></mat-error>
         </mat-form-field>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 class NgModelSelectHostComponent {
@@ -58,6 +60,7 @@ class NgModelSelectHostComponent {
             <input matInput [formControl]="control">
             <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 class ReactiveInputHostComponent {

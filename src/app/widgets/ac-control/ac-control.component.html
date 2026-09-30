@@ -33,27 +33,27 @@
               matTooltip="Cleaning Required!">warning
             </mat-icon>
           }
-          @if (widget.properties.acControl?.getTargetTemperature !== undefined) {
+          @if ($safeNavigationMigration(widget.properties.acControl?.getTargetTemperature) !== undefined) {
             <div
-              style="font-size: xx-large;">{{bufferedSetTemperature || joinMeasurementsString(widget.properties.acControl?.getTargetTemperature, true)}} °C
-              @if (bufferedSetTemperature !== null && '' + bufferedSetTemperature !== joinMeasurementsString(widget.properties.acControl?.getTargetTemperature, true)) {
+              style="font-size: xx-large;">{{bufferedSetTemperature || joinMeasurementsString($safeNavigationMigration(widget.properties.acControl?.getTargetTemperature), true)}} °C
+              @if (bufferedSetTemperature !== null && '' + bufferedSetTemperature !== joinMeasurementsString($safeNavigationMigration(widget.properties.acControl?.getTargetTemperature), true)) {
                 <mat-icon color="accent"
                 matTooltip="syncing">sync</mat-icon>
               }
             </div>
           }
-          @if (widget.properties.acControl?.getTemperatureMeasurements !== undefined) {
+          @if ($safeNavigationMigration(widget.properties.acControl?.getTemperatureMeasurements) !== undefined) {
             <mat-icon inline>
               fiber_manual_record
             </mat-icon>
           }
-          @if (widget.properties.acControl?.getTemperatureMeasurements !== undefined || widget.properties.acControl?.getBatteryLevel !== undefined) {
+          @if ($safeNavigationMigration(widget.properties.acControl?.getTemperatureMeasurements) !== undefined || $safeNavigationMigration(widget.properties.acControl?.getBatteryLevel) !== undefined) {
             <div
               style="font-size: large;">
-              ({{joinMeasurementsString(widget.properties.acControl?.getTemperatureMeasurements, true)}} °C
-              @if (widget.properties.acControl?.getBatteryLevel !== undefined) {
-                {{widget.properties.acControl?.getTemperatureMeasurements !== undefined ? ', ' : ''}}
-                <mat-icon class="battery-icon" [color]="getBatteryIconColor(widget.properties.acControl?.getBatteryLevel)">{{getBatteryIcon(widget.properties.acControl?.getBatteryLevel)}}</mat-icon>
+              ({{joinMeasurementsString($safeNavigationMigration(widget.properties.acControl?.getTemperatureMeasurements), true)}} °C
+              @if ($safeNavigationMigration(widget.properties.acControl?.getBatteryLevel) !== undefined) {
+                {{$safeNavigationMigration(widget.properties.acControl?.getTemperatureMeasurements) !== undefined ? ', ' : ''}}
+                <mat-icon class="battery-icon" [color]="getBatteryIconColor($safeNavigationMigration(widget.properties.acControl?.getBatteryLevel))">{{getBatteryIcon($safeNavigationMigration(widget.properties.acControl?.getBatteryLevel))}}</mat-icon>
                 {{joinMeasurementsString([widget.properties.acControl.getBatteryLevel], true)}} %
               }
               )
@@ -61,7 +61,7 @@
           }
         </div>
         <div fxLayout="row" fxLayoutAlign="space-between">
-          @if (widget.properties.acControl?.getOnOff !== undefined) {
+          @if ($safeNavigationMigration(widget.properties.acControl?.getOnOff) !== undefined) {
             <button mat-icon-button color="accent"
               (click)="togglePower()">
               @if (widget.properties.acControl?.getOnOff?.value === true) {
@@ -72,42 +72,42 @@
               }
             </button>
           }
-          @if (widget.properties.acControl?.setModeAuto !== undefined) {
+          @if ($safeNavigationMigration(widget.properties.acControl?.setModeAuto) !== undefined) {
             <button mat-icon-button
               [color]="widget.properties.acControl?.getMode?.value === widget.properties.acControl?.setModeAuto?.value ? 'warn': 'accent'"
-              (click)="runCommand(widget.properties.acControl?.setModeAuto, widget.properties.acControl?.setModeAuto?.value)">
+              (click)="runCommand($safeNavigationMigration(widget.properties.acControl?.setModeAuto), $safeNavigationMigration(widget.properties.acControl?.setModeAuto?.value))">
               <mat-icon>auto_mode</mat-icon>
             </button>
           }
-          @if (widget.properties.acControl?.setModeCool !== undefined) {
+          @if ($safeNavigationMigration(widget.properties.acControl?.setModeCool) !== undefined) {
             <button mat-icon-button color="accent"
               [color]="widget.properties.acControl?.getMode?.value === widget.properties.acControl?.setModeCool?.value ? 'warn': 'accent'"
-              (click)="runCommand(widget.properties.acControl?.setModeCool, widget.properties.acControl?.setModeCool?.value)">
+              (click)="runCommand($safeNavigationMigration(widget.properties.acControl?.setModeCool), $safeNavigationMigration(widget.properties.acControl?.setModeCool?.value))">
               <mat-icon>ac_unit</mat-icon>
             </button>
           }
-          @if (widget.properties.acControl?.setModeHeat !== undefined) {
+          @if ($safeNavigationMigration(widget.properties.acControl?.setModeHeat) !== undefined) {
             <button mat-icon-button color="accent"
               [color]="widget.properties.acControl?.getMode?.value === widget.properties.acControl?.setModeHeat?.value ? 'warn': 'accent'"
-              (click)="runCommand(widget.properties.acControl?.setModeHeat, widget.properties.acControl?.setModeHeat?.value)">
+              (click)="runCommand($safeNavigationMigration(widget.properties.acControl?.setModeHeat), $safeNavigationMigration(widget.properties.acControl?.setModeHeat?.value))">
               <mat-icon>local_fire_department</mat-icon>
             </button>
           }
-          @if (widget.properties.acControl?.setModeVent !== undefined) {
+          @if ($safeNavigationMigration(widget.properties.acControl?.setModeVent) !== undefined) {
             <button mat-icon-button color="accent"
               [color]="widget.properties.acControl?.getMode?.value === widget.properties.acControl?.setModeVent?.value ? 'warn': 'accent'"
-              (click)="runCommand(widget.properties.acControl?.setModeVent, widget.properties.acControl?.setModeVent?.value)">
+              (click)="runCommand($safeNavigationMigration(widget.properties.acControl?.setModeVent), $safeNavigationMigration(widget.properties.acControl?.setModeVent?.value))">
               <mat-icon>air</mat-icon>
             </button>
           }
-          @if (widget.properties.acControl?.setModeDry !== undefined) {
+          @if ($safeNavigationMigration(widget.properties.acControl?.setModeDry) !== undefined) {
             <button mat-icon-button color="accent"
               [color]="widget.properties.acControl?.getMode?.value === widget.properties.acControl?.setModeDry?.value ? 'warn': 'accent'"
-              (click)="runCommand(widget.properties.acControl?.setModeDry, widget.properties.acControl?.setModeDry?.value)">
+              (click)="runCommand($safeNavigationMigration(widget.properties.acControl?.setModeDry), $safeNavigationMigration(widget.properties.acControl?.setModeDry?.value))">
               <mat-icon>water_drop</mat-icon>
             </button>
           }
-          @if (widget.properties.acControl?.getLocked !== undefined) {
+          @if ($safeNavigationMigration(widget.properties.acControl?.getLocked) !== undefined) {
             <button mat-icon-button color="accent"
               (click)="toggleLocked()">
               @if (widget.properties.acControl?.getLocked?.value === false) {
@@ -119,25 +119,25 @@
             </button>
           }
         </div>
-        @if (widget.properties.acControl?.getFanSpeedLevel !== undefined && widget.properties.acControl?.setFanSpeedLevel !== undefined) {
+        @if ($safeNavigationMigration(widget.properties.acControl?.getFanSpeedLevel) !== undefined && $safeNavigationMigration(widget.properties.acControl?.setFanSpeedLevel) !== undefined) {
           <div
             fxLayout="row" fxLayoutAlign="space-between center">
             <mat-icon inline>air</mat-icon>
             <mat-slider [min]="0" [max]=100 [step]="1" color="accent" discrete>
               <input matSliderThumb [value]="widget.properties.acControl?.getFanSpeedLevel?.value || 0"
-                (valueChange)="runCommand(widget.properties.acControl?.setFanSpeedLevel, $event)"/>
+                (valueChange)="runCommand($safeNavigationMigration(widget.properties.acControl?.setFanSpeedLevel), $event)"/>
             </mat-slider>
             %
           </div>
         }
-        @if (widget.properties.acControl?.getFanSpeedLevelAutomatic !== undefined && widget.properties.acControl?.setFanSpeedLevelAutomatic !== undefined) {
+        @if ($safeNavigationMigration(widget.properties.acControl?.getFanSpeedLevelAutomatic) !== undefined && $safeNavigationMigration(widget.properties.acControl?.setFanSpeedLevelAutomatic) !== undefined) {
           <div
             fxLayout="row" fxLayoutAlign="space-between center">
             <mat-icon inline>air</mat-icon>
             @if (widget.properties.acControl?.getFanSpeedLevelAutomatic?.value !== 'AUTO') {
               <button
                 mat-stroked-button color="accent"
-                (click)="runCommand(widget.properties.acControl?.setFanSpeedLevelAutomatic, 'AUTO')">Auto
+                (click)="runCommand($safeNavigationMigration(widget.properties.acControl?.setFanSpeedLevelAutomatic), 'AUTO')">Auto
               </button>
             }
             @if (widget.properties.acControl?.getFanSpeedLevelAutomatic?.value === 'AUTO') {
@@ -148,7 +148,7 @@
             @if (widget.properties.acControl?.getFanSpeedLevelAutomatic?.value !== 'LOW') {
               <button
                 mat-stroked-button color="accent"
-                (click)="runCommand(widget.properties.acControl?.setFanSpeedLevelAutomatic, 'LOW')">Low
+                (click)="runCommand($safeNavigationMigration(widget.properties.acControl?.setFanSpeedLevelAutomatic), 'LOW')">Low
               </button>
             }
             @if (widget.properties.acControl?.getFanSpeedLevelAutomatic?.value === 'LOW') {
@@ -159,7 +159,7 @@
             @if (widget.properties.acControl?.getFanSpeedLevelAutomatic?.value !== 'MID') {
               <button
                 mat-stroked-button color="accent"
-                (click)="runCommand(widget.properties.acControl?.setFanSpeedLevelAutomatic, 'MID')">Mid
+                (click)="runCommand($safeNavigationMigration(widget.properties.acControl?.setFanSpeedLevelAutomatic), 'MID')">Mid
               </button>
             }
             @if (widget.properties.acControl?.getFanSpeedLevelAutomatic?.value === 'MID') {
@@ -170,7 +170,7 @@
             @if (widget.properties.acControl?.getFanSpeedLevelAutomatic?.value !== 'HIGH') {
               <button
                 mat-stroked-button color="accent"
-                (click)="runCommand(widget.properties.acControl?.setFanSpeedLevelAutomatic, 'HIGH')">High
+                (click)="runCommand($safeNavigationMigration(widget.properties.acControl?.setFanSpeedLevelAutomatic), 'HIGH')">High
               </button>
             }
             @if (widget.properties.acControl?.getFanSpeedLevelAutomatic?.value === 'HIGH') {
@@ -180,7 +180,7 @@
             }
           </div>
         }
-        @if (widget.properties.acControl?.getTargetTemperature !== undefined && widget.properties.acControl?.setTargetTemperature !== undefined) {
+        @if ($safeNavigationMigration(widget.properties.acControl?.getTargetTemperature) !== undefined && $safeNavigationMigration(widget.properties.acControl?.setTargetTemperature) !== undefined) {
           <div
             fxLayout="row" fxLayoutAlign="space-between center">
             <mat-icon inline>device_thermostat</mat-icon>
@@ -189,7 +189,7 @@
               [step]="widget.properties.acControl?.tempStep || 1"
               discrete
               color="accent"><input matSliderThumb (valueChange)="setAllTargets($event)"
-              [value]="(bufferedSetTemperature !== null ? [{value: bufferedSetTemperature}] : widget.properties.acControl?.getTargetTemperature || [{value:0}])[0]?.value"/>
+              [value]="$safeNavigationMigration((bufferedSetTemperature !== null ? [{value: bufferedSetTemperature}] : widget.properties.acControl?.getTargetTemperature || [{value:0}])[0]?.value)"/>
           </mat-slider>
           °C
         </div>

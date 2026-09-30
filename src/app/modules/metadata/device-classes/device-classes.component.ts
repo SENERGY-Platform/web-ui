@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
@@ -39,6 +39,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-device-classes',
     templateUrl: './device-classes.component.html',
     styleUrls: ['./device-classes.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit {

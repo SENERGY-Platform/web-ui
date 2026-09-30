@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 
 /**
@@ -27,6 +27,7 @@ import { MatDialogRef } from '@angular/material/dialog';
     selector: 'senergy-environments-version-conflict-dialog',
     templateUrl: './environments-version-conflict-dialog.component.html',
     styleUrls: ['./environments-version-conflict-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsVersionConflictDialogComponent {

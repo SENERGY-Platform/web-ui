@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CodeEditorLanguage } from '../../../../../core/components/code-editor/code-editor.component';
 import { CodeEditorCompletionSource } from '../../../../../core/components/code-editor/code-editor-completion';
@@ -31,6 +31,7 @@ import { ScriptEditModel } from '../../shared/designer-dialog.model';
 @Component({
     templateUrl: './script-editor-dialog.component.html',
     styleUrls: ['./script-editor-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ScriptEditorDialogComponent {

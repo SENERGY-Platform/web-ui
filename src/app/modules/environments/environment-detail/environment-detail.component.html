@@ -390,7 +390,7 @@
                     </div>
                     <mat-divider></mat-divider>
                     <h3>Source</h3>
-                    <mat-button-toggle-group [value]="selectedChannel!.source?.kind"
+                    <mat-button-toggle-group [value]="$safeNavigationMigration(selectedChannel!.source?.kind)"
                       (change)="onSourceKindChange(selectedChannel!, $event.value)" name="source-kind">
                       @for (k of SOURCE_KINDS; track k) {
                         <mat-button-toggle [value]="k">{{sourceKindLabel(k)}}</mat-button-toggle>

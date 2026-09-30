@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ChartSelectEvent, GoogleChartComponent } from 'ng2-google-charts';
 import { concatMap, of, Subscription, map } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -28,6 +28,7 @@ import { SingleValueModel } from '../single-value/shared/single-value.model';
     selector: 'senergy-pv-prediction',
     templateUrl: './pv-prediction.component.html',
     styleUrls: ['./pv-prediction.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PvPredictionComponent implements OnInit, OnDestroy {

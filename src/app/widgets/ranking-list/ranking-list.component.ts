@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { RankingListModel } from './shared/ranking-list.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
@@ -25,6 +25,7 @@ import { RankingListService } from './shared/ranking-list.service';
     selector: 'senergy-ranking-list',
     templateUrl: './ranking-list.component.html',
     styleUrls: ['./ranking-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class RankingListComponent implements OnInit, OnDestroy {

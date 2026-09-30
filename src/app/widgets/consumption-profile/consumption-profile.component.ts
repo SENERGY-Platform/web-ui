@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { map, Subscription } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ApexChartOptions } from '../charts/export/shared/charts-export-properties.model';
@@ -26,6 +26,7 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
     selector: 'senergy-consumption-profile-widget',
     templateUrl: './consumption-profile.component.html',
     styleUrls: ['./consumption-profile.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ConsumptionProfileComponent implements OnInit, OnDestroy {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges, OnDestroy } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import {
     DynamicFormGroup,
@@ -40,6 +40,7 @@ const INPUT_TYPES: { value: InputType; label: string }[] = [
     selector: 'senergy-reporting-object',
     templateUrl: './report-object.component.html',
     styleUrls: ['./report-object.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ReportObjectComponent implements OnChanges, OnDestroy {

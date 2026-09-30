@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ImportInstancesModel} from '../shared/import-instances.model';
 import {FormControl, Validators} from '@angular/forms';
@@ -31,6 +31,7 @@ import {environment} from '../../../../../environments/environment';
     selector: 'senergy-import-instance-export-dialog',
     templateUrl: './import-instance-export-dialog.component.html',
     styleUrls: ['./import-instance-export-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ImportInstanceExportDialogComponent implements OnInit {

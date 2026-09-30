@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UntypedFormControl, Validators } from '@angular/forms';
 import { DashboardModel } from '../shared/dashboard.model';
@@ -22,6 +22,7 @@ import { DashboardModel } from '../shared/dashboard.model';
 @Component({
     templateUrl: './dashboard-edit-dialog.component.html',
     styleUrls: ['./dashboard-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DashboardEditDialogComponent {

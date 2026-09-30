@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProcessRepoService } from '../../process-repo/shared/process-repo.service';
 import { DeploymentsService } from '../shared/deployments.service';
@@ -48,6 +48,7 @@ interface V2DeploymentsPreparedSelectionOptionModelWithGroup extends V2Deploymen
     selector: 'senergy-process-deployments-config',
     templateUrl: './deployments-config.component.html',
     styleUrls: ['./deployments-config.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessDeploymentsConfigComponent implements OnInit {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormArray, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
 import {
@@ -45,6 +45,7 @@ import {DeviceTypeService} from '../../metadata/device-types-overview/shared/dev
     selector: 'senergy-import-types-create-edit',
     templateUrl: './import-types-create-edit.component.html',
     styleUrls: ['./import-types-create-edit.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ImportTypesCreateEditComponent implements OnInit {

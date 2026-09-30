@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { deprecatedAspectName } from '../../device-types-overview/shared/device-type.model';
@@ -45,6 +45,7 @@ export interface AspectToClassDialogResult {
 @Component({
     templateUrl: './aspect-to-class-dialog.component.html',
     styleUrls: ['./aspect-to-class-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AspectToClassDialogComponent {

@@ -37,7 +37,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import {v4 as uuid} from 'uuid';
 import {MatTreeModule} from '@angular/material/tree';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
@@ -179,7 +179,7 @@ describe('DeviceTypesComponent', () => {
         },
         { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
         { provide: AspectClassesService, useValue: aspectClassesServiceSpy },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
     ]
 }).compileComponents();

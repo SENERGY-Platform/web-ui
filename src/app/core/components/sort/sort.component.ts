@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChange, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChange, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { SortModel } from './shared/sort.model';
 
 @Component({
     selector: 'senergy-sort',
     templateUrl: './sort.component.html',
     styleUrls: ['./sort.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SortComponent implements OnChanges {

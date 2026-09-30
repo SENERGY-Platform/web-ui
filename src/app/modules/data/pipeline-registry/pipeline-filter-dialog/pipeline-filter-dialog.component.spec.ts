@@ -4,7 +4,7 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angula
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {of} from 'rxjs';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import {provideHttpClient, withInterceptorsFromDi, withXhr} from '@angular/common/http';
 
 describe('PipelineFilterDialogComponent', () => {
   let component: PipelineFilterDialogComponent;
@@ -22,7 +22,7 @@ describe('PipelineFilterDialogComponent', () => {
             {provide: MatDialog, useValue: dialogSpy},
             { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
             { provide: MAT_DIALOG_DATA, useValue: undefined },
-            provideHttpClient(withInterceptorsFromDi()),
+            provideHttpClient(withXhr(), withInterceptorsFromDi()),
         ]
     })
     .compileComponents();

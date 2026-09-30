@@ -35,7 +35,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 
 describe('DeviceTypesContentVariableDialog', () => {
     let component: DeviceTypesContentVariableDialogComponent;
@@ -60,7 +60,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                         prohibitedNames: [],
                     },
                 },
-                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(DeviceTypesContentVariableDialogComponent);

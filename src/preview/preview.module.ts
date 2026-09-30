@@ -1,5 +1,5 @@
 /* Preview harness module - local only. */
-import { Component, NgModule } from '@angular/core';
+import { Component, NgModule, ChangeDetectionStrategy } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
@@ -14,6 +14,7 @@ import { PermissionTestResponse } from '../app/modules/admin/permissions/shared/
 @Component({
     selector: 'senergy-root',
     template: '<div style="height:100vh;display:flex;flex-direction:column"><router-outlet></router-outlet></div>',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PreviewRootComponent {

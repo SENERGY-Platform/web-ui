@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DevicesStateService } from './shared/devices-state.service';
 import { DevicesStateModel } from './shared/devices-state.model';
@@ -27,6 +27,7 @@ import { DeviceInstancesRouterStateTabEnum } from 'src/app/modules/devices/devic
     selector: 'senergy-devices-state',
     templateUrl: './devices-state.component.html',
     styleUrls: ['./devices-state.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DevicesStateComponent implements OnInit, OnDestroy {

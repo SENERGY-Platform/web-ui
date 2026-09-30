@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     DeviceTypeContentVariableModel,
@@ -25,6 +25,7 @@ import {
 @Component({
     templateUrl: './device-types-content-variable-json-dialog.component.html',
     styleUrls: ['./device-types-content-variable-json-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceTypesContentVariableJsonDialogComponent {

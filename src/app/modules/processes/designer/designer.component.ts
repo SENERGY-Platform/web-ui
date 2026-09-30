@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import {
     Modeler,
@@ -50,6 +50,7 @@ import { MissingMetadataOverlays } from '../../metadata/shared/missing-metadata-
     selector: 'senergy-process-designer',
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessDesignerComponent implements OnInit, OnDestroy {

@@ -16,7 +16,7 @@
 
 
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import {
     DeviceTypeAspectModel,
     DeviceTypeAspectNodeModel,
@@ -40,6 +40,7 @@ import {
     selector: 'senergy-criteria-list',
     templateUrl: './criteria-list.component.html',
     styleUrls: ['./criteria-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CriteriaListComponent implements OnInit {

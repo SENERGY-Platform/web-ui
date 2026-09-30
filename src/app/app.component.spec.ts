@@ -27,7 +27,7 @@ import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { NotificationService } from './core/components/notifications/shared/notification.service';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
@@ -57,7 +57,7 @@ describe('AppComponent', () => {
         { provide: AuthorizationService, useClass: AuthorizationServiceMock },
         { provide: LadonService, useValue: ladonServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting()
     ]
 }).compileComponents();

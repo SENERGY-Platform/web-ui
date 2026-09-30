@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { LocationsService } from '../shared/locations.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -32,6 +32,7 @@ import { DeviceGroupsDialogService } from '../../device-groups/shared/device-gro
     selector: 'senergy-locations-edit',
     templateUrl: './locations-edit.component.html',
     styleUrls: ['./locations-edit.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class LocationsEditComponent implements OnInit {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Source } from '../../shared/environments.model';
 import { clonePresetSource, CONTEXT_PRESETS, ContextPreset } from '../../shared/environments-context-presets';
@@ -39,6 +39,7 @@ export interface AddContextDialogResult {
     selector: 'senergy-environments-add-context-dialog',
     templateUrl: './environments-add-context-dialog.component.html',
     styleUrls: ['./environments-add-context-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsAddContextDialogComponent implements OnInit {

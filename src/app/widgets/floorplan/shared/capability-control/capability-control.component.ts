@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { FloorplanControlInput, FloorplanControlModel, isOneClickControl, sendsOnChange } from '../floorplan.model';
 
@@ -31,6 +31,7 @@ export interface CapabilityCommandModel {
     selector: 'senergy-capability-control',
     templateUrl: './capability-control.component.html',
     styleUrl: './capability-control.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CapabilityControlComponent implements OnInit {

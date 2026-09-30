@@ -15,7 +15,7 @@
  */
 
 
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
 import {BudgetModel} from '../shared/budget.model';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
@@ -25,6 +25,7 @@ import {BudgetService} from '../shared/budget.service';
     selector: 'senergy-budget-create-edit',
     templateUrl: './budget-create-edit.component.html',
     styleUrls: ['./budget-create-edit.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class BudgetCreateEditComponent {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
 import {UntypedFormControl, Validators} from '@angular/forms';
@@ -22,6 +22,7 @@ import {UntypedFormControl, Validators} from '@angular/forms';
 @Component({
     templateUrl: './concepts-new-dialog.component.html',
     styleUrls: ['./concepts-new-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ConceptsNewDialogComponent {

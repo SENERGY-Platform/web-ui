@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
@@ -24,6 +24,7 @@ import { DeviceTypeConceptModel } from '../../device-types-overview/shared/devic
 @Component({
     templateUrl: './functions-edit-dialog.component.html',
     styleUrls: ['./functions-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FunctionsEditDialogComponent implements OnInit {

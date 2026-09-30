@@ -37,7 +37,7 @@ import { CommonModule } from '@angular/common';
 import { DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { AspectsPermSearchModel } from '../../../metadata/aspects/shared/aspects-perm-search.model';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import {FlexLayoutModule} from '@ngbracket/ngx-layout';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
@@ -539,7 +539,7 @@ describe('DeviceGroupsEditComponent', () => {
         },
         { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
         { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
     ]
 }).compileComponents();

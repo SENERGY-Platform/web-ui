@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {UntypedFormBuilder, Validators} from '@angular/forms';
 import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
@@ -34,6 +34,7 @@ import {rangeValidator} from '../../../core/validators/range.validator';
 @Component({
     templateUrl: './range-slider-edit-dialog.component.html',
     styleUrls: ['./range-slider-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class RangeSliderEditDialogComponent implements OnInit {

@@ -56,7 +56,7 @@
           <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Connection
           </th>
           <td mat-cell *matCellDef="let network">
-            <senergy-state-icon [state]="network?.connection_state"></senergy-state-icon>
+            <senergy-state-icon [state]="$safeNavigationMigration(network?.connection_state)"></senergy-state-icon>
           </td>
         </ng-container>
         <ng-container matColumnDef="shared">

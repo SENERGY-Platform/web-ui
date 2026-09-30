@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
     MAT_DIALOG_DATA,
     MatDialogRef
@@ -51,6 +51,7 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 @Component({
     templateUrl: './notification-dialog.component.html',
     styleUrls: ['./notification-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class NotificationDialogComponent implements OnInit, OnDestroy {

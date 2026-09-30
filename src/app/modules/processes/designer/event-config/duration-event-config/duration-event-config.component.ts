@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { DurationIso, DurationResult } from '../../shared/designer.model';
 import * as moment from 'moment';
@@ -23,6 +23,7 @@ import * as moment from 'moment';
     selector: 'senergy-duration-event-config',
     templateUrl: './duration-event-config.component.html',
     styleUrls: ['./duration-event-config.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DurationEventConfigComponent implements OnInit {

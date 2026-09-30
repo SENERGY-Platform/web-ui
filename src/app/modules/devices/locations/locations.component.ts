@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -34,6 +34,7 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
     selector: 'senergy-locations',
     templateUrl: './locations.component.html',
     styleUrls: ['./locations.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {

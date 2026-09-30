@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 export interface QueryPreviewData {
@@ -35,6 +35,7 @@ const MAX_ROWS = 200;
     selector: 'senergy-reporting-query-preview-dialog',
     templateUrl: './query-preview-dialog.component.html',
     styleUrls: ['./query-preview-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class QueryPreviewDialogComponent {

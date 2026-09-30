@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ChartsExportVAxesModel, ChartsExportDeviceGroupMergingStrategy, ChartsExportConversion } from '../../shared/charts-export-properties.model';
 import { ListRulesComponent } from '../list-rules/list-rules.component';
@@ -27,6 +27,7 @@ import { hashCode } from 'src/app/core/services/util.service';
     selector: 'senergy-axis-config',
     templateUrl: './axis-config.component.html',
     styleUrls: ['./axis-config.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AxisConfigComponent {

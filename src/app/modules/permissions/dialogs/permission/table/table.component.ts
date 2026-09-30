@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterContentInit, Component, Input, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { PermissionsRightsModel } from '../../../shared/permissions-rights.model';
 import { PermissionsUserModel } from '../../../shared/permissions-user.model';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
@@ -37,6 +37,7 @@ export enum PermissionTypes {
     selector: 'senergy-permission-table',
     templateUrl: './table.component.html',
     styleUrls: ['./table.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class TableComponent implements AfterContentInit {

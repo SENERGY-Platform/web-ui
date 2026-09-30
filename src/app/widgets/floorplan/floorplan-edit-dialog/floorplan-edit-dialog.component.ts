@@ -15,7 +15,7 @@
  */
 
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable, Subscription, concatMap, forkJoin, map, of } from 'rxjs';
@@ -50,6 +50,7 @@ import { ImageCroppedEvent } from 'ngx-image-cropper';
     selector: 'senergy-floorplan-edit-dialog',
     templateUrl: './floorplan-edit-dialog.component.html',
     styleUrl: './floorplan-edit-dialog.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {

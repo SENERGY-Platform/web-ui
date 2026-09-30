@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {FormBuilder, FormGroup, UntypedFormControl, Validators} from '@angular/forms';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
@@ -24,6 +24,7 @@ import {v4 as uuid} from 'uuid';
 @Component({
     templateUrl: './functions-create-dialog.component.html',
     styleUrls: ['./functions-create-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FunctionsCreateDialogComponent implements OnInit {

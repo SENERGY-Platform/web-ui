@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BpmnElement, BpmnParameter } from '../../shared/designer.model';
 import { DesignerHelperService } from '../../shared/designer-helper.service';
@@ -23,6 +23,7 @@ import { AddTagFn } from '../../../../../core/model/mtx-select.model';
 @Component({
     templateUrl: './edit-input-dialog.component.html',
     styleUrls: ['./edit-input-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EditInputDialogComponent {

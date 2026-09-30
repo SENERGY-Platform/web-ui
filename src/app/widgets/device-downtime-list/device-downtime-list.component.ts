@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DeviceDowntimeListService } from './shared/device-downtime-list.service';
 import { Subscription } from 'rxjs';
@@ -28,6 +28,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
     selector: 'senergy-device-downtime-list',
     templateUrl: './device-downtime-list.component.html',
     styleUrls: ['./device-downtime-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceDowntimeListComponent implements OnInit, OnDestroy {

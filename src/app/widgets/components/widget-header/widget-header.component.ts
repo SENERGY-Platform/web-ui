@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -23,6 +23,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
     selector: 'senergy-widget-header',
     templateUrl: './widget-header.component.html',
     styleUrls: ['./widget-header.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class WidgetHeaderComponent {

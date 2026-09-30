@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { HubModel } from '../shared/networks.model';
 import { Attribute } from '../../device-instances/shared/device-instances.model';
@@ -37,6 +37,7 @@ import { getCenter } from 'ol/extent';
 @Component({
     templateUrl: './networks-edit-dialog.component.html',
     styleUrls: ['./networks-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class NetworksEditDialogComponent implements OnInit {

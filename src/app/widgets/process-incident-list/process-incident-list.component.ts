@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { ProcessIncidentListService } from './shared/process-incident-list.service';
 import { Subscription } from 'rxjs';
@@ -28,6 +28,7 @@ import { Router } from '@angular/router';
     selector: 'senergy-process-incident-list',
     templateUrl: './process-incident-list.component.html',
     styleUrls: ['./process-incident-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessIncidentListComponent implements OnInit, OnDestroy {

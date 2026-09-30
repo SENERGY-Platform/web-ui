@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { concat, Observable, of } from 'rxjs';
 import { concatMap, map, tap, toArray } from 'rxjs/operators';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -60,6 +60,7 @@ export interface AspectClassGroupNode extends DeviceTypeAspectModel {
     selector: 'senergy-aspects',
     templateUrl: './aspects.component.html',
     styleUrls: ['./aspects.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AspectsComponent implements OnInit {

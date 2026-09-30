@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { DeviceTypeCharacteristicsModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import {
   characteristicStep,
@@ -34,6 +34,7 @@ import {
     selector: 'senergy-characteristic-input',
     templateUrl: './characteristic-input.component.html',
     styleUrl: './characteristic-input.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CharacteristicInputComponent implements OnInit {

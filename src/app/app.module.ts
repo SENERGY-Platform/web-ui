@@ -20,7 +20,7 @@ import { APP_INITIALIZER, LOCALE_ID, NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { AppRoutingModule } from './app-routing.module';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { KeycloakAngularModule } from 'keycloak-angular';
 import { initializerService } from './core/services/initializer.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -67,7 +67,7 @@ registerLocaleData(localeDe);
             useClass: AuthorizationService,
             multi: true,
         },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideNativeDateAdapter(),
     ]
 })

@@ -27,7 +27,7 @@ import { CoreModule } from '../../../core/core.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 class MockOperatorRepoService {}
@@ -49,7 +49,7 @@ describe('OperatorRepoComponent', () => {
         { provide: OperatorRepoService, useClass: MockOperatorRepoService },
         { provide: AuthorizationService, useClass: AuthorizationServiceMock },
         DialogsService,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
     ]
 });

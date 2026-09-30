@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { HistoricDataConfig } from '../../shared/designer.model';
 import { ExportModel } from '../../../../exports/shared/export.model';
@@ -23,6 +23,7 @@ import { ExportService } from '../../../../exports/shared/export.service';
 @Component({
     templateUrl: './historic-data-config-dialog.component.html',
     styleUrls: ['./historic-data-config-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class HistoricDataConfigDialogComponent {

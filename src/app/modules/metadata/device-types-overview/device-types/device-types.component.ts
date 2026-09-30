@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
     DeviceTypeAspectClassModel,
     DeviceTypeAspectModel,
@@ -66,6 +66,7 @@ interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     selector: 'senergy-device-types',
     templateUrl: './device-types.component.html',
     styleUrls: ['./device-types.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceTypesComponent implements OnInit {

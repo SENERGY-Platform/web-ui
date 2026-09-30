@@ -23,7 +23,7 @@ import { of } from 'rxjs';
 import { DeviceInstancesService } from '../../shared/device-instances.service';
 
 import { DeviceInstancesFilterDialogComponent } from './device-instances-filter-dialog.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeviceInstancesFilterDialogComponent', () => {
@@ -45,7 +45,7 @@ describe('DeviceInstancesFilterDialogComponent', () => {
             provide: MAT_DIALOG_DATA,
             useValue: {},
         },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
     ]
 })

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {CellModel} from '../../diagram-editor/shared/diagram.model';
 
@@ -27,6 +27,7 @@ export interface DialogData {
     selector: 'flow-update-dialog',
     templateUrl: './flow-update-dialog.component.html',
     styleUrls: ['./flow-update-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FlowUpdateDialogComponent {

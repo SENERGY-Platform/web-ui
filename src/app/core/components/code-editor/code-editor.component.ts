@@ -26,6 +26,7 @@ import {
     Output,
     SimpleChanges,
     ViewChild,
+    ChangeDetectionStrategy
 } from '@angular/core';
 import type { editor, IDisposable } from 'monaco-editor/editor/editor.api.js';
 import {
@@ -56,6 +57,7 @@ export type CodeEditorLanguage = 'javascript' | 'json' | 'plaintext';
     selector: 'senergy-code-editor',
     templateUrl: './code-editor.component.html',
     styleUrls: ['./code-editor.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CodeEditorComponent implements AfterViewInit, OnChanges, OnDestroy {

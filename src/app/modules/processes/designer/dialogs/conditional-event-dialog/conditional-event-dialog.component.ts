@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
     MAT_DIALOG_DATA,
     MatDialogRef
@@ -44,6 +44,7 @@ import {
 @Component({
     templateUrl: './conditional-event-dialog.component.html',
     styleUrls: ['./conditional-event-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ConditionalEventDialogComponent implements OnInit {

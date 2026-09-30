@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 import { SmartServiceInstanceService } from './shared/instances.service';
 import { SmartServiceInstanceModel } from './shared/instances.model';
@@ -48,6 +48,7 @@ import { smartServiceLogsUrl } from './shared/opensearch';
             transition('expanded <=> collapsed', animate('220ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
         ]),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { ProcessModel } from '../../processes/process-repo/shared/process.model';
@@ -42,6 +42,7 @@ const grids = new Map([
     selector: 'senergy-smart-service-designs',
     templateUrl: './designs.component.html',
     styleUrls: ['./designs.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDestroy {

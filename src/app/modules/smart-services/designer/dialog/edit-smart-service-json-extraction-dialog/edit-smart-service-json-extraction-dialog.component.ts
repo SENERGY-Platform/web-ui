@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     SmartServiceTaskInputDescription,
@@ -25,6 +25,7 @@ import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../pr
 @Component({
     templateUrl: './edit-smart-service-json-extraction-dialog.component.html',
     styleUrls: ['./edit-smart-service-json-extraction-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EditSmartServiceJsonExtractionDialogComponent {

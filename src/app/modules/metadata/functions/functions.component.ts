@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {forkJoin, Observable, Subscription, map, skip} from 'rxjs';
 import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
@@ -43,6 +43,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-functions',
     templateUrl: './functions.component.html',
     styleUrls: ['./functions.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {

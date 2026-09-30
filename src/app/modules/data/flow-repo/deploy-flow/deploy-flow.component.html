@@ -88,11 +88,11 @@
                           <mat-expansion-panel-header>
                             <mat-panel-title>Operator</mat-panel-title>
                             <mat-panel-description>
-                              {{this.getPipelineOperator(pipeline.get('pipelineId')?.value,
-                              pipeline.get('operatorId')?.value)?.name}}
+                              {{this.getPipelineOperator($safeNavigationMigration(pipeline.get('pipelineId')?.value),
+                              $safeNavigationMigration(pipeline.get('operatorId')?.value))?.name}}
                               -
-                              {{this.getPipelineOperator(pipeline.get('pipelineId')?.value,
-                              pipeline.get('operatorId')?.value)?.id}}
+                              {{this.getPipelineOperator($safeNavigationMigration(pipeline.get('pipelineId')?.value),
+                              $safeNavigationMigration(pipeline.get('operatorId')?.value))?.id}}
                             </mat-panel-description>
                           </mat-expansion-panel-header>
                           <div>Select an operator by clicking on it</div>
@@ -104,7 +104,7 @@
                       <mat-form-field fxFlex color="accent" appearance="outline">
                         <mat-label>Path</mat-label>
                         <mtx-select
-                          [items]="getOperatorPaths(pipeline.get('pipelineId')?.value, pipeline.get('operatorId')?.value)"
+                          [items]="getOperatorPaths($safeNavigationMigration(pipeline.get('pipelineId')?.value), $safeNavigationMigration(pipeline.get('operatorId')?.value))"
                           formControlName="path" appendTo=".ng-select-anchor">
                         </mtx-select>
                         <mat-error senergyError label="Path"></mat-error>
@@ -123,14 +123,14 @@
                   </senergy-aspect-select>
                   <mat-form-field fxFlex color="accent" appearance="outline">
                     <mat-label>Function</mat-label>
-                    <mtx-select [items]="getAspectFunctions(input.get('aspectIds')?.value)" bindLabel="name"
+                    <mtx-select [items]="getAspectFunctions($safeNavigationMigration(input.get('aspectIds')?.value))" bindLabel="name"
                       bindValue="id" formControlName="functionId" appendTo=".ng-select-anchor">
                     </mtx-select>
                     <mat-error senergyError label="Function"></mat-error>
                   </mat-form-field>
                   <mat-form-field fxFlex color="accent" appearance="outline">
                     <mat-label>Characteristics</mat-label>
-                    <mtx-select [items]="getFunctionCharacteristics(input.get('functionId')?.value)"
+                    <mtx-select [items]="getFunctionCharacteristics($safeNavigationMigration(input.get('functionId')?.value))"
                       bindLabel="name" bindValue="id" formControlName="characteristics" multiple
                       closeOnSelect="false" appendTo=".ng-select-anchor">
                     </mtx-select>
@@ -139,7 +139,7 @@
                   <mat-form-field fxFlex color="accent" appearance="outline">
                     <mat-label>Device/group/import</mat-label>
                     <mtx-select
-                      [items]="getSelectables(input.get('aspectIds')?.value, input.get('functionId')?.value, input.get('characteristics')?.value)"
+                      [items]="getSelectables($safeNavigationMigration(input.get('aspectIds')?.value), $safeNavigationMigration(input.get('functionId')?.value), $safeNavigationMigration(input.get('characteristics')?.value))"
                       bindLabel="name" bindValue="id" placeholder="Device/Group"
                       formControlName="selectableId" groupBy="groupName" appendTo=".ng-select-anchor">
                     </mtx-select>
@@ -150,14 +150,14 @@
                       [formGroup]="deviceType">
                       <mat-form-field fxFlex color="accent" appearance="outline">
                         <mat-label
-                          [ngClass]="{'device-type-not-used-label': getServiceOptions(input, deviceType.get('id')?.value).length === 0}">
-                          {{getServiceOptions(input, deviceType.get('id')?.value).length > 0 ? 'Service/Path:
+                          [ngClass]="{'device-type-not-used-label': getServiceOptions(input, $safeNavigationMigration(deviceType.get('id')?.value)).length === 0}">
+                          {{getServiceOptions(input, $safeNavigationMigration(deviceType.get('id')?.value)).length > 0 ? 'Service/Path:
                           ' + deviceType.get('name')?.value : deviceType.get('name')?.value + ' will not be
                         used: no matching characteristic!'}}</mat-label>
                         <mtx-select placeholder="Service" [multiple]="true" groupBy="group"
                           [compareWith]="comparePathOptions" appendTo=".ng-select-anchor"
                           formControlName="selection" closeOnSelect="false">
-                          @for (option of getServiceOptions(input, deviceType.get('id')?.value); track option) {
+                          @for (option of getServiceOptions(input, $safeNavigationMigration(deviceType.get('id')?.value)); track option) {
                             <mtx-option
                               [disabled]="getServiceOptionDisabledFunction(deviceType)(option)"
                             [value]="option">{{option.path}}</mtx-option>

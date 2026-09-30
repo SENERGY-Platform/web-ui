@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { WaitingDeviceModel } from '../shared/waiting-room.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
@@ -25,6 +25,7 @@ import { Attribute } from '../../device-instances/shared/device-instances.model'
 @Component({
     templateUrl: './waiting-room-device-edit-dialog.component.html',
     styleUrls: ['./waiting-room-device-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class WaitingRoomDeviceEditDialogComponent {

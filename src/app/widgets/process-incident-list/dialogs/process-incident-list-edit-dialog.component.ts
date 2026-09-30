@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -26,6 +26,7 @@ import {FormBuilder, FormGroup,  Validators} from '@angular/forms';
 @Component({
     templateUrl: './process-incident-list-edit-dialog.component.html',
     styleUrls: ['./process-incident-list-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessIncidentListEditDialogComponent implements OnInit {

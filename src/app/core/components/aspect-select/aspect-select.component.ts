@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Injector, Input, OnChanges, OnInit, SimpleChanges, forwardRef } from '@angular/core';
+import { Component, Injector, Input, OnChanges, OnInit, SimpleChanges, forwardRef, ChangeDetectionStrategy } from '@angular/core';
 import {
     AbstractControl,
     ControlValueAccessor,
@@ -52,6 +52,7 @@ import {
         { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => AspectSelectComponent), multi: true },
         { provide: NG_VALIDATORS, useExisting: forwardRef(() => AspectSelectComponent), multi: true },
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAccessor, Validator {

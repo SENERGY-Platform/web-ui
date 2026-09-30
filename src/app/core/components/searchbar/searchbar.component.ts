@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
 import {UntypedFormControl} from '@angular/forms';
 import {SearchbarService} from './shared/searchbar.service';
 
@@ -22,6 +22,7 @@ import {SearchbarService} from './shared/searchbar.service';
     selector: 'senergy-searchbar',
     templateUrl: './searchbar.component.html',
     styleUrls: ['./searchbar.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {

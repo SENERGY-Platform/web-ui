@@ -48,7 +48,7 @@
       <div class="content-box">
         <senergy-single-value-value [color]="highlightColor" [sv]="sv" [widget]="widget"></senergy-single-value-value>
         @if (showTimestamp) {
-          <div id="date-container" [class]="timestampAgeClass">{{this.sv?.date | date:"short" }}</div>
+          <div id="date-container" [class]="timestampAgeClass">{{$safeNavigationMigration(this.sv?.date) | date:"short" }}</div>
         }
       </div>
     }

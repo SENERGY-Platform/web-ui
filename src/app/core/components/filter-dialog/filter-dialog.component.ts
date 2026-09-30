@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormRecord } from '@angular/forms';
 import { AddTagFn } from '../../model/mtx-select.model';
 import { forkJoin, map, Observable } from 'rxjs';
@@ -28,6 +28,7 @@ import { FilterDialogConfigModel, FilterDialogFieldModel, FilterDialogResultMode
     selector: 'senergy-filter-dialog',
     templateUrl: './filter-dialog.component.html',
     styleUrls: ['./filter-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FilterDialogComponent implements OnInit {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ParserService } from '../../shared/parser.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfigModel, ParseModel } from '../../shared/parse.model';
@@ -35,6 +35,7 @@ import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/sh
     selector: 'senergy-deploy-flow-classic',
     templateUrl: './deploy-flow-component-classic.component.html',
     styleUrls: ['./deploy-flow-component-classic.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeployFlowClassicComponent {

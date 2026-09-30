@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Location } from '@angular/common';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
@@ -58,6 +58,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     selector: 'senergy-new-export',
     templateUrl: './new-export.component.html',
     styleUrls: ['./new-export.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class NewExportComponent implements OnInit {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 interface Tile {
     key: string;
@@ -50,6 +50,7 @@ interface Tile {
     selector: 'senergy-environments-live-state-tiles',
     templateUrl: './environments-live-state-tiles.component.html',
     styleUrls: ['./environments-live-state-tiles.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsLiveStateTilesComponent implements OnChanges {

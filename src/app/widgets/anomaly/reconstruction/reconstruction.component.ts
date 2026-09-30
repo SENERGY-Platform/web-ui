@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { GoogleChartComponent } from 'ng2-google-charts';
 import { ChartsModel } from 'src/app/widgets/charts/shared/charts.model';
@@ -24,6 +24,7 @@ import { AnomalyResultModel } from '../shared/anomaly.model';
     selector: 'anomaly-reconstruction',
     templateUrl: './reconstruction.component.html',
     styleUrls: ['./reconstruction.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AnomalyReconstructionComponent implements OnInit {

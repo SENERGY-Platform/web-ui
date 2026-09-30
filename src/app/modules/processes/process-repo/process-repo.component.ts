@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { concatMap, forkJoin, map, Observable, Subscription } from 'rxjs';
@@ -50,6 +50,7 @@ const sortingAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel(
     selector: 'senergy-process-repo',
     templateUrl: './process-repo.component.html',
     styleUrls: ['./process-repo.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {

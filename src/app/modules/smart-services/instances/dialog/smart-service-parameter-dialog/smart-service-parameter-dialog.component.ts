@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { SmartServiceExtendedParameterModel, SmartServiceParameterOptionModel } from '../../../releases/shared/release.model';
@@ -94,6 +94,7 @@ const virtualScrollFrom = 50;
     selector: 'senergy-smart-service-parameter-dialog',
     templateUrl: './smart-service-parameter-dialog.component.html',
     styleUrls: ['./smart-service-parameter-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SmartServiceParameterDialogComponent implements OnInit, OnDestroy {

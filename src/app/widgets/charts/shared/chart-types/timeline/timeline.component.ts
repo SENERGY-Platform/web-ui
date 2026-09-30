@@ -18,7 +18,8 @@ import {
     ChangeDetectorRef,
     Component, Input,
     OnChanges,
-    OnInit, SimpleChanges
+    OnInit, SimpleChanges,
+    ChangeDetectionStrategy
 } from '@angular/core';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { ApexChartOptions, ChartsExportVAxesModel } from '../../../export/shared/charts-export-properties.model';
@@ -28,6 +29,7 @@ import ApexCharts from 'apexcharts';
     selector: 'timeline-chart',
     templateUrl: './timeline.component.html',
     styleUrls: ['./timeline.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class TimelineComponent implements OnInit, OnChanges {

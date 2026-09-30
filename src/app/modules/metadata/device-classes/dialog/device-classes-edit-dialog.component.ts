@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
@@ -23,6 +23,7 @@ import { DeviceTypeDeviceClassModel } from '../../device-types-overview/shared/d
 @Component({
     templateUrl: './device-classes-edit-dialog.component.html',
     styleUrls: ['./device-classes-edit-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceClassesEditDialogComponent {

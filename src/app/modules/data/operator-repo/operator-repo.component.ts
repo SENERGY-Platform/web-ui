@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { OperatorModel } from './shared/operator.model';
 import { OperatorRepoService } from './shared/operator-repo.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
@@ -40,6 +40,7 @@ import {FlowOperatorUsage} from '../flow-repo/shared/flow.model';
     selector: 'senergy-operator-repo',
     templateUrl: './operator-repo.component.html',
     styleUrls: ['./operator-repo.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class OperatorRepoComponent implements OnInit, OnDestroy {

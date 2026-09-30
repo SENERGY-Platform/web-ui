@@ -15,7 +15,7 @@
  */
 
 
-import {Component, Input} from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {SingleValueModel} from '../shared/single-value.model';
 
@@ -23,6 +23,7 @@ import {SingleValueModel} from '../shared/single-value.model';
     selector: 'senergy-single-value-value',
     templateUrl: './value.component.html',
     styleUrls: ['./value.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ValueComponent {

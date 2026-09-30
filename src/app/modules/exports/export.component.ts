@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ExportService } from './shared/export.service';
 import { ExportModel, ExportResponseModel } from './shared/export.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -62,6 +62,7 @@ export function bulkDeleteOutcome(status: number, count: number): { message: str
     selector: 'senergy-export',
     templateUrl: './export.component.html',
     styleUrls: ['./export.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {

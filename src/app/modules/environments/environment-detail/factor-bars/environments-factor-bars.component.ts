@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { withFactorSet } from '../../shared/environments-source';
 
 /**
@@ -33,6 +33,7 @@ import { withFactorSet } from '../../shared/environments-source';
     selector: 'senergy-environments-factor-bars',
     templateUrl: './environments-factor-bars.component.html',
     styleUrls: ['./environments-factor-bars.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsFactorBarsComponent implements OnChanges {

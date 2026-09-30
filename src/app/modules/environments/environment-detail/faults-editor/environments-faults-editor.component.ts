@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FAULT_KINDS, Fault, FaultKind, faultKindDescription, faultKindLabel } from '../../shared/environments.model';
 import { NodeProblem } from '../../shared/environments-path';
 import { toLocalDateTimeInput, toRfc3339Seconds } from '../../shared/environments-datetime';
@@ -54,6 +54,7 @@ interface RowProblem {
     selector: 'senergy-environments-faults-editor',
     templateUrl: './environments-faults-editor.component.html',
     styleUrls: ['./environments-faults-editor.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsFaultsEditorComponent implements OnChanges {

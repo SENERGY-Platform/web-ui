@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { DeviceInstancesService } from './shared/device-instances.service';
 import {
@@ -62,6 +62,7 @@ export enum DeviceInstancesRouterStateTypesEnum {
     selector: 'senergy-device-instances',
     templateUrl: './device-instances.component.html',
     styleUrls: ['./device-instances.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestroy {

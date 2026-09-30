@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { EnvironmentsService } from '../../shared/environments.service';
 import { CatalogDeviceType } from '../../shared/environments.model';
@@ -34,6 +34,7 @@ export interface AddMachineDialogResult {
     selector: 'senergy-environments-add-machine-dialog',
     templateUrl: './environments-add-machine-dialog.component.html',
     styleUrls: ['./environments-add-machine-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentsAddMachineDialogComponent implements OnInit {

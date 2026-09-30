@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, AfterViewInit, ViewChild} from '@angular/core';
+import {Component, AfterViewInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {IOModel, OperatorModel} from '../operator-repo/shared/operator.model';
 import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -30,6 +30,7 @@ import {CellModel} from '../diagram-editor/shared/diagram.model';
     selector: 'senergy-flow-designer',
     templateUrl: './flow-designer.component.html',
     styleUrls: ['./flow-designer.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FlowDesignerComponent implements AfterViewInit {

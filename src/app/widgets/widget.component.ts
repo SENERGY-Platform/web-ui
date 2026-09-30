@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../modules/dashboard/shared/dashboard-widget.model';
 
 @Component({
     selector: 'senergy-widget',
     templateUrl: './widget.component.html',
     styleUrls: ['./widget.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class WidgetComponent {

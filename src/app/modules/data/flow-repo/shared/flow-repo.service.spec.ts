@@ -15,7 +15,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -41,7 +41,7 @@ describe('FlowRepoService', () => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
             imports: [MatDialogModule, MatSnackBarModule],
-            providers: [FlowRepoService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
+            providers: [FlowRepoService, provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
         });
         service = TestBed.inject(FlowRepoService);
         http = TestBed.inject(HttpTestingController);

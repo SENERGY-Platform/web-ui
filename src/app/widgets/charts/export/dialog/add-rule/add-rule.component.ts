@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ChartsExportConversion } from '../../shared/charts-export-properties.model';
@@ -23,6 +23,7 @@ import { ChartsExportConversion } from '../../shared/charts-export-properties.mo
     selector: 'app-add-rule',
     templateUrl: './add-rule.component.html',
     styleUrls: ['./add-rule.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AddRuleComponent {

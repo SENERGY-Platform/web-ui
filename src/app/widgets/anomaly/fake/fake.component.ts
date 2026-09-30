@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, ChangeDetectionStrategy } from '@angular/core';
 import { concatMap, of, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
@@ -25,6 +25,7 @@ import { ChartsExportService } from '../../charts/export/shared/charts-export.se
     selector: 'fake-senergy-anomaly-detection',
     templateUrl: './fake.component.html',
     styleUrls: ['./fake.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FakeAnomalyComponent implements AfterViewInit, AfterViewChecked {

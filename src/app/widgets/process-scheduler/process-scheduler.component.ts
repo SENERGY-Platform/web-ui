@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { ProcessSchedulerService } from './shared/process-scheduler.service';
 import { ProcessSchedulerModel } from './shared/process-scheduler.model';
@@ -32,6 +32,7 @@ import { CronConverterService } from './shared/cron-converter.service';
     selector: 'senergy-process-scheduler',
     templateUrl: './process-scheduler.component.html',
     styleUrls: ['./process-scheduler.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ProcessSchedulerComponent implements OnInit, OnDestroy {

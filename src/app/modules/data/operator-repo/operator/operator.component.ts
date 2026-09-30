@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { IOModel, OperatorModel } from '../shared/operator.model';
 import { ActivatedRoute } from '@angular/router';
 import { OperatorRepoService } from '../shared/operator-repo.service';
@@ -28,6 +28,7 @@ import {PermissionsV2RightsAndIdModel} from '../../../permissions/shared/permiss
     selector: 'senergy-operator',
     templateUrl: './operator.component.html',
     styleUrls: ['./operator.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class OperatorComponent implements OnInit {
