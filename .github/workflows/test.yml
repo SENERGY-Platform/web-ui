@@ -5,6 +5,7 @@ on:
     branches:
       - dev
       - master
+      - feat/ui-upgrade
   workflow_dispatch:
 
 jobs:
