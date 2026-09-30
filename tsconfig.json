@@ -1,7 +1,6 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
     "importHelpers": true,
     "strict": true,
     "outDir": "./dist/out-tsc",
@@ -24,6 +23,12 @@
       "node_modules/@types"
     ],
     "paths": {
+      "src/*": [
+        "./src/*"
+      ],
+      "node_modules/*": [
+        "./node_modules/*"
+      ],
       "core-js/es7/reflect": [
         "./node_modules/core-js/proposals/reflect-metadata"
       ],
