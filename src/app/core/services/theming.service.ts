@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Inject, Injectable } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable, DOCUMENT } from '@angular/core';
+
 import { environment } from '../../../environments/environment';
 import { Title } from '@angular/platform-browser';
 
