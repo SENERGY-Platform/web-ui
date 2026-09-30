@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -175,6 +175,7 @@ describe('AspectSelectComponent', () => {
                 <senergy-aspect-select formControlName="aspect_ids" [aspects]="aspects" [aspectClasses]="classes"
                     [showCollisionUntouched]="showCollisionUntouched"></senergy-aspect-select>
             </form>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
         class HostComponent {
