@@ -53,10 +53,8 @@
           <td mat-cell *matCellDef="let ds">
             @for (c of ds.columns; track c) {
               <div class="dataset-column-line">
-                {{c.name}} ({{c.points || 0}} pts@if (c.from_unix && c.to_unix) {
-                ,
-                {{c.from_unix * 1000 | date:'short'}} &ndash; {{c.to_unix * 1000 | date:'short'}}
-                })
+                {{c.name}} ({{c.points || 0}} pts@if (c.from_unix && c.to_unix) {,
+                {{c.from_unix * 1000 | date:'short'}} &ndash; {{c.to_unix * 1000 | date:'short'}}})
               </div>
             }
           </td>
