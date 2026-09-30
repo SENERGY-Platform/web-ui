@@ -14,18 +14,147 @@
  * limitations under the License.
  */
 
-.history-panel {
-    max-width: 800px;
+/* The rules below marked "as on the Live state tab" are copies of environment-detail.component.css
+   and environments-live-state-tiles.component.css: view encapsulation keeps those classes from
+   reaching this component. Colors come from the global theme classes (color-accent, color-warn)
+   so every theme renders them in its own palette. */
+
+/* as on the Live state tab */
+.live-state-panel {
+    padding: 16px 4px;
 }
 
-.history-warning-panel {
+.live-state-intro {
+    max-width: 900px;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 13px;
+}
+
+.live-state-status {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 8px;
-    background: rgba(244, 67, 54, 0.08);
+    margin-bottom: 20px;
+    padding: 6px 10px;
     border-radius: 4px;
-    padding: 8px 12px;
-    margin-bottom: 16px;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+/* currentColor: the color-accent / color-warn class on the dot picks the palette color */
+.live-state-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    color: rgba(0, 0, 0, 0.3);
+    flex: 0 0 auto;
+}
+
+.live-state-status-dot.running {
+    animation: history-pulse 1s ease-in-out infinite;
+}
+
+@keyframes history-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.live-state-status-text {
+    flex: 1 1 auto;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.live-state-section {
+    margin-bottom: 24px;
+}
+
+.live-state-section h3 {
+    margin: 0 0 8px;
+}
+
+.live-state-not-running-hint {
+    max-width: 900px;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 13px;
+    font-style: italic;
+    margin-top: -4px;
+}
+
+.section-hint {
+    margin-top: 2px;
+    margin-bottom: 8px;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+}
+
+.live-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.live-tile {
+    position: relative;
+    flex: 1 1 160px;
+    min-width: 150px;
+    max-width: 240px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    padding: 10px 12px 12px;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.live-tile-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 24px;
+}
+
+.live-tile-key {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.live-tile-value {
+    margin-top: 4px;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.live-tile-baseline {
+    margin-top: 2px;
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+/* specific to this tab */
+
+/* a date or duration at the 26px of a counter would not fit the tile */
+.live-tile-value.live-tile-value-text {
+    font-size: 16px;
+    line-height: 1.4;
+    white-space: normal;
+}
+
+.history-warning {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.history-warning .mat-icon {
+    flex: 0 0 auto;
 }
 
 .from-field {
@@ -33,23 +162,63 @@
 }
 
 .history-form-error,
-.history-error,
-.history-refusal {
+.history-error {
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    color: #f44336;
     margin-bottom: 12px;
+}
+
+.history-error {
+    max-width: 900px;
 }
 
 .history-poll-error {
     display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: -8px 0 16px;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+}
+
+.history-poll-error .mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+}
+
+.history-card {
+    max-width: 900px;
+}
+
+.history-progress-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.history-progress-percent {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.history-tiles {
+    margin-top: 16px;
+}
+
+.history-refusal {
+    display: flex;
     align-items: flex-start;
     gap: 8px;
-    color: #f44336;
-    opacity: 0.8;
-    margin-bottom: 12px;
-    font-size: 0.9em;
+    max-width: 900px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .history-refusal-body {
@@ -68,29 +237,15 @@
     gap: 8px;
 }
 
-.history-actions {
-    margin: 12px 0;
-    display: flex;
-    gap: 8px;
-}
-
-.history-status-line {
-    margin-bottom: 8px;
-}
-
-.history-state-line {
-    font-weight: 500;
-}
-
-.history-counters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    opacity: 0.8;
-    margin: 8px 0;
+.history-channels-panel {
+    max-width: 900px;
 }
 
 .history-channel-table {
     width: 100%;
-    margin-top: 12px;
+}
+
+.history-channel-reason {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
 }

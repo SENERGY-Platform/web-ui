@@ -27,6 +27,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
@@ -70,6 +71,7 @@ describe('EnvironmentsHistoryComponent', () => {
                 MatTooltipModule,
                 MatTableModule,
                 MatProgressBarModule,
+                MatExpansionModule,
                 MatDialogModule,
                 MatSnackBarModule,
             ],
@@ -223,6 +225,10 @@ describe('EnvironmentsHistoryComponent', () => {
 
         expect(fixture.nativeElement.querySelector('mat-progress-bar')).toBeTruthy();
         expect(component.progressPercent(component.status!)).toBe(50);
+        expect(fixture.nativeElement.querySelector('.history-progress-percent').textContent.trim()).toBe('50%');
+        const tileKeys = Array.from(fixture.nativeElement.querySelectorAll('.live-tile-key')).map((el: any) => el.textContent.trim());
+        expect(tileKeys).toEqual(['Simulated position', 'Published', 'Failed', 'Remaining (estimated)']);
+        expect(fixture.nativeElement.querySelector('.live-state-status-text').textContent).toContain('Running since');
         const abortButton = Array.from(fixture.nativeElement.querySelectorAll('button')).find((b: any) => b.textContent.includes('Abort'));
         expect(abortButton).toBeTruthy();
 
@@ -322,7 +328,7 @@ describe('EnvironmentsHistoryComponent', () => {
         discardPeriodicTasks();
     }));
 
-    it('renders the channel table for a done run and offers to start another one', fakeAsync(() => {
+    it('renders the summary and the channel table for a done run and offers to start another one', fakeAsync(() => {
         fixture.detectChanges();
         tick();
         httpMock.expectOne(historyUrl).flush({
@@ -331,7 +337,7 @@ describe('EnvironmentsHistoryComponent', () => {
             from: '2026-07-01T00:00:00Z',
             to: '2026-08-01T00:00:00Z',
             started_at: '2026-07-01T00:00:01Z',
-            finished_at: '2026-08-01T00:00:01Z',
+            finished_at: '2026-07-01T02:15:01Z',
             published: 5,
             failed: 0,
             channels: [{ channel_id: 'c1', name: 'Power', publishable: true, published: 5, silent: 0, failed: 0 }],
@@ -340,17 +346,129 @@ describe('EnvironmentsHistoryComponent', () => {
 
         expect(fixture.nativeElement.querySelector('table.history-channel-table')).toBeTruthy();
         expect(fixture.nativeElement.textContent).toContain('Power');
-        expect(fixture.nativeElement.textContent).toContain('Done');
+        expect(fixture.nativeElement.querySelector('.live-state-status-text').textContent).toContain('Completed on');
+        const tileKeys = Array.from(fixture.nativeElement.querySelectorAll('.live-tile-key')).map((el: any) => el.textContent.trim());
+        expect(tileKeys).toEqual(['Window', 'Duration', 'Published', 'Failed']);
+        expect(fixture.nativeElement.textContent).toContain('2h 15m');
 
         const startAnotherButton = Array.from(fixture.nativeElement.querySelectorAll('button')).find((b: any) => b.textContent.includes('Start another run'));
         (startAnotherButton as HTMLElement).click();
         fixture.detectChanges();
 
         expect(component.showForm).toBe(true);
+        expect(component.headerState).toBe('none');
         expect(fixture.nativeElement.querySelector('input[type="datetime-local"]')).toBeTruthy();
 
         discardPeriodicTasks();
     }));
+
+    it('labels the header of an aborted run and keeps the channel table collapsed behind a summary label', fakeAsync(() => {
+        fixture.detectChanges();
+        tick();
+        httpMock.expectOne(historyUrl).flush({
+            environment_id: 'e1',
+            state: 'cancelled',
+            from: '2026-07-01T00:00:00Z',
+            to: '2026-08-01T00:00:00Z',
+            started_at: '2026-07-01T00:00:01Z',
+            finished_at: '2026-07-01T00:10:00Z',
+            channels: [
+                { name: 'Ok', publishable: true, published: 5, failed: 0 },
+                { name: 'Broken', publishable: true, published: 1, failed: 3, last_error: 'kafka down' },
+                { name: 'Mute', publishable: false, reason: 'service has no senergy/time_path' },
+            ],
+        });
+        fixture.detectChanges();
+
+        expect(component.headerState).toBe('cancelled');
+        expect(fixture.nativeElement.querySelector('.live-state-status-text').textContent).toContain('Aborted on');
+        const panel = fixture.nativeElement.querySelector('mat-expansion-panel');
+        expect(panel.classList).not.toContain('mat-expanded');
+        expect(panel.querySelector('mat-panel-title').textContent.trim()).toBe('Channels (3, of which 1 not publishable)');
+        // the reason of a channel without publication is text, not a tooltip
+        expect(fixture.nativeElement.querySelector('.history-channel-reason').textContent).toContain('service has no senergy/time_path');
+        const rowNames = Array.from(fixture.nativeElement.querySelectorAll('tr.mat-mdc-row td:first-child')).map((td: any) => td.textContent.trim());
+        expect(rowNames).toEqual(['Broken', 'Mute', 'Ok']);
+
+        discardPeriodicTasks();
+    }));
+
+    it('shows the idle header next to the start form when no run is known', fakeAsync(() => {
+        loadWithNoRun();
+
+        expect(component.headerState).toBe('none');
+        expect(fixture.nativeElement.querySelector('.live-state-status-text').textContent).toContain('No run in progress');
+        expect(fixture.nativeElement.querySelector('.live-state-section h3').textContent).toContain('Start a history run');
+        expect(fixture.nativeElement.querySelector('.section-hint')).toBeTruthy();
+
+        discardPeriodicTasks();
+    }));
+
+    describe('view logic', () => {
+        const from = '2026-07-01T00:00:00Z';
+        const to = '2026-07-02T00:00:00Z';
+        const startedAt = '2026-08-01T10:00:00Z';
+        const hourAfterStart = new Date(startedAt).getTime() + 60 * 60 * 1000;
+
+        it('rounds the progress down to whole percent and clamps it', () => {
+            expect(component.progressLabel({ from, to, position: '2026-07-01T12:00:00Z' })).toBe('50%');
+            // 99.93% must not read as a finished 100%
+            expect(component.progressLabel({ from, to, position: '2026-07-01T23:59:00Z' })).toBe('99%');
+            expect(component.progressLabel({ from, to, position: '2026-07-05T00:00:00Z' })).toBe('100%');
+            expect(component.progressLabel({ from, to })).toBe('0%');
+        });
+
+        it('extrapolates the remaining time from the pace so far', () => {
+            // a quarter done after 1h -> 3h to go
+            const status = { from, to, position: '2026-07-01T06:00:00Z', started_at: startedAt };
+            expect(component.estimateRemainingMs(status, hourAfterStart)).toBe(3 * 60 * 60 * 1000);
+        });
+
+        it('has no estimate without progress, without a start, at the end, or before the start', () => {
+            const running = { from, to, position: '2026-07-01T06:00:00Z', started_at: startedAt };
+            expect(component.estimateRemainingMs({ ...running, position: from }, hourAfterStart)).toBeUndefined();
+            expect(component.estimateRemainingMs({ ...running, position: to }, hourAfterStart)).toBeUndefined();
+            expect(component.estimateRemainingMs({ ...running, started_at: undefined }, hourAfterStart)).toBeUndefined();
+            expect(component.estimateRemainingMs(running, new Date(startedAt).getTime())).toBeUndefined();
+        });
+
+        it('labels the estimate and falls back to a dash', () => {
+            spyOn(Date, 'now').and.returnValue(hourAfterStart);
+            expect(component.remainingLabel({ from, to, position: '2026-07-01T06:00:00Z', started_at: startedAt })).toBe('about 3h 0m');
+            expect(component.remainingLabel({ from, to, started_at: startedAt })).toBe('--');
+        });
+
+        it('formats durations in at most two units', () => {
+            const at = (ms: number) => component.durationLabel({ started_at: startedAt, finished_at: new Date(new Date(startedAt).getTime() + ms).toISOString() });
+            expect(at(40 * 1000)).toBe('40s');
+            expect(at(12 * 60 * 1000 + 59 * 1000)).toBe('12m');
+            expect(at((2 * 60 + 15) * 60 * 1000)).toBe('2h 15m');
+            expect(at((27 * 60 + 5) * 60 * 1000)).toBe('1d 3h');
+            expect(component.durationLabel({ started_at: startedAt })).toBe('--');
+        });
+
+        it('sorts channels by failures, then those without publication, then by name, without touching the source', () => {
+            const channels = [
+                { name: 'b-ok', publishable: true, failed: 0 },
+                { name: 'a-ok', publishable: true },
+                { name: 'mute', publishable: false },
+                { name: 'few', publishable: true, failed: 1 },
+                { name: 'many', publishable: true, failed: 7 },
+            ];
+            const status = { channels };
+
+            expect(component.sortedChannels(status).map((c) => c.name)).toEqual(['many', 'few', 'mute', 'a-ok', 'b-ok']);
+            expect(channels.map((c) => c.name)).toEqual(['b-ok', 'a-ok', 'mute', 'few', 'many']);
+            // same channels array -> same result array, so the table is not rebuilt on every change detection
+            expect(component.sortedChannels(status)).toBe(component.sortedChannels(status));
+            expect(component.sortedChannels({})).toEqual([]);
+        });
+
+        it('counts the channels without publication in the summary label', () => {
+            expect(component.channelsLabel({ channels: [{ publishable: true }, { publishable: false }, {}] })).toBe('Channels (3, of which 2 not publishable)');
+            expect(component.channelsLabel({ channels: [{ publishable: true }] })).toBe('Channels (1)');
+        });
+    });
 
     it('start() begins polling immediately and every 5s, and stop() ends it', fakeAsync(() => {
         fixture.detectChanges(); // ngOnInit -> start()

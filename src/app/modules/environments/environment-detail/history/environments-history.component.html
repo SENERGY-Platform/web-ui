@@ -14,40 +14,63 @@
   ~ limitations under the License.
   -->
 
-<div class="history-panel">
+<div class="live-state-panel">
     <senergy-spinner [show]="loading"></senergy-spinner>
 
     <ng-container *ngIf="!loading">
+        <p class="live-state-intro">
+            A history run simulates this environment from a chosen start up to now and publishes every reading under
+            the instant it was computed for. Follow its progress here and abort it at any time.
+        </p>
+
+        <div class="live-state-status">
+            <span class="live-state-status-dot" [class.running]="headerState === 'running'"
+                [class.color-accent]="headerState === 'running' || headerState === 'done'"
+                [class.color-warn]="headerState === 'failed' || headerState === 'cancelled'"></span>
+            <span class="live-state-status-text" [ngSwitch]="headerState">
+                <ng-container *ngSwitchCase="'running'">Running since {{status!.started_at | date:'medium'}}</ng-container>
+                <ng-container *ngSwitchCase="'done'">Completed{{status!.finished_at ? ' on ' : ''}}{{status!.finished_at | date:'medium'}}</ng-container>
+                <ng-container *ngSwitchCase="'failed'">Failed{{status!.finished_at ? ' on ' : ''}}{{status!.finished_at | date:'medium'}}</ng-container>
+                <ng-container *ngSwitchCase="'cancelled'">Aborted{{status!.finished_at ? ' on ' : ''}}{{status!.finished_at | date:'medium'}}</ng-container>
+                <ng-container *ngSwitchCase="'none'">No run in progress</ng-container>
+                <ng-container *ngSwitchDefault>Status unknown</ng-container>
+            </span>
+            <button mat-raised-button color="accent" *ngIf="headerState === 'none'" [disabled]="isStarting" (click)="startRun(false)">
+                <mat-icon>play_arrow</mat-icon> Start
+            </button>
+            <button mat-stroked-button color="warn" *ngIf="headerState === 'running'" [disabled]="isAborting" (click)="confirmAbort()">
+                <mat-icon>stop</mat-icon> Abort
+            </button>
+            <button mat-stroked-button color="accent" *ngIf="headerState === 'done' || headerState === 'failed' || headerState === 'cancelled'"
+                (click)="startAnotherRun()">
+                <mat-icon>replay</mat-icon> Start another run
+            </button>
+        </div>
+
         <div class="history-poll-error" *ngIf="pollError">
             <mat-icon color="warn">warning</mat-icon>
             <span>{{pollError}}</span>
             <button mat-stroked-button *ngIf="status === undefined" (click)="retryPoll()">Try again</button>
         </div>
 
-        <ng-container *ngIf="showForm">
-            <div class="history-warning-panel">
-                <mat-icon color="warn">warning</mat-icon>
-                <span>
-                    A history run replaces this environment's live state and suspends the live simulation until the
-                    run ends. It simulates from the chosen start up to now and publishes every reading under the
-                    instant it was computed for.
-                </span>
-            </div>
+        <div class="live-state-section" *ngIf="showForm">
+            <h3>Start a history run</h3>
+            <p class="section-hint">
+                The run simulates from the chosen start up to now. The further back the start, the longer the run takes.
+            </p>
+            <p class="section-hint history-warning">
+                <mat-icon color="warn" inline="true">warning</mat-icon>
+                A history run replaces this environment's live state and suspends the live simulation until the run ends.
+            </p>
 
             <mat-form-field appearance="outline" color="accent" class="from-field">
                 <mat-label>Run from</mat-label>
                 <input matInput type="datetime-local" [(ngModel)]="fromValue" name="history-from">
                 <mat-hint>Up to {{maxWindowDays}} days in the past.</mat-hint>
             </mat-form-field>
-            <div class="history-form-error" *ngIf="formError">
-                <mat-icon color="warn">error</mat-icon>
+            <div class="history-form-error color-warn" *ngIf="formError">
+                <mat-icon>error</mat-icon>
                 <span>{{formError}}</span>
-            </div>
-
-            <div class="history-actions">
-                <button mat-raised-button color="accent" [disabled]="isStarting" (click)="startRun(false)">
-                    <mat-icon>play_arrow</mat-icon> Start
-                </button>
             </div>
 
             <div class="history-refusal" *ngIf="refusal">
@@ -70,34 +93,44 @@
                     </div>
                 </div>
             </div>
-        </ng-container>
+        </div>
 
         <ng-container *ngIf="!showForm && status as run">
-            <ng-container *ngIf="run.state === 'running'">
-                <div class="history-status-line">
-                    <span>Running from {{run.from | date:'medium'}} &middot; now at {{run.position | date:'medium'}} &middot; elapsed {{elapsedSince(run.started_at)}}</span>
+            <div class="live-state-section history-card" *ngIf="run.state === 'running'">
+                <h3>Progress</h3>
+                <div class="history-progress-head">
+                    <span class="section-hint">Simulating {{run.from | date:'medium'}} to {{run.to | date:'medium'}}</span>
+                    <span class="history-progress-percent">{{progressLabel(run)}}</span>
                 </div>
-                <mat-progress-bar mode="determinate" [value]="progressPercent(run)"></mat-progress-bar>
-                <div class="history-counters">
-                    <span>Published: {{run.published || 0}}</span>
-                    <span>Failed: {{run.failed || 0}}</span>
+                <mat-progress-bar mode="determinate" color="accent" [value]="progressPercent(run)"></mat-progress-bar>
+
+                <div class="live-tiles history-tiles">
+                    <div class="live-tile">
+                        <div class="live-tile-header"><span class="live-tile-key">Simulated position</span></div>
+                        <div class="live-tile-value live-tile-value-text">{{run.position ? (run.position | date:'medium') : '--'}}</div>
+                    </div>
+                    <div class="live-tile">
+                        <div class="live-tile-header"><span class="live-tile-key">Published</span></div>
+                        <div class="live-tile-value">{{run.published || 0}}</div>
+                    </div>
+                    <div class="live-tile">
+                        <div class="live-tile-header"><span class="live-tile-key">Failed</span></div>
+                        <div class="live-tile-value" [class.color-warn]="run.failed">{{run.failed || 0}}</div>
+                    </div>
+                    <div class="live-tile">
+                        <div class="live-tile-header"><span class="live-tile-key">Remaining (estimated)</span></div>
+                        <div class="live-tile-value live-tile-value-text">{{remainingLabel(run)}}</div>
+                        <div class="live-tile-baseline">elapsed {{elapsedSince(run.started_at)}}</div>
+                    </div>
                 </div>
-                <div class="history-actions">
-                    <button mat-stroked-button color="warn" [disabled]="isAborting" (click)="confirmAbort()">
-                        <mat-icon>stop</mat-icon> Abort
-                    </button>
-                </div>
-            </ng-container>
+            </div>
 
             <ng-container *ngIf="run.state !== 'running'">
-                <p class="history-state-line" *ngIf="run.state === 'done'">
-                    Done: the live simulation is running again on the state this run arrived at.
+                <p class="live-state-not-running-hint" *ngIf="run.state === 'done'">
+                    The live simulation is running again on the state this run arrived at.
                 </p>
-                <p class="history-state-line" *ngIf="run.state === 'failed'">
-                    Failed: the live simulation is running again on the partial state this run had reached.
-                </p>
-                <p class="history-state-line" *ngIf="run.state === 'cancelled'">
-                    Aborted: the live simulation is running again on the partial state this run had reached.
+                <p class="live-state-not-running-hint" *ngIf="run.state === 'failed' || run.state === 'cancelled'">
+                    The live simulation is running again on the partial state this run had reached.
                 </p>
 
                 <div class="history-error" *ngIf="run.error">
@@ -109,48 +142,66 @@
                     <span>Last publish failure: {{run.last_error}}</span>
                 </div>
 
-                <div class="history-counters">
-                    <span>From {{run.from | date:'medium'}} to {{run.to | date:'medium'}}</span>
-                    <span>Started {{run.started_at | date:'medium'}}</span>
-                    <span *ngIf="run.finished_at">Finished {{run.finished_at | date:'medium'}}</span>
-                    <span>Published: {{run.published || 0}}</span>
-                    <span>Failed: {{run.failed || 0}}</span>
+                <div class="live-state-section">
+                    <h3>Summary</h3>
+                    <div class="live-tiles">
+                        <div class="live-tile">
+                            <div class="live-tile-header"><span class="live-tile-key">Window</span></div>
+                            <div class="live-tile-value live-tile-value-text">{{run.from | date:'medium'}}</div>
+                            <div class="live-tile-baseline">to {{run.to | date:'medium'}}</div>
+                        </div>
+                        <div class="live-tile">
+                            <div class="live-tile-header"><span class="live-tile-key">Duration</span></div>
+                            <div class="live-tile-value live-tile-value-text">{{durationLabel(run)}}</div>
+                            <div class="live-tile-baseline">started {{run.started_at | date:'medium'}}</div>
+                        </div>
+                        <div class="live-tile">
+                            <div class="live-tile-header"><span class="live-tile-key">Published</span></div>
+                            <div class="live-tile-value">{{run.published || 0}}</div>
+                        </div>
+                        <div class="live-tile">
+                            <div class="live-tile-header"><span class="live-tile-key">Failed</span></div>
+                            <div class="live-tile-value" [class.color-warn]="run.failed">{{run.failed || 0}}</div>
+                        </div>
+                    </div>
                 </div>
 
-                <table mat-table [dataSource]="run.channels || []" class="history-channel-table" *ngIf="run.channels?.length">
-                    <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef>Channel</th>
-                        <td mat-cell *matCellDef="let c">{{c.name}}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="publishable">
-                        <th mat-header-cell *matHeaderCellDef>Publishable</th>
-                        <td mat-cell *matCellDef="let c" [matTooltip]="c.reason || ''">{{c.publishable ? 'Yes' : 'No'}}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="published">
-                        <th mat-header-cell *matHeaderCellDef>Published</th>
-                        <td mat-cell *matCellDef="let c">{{c.published || 0}}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="silent">
-                        <th mat-header-cell *matHeaderCellDef>Silent</th>
-                        <td mat-cell *matCellDef="let c">{{c.silent || 0}}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="failed">
-                        <th mat-header-cell *matHeaderCellDef>Failed</th>
-                        <td mat-cell *matCellDef="let c">{{c.failed || 0}}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="last_error">
-                        <th mat-header-cell *matHeaderCellDef>Last error</th>
-                        <td mat-cell *matCellDef="let c">{{c.last_error}}</td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="channelColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: channelColumns;"></tr>
-                </table>
-
-                <div class="history-actions">
-                    <button mat-stroked-button color="accent" (click)="startAnotherRun()">
-                        <mat-icon>replay</mat-icon> Start another run
-                    </button>
-                </div>
+                <mat-expansion-panel class="history-channels-panel" *ngIf="run.channels?.length">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>{{channelsLabel(run)}}</mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <table mat-table [dataSource]="sortedChannels(run)" class="history-channel-table">
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef>Channel</th>
+                            <td mat-cell *matCellDef="let c">{{c.name}}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="publishable">
+                            <th mat-header-cell *matHeaderCellDef>Publishable</th>
+                            <td mat-cell *matCellDef="let c">
+                                {{c.publishable ? 'Yes' : 'No'}}
+                                <div class="history-channel-reason" *ngIf="!c.publishable && c.reason">{{c.reason}}</div>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="published">
+                            <th mat-header-cell *matHeaderCellDef>Published</th>
+                            <td mat-cell *matCellDef="let c">{{c.published || 0}}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="silent">
+                            <th mat-header-cell *matHeaderCellDef>Silent</th>
+                            <td mat-cell *matCellDef="let c">{{c.silent || 0}}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="failed">
+                            <th mat-header-cell *matHeaderCellDef>Failed</th>
+                            <td mat-cell *matCellDef="let c" [class.color-warn]="c.failed">{{c.failed || 0}}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="last_error">
+                            <th mat-header-cell *matHeaderCellDef>Last error</th>
+                            <td mat-cell *matCellDef="let c">{{c.last_error}}</td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="channelColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: channelColumns;"></tr>
+                    </table>
+                </mat-expansion-panel>
             </ng-container>
         </ng-container>
     </ng-container>

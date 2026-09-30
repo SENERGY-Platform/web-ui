@@ -20,7 +20,13 @@ import { Subscription, timer } from 'rxjs';
 import { exhaustMap, map } from 'rxjs/operators';
 import { DialogsService } from '../../../../core/services/dialogs.service';
 import { EnvironmentsService } from '../../shared/environments.service';
-import { HistoryPollResult, HistoryStartRefusal, HistoryStatus, isHistoryStartRefusal } from '../../shared/environments.model';
+import {
+    HistoryChannelStatus,
+    HistoryPollResult,
+    HistoryStartRefusal,
+    HistoryStatus,
+    isHistoryStartRefusal,
+} from '../../shared/environments.model';
 
 const POLL_INTERVAL_MS = 5000;
 const MAX_WINDOW_DAYS = 366;
@@ -70,6 +76,10 @@ export class EnvironmentsHistoryComponent implements OnInit, OnDestroy {
      * run actually starts. Cleared as soon as a poll reports a running run.
      */
     private showingFormAfterFinishedRun = false;
+
+    /** Last input/output of sortedChannels: the table's dataSource must keep its identity between change detections. */
+    private sortedSource: HistoryChannelStatus[] | undefined;
+    private sortedResult: HistoryChannelStatus[] = [];
 
     private pollSub: Subscription | undefined;
     private refreshSub: Subscription | undefined;
@@ -123,6 +133,14 @@ export class EnvironmentsHistoryComponent implements OnInit, OnDestroy {
 
     get showForm(): boolean {
         return this.status === null || this.showingFormAfterFinishedRun;
+    }
+
+    /** What the status header shows: the form wins over a finished status still held, see showingFormAfterFinishedRun. */
+    get headerState(): 'none' | 'unknown' | NonNullable<HistoryStatus['state']> {
+        if (this.showForm) {
+            return 'none';
+        }
+        return this.status?.state ?? 'unknown';
     }
 
     /** Whether the chosen start time passes the form's own checks, without calling the API. */
@@ -263,6 +281,66 @@ export class EnvironmentsHistoryComponent implements OnInit, OnDestroy {
         return Math.min(100, Math.max(0, percent));
     }
 
+    /** Whole percent for display; floored so a run still going never reads 100%. */
+    progressLabel(status: HistoryStatus): string {
+        return Math.floor(this.progressPercent(status)) + '%';
+    }
+
+    /**
+     * Time left if the run keeps the pace it has had since started_at, in ms; undefined while
+     * there is nothing to extrapolate from (no progress yet, no start time, already at the end).
+     * `to` moves forward while the run chases the present, so this errs on the short side.
+     */
+    estimateRemainingMs(status: HistoryStatus, now: number = Date.now()): number | undefined {
+        const percent = this.progressPercent(status);
+        const elapsed = status.started_at ? now - new Date(status.started_at).getTime() : NaN;
+        if (!(percent > 0) || percent >= 100 || !(elapsed > 0)) {
+            return undefined;
+        }
+        return (elapsed * (100 - percent)) / percent;
+    }
+
+    /** "about 1h 10m", or "--" when estimateRemainingMs has nothing to go on. */
+    remainingLabel(status: HistoryStatus): string {
+        const ms = this.estimateRemainingMs(status);
+        return ms === undefined ? '--' : 'about ' + formatDuration(ms);
+    }
+
+    /** started_at to finished_at of an ended run. */
+    durationLabel(status: HistoryStatus): string {
+        if (!status.started_at || !status.finished_at) {
+            return '--';
+        }
+        const ms = new Date(status.finished_at).getTime() - new Date(status.started_at).getTime();
+        return Number.isNaN(ms) ? '--' : formatDuration(ms);
+    }
+
+    /**
+     * Channels with failures first (most failed on top), then those that never publish, then by
+     * name. Memoized on the channels array: a fresh array per change detection would make the
+     * table re-render every row each time.
+     */
+    sortedChannels(status: HistoryStatus): HistoryChannelStatus[] {
+        const channels = status.channels || [];
+        if (channels !== this.sortedSource) {
+            this.sortedSource = channels;
+            this.sortedResult = [...channels].sort(
+                (a, b) =>
+                    (b.failed || 0) - (a.failed || 0) ||
+                    Number(!!a.publishable) - Number(!!b.publishable) ||
+                    (a.name || '').localeCompare(b.name || ''),
+            );
+        }
+        return this.sortedResult;
+    }
+
+    /** "Channels (12, of which 3 not publishable)" -- the count of channels that never send a reading is what needs noticing. */
+    channelsLabel(status: HistoryStatus): string {
+        const channels = status.channels || [];
+        const unpublishable = channels.filter((c) => !c.publishable).length;
+        return 'Channels (' + channels.length + (unpublishable > 0 ? ', of which ' + unpublishable + ' not publishable' : '') + ')';
+    }
+
     /** "2h 15m" since started_at, for the running view -- recomputed on every check (the template re-evaluates it while polling refreshes the view). */
     elapsedSince(startedAt: string | undefined): string {
         if (!startedAt) {
@@ -318,6 +396,21 @@ export class EnvironmentsHistoryComponent implements OnInit, OnDestroy {
         // A finished run does not change any more; Start begins polling again.
         this.stop();
     }
+}
+
+/** "1d 3h", "2h 15m", "12m" or "40s" -- two units at most, minutes and up rounded down. */
+function formatDuration(ms: number): string {
+    if (ms < 60000) {
+        return Math.max(0, Math.floor(ms / 1000)) + 's';
+    }
+    const totalMinutes = Math.floor(ms / 60000);
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+    if (days > 0) {
+        return days + 'd ' + hours + 'h';
+    }
+    return hours > 0 ? hours + 'h ' + minutes + 'm' : minutes + 'm';
 }
 
 /** Local-time value for an <input type="datetime-local">, e.g. "2026-08-09T10:00". */
