@@ -14,75 +14,89 @@
   ~ limitations under the License.
   -->
 
-<p class="empty-hint" *ngIf="tiles.length === 0 && !addingNew">{{emptyHint}}</p>
+@if (tiles.length === 0 && !addingNew) {
+  <p class="empty-hint">{{emptyHint}}</p>
+}
 
 <div class="live-tiles">
-    <div class="live-tile" *ngFor="let tile of tiles; trackBy: trackByKey" [class.changed]="isChangedFromBaseline(tile)"
-        [class.live-tile-editing]="editingKey === tile.key">
-        <div class="live-tile-header">
-            <span class="live-tile-key">{{tile.key}}</span>
-            <mat-icon *ngIf="hintFor(tile.key) as hint" class="live-tile-hint-icon" [matTooltip]="hint">info</mat-icon>
-            <mat-icon *ngIf="tile.locked" class="live-tile-hint-icon" matTooltip="Driven by the timeline -- not editable here.">schedule</mat-icon>
-            <span class="live-tile-actions" *ngIf="editingKey !== tile.key && !tile.locked">
-                <button mat-icon-button class="live-tile-action" matTooltip="Edit" (click)="startEdit(tile)">
-                    <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" class="live-tile-action" matTooltip="Remove" (click)="removeTile(tile)">
-                    <mat-icon>delete</mat-icon>
-                </button>
-            </span>
-        </div>
-
-        <ng-container *ngIf="editingKey !== tile.key; else editTpl">
-            <div class="live-tile-value"
-                [matTooltip]="tile.locked ? 'Driven by the timeline -- not editable here.' : (tile.readOnly ? 'Not editable here: not a number or text value.' : 'Click to edit')"
-                (click)="!tile.readOnly && !tile.locked && startEdit(tile)">{{tile.value}}</div>
-            <div class="live-tile-baseline" *ngIf="isChangedFromBaseline(tile)">was {{baselineFor(tile)}}</div>
-        </ng-container>
-        <ng-template #editTpl>
-            <div class="live-tile-edit-row">
-                <mat-button-toggle-group [(ngModel)]="draftIsText" [ngModelOptions]="{standalone: true}" class="live-tile-type-toggle">
-                    <mat-button-toggle [value]="false" matTooltip="Number">123</mat-button-toggle>
-                    <mat-button-toggle [value]="true" matTooltip="Text">Abc</mat-button-toggle>
-                </mat-button-toggle-group>
-                <mat-form-field appearance="outline" color="accent" class="live-tile-edit-field">
-                    <input matInput [type]="draftIsText ? 'text' : 'number'" [(ngModel)]="draftValue" [ngModelOptions]="{standalone: true}"
-                        (keydown.enter)="commitEdit()">
-                </mat-form-field>
-                <button mat-icon-button color="accent" matTooltip="Save" (click)="commitEdit()">
-                    <mat-icon>check</mat-icon>
-                </button>
-                <button mat-icon-button matTooltip="Cancel" (click)="cancelEdit()">
-                    <mat-icon>close</mat-icon>
-                </button>
-            </div>
-        </ng-template>
-    </div>
-
-    <div class="live-tile live-tile-add" *ngIf="!addingNew" (click)="startAdd()">
-        <mat-icon>add</mat-icon> Add value
-    </div>
-    <div class="live-tile live-tile-add-editing" *ngIf="addingNew">
+  @for (tile of tiles; track trackByKey($index, tile)) {
+    <div class="live-tile" [class.changed]="isChangedFromBaseline(tile)"
+      [class.live-tile-editing]="editingKey === tile.key">
+      <div class="live-tile-header">
+        <span class="live-tile-key">{{tile.key}}</span>
+        @if (hintFor(tile.key); as hint) {
+          <mat-icon class="live-tile-hint-icon" [matTooltip]="hint">info</mat-icon>
+        }
+        @if (tile.locked) {
+          <mat-icon class="live-tile-hint-icon" matTooltip="Driven by the timeline -- not editable here.">schedule</mat-icon>
+        }
+        @if (editingKey !== tile.key && !tile.locked) {
+          <span class="live-tile-actions">
+            <button mat-icon-button class="live-tile-action" matTooltip="Edit" (click)="startEdit(tile)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" class="live-tile-action" matTooltip="Remove" (click)="removeTile(tile)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </span>
+        }
+      </div>
+      @if (editingKey !== tile.key) {
+        <div class="live-tile-value"
+          [matTooltip]="tile.locked ? 'Driven by the timeline -- not editable here.' : (tile.readOnly ? 'Not editable here: not a number or text value.' : 'Click to edit')"
+        (click)="!tile.readOnly && !tile.locked && startEdit(tile)">{{tile.value}}</div>
+        @if (isChangedFromBaseline(tile)) {
+          <div class="live-tile-baseline">was {{baselineFor(tile)}}</div>
+        }
+      } @else {
         <div class="live-tile-edit-row">
-            <mat-form-field appearance="outline" color="accent" class="live-tile-key-field">
-                <mat-label>Key</mat-label>
-                <input matInput [(ngModel)]="newKey" [ngModelOptions]="{standalone: true}">
-            </mat-form-field>
-            <mat-button-toggle-group [(ngModel)]="newIsText" [ngModelOptions]="{standalone: true}" class="live-tile-type-toggle">
-                <mat-button-toggle [value]="false" matTooltip="Number">123</mat-button-toggle>
-                <mat-button-toggle [value]="true" matTooltip="Text">Abc</mat-button-toggle>
-            </mat-button-toggle-group>
-            <mat-form-field appearance="outline" color="accent" class="live-tile-edit-field">
-                <mat-label>Value</mat-label>
-                <input matInput [type]="newIsText ? 'text' : 'number'" [(ngModel)]="newValue" [ngModelOptions]="{standalone: true}"
-                    (keydown.enter)="commitAdd()">
-            </mat-form-field>
-            <button mat-icon-button color="accent" matTooltip="Add" [disabled]="!newKey" (click)="commitAdd()">
-                <mat-icon>check</mat-icon>
-            </button>
-            <button mat-icon-button matTooltip="Cancel" (click)="cancelAdd()">
-                <mat-icon>close</mat-icon>
-            </button>
+          <mat-button-toggle-group [(ngModel)]="draftIsText" [ngModelOptions]="{standalone: true}" class="live-tile-type-toggle">
+            <mat-button-toggle [value]="false" matTooltip="Number">123</mat-button-toggle>
+            <mat-button-toggle [value]="true" matTooltip="Text">Abc</mat-button-toggle>
+          </mat-button-toggle-group>
+          <mat-form-field appearance="outline" color="accent" class="live-tile-edit-field">
+            <input matInput [type]="draftIsText ? 'text' : 'number'" [(ngModel)]="draftValue" [ngModelOptions]="{standalone: true}"
+              (keydown.enter)="commitEdit()">
+          </mat-form-field>
+          <button mat-icon-button color="accent" matTooltip="Save" (click)="commitEdit()">
+            <mat-icon>check</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Cancel" (click)="cancelEdit()">
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
+      }
     </div>
+  }
+
+  @if (!addingNew) {
+    <div class="live-tile live-tile-add" (click)="startAdd()">
+      <mat-icon>add</mat-icon> Add value
+    </div>
+  }
+  @if (addingNew) {
+    <div class="live-tile live-tile-add-editing">
+      <div class="live-tile-edit-row">
+        <mat-form-field appearance="outline" color="accent" class="live-tile-key-field">
+          <mat-label>Key</mat-label>
+          <input matInput [(ngModel)]="newKey" [ngModelOptions]="{standalone: true}">
+        </mat-form-field>
+        <mat-button-toggle-group [(ngModel)]="newIsText" [ngModelOptions]="{standalone: true}" class="live-tile-type-toggle">
+          <mat-button-toggle [value]="false" matTooltip="Number">123</mat-button-toggle>
+          <mat-button-toggle [value]="true" matTooltip="Text">Abc</mat-button-toggle>
+        </mat-button-toggle-group>
+        <mat-form-field appearance="outline" color="accent" class="live-tile-edit-field">
+          <mat-label>Value</mat-label>
+          <input matInput [type]="newIsText ? 'text' : 'number'" [(ngModel)]="newValue" [ngModelOptions]="{standalone: true}"
+            (keydown.enter)="commitAdd()">
+        </mat-form-field>
+        <button mat-icon-button color="accent" matTooltip="Add" [disabled]="!newKey" (click)="commitAdd()">
+          <mat-icon>check</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Cancel" (click)="cancelAdd()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
 </div>

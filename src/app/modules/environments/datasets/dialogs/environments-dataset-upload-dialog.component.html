@@ -17,30 +17,34 @@
 <h2 mat-dialog-title>Upload Dataset</h2>
 
 <mat-dialog-content>
-    <div class="file-picker">
-        <input hidden type="file" accept=".csv" #fileInput (change)="onFileSelected($event)">
-        <button type="button" mat-raised-button color="accent" (click)="triggerFilePicker()">Choose File</button>
-        <span *ngIf="fileName" class="file-name">{{fileName}}</span>
+  <div class="file-picker">
+    <input hidden type="file" accept=".csv" #fileInput (change)="onFileSelected($event)">
+    <button type="button" mat-raised-button color="accent" (click)="triggerFilePicker()">Choose File</button>
+    @if (fileName) {
+      <span class="file-name">{{fileName}}</span>
+    }
+  </div>
+
+  <mat-form-field appearance="outline" color="accent">
+    <mat-label>Name</mat-label>
+    <input matInput [(ngModel)]="name" required>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" color="accent">
+    <mat-label>Timezone</mat-label>
+    <input matInput [(ngModel)]="timezone">
+    <mat-hint>IANA timezone of the timestamps in the file, e.g. Europe/Berlin.</mat-hint>
+  </mat-form-field>
+
+  @if (errorMessage) {
+    <div class="upload-error">
+      <mat-icon color="warn">error</mat-icon>
+      <span>{{errorMessage}}</span>
     </div>
-
-    <mat-form-field appearance="outline" color="accent">
-        <mat-label>Name</mat-label>
-        <input matInput [(ngModel)]="name" required>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" color="accent">
-        <mat-label>Timezone</mat-label>
-        <input matInput [(ngModel)]="timezone">
-        <mat-hint>IANA timezone of the timestamps in the file, e.g. Europe/Berlin.</mat-hint>
-    </mat-form-field>
-
-    <div class="upload-error" *ngIf="errorMessage">
-        <mat-icon color="warn">error</mat-icon>
-        <span>{{errorMessage}}</span>
-    </div>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions style="display: flex; justify-content: end;">
-    <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="!canUpload()" (click)="upload()">Upload</button>
+  <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="accent" [disabled]="!canUpload()" (click)="upload()">Upload</button>
 </mat-dialog-actions>

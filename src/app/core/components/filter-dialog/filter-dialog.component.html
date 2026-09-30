@@ -17,42 +17,50 @@
 <h2 mat-dialog-title>{{config.title || 'Filter'}}</h2>
 
 <mat-dialog-content>
-    <senergy-spinner [show]="!ready"></senergy-spinner>
+  <senergy-spinner [show]="!ready"></senergy-spinner>
 
-    <div [formGroup]="form" fxLayout="column" class="filter-container" *ngIf="ready">
-        <ng-container *ngFor="let section of sections">
-            <ng-container *ngIf="section.title">
-                <div class="section-title">{{section.title}}</div>
-                <mat-divider></mat-divider>
-            </ng-container>
-
-            <ng-container *ngFor="let field of section.fields">
-                <mat-checkbox *ngIf="field.type === 'checkbox'" [formControlName]="field.key" color="accent"
-                    class="checkbox-row">
-                    {{field.label}}
-                </mat-checkbox>
-
-                <mat-form-field *ngIf="field.type !== 'checkbox'" class="full-width" color="accent"
-                    appearance="outline">
-                    <mat-icon matPrefix *ngIf="field.icon">{{field.icon}}</mat-icon>
-                    <mat-label>{{field.label}}</mat-label>
-                    <!-- multiselects are cleared per chip, so they don't need the additional clear all button -->
-                    <mtx-select [items]="items[field.key]" [formControlName]="field.key"
-                        [bindLabel]="field.bindLabel || ''" [bindValue]="field.bindValue || ''"
-                        [multiple]="field.type === 'multiselect'" [closeOnSelect]="field.type !== 'multiselect'"
-                        [clearable]="field.type !== 'multiselect'" [addTag]="addTagFns[field.key]"
-                        appendTo=".ng-select-anchor"></mtx-select>
-                    <mat-hint *ngIf="field.hint">{{field.hint}}</mat-hint>
-                </mat-form-field>
-            </ng-container>
-        </ng-container>
+  @if (ready) {
+    <div [formGroup]="form" fxLayout="column" class="filter-container">
+      @for (section of sections; track section) {
+        @if (section.title) {
+          <div class="section-title">{{section.title}}</div>
+          <mat-divider></mat-divider>
+        }
+        @for (field of section.fields; track field) {
+          @if (field.type === 'checkbox') {
+            <mat-checkbox [formControlName]="field.key" color="accent"
+              class="checkbox-row">
+              {{field.label}}
+            </mat-checkbox>
+          }
+          @if (field.type !== 'checkbox') {
+            <mat-form-field class="full-width" color="accent"
+              appearance="outline">
+              @if (field.icon) {
+                <mat-icon matPrefix>{{field.icon}}</mat-icon>
+              }
+              <mat-label>{{field.label}}</mat-label>
+              <!-- multiselects are cleared per chip, so they don't need the additional clear all button -->
+              <mtx-select [items]="items[field.key]" [formControlName]="field.key"
+                [bindLabel]="field.bindLabel || ''" [bindValue]="field.bindValue || ''"
+                [multiple]="field.type === 'multiselect'" [closeOnSelect]="field.type !== 'multiselect'"
+                [clearable]="field.type !== 'multiselect'" [addTag]="addTagFns[field.key]"
+              appendTo=".ng-select-anchor"></mtx-select>
+              @if (field.hint) {
+                <mat-hint>{{field.hint}}</mat-hint>
+              }
+            </mat-form-field>
+          }
+        }
+      }
     </div>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="space-between center">
-    <button mat-button (click)="resetAllFilters()" [disabled]="!ready || !hasActiveFilter()">Reset All</button>
-    <span>
-        <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-        <button mat-raised-button color="accent" (click)="filter()" [disabled]="!ready">Filter</button>
-    </span>
+  <button mat-button (click)="resetAllFilters()" [disabled]="!ready || !hasActiveFilter()">Reset All</button>
+  <span>
+    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+    <button mat-raised-button color="accent" (click)="filter()" [disabled]="!ready">Filter</button>
+  </span>
 </mat-dialog-actions>

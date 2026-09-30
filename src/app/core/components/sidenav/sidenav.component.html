@@ -15,47 +15,55 @@
   -->
 
 <mat-sidenav-container class="sidenav-container" [ngStyle]="{'z-index': zIndex}" (backdropClick)="closeSidenav()">
-    <mat-sidenav disableClose #sidenav role="navigation" class="sidenav mat-elevation-z1" [fixedInViewport]="true">
-        <ul class="side-menu">
-            <li *ngFor="let section of sections">
-                    <button mat-button  type=button routerLink="{{section.state}}" routerLinkActive="background-color-sidenav" *ngIf="section.type === 'link'"
-                    (click)="toggleSection(section)"
-                    class="md-button-toggle">
-                    <mat-icon>{{section.icon}}</mat-icon>
-                    {{section.name | uppercase}}
-                    </button>
-                <button mat-button *ngIf="section.type === 'toggle'"
-                        (click)="toggleSection(section)"
-                        [ngClass]="{'background-color-sidenav': isSectionOpen(section)}"
-                        class="md-button-toggle">
-                    <div fxLayout="row" fxLayoutAlign="none center">
-                        <mat-icon>{{section.icon}}</mat-icon>
-                        <div fxFlexOffset="5px">{{section.name | uppercase}}</div>
-                        <mat-icon class="md-toggle-icon"
-                                  [ngClass]="{'toggled': isSectionOpen(section)}">
-                            keyboard_arrow_down
-                        </mat-icon>
-                    </div>
+  <mat-sidenav disableClose #sidenav role="navigation" class="sidenav mat-elevation-z1" [fixedInViewport]="true">
+    <ul class="side-menu">
+      @for (section of sections; track section) {
+        <li>
+          @if (section.type === 'link') {
+            <button mat-button  type=button routerLink="{{section.state}}" routerLinkActive="background-color-sidenav"
+              (click)="toggleSection(section)"
+              class="md-button-toggle">
+              <mat-icon>{{section.icon}}</mat-icon>
+              {{section.name | uppercase}}
+            </button>
+          }
+          @if (section.type === 'toggle') {
+            <button mat-button
+              (click)="toggleSection(section)"
+              [ngClass]="{'background-color-sidenav': isSectionOpen(section)}"
+              class="md-button-toggle">
+              <div fxLayout="row" fxLayoutAlign="none center">
+                <mat-icon>{{section.icon}}</mat-icon>
+                <div fxFlexOffset="5px">{{section.name | uppercase}}</div>
+                <mat-icon class="md-toggle-icon"
+                  [ngClass]="{'toggled': isSectionOpen(section)}">
+                  keyboard_arrow_down
+                </mat-icon>
+              </div>
+            </button>
+          }
+          <ul [ngClass]="{'toggled': isSectionOpen(section)}"
+            class="menu-toggle-list">
+            @for (page of section.pages; track page) {
+              <li>
+                <button mat-button
+                  routerLink="{{page.state}}" [class.background-color-sidenav]="isPageActive(page, section)"
+                  (click)="closeSidenav()" class="md-button-toggle">
+                  <mat-icon aria-hidden="false" matBadge="{{page.badge}}"
+                    [matBadgeHidden]="!page.badge || page.badge === ''"
+                    matBadgePosition="below before"
+                    matBadgeSize="small"
+                  matBadgeColor="accent">{{page.icon}}</mat-icon>
+                  {{page.name}}
                 </button>
-                <ul [ngClass]="{'toggled': isSectionOpen(section)}"
-                    class="menu-toggle-list">
-                    <li *ngFor="let page of section.pages">
-                        <button mat-button
-                                routerLink="{{page.state}}" [class.background-color-sidenav]="isPageActive(page, section)"
-                                (click)="closeSidenav()" class="md-button-toggle">
-                            <mat-icon aria-hidden="false" matBadge="{{page.badge}}"
-                                      [matBadgeHidden]="!page.badge || page.badge === ''"
-                                      matBadgePosition="below before"
-                                      matBadgeSize="small"
-                                      matBadgeColor="accent">{{page.icon}}</mat-icon>
-                            {{page.name}}
-                        </button>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-    </mat-sidenav>
-    <mat-sidenav-content [@fadeInAnimation]="o.isActivated ? o.activatedRoute : ''" role="main">
-        <router-outlet #o="outlet"></router-outlet>
-    </mat-sidenav-content>
+              </li>
+            }
+          </ul>
+        </li>
+      }
+    </ul>
+  </mat-sidenav>
+  <mat-sidenav-content [@fadeInAnimation]="o.isActivated ? o.activatedRoute : ''" role="main">
+    <router-outlet #o="outlet"></router-outlet>
+  </mat-sidenav-content>
 </mat-sidenav-container>

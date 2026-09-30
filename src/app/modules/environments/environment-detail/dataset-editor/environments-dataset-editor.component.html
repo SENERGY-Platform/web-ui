@@ -15,198 +15,228 @@
   -->
 
 <mat-form-field appearance="outline" color="accent" class="third-width">
-    <mat-label>Origin</mat-label>
-    <mtx-select [(ngModel)]="dataset!.origin" (ngModelChange)="onOriginChange()" name="dataset-origin"
-        appendTo=".ng-select-anchor">
-        <mtx-option *ngFor="let o of DATASET_ORIGINS" [value]="o">{{datasetOriginLabel(o)}}</mtx-option>
-    </mtx-select>
-    <mat-hint>Uploaded file: a dataset uploaded on the Datasets page. Platform device: a real device's recorded timeseries. Platform export: a column of an export already leaving the platform.</mat-hint>
+  <mat-label>Origin</mat-label>
+  <mtx-select [(ngModel)]="dataset!.origin" (ngModelChange)="onOriginChange()" name="dataset-origin"
+    appendTo=".ng-select-anchor">
+    @for (o of DATASET_ORIGINS; track o) {
+      <mtx-option [value]="o">{{datasetOriginLabel(o)}}</mtx-option>
+    }
+  </mtx-select>
+  <mat-hint>Uploaded file: a dataset uploaded on the Datasets page. Platform device: a real device's recorded timeseries. Platform export: a column of an export already leaving the platform.</mat-hint>
 </mat-form-field>
 
-<ng-container *ngIf="dataset!.origin === 'file'">
-    <mat-form-field appearance="outline" color="accent" class="third-width">
-        <mat-label>Dataset</mat-label>
-        <mtx-select [(ngModel)]="dataset!.ref" (ngModelChange)="onFieldChange()" name="dataset-ref"
-            appendTo=".ng-select-anchor">
-            <mtx-option *ngFor="let d of datasets" [value]="d.id">{{d.name}}</mtx-option>
-        </mtx-select>
-    </mat-form-field>
-    <mat-form-field appearance="outline" color="accent" class="third-width">
-        <mat-label>Column</mat-label>
-        <mtx-select [(ngModel)]="dataset!.column" (ngModelChange)="onFieldChange()" name="dataset-column"
-            appendTo=".ng-select-anchor">
-            <mtx-option *ngFor="let c of columnsForDataset(dataset!.ref)" [value]="c.name">{{c.name}}</mtx-option>
-        </mtx-select>
-        <mat-hint>Which value column to replay. Empty = the first one.</mat-hint>
-    </mat-form-field>
-    <a mat-button color="accent" routerLink="/environments/datasets" class="manage-datasets-link">
-        <mat-icon>open_in_new</mat-icon> Manage datasets
-    </a>
-</ng-container>
+@if (dataset!.origin === 'file') {
+  <mat-form-field appearance="outline" color="accent" class="third-width">
+    <mat-label>Dataset</mat-label>
+    <mtx-select [(ngModel)]="dataset!.ref" (ngModelChange)="onFieldChange()" name="dataset-ref"
+      appendTo=".ng-select-anchor">
+      @for (d of datasets; track d) {
+        <mtx-option [value]="d.id">{{d.name}}</mtx-option>
+      }
+    </mtx-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline" color="accent" class="third-width">
+    <mat-label>Column</mat-label>
+    <mtx-select [(ngModel)]="dataset!.column" (ngModelChange)="onFieldChange()" name="dataset-column"
+      appendTo=".ng-select-anchor">
+      @for (c of columnsForDataset(dataset!.ref); track c) {
+        <mtx-option [value]="c.name">{{c.name}}</mtx-option>
+      }
+    </mtx-select>
+    <mat-hint>Which value column to replay. Empty = the first one.</mat-hint>
+  </mat-form-field>
+  <a mat-button color="accent" routerLink="/environments/datasets" class="manage-datasets-link">
+    <mat-icon>open_in_new</mat-icon> Manage datasets
+  </a>
+}
 
-<ng-container *ngIf="dataset!.origin === 'platform'">
-    <div class="readonly-hint-row">
-        <mat-form-field appearance="outline" color="accent" class="third-width">
-            <mat-label>Device</mat-label>
-            <input matInput [value]="platformDeviceName || ''" disabled name="dataset-platform-ref">
-            <mat-hint>The real device whose recordings this channel replays.</mat-hint>
-        </mat-form-field>
-        <button mat-stroked-button type="button" color="accent" (click)="selectDevice.emit()">
-            <mat-icon>search</mat-icon> Select device
-        </button>
-    </div>
+@if (dataset!.origin === 'platform') {
+  <div class="readonly-hint-row">
     <mat-form-field appearance="outline" color="accent" class="third-width">
-        <mat-label>Service</mat-label>
-        <mtx-select [(ngModel)]="dataset!.service_ref" (ngModelChange)="onFieldChange()" name="dataset-service-ref"
-            appendTo=".ng-select-anchor">
-            <mtx-option *ngFor="let s of serviceOptions" [value]="s.id">{{s.name}}</mtx-option>
-        </mtx-select>
-        <mat-hint>Which of the device's services to replay.</mat-hint>
+      <mat-label>Device</mat-label>
+      <input matInput [value]="platformDeviceName || ''" disabled name="dataset-platform-ref">
+      <mat-hint>The real device whose recordings this channel replays.</mat-hint>
     </mat-form-field>
-    <mat-form-field appearance="outline" color="accent" class="third-width">
-        <mat-label>Column</mat-label>
-        <mtx-select [(ngModel)]="dataset!.column" (ngModelChange)="onFieldChange()" name="dataset-platform-column"
-            appendTo=".ng-select-anchor">
-            <mtx-option *ngFor="let p of columnOptions" [value]="p">{{p}}</mtx-option>
-        </mtx-select>
-        <mat-hint>Which output variable of the service to replay.</mat-hint>
-    </mat-form-field>
-</ng-container>
+    <button mat-stroked-button type="button" color="accent" (click)="selectDevice.emit()">
+      <mat-icon>search</mat-icon> Select device
+    </button>
+  </div>
+  <mat-form-field appearance="outline" color="accent" class="third-width">
+    <mat-label>Service</mat-label>
+    <mtx-select [(ngModel)]="dataset!.service_ref" (ngModelChange)="onFieldChange()" name="dataset-service-ref"
+      appendTo=".ng-select-anchor">
+      @for (s of serviceOptions; track s) {
+        <mtx-option [value]="s.id">{{s.name}}</mtx-option>
+      }
+    </mtx-select>
+    <mat-hint>Which of the device's services to replay.</mat-hint>
+  </mat-form-field>
+  <mat-form-field appearance="outline" color="accent" class="third-width">
+    <mat-label>Column</mat-label>
+    <mtx-select [(ngModel)]="dataset!.column" (ngModelChange)="onFieldChange()" name="dataset-platform-column"
+      appendTo=".ng-select-anchor">
+      @for (p of columnOptions; track p) {
+        <mtx-option [value]="p">{{p}}</mtx-option>
+      }
+    </mtx-select>
+    <mat-hint>Which output variable of the service to replay.</mat-hint>
+  </mat-form-field>
+}
 
-<ng-container *ngIf="dataset!.origin === 'export'">
-    <mat-form-field appearance="outline" color="accent" class="third-width">
-        <mat-label>Export</mat-label>
-        <mtx-select [(ngModel)]="dataset!.ref" (ngModelChange)="onFieldChange()" name="dataset-export-ref"
-            appendTo=".ng-select-anchor">
-            <mtx-option *ngFor="let e of exports" [value]="e.ID">{{e.Name}}</mtx-option>
-        </mtx-select>
-    </mat-form-field>
-    <mat-form-field appearance="outline" color="accent" class="third-width">
-        <mat-label>Column</mat-label>
-        <mtx-select [(ngModel)]="dataset!.column" (ngModelChange)="onFieldChange()" name="dataset-export-column"
-            appendTo=".ng-select-anchor">
-            <mtx-option *ngFor="let c of columnsForExport(dataset!.ref)" [value]="c.Name">{{c.Name}}</mtx-option>
-        </mtx-select>
-        <mat-hint>Which column of the export to replay.</mat-hint>
-    </mat-form-field>
-</ng-container>
+@if (dataset!.origin === 'export') {
+  <mat-form-field appearance="outline" color="accent" class="third-width">
+    <mat-label>Export</mat-label>
+    <mtx-select [(ngModel)]="dataset!.ref" (ngModelChange)="onFieldChange()" name="dataset-export-ref"
+      appendTo=".ng-select-anchor">
+      @for (e of exports; track e) {
+        <mtx-option [value]="e.ID">{{e.Name}}</mtx-option>
+      }
+    </mtx-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline" color="accent" class="third-width">
+    <mat-label>Column</mat-label>
+    <mtx-select [(ngModel)]="dataset!.column" (ngModelChange)="onFieldChange()" name="dataset-export-column"
+      appendTo=".ng-select-anchor">
+      @for (c of columnsForExport(dataset!.ref); track c) {
+        <mtx-option [value]="c.Name">{{c.Name}}</mtx-option>
+      }
+    </mtx-select>
+    <mat-hint>Which column of the export to replay.</mat-hint>
+  </mat-form-field>
+}
 
-<mat-form-field appearance="outline" color="accent" class="third-width" *ngIf="isRemoteOrigin(dataset!.origin)">
+@if (isRemoteOrigin(dataset!.origin)) {
+  <mat-form-field appearance="outline" color="accent" class="third-width">
     <mat-label>Window</mat-label>
     <input matInput [(ngModel)]="dataset!.window" (ngModelChange)="onFieldChange()" name="dataset-window">
     <mat-hint>How much history to fetch, backwards from environment start, e.g. 36h, 7d, 4w, 1y.</mat-hint>
-</mat-form-field>
+  </mat-form-field>
+}
 <div class="max-gap-row">
-    <mat-form-field appearance="outline" color="accent" class="third-width">
-        <mat-label>Max gap</mat-label>
-        <input matInput [(ngModel)]="dataset!.max_gap" (ngModelChange)="onFieldChange()" name="dataset-max-gap">
-        <mat-hint>A duration like the window, at least 1s; wider than this between two points the source plays nothing.</mat-hint>
-    </mat-form-field>
-    <mat-icon class="inline-help-icon" matTooltip="Holds for every resample mode -- hold, linear and distribute all stop at this distance rather than bridging the gap.">help_outline</mat-icon>
+  <mat-form-field appearance="outline" color="accent" class="third-width">
+    <mat-label>Max gap</mat-label>
+    <input matInput [(ngModel)]="dataset!.max_gap" (ngModelChange)="onFieldChange()" name="dataset-max-gap">
+    <mat-hint>A duration like the window, at least 1s; wider than this between two points the source plays nothing.</mat-hint>
+  </mat-form-field>
+  <mat-icon class="inline-help-icon" matTooltip="Holds for every resample mode -- hold, linear and distribute all stop at this distance rather than bridging the gap.">help_outline</mat-icon>
 </div>
 
 <mat-form-field appearance="outline" color="accent" class="third-width">
-    <mat-label>Resample</mat-label>
-    <mtx-select [(ngModel)]="dataset!.resample" (ngModelChange)="onFieldChange()" name="dataset-resample"
-        appendTo=".ng-select-anchor">
-        <mtx-option *ngFor="let r of RESAMPLE_MODES" [value]="r">{{resampleModeLabel(r)}}</mtx-option>
-    </mtx-select>
-    <mat-hint>{{resampleModeHint(dataset!.resample)}}</mat-hint>
+  <mat-label>Resample</mat-label>
+  <mtx-select [(ngModel)]="dataset!.resample" (ngModelChange)="onFieldChange()" name="dataset-resample"
+    appendTo=".ng-select-anchor">
+    @for (r of RESAMPLE_MODES; track r) {
+      <mtx-option [value]="r">{{resampleModeLabel(r)}}</mtx-option>
+    }
+  </mtx-select>
+  <mat-hint>{{resampleModeHint(dataset!.resample)}}</mat-hint>
 </mat-form-field>
 <mat-form-field appearance="outline" color="accent" class="third-width">
-    <mat-label>Anchor</mat-label>
-    <mtx-select [(ngModel)]="dataset!.anchor" (ngModelChange)="onFieldChange()" name="dataset-anchor"
-        appendTo=".ng-select-anchor">
-        <mtx-option *ngFor="let a of ANCHOR_MODES" [value]="a">{{anchorModeLabel(a)}}</mtx-option>
-    </mtx-select>
-    <mat-hint>{{anchorModeHint(dataset!.anchor)}}</mat-hint>
+  <mat-label>Anchor</mat-label>
+  <mtx-select [(ngModel)]="dataset!.anchor" (ngModelChange)="onFieldChange()" name="dataset-anchor"
+    appendTo=".ng-select-anchor">
+    @for (a of ANCHOR_MODES; track a) {
+      <mtx-option [value]="a">{{anchorModeLabel(a)}}</mtx-option>
+    }
+  </mtx-select>
+  <mat-hint>{{anchorModeHint(dataset!.anchor)}}</mat-hint>
 </mat-form-field>
 
-<ng-container *ngIf="isRemoteOrigin(dataset!.origin) || dataset!.follow">
-    <div class="follow-row">
-        <mat-checkbox [(ngModel)]="dataset!.follow" (ngModelChange)="onFollowChange()" name="dataset-follow">
-            Follow
-        </mat-checkbox>
-        <mat-icon class="inline-help-icon" matTooltip="Keeps the series current after the initial fetch, refreshed on the cadence below. Needs anchor Original. A distribute resample never holds between two refreshes, so following leaves such a channel silent in between.">help_outline</mat-icon>
-    </div>
-    <mat-form-field appearance="outline" color="accent" class="third-width" *ngIf="dataset!.follow">
-        <mat-label>Follow every</mat-label>
-        <input matInput [(ngModel)]="dataset!.follow_every" (ngModelChange)="onFieldChange()" name="dataset-follow-every" placeholder="30m">
-        <mat-hint>A duration like the window, at least 1m, not shorter than the upstream's own interval.</mat-hint>
+@if (isRemoteOrigin(dataset!.origin) || dataset!.follow) {
+  <div class="follow-row">
+    <mat-checkbox [(ngModel)]="dataset!.follow" (ngModelChange)="onFollowChange()" name="dataset-follow">
+      Follow
+    </mat-checkbox>
+    <mat-icon class="inline-help-icon" matTooltip="Keeps the series current after the initial fetch, refreshed on the cadence below. Needs anchor Original. A distribute resample never holds between two refreshes, so following leaves such a channel silent in between.">help_outline</mat-icon>
+  </div>
+  @if (dataset!.follow) {
+    <mat-form-field appearance="outline" color="accent" class="third-width">
+      <mat-label>Follow every</mat-label>
+      <input matInput [(ngModel)]="dataset!.follow_every" (ngModelChange)="onFieldChange()" name="dataset-follow-every" placeholder="30m">
+      <mat-hint>A duration like the window, at least 1m, not shorter than the upstream's own interval.</mat-hint>
     </mat-form-field>
-</ng-container>
-<div class="follow-problem" *ngIf="followProblem(dataset)">
+  }
+}
+@if (followProblem(dataset)) {
+  <div class="follow-problem">
     <mat-icon color="warn">error</mat-icon>
     <span>{{followProblem(dataset)}}</span>
-</div>
+  </div>
+}
 
 <mat-form-field appearance="outline" color="accent" class="third-width">
-    <mat-label>Scale</mat-label>
-    <input matInput type="number" [(ngModel)]="dataset!.scale" (ngModelChange)="onFieldChange()" name="dataset-scale">
-    <mat-hint>Multiplies every replayed value. 0 = unscaled.</mat-hint>
+  <mat-label>Scale</mat-label>
+  <input matInput type="number" [(ngModel)]="dataset!.scale" (ngModelChange)="onFieldChange()" name="dataset-scale">
+  <mat-hint>Multiplies every replayed value. 0 = unscaled.</mat-hint>
 </mat-form-field>
 <mat-checkbox [(ngModel)]="dataset!.cumulative" (ngModelChange)="onFieldChange()" name="dataset-cumulative">
-    Cumulative
+  Cumulative
 </mat-checkbox>
 <mat-icon class="inline-help-icon" matTooltip="A meter reading that keeps counting up across a loop boundary instead of jumping back to the first value.">help_outline</mat-icon>
 
-<ng-container *ngIf="dataset!.origin === 'export' || dataset!.filters?.length">
-    <div class="filter-row" *ngFor="let filter of dataset!.filters; let i = index; trackBy: trackByFilter">
+@if (dataset!.origin === 'export' || dataset!.filters?.length) {
+  @for (filter of dataset!.filters; track trackByFilter(i, filter); let i = $index) {
+    <div class="filter-row">
+      <mat-form-field appearance="outline" color="accent" class="filter-column-field">
+        <mat-label>Column</mat-label>
+        <input matInput [(ngModel)]="filter.column" (ngModelChange)="onFieldChange()" name="dataset-filter-column-{{i}}">
+      </mat-form-field>
+      <mat-form-field appearance="outline" color="accent" class="filter-value-field">
+        <mat-label>Value</mat-label>
+        <input matInput [(ngModel)]="filter.value" (ngModelChange)="onFieldChange()" name="dataset-filter-value-{{i}}">
+      </mat-form-field>
+      <button mat-icon-button type="button" color="warn" matTooltip="Remove filter" (click)="removeFilter(i)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  }
+  <button mat-stroked-button color="accent" type="button" (click)="addFilter()">
+    <mat-icon>add</mat-icon> Add filter
+  </button>
+}
+
+@if (dataset!.origin === 'export' || dataset!.fallback) {
+  <div class="fallback-checkbox-row">
+    <mat-checkbox [ngModel]="!!dataset!.fallback" [ngModelOptions]="{standalone: true}" (ngModelChange)="onFallbackToggle($event)" name="dataset-fallback-enabled">
+      Fallback series
+    </mat-checkbox>
+    <mat-icon class="inline-help-icon" matTooltip="Read only inside a gap of this source wider than max_gap, never at the edges, not with cumulative.">help_outline</mat-icon>
+  </div>
+  @if (dataset!.fallback; as fallback) {
+    @for (filter of fallback.filters; track trackByFilter(i, filter); let i = $index) {
+      <div class="filter-row">
         <mat-form-field appearance="outline" color="accent" class="filter-column-field">
-            <mat-label>Column</mat-label>
-            <input matInput [(ngModel)]="filter.column" (ngModelChange)="onFieldChange()" name="dataset-filter-column-{{i}}">
+          <mat-label>Column</mat-label>
+          <input matInput [(ngModel)]="filter.column" (ngModelChange)="onFieldChange()" name="dataset-fallback-filter-column-{{i}}">
         </mat-form-field>
         <mat-form-field appearance="outline" color="accent" class="filter-value-field">
-            <mat-label>Value</mat-label>
-            <input matInput [(ngModel)]="filter.value" (ngModelChange)="onFieldChange()" name="dataset-filter-value-{{i}}">
+          <mat-label>Value</mat-label>
+          <input matInput [(ngModel)]="filter.value" (ngModelChange)="onFieldChange()" name="dataset-fallback-filter-value-{{i}}">
         </mat-form-field>
-        <button mat-icon-button type="button" color="warn" matTooltip="Remove filter" (click)="removeFilter(i)">
-            <mat-icon>delete</mat-icon>
+        <button mat-icon-button type="button" color="warn" matTooltip="Remove filter" (click)="removeFallbackFilter(i)">
+          <mat-icon>delete</mat-icon>
         </button>
-    </div>
-    <button mat-stroked-button color="accent" type="button" (click)="addFilter()">
-        <mat-icon>add</mat-icon> Add filter
+      </div>
+    }
+    <button mat-stroked-button color="accent" type="button" (click)="addFallbackFilter()">
+      <mat-icon>add</mat-icon> Add filter
     </button>
-</ng-container>
+    <mat-form-field appearance="outline" color="accent" class="third-width">
+      <mat-label>Export</mat-label>
+      <input matInput [(ngModel)]="fallback.ref" (ngModelChange)="onFieldChange()" name="dataset-fallback-ref">
+      <mat-hint>Empty reads the source's own.</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline" color="accent" class="third-width">
+      <mat-label>Column</mat-label>
+      <input matInput [(ngModel)]="fallback.column" (ngModelChange)="onFieldChange()" name="dataset-fallback-column">
+      <mat-hint>Empty reads the source's own.</mat-hint>
+    </mat-form-field>
+  }
+}
 
-<ng-container *ngIf="dataset!.origin === 'export' || dataset!.fallback">
-    <div class="fallback-checkbox-row">
-        <mat-checkbox [ngModel]="!!dataset!.fallback" [ngModelOptions]="{standalone: true}" (ngModelChange)="onFallbackToggle($event)" name="dataset-fallback-enabled">
-            Fallback series
-        </mat-checkbox>
-        <mat-icon class="inline-help-icon" matTooltip="Read only inside a gap of this source wider than max_gap, never at the edges, not with cumulative.">help_outline</mat-icon>
-    </div>
-    <ng-container *ngIf="dataset!.fallback as fallback">
-        <div class="filter-row" *ngFor="let filter of fallback.filters; let i = index; trackBy: trackByFilter">
-            <mat-form-field appearance="outline" color="accent" class="filter-column-field">
-                <mat-label>Column</mat-label>
-                <input matInput [(ngModel)]="filter.column" (ngModelChange)="onFieldChange()" name="dataset-fallback-filter-column-{{i}}">
-            </mat-form-field>
-            <mat-form-field appearance="outline" color="accent" class="filter-value-field">
-                <mat-label>Value</mat-label>
-                <input matInput [(ngModel)]="filter.value" (ngModelChange)="onFieldChange()" name="dataset-fallback-filter-value-{{i}}">
-            </mat-form-field>
-            <button mat-icon-button type="button" color="warn" matTooltip="Remove filter" (click)="removeFallbackFilter(i)">
-                <mat-icon>delete</mat-icon>
-            </button>
-        </div>
-        <button mat-stroked-button color="accent" type="button" (click)="addFallbackFilter()">
-            <mat-icon>add</mat-icon> Add filter
-        </button>
-        <mat-form-field appearance="outline" color="accent" class="third-width">
-            <mat-label>Export</mat-label>
-            <input matInput [(ngModel)]="fallback.ref" (ngModelChange)="onFieldChange()" name="dataset-fallback-ref">
-            <mat-hint>Empty reads the source's own.</mat-hint>
-        </mat-form-field>
-        <mat-form-field appearance="outline" color="accent" class="third-width">
-            <mat-label>Column</mat-label>
-            <input matInput [(ngModel)]="fallback.column" (ngModelChange)="onFieldChange()" name="dataset-fallback-column">
-            <mat-hint>Empty reads the source's own.</mat-hint>
-        </mat-form-field>
-    </ng-container>
-</ng-container>
-
-<div class="follow-problem" *ngFor="let msg of datasetGapProblems(dataset)">
+@for (msg of datasetGapProblems(dataset); track msg) {
+  <div class="follow-problem">
     <mat-icon color="warn">error</mat-icon>
     <span>{{msg}}</span>
-</div>
+  </div>
+}

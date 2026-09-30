@@ -17,50 +17,58 @@
   -->
 
 <div class="layout-margin card-container">
-    <span class="search-button-container">
-        <senergy-searchbar></senergy-searchbar>
-    </span>
+  <span class="search-button-container">
+    <senergy-searchbar></senergy-searchbar>
+  </span>
 
-    <div [hidden]="!ready" *ngIf="swaggerService.authorizationsSwagger['GET']">
-        <h1>REST API</h1>
-        <div>
-            <div [hidden]="!ready" class="service-container">
-                <mat-card appearance="outlined" *ngFor="let element of swaggerListShown; let i = index"
-                    [routerLink]="['/dev/api', 'openapi', element.id]" class="hover-mat-card entry-card api-card">
-                    <mat-card-header>
-                        <mat-card-title>{{ element.title }}</mat-card-title>
-                    </mat-card-header>
-                    <mat-card-content>
-                        <p>
-                            {{ element.description }}
-                        </p>
-                    </mat-card-content>
-                </mat-card>
-            </div>
+  @if (swaggerService.authorizationsSwagger['GET']) {
+    <div [hidden]="!ready">
+      <h1>REST API</h1>
+      <div>
+        <div [hidden]="!ready" class="service-container">
+          @for (element of swaggerListShown; track element; let i = $index) {
+            <mat-card appearance="outlined"
+              [routerLink]="['/dev/api', 'openapi', element.id]" class="hover-mat-card entry-card api-card">
+              <mat-card-header>
+                <mat-card-title>{{ element.title }}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p>
+                  {{ element.description }}
+                </p>
+              </mat-card-content>
+            </mat-card>
+          }
         </div>
+      </div>
     </div>
+  }
 
-    <div [hidden]="!ready" *ngIf="swaggerService.authorizationsAsyncAPI['GET']" style="padding-top: 1rem">
-        <h1>Async API</h1>
-        <div>
-            <div [hidden]="!ready" class="service-container">
-                <mat-card appearance="outlined" *ngFor="let element of asyncListShown; let i = index"
-                    [routerLink]="['/dev/api/', 'asyncapi', element.id]" class="hover-mat-card entry-card api-card">
-                    <mat-card-header>
-                        <mat-card-title>{{ element.title }}</mat-card-title>
-                    </mat-card-header>
-                    <mat-card-content>
-                        <p>
-                            {{ element.description }}
-                        </p>
-                    </mat-card-content>
-                </mat-card>
-            </div>
+  @if (swaggerService.authorizationsAsyncAPI['GET']) {
+    <div [hidden]="!ready" style="padding-top: 1rem">
+      <h1>Async API</h1>
+      <div>
+        <div [hidden]="!ready" class="service-container">
+          @for (element of asyncListShown; track element; let i = $index) {
+            <mat-card appearance="outlined"
+              [routerLink]="['/dev/api/', 'asyncapi', element.id]" class="hover-mat-card entry-card api-card">
+              <mat-card-header>
+                <mat-card-title>{{ element.title }}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p>
+                  {{ element.description }}
+                </p>
+              </mat-card-content>
+            </mat-card>
+          }
         </div>
+      </div>
     </div>
+  }
 
-    <senergy-spinner [show]="!ready"></senergy-spinner>
+  <senergy-spinner [show]="!ready"></senergy-spinner>
 
-    <router-outlet></router-outlet>
+  <router-outlet></router-outlet>
 
 </div>

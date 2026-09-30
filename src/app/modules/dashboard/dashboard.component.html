@@ -16,144 +16,175 @@
 
 
 <div class="dashboard-container">
-    <mat-tab-group backgroundColor="accent" color="primary" (animationDone)="initAllWidgets()"
-        (selectedIndexChange)="setTabIndex($event)" [(selectedIndex)]="activeTabIndex" dynamicHeight="true"
-        headerPosition="above" mat-stretch-tabs="false">
-        <mat-tab *ngFor="let dashboard of dashboards; let i=index">
-            <ng-template mat-tab-label>
-                <span (mouseenter)="mouseEnterHeader(i)" (mouseleave)="mouseLeaveHeader()"
-                    [ngClass]="dragging && mouseHoverHeaderIndex === i ? 'tab-label-drag' : 'tab-label'">
-                    {{dashboard.name}}
-                </span>
-            </ng-template>
-            <div fxFill fxLayout="column" *ngIf="dashboard === dashboards[activeTabIndex]">
-
-                <div *ngIf="zoomedWidgetIndex === null" fxLayout="row" fxLayoutAlign="end center">
-                    <button *ngIf="userHasUpdateDashboardAuthorization" mat-icon-button [matMenuTriggerFor]="refresh"
-                        color="accent" matTooltip="set widget refresh time">
-                        <mat-icon>history</mat-icon>
+  <mat-tab-group backgroundColor="accent" color="primary" (animationDone)="initAllWidgets()"
+    (selectedIndexChange)="setTabIndex($event)" [(selectedIndex)]="activeTabIndex" dynamicHeight="true"
+    headerPosition="above" mat-stretch-tabs="false">
+    @for (dashboard of dashboards; track dashboard; let i = $index) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span (mouseenter)="mouseEnterHeader(i)" (mouseleave)="mouseLeaveHeader()"
+            [ngClass]="dragging && mouseHoverHeaderIndex === i ? 'tab-label-drag' : 'tab-label'">
+            {{dashboard.name}}
+          </span>
+        </ng-template>
+        @if (dashboard === dashboards[activeTabIndex]) {
+          <div fxFill fxLayout="column">
+            @if (zoomedWidgetIndex === null) {
+              <div fxLayout="row" fxLayoutAlign="end center">
+                @if (userHasUpdateDashboardAuthorization) {
+                  <button mat-icon-button [matMenuTriggerFor]="refresh"
+                    color="accent" matTooltip="set widget refresh time">
+                    <mat-icon>history</mat-icon>
+                  </button>
+                }
+                <mat-menu #refresh="matMenu" [overlapTrigger]="false" xPosition="before">
+                  <button mat-menu-item (click)="refreshTime(5)">
+                    <p [ngClass]="{'color-accent': dashboard.refresh_time === 5}">5 seconds</p>
+                  </button>
+                  <button mat-menu-item (click)="refreshTime(15)">
+                    <p [ngClass]="{'color-accent': dashboard.refresh_time === 15}">15 seconds</p>
+                  </button>
+                  <button mat-menu-item (click)="refreshTime(30)">
+                    <p [ngClass]="{'color-accent': dashboard.refresh_time === 30}">30 seconds</p>
+                  </button>
+                  <button mat-menu-item (click)="refreshTime(60)">
+                    <p [ngClass]="{'color-accent': dashboard.refresh_time === 60}">1 minute</p>
+                  </button>
+                  <mat-divider></mat-divider>
+                  <button mat-menu-item (click)="refreshTime(0)">
+                    <p [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh</p>
+                  </button>
+                </mat-menu>
+                @if (userHasUpdateDashboardAuthorization) {
+                  <button (click)="moveDashboard(true)" mat-icon-button
+                    color="accent" [disabled]="activeTabIndex === 0" matTooltip="move dashboard left">
+                    <mat-icon>keyboard_arrow_left</mat-icon>
+                  </button>
+                }
+                @if (userHasUpdateDashboardAuthorization) {
+                  <button (click)="moveDashboard(false)" mat-icon-button
+                    color="accent" [disabled]="activeTabIndex === dashboards.length - 1"
+                    matTooltip="move dashboard right">
+                    <mat-icon>keyboard_arrow_right</mat-icon>
+                  </button>
+                }
+                @if (userHasMoveWidgetAuthorization) {
+                  <button (click)="toggleDragMode()" mat-icon-button
+                    [color]="inDragMode ? 'warn' : 'accent'" [disabled]="dragModeDisabled"
+                    matTooltip="reorder widgets">
+                    <mat-icon>open_with</mat-icon>
+                  </button>
+                }
+                @if (userHasUpdateDashboardAuthorization) {
+                  <button mat-icon-button
+                    [matMenuTriggerFor]="layout" color="accent"
+                    matTooltip="set what happens to the widgets when the window changes width">
+                    <mat-icon>view_quilt</mat-icon>
+                  </button>
+                }
+                <mat-menu #layout="matMenu" [overlapTrigger]="false" xPosition="before">
+                  @for (option of layoutModes; track option) {
+                    <button mat-menu-item
+                      (click)="selectLayoutMode(option.mode)" [matTooltip]="option.hint"
+                      matTooltipPosition="left">
+                      <p [ngClass]="{'color-accent': layoutMode() === option.mode}">{{option.label}}</p>
                     </button>
-                    <mat-menu #refresh="matMenu" [overlapTrigger]="false" xPosition="before">
-                        <button mat-menu-item (click)="refreshTime(5)">
-                            <p [ngClass]="{'color-accent': dashboard.refresh_time === 5}">5 seconds</p>
-                        </button>
-                        <button mat-menu-item (click)="refreshTime(15)">
-                            <p [ngClass]="{'color-accent': dashboard.refresh_time === 15}">15 seconds</p>
-                        </button>
-                        <button mat-menu-item (click)="refreshTime(30)">
-                            <p [ngClass]="{'color-accent': dashboard.refresh_time === 30}">30 seconds</p>
-                        </button>
-                        <button mat-menu-item (click)="refreshTime(60)">
-                            <p [ngClass]="{'color-accent': dashboard.refresh_time === 60}">1 minute</p>
-                        </button>
-                        <mat-divider></mat-divider>
-                        <button mat-menu-item (click)="refreshTime(0)">
-                            <p [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh</p>
-                        </button>
-                    </mat-menu>
-                    <button *ngIf="userHasUpdateDashboardAuthorization" (click)="moveDashboard(true)" mat-icon-button
-                        color="accent" [disabled]="activeTabIndex === 0" matTooltip="move dashboard left">
-                        <mat-icon>keyboard_arrow_left</mat-icon>
+                  }
+                </mat-menu>
+                @if (userHasUpdateDashboardAuthorization) {
+                  <button mat-icon-button
+                    [matMenuTriggerFor]="columns" color="accent"
+                    matTooltip="set how many columns the widgets are laid out on">
+                    <mat-icon>view_column</mat-icon>
+                  </button>
+                }
+                <mat-menu #columns="matMenu" [overlapTrigger]="false" xPosition="before">
+                  <button mat-menu-item (click)="selectColumns(0)" matTooltipPosition="left"
+                    matTooltip="Take the column count from the window width, as a dashboard always has">
+                    <p [ngClass]="{'color-accent': isAutoColumns()}">Auto</p>
+                  </button>
+                  <mat-divider></mat-divider>
+                  @for (count of columnChoices; track count) {
+                    <button mat-menu-item (click)="selectColumns(count)"
+                      matTooltip="Hold this many columns at every window width" matTooltipPosition="left">
+                      <p [ngClass]="{'color-accent': fixedColumns() === count}">
+                        {{count}} {{count === 1 ? 'column' : 'columns'}}
+                      </p>
                     </button>
-                    <button *ngIf="userHasUpdateDashboardAuthorization" (click)="moveDashboard(false)" mat-icon-button
-                        color="accent" [disabled]="activeTabIndex === dashboards.length - 1"
-                        matTooltip="move dashboard right">
-                        <mat-icon>keyboard_arrow_right</mat-icon>
-                    </button>
-                    <button *ngIf="userHasMoveWidgetAuthorization" (click)="toggleDragMode()" mat-icon-button
-                        [color]="inDragMode ? 'warn' : 'accent'" [disabled]="dragModeDisabled"
-                        matTooltip="reorder widgets">
-                        <mat-icon>open_with</mat-icon>
-                    </button>
-                    <button *ngIf="userHasUpdateDashboardAuthorization" mat-icon-button
-                        [matMenuTriggerFor]="layout" color="accent"
-                        matTooltip="set what happens to the widgets when the window changes width">
-                        <mat-icon>view_quilt</mat-icon>
-                    </button>
-                    <mat-menu #layout="matMenu" [overlapTrigger]="false" xPosition="before">
-                        <button mat-menu-item *ngFor="let option of layoutModes"
-                            (click)="selectLayoutMode(option.mode)" [matTooltip]="option.hint"
-                            matTooltipPosition="left">
-                            <p [ngClass]="{'color-accent': layoutMode() === option.mode}">{{option.label}}</p>
-                        </button>
-                    </mat-menu>
-                    <button *ngIf="userHasUpdateDashboardAuthorization" mat-icon-button
-                        [matMenuTriggerFor]="columns" color="accent"
-                        matTooltip="set how many columns the widgets are laid out on">
-                        <mat-icon>view_column</mat-icon>
-                    </button>
-                    <mat-menu #columns="matMenu" [overlapTrigger]="false" xPosition="before">
-                        <button mat-menu-item (click)="selectColumns(0)" matTooltipPosition="left"
-                            matTooltip="Take the column count from the window width, as a dashboard always has">
-                            <p [ngClass]="{'color-accent': isAutoColumns()}">Auto</p>
-                        </button>
-                        <mat-divider></mat-divider>
-                        <button mat-menu-item *ngFor="let count of columnChoices" (click)="selectColumns(count)"
-                            matTooltip="Hold this many columns at every window width" matTooltipPosition="left">
-                            <p [ngClass]="{'color-accent': fixedColumns() === count}">
-                                {{count}} {{count === 1 ? 'column' : 'columns'}}
-                            </p>
-                        </button>
-                    </mat-menu>
-                    <button *ngIf="userHasUpdateDashboardAuthorization" (click)="openEditDashboardDialog()"
-                        mat-icon-button color="accent" matTooltip="edit dashboard">
-                        <mat-icon>edit</mat-icon>
-                    </button>
-                    <button *ngIf="userHasDeleteDashboardAuthorization" (click)="openDeleteDashboardDialog()"
-                        mat-icon-button color="accent" [disabled]="dashboards.length <= 1"
-                        matTooltip="delete dashboard">
-                        <mat-icon>delete</mat-icon>
-                    </button>
+                  }
+                </mat-menu>
+                @if (userHasUpdateDashboardAuthorization) {
+                  <button (click)="openEditDashboardDialog()"
+                    mat-icon-button color="accent" matTooltip="edit dashboard">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                }
+                @if (userHasDeleteDashboardAuthorization) {
+                  <button (click)="openDeleteDashboardDialog()"
+                    mat-icon-button color="accent" [disabled]="dashboards.length <= 1"
+                    matTooltip="delete dashboard">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+            }
+            @if (zoomedWidgetIndex !== null) {
+              <div>
+                <div class="zoomed-widget">
+                  <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization"
+                    [userHasUpdatePropertiesAuthorization]="userHasUpdateWidgetPropertiesAuthorization"
+                    [userHasUpdateNameAuthorization]="userHasUpdateWidgetNameAuthorization"
+                    [dashboardId]="dashboard.id"
+                    [widget]="dashboards[activeTabIndex].widgets[zoomedWidgetIndex]" [zoom]="true"
+                  [initialWidgetData]="initialWidgetData"></senergy-widget>
                 </div>
+              </div>
+            }
+            <!-- only drag/resize stop are bound: gridstack's `change` also fires when it re-columns
+            itself as the window narrows, which is what let a resize rewrite every stored
+            coordinate, and added/removed are already covered by the widget manipulation
+            subscribe. The scroll wrapper is ours because Material's .mat-mdc-tab-body-content
+            is overflow-x: hidden and would clip it. -->
+            @if (zoomedWidgetIndex === null) {
+              <div class="grid-scroll">
+                <gridstack class="grid-stack" [options]="gridOptions" (dragStartCB)="startDrag()"
+                  (dragStopCB)="stopDrag($event)" (resizeStopCB)="applyRepack(); saveWidgetPositions()"
+                  [style.min-width.px]="gridMinWidth"
+                  [ngClass]="{'gridstack-with-button': userHasCreateWidgetAuthorization}">
+                  @for (widget of dashboards[activeTabIndex].widgets; track trackById($index, widget)) {
+                    <gridstack-item [id]="'gridstack-item-' + widget.id"
+                      [ngClass]="{'color-sidenav': inDragMode}"
+                      [options]="{x: widget.x, y: widget.y, w: widget.w, h: widget.h, noResize: !resizable(dashboardTypesEnumFromString(widget.type))}">
+                      <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization"
+                        [userHasUpdatePropertiesAuthorization]="userHasUpdateWidgetPropertiesAuthorization"
+                        [userHasUpdateNameAuthorization]="userHasUpdateWidgetNameAuthorization"
+                      [dashboardId]="dashboard.id" [widget]="widget" [zoom]="false" class="item"></senergy-widget>
+                    </gridstack-item>
+                  }
+                </gridstack>
+              </div>
+            }
+          </div>
+        }
+      </mat-tab>
+    }
 
-                <div *ngIf="zoomedWidgetIndex !== null">
-                    <div class="zoomed-widget">
-                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization"
-                            [userHasUpdatePropertiesAuthorization]="userHasUpdateWidgetPropertiesAuthorization"
-                            [userHasUpdateNameAuthorization]="userHasUpdateWidgetNameAuthorization"
-                            [dashboardId]="dashboard.id"
-                            [widget]="dashboards[activeTabIndex].widgets[zoomedWidgetIndex]" [zoom]="true"
-                            [initialWidgetData]="initialWidgetData"></senergy-widget>
-                    </div>
+    @if (dashboardsRetrieved && userHasCreateDashboardAuthorization) {
+      <mat-tab disabled>
+        <ng-template mat-tab-label>
+          <button (click)="openAddDashboardDialog()" mat-icon-button>
+            <mat-icon>add</mat-icon>
+          </button>
+        </ng-template>
+      </mat-tab>
+    }
 
-                </div>
-
-                <!-- only drag/resize stop are bound: gridstack's `change` also fires when it re-columns
-                     itself as the window narrows, which is what let a resize rewrite every stored
-                     coordinate, and added/removed are already covered by the widget manipulation
-                     subscribe. The scroll wrapper is ours because Material's .mat-mdc-tab-body-content
-                     is overflow-x: hidden and would clip it. -->
-                <div class="grid-scroll" *ngIf="zoomedWidgetIndex === null">
-                    <gridstack class="grid-stack" [options]="gridOptions" (dragStartCB)="startDrag()"
-                        (dragStopCB)="stopDrag($event)" (resizeStopCB)="applyRepack(); saveWidgetPositions()"
-                        [style.min-width.px]="gridMinWidth"
-                        [ngClass]="{'gridstack-with-button': userHasCreateWidgetAuthorization}">
-                        <gridstack-item *ngFor="let widget of dashboards[activeTabIndex].widgets; trackBy:trackById" [id]="'gridstack-item-' + widget.id"
-                            [ngClass]="{'color-sidenav': inDragMode}"
-                            [options]="{x: widget.x, y: widget.y, w: widget.w, h: widget.h, noResize: !resizable(dashboardTypesEnumFromString(widget.type))}">
-                            <senergy-widget [userHasDeleteAuthorization]="userHasDeleteWidgetAuthorization"
-                                [userHasUpdatePropertiesAuthorization]="userHasUpdateWidgetPropertiesAuthorization"
-                                [userHasUpdateNameAuthorization]="userHasUpdateWidgetNameAuthorization"
-                                [dashboardId]="dashboard.id" [widget]="widget" [zoom]="false" class="item"></senergy-widget>
-                        </gridstack-item>
-                    </gridstack>
-                </div>
-            </div>
-
-        </mat-tab>
-
-        <mat-tab disabled *ngIf="dashboardsRetrieved && userHasCreateDashboardAuthorization">
-            <ng-template mat-tab-label>
-                <button (click)="openAddDashboardDialog()" mat-icon-button>
-                    <mat-icon>add</mat-icon>
-                </button>
-            </ng-template>
-        </mat-tab>
-
-    </mat-tab-group>
+  </mat-tab-group>
 </div>
 
-<button *ngIf="zoomedWidgetIndex === null && userHasCreateWidgetAuthorization" mat-fab class="fab"
+@if (zoomedWidgetIndex === null && userHasCreateWidgetAuthorization) {
+  <button mat-fab class="fab"
     matTooltip="Add new widget" (click)="openAddWidgetDialog()">
     <mat-icon>add</mat-icon>
-</button>
+  </button>
+}

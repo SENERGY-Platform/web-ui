@@ -15,62 +15,116 @@
   -->
 
 <mat-expansion-panel>
-    <mat-expansion-panel-header>
-        <mat-panel-title>
-            {{element.displayName || name}}
-        </mat-panel-title>
-        <mat-panel-description>
-            <div *ngIf="sum(element.month) > 0">
-                Total: {{sum(element.month) | currency:'EUR'}}&nbsp;
-            </div>
-            <div *ngIf="element.estimation_month !== undefined && sum(element.estimation_month) > 0">
-                Estimation: {{sum(element.estimation_month) | currency:'EUR'}}&nbsp;
-            </div>
-            <div *ngIf="element.month.requests !== undefined">
-                Total Requests: {{element.month.requests | number: '1.0-0'}}&nbsp;
-            </div>
-            <div *ngIf="element.estimation_month !== undefined && element.estimation_month.requests !== undefined">
-                Estimated Total Requests: {{element.estimation_month.requests | number: '1.0-0'}}
-            </div>
-        </mat-panel-description>
-    </mat-expansion-panel-header>
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      {{element.displayName || name}}
+    </mat-panel-title>
+    <mat-panel-description>
+      @if (sum(element.month) > 0) {
+        <div>
+          Total: {{sum(element.month) | currency:'EUR'}}&nbsp;
+        </div>
+      }
+      @if (element.estimation_month !== undefined && sum(element.estimation_month) > 0) {
+        <div>
+          Estimation: {{sum(element.estimation_month) | currency:'EUR'}}&nbsp;
+        </div>
+      }
+      @if (element.month.requests !== undefined) {
+        <div>
+          Total Requests: {{element.month.requests | number: '1.0-0'}}&nbsp;
+        </div>
+      }
+      @if (element.estimation_month !== undefined && element.estimation_month.requests !== undefined) {
+        <div>
+          Estimated Total Requests: {{element.estimation_month.requests | number: '1.0-0'}}
+        </div>
+      }
+    </mat-panel-description>
+  </mat-expansion-panel-header>
 
 
-    <table>
-        <tr>
-            <td>This month:</td>
-            <div>
-                <td *ngIf="element.month.cpu !== undefined"><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon></td>
-                <td *ngIf="element.month.cpu !== undefined">{{element.month.cpu | currency:'EUR'}}</td>
-                <td *ngIf="element.month.ram !== undefined"><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
-                <td *ngIf="element.month.ram !== undefined">{{element.month.ram | currency:'EUR'}}</td>
-                <td *ngIf="element.month.storage !== undefined"><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
-                <td *ngIf="element.month.storage !== undefined">{{element.month.storage | currency:'EUR'}}</td>
-                <td *ngIf="element.month.requests !== undefined"><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
-                <td *ngIf="element.month.requests !== undefined">{{element.month.requests | number: '1.0-0'}}</td>
-                <td *ngIf="element.month.requestedDatapoints !== undefined"><mat-icon matTooltip="Requested Datapoints" class="inline-icon">format_list_numbered</mat-icon></td>
-                <td *ngIf="element.month.requestedDatapoints !== undefined">{{element.month.requestedDatapoints | number: '1.0-0'}}</td>
-                </div>
-        </tr>
-        <tr *ngIf="element.estimation_month !== undefined">
-            <td>Estimation (month):</td>
-            <div>
-                <td *ngIf="element.estimation_month.cpu !== undefined"><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon> </td>
-                <td *ngIf="element.estimation_month.cpu !== undefined">{{element.estimation_month.cpu | currency:'EUR'}}</td>
-                <td *ngIf="element.estimation_month.ram !== undefined"><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
-                <td *ngIf="element.estimation_month.ram !== undefined">{{element.estimation_month.ram | currency:'EUR'}}</td>
-                <td *ngIf="element.estimation_month.storage !== undefined"><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
-                <td *ngIf="element.estimation_month.storage !== undefined">{{element.estimation_month.storage | currency:'EUR'}}</td>
-                <td *ngIf="element.estimation_month.requests !== undefined"><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
-                <td *ngIf="element.estimation_month.requests !== undefined">{{element.estimation_month.requests | number: '1.0-0'}}</td>
-                <td *ngIf="element.estimation_month.requestedDatapoints !== undefined"><mat-icon matTooltip="Requested Datapoints" class="inline-icon">format_list_numbered</mat-icon></td>
-                <td *ngIf="element.estimation_month.requestedDatapoints !== undefined">{{element.estimation_month.requestedDatapoints | number: '1.0-0'}}</td>
-            </div>
-        </tr>
-    </table>
+  <table>
+    <tr>
+      <td>This month:</td>
+      <div>
+        @if (element.month.cpu !== undefined) {
+          <td><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon></td>
+        }
+        @if (element.month.cpu !== undefined) {
+          <td>{{element.month.cpu | currency:'EUR'}}</td>
+        }
+        @if (element.month.ram !== undefined) {
+          <td><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
+        }
+        @if (element.month.ram !== undefined) {
+          <td>{{element.month.ram | currency:'EUR'}}</td>
+        }
+        @if (element.month.storage !== undefined) {
+          <td><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
+        }
+        @if (element.month.storage !== undefined) {
+          <td>{{element.month.storage | currency:'EUR'}}</td>
+        }
+        @if (element.month.requests !== undefined) {
+          <td><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
+        }
+        @if (element.month.requests !== undefined) {
+          <td>{{element.month.requests | number: '1.0-0'}}</td>
+        }
+        @if (element.month.requestedDatapoints !== undefined) {
+          <td><mat-icon matTooltip="Requested Datapoints" class="inline-icon">format_list_numbered</mat-icon></td>
+        }
+        @if (element.month.requestedDatapoints !== undefined) {
+          <td>{{element.month.requestedDatapoints | number: '1.0-0'}}</td>
+        }
+      </div>
+    </tr>
+    @if (element.estimation_month !== undefined) {
+      <tr>
+        <td>Estimation (month):</td>
+        <div>
+          @if (element.estimation_month.cpu !== undefined) {
+            <td><mat-icon matTooltip="CPU" class="inline-icon">developer_board</mat-icon> </td>
+          }
+          @if (element.estimation_month.cpu !== undefined) {
+            <td>{{element.estimation_month.cpu | currency:'EUR'}}</td>
+          }
+          @if (element.estimation_month.ram !== undefined) {
+            <td><mat-icon matTooltip="RAM" class="inline-icon">memory</mat-icon></td>
+          }
+          @if (element.estimation_month.ram !== undefined) {
+            <td>{{element.estimation_month.ram | currency:'EUR'}}</td>
+          }
+          @if (element.estimation_month.storage !== undefined) {
+            <td><mat-icon matTooltip="Storage" class="inline-icon">storage</mat-icon></td>
+          }
+          @if (element.estimation_month.storage !== undefined) {
+            <td>{{element.estimation_month.storage | currency:'EUR'}}</td>
+          }
+          @if (element.estimation_month.requests !== undefined) {
+            <td><mat-icon matTooltip="Requests" class="inline-icon">cloud_sync</mat-icon></td>
+          }
+          @if (element.estimation_month.requests !== undefined) {
+            <td>{{element.estimation_month.requests | number: '1.0-0'}}</td>
+          }
+          @if (element.estimation_month.requestedDatapoints !== undefined) {
+            <td><mat-icon matTooltip="Requested Datapoints" class="inline-icon">format_list_numbered</mat-icon></td>
+          }
+          @if (element.estimation_month.requestedDatapoints !== undefined) {
+            <td>{{element.estimation_month.requestedDatapoints | number: '1.0-0'}}</td>
+          }
+        </div>
+      </tr>
+    }
+  </table>
 
-    <mat-accordion multi *ngIf="ready">
-        <senergy-cost-element *ngFor="let child of element.children  | keyvalue: expensiveFirst" [parentName]="name" [name]="child.key"
+  @if (ready) {
+    <mat-accordion multi>
+      @for (child of element.children  | keyvalue: expensiveFirst; track child) {
+        <senergy-cost-element [parentName]="name" [name]="child.key"
         [pipelines]="pipelines" [imports]="imports" [operators]="operators" [devices]="devices" [exports]="exports" [brokerExports]="brokerExports" [reports]="reports" [element]="child.value" ></senergy-cost-element>
+      }
     </mat-accordion>
+  }
 </mat-expansion-panel>

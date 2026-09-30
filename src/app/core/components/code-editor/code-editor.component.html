@@ -18,8 +18,10 @@
 <link rel="stylesheet" href="/monaco.css" />
 
 <div class="code-editor" [style.height]="height">
-    <div class="code-editor-host" #host></div>
-    <div class="code-editor-loading" *ngIf="loading">
-        <mat-progress-spinner diameter="32" mode="indeterminate" color="accent"></mat-progress-spinner>
+  <div class="code-editor-host" #host></div>
+  @if (loading) {
+    <div class="code-editor-loading">
+      <mat-progress-spinner diameter="32" mode="indeterminate" color="accent"></mat-progress-spinner>
     </div>
+  }
 </div>

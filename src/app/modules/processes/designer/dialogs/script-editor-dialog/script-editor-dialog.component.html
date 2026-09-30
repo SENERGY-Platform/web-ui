@@ -15,23 +15,31 @@
   -->
 
 <h2 mat-dialog-title>
-  Edit Script<span *ngIf="label">: {{label}}</span>
+  Edit Script@if (label) {
+  <span>: {{label}}</span>
+}
 </h2>
 
 <mat-dialog-content>
   <!-- the separator is drawn in css between adjacent parts, so a missing script
-       format does not leave a leading one -->
+  format does not leave a leading one -->
   <div class="script-hint">
-    <span class="script-hint-part" *ngIf="scriptFormat">Script Format: {{scriptFormat}}</span>
-    <span class="script-hint-part" *ngIf="variables.length">
-      {{variables.length}} process variable(s) available here
-    </span>
-    <span class="script-hint-part" *ngIf="!variables.length">
-      No process variables are set yet at this point in the flow
-    </span>
+    @if (scriptFormat) {
+      <span class="script-hint-part">Script Format: {{scriptFormat}}</span>
+    }
+    @if (variables.length) {
+      <span class="script-hint-part">
+        {{variables.length}} process variable(s) available here
+      </span>
+    }
+    @if (!variables.length) {
+      <span class="script-hint-part">
+        No process variables are set yet at this point in the flow
+      </span>
+    }
   </div>
   <senergy-code-editor [(value)]="script" [language]="language" [completions]="completions" height="60vh"
-                       [scriptEnvironment]="scriptEnvironment">
+    [scriptEnvironment]="scriptEnvironment">
   </senergy-code-editor>
 </mat-dialog-content>
 

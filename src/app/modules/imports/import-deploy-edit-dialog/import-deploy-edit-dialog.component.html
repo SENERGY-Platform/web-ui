@@ -16,88 +16,92 @@
 <h2 mat-dialog-title>Deploy Import</h2>
 
 <mat-dialog-content>
-    <form [formGroup]="form" fxLayout="column">
-        <div *ngIf="editMode">
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>ID</mat-label>
-                <input matInput formControlName="id">
-                <mat-error senergyError label="ID"></mat-error>
-            </mat-form-field>
-        </div>
+  <form [formGroup]="form" fxLayout="column">
+    @if (editMode) {
+      <div>
+        <mat-form-field color="accent" appearance="outline" fxFill>
+          <mat-label>ID</mat-label>
+          <input matInput formControlName="id">
+          <mat-error senergyError label="ID"></mat-error>
+        </mat-form-field>
+      </div>
+    }
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Image</mat-label>
-                <input matInput formControlName="image" required>
-                <mat-error senergyError label="Image"></mat-error>
-            </mat-form-field>
-        </div>
+    <div>
+      <mat-form-field color="accent" appearance="outline" fxFill>
+        <mat-label>Image</mat-label>
+        <input matInput formControlName="image" required>
+        <mat-error senergyError label="Image"></mat-error>
+      </mat-form-field>
+    </div>
 
-        <div *ngIf="editMode">
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Topic</mat-label>
-                <input matInput formControlName="kafka_topic">
-                <mat-error senergyError label="Topic"></mat-error>
-            </mat-form-field>
-        </div>
+    @if (editMode) {
+      <div>
+        <mat-form-field color="accent" appearance="outline" fxFill>
+          <mat-label>Topic</mat-label>
+          <input matInput formControlName="kafka_topic">
+          <mat-error senergyError label="Topic"></mat-error>
+        </mat-form-field>
+      </div>
+    }
 
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Name</mat-label>
-                <input matInput formControlName="name" required>
-                <mat-error senergyError label="Name"></mat-error>
-            </mat-form-field>
-        </div>
+    <div>
+      <mat-form-field color="accent" appearance="outline" fxFill>
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error senergyError label="Name"></mat-error>
+      </mat-form-field>
+    </div>
 
-        <h4 fxFlex>Configs</h4>
-        <table mat-table
-               [dataSource]="configs" matSort>
-            <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Name</th>
-                <td mat-cell *matCellDef="let m" [formGroup]="m">
-                    {{m.get('name')?.value || ''}}
-                </td>
-            </ng-container>
-            <ng-container matColumnDef="type">
-                <th mat-header-cell *matHeaderCellDef>Type</th>
-                <td mat-cell *matCellDef="let m" [formGroup]="m">
-                    {{types.get(m.get('type')?.value) || 'unknown'}}
-                </td>
-            </ng-container>
-            <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef>Description</th>
-                <td mat-cell *matCellDef="let m" [formGroup]="m">
-                    {{m.get('description')?.value || ''}}
-                </td>
-            </ng-container>
-            <ng-container matColumnDef="value">
-                <th mat-header-cell *matHeaderCellDef>Value</th>
-                <td mat-cell *matCellDef="let m" [formGroup]="m">
-                    <mat-form-field fxFlex class="inline" color="accent" appearance="outline">
-                        <mat-label>Value</mat-label>
-                        <input matInput required formControlName="value">
-                        <mat-error senergyError label="Value"></mat-error>
-                    </mat-form-field>
-                </td>
-            </ng-container>
+    <h4 fxFlex>Configs</h4>
+    <table mat-table
+      [dataSource]="configs" matSort>
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let m" [formGroup]="m">
+          {{m.get('name')?.value || ''}}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let m" [formGroup]="m">
+          {{types.get(m.get('type')?.value) || 'unknown'}}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef>Description</th>
+        <td mat-cell *matCellDef="let m" [formGroup]="m">
+          {{m.get('description')?.value || ''}}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="value">
+        <th mat-header-cell *matHeaderCellDef>Value</th>
+        <td mat-cell *matCellDef="let m" [formGroup]="m">
+          <mat-form-field fxFlex class="inline" color="accent" appearance="outline">
+            <mat-label>Value</mat-label>
+            <input matInput required formControlName="value">
+            <mat-error senergyError label="Value"></mat-error>
+          </mat-form-field>
+        </td>
+      </ng-container>
 
 
-            <tr mat-header-row
-                *matHeaderRowDef="['name', 'type', 'description', 'value'];"></tr>
-            <tr mat-row
-                *matRowDef="let m; columns: ['name', 'type', 'description', 'value'];"></tr>
-        </table>
+      <tr mat-header-row
+      *matHeaderRowDef="['name', 'type', 'description', 'value'];"></tr>
+      <tr mat-row
+      *matRowDef="let m; columns: ['name', 'type', 'description', 'value'];"></tr>
+    </table>
 
-        <div>
+    <div>
             <mat-checkbox formControlName="restart" matTooltip="Should be checked, if the import is regularly
              importing recent data. If it only imports historic data once, it should not be checked.">Restart
-            </mat-checkbox>
-        </div>
-    </form>
+      </mat-checkbox>
+    </div>
+  </form>
 </mat-dialog-content>
 
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
 </mat-dialog-actions>

@@ -23,9 +23,11 @@
       <mat-form-field appearance="outline" class="form-field" color="accent">
         <mat-label>Subject</mat-label>
         <input matInput type="text" formControlName="defaultValue" [errorStateMatcher]="parentErrorStateMatcher">
-        <mat-error *ngIf="subjectFormGroup.hasError('fixedNull')">
-          Can't be empty!
-        </mat-error>
+        @if (subjectFormGroup.hasError('fixedNull')) {
+          <mat-error>
+            Can't be empty!
+          </mat-error>
+        }
       </mat-form-field>
     </div>
 
@@ -33,9 +35,11 @@
       <mat-form-field appearance="outline" class="form-field-area" color="accent">
         <mat-label>Message</mat-label>
         <textarea matInput type="text" formControlName="defaultValue" [errorStateMatcher]="parentErrorStateMatcher"></textarea>
-        <mat-error *ngIf="contentFormGroup.hasError('fixedNull')">
-          Can't be empty!
-        </mat-error>
+        @if (contentFormGroup.hasError('fixedNull')) {
+          <mat-error>
+            Can't be empty!
+          </mat-error>
+        }
       </mat-form-field>
     </div>
   </form>

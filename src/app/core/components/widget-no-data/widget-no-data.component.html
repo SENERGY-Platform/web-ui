@@ -13,6 +13,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div fxFill *ngIf="showIf === true">
+@if (showIf === true) {
+  <div fxFill>
     <div fxFlex fxLayoutAlign="center center">{{message}}</div>
-</div>
+  </div>
+}

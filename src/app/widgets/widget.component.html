@@ -14,107 +14,177 @@
   ~ limitations under the License.
   -->
 
-<div [ngSwitch]="widget.type" fxFill>
-  <div *ngSwitchCase="'switch'" fxFill>
-    <senergy-switch class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-switch>
-  </div>
-  <div *ngSwitchCase="'range_slider'" fxFill>
-    <senergy-range-slider class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-range-slider>
-  </div>
-  <div *ngSwitchCase="'devices_state'" fxFill>
-    <senergy-devices-state class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-devices-state>
-  </div>
-  <div *ngSwitchCase="'process_state'" fxFill>
-    <senergy-process-state class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-process-state>
-  </div>
-  <div *ngSwitchCase="'event_list'" fxFill>
-    <senergy-event-list class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-event-list>
-  </div>
-  <div *ngSwitchCase="'ranking_list'" fxFill>
-    <senergy-ranking-list class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-ranking-list>
-  </div>
-  <div *ngSwitchCase="'charts_export'" fxFill>
-    <senergy-charts-export class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" [initialWidgetData]="initialWidgetData" fxFill></senergy-charts-export>
-  </div>
-  <div *ngSwitchCase="'charts_process_instances'" fxFill>
-    <senergy-charts-process-instances class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-charts-process-instances>
-  </div>
-  <div *ngSwitchCase="'charts_process_deployments'" fxFill>
-    <senergy-charts-process-deployments class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-charts-process-deployments>
-  </div>
-  <div *ngSwitchCase="'charts_device_downtime_gateway'" fxFill>
-    <senergy-device-downtime-gateway class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-downtime-gateway>
-  </div>
-  <div *ngSwitchCase="'charts_device_total_downtime'" fxFill>
-    <senergy-device-total-downtime class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-total-downtime>
-  </div>
-  <div *ngSwitchCase="'charts_device_downtime_rate_per_gateway'" fxFill>
-    <senergy-device-downtime-gateway class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-downtime-gateway>
-  </div>
-  <div *ngSwitchCase="'charts_device_per_gateway'" fxFill>
-    <senergy-device-gateway class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-gateway>
-  </div>
-  <div *ngSwitchCase="'process_model_list'" fxFill>
-    <senergy-process-model-list class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-process-model-list>
-  </div>
-  <div *ngSwitchCase="'device_downtime_list'" fxFill>
-    <senergy-device-downtime-list class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-downtime-list>
-  </div>
-  <div *ngSwitchCase="'single_value'" fxFill>
-    <senergy-single-value class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-single-value>
-  </div>
-  <div *ngSwitchCase="'multi_value'" fxFill>
-    <senergy-multi-value class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-multi-value>
-  </div>
-  <div *ngSwitchCase="'energy_prediction'" fxFill>
-    <senergy-energy-prediction class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-energy-prediction>
-  </div>
-  <div *ngSwitchCase="'air_quality'" fxFill>
-    <senergy-air-quality class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-air-quality>
-  </div>
-  <div *ngSwitchCase="'process_incident_list'" fxFill>
-    <senergy-process-incident-list class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-process-incident-list>
-  </div>
-  <div *ngSwitchCase="'process_scheduler'" fxFill>
-    <senergy-process-scheduler class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-process-scheduler>
-  </div>
-  <div *ngSwitchCase="'device_status'" fxFill>
-    <senergy-device-status class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-status>
-  </div>
-  <div *ngSwitchCase="'data_table'" fxFill>
-    <senergy-data-table class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-data-table>
-  </div>
-  <div *ngSwitchCase="'ac_control'" fxFill>
-    <senergy-ac-control class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-ac-control>
-  </div>
-  <div *ngSwitchCase="'anomaly_detection'" fxFill>
-    <senergy-anomaly-detection class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-anomaly-detection>
-  </div>
-  <div *ngSwitchCase="'open_window'" fxFill>
-    <senergy-open-window class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-open-window>
-  </div>
-  <div *ngSwitchCase="'fake-anomaly'" fxFill>
-    <fake-senergy-anomaly-detection class="widget" [dashboardId]="dashboardId" [widget]="widget" fxFill></fake-senergy-anomaly-detection>
-  </div>
-  <div *ngSwitchCase="'pv_prediction'" fxFill>
-    <senergy-pv-prediction class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-pv-prediction>
-  </div>
-  <div *ngSwitchCase="'pv_load_recommendation'" fxFill>
-    <senergy-pv-load-recommendation class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-pv-load-recommendation>
-  </div>
-  <div *ngSwitchCase="'leakage_detection'" fxFill>
-    <senergy-leakage-detection-widget class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-leakage-detection-widget>
-  </div>
-  <div *ngSwitchCase="'consumption_profile'" fxFill>
-    <senergy-consumption-profile-widget class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-consumption-profile-widget>
-  </div>
-  <div *ngSwitchCase="'bad_ventilation'" fxFill>
-    <senergy-bad-ventilation class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-bad-ventilation>
-  </div>
-  <div *ngSwitchCase="'floorplan'" fxFill>
-    <senergy-floorplan class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-floorplan>
-  </div>
-  <div *ngSwitchDefault>
-    <div>default</div>
-  </div>
+<div fxFill>
+  @switch (widget.type) {
+    @case ('switch') {
+      <div fxFill>
+        <senergy-switch class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-switch>
+      </div>
+    }
+    @case ('range_slider') {
+      <div fxFill>
+        <senergy-range-slider class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-range-slider>
+      </div>
+    }
+    @case ('devices_state') {
+      <div fxFill>
+        <senergy-devices-state class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-devices-state>
+      </div>
+    }
+    @case ('process_state') {
+      <div fxFill>
+        <senergy-process-state class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-process-state>
+      </div>
+    }
+    @case ('event_list') {
+      <div fxFill>
+        <senergy-event-list class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-event-list>
+      </div>
+    }
+    @case ('ranking_list') {
+      <div fxFill>
+        <senergy-ranking-list class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-ranking-list>
+      </div>
+    }
+    @case ('charts_export') {
+      <div fxFill>
+        <senergy-charts-export class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" [initialWidgetData]="initialWidgetData" fxFill></senergy-charts-export>
+      </div>
+    }
+    @case ('charts_process_instances') {
+      <div fxFill>
+        <senergy-charts-process-instances class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-charts-process-instances>
+      </div>
+    }
+    @case ('charts_process_deployments') {
+      <div fxFill>
+        <senergy-charts-process-deployments class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-charts-process-deployments>
+      </div>
+    }
+    @case ('charts_device_downtime_gateway') {
+      <div fxFill>
+        <senergy-device-downtime-gateway class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-downtime-gateway>
+      </div>
+    }
+    @case ('charts_device_total_downtime') {
+      <div fxFill>
+        <senergy-device-total-downtime class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-total-downtime>
+      </div>
+    }
+    @case ('charts_device_downtime_rate_per_gateway') {
+      <div fxFill>
+        <senergy-device-downtime-gateway class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-downtime-gateway>
+      </div>
+    }
+    @case ('charts_device_per_gateway') {
+      <div fxFill>
+        <senergy-device-gateway class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-gateway>
+      </div>
+    }
+    @case ('process_model_list') {
+      <div fxFill>
+        <senergy-process-model-list class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-process-model-list>
+      </div>
+    }
+    @case ('device_downtime_list') {
+      <div fxFill>
+        <senergy-device-downtime-list class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-downtime-list>
+      </div>
+    }
+    @case ('single_value') {
+      <div fxFill>
+        <senergy-single-value class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-single-value>
+      </div>
+    }
+    @case ('multi_value') {
+      <div fxFill>
+        <senergy-multi-value class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-multi-value>
+      </div>
+    }
+    @case ('energy_prediction') {
+      <div fxFill>
+        <senergy-energy-prediction class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-energy-prediction>
+      </div>
+    }
+    @case ('air_quality') {
+      <div fxFill>
+        <senergy-air-quality class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-air-quality>
+      </div>
+    }
+    @case ('process_incident_list') {
+      <div fxFill>
+        <senergy-process-incident-list class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-process-incident-list>
+      </div>
+    }
+    @case ('process_scheduler') {
+      <div fxFill>
+        <senergy-process-scheduler class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-process-scheduler>
+      </div>
+    }
+    @case ('device_status') {
+      <div fxFill>
+        <senergy-device-status class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-status>
+      </div>
+    }
+    @case ('data_table') {
+      <div fxFill>
+        <senergy-data-table class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-data-table>
+      </div>
+    }
+    @case ('ac_control') {
+      <div fxFill>
+        <senergy-ac-control class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-ac-control>
+      </div>
+    }
+    @case ('anomaly_detection') {
+      <div fxFill>
+        <senergy-anomaly-detection class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-anomaly-detection>
+      </div>
+    }
+    @case ('open_window') {
+      <div fxFill>
+        <senergy-open-window class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-open-window>
+      </div>
+    }
+    @case ('fake-anomaly') {
+      <div fxFill>
+        <fake-senergy-anomaly-detection class="widget" [dashboardId]="dashboardId" [widget]="widget" fxFill></fake-senergy-anomaly-detection>
+      </div>
+    }
+    @case ('pv_prediction') {
+      <div fxFill>
+        <senergy-pv-prediction class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-pv-prediction>
+      </div>
+    }
+    @case ('pv_load_recommendation') {
+      <div fxFill>
+        <senergy-pv-load-recommendation class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-pv-load-recommendation>
+      </div>
+    }
+    @case ('leakage_detection') {
+      <div fxFill>
+        <senergy-leakage-detection-widget class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-leakage-detection-widget>
+      </div>
+    }
+    @case ('consumption_profile') {
+      <div fxFill>
+        <senergy-consumption-profile-widget class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-consumption-profile-widget>
+      </div>
+    }
+    @case ('bad_ventilation') {
+      <div fxFill>
+        <senergy-bad-ventilation class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-bad-ventilation>
+      </div>
+    }
+    @case ('floorplan') {
+      <div fxFill>
+        <senergy-floorplan class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-floorplan>
+      </div>
+    }
+    @default {
+      <div>
+        <div>default</div>
+      </div>
+    }
+  }
 </div>

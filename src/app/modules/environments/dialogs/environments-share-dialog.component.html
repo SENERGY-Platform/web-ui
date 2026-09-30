@@ -17,78 +17,85 @@
 <h2 mat-dialog-title>Share {{data.name || 'Environment'}}</h2>
 
 <mat-dialog-content>
-    <senergy-spinner [show]="loading"></senergy-spinner>
+  <senergy-spinner [show]="loading"></senergy-spinner>
 
-    <div class="share-error" *ngIf="!loading && loadFailed">
-        <mat-icon color="warn">error</mat-icon>
-        <span>Could not load the current sharing. Saving is blocked until it loads, since it would withdraw every share.</span>
-        <button mat-button color="accent" (click)="loadShares()">Retry</button>
+  @if (!loading && loadFailed) {
+    <div class="share-error">
+      <mat-icon color="warn">error</mat-icon>
+      <span>Could not load the current sharing. Saving is blocked until it loads, since it would withdraw every share.</span>
+      <button mat-button color="accent" (click)="loadShares()">Retry</button>
     </div>
+  }
 
-    <ng-container *ngIf="!loading && !loadFailed">
-        <p class="hint">Grants read and execute rights on the environment's managed devices and its graph. "May edit the graph" adds write on the graph only; the graph is rebuilt on every save of the environment, so such edits last until then.</p>
-
-        <h3>Users</h3>
-        <div class="share-row" *ngFor="let id of users">
-            <span class="share-name">{{userName(id)}}</span>
-            <mat-checkbox class="graph-writer" [checked]="isUserGraphWriter(id)"
-                (change)="setUserGraphWriter(id, $event.checked)">may edit the graph</mat-checkbox>
-            <button mat-icon-button color="warn" (click)="removeUser(id)" matTooltip="Remove">
-                <mat-icon>close</mat-icon>
-            </button>
+  @if (!loading && !loadFailed) {
+    <p class="hint">Grants read and execute rights on the environment's managed devices and its graph. "May edit the graph" adds write on the graph only; the graph is rebuilt on every save of the environment, so such edits last until then.</p>
+    <h3>Users</h3>
+    @for (id of users; track id) {
+      <div class="share-row">
+        <span class="share-name">{{userName(id)}}</span>
+        <mat-checkbox class="graph-writer" [checked]="isUserGraphWriter(id)"
+        (change)="setUserGraphWriter(id, $event.checked)">may edit the graph</mat-checkbox>
+        <button mat-icon-button color="warn" (click)="removeUser(id)" matTooltip="Remove">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    }
+    <form class="user-input">
+      <mat-form-field color="accent" appearance="outline" class="selector">
+        <mat-label>Add user</mat-label>
+        <mtx-select [items]="addableUsers" [formControl]="userFormControl" bindValue="id" bindLabel="username"
+          appendTo=".ng-select-anchor">
+        </mtx-select>
+      </mat-form-field>
+      <button [disabled]="addableUsers.length === 0" class="margin add-button" mat-icon-button color="accent"
+        (click)="addUser()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </form>
+    <mat-divider></mat-divider>
+    <h3>Groups</h3>
+    @for (path of groups; track path) {
+      <div class="share-row">
+        <span class="share-name">{{path}}</span>
+        <mat-checkbox class="graph-writer" [checked]="isGroupGraphWriter(path)"
+        (change)="setGroupGraphWriter(path, $event.checked)">may edit the graph</mat-checkbox>
+        <button mat-icon-button color="warn" (click)="removeGroup(path)" matTooltip="Remove">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    }
+    <form class="user-input">
+      <mat-form-field color="accent" appearance="outline" class="selector">
+        <mat-label>Add group</mat-label>
+        <mtx-select [items]="addableGroups" [formControl]="groupFormControl" appendTo=".ng-select-anchor">
+        </mtx-select>
+      </mat-form-field>
+      <button [disabled]="addableGroups.length === 0" class="margin add-button" mat-icon-button color="accent"
+        (click)="addGroup()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </form>
+    @if (errorMessage) {
+      <div class="share-error">
+        <mat-icon color="warn">error</mat-icon>
+        <span>{{errorMessage}}</span>
+      </div>
+    }
+    @if (deviceErrors.length > 0) {
+      <div class="share-error">
+        <mat-icon color="warn">error</mat-icon>
+        <div>
+          <div>Could not update {{deviceErrors.length}} resource(s), so the sharing is only partly applied. Saving again completes it, or takes it back if you change the set.</div>
+          @for (d of deviceErrors; track d) {
+            <div>{{d.id}}: {{d.error}}</div>
+          }
         </div>
-        <form class="user-input">
-            <mat-form-field color="accent" appearance="outline" class="selector">
-                <mat-label>Add user</mat-label>
-                <mtx-select [items]="addableUsers" [formControl]="userFormControl" bindValue="id" bindLabel="username"
-                    appendTo=".ng-select-anchor">
-                </mtx-select>
-            </mat-form-field>
-            <button [disabled]="addableUsers.length === 0" class="margin add-button" mat-icon-button color="accent"
-                (click)="addUser()">
-                <mat-icon>add</mat-icon>
-            </button>
-        </form>
-
-        <mat-divider></mat-divider>
-
-        <h3>Groups</h3>
-        <div class="share-row" *ngFor="let path of groups">
-            <span class="share-name">{{path}}</span>
-            <mat-checkbox class="graph-writer" [checked]="isGroupGraphWriter(path)"
-                (change)="setGroupGraphWriter(path, $event.checked)">may edit the graph</mat-checkbox>
-            <button mat-icon-button color="warn" (click)="removeGroup(path)" matTooltip="Remove">
-                <mat-icon>close</mat-icon>
-            </button>
-        </div>
-        <form class="user-input">
-            <mat-form-field color="accent" appearance="outline" class="selector">
-                <mat-label>Add group</mat-label>
-                <mtx-select [items]="addableGroups" [formControl]="groupFormControl" appendTo=".ng-select-anchor">
-                </mtx-select>
-            </mat-form-field>
-            <button [disabled]="addableGroups.length === 0" class="margin add-button" mat-icon-button color="accent"
-                (click)="addGroup()">
-                <mat-icon>add</mat-icon>
-            </button>
-        </form>
-
-        <div class="share-error" *ngIf="errorMessage">
-            <mat-icon color="warn">error</mat-icon>
-            <span>{{errorMessage}}</span>
-        </div>
-
-        <div class="share-error" *ngIf="deviceErrors.length > 0">
-            <mat-icon color="warn">error</mat-icon>
-            <div>
-                <div>Could not update {{deviceErrors.length}} resource(s), so the sharing is only partly applied. Saving again completes it, or takes it back if you change the set.</div>
-                <div *ngFor="let d of deviceErrors">{{d.id}}: {{d.error}}</div>
-            </div>
-        </div>
-    </ng-container>
+      </div>
+    }
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions style="display: flex; justify-content: end;">
-    <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="loading || loadFailed || saving" (click)="save()">Save</button>
+  <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="accent" [disabled]="loading || loadFailed || saving" (click)="save()">Save</button>
 </mat-dialog-actions>

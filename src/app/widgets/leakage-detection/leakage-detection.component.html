@@ -17,39 +17,49 @@
 <mat-card appearance="outlined">
   <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
   <mat-card-content>
-    <div *ngIf="!configured" fxFill fxLayout="column" fxLayoutAlign="center center">
-      <div>Please configure widget!</div>
-    </div>
-
-    <span *ngIf="configured">
-      <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
-      <div *ngIf="ready" fxLayoutAlign="center center">
-
-        <!-- e.g. network problem or 500 from timescale -->
-        <div *ngIf="error === true">
-          <h2>An error occured</h2>
-        </div>
-
-        <div *ngIf="error === false">
-          <div *ngIf="operatorIsInitPhase === true" class="text-container">
-            <h2>Operator is not ready</h2>
-            <p>{{initialPhaseMsg}}</p>
-          </div>
-
-          <div *ngIf="operatorIsInitPhase === false">
-            <p>{{message}}: <b>{{timeWindow}}</b></p>
-            <div fxLayoutAlign="center center">
-              <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!"
-                [colors]="chartData.colors!" [series]="chartData.series!" [chart]="chartData.chart!"
-                [plotOptions]="chartData.plotOptions!" [xaxis]="chartData.xaxis!" [yaxis]="chartData.yaxis!"
-                [annotations]="chartData.annotations!" [markers]="chartData.markers!">
-              </apx-chart>
-            </div>
-          </div>
-        </div>
-
+    @if (!configured) {
+      <div fxFill fxLayout="column" fxLayoutAlign="center center">
+        <div>Please configure widget!</div>
       </div>
-    </span>
+    }
+
+    @if (configured) {
+      <span>
+        <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
+        @if (ready) {
+          <div fxLayoutAlign="center center">
+            <!-- e.g. network problem or 500 from timescale -->
+            @if (error === true) {
+              <div>
+                <h2>An error occured</h2>
+              </div>
+            }
+            @if (error === false) {
+              <div>
+                @if (operatorIsInitPhase === true) {
+                  <div class="text-container">
+                    <h2>Operator is not ready</h2>
+                    <p>{{initialPhaseMsg}}</p>
+                  </div>
+                }
+                @if (operatorIsInitPhase === false) {
+                  <div>
+                    <p>{{message}}: <b>{{timeWindow}}</b></p>
+                    <div fxLayoutAlign="center center">
+                      <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!"
+                        [colors]="chartData.colors!" [series]="chartData.series!" [chart]="chartData.chart!"
+                        [plotOptions]="chartData.plotOptions!" [xaxis]="chartData.xaxis!" [yaxis]="chartData.yaxis!"
+                        [annotations]="chartData.annotations!" [markers]="chartData.markers!">
+                      </apx-chart>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </span>
+    }
 
 
   </mat-card-content>
@@ -58,6 +68,6 @@
       [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
       [userHasDeleteAuthorization]="userHasDeleteAuthorization"
       [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
-      [widget]="widget" (editEvent)="edit()" [optionZoom]="true"></senergy-widget-footer>
+    [widget]="widget" (editEvent)="edit()" [optionZoom]="true"></senergy-widget-footer>
   </div>
 </mat-card>

@@ -15,25 +15,31 @@
   -->
 
 <div class="factor-bars">
-    <div class="factor-bars-track" #track
-        (pointerdown)="onPointerDown($event)" (pointermove)="onPointerMove($event)"
-        (pointerup)="onPointerUp()" (pointercancel)="onPointerUp()" (pointerleave)="onPointerLeave()">
-        <div class="factor-bars-refline" [style.bottom.%]="referenceLinePercent">
-            <span class="factor-bars-refline-label">1 = unchanged</span>
-        </div>
-        <div class="factor-bar-col" *ngFor="let v of effectiveValues; let i = index">
-            <span class="factor-bar-value" *ngIf="i === hoverIndex">{{v}}</span>
-            <div class="factor-bar" [class.neutral]="isNeutral(v)" [style.height.%]="heightPercent(v)"></div>
-        </div>
+  <div class="factor-bars-track" #track
+    (pointerdown)="onPointerDown($event)" (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp()" (pointercancel)="onPointerUp()" (pointerleave)="onPointerLeave()">
+    <div class="factor-bars-refline" [style.bottom.%]="referenceLinePercent">
+      <span class="factor-bars-refline-label">1 = unchanged</span>
     </div>
-    <div class="factor-bars-labels">
-        <span class="factor-bar-label" *ngFor="let l of labels">{{l}}</span>
-    </div>
+    @for (v of effectiveValues; track v; let i = $index) {
+      <div class="factor-bar-col">
+        @if (i === hoverIndex) {
+          <span class="factor-bar-value">{{v}}</span>
+        }
+        <div class="factor-bar" [class.neutral]="isNeutral(v)" [style.height.%]="heightPercent(v)"></div>
+      </div>
+    }
+  </div>
+  <div class="factor-bars-labels">
+    @for (l of labels; track l) {
+      <span class="factor-bar-label">{{l}}</span>
+    }
+  </div>
 
-    <mat-form-field appearance="outline" color="accent" class="factor-bars-precise-field">
-        <mat-label>{{labelFor(lastIndex)}}</mat-label>
-        <input matInput type="number" step="0.01" [ngModel]="effectiveValues[lastIndex]" [ngModelOptions]="{standalone: true}"
-            (ngModelChange)="setPreciseValue($event)">
-        <mat-hint>Sets this one slot exactly.</mat-hint>
-    </mat-form-field>
+  <mat-form-field appearance="outline" color="accent" class="factor-bars-precise-field">
+    <mat-label>{{labelFor(lastIndex)}}</mat-label>
+    <input matInput type="number" step="0.01" [ngModel]="effectiveValues[lastIndex]" [ngModelOptions]="{standalone: true}"
+      (ngModelChange)="setPreciseValue($event)">
+    <mat-hint>Sets this one slot exactly.</mat-hint>
+  </mat-form-field>
 </div>

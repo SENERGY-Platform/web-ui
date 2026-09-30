@@ -15,30 +15,32 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
-    <mat-card-content class="content-size drag-handler">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready" fxLayout="column" fxFill>
-            <div fxFlex>
-                <div class="widget-icon-blue" fxFill fxFlex="30" fxLayoutAlign="center center">
-                    <mat-icon class="white mat-40">storage</mat-icon>
-                </div>
-                <div fxFill fxFlex="70" fxLayout="column">
-                    <div class="kpi-header">AVAILABLE</div>
-                    <div class="mat-h2 kpi">{{processStatus.available}}</div>
-                </div>
-            </div>
-            <div fxFlex class="margin-last-element">
-                <div class="widget-icon-orange" fxFill fxFlex="30" fxLayoutAlign="center center">
-                    <mat-icon class="white mat-40">publish</mat-icon>
-                </div>
-                <div fxFill fxFlex="70" fxLayout="column">
-                    <div class="kpi-header">EXECUTABLE</div>
-                    <div class="mat-h2 kpi">{{processStatus.executable}}</div>
-                </div>
-            </div>
+  <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
+  <mat-card-content class="content-size drag-handler">
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    @if (ready) {
+      <div fxLayout="column" fxFill>
+        <div fxFlex>
+          <div class="widget-icon-blue" fxFill fxFlex="30" fxLayoutAlign="center center">
+            <mat-icon class="white mat-40">storage</mat-icon>
+          </div>
+          <div fxFill fxFlex="70" fxLayout="column">
+            <div class="kpi-header">AVAILABLE</div>
+            <div class="mat-h2 kpi">{{processStatus.available}}</div>
+          </div>
         </div>
-    </mat-card-content>
-    <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+        <div fxFlex class="margin-last-element">
+          <div class="widget-icon-orange" fxFill fxFlex="30" fxLayoutAlign="center center">
+            <mat-icon class="white mat-40">publish</mat-icon>
+          </div>
+          <div fxFill fxFlex="70" fxLayout="column">
+            <div class="kpi-header">EXECUTABLE</div>
+            <div class="mat-h2 kpi">{{processStatus.executable}}</div>
+          </div>
+        </div>
+      </div>
+    }
+  </mat-card-content>
+  <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

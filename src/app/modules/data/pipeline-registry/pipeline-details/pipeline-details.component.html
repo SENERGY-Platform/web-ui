@@ -15,84 +15,102 @@
   -->
 
 <div class="main-panel">
-    <div class="main-panel">
-        <div fxLayout="column" class="layout-margin">
-            <div fxLayout="row" fxLayoutAlign="start center" style="margin-bottom:8px;">
-                <button mat-raised-button color="accent" (click)="back()">back</button>
-            </div>
-            <mat-card appearance="outlined" style="margin-bottom:10px;">
-                <mat-card-header>
-                    <div mat-card-avatar>
-                        <mat-icon>timeline</mat-icon>
-                    </div>
-                    <mat-card-title>{{pipe.name}}</mat-card-title>
-                    <mat-card-subtitle>Id: {{pipe.id}}</mat-card-subtitle>
-                    <mat-card-subtitle>Flow Id: <a routerLink="/data/designer/{{pipe.flowId}}">{{pipe.flowId}}</a>
-                    </mat-card-subtitle>
-                </mat-card-header>
-                <mat-card-content>
-                    <div fxLayout="column">
-                        {{pipe.description}}
-                    </div>
-                </mat-card-content>
-            </mat-card>
-            <mat-card appearance="outlined" class="config">
-                <mat-card-content>
-                    <div fxLayout="column" *ngFor="let operator of pipe.operators">
-                        <h3>
-                            <mat-icon class="v-align-middle">poll</mat-icon>
-                            {{ operator.name }} - {{ operator.id }} - {{ operator.imageId }}</h3>
-                        <div *ngFor="let config of getConfigByOperatorId(operator.id)">
-                            <h4>
-                                <mat-icon
-                                        class="v-align-middle material-icons-outlined">build
-                                </mat-icon>
-                                {{config[0]}}: {{config[1]}}
-                            </h4>
-                        </div>
-                        <div class="pipe-operator" *ngFor="let topic of operator.inputTopics">
-                            <div *ngIf="show(topic)">
-                                <h4>
-                                    <mat-icon
-                                            class="v-align-middle material-icons-outlined">miscellaneous_services
-                                    </mat-icon>
-                                    {{ topic.name }} </h4>
-                                <div class="operator-input" *ngIf="topic.filterType !=='DeviceId'">
-                                    <h4>
-                                        <mat-icon class="v-align-middle material-icons-outlined">poll</mat-icon>
-                                        {{ getOperatorPipelineStr(topic.filterValue) }}</h4>
-                                    <div class="operator-mapping" *ngFor="let mapping of topic.mappings">
-                                        <h4>
-                                            <mat-icon class="v-align-middle material-icons-outlined">map</mat-icon>
-                                            {{mapping.source}} --> {{ mapping.dest}}
-                                        </h4>
-                                    </div>
-                                </div>
-                                <div class="operator-input" *ngIf="topic.filterType === 'DeviceId'">
-                                    <h4 *ngFor="let device of topic.devices">
-                                        <mat-icon class="v-align-middle material-icons-outlined">devices</mat-icon>
-                                        {{device}}
-                                    </h4>
-                                    <div class="operator-mapping" *ngFor="let mapping of topic.mappings">
-                                        <h4>
-                                            <mat-icon class="v-align-middle material-icons-outlined">map</mat-icon>
-                                            {{mapping.source}} --> {{ mapping.dest}}
-                                        </h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </mat-card-content>
-            </mat-card>
-            <mat-card appearance="outlined" style="margin-top: 10px;">
-                <div class="widget-image" [innerHtml]="pipe.image"></div>
-            </mat-card>
-            <section class="checkbox-section">
-                <mat-checkbox class="checkbox-margin" [(ngModel)]="showAll" [ngModelOptions]="{standalone: true}">Show
-                    All
-                </mat-checkbox>
-            </section>
+  <div class="main-panel">
+    <div fxLayout="column" class="layout-margin">
+      <div fxLayout="row" fxLayoutAlign="start center" style="margin-bottom:8px;">
+        <button mat-raised-button color="accent" (click)="back()">back</button>
+      </div>
+      <mat-card appearance="outlined" style="margin-bottom:10px;">
+        <mat-card-header>
+          <div mat-card-avatar>
+            <mat-icon>timeline</mat-icon>
+          </div>
+          <mat-card-title>{{pipe.name}}</mat-card-title>
+          <mat-card-subtitle>Id: {{pipe.id}}</mat-card-subtitle>
+          <mat-card-subtitle>Flow Id: <a routerLink="/data/designer/{{pipe.flowId}}">{{pipe.flowId}}</a>
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div fxLayout="column">
+          {{pipe.description}}
         </div>
-    </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined" class="config">
+      <mat-card-content>
+        @for (operator of pipe.operators; track operator) {
+          <div fxLayout="column">
+            <h3>
+              <mat-icon class="v-align-middle">poll</mat-icon>
+            {{ operator.name }} - {{ operator.id }} - {{ operator.imageId }}</h3>
+            @for (config of getConfigByOperatorId(operator.id); track config) {
+              <div>
+                <h4>
+                  <mat-icon
+                    class="v-align-middle material-icons-outlined">build
+                  </mat-icon>
+                  {{config[0]}}: {{config[1]}}
+                </h4>
+              </div>
+            }
+            @for (topic of operator.inputTopics; track topic) {
+              <div class="pipe-operator">
+                @if (show(topic)) {
+                  <div>
+                    <h4>
+                      <mat-icon
+                        class="v-align-middle material-icons-outlined">miscellaneous_services
+                      </mat-icon>
+                    {{ topic.name }} </h4>
+                    @if (topic.filterType !=='DeviceId') {
+                      <div class="operator-input">
+                        <h4>
+                          <mat-icon class="v-align-middle material-icons-outlined">poll</mat-icon>
+                        {{ getOperatorPipelineStr(topic.filterValue) }}</h4>
+                        @for (mapping of topic.mappings; track mapping) {
+                          <div class="operator-mapping">
+                            <h4>
+                              <mat-icon class="v-align-middle material-icons-outlined">map</mat-icon>
+                              {{mapping.source}} --> {{ mapping.dest}}
+                            </h4>
+                          </div>
+                        }
+                      </div>
+                    }
+                    @if (topic.filterType === 'DeviceId') {
+                      <div class="operator-input">
+                        @for (device of topic.devices; track device) {
+                          <h4>
+                            <mat-icon class="v-align-middle material-icons-outlined">devices</mat-icon>
+                            {{device}}
+                          </h4>
+                        }
+                        @for (mapping of topic.mappings; track mapping) {
+                          <div class="operator-mapping">
+                            <h4>
+                              <mat-icon class="v-align-middle material-icons-outlined">map</mat-icon>
+                              {{mapping.source}} --> {{ mapping.dest}}
+                            </h4>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined" style="margin-top: 10px;">
+      <div class="widget-image" [innerHtml]="pipe.image"></div>
+    </mat-card>
+    <section class="checkbox-section">
+      <mat-checkbox class="checkbox-margin" [(ngModel)]="showAll" [ngModelOptions]="{standalone: true}">Show
+        All
+      </mat-checkbox>
+    </section>
+  </div>
+</div>
 </div>

@@ -17,127 +17,151 @@
 <h2 mat-dialog-title>{{data.title}}</h2>
 
 <mat-dialog-content>
-    <div class="release">
-        <div class="release-name">{{data.releaseName}}</div>
-        <div class="release-description" *ngIf="data.releaseDescription">{{data.releaseDescription}}</div>
+  <div class="release">
+    <div class="release-name">{{data.releaseName}}</div>
+    @if (data.releaseDescription) {
+      <div class="release-description">{{data.releaseDescription}}</div>
+    }
+  </div>
+
+  @if (data.note) {
+    <div class="note">
+      <mat-icon color="accent">info</mat-icon>
+      <span>{{data.note}}</span>
     </div>
+  }
 
-    <div class="note" *ngIf="data.note">
-        <mat-icon color="accent">info</mat-icon>
-        <span>{{data.note}}</span>
-    </div>
+  @if (data.collectInfo) {
+    <mat-form-field appearance="outline" color="accent">
+      <mat-label>Name</mat-label>
+      <input matInput [(ngModel)]="name" required>
+    </mat-form-field>
+    <mat-form-field appearance="outline" color="accent">
+      <mat-label>Description</mat-label>
+      <textarea matInput [(ngModel)]="description" rows="3"></textarea>
+    </mat-form-field>
+  }
 
-    <ng-container *ngIf="data.collectInfo">
-        <mat-form-field appearance="outline" color="accent">
-            <mat-label>Name</mat-label>
-            <input matInput [(ngModel)]="name" required>
-        </mat-form-field>
+  <!-- elementCount keeps the spinner inline; at 0 it is fixed and centres over the whole viewport -->
+  <senergy-spinner [show]="!ready" [elementCount]="1"></senergy-spinner>
 
-        <mat-form-field appearance="outline" color="accent">
-            <mat-label>Description</mat-label>
-            <textarea matInput [(ngModel)]="description" rows="3"></textarea>
-        </mat-form-field>
-    </ng-container>
+  @if (ready && views.length === 0) {
+    <div class="no-parameters">This release asks for no parameters.</div>
+  }
 
-    <!-- elementCount keeps the spinner inline; at 0 it is fixed and centres over the whole viewport -->
-    <senergy-spinner [show]="!ready" [elementCount]="1"></senergy-spinner>
-
-    <div *ngIf="ready && views.length === 0" class="no-parameters">This release asks for no parameters.</div>
-
-    <div class="parameter" *ngFor="let view of views; trackBy: trackByParameter">
-        <mat-divider></mat-divider>
-
-        <div class="parameter-error" *ngIf="view.param.has_no_valid_option">
-            <mat-icon color="warn">warning</mat-icon>
-            <span>{{view.param.label}}: nothing you may use matches what this release asks for.</span>
+  @for (view of views; track trackByParameter($index, view)) {
+    <div class="parameter">
+      <mat-divider></mat-divider>
+      @if (view.param.has_no_valid_option) {
+        <div class="parameter-error">
+          <mat-icon color="warn">warning</mat-icon>
+          <span>{{view.param.label}}: nothing you may use matches what this release asks for.</span>
         </div>
-
-        <ng-container *ngIf="!view.param.has_no_valid_option" [ngSwitch]="view.input">
-
-            <mat-form-field *ngSwitchCase="inputs.Select" appearance="outline" color="accent">
-                <mat-label>{{view.param.label}}</mat-label>
-                <mtx-select [(ngModel)]="view.param.value" (ngModelChange)="valueChanged()"
-                    appendTo=".ng-select-anchor" [items]="view.options" bindLabel="label" bindValue="value"
-                    [groupBy]="view.groupBy" [virtualScroll]="view.virtualScroll" [clearable]="view.param.optional"
-                    [required]="!view.param.optional">
-                </mtx-select>
+      }
+      @if (!view.param.has_no_valid_option) {
+        @switch (view.input) {
+          @case (inputs.Select) {
+            <mat-form-field appearance="outline" color="accent">
+              <mat-label>{{view.param.label}}</mat-label>
+              <mtx-select [(ngModel)]="view.param.value" (ngModelChange)="valueChanged()"
+                appendTo=".ng-select-anchor" [items]="view.options" bindLabel="label" bindValue="value"
+                [groupBy]="view.groupBy" [virtualScroll]="view.virtualScroll" [clearable]="view.param.optional"
+                [required]="!view.param.optional">
+              </mtx-select>
             </mat-form-field>
-
-            <mat-form-field *ngSwitchCase="inputs.MultiSelect" appearance="outline" color="accent">
-                <mat-label>{{view.param.label}}</mat-label>
-                <mtx-select [(ngModel)]="view.param.value" (ngModelChange)="valueChanged()"
-                    appendTo=".ng-select-anchor" [items]="view.options" bindLabel="label" bindValue="value"
-                    [groupBy]="view.groupBy" [virtualScroll]="view.virtualScroll" [multiple]="true"
-                    [closeOnSelect]="false" [required]="!view.param.optional">
-                </mtx-select>
+          }
+          @case (inputs.MultiSelect) {
+            <mat-form-field appearance="outline" color="accent">
+              <mat-label>{{view.param.label}}</mat-label>
+              <mtx-select [(ngModel)]="view.param.value" (ngModelChange)="valueChanged()"
+                appendTo=".ng-select-anchor" [items]="view.options" bindLabel="label" bindValue="value"
+                [groupBy]="view.groupBy" [virtualScroll]="view.virtualScroll" [multiple]="true"
+                [closeOnSelect]="false" [required]="!view.param.optional">
+              </mtx-select>
             </mat-form-field>
-
-            <senergy-characteristic-input *ngSwitchCase="inputs.Characteristic"
-                [characteristic]="view.param.characteristic" [label]="view.param.label" [value]="view.param.value"
-                (valueChange)="view.param.value = $event">
+          }
+          @case (inputs.Characteristic) {
+            <senergy-characteristic-input
+              [characteristic]="view.param.characteristic" [label]="view.param.label" [value]="view.param.value"
+              (valueChange)="view.param.value = $event">
             </senergy-characteristic-input>
-
-            <ng-container *ngSwitchDefault>
-                <!-- a free input asking for several values is a list of rows the user adds and removes -->
-                <ng-container *ngIf="view.isList; else single">
-                    <div class="list-header">
-                        <span class="list-label">{{view.param.label}}</span>
-                        <button mat-icon-button color="accent" matTooltip="Add entry" (click)="addEntry(view.param)">
-                            <mat-icon>add</mat-icon>
-                        </button>
-                    </div>
-                    <div class="list-entry"
-                        *ngFor="let entry of entriesOf(view.param); let i = index; trackBy: trackByIndex">
-                        <mat-slide-toggle *ngIf="view.input === inputs.Boolean" class="toggle" labelPosition="before"
-                            color="accent" [checked]="!!entry"
-                            (change)="setEntry(view.param, i, $event.checked)">{{view.param.label}}</mat-slide-toggle>
-                        <!--
-                          ~ The type has to be a static attribute: NumberValueAccessor is selected by
-                          ~ input[type=number][ngModel], and a bound [type] cannot match a selector that
-                          ~ asks for a value, which would leave the default accessor handing over strings.
-                          -->
-                        <mat-form-field *ngIf="view.input === inputs.Number" appearance="outline" color="accent">
-                            <mat-label>{{view.param.label}}</mat-label>
-                            <input matInput type="number" [step]="view.step" [ngModel]="entry"
-                                (ngModelChange)="setEntry(view.param, i, $event)">
-                        </mat-form-field>
-                        <mat-form-field *ngIf="view.input === inputs.Text" appearance="outline" color="accent">
-                            <mat-label>{{view.param.label}}</mat-label>
-                            <input matInput type="text" [ngModel]="entry"
-                                (ngModelChange)="setEntry(view.param, i, $event)">
-                        </mat-form-field>
-                        <button mat-icon-button color="warn" matTooltip="Remove entry"
-                            (click)="removeEntry(view.param, i)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
-                </ng-container>
-
-                <ng-template #single>
-                    <mat-slide-toggle *ngIf="view.input === inputs.Boolean" class="toggle" labelPosition="before"
-                        color="accent" [checked]="!!view.param.value"
-                        (change)="view.param.value = $event.checked">{{view.param.label}}</mat-slide-toggle>
-                    <mat-form-field *ngIf="view.input === inputs.Number" appearance="outline" color="accent">
-                        <mat-label>{{view.param.label}}</mat-label>
-                        <input matInput type="number" [step]="view.step" [(ngModel)]="view.param.value"
-                            [required]="!view.param.optional">
+          }
+          @default {
+            <!-- a free input asking for several values is a list of rows the user adds and removes -->
+            @if (view.isList) {
+              <div class="list-header">
+                <span class="list-label">{{view.param.label}}</span>
+                <button mat-icon-button color="accent" matTooltip="Add entry" (click)="addEntry(view.param)">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+              @for (entry of entriesOf(view.param); track trackByIndex(i, entry); let i = $index) {
+                <div class="list-entry"
+                  >
+                  @if (view.input === inputs.Boolean) {
+                    <mat-slide-toggle class="toggle" labelPosition="before"
+                      color="accent" [checked]="!!entry"
+                    (change)="setEntry(view.param, i, $event.checked)">{{view.param.label}}</mat-slide-toggle>
+                  }
+                  <!--
+                  ~ The type has to be a static attribute: NumberValueAccessor is selected by
+                  ~ input[type=number][ngModel], and a bound [type] cannot match a selector that
+                  ~ asks for a value, which would leave the default accessor handing over strings.
+                  -->
+                  @if (view.input === inputs.Number) {
+                    <mat-form-field appearance="outline" color="accent">
+                      <mat-label>{{view.param.label}}</mat-label>
+                      <input matInput type="number" [step]="view.step" [ngModel]="entry"
+                        (ngModelChange)="setEntry(view.param, i, $event)">
                     </mat-form-field>
-                    <mat-form-field *ngIf="view.input === inputs.Text" appearance="outline" color="accent">
-                        <mat-label>{{view.param.label}}</mat-label>
-                        <input matInput type="text" [(ngModel)]="view.param.value" [required]="!view.param.optional">
+                  }
+                  @if (view.input === inputs.Text) {
+                    <mat-form-field appearance="outline" color="accent">
+                      <mat-label>{{view.param.label}}</mat-label>
+                      <input matInput type="text" [ngModel]="entry"
+                        (ngModelChange)="setEntry(view.param, i, $event)">
                     </mat-form-field>
-                </ng-template>
-            </ng-container>
-
-        </ng-container>
-
-        <div class="parameter-problem color-warn" *ngIf="problemOf(view)">{{problemOf(view)}}</div>
-
-        <div class="parameter-description" *ngIf="view.param.description">{{view.param.description}}</div>
+                  }
+                  <button mat-icon-button color="warn" matTooltip="Remove entry"
+                    (click)="removeEntry(view.param, i)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              }
+            } @else {
+              @if (view.input === inputs.Boolean) {
+                <mat-slide-toggle class="toggle" labelPosition="before"
+                  color="accent" [checked]="!!view.param.value"
+                (change)="view.param.value = $event.checked">{{view.param.label}}</mat-slide-toggle>
+              }
+              @if (view.input === inputs.Number) {
+                <mat-form-field appearance="outline" color="accent">
+                  <mat-label>{{view.param.label}}</mat-label>
+                  <input matInput type="number" [step]="view.step" [(ngModel)]="view.param.value"
+                    [required]="!view.param.optional">
+                </mat-form-field>
+              }
+              @if (view.input === inputs.Text) {
+                <mat-form-field appearance="outline" color="accent">
+                  <mat-label>{{view.param.label}}</mat-label>
+                  <input matInput type="text" [(ngModel)]="view.param.value" [required]="!view.param.optional">
+                </mat-form-field>
+              }
+            }
+          }
+        }
+      }
+      @if (problemOf(view)) {
+        <div class="parameter-problem color-warn">{{problemOf(view)}}</div>
+      }
+      @if (view.param.description) {
+        <div class="parameter-description">{{view.param.description}}</div>
+      }
     </div>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions style="display: flex; justify-content: end;">
-    <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="submit()" [disabled]="!valid">{{data.submitLabel}}</button>
+  <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="submit()" [disabled]="!valid">{{data.submitLabel}}</button>
 </mat-dialog-actions>

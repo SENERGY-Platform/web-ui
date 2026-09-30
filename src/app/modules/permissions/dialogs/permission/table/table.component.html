@@ -17,61 +17,61 @@
 
 <table #table mat-table [dataSource]="flattened">
 
-    <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef> Shared with</th>
-        <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-    </ng-container>
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef> Shared with</th>
+    <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+  </ng-container>
 
-    <ng-container matColumnDef="icon">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let element">
-            <mat-icon color="accent">{{icon}}</mat-icon>
+  <ng-container matColumnDef="icon">
+    <th mat-header-cell *matHeaderCellDef></th>
+    <td mat-cell *matCellDef="let element">
+      <mat-icon color="accent">{{icon}}</mat-icon>
     </ng-container>
 
     <ng-container matColumnDef="read">
-        <th mat-header-cell *matHeaderCellDef> Read</th>
-        <td mat-cell *matCellDef="let element">
-            <mat-checkbox fxLayoutAlign="center center" (change)="setR(element, $event)" [checked]="element.read" [disabled]="!canEdit(element)"
-                [matTooltip]="descriptions.read"></mat-checkbox>
-        </td>
+      <th mat-header-cell *matHeaderCellDef> Read</th>
+      <td mat-cell *matCellDef="let element">
+        <mat-checkbox fxLayoutAlign="center center" (change)="setR(element, $event)" [checked]="element.read" [disabled]="!canEdit(element)"
+        [matTooltip]="descriptions.read"></mat-checkbox>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="write">
-        <th mat-header-cell *matHeaderCellDef> Write</th>
-        <td mat-cell *matCellDef="let element">
-            <mat-checkbox fxLayoutAlign="center center"  (change)="setW(element, $event)" [checked]="element.write" [disabled]="!canEdit(element)"
-                [matTooltip]="descriptions.write"></mat-checkbox>
-        </td>
+      <th mat-header-cell *matHeaderCellDef> Write</th>
+      <td mat-cell *matCellDef="let element">
+        <mat-checkbox fxLayoutAlign="center center"  (change)="setW(element, $event)" [checked]="element.write" [disabled]="!canEdit(element)"
+        [matTooltip]="descriptions.write"></mat-checkbox>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="execute">
-        <th mat-header-cell *matHeaderCellDef> Execute</th>
-        <td mat-cell *matCellDef="let element">
-            <mat-checkbox fxLayoutAlign="center center"  (change)="setX(element, $event)" [checked]="element.execute" [disabled]="!canEdit(element)"
-                [matTooltip]="descriptions.execute"></mat-checkbox>
-        </td>
+      <th mat-header-cell *matHeaderCellDef> Execute</th>
+      <td mat-cell *matCellDef="let element">
+        <mat-checkbox fxLayoutAlign="center center"  (change)="setX(element, $event)" [checked]="element.execute" [disabled]="!canEdit(element)"
+        [matTooltip]="descriptions.execute"></mat-checkbox>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="administrate">
-        <th mat-header-cell *matHeaderCellDef> Administrate</th>
-        <td mat-cell *matCellDef="let element">
-            <mat-checkbox fxLayoutAlign="center center"  (change)="setA(element, $event)" [checked]="element.administrate"
-                [disabled]="!canEdit(element)" [matTooltip]="descriptions.administrate"></mat-checkbox>
-        </td>
+      <th mat-header-cell *matHeaderCellDef> Administrate</th>
+      <td mat-cell *matCellDef="let element">
+        <mat-checkbox fxLayoutAlign="center center"  (change)="setA(element, $event)" [checked]="element.administrate"
+        [disabled]="!canEdit(element)" [matTooltip]="descriptions.administrate"></mat-checkbox>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="action">
-        <th mat-header-cell *matHeaderCellDef> Action</th>
-        <td mat-cell *matCellDef="let i = index; let element">
-            <button class="margin" mat-icon-button color="accent" (click)="delete(element)"
-                [disabled]="!canEdit(element)">
-                <mat-icon>delete</mat-icon>
-            </button>
-        </td>
+      <th mat-header-cell *matHeaderCellDef> Action</th>
+      <td mat-cell *matCellDef="let i = index; let element">
+        <button class="margin" mat-icon-button color="accent" (click)="delete(element)"
+          [disabled]="!canEdit(element)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
     </ng-container>
 
-    <ng-container *ngIf="header">
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    </ng-container>
+    @if (header) {
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    }
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-</table>
+  </table>

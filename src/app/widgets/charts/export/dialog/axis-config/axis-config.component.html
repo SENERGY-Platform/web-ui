@@ -15,67 +15,76 @@
   -->
 
 <li class="mat-tree-node" cdkDrag [cdkDragData]="element" (cdkDragStarted)="dragStart.emit(null)"
-    (cdkDragEnded)="dragEnd.emit(null)">
-    <button cdkDragHandle mat-icon-button color="accent" disableRipple class="tree-inline" [hidden]="!enableDragDrop">
-        <mat-icon>drag_handle</mat-icon>
-    </button>
-    <button mat-icon-button (click)="treeControl?.toggle(element)" class="nested-tree-inline">
-        <mat-icon class="mat-icon-rtl-mirror">
-            {{(treeControl !== undefined ? treeControl!.isExpanded(element) : false) ? 'expand_more' : 'chevron_right'}}
-        </mat-icon>
-    </button>
+  (cdkDragEnded)="dragEnd.emit(null)">
+  <button cdkDragHandle mat-icon-button color="accent" disableRipple class="tree-inline" [hidden]="!enableDragDrop">
+    <mat-icon>drag_handle</mat-icon>
+  </button>
+  <button mat-icon-button (click)="treeControl?.toggle(element)" class="nested-tree-inline">
+    <mat-icon class="mat-icon-rtl-mirror">
+      {{(treeControl !== undefined ? treeControl!.isExpanded(element) : false) ? 'expand_more' : 'chevron_right'}}
+    </mat-icon>
+  </button>
 
-    <div *ngIf="element !== undefined" class="column w-100">
-        <mat-card appearance="outlined">
-            <mat-card-header>
-                <mat-card-title [ngClass]="{'pb': !expanded}" (click)="treeControl?.toggle(element)">
-                    {{element.exportName}} - {{element.valueName}} ({{element.valueType}})
-                </mat-card-title>
-                <div *ngIf="!subElement" class="cpy-delete">
-                    <button mat-icon-button *ngIf="element.isDuplicate === false || element.isDuplicate === undefined"
-                        (click)="copyClicked.emit(null)">
-                        <mat-icon>content_copy</mat-icon>
-                    </button>
-                    <button mat-icon-button *ngIf="element.isDuplicate === true" (click)="deleteClicked.emit(null)">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </div>
-            </mat-card-header>
-            <mat-card-content *ngIf="expanded">
-                <div class="row w-100">
-                    <div>
-                        <mat-form-field color="accent" appearance="outline">
-                            <mat-label>Value Alias</mat-label>
-                            <input type="text" matInput [(ngModel)]="element.valueAlias">
-                            <mat-error senergyError label="Value Alias"></mat-error>
-                        </mat-form-field>
-                    </div>
-                    <div>
-                        <mat-form-field color="accent" appearance="outline">
-                            <mat-label>Color</mat-label>
-                            <input type="text" matInput placeholder="e.g. red, #004411" [(ngModel)]="element.color">
-                            <mat-error senergyError label="Color"></mat-error>
-                        </mat-form-field>
-                    </div>
-                    <div [hidden]="groupTypeIsDifference">
-                        <mat-form-field color="accent" appearance="outline">
-                            <mat-label>Math</mat-label>
-                            <input type="text" matInput placeholder="e.g. / 1000" [(ngModel)]="element.math"
-                                [disabled]="groupTypeIsDifference">
-                            <mat-error senergyError label="Math"></mat-error>
-                        </mat-form-field>
-                    </div>
-                </div>
-                <div class="row w-100">
-
-                    <div>
-                        <mat-form-field color="accent" appearance="outline">
-                            <mat-label>Filter</mat-label>
-                            <mtx-select [compareWith]="compareFilterTypes" [(ngModel)]="element.filterType"
-                                (valueChange)="filerTypeSelected(element)" appendTo=".ng-select-anchor">
-                                <mtx-option [value]="undefined">None</mtx-option>
-                                <mtx-option *ngFor="let option of [ '=', '!=', '>', '>=', '<' ,'<=']" [value]="option">
+  @if (element !== undefined) {
+    <div class="column w-100">
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title [ngClass]="{'pb': !expanded}" (click)="treeControl?.toggle(element)">
+            {{element.exportName}} - {{element.valueName}} ({{element.valueType}})
+          </mat-card-title>
+          @if (!subElement) {
+            <div class="cpy-delete">
+              @if (element.isDuplicate === false || element.isDuplicate === undefined) {
+                <button mat-icon-button
+                  (click)="copyClicked.emit(null)">
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+              }
+              @if (element.isDuplicate === true) {
+                <button mat-icon-button (click)="deleteClicked.emit(null)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+            </div>
+          }
+        </mat-card-header>
+        @if (expanded) {
+          <mat-card-content>
+            <div class="row w-100">
+              <div>
+                <mat-form-field color="accent" appearance="outline">
+                  <mat-label>Value Alias</mat-label>
+                  <input type="text" matInput [(ngModel)]="element.valueAlias">
+                  <mat-error senergyError label="Value Alias"></mat-error>
+                </mat-form-field>
+              </div>
+              <div>
+                <mat-form-field color="accent" appearance="outline">
+                  <mat-label>Color</mat-label>
+                  <input type="text" matInput placeholder="e.g. red, #004411" [(ngModel)]="element.color">
+                  <mat-error senergyError label="Color"></mat-error>
+                </mat-form-field>
+              </div>
+              <div [hidden]="groupTypeIsDifference">
+                <mat-form-field color="accent" appearance="outline">
+                  <mat-label>Math</mat-label>
+                  <input type="text" matInput placeholder="e.g. / 1000" [(ngModel)]="element.math"
+                    [disabled]="groupTypeIsDifference">
+                  <mat-error senergyError label="Math"></mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="row w-100">
+              <div>
+                <mat-form-field color="accent" appearance="outline">
+                  <mat-label>Filter</mat-label>
+                  <mtx-select [compareWith]="compareFilterTypes" [(ngModel)]="element.filterType"
+                    (valueChange)="filerTypeSelected(element)" appendTo=".ng-select-anchor">
+                    <mtx-option [value]="undefined">None</mtx-option>
+                                @for (option of [ '=', '!=', '>', '>=', '<' ,'<=']; track option) {
+<mtx-option [value]="option">
                                     {{option}}</mtx-option>
+}
                             </mtx-select>
                             <mat-error senergyError label="Filter"></mat-error>
                         </mat-form-field>
@@ -97,9 +106,11 @@
                             <mtx-select placeholder="Choose Tags" multiple closeOnSelect="false"
                                 [disabled]="getTags(element).length === 0" [(ngModel)]="element.tagSelection"
                                 appendTo=".ng-select-anchor" groupBy="group">
-                                <mtx-option *ngFor="let option of getTags(element)"
+                                @for (option of getTags(element); track option) {
+<mtx-option
                                     [disabled]="getTagOptionDisabledFunction(element)(option)"
                                     [value]="getTagValue(option)">{{option.value}}</mtx-option>
+}
                             </mtx-select>
                             <mat-error senergyError label="Tags"></mat-error>
                         </mat-form-field>
@@ -112,8 +123,10 @@
                                 <mtx-option
                                     [value]="chartsExportDeviceGroupMergingStrategy.Separate">Separate</mtx-option>
                                 <mtx-option [value]="chartsExportDeviceGroupMergingStrategy.Merge">Merge</mtx-option>
-                                <mtx-option *ngIf="groupType !== undefined"
+                                @if (groupType !== undefined) {
+<mtx-option
                                     [value]="chartsExportDeviceGroupMergingStrategy.Sum">Sum</mtx-option>
+}
                             </mtx-select>
                             <mat-error senergyError label="Merging Strategy"></mat-error>
                         </mat-form-field>
@@ -133,7 +146,8 @@
                 <div class="column w-100 drop-zone" [ngClass]="{'drop-zone-active': dragging}" cdkDropList
                     (cdkDropListDropped)="dropped.emit({$event, target: element})" [id]="getId()"
                     [cdkDropListConnectedTo]="connectedNodes(element)">
-                    <senergy-axis-config *ngFor="let child of element.subAxes" class="w-100" [element]="child"
+                    @for (child of element.subAxes; track child) {
+<senergy-axis-config class="w-100" [element]="child"
                         [treeControl]="treeControl" [groupTypeIsDifference]="groupTypeIsDifference"
                         [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"
                         [subElement]="true" [exportTags]="exportTags" [groupType]="groupType"
@@ -141,10 +155,13 @@
                         [enableDragDrop]="enableDragDrop" (dropped)="dropped.emit($event)"
                         [connectedNodes]="connectedNodes" [dragging]="dragging">
                     </senergy-axis-config>
+}
                     <div [hidden]="!dragging" style="height: 3rem">
                     </div>
                 </div>
             </mat-card-content>
+}
         </mat-card>
     </div>
+}
 </li>

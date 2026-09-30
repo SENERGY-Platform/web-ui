@@ -14,60 +14,68 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title *ngIf="!useDialog">Edit Device</h2>
-<h2 mat-dialog-title *ngIf="useDialog">Use Device</h2>
+@if (!useDialog) {
+  <h2 mat-dialog-title>Edit Device</h2>
+}
+@if (useDialog) {
+  <h2 mat-dialog-title>Use Device</h2>
+}
 <mat-dialog-content>
-    <form class="form">
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>ID</mat-label>
-            <input matInput disabled value="{{device.local_id}}">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Device Type ID</mat-label>
-            <input matInput disabled value="{{device.device_type_id}}">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Device Type Name</mat-label>
-            <input matInput disabled value="{{deviceType.name}}">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Name</mat-label>
-            <input matInput required [(ngModel)]="device.name" [ngModelOptions]="{standalone: true}" #name="ngModel">
-            <mat-error senergyError label="Name"></mat-error>
-        </mat-form-field>
+  <form class="form">
+    <mat-form-field appearance="outline" class="full-width" color="accent">
+      <mat-label>ID</mat-label>
+      <input matInput disabled value="{{device.local_id}}">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width" color="accent">
+      <mat-label>Device Type ID</mat-label>
+      <input matInput disabled value="{{device.device_type_id}}">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width" color="accent">
+      <mat-label>Device Type Name</mat-label>
+      <input matInput disabled value="{{deviceType.name}}">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width" color="accent">
+      <mat-label>Name</mat-label>
+      <input matInput required [(ngModel)]="device.name" [ngModelOptions]="{standalone: true}" #name="ngModel">
+      <mat-error senergyError label="Name"></mat-error>
+    </mat-form-field>
 
-        <mat-checkbox class="checkbox-margin" *ngIf="!useDialog" [(ngModel)]="device.hidden" [ngModelOptions]="{standalone: true}">Hide</mat-checkbox>
+    @if (!useDialog) {
+      <mat-checkbox class="checkbox-margin" [(ngModel)]="device.hidden" [ngModelOptions]="{standalone: true}">Hide</mat-checkbox>
+    }
 
-        <form [formGroup]="attrFormGroup" class="attributes">
-            <div class="divider">
-                Attributes
-                <mat-divider></mat-divider>
-            </div>
-            <div formArrayName="attributes">
-                <div [formGroupName]="i" *ngFor="let _ of attributes.controls; let i = index" class="attribute">
-                    <mat-form-field appearance="outline" class="third-width" color="accent">
-                        <mat-label>Key</mat-label>
-                        <input matInput formControlName="key">
-                        <mat-error senergyError label="Key"></mat-error>
-                    </mat-form-field>
-                    =
-                    <mat-form-field appearance="outline" class="third-width" color="accent">
-                        <mat-label>Value</mat-label>
-                        <input matInput formControlName="value" >
-                        <mat-error senergyError label="Value"></mat-error>
-                    </mat-form-field>
-                    <button mat-icon-button color="warn" (click)="removeAttr(i)">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </div>
-                <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
-            </div>
-        </form>
+    <form [formGroup]="attrFormGroup" class="attributes">
+      <div class="divider">
+        Attributes
+        <mat-divider></mat-divider>
+      </div>
+      <div formArrayName="attributes">
+        @for (_ of attributes.controls; track _; let i = $index) {
+          <div [formGroupName]="i" class="attribute">
+            <mat-form-field appearance="outline" class="third-width" color="accent">
+              <mat-label>Key</mat-label>
+              <input matInput formControlName="key">
+              <mat-error senergyError label="Key"></mat-error>
+            </mat-form-field>
+            =
+            <mat-form-field appearance="outline" class="third-width" color="accent">
+              <mat-label>Value</mat-label>
+              <input matInput formControlName="value" >
+              <mat-error senergyError label="Value"></mat-error>
+            </mat-form-field>
+            <button mat-icon-button color="warn" (click)="removeAttr(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        }
+        <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+      </div>
     </form>
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="attributes.invalid || name.invalid" (click)="save()">{{useDialog ? "Use" : "Save"}}</button>
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" [disabled]="attributes.invalid || name.invalid" (click)="save()">{{useDialog ? "Use" : "Save"}}</button>
 </mat-dialog-actions>
 

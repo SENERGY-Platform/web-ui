@@ -16,74 +16,88 @@
 
 
 <div class="layout-margin">
-    <senergy-spinner [show]="!ready || downloading"></senergy-spinner>
-    <div *ngIf="ready && report.name" class="report-name">{{report.name}}</div>
-    <div *ngIf="reportJob !== null" class="job-status mat-elevation-z1">
-        <mat-icon *ngIf="reportJobRunning">hourglass_empty</mat-icon>
-        <mat-icon *ngIf="reportJobFailed" color="warn">warning</mat-icon>
-        <mat-icon *ngIf="!reportJobRunning && !reportJobFailed" class="color-accent">check_circle</mat-icon>
-        <div class="job-status-body">
-            <span>{{reportJobLabel}}</span>
-            <mat-progress-bar *ngIf="reportJobRunning" mode="indeterminate" color="accent"></mat-progress-bar>
-        </div>
+  <senergy-spinner [show]="!ready || downloading"></senergy-spinner>
+  @if (ready && report.name) {
+    <div class="report-name">{{report.name}}</div>
+  }
+  @if (reportJob !== null) {
+    <div class="job-status mat-elevation-z1">
+      @if (reportJobRunning) {
+        <mat-icon>hourglass_empty</mat-icon>
+      }
+      @if (reportJobFailed) {
+        <mat-icon color="warn">warning</mat-icon>
+      }
+      @if (!reportJobRunning && !reportJobFailed) {
+        <mat-icon class="color-accent">check_circle</mat-icon>
+      }
+      <div class="job-status-body">
+        <span>{{reportJobLabel}}</span>
+        @if (reportJobRunning) {
+          <mat-progress-bar mode="indeterminate" color="accent"></mat-progress-bar>
+        }
+      </div>
     </div>
-    <div class="mat-elevation-z1" [hidden]="!ready || reportsDataSource.data.length === 0">
-        <div class="table-container">
-            <table mat-table [dataSource]="reportsDataSource" matSort matSortActive="createdAt"
-                   matSortDirection="desc" matSortDisableClear>
+  }
+  <div class="mat-elevation-z1" [hidden]="!ready || reportsDataSource.data.length === 0">
+    <div class="table-container">
+      <table mat-table [dataSource]="reportsDataSource" matSort matSortActive="createdAt"
+        matSortDirection="desc" matSortDisableClear>
 
-                <ng-container matColumnDef="id">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Id</th>
-                    <td mat-cell *matCellDef="let element">
-                        <div>
-                            {{element.id}}
-                        </div>
-                    </td>
-                </ng-container>
+        <ng-container matColumnDef="id">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>Id</th>
+          <td mat-cell *matCellDef="let element">
+            <div>
+              {{element.id}}
+            </div>
+          </td>
+        </ng-container>
 
-                <ng-container matColumnDef="type">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Typ</th>
-                    <td mat-cell *matCellDef="let element">
-                        <div>
-                            {{element.type}}
-                        </div>
-                    </td>
-                </ng-container>
+        <ng-container matColumnDef="type">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>Typ</th>
+          <td mat-cell *matCellDef="let element">
+            <div>
+              {{element.type}}
+            </div>
+          </td>
+        </ng-container>
 
-                <ng-container matColumnDef="createdAt">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>createdAt</th>
-                    <td mat-cell *matCellDef="let element">
-                        <div>
-                            {{element.createdAt | date:"medium"}}
-                        </div>
-                    </td>
-                </ng-container>
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>createdAt</th>
+          <td mat-cell *matCellDef="let element">
+            <div>
+              {{element.createdAt | date:"medium"}}
+            </div>
+          </td>
+        </ng-container>
 
-                <ng-container matColumnDef="download">
-                    <th mat-header-cell *matHeaderCellDef class="button-column">Download</th>
-                    <td mat-cell *matCellDef="let element">
-                        <button mat-icon-button color="accent" [disabled]="downloading"
-                                (click)="download($event, element)" matTooltip="Download">
-                            <mat-icon>download-circle</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
+        <ng-container matColumnDef="download">
+          <th mat-header-cell *matHeaderCellDef class="button-column">Download</th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button color="accent" [disabled]="downloading"
+              (click)="download($event, element)" matTooltip="Download">
+              <mat-icon>download-circle</mat-icon>
+            </button>
+          </td>
+        </ng-container>
 
-                <ng-container matColumnDef="delete">
-                    <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
-                    <td mat-cell *matCellDef="let element">
-                        <button mat-icon-button color="warn" (click)="delete($event, element)" matTooltip="Delete">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
+        <ng-container matColumnDef="delete">
+          <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button color="warn" (click)="delete($event, element)" matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
 
-                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-        </div>
-        <mat-paginator #paginator [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-                       showFirstLastButtons></mat-paginator>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
     </div>
-    <div *ngIf="ready && reportsDataSource.data.length === 0">No report files found.</div>
+    <mat-paginator #paginator [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+    showFirstLastButtons></mat-paginator>
+  </div>
+  @if (ready && reportsDataSource.data.length === 0) {
+    <div>No report files found.</div>
+  }
 </div>

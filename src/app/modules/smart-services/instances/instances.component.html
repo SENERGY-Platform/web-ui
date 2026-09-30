@@ -15,18 +15,22 @@
   -->
 <div class="instance-container layout-margin" fxLayout="column">
 
-  <div *ngIf="dataSource.data.length === 0 && ready">No Instances found.</div>
+  @if (dataSource.data.length === 0 && ready) {
+    <div>No Instances found.</div>
+  }
   <senergy-spinner [show]="!ready"></senergy-spinner>
 
   <div style="padding-bottom: 1em;" #chipDiv [hidden]="!ready || dataSource.data.length === 0">
     <mat-chip-set>
-      <mat-chip *ngIf="releaseId !== undefined">
-        <mat-icon matChipAvatar>cloud</mat-icon>
-        <span>Filter by Release</span>
-        <button matChipRemove (click)="this.releaseId = undefined; updateQueryParams(); loadInstances()">
-          <mat-icon>cancel</mat-icon>
-        </button>
-      </mat-chip>
+      @if (releaseId !== undefined) {
+        <mat-chip>
+          <mat-icon matChipAvatar>cloud</mat-icon>
+          <span>Filter by Release</span>
+          <button matChipRemove (click)="this.releaseId = undefined; updateQueryParams(); loadInstances()">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip>
+      }
     </mat-chip-set>
   </div>
 
@@ -39,13 +43,17 @@
         <ng-container matColumnDef="pub">
           <th mat-header-cell *matHeaderCellDef class="button-column">Access</th>
           <td mat-cell *matCellDef="let instance">
-            <mat-icon color="accent" *ngIf="instance.permissions_info.shared"
-              matTooltip="Shared by {{userIdToName.get(instance.user_id) || ''}}">
-              share
-            </mat-icon>
-            <mat-icon color="accent" *ngIf="!instance.permissions_info.shared" matTooltip="Owner">
-              person
-            </mat-icon>
+            @if (instance.permissions_info.shared) {
+              <mat-icon color="accent"
+                matTooltip="Shared by {{userIdToName.get(instance.user_id) || ''}}">
+                share
+              </mat-icon>
+            }
+            @if (!instance.permissions_info.shared) {
+              <mat-icon color="accent" matTooltip="Owner">
+                person
+              </mat-icon>
+            }
           </td>
         </ng-container>
 
@@ -109,14 +117,18 @@
         <ng-container matColumnDef="upgrade">
           <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Upgrade</th>
           <td mat-cell *matCellDef="let instance">
-            <mat-spinner *ngIf="isUpgrading(instance)" [diameter]="24" [strokeWidth]="3" color="accent"
+            @if (isUpgrading(instance)) {
+              <mat-spinner [diameter]="24" [strokeWidth]="3" color="accent"
               matTooltip="Reading the parameters of the new release"></mat-spinner>
-            <button mat-icon-button color="accent" *ngIf="instance.new_release_id && !isUpgrading(instance)"
-              matTooltip="A newer release of this smart service exists, upgrade to it"
-              [disabled]="instance.permissions_info.permissions.administrate === false"
-              (click)="$event.stopPropagation(); upgradeInstance(instance)">
-              <mat-icon>upgrade</mat-icon>
-            </button>
+            }
+            @if (instance.new_release_id && !isUpgrading(instance)) {
+              <button mat-icon-button color="accent"
+                matTooltip="A newer release of this smart service exists, upgrade to it"
+                [disabled]="instance.permissions_info.permissions.administrate === false"
+                (click)="$event.stopPropagation(); upgradeInstance(instance)">
+                <mat-icon>upgrade</mat-icon>
+              </button>
+            }
           </td>
         </ng-container>
 
@@ -168,81 +180,89 @@
           <td mat-cell *matCellDef="let instance" [attr.colspan]="displayedColumns.length">
             <div class="instance-detail"
               [@detailExpand]="expandedInstance?.id === instance.id ? 'expanded' : 'collapsed'">
-              <div *ngIf="expandedInstance?.id === instance.id" class="instance-detail-content">
-                <div *ngIf="isLoadingModules(instance.id)">Loading modules...</div>
-
-                <div
-                  *ngIf="!isLoadingModules(instance.id) && hasLoadedModules(instance.id) && getModulesByInstanceId(instance.id).length === 0">
-                  No modules found for this instance.
+              @if (expandedInstance?.id === instance.id) {
+                <div class="instance-detail-content">
+                  @if (isLoadingModules(instance.id)) {
+                    <div>Loading modules...</div>
+                  }
+                  @if (!isLoadingModules(instance.id) && hasLoadedModules(instance.id) && getModulesByInstanceId(instance.id).length === 0) {
+                    <div
+                      >
+                      No modules found for this instance.
+                    </div>
+                  }
+                  @if (!isLoadingModules(instance.id) && getModulesByInstanceId(instance.id).length > 0) {
+                    <div>
+                      <table class="module-table">
+                        @for (module of getModulesByInstanceId(instance.id); track module) {
+                          <tr>
+                            @switch(module.module_type) {
+                              @case ('process_deployment') {
+                                <td>Process Deployment</td>
+                                <td>
+                                  <button mat-icon-button color="accent" (click)="openDeployment(module)"
+                                    [disabled]="!canOpenDeployment(module)">
+                                    <mat-icon>arrow_circle_right</mat-icon>
+                                  </button>
+                                </td>
+                              }
+                              @case ('process_deployment_start') {
+                                <td>Process Instance {{module.module_data.process_deployment_name}}</td>
+                                <td>
+                                  <button mat-icon-button color="accent" (click)="openProcessInstance(module)"
+                                    [disabled]="!canOpenProcessInstance(module)">
+                                    <mat-icon>arrow_circle_right</mat-icon>
+                                  </button>
+                                </td>
+                              }
+                              @case ('widget') {
+                                <td>Widget</td>
+                              }
+                              @case ('device_repository_create_device_group') {
+                                <td>Device Group</td>
+                                <td>
+                                  <button mat-icon-button color="accent" (click)="openDeviceGroup(module)"
+                                    [disabled]="!canOpenDeviceGroup(module)">
+                                    <mat-icon>arrow_circle_right</mat-icon>
+                                  </button>
+                                </td>
+                              }
+                              @case ('import') {
+                                <td>Import {{module.module_data.import?.name}}</td>
+                                <td>
+                                  <button mat-icon-button color="accent" (click)="openImport(module)">
+                                    <mat-icon>arrow_circle_right</mat-icon>
+                                  </button>
+                                </td>
+                              }
+                              @case ('analytics') {
+                                <td>Analytics Pipeline {{module.module_data.pipeline?.name}}</td>
+                                <td>
+                                  <button mat-icon-button color="accent" (click)="openPipeline(module)">
+                                    <mat-icon>arrow_circle_right</mat-icon>
+                                  </button>
+                                </td>
+                              }
+                              @case ('export') {
+                                <td>Export {{module.module_data.export?.Name}}</td>
+                                <td>
+                                  <button mat-icon-button color="accent" (click)="openExport(module)">
+                                    <mat-icon>arrow_circle_right</mat-icon>
+                                  </button>
+                                </td>
+                              }
+                              @default {
+                                <td>{{module.module_type}}</td>
+                                <td>{{module.module_data | json}}</td>
+                              }
+                            }
+                          </tr>
+                        }
+                      </table>
+                    </div>
+                  }
                 </div>
-
-                <div *ngIf="!isLoadingModules(instance.id) && getModulesByInstanceId(instance.id).length > 0">
-                  <table class="module-table">
-                    <tr *ngFor="let module of getModulesByInstanceId(instance.id)">
-                      @switch(module.module_type) {
-                      @case ('process_deployment') {
-                      <td>Process Deployment</td>
-                      <td>
-                        <button mat-icon-button color="accent" (click)="openDeployment(module)"
-                          [disabled]="!canOpenDeployment(module)">
-                          <mat-icon>arrow_circle_right</mat-icon>
-                        </button>
-                      </td>
-                      }
-                      @case ('process_deployment_start') {
-                      <td>Process Instance {{module.module_data.process_deployment_name}}</td>
-                      <td>
-                        <button mat-icon-button color="accent" (click)="openProcessInstance(module)"
-                          [disabled]="!canOpenProcessInstance(module)">
-                          <mat-icon>arrow_circle_right</mat-icon>
-                        </button>
-                      </td>
-                      }
-                      @case ('widget') {
-                      <td>Widget</td>
-                      }
-                      @case ('device_repository_create_device_group') {
-                      <td>Device Group</td>
-                      <td>
-                        <button mat-icon-button color="accent" (click)="openDeviceGroup(module)"
-                          [disabled]="!canOpenDeviceGroup(module)">
-                          <mat-icon>arrow_circle_right</mat-icon>
-                        </button>
-                      </td>
-                      }
-                      @case ('import') {
-                      <td>Import {{module.module_data.import?.name}}</td>
-                      <td>
-                        <button mat-icon-button color="accent" (click)="openImport(module)">
-                          <mat-icon>arrow_circle_right</mat-icon>
-                        </button>
-                      </td>
-                      }
-                      @case ('analytics') {
-                      <td>Analytics Pipeline {{module.module_data.pipeline?.name}}</td>
-                      <td>
-                        <button mat-icon-button color="accent" (click)="openPipeline(module)">
-                          <mat-icon>arrow_circle_right</mat-icon>
-                        </button>
-                      </td>
-                      }
-                      @case ('export') {
-                      <td>Export {{module.module_data.export?.Name}}</td>
-                      <td>
-                        <button mat-icon-button color="accent" (click)="openExport(module)">
-                          <mat-icon>arrow_circle_right</mat-icon>
-                        </button>
-                      </td>
-                      }
-                      @default {
-                      <td>{{module.module_type}}</td>
-                      <td>{{module.module_data | json}}</td>
-                      }
-                      }
-                    </tr>
-                  </table>
-                </div>
-              </div>
+              }
             </div>
           </td>
         </ng-container>
@@ -259,11 +279,13 @@
     </div>
 
     <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageIndex]="pageIndex"
-      [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
+    [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
   </div>
 </div>
-<div class="center-button" *ngIf="this.instanceId">
-  <button mat-raised-button color="accent" (click)="clearQueryParams()">
-    Reset
-  </button>
-</div>
+@if (this.instanceId) {
+  <div class="center-button">
+    <button mat-raised-button color="accent" (click)="clearQueryParams()">
+      Reset
+    </button>
+  </div>
+}

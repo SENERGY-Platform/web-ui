@@ -17,37 +17,47 @@
 <h2 mat-dialog-title>Edit AC Control</h2>
 
 <mat-dialog-content>
-    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-    <form *ngIf="ready" [formGroup]="form" fxLayout="column">
-        <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
-            <mat-label>Widget Name</mat-label>
-            <input type="text" matInput formControlName="name" required>
-            <mat-error senergyError [label]="'Widget Name'"></mat-error>
+  <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+  @if (ready) {
+    <form [formGroup]="form" fxLayout="column">
+      @if (userHasUpdateNameAuthorization) {
+        <mat-form-field color="accent" appearance="outline">
+          <mat-label>Widget Name</mat-label>
+          <input type="text" matInput formControlName="name" required>
+          <mat-error senergyError [label]="'Widget Name'"></mat-error>
         </mat-form-field>
-        <div *ngIf="userHasUpdatePropertiesAuthorization" fxLayout="column">
-            <mat-form-field color="accent" appearance="outline">
-                <mat-label>Device/group</mat-label>
-                <mtx-select ngDefaultControl formControlName="selectable" required appendTo=".ng-select-anchor">
-                    <mtx-option *ngFor="let option of selectables"
-                        [value]="getSelectableId(option)">{{getSelectableName(option)}}</mtx-option>
-                </mtx-select>
-                <mat-error senergyError [label]="'Device/Group'"></mat-error>
-            </mat-form-field>
-            <mat-form-field color="accent" appearance="outline">
-                <mat-label>Min. Temperature</mat-label>
-                <input type="number" matInput formControlName="minTarget" required>
-                <mat-error senergyError [label]="'Min. Temperature'"></mat-error>
-            </mat-form-field>
-            <mat-form-field color="accent" appearance="outline">
-                <mat-label>Max. Temperature</mat-label>
-                <input type="number" matInput formControlName="maxTarget" required>
-                <mat-error senergyError [label]="'Max. Temperature'"></mat-error>
-            </mat-form-field>
+      }
+      @if (userHasUpdatePropertiesAuthorization) {
+        <div fxLayout="column">
+          <mat-form-field color="accent" appearance="outline">
+            <mat-label>Device/group</mat-label>
+            <mtx-select ngDefaultControl formControlName="selectable" required appendTo=".ng-select-anchor">
+              @for (option of selectables; track option) {
+                <mtx-option
+                [value]="getSelectableId(option)">{{getSelectableName(option)}}</mtx-option>
+              }
+            </mtx-select>
+            <mat-error senergyError [label]="'Device/Group'"></mat-error>
+          </mat-form-field>
+          <mat-form-field color="accent" appearance="outline">
+            <mat-label>Min. Temperature</mat-label>
+            <input type="number" matInput formControlName="minTarget" required>
+            <mat-error senergyError [label]="'Min. Temperature'"></mat-error>
+          </mat-form-field>
+          <mat-form-field color="accent" appearance="outline">
+            <mat-label>Max. Temperature</mat-label>
+            <input type="number" matInput formControlName="maxTarget" required>
+            <mat-error senergyError [label]="'Max. Temperature'"></mat-error>
+          </mat-form-field>
         </div>
+      }
     </form>
+  }
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center" *ngIf="ready">
+@if (ready) {
+  <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
-</mat-dialog-actions>
+  </mat-dialog-actions>
+}

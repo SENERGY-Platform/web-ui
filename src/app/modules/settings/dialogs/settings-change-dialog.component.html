@@ -17,39 +17,41 @@
 <h2 mat-dialog-title>Settings</h2>
 
 <mat-dialog-content>
-    <form class="form" [formGroup]="firstFormGroup">
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>User Name</mat-label>
-            <input type="text" matInput [value]="profile.username" disabled>
-        </mat-form-field>
-        <table class="full-width">
-            <tr>
-                <td>
-                    <mat-form-field appearance="outline" color="accent" class="full-width">
-                        <mat-label>First Name</mat-label>
-                        <input type="text" matInput formControlName="firstName">
-                        <mat-error senergyError label="First Name"></mat-error>
-                    </mat-form-field>
-                </td>
-                <td>
-                    <mat-form-field appearance="outline" color="accent" class="full-width">
-                        <mat-label>Last Name</mat-label>
-                        <input type="text" matInput formControlName="lastName">
-                        <mat-error senergyError label="Last Name"></mat-error>
-                    </mat-form-field>
-                </td>
-            </tr>
-        </table>
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Email</mat-label>
-            <input type="email" matInput formControlName="email">
-			<mat-error senergyError></mat-error>
-        </mat-form-field>
-    </form>
+  <form class="form" [formGroup]="firstFormGroup">
+    <mat-form-field appearance="outline" class="full-width" color="accent">
+      <mat-label>User Name</mat-label>
+      <input type="text" matInput [value]="profile.username" disabled>
+    </mat-form-field>
+    <table class="full-width">
+      <tr>
+        <td>
+          <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>First Name</mat-label>
+            <input type="text" matInput formControlName="firstName">
+            <mat-error senergyError label="First Name"></mat-error>
+          </mat-form-field>
+        </td>
+        <td>
+          <mat-form-field appearance="outline" color="accent" class="full-width">
+            <mat-label>Last Name</mat-label>
+            <input type="text" matInput formControlName="lastName">
+            <mat-error senergyError label="Last Name"></mat-error>
+          </mat-form-field>
+        </td>
+      </tr>
+    </table>
+    <mat-form-field appearance="outline" class="full-width" color="accent">
+      <mat-label>Email</mat-label>
+      <input type="email" matInput formControlName="email">
+      <mat-error senergyError></mat-error>
+    </mat-form-field>
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="accent" *ngIf="canChangePassword" (click)="changePassword()">Change Password</button>
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()">Save</button>
+  @if (canChangePassword) {
+    <button mat-raised-button color="accent" (click)="changePassword()">Change Password</button>
+  }
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="save()">Save</button>
 </mat-dialog-actions>

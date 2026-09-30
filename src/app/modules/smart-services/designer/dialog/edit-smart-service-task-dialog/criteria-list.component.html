@@ -15,63 +15,67 @@
   -->
 
 <mat-accordion>
-    <mat-expansion-panel *ngFor="let criteria of criteriaList; let i = index">
-        <mat-expansion-panel-header>
-            <mat-panel-title>
-                {{criteriaToLabel(criteria)}}
-            </mat-panel-title>
-            <mat-panel-description *ngIf="hasAspectClassCollision(criteria)" style="color: var(--warn-color, #f44336)">Aspect class collision</mat-panel-description>
-        </mat-expansion-panel-header>
+  @for (criteria of criteriaList; track criteria; let i = $index) {
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{criteriaToLabel(criteria)}}
+        </mat-panel-title>
+        @if (hasAspectClassCollision(criteria)) {
+          <mat-panel-description style="color: var(--warn-color, #f44336)">Aspect class collision</mat-panel-description>
+        }
+      </mat-expansion-panel-header>
+      <div>
         <div>
-            <div>
-                <mat-form-field appearance="outline" class="full-width" color="accent">
-                    <mat-label>Interaction</mat-label>
-                    <mtx-select [(ngModel)]="criteria.interaction" (change)="emitUpdate()" appendTo=".ng-select-anchor">
-                        <mtx-option [value]="undefined">NONE</mtx-option>
-                        <mtx-option value="event">event</mtx-option>
-                        <mtx-option value="request">request</mtx-option>
-                        <mtx-option value="event+request">event+request</mtx-option>
-                    </mtx-select>
-                    <mat-error senergyError label="Interaction"></mat-error>
-                </mat-form-field>
-            </div>
-            <div>
-                <div>
-                    <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                        <mat-label>Function</mat-label>
-                        <mtx-select [(ngModel)]="criteria.function_id" [items]="functions" (change)="emitUpdate()"
-                            bindLabel="name" bindValue="id" appendTo=".ng-select-anchor">
-                        </mtx-select>
-                        <mat-error senergyError label="Function"></mat-error>
-                    </mat-form-field>
-                </div>
-                <div>
-                    <senergy-aspect-select [ngModel]="criteria.aspect_ids" (ngModelChange)="setAspects(criteria, $event)"
-                        [aspects]="aspects" [aspectClasses]="[]" label="Aspects" [showCollisionUntouched]="true">
-                    </senergy-aspect-select>
-                </div>
-                <div>
-                    <mat-form-field appearance="outline" class="form-field full-width" color="accent">
-                        <mat-label>Device Class</mat-label>
-                        <mtx-select [(ngModel)]="criteria.device_class_id" [items]="deviceClasses"
-                            (change)="emitUpdate()" bindLabel="name" bindValue="id" appendTo=".ng-select-anchor">
-                        </mtx-select>
-                        <mat-error senergyError label="Device Class"></mat-error>
-                    </mat-form-field>
-                </div>
-            </div>
-            <div>
-                <button mat-raised-button color="accent"
-                    (click)="criteriaList = removeCriteria(criteriaList, i); emitUpdate()">
-                    Remove Criteria
-                </button>
-            </div>
+          <mat-form-field appearance="outline" class="full-width" color="accent">
+            <mat-label>Interaction</mat-label>
+            <mtx-select [(ngModel)]="criteria.interaction" (change)="emitUpdate()" appendTo=".ng-select-anchor">
+              <mtx-option [value]="undefined">NONE</mtx-option>
+              <mtx-option value="event">event</mtx-option>
+              <mtx-option value="request">request</mtx-option>
+              <mtx-option value="event+request">event+request</mtx-option>
+            </mtx-select>
+            <mat-error senergyError label="Interaction"></mat-error>
+          </mat-form-field>
         </div>
+        <div>
+          <div>
+            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+              <mat-label>Function</mat-label>
+              <mtx-select [(ngModel)]="criteria.function_id" [items]="functions" (change)="emitUpdate()"
+                bindLabel="name" bindValue="id" appendTo=".ng-select-anchor">
+              </mtx-select>
+              <mat-error senergyError label="Function"></mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <senergy-aspect-select [ngModel]="criteria.aspect_ids" (ngModelChange)="setAspects(criteria, $event)"
+              [aspects]="aspects" [aspectClasses]="[]" label="Aspects" [showCollisionUntouched]="true">
+            </senergy-aspect-select>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" class="form-field full-width" color="accent">
+              <mat-label>Device Class</mat-label>
+              <mtx-select [(ngModel)]="criteria.device_class_id" [items]="deviceClasses"
+                (change)="emitUpdate()" bindLabel="name" bindValue="id" appendTo=".ng-select-anchor">
+              </mtx-select>
+              <mat-error senergyError label="Device Class"></mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div>
+          <button mat-raised-button color="accent"
+            (click)="criteriaList = removeCriteria(criteriaList, i); emitUpdate()">
+            Remove Criteria
+          </button>
+        </div>
+      </div>
     </mat-expansion-panel>
+  }
 </mat-accordion>
 <div>
-    <button mat-raised-button color="accent" class="add-criteria-button"
-        (click)="criteriaList = addCriteria(criteriaList); emitUpdate()">
-        Add Criteria
-    </button>
+  <button mat-raised-button color="accent" class="add-criteria-button"
+    (click)="criteriaList = addCriteria(criteriaList); emitUpdate()">
+    Add Criteria
+  </button>
 </div>

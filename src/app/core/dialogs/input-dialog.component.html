@@ -17,15 +17,17 @@
 <h2 mat-dialog-title>{{title}}</h2>
 
 <mat-dialog-content>
-    <div *ngFor="let key of Object.keys(fields)">
-        <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
-            <mat-label>{{key | titlecase}}</mat-label>
-            <input matInput placeholder="{{key | titlecase}}" [(ngModel)]="fields[key]" [required]="isRequired(key)">
-        </mat-form-field>
+  @for (key of Object.keys(fields); track key) {
+    <div>
+      <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
+        <mat-label>{{key | titlecase}}</mat-label>
+        <input matInput placeholder="{{key | titlecase}}" [(ngModel)]="fields[key]" [required]="isRequired(key)">
+      </mat-form-field>
     </div>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="ok()">OK</button>
+  <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="ok()">OK</button>
 </mat-dialog-actions>

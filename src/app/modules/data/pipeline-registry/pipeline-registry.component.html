@@ -15,191 +15,221 @@
   -->
 
 <div class="layout-margin">
-    <span fxLayout="row" class="search-button-container">
-        <senergy-searchbar></senergy-searchbar>
-        <button mat-icon-button (click)="openFilterDialog()" matTooltip="Filter" color="accent" class="suffix-button">
-            <mat-icon>filter_alt</mat-icon>
-        </button>
-    </span>
+  <span fxLayout="row" class="search-button-container">
+    <senergy-searchbar></senergy-searchbar>
+    <button mat-icon-button (click)="openFilterDialog()" matTooltip="Filter" color="accent" class="suffix-button">
+      <mat-icon>filter_alt</mat-icon>
+    </button>
+  </span>
 
-    <div style="padding-bottom: 1em;" #chipDiv>
-        <mat-chip-set>
-            <mat-chip *ngFor="let op of routerOperator; let i = index">
-                <mat-icon matChipAvatar>settings</mat-icon>
-                {{routerOperatorNames![i]}}
-                <button matChipRemove (click)="removeChip(i, 'operator')">
-                    <mat-icon>cancel</mat-icon>
+  <div style="padding-bottom: 1em;" #chipDiv>
+    <mat-chip-set>
+      @for (op of routerOperator; track op; let i = $index) {
+        <mat-chip>
+          <mat-icon matChipAvatar>settings</mat-icon>
+          {{routerOperatorNames![i]}}
+          <button matChipRemove (click)="removeChip(i, 'operator')">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip>
+      }
+      @for (op of routerFlow; track op; let i = $index) {
+        <mat-chip>
+          <mat-icon matChipAvatar>loop</mat-icon>
+          {{routerFlowNames![i]}}
+          <button matChipRemove (click)="removeChip(i, 'flow')">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip>
+      }
+    </mat-chip-set>
+  </div>
+
+  <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
+  @if (dataSource.data.length === 0 && ready) {
+    <div>No pipelines found.</div>
+  }
+
+  <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
+    <div class="table-container" [style.max-height]="calcTableMaxHeight()">
+      <table mat-table [dataSource]="dataSource" [matSortActive]="sortBy" matSort matSortDisableClear
+        [matSortDirection]="sortDirection" (matSortChange)="matSortChange($event)">
+
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef class="button-column">
+            <mat-checkbox (change)="$event ? masterToggle() : null"
+              [checked]="selection.hasValue() && isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()">
+            </mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="$event.stopPropagation()"
+              (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
+              [disabled]="row.editable === false">
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear style="max-width: 20%"> Id</th>
+          <td mat-cell *matCellDef="let element"> {{element.id}}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Name</th>
+          <td mat-cell *matCellDef="let element"> {{element.name}}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="smartServiceInstanceId">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Smart Service</th>
+          <td mat-cell *matCellDef="let element">
+            <a
+              [routerLink]="['/smart-services/instances']"
+              [queryParams]="{ instance_id: element.smartServiceInstanceId}"
+              class="linkbutton color-accent"
+              matTooltip="smart service instance"
+              >
+              {{ element.smartServiceInstanceId }}
+            </a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdat">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Created at</th>
+          <td mat-cell *matCellDef="let element">
+            @if (utilsService.dateIsToday(element.createdAt)) {
+              <span>{{ element.createdAt |  date:'HH:mm'}}</span>
+            }
+            @if (!utilsService.dateIsToday(element.createdAt)) {
+              <span>{{ element.createdAt |  date:'dd.MM.yyyy - HH:mm'}}</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="updatedat">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Updated at</th>
+          <td mat-cell *matCellDef="let element">
+            @if (utilsService.dateIsToday(element.updatedAt)) {
+              <span>{{ element.updatedAt |  date:'HH:mm'}}</span>
+            }
+            @if (!utilsService.dateIsToday(element.updatedAt)) {
+              <span>{{ element.updatedAt |  date:'dd.MM.yyyy - HH:mm'}}</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="info">
+          <th mat-header-cell *matHeaderCellDef class="button-column">Info</th>
+          <td mat-cell *matCellDef="let element;">
+            <button class="margin" mat-icon-button color="accent"
+              routerLink="/data/pipelines/details/{{element.id}}" matTooltip="info">
+              <mat-icon>info</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="share">
+          <th mat-header-cell *matHeaderCellDef class="button-column">Share</th>
+          <td mat-cell *matCellDef="let element">
+            @if (element.id !== undefined) {
+              <button mat-icon-button color="accent"
+                matTooltip="Share" (click)="sharePipeline(element)"
+                [disabled]="!userHasAdministratePermission(element.id)">
+                <mat-icon>share</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        @if (userHasUpdateAuthorization) {
+          <ng-container matColumnDef="edit">
+            <th mat-header-cell *matHeaderCellDef class="button-column">Edit</th>
+            <td mat-cell *matCellDef="let element;"
+              matTooltip="{{isEditable(element) ? 'edit' : 'Can\'t edit legacy pipelines'}}">
+              <button class="margin" mat-icon-button color="accent"
+                routerLink="/data/pipelines/edit/{{element.id}}" [disabled]="!isEditable(element)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+        }
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef class="button-column">State</th>
+          <td mat-cell *matCellDef="let pipeline">
+            @if (pipeline.status == null) {
+              <div class="circle grey" matTooltip="Status could not be checked"></div>
+            }
+            @if (pipeline.status != null) {
+              <span>
+                @if (pipeline.status.transitioning === false && pipeline.status.running === false) {
+                  <div class="circle red" matTooltip="{{'Pipeline is not running: ' + pipeline.status.message}}"></div>
+                }
+                @if (pipeline.status.transitioning) {
+                  <div class="circle yellow" matTooltip="{{'Pipeline is transitioning: ' + pipeline.status.message}}"></div>
+                }
+                @if (pipeline.status.running) {
+                  <div class="circle green" matTooltip="Pipeline is running"></div>
+                }
+              </span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="access">
+          <th mat-header-cell *matHeaderCellDef class="button-column">Access</th>
+          <td mat-cell *matCellDef="let element">
+            @if (userId !== element.userId) {
+              <mat-icon color="accent" (mouseover)="getPipelineUser(element.userId)"
+                matTooltip="Shared by {{shareUser}}">
+                share
+              </mat-icon>
+            }
+            @if (userId === element.userId) {
+              <mat-icon color="accent"
+                matTooltip="Owner">
+                person
+              </mat-icon>
+            }
+          </td>
+        </ng-container>
+
+        @if (userHasDeleteAuthorization) {
+          <span>
+            <ng-container matColumnDef="delete">
+              <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
+              <td mat-cell *matCellDef="let element;">
+                <button class="margin" mat-icon-button color="accent" (click)="deletePipeline(element)"
+                  matTooltip="delete">
+                  <mat-icon>delete</mat-icon>
                 </button>
-            </mat-chip>
-            <mat-chip *ngFor="let op of routerFlow; let i = index">
-                <mat-icon matChipAvatar>loop</mat-icon>
-                {{routerFlowNames![i]}}
-                <button matChipRemove (click)="removeChip(i, 'flow')">
-                    <mat-icon>cancel</mat-icon>
-                </button>
-            </mat-chip>
-        </mat-chip-set>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="header-delete-all">
+              <th mat-header-cell *matHeaderCellDef colspan="10">
+                <div fxLayout="row">
+                  <div fxLayoutAlign="center center">You have
+                    selected {{selection.selected.length}} items
+                  </div>
+                  <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </th>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
+            </tr>
+          </span>
+        }
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
     </div>
-
-    <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
-    <div *ngIf="dataSource.data.length === 0 && ready">No pipelines found.</div>
-
-    <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
-        <div class="table-container" [style.max-height]="calcTableMaxHeight()">
-            <table mat-table [dataSource]="dataSource" [matSortActive]="sortBy" matSort matSortDisableClear
-                [matSortDirection]="sortDirection" (matSortChange)="matSortChange($event)">
-
-                <ng-container matColumnDef="select">
-                    <th mat-header-cell *matHeaderCellDef class="button-column">
-                        <mat-checkbox (change)="$event ? masterToggle() : null"
-                            [checked]="selection.hasValue() && isAllSelected()"
-                            [indeterminate]="selection.hasValue() && !isAllSelected()">
-                        </mat-checkbox>
-                    </th>
-                    <td mat-cell *matCellDef="let row">
-                        <mat-checkbox (click)="$event.stopPropagation()"
-                            (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
-                            [disabled]="row.editable === false">
-                        </mat-checkbox>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="id">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear style="max-width: 20%"> Id</th>
-                    <td mat-cell *matCellDef="let element"> {{element.id}}
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="name">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Name</th>
-                    <td mat-cell *matCellDef="let element"> {{element.name}}
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="smartServiceInstanceId">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Smart Service</th>
-                    <td mat-cell *matCellDef="let element">
-                        <a
-                                [routerLink]="['/smart-services/instances']"
-                                [queryParams]="{ instance_id: element.smartServiceInstanceId}"
-                                class="linkbutton color-accent"
-                                matTooltip="smart service instance"
-                        >
-                            {{ element.smartServiceInstanceId }}
-                        </a>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="createdat">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Created at</th>
-                    <td mat-cell *matCellDef="let element">
-                    <span *ngIf="utilsService.dateIsToday(element.createdAt)">{{ element.createdAt |  date:'HH:mm'}}</span>
-                    <span *ngIf="!utilsService.dateIsToday(element.createdAt)">{{ element.createdAt |  date:'dd.MM.yyyy - HH:mm'}}</span>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="updatedat">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Updated at</th>
-                    <td mat-cell *matCellDef="let element">
-                    <span *ngIf="utilsService.dateIsToday(element.updatedAt)">{{ element.updatedAt |  date:'HH:mm'}}</span>
-                    <span *ngIf="!utilsService.dateIsToday(element.updatedAt)">{{ element.updatedAt |  date:'dd.MM.yyyy - HH:mm'}}</span>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="info">
-                    <th mat-header-cell *matHeaderCellDef class="button-column">Info</th>
-                    <td mat-cell *matCellDef="let element;">
-                        <button class="margin" mat-icon-button color="accent"
-                            routerLink="/data/pipelines/details/{{element.id}}" matTooltip="info">
-                            <mat-icon>info</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="share">
-                    <th mat-header-cell *matHeaderCellDef class="button-column">Share</th>
-                    <td mat-cell *matCellDef="let element">
-                        <button *ngIf="element.id !== undefined" mat-icon-button color="accent"
-                                matTooltip="Share" (click)="sharePipeline(element)"
-                                [disabled]="!userHasAdministratePermission(element.id)">
-                            <mat-icon>share</mat-icon>
-
-                        </button>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="edit" *ngIf="userHasUpdateAuthorization">
-                    <th mat-header-cell *matHeaderCellDef class="button-column">Edit</th>
-                    <td mat-cell *matCellDef="let element;"
-                        matTooltip="{{isEditable(element) ? 'edit' : 'Can\'t edit legacy pipelines'}}">
-                        <button class="margin" mat-icon-button color="accent"
-                            routerLink="/data/pipelines/edit/{{element.id}}" [disabled]="!isEditable(element)">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="status">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef class="button-column">State</th>
-                    <td mat-cell *matCellDef="let pipeline">
-                        <div class="circle grey" *ngIf="pipeline.status == null" matTooltip="Status could not be checked"></div>
-                        <span *ngIf="pipeline.status != null">
-                            <div class="circle red" *ngIf="pipeline.status.transitioning === false && pipeline.status.running === false" matTooltip="{{'Pipeline is not running: ' + pipeline.status.message}}"></div>
-                            <div class="circle yellow" *ngIf="pipeline.status.transitioning" matTooltip="{{'Pipeline is transitioning: ' + pipeline.status.message}}"></div>
-                            <div class="circle green" *ngIf="pipeline.status.running" matTooltip="Pipeline is running"></div>
-                        </span>
-                    </td>
-                  </ng-container>
-
-                <ng-container matColumnDef="access">
-                    <th mat-header-cell *matHeaderCellDef class="button-column">Access</th>
-                    <td mat-cell *matCellDef="let element">
-                        <mat-icon color="accent" (mouseover)="getPipelineUser(element.userId)"
-                                  *ngIf="userId !== element.userId"
-                                  matTooltip="Shared by {{shareUser}}">
-                            share
-                        </mat-icon>
-                        <mat-icon color="accent" *ngIf="userId === element.userId"
-                                  matTooltip="Owner">
-                            person
-                        </mat-icon>
-                    </td>
-                </ng-container>
-
-                <span *ngIf="userHasDeleteAuthorization">
-                    <ng-container matColumnDef="delete">
-                        <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
-                        <td mat-cell *matCellDef="let element;">
-                            <button class="margin" mat-icon-button color="accent" (click)="deletePipeline(element)"
-                                matTooltip="delete">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
-    
-                    <ng-container matColumnDef="header-delete-all">
-                        <th mat-header-cell *matHeaderCellDef colspan="10">
-                            <div fxLayout="row">
-                                <div fxLayoutAlign="center center">You have
-                                    selected {{selection.selected.length}} items
-                                </div>
-                                <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </div>
-                        </th>
-                    </ng-container>
-    
-                    <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
-                    </tr>
-                </span>
-                
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-        </div>
-        <mat-paginator #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-                       (page)="selectionClear()" showFirstLastButtons></mat-paginator>
-    </div>
+    <mat-paginator #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+    (page)="selectionClear()" showFirstLastButtons></mat-paginator>
+  </div>
 
 </div>

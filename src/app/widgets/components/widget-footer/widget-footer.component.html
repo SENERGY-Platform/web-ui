@@ -14,37 +14,53 @@
   ~ limitations under the License.
   -->
 
-<mat-card-actions *ngIf="!zoom">
-    <div *ngFor="let icon of optionCustomIcon; let i = index">
+@if (!zoom) {
+  <mat-card-actions>
+    @for (icon of optionCustomIcon; track icon; let i = $index) {
+      <div>
         <button mat-icon-button color="accent" (click)="custom(i)" [disabled]="optionCustomDisabled[i]" [matTooltip]="optionCustomTooltip[i]">
-            <mat-icon>{{icon}}</mat-icon>
+          <mat-icon>{{icon}}</mat-icon>
         </button>
-    </div>
-    <div *ngIf="optionAdd">
+      </div>
+    }
+    @if (optionAdd) {
+      <div>
         <button mat-icon-button color="accent" (click)="add()" matTooltip="Add Element">
-            <mat-icon>add</mat-icon>
+          <mat-icon>add</mat-icon>
         </button>
-    </div>
+      </div>
+    }
     <div fxFlex class="drag-handler"></div>
     <div>
-        <button mat-icon-button color="accent" (click)="refresh()" matTooltip="Refresh" [disabled]="refreshing">
-            <mat-icon *ngIf="!refreshing">refresh</mat-icon>
-            <mat-icon *ngIf="refreshing">sync</mat-icon>
-        </button>
+      <button mat-icon-button color="accent" (click)="refresh()" matTooltip="Refresh" [disabled]="refreshing">
+        @if (!refreshing) {
+          <mat-icon>refresh</mat-icon>
+        }
+        @if (refreshing) {
+          <mat-icon>sync</mat-icon>
+        }
+      </button>
     </div>
-    <div *ngIf="optionZoom">
+    @if (optionZoom) {
+      <div>
         <button mat-icon-button color="accent" (click)="zoomWidget()" matTooltip="Maximize">
-            <mat-icon>zoom_out_map</mat-icon>
+          <mat-icon>zoom_out_map</mat-icon>
         </button>
+      </div>
+    }
+    <div>
+      @if ((widgetHasUpdateableProperties && userHasUpdatePropertiesAuthorization) || userHasUpdateNameAuthorization) {
+        <button mat-icon-button color="accent" (click)="edit()" matTooltip="Edit">
+          <mat-icon>edit</mat-icon>
+        </button>
+      }
     </div>
     <div>
-        <button *ngIf="(widgetHasUpdateableProperties && userHasUpdatePropertiesAuthorization) || userHasUpdateNameAuthorization" mat-icon-button color="accent" (click)="edit()" matTooltip="Edit">
-            <mat-icon>edit</mat-icon>
+      @if (userHasDeleteAuthorization) {
+        <button mat-icon-button color="accent" (click)="delete()" matTooltip="Delete">
+          <mat-icon>delete</mat-icon>
         </button>
+      }
     </div>
-    <div>
-        <button *ngIf="userHasDeleteAuthorization" mat-icon-button color="accent" (click)="delete()" matTooltip="Delete">
-            <mat-icon>delete</mat-icon>
-        </button>
-    </div>
-</mat-card-actions>
+  </mat-card-actions>
+}

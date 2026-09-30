@@ -17,69 +17,76 @@
 <h2 mat-dialog-title>Edit Anomaly Detection</h2>
 
 <mat-dialog-content>
-    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-    <div *ngIf="ready">
-        <form fxLayout="column" [formGroup]="form">
-            <mat-form-field color="accent" appearance="outline" fxFlex="47" *ngIf="userHasUpdateNameAuthorization">
-                <mat-label>Widget Name</mat-label>
-                <input type="text" matInput formControlName="name" required>
-                <mat-error senergyError [label]="'Widget name'"></mat-error>
+  <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+  @if (ready) {
+    <div>
+      <form fxLayout="column" [formGroup]="form">
+        @if (userHasUpdateNameAuthorization) {
+          <mat-form-field color="accent" appearance="outline" fxFlex="47">
+            <mat-label>Widget Name</mat-label>
+            <input type="text" matInput formControlName="name" required>
+            <mat-error senergyError [label]="'Widget name'"></mat-error>
+          </mat-form-field>
+        }
+        @if (exports.length > 0 && userHasUpdatePropertiesAuthorization) {
+          <div fxLayout="column">
+            <h2>Anomaly Export</h2>
+            <mat-form-field color="accent" appearance="outline" fxFlex="47">
+              <mat-label>Choose Export</mat-label>
+              <mat-error senergyError [label]="'Export'"></mat-error>
+              <mtx-select formControlName="export" required [items]="exports" bindLabel="name"
+                appendTo=".ng-select-anchor">
+              </mtx-select>
             </mat-form-field>
-
-            <div *ngIf="exports.length > 0 && userHasUpdatePropertiesAuthorization" fxLayout="column">
-                <h2>Anomaly Export</h2>
-                <mat-form-field color="accent" appearance="outline" fxFlex="47">
-                    <mat-label>Choose Export</mat-label>
-                    <mat-error senergyError [label]="'Export'"></mat-error>
-                    <mtx-select formControlName="export" required [items]="exports" bindLabel="name"
-                        appendTo=".ng-select-anchor">
-                    </mtx-select>
-                </mat-form-field>
-
-                <data-source-selector [dataSourceConfig]="form.controls.timeRangeConfig.value"
-                    [enableAggretationConfig]="false" (updatedDataSourceConfig)="timeRangeConfigUpdated($event)"
-                    [enableFieldSelection]="false" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="false"
-                    [showSource]="false">
-                </data-source-selector>
-
-                <h2>Type of Visualization</h2>
-                <mat-form-field color="accent" appearance="outline" fxFlex="47">
-                    <mat-label>Choose Visualization</mat-label>
-                    <mtx-select formControlName="visualizationType" appendTo=".ng-select-anchor">
-                        <mtx-option *ngFor="let visOption of visualizationTypes" [value]="visOption">
-                            {{visOption.name}}
-                        </mtx-option>
-                    </mtx-select>
-                    <mat-error senergyError label="Choose Visualization"></mat-error>
-                </mat-form-field>
-
-                <div *ngIf="form.controls.visualizationType.value.id === 'timeline'">
-                    <data-source-selector [dataSourceConfig]="form.controls.deviceValueConfig.value"
-                        [enableAggretationConfig]="false" (updatedDataSourceConfig)="deviceValuesConfigUpdated($event)"
-                        [enableFieldSelection]="false" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="true"
-                        [showExportsAsSource]="false" [showTimeRange]="false"></data-source-selector>
-                </div>
-
-                <div *ngIf="form.controls.visualizationType.value.id === 'device'">
-                    <data-source-selector [dataSourceConfig]="form.controls.deviceValueConfig.value"
-                        [enableAggretationConfig]="false" (updatedDataSourceConfig)="deviceValuesConfigUpdated($event)"
-                        [enableFieldSelection]="true" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="true"
-                        [showExportsAsSource]="false" [showTimeRange]="false"></data-source-selector>
-                    <div><mat-checkbox formControlName="showFrequencyAnomalies">Show Frequency
-                            Anomalies?</mat-checkbox></div>
-                </div>
-
-                <div><mat-checkbox formControlName="showDebug">Show interpretability data?</mat-checkbox></div>
-
-            </div>
-            <div *ngIf="exports.length === 0">
-                No export available
-            </div>
-        </form>
+            <data-source-selector [dataSourceConfig]="form.controls.timeRangeConfig.value"
+              [enableAggretationConfig]="false" (updatedDataSourceConfig)="timeRangeConfigUpdated($event)"
+              [enableFieldSelection]="false" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="false"
+              [showSource]="false">
+            </data-source-selector>
+            <h2>Type of Visualization</h2>
+            <mat-form-field color="accent" appearance="outline" fxFlex="47">
+              <mat-label>Choose Visualization</mat-label>
+              <mtx-select formControlName="visualizationType" appendTo=".ng-select-anchor">
+                @for (visOption of visualizationTypes; track visOption) {
+                  <mtx-option [value]="visOption">
+                    {{visOption.name}}
+                  </mtx-option>
+                }
+              </mtx-select>
+              <mat-error senergyError label="Choose Visualization"></mat-error>
+            </mat-form-field>
+            @if (form.controls.visualizationType.value.id === 'timeline') {
+              <div>
+                <data-source-selector [dataSourceConfig]="form.controls.deviceValueConfig.value"
+                  [enableAggretationConfig]="false" (updatedDataSourceConfig)="deviceValuesConfigUpdated($event)"
+                  [enableFieldSelection]="false" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="true"
+                [showExportsAsSource]="false" [showTimeRange]="false"></data-source-selector>
+              </div>
+            }
+            @if (form.controls.visualizationType.value.id === 'device') {
+              <div>
+                <data-source-selector [dataSourceConfig]="form.controls.deviceValueConfig.value"
+                  [enableAggretationConfig]="false" (updatedDataSourceConfig)="deviceValuesConfigUpdated($event)"
+                  [enableFieldSelection]="true" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="true"
+                [showExportsAsSource]="false" [showTimeRange]="false"></data-source-selector>
+                <div><mat-checkbox formControlName="showFrequencyAnomalies">Show Frequency
+                Anomalies?</mat-checkbox></div>
+              </div>
+            }
+            <div><mat-checkbox formControlName="showDebug">Show interpretability data?</mat-checkbox></div>
+          </div>
+        }
+        @if (exports.length === 0) {
+          <div>
+            No export available
+          </div>
+        }
+      </form>
     </div>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
 </mat-dialog-actions>

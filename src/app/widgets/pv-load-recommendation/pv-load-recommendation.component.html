@@ -14,47 +14,56 @@
   ~ limitations under the License.
   -->
 
-  <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
-    <mat-card-content>
-      <div *ngIf="!configured" fxFill fxLayout="column" fxLayoutAlign="center center">
+<mat-card appearance="outlined">
+  <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
+  <mat-card-content>
+    @if (!configured) {
+      <div fxFill fxLayout="column" fxLayoutAlign="center center">
         <div>Please configure widget!</div>
       </div>
-  
-      <span *ngIf="configured">
+    }
+
+    @if (configured) {
+      <span>
         <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
-        <div *ngIf="ready" fxLayoutAlign="center center" class="outer-container">
-  
-          <!-- e.g. network problem or 500 from timescale -->
-          <div *ngIf="error != null" class="text-container">
-            <h2>Data could not be loaded!</h2>
-          </div>
-  
-          <div *ngIf="error == null">
-            <div *ngIf="recommendation != null" class="text-container">
-                <h2>Enough energy will be produced to start the device</h2>
-                <!--<span *ngFor="let item of recommendation.recommendations | keyvalue">
+        @if (ready) {
+          <div fxLayoutAlign="center center" class="outer-container">
+            <!-- e.g. network problem or 500 from timescale -->
+            @if (error != null) {
+              <div class="text-container">
+                <h2>Data could not be loaded!</h2>
+              </div>
+            }
+            @if (error == null) {
+              <div>
+                @if (recommendation != null) {
+                  <div class="text-container">
+                    <h2>Enough energy will be produced to start the device</h2>
+                    <!--<span *ngFor="let item of recommendation.recommendations | keyvalue">
                     <p *ngIf="item.value === true">{{item.key}}</p>
-                </span>-->
+                  </span>-->
+                </div>
+              }
+              <!-- Fallback when variable is not set to anything -> timescale returned nothing -> operator has not send his init message yet -->
+              @if (recommendation == null) {
+                <div class="text-container">
+                  <h2>Operator is not ready</h2>
+                </div>
+              }
             </div>
-  
-            <!-- Fallback when variable is not set to anything -> timescale returned nothing -> operator has not send his init message yet -->
-            <div *ngIf="recommendation == null" class="text-container">
-              <h2>Operator is not ready</h2>
-            </div>
-          </div>
-  
+          }
         </div>
-      </span>
-  
-  
-    </mat-card-content>
-    <div>
-      <senergy-widget-footer [widgetHasUpdateableProperties]="true"
-        [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
-        [userHasDeleteAuthorization]="userHasDeleteAuthorization"
-        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
-        [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
-    </div>
-  </mat-card>
-  
+      }
+    </span>
+  }
+
+
+</mat-card-content>
+<div>
+  <senergy-widget-footer [widgetHasUpdateableProperties]="true"
+    [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
+    [userHasDeleteAuthorization]="userHasDeleteAuthorization"
+    [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
+  [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+</div>
+</mat-card>

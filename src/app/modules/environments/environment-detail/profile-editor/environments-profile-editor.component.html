@@ -14,49 +14,51 @@
   ~ limitations under the License.
   -->
 
-<div class="profile-chart" *ngIf="chart">
+@if (chart) {
+  <div class="profile-chart">
     <apx-chart [series]="chart.series" [chart]="chart.chart" [xaxis]="chart.xaxis" [yaxis]="chart.yaxis"
-        [dataLabels]="chart.dataLabels" [stroke]="chart.stroke" [legend]="chart.legend" [colors]="chart.colors">
+      [dataLabels]="chart.dataLabels" [stroke]="chart.stroke" [legend]="chart.legend" [colors]="chart.colors">
     </apx-chart>
     <p class="section-hint">24-hour preview for today ({{weekdayLabels[todayWeekday]}}): base &times; hour factor &times; weekday factor.</p>
-</div>
+  </div>
+}
 
 <div class="field-row">
-<mat-form-field appearance="outline" color="accent" class="third-width">
+  <mat-form-field appearance="outline" color="accent" class="third-width">
     <mat-label>Base</mat-label>
     <input matInput type="number" [(ngModel)]="profile!.base" (ngModelChange)="onFieldChange()" name="profile-base">
     <mat-hint>The typical value the day pattern below scales from.</mat-hint>
-</mat-form-field>
-<mat-form-field appearance="outline" color="accent" class="third-width">
+  </mat-form-field>
+  <mat-form-field appearance="outline" color="accent" class="third-width">
     <mat-label>Spread (%)</mat-label>
     <input matInput type="number" [(ngModel)]="profile!.spread_percent" (ngModelChange)="onFieldChange()" name="profile-spread">
     <mat-icon matSuffix class="inline-help-icon"
-        matTooltip="Random noise added around the value, as a percent -- e.g. 5 means the value randomly varies by up to ±5%.">help_outline</mat-icon>
-</mat-form-field>
+    matTooltip="Random noise added around the value, as a percent -- e.g. 5 means the value randomly varies by up to ±5%.">help_outline</mat-icon>
+  </mat-form-field>
 </div>
 <mat-checkbox [(ngModel)]="profile!.cumulative" (ngModelChange)="onFieldChange()" name="profile-cumulative">
-    Cumulative
+  Cumulative
 </mat-checkbox>
 <mat-icon class="inline-help-icon" matTooltip="A meter reading that keeps counting up instead of resetting each cycle.">help_outline</mat-icon>
 
 <div class="factors-block">
-    <span class="factors-label">Hour factors</span>
-    <p class="section-hint">
-        How the day shapes the value. Each bar scales the base value for one hour -- 1 leaves it unchanged, 0
-        switches it off, 2 doubles it. Click or drag across the bars to shape the day.
-    </p>
-    <senergy-environments-factor-bars [values]="profile!.hour_factors" [count]="24" [labels]="hourLabels" labelPrefix="Hour"
-        (valuesChange)="setHourFactors($event)">
-    </senergy-environments-factor-bars>
+  <span class="factors-label">Hour factors</span>
+  <p class="section-hint">
+    How the day shapes the value. Each bar scales the base value for one hour -- 1 leaves it unchanged, 0
+    switches it off, 2 doubles it. Click or drag across the bars to shape the day.
+  </p>
+  <senergy-environments-factor-bars [values]="profile!.hour_factors" [count]="24" [labels]="hourLabels" labelPrefix="Hour"
+    (valuesChange)="setHourFactors($event)">
+  </senergy-environments-factor-bars>
 </div>
 
 <div class="factors-block">
-    <span class="factors-label">Weekday factors</span>
-    <p class="section-hint">
-        How the day of the week shapes the value. 1 leaves it unchanged, 0 switches it off, 2 doubles it. Click or
-        drag across the bars to shape the week.
-    </p>
-    <senergy-environments-factor-bars [values]="profile!.weekday_factors" [count]="7" [labels]="weekdayLabels"
-        (valuesChange)="setWeekdayFactors($event)">
-    </senergy-environments-factor-bars>
+  <span class="factors-label">Weekday factors</span>
+  <p class="section-hint">
+    How the day of the week shapes the value. 1 leaves it unchanged, 0 switches it off, 2 doubles it. Click or
+    drag across the bars to shape the week.
+  </p>
+  <senergy-environments-factor-bars [values]="profile!.weekday_factors" [count]="7" [labels]="weekdayLabels"
+    (valuesChange)="setWeekdayFactors($event)">
+  </senergy-environments-factor-bars>
 </div>

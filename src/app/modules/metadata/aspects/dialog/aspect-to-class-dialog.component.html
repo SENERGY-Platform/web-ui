@@ -17,38 +17,44 @@
 <h2 mat-dialog-title>Convert Aspect to Aspect Class</h2>
 
 <mat-dialog-content>
-    <form class="form" [formGroup]="formGroup">
-        <mat-form-field class="full-width" appearance="outline" color="accent">
-            <mat-label>Aspect Class Name</mat-label>
-            <input matInput formControlName="className" required>
-            <mat-hint *ngIf="reusesExistingClass()">An aspect class of this name exists and will be
-                reused.</mat-hint>
-            <mat-error senergyError label="Aspect Class Name"></mat-error>
-        </mat-form-field>
+  <form class="form" [formGroup]="formGroup">
+    <mat-form-field class="full-width" appearance="outline" color="accent">
+      <mat-label>Aspect Class Name</mat-label>
+      <input matInput formControlName="className" required>
+      @if (reusesExistingClass()) {
+        <mat-hint>An aspect class of this name exists and will be
+        reused.</mat-hint>
+      }
+      <mat-error senergyError label="Aspect Class Name"></mat-error>
+    </mat-form-field>
 
-        <h4>These become root aspects of the new class</h4>
-        <ul class="children">
-            <li *ngFor="let child of childNames">{{child}}</li>
-        </ul>
-        <p class="hint">Each keeps its own sub-aspects and its id, so device-types that use them are
-            unaffected.</p>
+    <h4>These become root aspects of the new class</h4>
+    <ul class="children">
+      @for (child of childNames; track child) {
+        <li>{{child}}</li>
+      }
+    </ul>
+    <p class="hint">Each keeps its own sub-aspects and its id, so device-types that use them are
+    unaffected.</p>
 
-        <h4>What happens to "{{aspectName}}"</h4>
-        <mat-radio-group formControlName="fate" class="what-happens">
-            <mat-radio-button value="delete" [disabled]="deleteBlocked()">Delete it</mat-radio-button>
-            <mat-radio-button value="deprecate">Keep it, renamed to "{{deprecatedName()}}"</mat-radio-button>
-            <mat-radio-button value="keep">Keep it under its current name</mat-radio-button>
-        </mat-radio-group>
-        <p class="hint">Either way it stays behind without sub-aspects and carries the new class.</p>
-        <p class="hint" *ngIf="deleteBlocked()">
-            Deleting is not possible: {{usedInCount}} device-type usage(s) still reference this aspect, and
-            the device repository refuses the delete while they do. Keep it renamed, move those device-types
-            over to the new root aspects, then delete it here once the count reaches zero.
-        </p>
-    </form>
+    <h4>What happens to "{{aspectName}}"</h4>
+    <mat-radio-group formControlName="fate" class="what-happens">
+      <mat-radio-button value="delete" [disabled]="deleteBlocked()">Delete it</mat-radio-button>
+      <mat-radio-button value="deprecate">Keep it, renamed to "{{deprecatedName()}}"</mat-radio-button>
+      <mat-radio-button value="keep">Keep it under its current name</mat-radio-button>
+    </mat-radio-group>
+    <p class="hint">Either way it stays behind without sub-aspects and carries the new class.</p>
+    @if (deleteBlocked()) {
+      <p class="hint">
+        Deleting is not possible: {{usedInCount}} device-type usage(s) still reference this aspect, and
+        the device repository refuses the delete while they do. Keep it renamed, move those device-types
+        over to the new root aspects, then delete it here once the count reaches zero.
+      </p>
+    }
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="formGroup.invalid" (click)="save()">Convert</button>
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" [disabled]="formGroup.invalid" (click)="save()">Convert</button>
 </mat-dialog-actions>

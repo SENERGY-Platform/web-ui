@@ -15,43 +15,51 @@
   -->
 
 <mat-toolbar class="shadow" color="primary">
-    <button mat-icon-button color="accent" (click)="toggle()">
-        <mat-icon>menu</mat-icon>
+  <button mat-icon-button color="accent" (click)="toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <a routerLink="/dashboard" (click)="resetSidenav()" class="image-wrapper">
+    <img class="logo"
+      src="{{getLogoUrl()}}">
+  </a>
+  <span class="fill-remaining-space"></span>
+  @if (userHasNotificationsReadAuthorization) {
+    <button mat-icon-button color="accent" routerLink="/notifications">
+      @if (unreadCounter < 1) {
+        <mat-icon>notifications_none</mat-icon>
+      }
+      @if (unreadCounter > 0) {
+        <mat-icon matBadge="{{unreadCounter}}" matBadgeColor="warn">notifications</mat-icon>
+      }
     </button>
-    <a routerLink="/dashboard" (click)="resetSidenav()" class="image-wrapper">
-        <img class="logo"
-             src="{{getLogoUrl()}}">
-    </a>
-    <span class="fill-remaining-space"></span>
-    <button *ngIf="userHasNotificationsReadAuthorization" mat-icon-button color="accent" routerLink="/notifications">
-        <mat-icon *ngIf="unreadCounter < 1">notifications_none</mat-icon>
-        <mat-icon *ngIf="unreadCounter > 0" matBadge="{{unreadCounter}}" matBadgeColor="warn">notifications</mat-icon>
-    </button>
+  }
 
-    <button mat-icon-button [matMenuTriggerFor]="user" color="accent">
-        <mat-icon>account_circle</mat-icon>
+  <button mat-icon-button [matMenuTriggerFor]="user" color="accent">
+    <mat-icon>account_circle</mat-icon>
+  </button>
+  <mat-menu #user="matMenu" [overlapTrigger]="false">
+    <button disabled mat-menu-item>
+      <mat-icon>face</mat-icon>
+      {{userName}}{{usingConfidentialClient() ? ' (impersonated)' : ''}}
     </button>
-    <mat-menu #user="matMenu" [overlapTrigger]="false">
-        <button disabled mat-menu-item>
-            <mat-icon>face</mat-icon>
-            {{userName}}{{usingConfidentialClient() ? ' (impersonated)' : ''}}
-        </button>
-        <mat-divider></mat-divider>
-        <button *ngIf="userHasSettingsUpdateAuthorization" mat-menu-item (click)="settings()">
-            <mat-icon>settings</mat-icon>
-            Settings
-        </button>
-        <mat-divider></mat-divider>
-        <button mat-menu-item (click)="info()">
-            <mat-icon>info</mat-icon>
-            Info
-        </button>
-        <mat-divider></mat-divider>
-        <button mat-menu-item (click)="logout()">
-            <mat-icon>power_settings_new</mat-icon>
-            Logout
-        </button>
-    </mat-menu>
+    <mat-divider></mat-divider>
+    @if (userHasSettingsUpdateAuthorization) {
+      <button mat-menu-item (click)="settings()">
+        <mat-icon>settings</mat-icon>
+        Settings
+      </button>
+    }
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="info()">
+      <mat-icon>info</mat-icon>
+      Info
+    </button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>power_settings_new</mat-icon>
+      Logout
+    </button>
+  </mat-menu>
 </mat-toolbar>
 
 

@@ -15,22 +15,32 @@
   -->
 
 
-<senergy-fit-text *ngIf="sv?.type === 'String'" [txt]="sv?.value + ' ' + (widget?.properties?.vAxisLabel || '')"
-                  [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
-</senergy-fit-text>
-<senergy-fit-text *ngIf="sv?.type === 'Number'"
-                  [txt]="((sv?.value || 0 | number: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
-                  [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
-</senergy-fit-text>
-<senergy-fit-text *ngIf="sv?.type === 'Date'"
-                  [txt]="((sv?.value || '' | date: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
-                  [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
-</senergy-fit-text>
-<senergy-fit-text *ngIf="sv?.type === 'Currency'"
-                  [txt]="((sv?.value || 0 | currency: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
-                  [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
-</senergy-fit-text>
-<senergy-fit-text *ngIf="sv?.type === 'Percent'"
-                  [txt]="((sv?.value || 0 | percent: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
-                  [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
-</senergy-fit-text>
+@if (sv?.type === 'String') {
+  <senergy-fit-text [txt]="sv?.value + ' ' + (widget?.properties?.vAxisLabel || '')"
+    [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
+  </senergy-fit-text>
+}
+@if (sv?.type === 'Number') {
+  <senergy-fit-text
+    [txt]="((sv?.value || 0 | number: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
+    [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
+  </senergy-fit-text>
+}
+@if (sv?.type === 'Date') {
+  <senergy-fit-text
+    [txt]="((sv?.value || '' | date: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
+    [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
+  </senergy-fit-text>
+}
+@if (sv?.type === 'Currency') {
+  <senergy-fit-text
+    [txt]="((sv?.value || 0 | currency: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
+    [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
+  </senergy-fit-text>
+}
+@if (sv?.type === 'Percent') {
+  <senergy-fit-text
+    [txt]="((sv?.value || 0 | percent: widget?.properties?.format) || '') + ' ' + (widget?.properties?.vAxisLabel || '')"
+    [maxFontSize]="maxFontSize()" [ngStyle]="{'color': color}">
+  </senergy-fit-text>
+}

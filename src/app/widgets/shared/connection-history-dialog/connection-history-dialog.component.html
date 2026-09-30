@@ -16,16 +16,18 @@
 
 <h2 mat-dialog-title>Connection History</h2>
 <mat-dialog-content>
-    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+  <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
 
-    @if (ready) {
-    <timeline-chart chartId='deviceHistory' class="timeline" *ngIf="connectionHistory !== null"
+  @if (ready) {
+    @if (connectionHistory !== null) {
+      <timeline-chart chartId='deviceHistory' class="timeline"
         [data]="connectionHistory" [enableToolbar]="false" [vAxes]="timelineAxes" [width]="width"
-        [height]="100 * timelineAxes.length + 100"></timeline-chart>
+      [height]="100 * timelineAxes.length + 100"></timeline-chart>
     }
+  }
 
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()">Close</button>
+  <button mat-raised-button color="primary" (click)="close()">Close</button>
 </mat-dialog-actions>

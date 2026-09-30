@@ -14,12 +14,16 @@
   ~ limitations under the License.
   -->
 
-<div *ngIf="anomaliePhases.length === 0"class="text-container">
+@if (anomaliePhases.length === 0) {
+  <div class="text-container">
     <h2>No anomaly detected!</h2>
-</div>
+  </div>
+}
 
-<div *ngIf="anomaliePhases.length > 0 && chartDataReady === true">
+@if (anomaliePhases.length > 0 && chartDataReady === true) {
+  <div>
     <timeline-chart chartId='anomalyPhases' [data]="anomaliePhases" [hAxisLabel]="hAxisLabel" [vAxisLabel]="vAxisLabel"
-    [enableToolbar]="false" [vAxes]="vAxes" [width]="timelineWidth" [height]="timelineHeight" [OnClickFnc]="onClick">
+      [enableToolbar]="false" [vAxes]="vAxes" [width]="timelineWidth" [height]="timelineHeight" [OnClickFnc]="onClick">
     </timeline-chart>
-</div>
+  </div>
+}

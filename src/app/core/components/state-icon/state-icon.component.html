@@ -14,8 +14,16 @@
   ~ limitations under the License.
   -->
 <div>
-    <mat-icon class="padding connected" matTooltip="connected" *ngIf="state === 'online'">cloud</mat-icon>
-    <mat-icon class="padding disconnected" matTooltip="disconnected" *ngIf="state === 'offline'">cloud_off</mat-icon>
-    <mat-icon class="padding color-sidenav" matTooltip="unknown" *ngIf="state === ''">help outline</mat-icon>
-    <mat-icon class="padding inactive" matTooltip="inactive" *ngIf="state === 'inactive'">cloud_off</mat-icon>
+  @if (state === 'online') {
+    <mat-icon class="padding connected" matTooltip="connected">cloud</mat-icon>
+  }
+  @if (state === 'offline') {
+    <mat-icon class="padding disconnected" matTooltip="disconnected">cloud_off</mat-icon>
+  }
+  @if (state === '') {
+    <mat-icon class="padding color-sidenav" matTooltip="unknown">help outline</mat-icon>
+  }
+  @if (state === 'inactive') {
+    <mat-icon class="padding inactive" matTooltip="inactive">cloud_off</mat-icon>
+  }
 </div>

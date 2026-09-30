@@ -17,14 +17,26 @@
   -->
 
 <span class="example-pizza-party">
-  <div *ngFor="let poolError of poolErrors">
-    <div *ngFor="let laneError of poolError">
-      <div *ngIf="laneError.error === true">
-        <div [ngSwitch]="laneError.errorType">
-          <div *ngSwitchCase="'deviceType'">{{'Lane ' + laneError.laneName + ': No DeviceType can be determined!'}}</div>
-          <div *ngSwitchCase="'deviceClass'">{{'Lane ' + laneError.laneName + ': Different DeviceClasses !'}}</div>
+  @for (poolError of poolErrors; track poolError) {
+    <div>
+      @for (laneError of poolError; track laneError) {
+        <div>
+          @if (laneError.error === true) {
+            <div>
+              <div>
+                @switch (laneError.errorType) {
+                  @case ('deviceType') {
+                    <div>{{'Lane ' + laneError.laneName + ': No DeviceType can be determined!'}}</div>
+                  }
+                  @case ('deviceClass') {
+                    <div>{{'Lane ' + laneError.laneName + ': Different DeviceClasses !'}}</div>
+                  }
+                }
+              </div>
+            </div>
+          }
         </div>
-      </div>
+      }
     </div>
-  </div>
+  }
 </span>

@@ -15,24 +15,28 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
-    <mat-card-content class="mat-card-image content-size drag-handler">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready && offlineSinceList.length !== 0" fxLayout="column" fxFill>
-            <mat-list dense fxFlex>
-                <mat-list-item *ngFor="let item of offlineSinceList" (click)="showConnectionHistoryChart(item.id)">
-                    <span matListItemIcon><mat-icon 
-                            [ngClass]="format(item.offline_since).color">{{format(item.offline_since).icon}}</mat-icon>
-                    </span>
-                    <div matListItemTitle [matTooltip]="item.name">{{item.name}}</div>
-                    <div matListItemLine [matTooltip]="item.offline_since | date: 'dd.MM.yy HH:mm'">{{humanizeDuration(item.offline_since)}}</div>
-                </mat-list-item>
-            </mat-list>
-        </div>
-        <senergy-no-data [showIf]="ready && offlineSinceList.length === 0" message="Everything online!"></senergy-no-data>
-    </mat-card-content>
-    <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
-        [userHasDeleteAuthorization]="userHasDeleteAuthorization"
-        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
-        [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+  <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
+  <mat-card-content class="mat-card-image content-size drag-handler">
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    @if (ready && offlineSinceList.length !== 0) {
+      <div fxLayout="column" fxFill>
+        <mat-list dense fxFlex>
+          @for (item of offlineSinceList; track item) {
+            <mat-list-item (click)="showConnectionHistoryChart(item.id)">
+              <span matListItemIcon><mat-icon
+              [ngClass]="format(item.offline_since).color">{{format(item.offline_since).icon}}</mat-icon>
+            </span>
+            <div matListItemTitle [matTooltip]="item.name">{{item.name}}</div>
+            <div matListItemLine [matTooltip]="item.offline_since | date: 'dd.MM.yy HH:mm'">{{humanizeDuration(item.offline_since)}}</div>
+          </mat-list-item>
+        }
+      </mat-list>
+    </div>
+  }
+  <senergy-no-data [showIf]="ready && offlineSinceList.length === 0" message="Everything online!"></senergy-no-data>
+</mat-card-content>
+<senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
+  [userHasDeleteAuthorization]="userHasDeleteAuthorization"
+  [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
+[widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>

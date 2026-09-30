@@ -15,25 +15,31 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
-    <mat-card-content>
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready && processes.length !== 0" fxLayout="column" fxFill>
-            <mat-list>
-                <mat-list-item *ngFor="let process of processes">
-                    <div matListItemTitle class="drag-handler">{{process.name}}</div>
-                    <div matListItemLine class="drag-handler">{{process.date | date:'dd.MM.yyyy, HH:mm'}}</div>
-                    <div matListItemMeta>
-                        <button *ngIf="userHasProcessRepoUpdateAuthorization" mat-icon-button color="accent" matTooltip="edit process model"
-                                routerLink="/processes/designer/{{process.id}}" disableRipple (click)="this.void()">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                    </div>
-                </mat-list-item>
-            </mat-list>
-        </div>
-        <senergy-no-data [showIf]="ready && processes.length === 0"></senergy-no-data>
-    </mat-card-content>
-    <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+  <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
+  <mat-card-content>
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    @if (ready && processes.length !== 0) {
+      <div fxLayout="column" fxFill>
+        <mat-list>
+          @for (process of processes; track process) {
+            <mat-list-item>
+              <div matListItemTitle class="drag-handler">{{process.name}}</div>
+              <div matListItemLine class="drag-handler">{{process.date | date:'dd.MM.yyyy, HH:mm'}}</div>
+              <div matListItemMeta>
+                @if (userHasProcessRepoUpdateAuthorization) {
+                  <button mat-icon-button color="accent" matTooltip="edit process model"
+                    routerLink="/processes/designer/{{process.id}}" disableRipple (click)="this.void()">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                }
+              </div>
+            </mat-list-item>
+          }
+        </mat-list>
+      </div>
+    }
+    <senergy-no-data [showIf]="ready && processes.length === 0"></senergy-no-data>
+  </mat-card-content>
+  <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

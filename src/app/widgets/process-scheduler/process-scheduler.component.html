@@ -15,39 +15,45 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content>
-        <senergy-widget-spinner [show]="!ready()"></senergy-widget-spinner>
+  <senergy-widget-header [widget]="widget"></senergy-widget-header>
+  <mat-card-content>
+    <senergy-widget-spinner [show]="!ready()"></senergy-widget-spinner>
 
-        <div *ngIf="ready() && schedules.length !== 0" fxLayout="column" fxFill>
-            <mat-list>
-                <mat-list-item *ngFor="let schedule of schedules"
-                               [ngClass]="schedule.disabled === true ? 'schedule-disabled' : ''">
-                    <div matListItemTitle class="drag-handler">
-                        <mat-icon inline matListItemIcon>schedule</mat-icon>
-                        {{schedule.processAlias || schedule.processName}}
-                    </div>
-                    <div matListItemLine>
-                    <span class="drag-handler">
-                        {{cronReadable(schedule.cron)}}
-                    </span>
-                    </div>
-                    <div matListItemMeta>
-                        <button mat-icon-button color="accent" matTooltip="edit schedule"
-                                (click)="add(schedule)" [disabled]="!canEdit(schedule)">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                        <button mat-icon-button color="accent" matTooltip="delete schedule"
-                                (click)="delete(schedule.scheduleId)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
-                </mat-list-item>
-            </mat-list>
-        </div>
-        <senergy-no-data [showIf]=true *ngIf="ready() && schedules.length === 0"></senergy-no-data>
-    </mat-card-content>
-    <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionAdd]="true" (editEvent)="edit()"
-                           (addEvent)="add(null)"></senergy-widget-footer>
+    @if (ready() && schedules.length !== 0) {
+      <div fxLayout="column" fxFill>
+        <mat-list>
+          @for (schedule of schedules; track schedule) {
+            <mat-list-item
+              [ngClass]="schedule.disabled === true ? 'schedule-disabled' : ''">
+              <div matListItemTitle class="drag-handler">
+                <mat-icon inline matListItemIcon>schedule</mat-icon>
+                {{schedule.processAlias || schedule.processName}}
+              </div>
+              <div matListItemLine>
+                <span class="drag-handler">
+                  {{cronReadable(schedule.cron)}}
+                </span>
+              </div>
+              <div matListItemMeta>
+                <button mat-icon-button color="accent" matTooltip="edit schedule"
+                  (click)="add(schedule)" [disabled]="!canEdit(schedule)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="accent" matTooltip="delete schedule"
+                  (click)="delete(schedule.scheduleId)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </mat-list-item>
+          }
+        </mat-list>
+      </div>
+    }
+    @if (ready() && schedules.length === 0) {
+      <senergy-no-data [showIf]=true></senergy-no-data>
+    }
+  </mat-card-content>
+  <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionAdd]="true" (editEvent)="edit()"
+  (addEvent)="add(null)"></senergy-widget-footer>
 </mat-card>
 

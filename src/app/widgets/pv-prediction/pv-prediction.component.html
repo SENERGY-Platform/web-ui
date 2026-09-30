@@ -17,33 +17,45 @@
 <mat-card appearance="outlined">
   <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
   <mat-card-content>
-    <div *ngIf="!configured" fxFill fxLayout="column" fxLayoutAlign="center center">
-      <div>Please configure widget!</div>
-    </div>
-
-    <span *ngIf="configured">
-      <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
-      <div *ngIf="ready" fxLayoutAlign="center center" class="outer-container">
-
-        <!-- e.g. network problem or 500 from timescale -->
-        <div *ngIf="error != null" class="text-container">
-          <h2>An error occured</h2>
-        </div>
-
-        <div *ngIf="error == null">
-          <div *ngIf="widget.properties.pvPrediction?.displayNextValue === true && nextPrediction != null" class="text-container">
-            <h2>Estimated energy production for the next {{widget.properties.pvPrediction?.nextValueConfig?.time}}{{widget.properties.pvPrediction?.nextValueConfig?.level}}:</h2>
-            <senergy-single-value-value [sv]="nextPrediction" [widget]="widget"></senergy-single-value-value>
-          </div>
-
-          <div *ngIf="widget.properties.pvPrediction?.displayTimeline === true">
-            <google-chart *ngIf="chartExportData.dataTable[0].length !== 0" #chartExport [data]="chartExportData"
-              (chartSelect)="onChartSelect($event)"></google-chart>
-          </div>
-        </div>
-
+    @if (!configured) {
+      <div fxFill fxLayout="column" fxLayoutAlign="center center">
+        <div>Please configure widget!</div>
       </div>
-    </span>
+    }
+
+    @if (configured) {
+      <span>
+        <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
+        @if (ready) {
+          <div fxLayoutAlign="center center" class="outer-container">
+            <!-- e.g. network problem or 500 from timescale -->
+            @if (error != null) {
+              <div class="text-container">
+                <h2>An error occured</h2>
+              </div>
+            }
+            @if (error == null) {
+              <div>
+                @if (widget.properties.pvPrediction?.displayNextValue === true && nextPrediction != null) {
+                  <div class="text-container">
+                    <h2>Estimated energy production for the next {{widget.properties.pvPrediction?.nextValueConfig?.time}}{{widget.properties.pvPrediction?.nextValueConfig?.level}}:</h2>
+                    <senergy-single-value-value [sv]="nextPrediction" [widget]="widget"></senergy-single-value-value>
+                  </div>
+                }
+                @if (widget.properties.pvPrediction?.displayTimeline === true) {
+                  <div>
+                    @if (chartExportData.dataTable[0].length !== 0) {
+                      <google-chart #chartExport [data]="chartExportData"
+                      (chartSelect)="onChartSelect($event)"></google-chart>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </span>
+    }
 
 
   </mat-card-content>
@@ -52,6 +64,6 @@
       [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
       [userHasDeleteAuthorization]="userHasDeleteAuthorization"
       [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
-      [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+    [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
   </div>
 </mat-card>

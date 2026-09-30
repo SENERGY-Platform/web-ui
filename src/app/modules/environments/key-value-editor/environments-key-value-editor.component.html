@@ -15,33 +15,40 @@
   -->
 
 <div class="key-value-editor">
-    <div class="key-value-row" *ngFor="let row of rows; let i = index; trackBy: trackByIndex">
-        <mat-form-field appearance="outline" color="accent" class="key-field">
-            <mat-label>{{keyLabel}}</mat-label>
-            <input matInput [(ngModel)]="row.key" [ngModelOptions]="{standalone: true}" (ngModelChange)="emit()">
-            <mat-icon matSuffix *ngIf="hintFor(row.key) as hint" [matTooltip]="hint" class="key-hint-icon">info</mat-icon>
-        </mat-form-field>
-
-        <mat-button-toggle-group *ngIf="mode === 'mixed' && !row.readOnly" [(ngModel)]="row.isText"
-            [ngModelOptions]="{standalone: true}" (ngModelChange)="emit()" class="type-toggle">
-            <mat-button-toggle [value]="false" matTooltip="Number">123</mat-button-toggle>
-            <mat-button-toggle [value]="true" matTooltip="Text">Abc</mat-button-toggle>
+  @for (row of rows; track trackByIndex(i, row); let i = $index) {
+    <div class="key-value-row">
+      <mat-form-field appearance="outline" color="accent" class="key-field">
+        <mat-label>{{keyLabel}}</mat-label>
+        <input matInput [(ngModel)]="row.key" [ngModelOptions]="{standalone: true}" (ngModelChange)="emit()">
+        @if (hintFor(row.key); as hint) {
+          <mat-icon matSuffix [matTooltip]="hint" class="key-hint-icon">info</mat-icon>
+        }
+      </mat-form-field>
+      @if (mode === 'mixed' && !row.readOnly) {
+        <mat-button-toggle-group [(ngModel)]="row.isText"
+          [ngModelOptions]="{standalone: true}" (ngModelChange)="emit()" class="type-toggle">
+          <mat-button-toggle [value]="false" matTooltip="Number">123</mat-button-toggle>
+          <mat-button-toggle [value]="true" matTooltip="Text">Abc</mat-button-toggle>
         </mat-button-toggle-group>
-
-        <mat-form-field appearance="outline" color="accent" class="value-field">
-            <mat-label>Value</mat-label>
-            <input matInput *ngIf="!row.readOnly" [type]="mode === 'mixed' && row.isText ? 'text' : 'number'"
-                [attr.step]="mode === 'number' ? 1 : null" [(ngModel)]="row.value" [ngModelOptions]="{standalone: true}"
-                (ngModelChange)="emit()">
-            <input matInput *ngIf="row.readOnly" [value]="row.value" disabled matTooltip="Not editable here: not a number or text value.">
-        </mat-form-field>
-
-        <button mat-icon-button color="warn" matTooltip="Remove entry" (click)="removeRow(i)">
-            <mat-icon>delete</mat-icon>
-        </button>
+      }
+      <mat-form-field appearance="outline" color="accent" class="value-field">
+        <mat-label>Value</mat-label>
+        @if (!row.readOnly) {
+          <input matInput [type]="mode === 'mixed' && row.isText ? 'text' : 'number'"
+            [attr.step]="mode === 'number' ? 1 : null" [(ngModel)]="row.value" [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="emit()">
+        }
+        @if (row.readOnly) {
+          <input matInput [value]="row.value" disabled matTooltip="Not editable here: not a number or text value.">
+        }
+      </mat-form-field>
+      <button mat-icon-button color="warn" matTooltip="Remove entry" (click)="removeRow(i)">
+        <mat-icon>delete</mat-icon>
+      </button>
     </div>
+  }
 
-    <button mat-stroked-button color="accent" (click)="addRow()">
-        <mat-icon>add</mat-icon> Add entry
-    </button>
+  <button mat-stroked-button color="accent" (click)="addRow()">
+    <mat-icon>add</mat-icon> Add entry
+  </button>
 </div>

@@ -15,42 +15,56 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
-    <mat-card-content class="drag-handler">
-        <div *ngIf="!configured" fxFill fxLayout="column" fxLayoutAlign="center center">
-            <div>Please configure widget!</div>
-        </div>
-        <senergy-widget-spinner [show]="configured && !dataReady"></senergy-widget-spinner>
-        <div *ngIf="configured && dataReady && items.length > 0" fxLayout="column" fxFill>
-            <table mat-table [matSortActive]="matSortActive" [matSortDirection]="matSortDirection" matSortDisableClear
-                   [dataSource]="items" matSort (matSortChange)="matSortChange($event)">
-                <ng-container matColumnDef="name">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
-                    <td mat-cell *matCellDef="let m">{{m.name}}</td>
-                </ng-container>
-                <ng-container matColumnDef="value">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>{{widget.properties.dataTable?.valueAlias || 'Value'}}</th>
-                    <td mat-cell *matCellDef="let m" [ngClass]="m.class">
-                        <div *ngIf="m.icon !== ''">
-                            <mat-icon [matTooltip]="m.status" [ngStyle]="{'color': m.color}">
-                                {{m.icon}}
-                            </mat-icon>
-                        </div>
-                        <div *ngIf="m.icon === ''">
-                            <div *ngIf="m"></div>
-                            {{m.status}}
-                        </div>
-                    </td>
-                </ng-container>
-                <ng-container matColumnDef="time">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Time</th>
-                    <td mat-cell *matCellDef="let m"><ng-container *ngIf="m.time && m.time !== 'null'">{{m.time | date:'short'}}</ng-container></td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="['name', 'value', 'time']; sticky: true"></tr>
-                <tr mat-row *matRowDef="let m; columns: ['name', 'value', 'time'];"></tr>
-            </table>
-        </div>
-        <senergy-no-data *ngIf="configured && dataReady && items.length === 0" [showIf]=true></senergy-no-data>
-    </mat-card-content>
-    <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()" [optionCustomIcon]="['file_save']" [optionCustomTooltip]="['Download Excel']" [optionCustomDisabled]="[!configured || !dataReady]" (customEvent)="downloadExcel()"></senergy-widget-footer>
+  <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
+  <mat-card-content class="drag-handler">
+    @if (!configured) {
+      <div fxFill fxLayout="column" fxLayoutAlign="center center">
+        <div>Please configure widget!</div>
+      </div>
+    }
+    <senergy-widget-spinner [show]="configured && !dataReady"></senergy-widget-spinner>
+    @if (configured && dataReady && items.length > 0) {
+      <div fxLayout="column" fxFill>
+        <table mat-table [matSortActive]="matSortActive" [matSortDirection]="matSortDirection" matSortDisableClear
+          [dataSource]="items" matSort (matSortChange)="matSortChange($event)">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let m">{{m.name}}</td>
+          </ng-container>
+          <ng-container matColumnDef="value">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef>{{widget.properties.dataTable?.valueAlias || 'Value'}}</th>
+            <td mat-cell *matCellDef="let m" [ngClass]="m.class">
+              @if (m.icon !== '') {
+                <div>
+                  <mat-icon [matTooltip]="m.status" [ngStyle]="{'color': m.color}">
+                    {{m.icon}}
+                  </mat-icon>
+                </div>
+              }
+              @if (m.icon === '') {
+                <div>
+                  @if (m) {
+                    <div></div>
+                  }
+                  {{m.status}}
+                </div>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="time">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef>Time</th>
+            <td mat-cell *matCellDef="let m">@if (m.time && m.time !== 'null') {
+              {{m.time | date:'short'}}
+            }</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['name', 'value', 'time']; sticky: true"></tr>
+          <tr mat-row *matRowDef="let m; columns: ['name', 'value', 'time'];"></tr>
+        </table>
+      </div>
+    }
+    @if (configured && dataReady && items.length === 0) {
+      <senergy-no-data [showIf]=true></senergy-no-data>
+    }
+  </mat-card-content>
+  <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()" [optionCustomIcon]="['file_save']" [optionCustomTooltip]="['Download Excel']" [optionCustomDisabled]="[!configured || !dataReady]" (customEvent)="downloadExcel()"></senergy-widget-footer>
 </mat-card>

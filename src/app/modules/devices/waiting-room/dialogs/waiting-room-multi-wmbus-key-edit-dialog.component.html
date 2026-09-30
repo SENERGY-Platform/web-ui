@@ -16,25 +16,29 @@
 
 <h2 mat-dialog-title>Use Devices</h2>
 <mat-dialog-content>
-    <div class="description">
-        Add missing {{wmbusKeyAttributeKey}} attributes
-    </div>
+  <div class="description">
+    Add missing {{wmbusKeyAttributeKey}} attributes
+  </div>
 
-    <form class="form">
-        <div *ngFor="let device of devices">
-            <ng-container *ngFor="let attr of device.attributes">
-                <mat-form-field appearance="outline" class="full-width" color="accent"  *ngIf="attr.key === wmbusKeyAttributeKey">
-                    <mat-label>{{device.name}}</mat-label>
-                    <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" required>
-                    <mat-error senergyError label="{{device.name}}"></mat-error>
-                </mat-form-field>
-            </ng-container>
-        </div>
-    </form>
+  <form class="form">
+    @for (device of devices; track device) {
+      <div>
+        @for (attr of device.attributes; track attr) {
+          @if (attr.key === wmbusKeyAttributeKey) {
+            <mat-form-field appearance="outline" class="full-width" color="accent" >
+              <mat-label>{{device.name}}</mat-label>
+              <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" required>
+              <mat-error senergyError label="{{device.name}}"></mat-error>
+            </mat-form-field>
+          }
+        }
+      </div>
+    }
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="isInvalid()" (click)="save()">Use</button>
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" [disabled]="isInvalid()" (click)="save()">Use</button>
 </mat-dialog-actions>
 

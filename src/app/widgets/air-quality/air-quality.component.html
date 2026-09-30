@@ -15,70 +15,97 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
-    <mat-card-content>
-        <senergy-widget-spinner [show]="!ready && isWidgetConfigured()"></senergy-widget-spinner>
-        <div *ngIf="ready && isWidgetConfigured()" style="height: 100%">
-            <div *ngIf="!inDetailView" (click)="clicked()" matTooltip="Click to view details!"
-                 [matTooltipShowDelay]="500"
-                 fxLayout="column" fxLayoutAlign="space-evenly center">
-                <div *ngIf="pros.length === 0" style="width: 100%">
-                    <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
-                        <button mat-icon-button class="color-accent" (click)="clicked()">
-                            <mat-icon fontIcon="sentiment_very_satisfied"></mat-icon>
-                        </button>
-                    </div>
-                    <div class="text color-accent">
-                        No reason to open a window!
-                    </div>
-
+  <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
+  <mat-card-content>
+    <senergy-widget-spinner [show]="!ready && isWidgetConfigured()"></senergy-widget-spinner>
+    @if (ready && isWidgetConfigured()) {
+      <div style="height: 100%">
+        @if (!inDetailView) {
+          <div (click)="clicked()" matTooltip="Click to view details!"
+            [matTooltipShowDelay]="500"
+            fxLayout="column" fxLayoutAlign="space-evenly center">
+            @if (pros.length === 0) {
+              <div style="width: 100%">
+                <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
+                  <button mat-icon-button class="color-accent" (click)="clicked()">
+                    <mat-icon fontIcon="sentiment_very_satisfied"></mat-icon>
+                  </button>
                 </div>
-                <div *ngIf="pros.length > 0 && cons.length > 0" style="width: 100%">
-                    <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
-                        <button mat-icon-button class="color-accent" (click)="clicked()">
-                            <mat-icon fontIcon="sentiment_dissatisfied"></mat-icon>
-                        </button>
-                    </div>
-                    <div class="text color-accent">
-                        {{pros.length}} reason<span *ngIf="pros.length > 1">s</span> <!-- plural s -->
-                        for and {{cons.length}} reason<span *ngIf="cons.length > 1">s</span> <!-- plural s -->
-                        against opening a window!
-                    </div>
+                <div class="text color-accent">
+                  No reason to open a window!
                 </div>
-                <div *ngIf="pros.length > 0 && cons.length === 0" style="width: 100%">
-                    <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
-                        <button mat-icon-button class="color-accent" (click)="clicked()">
-                            <mat-icon fontIcon="sentiment_very_dissatisfied"></mat-icon>
-                        </button>
-                    </div>
-                    <div class="text color-warn">
-                        Consider opening a window!
-                    </div>
+              </div>
+            }
+            @if (pros.length > 0 && cons.length > 0) {
+              <div style="width: 100%">
+                <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
+                  <button mat-icon-button class="color-accent" (click)="clicked()">
+                    <mat-icon fontIcon="sentiment_dissatisfied"></mat-icon>
+                  </button>
                 </div>
-            </div>
-            <div *ngIf="inDetailView" (click)="clicked()" style="height: 100%" fxLayout="column" fxFill>
-                <mat-list style="overflow: auto; max-height: 100%">
-                    <div mat-subheader *ngIf="pros.length > 0">Reasons for opening a window</div>
-                    <mat-list-item *ngFor="let pro of pros">
-                        <div matListItemLine [innerHTML]="pro"></div>
-                    </mat-list-item>
-                    <div mat-subheader *ngIf="cons.length > 0">Reasons against opening a window</div>
-                    <mat-list-item *ngFor="let con of cons">
-                        <span matListItemLine [innerHTML]="con"></span>
-                    </mat-list-item>
-                </mat-list>
-                <div *ngIf="pros.length === 0 && cons.length === 0" fxFill fxLayout="row" fxLayoutAlign="center center">
-                    No reasons for or against opening a window
+                <div class="text color-accent">
+                  {{pros.length}} reason@if (pros.length > 1) {
+                  <span>s</span>
+                  } <!-- plural s -->
+                  for and {{cons.length}} reason@if (cons.length > 1) {
+                  <span>s</span>
+                  } <!-- plural s -->
+                  against opening a window!
                 </div>
-            </div>
-        </div>
-        <div *ngIf="!isWidgetConfigured()" fxFill fxLayout="row" fxLayoutAlign="center center">
-            Please configure widget!
-        </div>
-    </mat-card-content>
-    <div>
-        <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget"
-                               (editEvent)="edit()" [refreshing]="refreshing"></senergy-widget-footer>
-    </div>
+              </div>
+            }
+            @if (pros.length > 0 && cons.length === 0) {
+              <div style="width: 100%">
+                <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
+                  <button mat-icon-button class="color-accent" (click)="clicked()">
+                    <mat-icon fontIcon="sentiment_very_dissatisfied"></mat-icon>
+                  </button>
+                </div>
+                <div class="text color-warn">
+                  Consider opening a window!
+                </div>
+              </div>
+            }
+          </div>
+        }
+        @if (inDetailView) {
+          <div (click)="clicked()" style="height: 100%" fxLayout="column" fxFill>
+            <mat-list style="overflow: auto; max-height: 100%">
+              @if (pros.length > 0) {
+                <div mat-subheader>Reasons for opening a window</div>
+              }
+              @for (pro of pros; track pro) {
+                <mat-list-item>
+                  <div matListItemLine [innerHTML]="pro"></div>
+                </mat-list-item>
+              }
+              @if (cons.length > 0) {
+                <div mat-subheader>Reasons against opening a window</div>
+              }
+              @for (con of cons; track con) {
+                <mat-list-item>
+                  <span matListItemLine [innerHTML]="con"></span>
+                </mat-list-item>
+              }
+            </mat-list>
+            @if (pros.length === 0 && cons.length === 0) {
+              <div fxFill fxLayout="row" fxLayoutAlign="center center">
+                No reasons for or against opening a window
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+    @if (!isWidgetConfigured()) {
+      <div fxFill fxLayout="row" fxLayoutAlign="center center">
+        Please configure widget!
+      </div>
+    }
+  </mat-card-content>
+  <div>
+    <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget"
+    (editEvent)="edit()" [refreshing]="refreshing"></senergy-widget-footer>
+  </div>
 </mat-card>
 

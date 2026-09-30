@@ -17,34 +17,42 @@
 <h2 mat-dialog-title>Edit Default Attributes</h2>
 
 <mat-dialog-content>
-    <form class="form">
-        Attributes
-        <mat-divider></mat-divider>
-        <div *ngFor="let attr of attributes; let i = index" class="attribute">
-            <mat-form-field appearance="outline" class="third-width" color="accent" [matTooltip]="tooltip(attr.key)">
-                <mat-label>Key</mat-label>
-                <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
-                    appendTo=".ng-select-anchor" [addTag]="addAttribute()" [disabled]="isDisabled(attr.key)">
-                <mtx-option *ngFor="let a of knownAttributes" [value]="a.key" [disabled]="isDisabled(a.key)">{{a.label || a.key}}</mtx-option>
-                </mtx-select>
-                <mat-error senergyError label="Key"></mat-error>
-            </mat-form-field>
-            =
-            <mat-form-field appearance="outline" class="third-width" color="accent">
-                <mat-label>Value</mat-label>
-                <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}">
-                <mat-error senergyError label="Value"></mat-error>
-            </mat-form-field>
-            <button mat-icon-button color="warn" (click)="removeAttr(i)" *ngIf="!isDisabled(attr.key)">
-                <mat-icon>delete</mat-icon>
-            </button>
-            <span style="width: 48px" *ngIf="isDisabled(attr.key)"></span>
-        </div>
-        <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
-    </form>
+  <form class="form">
+    Attributes
+    <mat-divider></mat-divider>
+    @for (attr of attributes; track attr; let i = $index) {
+      <div class="attribute">
+        <mat-form-field appearance="outline" class="third-width" color="accent" [matTooltip]="tooltip(attr.key)">
+          <mat-label>Key</mat-label>
+          <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
+            appendTo=".ng-select-anchor" [addTag]="addAttribute()" [disabled]="isDisabled(attr.key)">
+            @for (a of knownAttributes; track a) {
+              <mtx-option [value]="a.key" [disabled]="isDisabled(a.key)">{{a.label || a.key}}</mtx-option>
+            }
+          </mtx-select>
+          <mat-error senergyError label="Key"></mat-error>
+        </mat-form-field>
+        =
+        <mat-form-field appearance="outline" class="third-width" color="accent">
+          <mat-label>Value</mat-label>
+          <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}">
+          <mat-error senergyError label="Value"></mat-error>
+        </mat-form-field>
+        @if (!isDisabled(attr.key)) {
+          <button mat-icon-button color="warn" (click)="removeAttr(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        }
+        @if (isDisabled(attr.key)) {
+          <span style="width: 48px"></span>
+        }
+      </div>
+    }
+    <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()">Save</button>
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="save()">Save</button>
 </mat-dialog-actions>

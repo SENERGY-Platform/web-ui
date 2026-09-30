@@ -17,17 +17,19 @@
 <h2 mat-dialog-title>Edit Device Total Downtime</h2>
 
 <mat-dialog-content>
-    <div fxLayout="column">
-       <mat-form-field color="accent" appearance="outline" *ngIf="userHasUpdateNameAuthorization">
-            <mat-label>Widget Name</mat-label>
-            <input matInput placeholder="Name" [(ngModel)]="widget.name" required>
-		   	<mat-error senergyError label="Widget Name"></mat-error>
-        </mat-form-field>
-    </div>
+  <div fxLayout="column">
+    @if (userHasUpdateNameAuthorization) {
+      <mat-form-field color="accent" appearance="outline">
+        <mat-label>Widget Name</mat-label>
+        <input matInput placeholder="Name" [(ngModel)]="widget.name" required>
+        <mat-error senergyError label="Widget Name"></mat-error>
+      </mat-form-field>
+    }
+  </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()">Save</button>
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="save()">Save</button>
 </mat-dialog-actions>
 

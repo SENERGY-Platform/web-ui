@@ -17,39 +17,48 @@
 <mat-card appearance="outlined">
   <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
   <mat-card-content id="widget-content">
-    <div *ngIf="!configured" fxFill fxLayout="column" fxLayoutAlign="center center">
-      <div>Please configure widget!</div>
-    </div>
+    @if (!configured) {
+      <div fxFill fxLayout="column" fxLayoutAlign="center center">
+        <div>Please configure widget!</div>
+      </div>
+    }
 
-    <div *ngIf="configured  && !ready">
-      <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
-    </div>
+    @if (configured  && !ready) {
+      <div>
+        <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
+      </div>
+    }
 
-    <div *ngIf="configured  && ready && error === true">
-      <h2>An error occured</h2>
-    </div>
+    @if (configured  && ready && error === true) {
+      <div>
+        <h2>An error occured</h2>
+      </div>
+    }
 
-    <div *ngIf="configured  && ready && error === false && operatorIsInitPhase === true"  fxFill fxLayout="row" fxLayoutAlign="center center">
-      <p>{{initialPhaseMsg}}</p>
-    </div>
+    @if (configured  && ready && error === false && operatorIsInitPhase === true) {
+      <div  fxFill fxLayout="row" fxLayoutAlign="center center">
+        <p>{{initialPhaseMsg}}</p>
+      </div>
+    }
 
-    <div *ngIf="configured  && ready && error === false && operatorIsInitPhase === false">
-      <p>{{message}}: <b>{{timeWindow}}</b></p>
-
-      <div fxLayoutAlign="center center" >
+    @if (configured  && ready && error === false && operatorIsInitPhase === false) {
+      <div>
+        <p>{{message}}: <b>{{timeWindow}}</b></p>
+        <div fxLayoutAlign="center center" >
           <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!" [colors]="chartData.colors!"
             [series]="chartData.series!" [chart]="chartData.chart!" [plotOptions]="chartData.plotOptions!"
             [xaxis]="chartData.xaxis!" [yaxis]="chartData.yaxis!" [annotations]="chartData.annotations!"
             [markers]="chartData.markers!">
           </apx-chart>
+        </div>
       </div>
-    </div>
+    }
   </mat-card-content>
   <div>
     <senergy-widget-footer [widgetHasUpdateableProperties]="true"
       [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
       [userHasDeleteAuthorization]="userHasDeleteAuthorization"
       [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
-      [widget]="widget" (editEvent)="edit()" [optionZoom]="true" ></senergy-widget-footer>
+    [widget]="widget" (editEvent)="edit()" [optionZoom]="true" ></senergy-widget-footer>
   </div>
 </mat-card>

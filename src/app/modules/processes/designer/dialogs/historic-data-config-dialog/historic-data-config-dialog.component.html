@@ -25,9 +25,11 @@
       <mat-label>Action</mat-label>
       <mtx-select placeholder="Select Action" [(ngModel)]="config.analysisAction" name="action"
         appendTo=".ng-select-anchor">
-        <mtx-option *ngFor="let action of availableActions" [value]="action.id">
-          {{action.name}}
-        </mtx-option>
+        @for (action of availableActions; track action) {
+          <mtx-option [value]="action.id">
+            {{action.name}}
+          </mtx-option>
+        }
       </mtx-select>
       <mat-error senergyError label="Action"></mat-error>
     </mat-form-field>
@@ -44,9 +46,11 @@
     <mat-form-field appearance="outline" color="accent" class="form-field">
       <mat-label>Unit</mat-label>
       <mtx-select [(ngModel)]="config.interval.type" name="unit" appendTo=".ng-select-anchor">
-        <mtx-option *ngFor="let time of times" [value]="time.id">
-          {{time.name}}
-        </mtx-option>
+        @for (time of times; track time) {
+          <mtx-option [value]="time.id">
+            {{time.name}}
+          </mtx-option>
+        }
       </mtx-select>
       <mat-error senergyError label="Unit"></mat-error>
     </mat-form-field>

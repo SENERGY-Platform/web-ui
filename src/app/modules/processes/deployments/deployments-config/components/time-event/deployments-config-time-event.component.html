@@ -13,68 +13,76 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="deployments-config-time-event-container" [formGroup]="time_event" *ngIf="time_event.value.type === 'timeCycle'">
+@if (time_event.value.type === 'timeCycle') {
+  <div class="deployments-config-time-event-container" [formGroup]="time_event">
     <mat-form-field appearance="outline" class="full-width" color="accent">
-        <mat-label>Cron</mat-label>
-        <input matInput formControlName="time">
-        <mat-error senergyError label="Cron"></mat-error>
+      <mat-label>Cron</mat-label>
+      <input matInput formControlName="time">
+      <mat-error senergyError label="Cron"></mat-error>
     </mat-form-field>
-</div>
-<div class="deployments-config-time-event-container" [formGroup]="time_event" *ngIf="time_event.value.type === 'timeDate'">
+  </div>
+}
+@if (time_event.value.type === 'timeDate') {
+  <div class="deployments-config-time-event-container" [formGroup]="time_event">
     <mat-form-field appearance="outline" class="full-width" color="accent">
-        <mat-label>Date-Timestamp</mat-label>
-        <input matInput placeholder="ISO 8601 Date-Timestam" formControlName="time">
-        <mat-error senergyError label="Date-Timestamp"></mat-error>
+      <mat-label>Date-Timestamp</mat-label>
+      <input matInput placeholder="ISO 8601 Date-Timestam" formControlName="time">
+      <mat-error senergyError label="Date-Timestamp"></mat-error>
     </mat-form-field>
-</div>
-<div class="deployments-config-time-event-container" [formGroup]="time_event" *ngIf="time_event.value.type === 'timeDuration'">
-    <mat-error *ngIf="time_event.hasError('durationLessThan5Seconds')">
+  </div>
+}
+@if (time_event.value.type === 'timeDuration') {
+  <div class="deployments-config-time-event-container" [formGroup]="time_event">
+    @if (time_event.hasError('durationLessThan5Seconds')) {
+      <mat-error>
         Please enter a valid time-event duration which is at least 5 seconds!
-    </mat-error>
+      </mat-error>
+    }
     <table class="full-width" formGroupName="durationUnits" (change)="changeDuration()" >
-        <tr>
-            <td>
-                <mat-form-field appearance="outline" class="full-width" color="accent">
-                    <mat-label>Years</mat-label>
-                    <input type="number" matInput formControlName="years">
-                    <mat-error senergyError label="Years"></mat-error>
-                </mat-form-field>
-            </td>
-            <td>
-                <mat-form-field appearance="outline" class="full-width" color="accent">
-                    <mat-label>Months</mat-label>
-                    <input type="number" matInput formControlName="months">
-                    <mat-error senergyError label="Months"></mat-error>
-                </mat-form-field>
-            </td>
-            <td>
-                <mat-form-field appearance="outline" class="full-width" color="accent">
-                    <mat-label>Days</mat-label>
-                    <input type="number" matInput formControlName="days">
-                    <mat-error senergyError label="Days"></mat-error>
-                </mat-form-field>
-            </td>
-            <td>
-                <mat-form-field appearance="outline" class="full-width" color="accent">
-                    <mat-label>Hours</mat-label>
-                    <input type="number" matInput formControlName="hours">
-                    <mat-error senergyError label="Hours"></mat-error>
-                </mat-form-field>
-            </td>
-            <td>
-                <mat-form-field appearance="outline" class="full-width" color="accent">
-                    <mat-label>Minutes</mat-label>
-                    <input type="number" matInput formControlName="minutes">
-                    <mat-error senergyError label="Minutes"></mat-error>
-                </mat-form-field>
-            </td>
-            <td>
-                <mat-form-field appearance="outline" class="full-width" color="accent">
-                    <mat-label>Seconds</mat-label>
-                    <input type="number" matInput formControlName="seconds">
-                    <mat-error senergyError label="Seconds"></mat-error>
-                </mat-form-field>
-            </td>
-        </tr>
+      <tr>
+        <td>
+          <mat-form-field appearance="outline" class="full-width" color="accent">
+            <mat-label>Years</mat-label>
+            <input type="number" matInput formControlName="years">
+            <mat-error senergyError label="Years"></mat-error>
+          </mat-form-field>
+        </td>
+        <td>
+          <mat-form-field appearance="outline" class="full-width" color="accent">
+            <mat-label>Months</mat-label>
+            <input type="number" matInput formControlName="months">
+            <mat-error senergyError label="Months"></mat-error>
+          </mat-form-field>
+        </td>
+        <td>
+          <mat-form-field appearance="outline" class="full-width" color="accent">
+            <mat-label>Days</mat-label>
+            <input type="number" matInput formControlName="days">
+            <mat-error senergyError label="Days"></mat-error>
+          </mat-form-field>
+        </td>
+        <td>
+          <mat-form-field appearance="outline" class="full-width" color="accent">
+            <mat-label>Hours</mat-label>
+            <input type="number" matInput formControlName="hours">
+            <mat-error senergyError label="Hours"></mat-error>
+          </mat-form-field>
+        </td>
+        <td>
+          <mat-form-field appearance="outline" class="full-width" color="accent">
+            <mat-label>Minutes</mat-label>
+            <input type="number" matInput formControlName="minutes">
+            <mat-error senergyError label="Minutes"></mat-error>
+          </mat-form-field>
+        </td>
+        <td>
+          <mat-form-field appearance="outline" class="full-width" color="accent">
+            <mat-label>Seconds</mat-label>
+            <input type="number" matInput formControlName="seconds">
+            <mat-error senergyError label="Seconds"></mat-error>
+          </mat-form-field>
+        </td>
+      </tr>
     </table>
-</div>
+  </div>
+}

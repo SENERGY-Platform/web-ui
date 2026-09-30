@@ -14,47 +14,63 @@
   ~ limitations under the License.
   -->
 <div [formGroup]="form" fxLayout="column">
-    <div class="object-header">
-        <div class="object-path">{{node.path}}</div>
-        <div class="object-type">{{node.data.valueType}}</div>
-    </div>
+  <div class="object-header">
+    <div class="object-path">{{node.path}}</div>
+    <div class="object-type">{{node.data.valueType}}</div>
+  </div>
 
-    <mat-button-toggle-group *ngIf="supportsQuery" formControlName="inputType" class="input-type"
-        aria-label="Input Type">
-        <mat-button-toggle *ngFor="let type of inputTypes" [value]="type.value">{{type.label}}</mat-button-toggle>
+  @if (supportsQuery) {
+    <mat-button-toggle-group formControlName="inputType" class="input-type"
+      aria-label="Input Type">
+      @for (type of inputTypes; track type) {
+        <mat-button-toggle [value]="type.value">{{type.label}}</mat-button-toggle>
+      }
     </mat-button-toggle-group>
+  }
 
-    <div *ngIf="inputType === 'value'" fxLayout="column">
-        <mat-form-field *ngIf="hasValueInput" fxFlex color="accent" appearance="outline">
-            <mat-label>{{ node.key }}</mat-label>
-            <input matInput formControlName="value">
-            <mat-error senergyError label="{{ node.key }}"></mat-error>
+  @if (inputType === 'value') {
+    <div fxLayout="column">
+      @if (hasValueInput) {
+        <mat-form-field fxFlex color="accent" appearance="outline">
+          <mat-label>{{ node.key }}</mat-label>
+          <input matInput formControlName="value">
+          <mat-error senergyError label="{{ node.key }}"></mat-error>
         </mat-form-field>
-
-        <div *ngIf="isContainer" class="children">
-            <div class="children-title">{{node.children.length}} {{node.data.fields ? 'fields' : 'items'}}</div>
-            <button *ngFor="let child of node.children" class="child-row" (click)="select(child)">
-                <span class="child-key">{{child.key}}</span>
-                <span class="child-type">{{childInputType(child)}}</span>
+      }
+      @if (isContainer) {
+        <div class="children">
+          <div class="children-title">{{node.children.length}} {{node.data.fields ? 'fields' : 'items'}}</div>
+          @for (child of node.children; track child) {
+            <button class="child-row" (click)="select(child)">
+              <span class="child-key">{{child.key}}</span>
+              <span class="child-type">{{childInputType(child)}}</span>
             </button>
+          }
         </div>
-
-        <div *ngIf="!hasValueInput && !isContainer" class="empty-hint">
-            This value type is filled by the report engine and has no input.
+      }
+      @if (!hasValueInput && !isContainer) {
+        <div class="empty-hint">
+          This value type is filled by the report engine and has no input.
         </div>
+      }
     </div>
+  }
 
-    <senergy-reporting-query-editor *ngIf="inputType === 'query' && queryForm !== undefined" [form]="queryForm!"
-        [allDevices]="allDevices" [allDeviceGroups]="allDeviceGroups" [valueType]="node.data.valueType">
+  @if (inputType === 'query' && queryForm !== undefined) {
+    <senergy-reporting-query-editor [form]="queryForm!"
+      [allDevices]="allDevices" [allDeviceGroups]="allDeviceGroups" [valueType]="node.data.valueType">
     </senergy-reporting-query-editor>
+  }
 
-    <div *ngIf="inputType === 'devices'" formGroupName="deviceQuery" fxLayout="column">
-        <mat-form-field fxFill color="accent" appearance="outline">
-            <mat-label>Last Days</mat-label>
-            <mtx-select formControlName="last" placeholder="Choose or write yourself"
-                [addTag]="addDeviceQueryLastValue()" [items]="deviceQueryLastValues"
-                appendTo=".ng-select-anchor"></mtx-select>
-            <mat-error senergyError label="Last Days"></mat-error>
-        </mat-form-field>
+  @if (inputType === 'devices') {
+    <div formGroupName="deviceQuery" fxLayout="column">
+      <mat-form-field fxFill color="accent" appearance="outline">
+        <mat-label>Last Days</mat-label>
+        <mtx-select formControlName="last" placeholder="Choose or write yourself"
+          [addTag]="addDeviceQueryLastValue()" [items]="deviceQueryLastValues"
+        appendTo=".ng-select-anchor"></mtx-select>
+        <mat-error senergyError label="Last Days"></mat-error>
+      </mat-form-field>
     </div>
+  }
 </div>

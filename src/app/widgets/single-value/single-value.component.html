@@ -15,49 +15,69 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"></senergy-widget-header>
-    <mat-card-content class="content-size drag-handler">
-        <div *ngIf="!configured" fxFill fxLayout="row" fxLayoutAlign="center center">
-            Please configure widget!
-        </div>
-        <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
-        <senergy-fit-text *ngIf="configured && ready && error" [txt]="'Problem fetching data! Check config'">
-        </senergy-fit-text>
-        <div class="content-box" *ngIf="configured && ready && !error && zoom" fxLayout="row"
-             [@animate]="{value: animationState, params: {marginLeft: marginLeft}}">
-            <div *ngFor="let sv of svList; let i = index" fxLayout="column"
-                 [ngClass]="{'side-value': i !== svListIndex}"
-                 [class]="timestampAgeClass"
-                 fxLayoutAlign="center center" (wheel)="wheel($event)">
-                <senergy-single-value-value [color]="highlightColor" *ngIf="zoom" [sv]="sv" [widget]="widget"></senergy-single-value-value>
-                <span class="center-text">{{sv.date | date:'medium'}}</span>
-            </div>
-        </div>
+  <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"></senergy-widget-header>
+  <mat-card-content class="content-size drag-handler">
+    @if (!configured) {
+      <div fxFill fxLayout="row" fxLayoutAlign="center center">
+        Please configure widget!
+      </div>
+    }
+    <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
+    @if (configured && ready && error) {
+      <senergy-fit-text [txt]="'Problem fetching data! Check config'">
+      </senergy-fit-text>
+    }
+    @if (configured && ready && !error && zoom) {
+      <div class="content-box" fxLayout="row"
+        [@animate]="{value: animationState, params: {marginLeft: marginLeft}}">
+        @for (sv of svList; track sv; let i = $index) {
+          <div fxLayout="column"
+            [ngClass]="{'side-value': i !== svListIndex}"
+            [class]="timestampAgeClass"
+            fxLayoutAlign="center center" (wheel)="wheel($event)">
+            @if (zoom) {
+              <senergy-single-value-value [color]="highlightColor" [sv]="sv" [widget]="widget"></senergy-single-value-value>
+            }
+            <span class="center-text">{{sv.date | date:'medium'}}</span>
+          </div>
+        }
+      </div>
+    }
 
-        <div class="content-box" *ngIf="configured && ready && !zoom">
-            <senergy-single-value-value [color]="highlightColor" [sv]="sv" [widget]="widget"></senergy-single-value-value>
-            <div *ngIf="showTimestamp" id="date-container" [class]="timestampAgeClass">{{this.sv?.date | date:"short" }}</div>
-        </div>
+    @if (configured && ready && !zoom) {
+      <div class="content-box">
+        <senergy-single-value-value [color]="highlightColor" [sv]="sv" [widget]="widget"></senergy-single-value-value>
+        @if (showTimestamp) {
+          <div id="date-container" [class]="timestampAgeClass">{{this.sv?.date | date:"short" }}</div>
+        }
+      </div>
+    }
 
-        <div *ngIf="zoom && svListIndex > 0" class="content-box arrow-left">
-            <button mat-icon-button (click)="left()">
-                <mat-icon>arrow_circle_left</mat-icon>
-            </button>
-        </div>
-        <div *ngIf="zoom && svListIndex < svList.length - 1" class="content-box arrow-right">
-            <button mat-icon-button (click)="right()">
-                <mat-icon>arrow_circle_right</mat-icon>
-            </button>
-        </div>
-        <div *ngIf="zoom" class="datepick">
-            <mat-form-field appearance="outline" fxFlex color="accent">
-                <mat-label>Date</mat-label>
-                <input placeholder="Select a Date" type="datetime-local" matInput [formControl]="dateControl">
-                <mat-error senergyError label="Date"></mat-error>
-            </mat-form-field>
-        </div>
-    </mat-card-content>
-    <senergy-widget-footer [widgetHasUpdateableProperties]="true" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()" [optionZoom]="zoomEnabled()"  [refreshing]="refreshing"
-                           [zoom]="zoom" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"></senergy-widget-footer>
+    @if (zoom && svListIndex > 0) {
+      <div class="content-box arrow-left">
+        <button mat-icon-button (click)="left()">
+          <mat-icon>arrow_circle_left</mat-icon>
+        </button>
+      </div>
+    }
+    @if (zoom && svListIndex < svList.length - 1) {
+      <div class="content-box arrow-right">
+        <button mat-icon-button (click)="right()">
+          <mat-icon>arrow_circle_right</mat-icon>
+        </button>
+      </div>
+    }
+    @if (zoom) {
+      <div class="datepick">
+        <mat-form-field appearance="outline" fxFlex color="accent">
+          <mat-label>Date</mat-label>
+          <input placeholder="Select a Date" type="datetime-local" matInput [formControl]="dateControl">
+          <mat-error senergyError label="Date"></mat-error>
+        </mat-form-field>
+      </div>
+    }
+  </mat-card-content>
+  <senergy-widget-footer [widgetHasUpdateableProperties]="true" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()" [optionZoom]="zoomEnabled()"  [refreshing]="refreshing"
+  [zoom]="zoom" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"></senergy-widget-footer>
 </mat-card>
 

@@ -15,104 +15,112 @@
   -->
 
 <div class="characteristics-container layout-margin">
-    <span class="search-button-container">
-        <senergy-searchbar></senergy-searchbar>
-    </span>
+  <span class="search-button-container">
+    <senergy-searchbar></senergy-searchbar>
+  </span>
 
-    <div *ngIf="dataSource.data.length === 0 && ready">No characteristic found.</div>
-    <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
+  @if (dataSource.data.length === 0 && ready) {
+    <div>No characteristic found.</div>
+  }
+  <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 
-    <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
-        <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
-            <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)" [matSortActive]="sortBy" [matSortDirection]="sortDirection">
-                <ng-container matColumnDef="select">
-                    <th mat-header-cell *matHeaderCellDef class="button-column">
-                        <mat-checkbox (change)="$event ? masterToggle() : null"
-                            [checked]="selection.hasValue() && isAllSelected()"
-                            [indeterminate]="selection.hasValue() && !isAllSelected()">
-                        </mat-checkbox>
-                    </th>
-                    <td mat-cell *matCellDef="let row">
-                        <mat-checkbox (click)="$event.stopPropagation()"
-                            (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
-                        </mat-checkbox>
-                    </td>
-                </ng-container>
+  <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
+    <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
+      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)" [matSortActive]="sortBy" [matSortDirection]="sortDirection">
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef class="button-column">
+            <mat-checkbox (change)="$event ? masterToggle() : null"
+              [checked]="selection.hasValue() && isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()">
+            </mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="$event.stopPropagation()"
+              (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
+            </mat-checkbox>
+          </td>
+        </ng-container>
 
-                <ng-container matColumnDef="name">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
-                    <td mat-cell *matCellDef="let characteristic">
-                        {{characteristic.name}}
-                    </td>
-                </ng-container>
+        <ng-container matColumnDef="name">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let characteristic">
+            {{characteristic.name}}
+          </td>
+        </ng-container>
 
-                <ng-container matColumnDef="useCount" *ngIf="userHasUsedInAuthorization">
-                    <th mat-header-cell disableClear *matHeaderCellDef class="button-column">Used In</th>
-                    <td mat-cell *matCellDef="let characteristic">
-                        <button (click)="showUsedInDialog(usedIn?.get(characteristic.id))" class="linkbutton" matTooltip="uses of characteristic in device-types">
-                            {{usedIn?.get(characteristic.id)?.count || 0}}
-                        </button>
-                    </td>
-                </ng-container>
+        @if (userHasUsedInAuthorization) {
+          <ng-container matColumnDef="useCount">
+            <th mat-header-cell disableClear *matHeaderCellDef class="button-column">Used In</th>
+            <td mat-cell *matCellDef="let characteristic">
+              <button (click)="showUsedInDialog(usedIn?.get(characteristic.id))" class="linkbutton" matTooltip="uses of characteristic in device-types">
+                {{usedIn?.get(characteristic.id)?.count || 0}}
+              </button>
+            </td>
+          </ng-container>
+        }
 
-                <ng-container matColumnDef="info">
-                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Info</th>
-                    <td mat-cell *matCellDef="let characteristic">
-                        <button mat-icon-button color="accent" (click)="showCharacteristic(characteristic)"
-                            matTooltip="Info">
-                            <mat-icon>info</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
+        <ng-container matColumnDef="info">
+          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Info</th>
+          <td mat-cell *matCellDef="let characteristic">
+            <button mat-icon-button color="accent" (click)="showCharacteristic(characteristic)"
+              matTooltip="Info">
+              <mat-icon>info</mat-icon>
+            </button>
+          </td>
+        </ng-container>
 
-                <ng-container matColumnDef="edit" *ngIf="userHasUpdateAuthorization">
-                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
-                    <td mat-cell *matCellDef="let characteristic">
-                        <button mat-icon-button color="accent" (click)="editCharacteristic(characteristic)"
-                            [disabled]="!userHasUpdateAuthorization" matTooltip="Edit">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
+        @if (userHasUpdateAuthorization) {
+          <ng-container matColumnDef="edit">
+            <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
+            <td mat-cell *matCellDef="let characteristic">
+              <button mat-icon-button color="accent" (click)="editCharacteristic(characteristic)"
+                [disabled]="!userHasUpdateAuthorization" matTooltip="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+        }
 
-                <span *ngIf="userHasDeleteAuthorization">
-                    <ng-container matColumnDef="delete">
-                        <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
-                        <td mat-cell *matCellDef="let characteristic">
-                            <button mat-icon-button color="accent" (click)="deleteCharacteristic(characteristic)"
-                                [disabled]="!userHasDeleteAuthorization" matTooltip="Delete">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
-    
-                    <ng-container matColumnDef="header-delete-all">
-                        <th mat-header-cell *matHeaderCellDef colspan="10">
-                            <div fxLayout="row">
-                                <div fxLayoutAlign="center center">You have
-                                    selected {{selection.selected.length}} items
-                                </div>
-                                <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </div>
-                        </th>
-                    </ng-container>
-    
-                    <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
-                    </tr>
-                </span>
-                
-                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-                <tr mat-row *matRowDef="let m; columns: displayedColumns;"></tr>
-            </table>
-        </div>
+        @if (userHasDeleteAuthorization) {
+          <span>
+            <ng-container matColumnDef="delete">
+              <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
+              <td mat-cell *matCellDef="let characteristic">
+                <button mat-icon-button color="accent" (click)="deleteCharacteristic(characteristic)"
+                  [disabled]="!userHasDeleteAuthorization" matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="header-delete-all">
+              <th mat-header-cell *matHeaderCellDef colspan="10">
+                <div fxLayout="row">
+                  <div fxLayoutAlign="center center">You have
+                    selected {{selection.selected.length}} items
+                  </div>
+                  <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </th>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
+            </tr>
+          </span>
+        }
 
-        <mat-paginator #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-            showFirstLastButtons></mat-paginator>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let m; columns: displayedColumns;"></tr>
+      </table>
     </div>
+
+    <mat-paginator #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+    showFirstLastButtons></mat-paginator>
+  </div>
 </div>
 
-<button *ngIf="userHasCreateAuthorization" mat-fab class="fab" matTooltip="Add new characteristic" (click)="newCharacteristic()">
+@if (userHasCreateAuthorization) {
+  <button mat-fab class="fab" matTooltip="Add new characteristic" (click)="newCharacteristic()">
     <mat-icon>add</mat-icon>
-</button>
+  </button>
+}

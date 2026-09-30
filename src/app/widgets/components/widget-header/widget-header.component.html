@@ -15,31 +15,43 @@
   -->
 
 <mat-card-header class="header-container drag-handler">
-    <mat-card-title [matTooltip]="widget.name">
-        {{widget.name}}
-    </mat-card-title>
-    <div fxFlex></div>
-    <mat-icon *ngIf="warnText !== ''"
-              color="warn"
-              [ngClass]="{'padded-icon': zoom}"
-              matTooltip="{{warnText}}">
-        warning
+  <mat-card-title [matTooltip]="widget.name">
+    {{widget.name}}
+  </mat-card-title>
+  <div fxFlex></div>
+  @if (warnText !== '') {
+    <mat-icon
+      color="warn"
+      [ngClass]="{'padded-icon': zoom}"
+      matTooltip="{{warnText}}">
+      warning
     </mat-icon>
-    <div *ngFor="let icon of optionCustomIcon; let i = index">
-        <button mat-icon-button color="accent" (click)="custom(i)" [disabled]="optionCustomDisabled[i]" [matTooltip]="optionCustomTooltip[i]">
-            <mat-icon>{{icon}}</mat-icon>
-        </button>
+  }
+  @for (icon of optionCustomIcon; track icon; let i = $index) {
+    <div>
+      <button mat-icon-button color="accent" (click)="custom(i)" [disabled]="optionCustomDisabled[i]" [matTooltip]="optionCustomTooltip[i]">
+        <mat-icon>{{icon}}</mat-icon>
+      </button>
     </div>
-    <div *ngIf="zoom">
-        <button mat-icon-button color="accent" (click)="refresh()" matTooltip="Refresh" [disabled]="refreshing">
-            <mat-icon *ngIf="!refreshing">refresh</mat-icon>
-            <mat-icon *ngIf="refreshing">sync</mat-icon>
-            <!--<senergy-widget-spinner [show]="refreshing"></senergy-widget-spinner>-->
-        </button>
+  }
+  @if (zoom) {
+    <div>
+      <button mat-icon-button color="accent" (click)="refresh()" matTooltip="Refresh" [disabled]="refreshing">
+        @if (!refreshing) {
+          <mat-icon>refresh</mat-icon>
+        }
+        @if (refreshing) {
+          <mat-icon>sync</mat-icon>
+        }
+        <!--<senergy-widget-spinner [show]="refreshing"></senergy-widget-spinner>-->
+      </button>
     </div>
-    <div *ngIf="zoom">
-        <button mat-icon-button color="accent" (click)="zoomWidget()" matTooltip="Close">
-            <mat-icon>close</mat-icon>
-        </button>
+  }
+  @if (zoom) {
+    <div>
+      <button mat-icon-button color="accent" (click)="zoomWidget()" matTooltip="Close">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
+  }
 </mat-card-header>

@@ -17,20 +17,22 @@
 <h2 mat-dialog-title>New Environment</h2>
 
 <mat-dialog-content>
-    <mat-form-field appearance="outline" color="accent">
-        <mat-label>Name</mat-label>
-        <input matInput [(ngModel)]="name" required>
-    </mat-form-field>
+  <mat-form-field appearance="outline" color="accent">
+    <mat-label>Name</mat-label>
+    <input matInput [(ngModel)]="name" required>
+  </mat-form-field>
 
-    <mat-form-field appearance="outline" color="accent">
-        <mat-label>Type</mat-label>
-        <mtx-select [(ngModel)]="type" appendTo=".ng-select-anchor" required>
-            <mtx-option *ngFor="let t of types" [value]="t">{{environmentTypeLabel(t)}}</mtx-option>
-        </mtx-select>
-    </mat-form-field>
+  <mat-form-field appearance="outline" color="accent">
+    <mat-label>Type</mat-label>
+    <mtx-select [(ngModel)]="type" appendTo=".ng-select-anchor" required>
+      @for (t of types; track t) {
+        <mtx-option [value]="t">{{environmentTypeLabel(t)}}</mtx-option>
+      }
+    </mtx-select>
+  </mat-form-field>
 </mat-dialog-content>
 
 <mat-dialog-actions style="display: flex; justify-content: end;">
-    <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="create()" [disabled]="!name || !type">Create</button>
+  <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="create()" [disabled]="!name || !type">Create</button>
 </mat-dialog-actions>

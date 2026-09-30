@@ -14,71 +14,91 @@
   ~ limitations under the License.
   -->
 
-<div class="characteristic-input" [ngSwitch]="input">
-
-  <mat-slide-toggle *ngSwitchCase="inputs.Switch" color="accent" [checked]="!!value" [disabled]="disabled"
-    (change)="commitValue($event.checked)">{{label}}</mat-slide-toggle>
-
-  <div *ngSwitchCase="inputs.Slider" class="slider-row">
-    <span class="input-label" *ngIf="label.length > 0">{{label}}</span>
-    <mat-slider [min]="min" [max]="max" [step]="step" [disabled]="disabled" discrete color="accent">
-      <!-- change is the commit of a range input, for the pointer as well as for the arrow keys -->
-      <input matSliderThumb [value]="value" (valueChange)="setValue($event)" (change)="commitValue(value)" />
-    </mat-slider>
-    <span class="input-value">{{value}} {{characteristic?.display_unit}}</span>
-  </div>
-
-  <div *ngSwitchCase="inputs.Buttons" class="buttons-row">
-    <span class="input-label" *ngIf="label.length > 0">{{label}}</span>
-    <button *ngFor="let allowed of allowedValues" mat-stroked-button color="accent" [disabled]="disabled"
-      [ngClass]="{'selected-value': value === allowed}" (click)="commitValue(allowed)">{{allowed}}</button>
-  </div>
-
-  <mat-form-field *ngSwitchCase="inputs.Select" appearance="outline" color="accent" class="full-width"
-    subscriptSizing="dynamic">
-    <mat-label>{{label}}</mat-label>
-    <mat-select [value]="value" [disabled]="disabled" (selectionChange)="commitValue($event.value)">
-      <mat-option *ngFor="let allowed of allowedValues" [value]="allowed">{{allowed}}</mat-option>
-    </mat-select>
-  </mat-form-field>
-
-  <mat-form-field *ngSwitchCase="inputs.Number" appearance="outline" color="accent" class="full-width"
-    subscriptSizing="dynamic">
-    <mat-label>{{label}}</mat-label>
-    <input matInput type="number" [min]="boundMin" [max]="boundMax" [step]="step"
-      [disabled]="disabled" [ngModel]="value" (ngModelChange)="setValue($event)">
-    <span matTextSuffix>{{characteristic?.display_unit}}</span>
-  </mat-form-field>
-
-  <mat-form-field *ngSwitchCase="inputs.Text" appearance="outline" color="accent" class="full-width"
-    subscriptSizing="dynamic">
-    <mat-label>{{label}}</mat-label>
-    <input matInput type="text" [disabled]="disabled" [ngModel]="value" (ngModelChange)="setValue($event)">
-    <span matTextSuffix>{{characteristic?.display_unit}}</span>
-  </mat-form-field>
-
-  <div *ngSwitchCase="inputs.Form" class="nested">
-    <span class="input-label" *ngIf="label.length > 0">{{label}}</span>
-
-    <ng-container *ngIf="isStructure">
-      <senergy-characteristic-input *ngFor="let sub of subCharacteristics" [characteristic]="sub" [label]="sub.name"
-        [disabled]="disabled" [value]="childValue(sub.name)" (valueChange)="setChild(sub.name, $event)"
-        (commit)="commit.emit(value)"></senergy-characteristic-input>
-    </ng-container>
-
-    <ng-container *ngIf="isList">
-      <div *ngFor="let entry of entries; let i = index; trackBy: trackByIndex" class="list-entry">
-        <senergy-characteristic-input [characteristic]="entryCharacteristic" [label]="entryCharacteristic?.name || ''"
-          [disabled]="disabled" [value]="entry" (valueChange)="setEntry(i, $event)"
-          (commit)="commit.emit(value)"></senergy-characteristic-input>
-        <button mat-icon-button color="warn" [disabled]="disabled" (click)="removeEntry(i)" matTooltip="Remove entry">
-          <mat-icon>delete</mat-icon>
-        </button>
+<div class="characteristic-input">
+  @switch (input) {
+    @case (inputs.Switch) {
+      <mat-slide-toggle color="accent" [checked]="!!value" [disabled]="disabled"
+      (change)="commitValue($event.checked)">{{label}}</mat-slide-toggle>
+    }
+    @case (inputs.Slider) {
+      <div class="slider-row">
+        @if (label.length > 0) {
+          <span class="input-label">{{label}}</span>
+        }
+        <mat-slider [min]="min" [max]="max" [step]="step" [disabled]="disabled" discrete color="accent">
+          <!-- change is the commit of a range input, for the pointer as well as for the arrow keys -->
+          <input matSliderThumb [value]="value" (valueChange)="setValue($event)" (change)="commitValue(value)" />
+        </mat-slider>
+        <span class="input-value">{{value}} {{characteristic?.display_unit}}</span>
       </div>
-      <button mat-icon-button color="accent" [disabled]="disabled" (click)="addEntry()" matTooltip="Add entry">
-        <mat-icon>add</mat-icon>
-      </button>
-    </ng-container>
-  </div>
-
+    }
+    @case (inputs.Buttons) {
+      <div class="buttons-row">
+        @if (label.length > 0) {
+          <span class="input-label">{{label}}</span>
+        }
+        @for (allowed of allowedValues; track allowed) {
+          <button mat-stroked-button color="accent" [disabled]="disabled"
+          [ngClass]="{'selected-value': value === allowed}" (click)="commitValue(allowed)">{{allowed}}</button>
+        }
+      </div>
+    }
+    @case (inputs.Select) {
+      <mat-form-field appearance="outline" color="accent" class="full-width"
+        subscriptSizing="dynamic">
+        <mat-label>{{label}}</mat-label>
+        <mat-select [value]="value" [disabled]="disabled" (selectionChange)="commitValue($event.value)">
+          @for (allowed of allowedValues; track allowed) {
+            <mat-option [value]="allowed">{{allowed}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+    @case (inputs.Number) {
+      <mat-form-field appearance="outline" color="accent" class="full-width"
+        subscriptSizing="dynamic">
+        <mat-label>{{label}}</mat-label>
+        <input matInput type="number" [min]="boundMin" [max]="boundMax" [step]="step"
+          [disabled]="disabled" [ngModel]="value" (ngModelChange)="setValue($event)">
+        <span matTextSuffix>{{characteristic?.display_unit}}</span>
+      </mat-form-field>
+    }
+    @case (inputs.Text) {
+      <mat-form-field appearance="outline" color="accent" class="full-width"
+        subscriptSizing="dynamic">
+        <mat-label>{{label}}</mat-label>
+        <input matInput type="text" [disabled]="disabled" [ngModel]="value" (ngModelChange)="setValue($event)">
+        <span matTextSuffix>{{characteristic?.display_unit}}</span>
+      </mat-form-field>
+    }
+    @case (inputs.Form) {
+      <div class="nested">
+        @if (label.length > 0) {
+          <span class="input-label">{{label}}</span>
+        }
+        @if (isStructure) {
+          @for (sub of subCharacteristics; track sub) {
+            <senergy-characteristic-input [characteristic]="sub" [label]="sub.name"
+              [disabled]="disabled" [value]="childValue(sub.name)" (valueChange)="setChild(sub.name, $event)"
+            (commit)="commit.emit(value)"></senergy-characteristic-input>
+          }
+        }
+        @if (isList) {
+          @for (entry of entries; track trackByIndex(i, entry); let i = $index) {
+            <div class="list-entry">
+              <senergy-characteristic-input [characteristic]="entryCharacteristic" [label]="entryCharacteristic?.name || ''"
+                [disabled]="disabled" [value]="entry" (valueChange)="setEntry(i, $event)"
+              (commit)="commit.emit(value)"></senergy-characteristic-input>
+              <button mat-icon-button color="warn" [disabled]="disabled" (click)="removeEntry(i)" matTooltip="Remove entry">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          }
+          <button mat-icon-button color="accent" [disabled]="disabled" (click)="addEntry()" matTooltip="Add entry">
+            <mat-icon>add</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  }
 </div>

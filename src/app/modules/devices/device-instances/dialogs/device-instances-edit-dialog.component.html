@@ -17,73 +17,91 @@
 <h2 mat-dialog-title>{{action}} Device</h2>
 
 <mat-dialog-content>
-    <form class="form">
-        <div class="qr-scan" *ngIf="userHasUpdateAttributesAuthorization && userHasUpdateDisplayNameAuthorization && localIdIsEditable && deviceTypeSupportsQR">
-            <div class="qr-scan-actions">
-                <button mat-stroked-button color="accent" *ngIf="!qrScanInProgress" (click)="startQrScan()" [disabled]="!qrScanSupported">
-                    <mat-icon>photo_camera</mat-icon>
-                    Scan QR Code
+  <form class="form">
+    @if (userHasUpdateAttributesAuthorization && userHasUpdateDisplayNameAuthorization && localIdIsEditable && deviceTypeSupportsQR) {
+      <div class="qr-scan">
+        <div class="qr-scan-actions">
+          @if (!qrScanInProgress) {
+            <button mat-stroked-button color="accent" (click)="startQrScan()" [disabled]="!qrScanSupported">
+              <mat-icon>photo_camera</mat-icon>
+              Scan QR Code
+            </button>
+          }
+          @if (qrScanInProgress) {
+            <button mat-stroked-button color="warn" (click)="stopQrScan()">
+              Stop Scan
+            </button>
+          }
+        </div>
+        <video #qrVideo class="qr-video" [class.hidden]="!qrScanInProgress"></video>
+      </div>
+    }
+
+    @if (userHasUpdateDisplayNameAuthorization) {
+      <div>
+        <mat-form-field appearance="outline" class="full-width" color="accent">
+          <mat-label>Display Name</mat-label>
+          <input cdkFocusInitial matInput [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}">
+          <mat-error senergyError label="Display Name"></mat-error>
+        </mat-form-field>
+      </div>
+    }
+
+    @if (localIdIsEditable) {
+      <div>
+        <mat-form-field appearance="outline" class="full-width" color="accent">
+          <mat-label>Local ID</mat-label>
+          <input matInput [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}"
+            [generic_validator]="isValidLocalIdValidator">
+          <mat-error senergyError label="Local ID"></mat-error>
+        </mat-form-field>
+      </div>
+    }
+
+    @if (userHasUpdateAttributesAuthorization) {
+      <div class="attributes">
+        <div class="divider">
+          Attributes
+          <mat-divider></mat-divider>
+        </div>
+        @for (attr of device.attributes; track attr; let i = $index) {
+          <div class="attribute">
+            @if (attr.key !== nicknameAttributeKey) {
+              <mat-form-field appearance="outline" class="third-width" color="accent">
+                <mat-label>Key</mat-label>
+                <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
+                  [disabled]="!editableAttribute(attr)" [items]="knownAttributes" appendTo=".ng-select-anchor"
+                [addTag]="addAttribute()"></mtx-select>
+                <mat-error senergyError label="Key"></mat-error>
+              </mat-form-field>
+              =
+              <mat-form-field appearance="outline" class="third-width" color="accent">
+                <mat-label>Value</mat-label>
+                <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
+                  [disabled]="!editableAttribute(attr)">
+                <mat-error senergyError label="Value"></mat-error>
+              </mat-form-field>
+              <div [matTooltip]="editableAttribute(attr) ? '' : attr.origin">
+                <button mat-icon-button color="warn" (click)="removeAttr(i)"
+                  [disabled]="!editableAttribute(attr)">
+                  @if (!editableAttribute(attr)) {
+                    <mat-icon>conversion_path</mat-icon>
+                  }
+                  @if (editableAttribute(attr)) {
+                    <mat-icon>delete</mat-icon>
+                  }
                 </button>
-                <button mat-stroked-button color="warn" *ngIf="qrScanInProgress" (click)="stopQrScan()">
-                    Stop Scan
-                </button>
-            </div>
-            <video #qrVideo class="qr-video" [class.hidden]="!qrScanInProgress"></video>
-        </div>
-
-        <div *ngIf="userHasUpdateDisplayNameAuthorization">
-            <mat-form-field appearance="outline" class="full-width" color="accent">
-                <mat-label>Display Name</mat-label>
-                <input cdkFocusInitial matInput [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}">
-                <mat-error senergyError label="Display Name"></mat-error>
-            </mat-form-field>
-        </div>
-
-        <div *ngIf="localIdIsEditable">
-            <mat-form-field appearance="outline" class="full-width" color="accent">
-                <mat-label>Local ID</mat-label>
-                <input matInput [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}"
-                    [generic_validator]="isValidLocalIdValidator">
-                <mat-error senergyError label="Local ID"></mat-error>
-            </mat-form-field>
-        </div>
-
-        <div class="attributes" *ngIf="userHasUpdateAttributesAuthorization">
-            <div class="divider">
-                Attributes
-                <mat-divider></mat-divider>
-            </div>
-            <div *ngFor="let attr of device.attributes; let i = index" class="attribute">
-                <ng-container *ngIf="attr.key !== nicknameAttributeKey">
-                    <mat-form-field appearance="outline" class="third-width" color="accent">
-                        <mat-label>Key</mat-label>
-                        <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
-                            [disabled]="!editableAttribute(attr)" [items]="knownAttributes" appendTo=".ng-select-anchor"
-                            [addTag]="addAttribute()"></mtx-select>
-                        <mat-error senergyError label="Key"></mat-error>
-                    </mat-form-field>
-                    =
-                    <mat-form-field appearance="outline" class="third-width" color="accent">
-                        <mat-label>Value</mat-label>
-                        <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
-                            [disabled]="!editableAttribute(attr)">
-                        <mat-error senergyError label="Value"></mat-error>
-                    </mat-form-field>
-                    <div [matTooltip]="editableAttribute(attr) ? '' : attr.origin">
-                        <button mat-icon-button color="warn" (click)="removeAttr(i)"
-                            [disabled]="!editableAttribute(attr)">
-                            <mat-icon *ngIf="!editableAttribute(attr)">conversion_path</mat-icon>
-                            <mat-icon *ngIf="editableAttribute(attr)">delete</mat-icon>
-                        </button>
-                    </div>
-                </ng-container>
-            </div>
-            <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
-        </div>
-    </form>
+              </div>
+            }
+          </div>
+        }
+        <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+      </div>
+    }
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()" [disabled]="!isValid()">Save</button>
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="save()" [disabled]="!isValid()">Save</button>
 </mat-dialog-actions>

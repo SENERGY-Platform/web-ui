@@ -14,143 +14,151 @@
   ~ limitations under the License.
   -->
 <div class="hubs-container layout-margin">
-    <span class="search-button-container">
-        <senergy-searchbar></senergy-searchbar>
-    </span>
+  <span class="search-button-container">
+    <senergy-searchbar></senergy-searchbar>
+  </span>
 
-    <senergy-spinner [show]="!ready"></senergy-spinner>
-    <div *ngIf="ready && dataSource.data.length === 0">No network found.</div>
+  <senergy-spinner [show]="!ready"></senergy-spinner>
+  @if (ready && dataSource.data.length === 0) {
+    <div>No network found.</div>
+  }
 
-    <div [hidden]="!ready || (dataSource.data.length === 0 && ready)" class="mat-elevation-z1">
-        <div class="table-container">
-            <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)" [matSortActive]="sortBy" [matSortDirection]="sortDirection">
-                <ng-container matColumnDef="select">
-                    <th mat-header-cell *matHeaderCellDef class="button-column">
-                        <mat-checkbox (change)="$event ? masterToggle() : null"
-                            [checked]="selection.hasValue() && isAllSelected()"
-                            [indeterminate]="selection.hasValue() && !isAllSelected()">
-                        </mat-checkbox>
-                    </th>
-                    <td mat-cell *matCellDef="let row">
-                        <mat-checkbox (click)="$event.stopPropagation()"
-                            (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
-                        </mat-checkbox>
-                    </td>
-                </ng-container>
+  <div [hidden]="!ready || (dataSource.data.length === 0 && ready)" class="mat-elevation-z1">
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)" [matSortActive]="sortBy" [matSortDirection]="sortDirection">
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef class="button-column">
+            <mat-checkbox (change)="$event ? masterToggle() : null"
+              [checked]="selection.hasValue() && isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()">
+            </mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="$event.stopPropagation()"
+              (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
+            </mat-checkbox>
+          </td>
+        </ng-container>
 
-                <ng-container matColumnDef="name">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
-                    <td mat-cell *matCellDef="let network">
-                        {{network.name}}
-                    </td>
-                </ng-container>
-                <ng-container matColumnDef="number_devices">
-                    <th mat-header-cell *matHeaderCellDef disableClear>Number of Devices</th>
-                    <td mat-cell *matCellDef="let network">
-                        {{network.device_local_ids?.length || 0}}
-                    </td>
-                </ng-container>
-                <ng-container matColumnDef="connection">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Connection
-                    </th>
-                    <td mat-cell *matCellDef="let network">
-                        <senergy-state-icon [state]="network?.connection_state"></senergy-state-icon>
-                    </td>
-                </ng-container>
-                <ng-container matColumnDef="shared">
-                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Shared</th>
-                    <td mat-cell *matCellDef="let network">
-                        <mat-icon matTooltip="Network is shared by {{userIdToName[network.creator]}}" *ngIf="network.shared" class="color-sidenav info-icon">
-                            share
-                        </mat-icon>
-                    </td>
-                </ng-container>
-                <ng-container matColumnDef="show">
-                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Show</th>
-                    <td mat-cell *matCellDef="let network">
-                        <button mat-icon-button color="accent" (click)="showDevices(network)" matTooltip="Show devices">
-                            <mat-icon>important_devices</mat-icon>
-                        </button>
+        <ng-container matColumnDef="name">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let network">
+            {{network.name}}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="number_devices">
+          <th mat-header-cell *matHeaderCellDef disableClear>Number of Devices</th>
+          <td mat-cell *matCellDef="let network">
+            {{network.device_local_ids?.length || 0}}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="connection">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Connection
+          </th>
+          <td mat-cell *matCellDef="let network">
+            <senergy-state-icon [state]="network?.connection_state"></senergy-state-icon>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="shared">
+          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Shared</th>
+          <td mat-cell *matCellDef="let network">
+            @if (network.shared) {
+              <mat-icon matTooltip="Network is shared by {{userIdToName[network.creator]}}" class="color-sidenav info-icon">
+                share
+              </mat-icon>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="show">
+          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Show</th>
+          <td mat-cell *matCellDef="let network">
+            <button mat-icon-button color="accent" (click)="showDevices(network)" matTooltip="Show devices">
+              <mat-icon>important_devices</mat-icon>
+            </button>
 
-                    </td>
-                </ng-container>
+          </td>
+        </ng-container>
 
-                <ng-container matColumnDef="edit" *ngIf="userHasUpdateAuthorization">
-                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
-                    <td mat-cell *matCellDef="let network">
-                        <button mat-icon-button color="accent" (click)="edit(network)" matTooltip="Edit" [disabled]="!network.permissions.write">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
+        @if (userHasUpdateAuthorization) {
+          <ng-container matColumnDef="edit">
+            <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
+            <td mat-cell *matCellDef="let network">
+              <button mat-icon-button color="accent" (click)="edit(network)" matTooltip="Edit" [disabled]="!network.permissions.write">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+        }
 
-                <ng-container matColumnDef="share">
-                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
-                    <td mat-cell *matCellDef="let network">
-                        <button mat-icon-button color="accent" matTooltip="Share" (click)="shareNetwork(network)" [disabled]="!network.permissions.administrate">
-                            <mat-icon>share</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
+        <ng-container matColumnDef="share">
+          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
+          <td mat-cell *matCellDef="let network">
+            <button mat-icon-button color="accent" matTooltip="Share" (click)="shareNetwork(network)" [disabled]="!network.permissions.administrate">
+              <mat-icon>share</mat-icon>
+            </button>
+          </td>
+        </ng-container>
 
-                <ng-container matColumnDef="certs">
-                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Certs</th>
-                    <td mat-cell *matCellDef="let network">
-                        <button mat-icon-button color="accent" matTooltip="Certs" (click)="getLoraCerts(network)" [disabled]="getLoraCertsDisabled(network)">
-                            <mat-icon>license</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
+        <ng-container matColumnDef="certs">
+          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Certs</th>
+          <td mat-cell *matCellDef="let network">
+            <button mat-icon-button color="accent" matTooltip="Certs" (click)="getLoraCerts(network)" [disabled]="getLoraCertsDisabled(network)">
+              <mat-icon>license</mat-icon>
+            </button>
+          </td>
+        </ng-container>
 
-                <ng-container matColumnDef="clear">
-                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Clear</th>
-                    <td mat-cell *matCellDef="let network">
-                        <button mat-icon-button color="accent" (click)="clear(network)" matTooltip="Refresh" [disabled]="!network.permissions.write">
-                            <mat-icon>refresh</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
+        <ng-container matColumnDef="clear">
+          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Clear</th>
+          <td mat-cell *matCellDef="let network">
+            <button mat-icon-button color="accent" (click)="clear(network)" matTooltip="Refresh" [disabled]="!network.permissions.write">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </td>
+        </ng-container>
 
-                <span *ngIf="userHasDeleteAuthorization">
-                    <ng-container matColumnDef="delete">
-                        <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
-                        <td mat-cell *matCellDef="let network">
-                            <button mat-icon-button color="accent" (click)="delete(network)" matTooltip="Delete" [disabled]="!network.permissions.administrate">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
-    
-                    <ng-container matColumnDef="header-delete-all">
-                        <th mat-header-cell *matHeaderCellDef colspan="10">
-                            <div fxLayout="row">
-                                <div fxLayoutAlign="center center">You have
-                                    selected {{selection.selected.length}} items
-                                </div>
-                                <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </div>
-                        </th>
-                    </ng-container>
-    
-                    <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
-                    </tr>
-                </span>
-               
-                <tr mat-header-row
-                    *matHeaderRowDef="displayedColumns; sticky: true">
-                </tr>
-                <tr mat-row
-                    *matRowDef="let m; columns: displayedColumns;">
-                </tr>
-            </table>
-        </div>
+        @if (userHasDeleteAuthorization) {
+          <span>
+            <ng-container matColumnDef="delete">
+              <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
+              <td mat-cell *matCellDef="let network">
+                <button mat-icon-button color="accent" (click)="delete(network)" matTooltip="Delete" [disabled]="!network.permissions.administrate">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="header-delete-all">
+              <th mat-header-cell *matHeaderCellDef colspan="10">
+                <div fxLayout="row">
+                  <div fxLayoutAlign="center center">You have
+                    selected {{selection.selected.length}} items
+                  </div>
+                  <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </th>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
+            </tr>
+          </span>
+        }
 
-        <mat-paginator #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-            showFirstLastButtons></mat-paginator>
+        <tr mat-header-row
+          *matHeaderRowDef="displayedColumns; sticky: true">
+        </tr>
+        <tr mat-row
+          *matRowDef="let m; columns: displayedColumns;">
+        </tr>
+      </table>
     </div>
+
+    <mat-paginator #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+    showFirstLastButtons></mat-paginator>
+  </div>
 </div>
-<button *ngIf="userHasCreateAuthorization" mat-fab class="fab" matTooltip="Add new Network" (click)="edit(undefined)">
+@if (userHasCreateAuthorization) {
+  <button mat-fab class="fab" matTooltip="Add new Network" (click)="edit(undefined)">
     <mat-icon>add</mat-icon>
-</button>
+  </button>
+}

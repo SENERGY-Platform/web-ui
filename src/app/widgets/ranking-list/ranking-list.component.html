@@ -15,19 +15,23 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content class="content-size drag-handler">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready" fxLayout="column" fxFlexFill>
-            <mat-list fxFlexFill>
-                <mat-list-item class="item-height" *ngFor="let ranking of rankings">
-                    <div matListItemIcon>{{ranking.rank}}</div>
-                    <div matListItemTitle>{{ranking.header}}</div>
-                    <div matListItemLine>{{ranking.savings + ' / ' + ranking.recommendation}}</div>
-                </mat-list-item>
-            </mat-list>
-        </div>
-    </mat-card-content>
-    <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+  <senergy-widget-header [widget]="widget"></senergy-widget-header>
+  <mat-card-content class="content-size drag-handler">
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    @if (ready) {
+      <div fxLayout="column" fxFlexFill>
+        <mat-list fxFlexFill>
+          @for (ranking of rankings; track ranking) {
+            <mat-list-item class="item-height">
+              <div matListItemIcon>{{ranking.rank}}</div>
+              <div matListItemTitle>{{ranking.header}}</div>
+              <div matListItemLine>{{ranking.savings + ' / ' + ranking.recommendation}}</div>
+            </mat-list-item>
+          }
+        </mat-list>
+      </div>
+    }
+  </mat-card-content>
+  <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

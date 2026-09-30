@@ -16,15 +16,19 @@
 
 <h2 mat-dialog-title>{{alias}}</h2>
 <mat-dialog-content>
-  <div *ngFor="let control of controls" class="control">
-    <div class="control-label">
-      <mat-icon color="accent" class="control-icon">{{control.icon}}</mat-icon>
-      <span>{{control.label}}</span>
-    </div>
-    <senergy-capability-control [control]="control" [showLabel]="false"
+  @for (control of controls; track control) {
+    <div class="control">
+      <div class="control-label">
+        <mat-icon color="accent" class="control-icon">{{control.icon}}</mat-icon>
+        <span>{{control.label}}</span>
+      </div>
+      <senergy-capability-control [control]="control" [showLabel]="false"
       (run)="perform($event)"></senergy-capability-control>
-  </div>
-  <div *ngIf="controls.length === 0">This element has no controls configured.</div>
+    </div>
+  }
+  @if (controls.length === 0) {
+    <div>This element has no controls configured.</div>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

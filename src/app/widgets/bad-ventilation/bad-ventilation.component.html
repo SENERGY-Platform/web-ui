@@ -15,40 +15,50 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
-    <mat-card-content id="{{widget.id}}">
-        <div *ngIf="!configured" fxFill fxLayout="column" fxLayoutAlign="center center">
-            <div>Please configure widget!</div>
-        </div>
+  <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
+  <mat-card-content id="{{widget.id}}">
+    @if (!configured) {
+      <div fxFill fxLayout="column" fxLayoutAlign="center center">
+        <div>Please configure widget!</div>
+      </div>
+    }
 
-        <div *ngIf="configured && !ready">
-            <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
-        </div>
+    @if (configured && !ready) {
+      <div>
+        <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
+      </div>
+    }
 
-        <div *ngIf="configured === true && ready === true && error === true">
-            <h2>Data could not be loaded!</h2>
-        </div>
+    @if (configured === true && ready === true && error === true) {
+      <div>
+        <h2>Data could not be loaded!</h2>
+      </div>
+    }
 
-        <div *ngIf="configured === true && ready === true && error === false && operatorIsInitPhase === false">
-            <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!"
-                [colors]="chartData.colors!" [series]="chartData.series!" [chart]="chartData.chart!"
-                [plotOptions]="chartData.plotOptions!" [xaxis]="chartData.xaxis!" [yaxis]="chartData.yaxis!"
-                [annotations]="chartData.annotations!" [markers]="chartData.markers!">
-            </apx-chart>
-        </div>
+    @if (configured === true && ready === true && error === false && operatorIsInitPhase === false) {
+      <div>
+        <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!"
+          [colors]="chartData.colors!" [series]="chartData.series!" [chart]="chartData.chart!"
+          [plotOptions]="chartData.plotOptions!" [xaxis]="chartData.xaxis!" [yaxis]="chartData.yaxis!"
+          [annotations]="chartData.annotations!" [markers]="chartData.markers!">
+        </apx-chart>
+      </div>
+    }
 
-        <div *ngIf="configured === true && ready === true && error === false && operatorIsInitPhase === true">
-            <h2>Operator is not ready</h2>
-            <p>{{initialPhaseMsg}}</p>
-        </div>
+    @if (configured === true && ready === true && error === false && operatorIsInitPhase === true) {
+      <div>
+        <h2>Operator is not ready</h2>
+        <p>{{initialPhaseMsg}}</p>
+      </div>
+    }
 
 
-    </mat-card-content>
-    <div>
-        <senergy-widget-footer [widgetHasUpdateableProperties]="true"
-            [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
-            [userHasDeleteAuthorization]="userHasDeleteAuthorization" [optionZoom]="true"
-            [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
-            [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
-    </div>
+  </mat-card-content>
+  <div>
+    <senergy-widget-footer [widgetHasUpdateableProperties]="true"
+      [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
+      [userHasDeleteAuthorization]="userHasDeleteAuthorization" [optionZoom]="true"
+      [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
+    [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+  </div>
 </mat-card>

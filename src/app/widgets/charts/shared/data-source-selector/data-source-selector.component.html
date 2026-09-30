@@ -14,147 +14,173 @@
   ~ limitations under the License.
   -->
 
-<mat-spinner *ngIf="!ready" [diameter]="50" [strokeWidth]="5" color="accent"></mat-spinner>
+@if (!ready) {
+  <mat-spinner [diameter]="50" [strokeWidth]="5" color="accent"></mat-spinner>
+}
 
-    <form fxLayout="column" [formGroup]="form" *ngIf="ready">
-        <div *ngIf="showSource">
-            <h2>Select the Data Sources</h2>
+@if (ready) {
+  <form fxLayout="column" [formGroup]="form">
+    @if (showSource) {
+      <div>
+        <h2>Select the Data Sources</h2>
+        <mat-form-field appearance="outline" color="accent">
+          <mat-label>Data Source Classes</mat-label>
+          <mtx-select formControlName="dataSourceClasses" multiple hideSelected="true"
+            closeOnSelect="false" placeholder="Search" fixedPlaceholder="true" [items]="dataSourceClasses" appendTo=".ng-select-anchor">
+          </mtx-select>
+          <mat-error senergyError label="Data Source Class"></mat-error>
+        </mat-form-field>
+        <ng-container formArrayName="exportsBySource">
+          @for (sourceForm of exportsControlBySource.controls; track sourceForm; let i = $index) {
+            <div [formGroupName]="i">
+              <mat-form-field [class.cdk-visually-hidden]="!sourceIsUsed(sourceForm)" appearance="outline"
+                color="accent">
+                <mat-label>{{getSourceClass(sourceForm)}}</mat-label>
+                <mtx-select formControlName="sourceExports" [multiple]="true" [hideSelected]="false"
+                  closeOnSelect="false" virtualScroll="true" placeholder="Type to search"
+                  bindLabel="display_name" bindValue="id"
+                  [items]="getExportOptions(getSourceClass(sourceForm))"
+                  (scroll)="onSelectScroll($event, sourceForm)"
+                  (scrollToEnd)="onSelectScrollEnd(sourceForm)"
+                  (search)="onSelectSearch($event, sourceForm)" (close)="onSelectClose(sourceForm)" appendTo=".ng-select-anchor">
+                </mtx-select>
+              </mat-form-field>
+            </div>
+          }
+          @if (showDataSourceError) {
+            <mat-error class="error">Please select at least one data source!</mat-error>
+          }
+        </ng-container>
+      </div>
+    }
+    @if (waitingForDataSourceChange) {
+      <mat-spinner [diameter]="50" [strokeWidth]="5" color="accent"></mat-spinner>
+    }
+    @if (!waitingForDataSourceChange) {
+      <span>
+        @if (enableFieldSelection) {
+          <span [hidden]="(form.get('exports')?.value || '').length === 0">
+            <h2>Select the Exported Fields</h2>
             <mat-form-field appearance="outline" color="accent">
-                <mat-label>Data Source Classes</mat-label>
-                <mtx-select formControlName="dataSourceClasses" multiple hideSelected="true"
-                    closeOnSelect="false" placeholder="Search" fixedPlaceholder="true" [items]="dataSourceClasses" appendTo=".ng-select-anchor">
-                </mtx-select>
-                <mat-error senergyError label="Data Source Class"></mat-error>
+              <mat-label>Fields</mat-label>
+              <mtx-select required multiple closeOnSelect="false"
+                formControlName="fields" [items]="fieldOptionsTMP" bindLabel="valueName" groupBy="group"
+                [compareWith]="compareFields" appendTo=".ng-select-anchor">
+              </mtx-select>
+              <mat-error senergyError [label]="'Fields'"></mat-error>
             </mat-form-field>
-
-            <ng-container formArrayName="exportsBySource">
-                <ng-container *ngFor="let sourceForm of exportsControlBySource.controls; let i = index">
-                    <div [formGroupName]="i">
-                        <mat-form-field [class.cdk-visually-hidden]="!sourceIsUsed(sourceForm)" appearance="outline"
-                            color="accent">
-                            <mat-label>{{getSourceClass(sourceForm)}}</mat-label>
-                            <mtx-select formControlName="sourceExports" [multiple]="true" [hideSelected]="false"
-                                closeOnSelect="false" virtualScroll="true" placeholder="Type to search"
-                                bindLabel="display_name" bindValue="id"
-                                [items]="getExportOptions(getSourceClass(sourceForm))"
-                                (scroll)="onSelectScroll($event, sourceForm)"
-                                (scrollToEnd)="onSelectScrollEnd(sourceForm)"
-                                (search)="onSelectSearch($event, sourceForm)" (close)="onSelectClose(sourceForm)" appendTo=".ng-select-anchor">
-                            </mtx-select>
-                        </mat-form-field>
-                    </div>
-                </ng-container>
-                <mat-error class="error" *ngIf="showDataSourceError">Please select at least one data source!</mat-error>
-            </ng-container>
-        </div>
-
-        <mat-spinner *ngIf="waitingForDataSourceChange" [diameter]="50" [strokeWidth]="5" color="accent"></mat-spinner>
-
-        <span *ngIf="!waitingForDataSourceChange">
-            <span [hidden]="(form.get('exports')?.value || '').length === 0" *ngIf="enableFieldSelection">
-                <h2>Select the Exported Fields</h2>
-                <mat-form-field appearance="outline" color="accent">
-                    <mat-label>Fields</mat-label>
-                    <mtx-select required multiple closeOnSelect="false"
-                        formControlName="fields" [items]="fieldOptionsTMP" bindLabel="valueName" groupBy="group"
-                        [compareWith]="compareFields" appendTo=".ng-select-anchor">
-                </mtx-select>
-                    <mat-error senergyError [label]="'Fields'"></mat-error>
+          </span>
+        }
+        @if (showTimeRange) {
+          <div>
+            <h2>Choose a Time Range</h2>
+            <div formGroupName="timeRange" class="one-line-form-container">
+              <div>
+                <mat-form-field color="accent" class="full-width" appearance="outline">
+                  <mat-label>Time Range Type</mat-label>
+                  <mtx-select formControlName="type" required appendTo=".ng-select-anchor">
+                    @for (timeRange of timeRangeTypes; track timeRange) {
+                      <mtx-option [value]="timeRange">
+                        {{timeRange}}
+                      </mtx-option>
+                    }
+                  </mtx-select>
+                  <mat-error senergyError [label]="'Time Range Type'"></mat-error>
                 </mat-form-field>
-            </span>
-
-
-            <div *ngIf="showTimeRange">
-                <h2>Choose a Time Range</h2>
-                <div formGroupName="timeRange" class="one-line-form-container">
-                    <div>
-                        <mat-form-field color="accent" class="full-width" appearance="outline">
-                            <mat-label>Time Range Type</mat-label>
-                            <mtx-select formControlName="type" required appendTo=".ng-select-anchor">
-                                <mtx-option *ngFor="let timeRange of timeRangeTypes" [value]="timeRange">
-                                    {{timeRange}}
-                                </mtx-option>
-                            </mtx-select>
-                            <mat-error senergyError [label]="'Time Range Type'"></mat-error>
-                        </mat-form-field>
-                    </div>
-                    <div
-                        *ngIf="form.get('timeRange.type')?.value === timeRangeEnum.RelativeAhead || form.get('timeRange.type')?.value === timeRangeEnum.Relative">
-                        <mat-form-field color="accent" class="full-width" appearance="outline">
-                            <mat-label>Time</mat-label>
-                            <input type="text" matInput placeholder="e.g. 15, 1" formControlName="time">
-                            <mat-error *ngIf="form.get('time')?.invalid"></mat-error>
-                        </mat-form-field>
-                    </div>
-                    <div
-                        *ngIf="form.get('timeRange.type')?.value === timeRangeEnum.RelativeAhead || form.get('timeRange.type')?.value === timeRangeEnum.Relative">
-                        <mat-form-field color="accent" class="full-width" appearance="outline">
-                            <mat-label>Interval</mat-label>
-                            <mtx-select formControlName="level" placeholder="Group Type" appendTo=".ng-select-anchor">
-                                <mtx-option [value]="">none</mtx-option>
-                                <mtx-option *ngFor="let level of levels" [value]="level.value">
-                                    {{level.name}}
-                                </mtx-option>
-                            </mtx-select>
-                            <mat-error senergyError label="Interval"></mat-error>
-                        </mat-form-field>
-                    </div>
-                    <div *ngIf="form.get('timeRange.type')?.value === timeRangeEnum.Absolute">
-                        <mat-form-field color="accent" class="full-width" appearance="outline">
-                            <mat-label>Start</mat-label>
-                            <input type="datetime-local" matInput formControlName="start">
-                            <mat-error senergyError label="Start"></mat-error>
-                        </mat-form-field>
-                    </div>
-                    <div *ngIf="form.get('timeRange.type')?.value === timeRangeEnum.Absolute">
-                        <mat-form-field color="accent" class="full-width" appearance="outline">
-                            <mat-label>End</mat-label>
-                            <input type="datetime-local" matInput placeholder="Start" formControlName="end">
-                            <mat-error senergyError label="End"></mat-error>
-                        </mat-form-field>
-                    </div>
+              </div>
+              @if (form.get('timeRange.type')?.value === timeRangeEnum.RelativeAhead || form.get('timeRange.type')?.value === timeRangeEnum.Relative) {
+                <div
+                  >
+                  <mat-form-field color="accent" class="full-width" appearance="outline">
+                    <mat-label>Time</mat-label>
+                    <input type="text" matInput placeholder="e.g. 15, 1" formControlName="time">
+                    @if (form.get('time')?.invalid) {
+                      <mat-error></mat-error>
+                    }
+                  </mat-form-field>
                 </div>
-            </div>
-
-            <div *ngIf="enableAggretationConfig">
-                <h2>Choose an Aggregation</h2>
-                <div formGroupName="group" class="one-line-form-container">
-                    <div>
-                        <mat-form-field color="accent" class="full-width" appearance="outline">
-                            <mat-label>Type</mat-label>
-                            <mtx-select formControlName="type" placeholder="" appendTo=".ng-select-anchor">
-                                <mtx-option [value]="">none</mtx-option>
-                                <mtx-option *ngFor="let groupLevel of groupTypes" [value]="groupLevel.value">
-                                    {{groupLevel.name}}
-                                </mtx-option>
-                            </mtx-select>
-                            <mat-error senergyError label="Type"></mat-error>
-                        </mat-form-field>
-                    </div>
-
-                    <div>
-                        <mat-form-field color="accent" class="full-width" appearance="outline">
-                            <mat-label>Time</mat-label>
-                            <input type="text" matInput placeholder="e.g. 15, 1" formControlName="time">
-
-                            <mat-error senergyError label="Time"></mat-error>
-                        </mat-form-field>
-                    </div>
-                    <div>
-                        <mat-form-field color="accent" class="full-width" appearance="outline">
-                            <mat-label>Interval</mat-label>
-                            <mtx-select formControlName="level" placeholder="" appendTo=".ng-select-anchor">
-                                <mtx-option [value]="">none</mtx-option>
-                                <mtx-option *ngFor="let level of levels" [value]="level.value">
-                                    {{level.name}}
-                                </mtx-option>
-                            </mtx-select>
-                            <mat-error senergyError label="Interval"></mat-error>
-                        </mat-form-field>
-                    </div>
+              }
+              @if (form.get('timeRange.type')?.value === timeRangeEnum.RelativeAhead || form.get('timeRange.type')?.value === timeRangeEnum.Relative) {
+                <div
+                  >
+                  <mat-form-field color="accent" class="full-width" appearance="outline">
+                    <mat-label>Interval</mat-label>
+                    <mtx-select formControlName="level" placeholder="Group Type" appendTo=".ng-select-anchor">
+                      <mtx-option [value]="">none</mtx-option>
+                      @for (level of levels; track level) {
+                        <mtx-option [value]="level.value">
+                          {{level.name}}
+                        </mtx-option>
+                      }
+                    </mtx-select>
+                    <mat-error senergyError label="Interval"></mat-error>
+                  </mat-form-field>
                 </div>
+              }
+              @if (form.get('timeRange.type')?.value === timeRangeEnum.Absolute) {
+                <div>
+                  <mat-form-field color="accent" class="full-width" appearance="outline">
+                    <mat-label>Start</mat-label>
+                    <input type="datetime-local" matInput formControlName="start">
+                    <mat-error senergyError label="Start"></mat-error>
+                  </mat-form-field>
+                </div>
+              }
+              @if (form.get('timeRange.type')?.value === timeRangeEnum.Absolute) {
+                <div>
+                  <mat-form-field color="accent" class="full-width" appearance="outline">
+                    <mat-label>End</mat-label>
+                    <input type="datetime-local" matInput placeholder="Start" formControlName="end">
+                    <mat-error senergyError label="End"></mat-error>
+                  </mat-form-field>
+                </div>
+              }
             </div>
-
-        </span>
-
-    </form>
+          </div>
+        }
+        @if (enableAggretationConfig) {
+          <div>
+            <h2>Choose an Aggregation</h2>
+            <div formGroupName="group" class="one-line-form-container">
+              <div>
+                <mat-form-field color="accent" class="full-width" appearance="outline">
+                  <mat-label>Type</mat-label>
+                  <mtx-select formControlName="type" placeholder="" appendTo=".ng-select-anchor">
+                    <mtx-option [value]="">none</mtx-option>
+                    @for (groupLevel of groupTypes; track groupLevel) {
+                      <mtx-option [value]="groupLevel.value">
+                        {{groupLevel.name}}
+                      </mtx-option>
+                    }
+                  </mtx-select>
+                  <mat-error senergyError label="Type"></mat-error>
+                </mat-form-field>
+              </div>
+              <div>
+                <mat-form-field color="accent" class="full-width" appearance="outline">
+                  <mat-label>Time</mat-label>
+                  <input type="text" matInput placeholder="e.g. 15, 1" formControlName="time">
+                  <mat-error senergyError label="Time"></mat-error>
+                </mat-form-field>
+              </div>
+              <div>
+                <mat-form-field color="accent" class="full-width" appearance="outline">
+                  <mat-label>Interval</mat-label>
+                  <mtx-select formControlName="level" placeholder="" appendTo=".ng-select-anchor">
+                    <mtx-option [value]="">none</mtx-option>
+                    @for (level of levels; track level) {
+                      <mtx-option [value]="level.value">
+                        {{level.name}}
+                      </mtx-option>
+                    }
+                  </mtx-select>
+                  <mat-error senergyError label="Interval"></mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        }
+      </span>
+    }
+  </form>
+}

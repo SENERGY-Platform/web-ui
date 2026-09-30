@@ -14,27 +14,35 @@
   ~ limitations under the License.
   -->
 
-<ng-container *ngIf="visible" [ngSwitch]="control.input">
-
-  <button *ngSwitchCase="inputs.Action" mat-icon-button color="accent" [disabled]="disabled"
-    [ngClass]="{'small-icon-button': compact}" (click)="perform()" [matTooltip]="control.label">
-    <mat-icon>{{control.icon}}</mat-icon>
-  </button>
-
-  <span *ngSwitchCase="inputs.Toggle" class="toggle">
-    <mat-slide-toggle color="accent" [checked]="checked" [disabled]="disabled"
-      (change)="toggle($event.checked)"></mat-slide-toggle>
-    <mat-icon *ngIf="syncing" class="syncing" matTooltip="syncing" inline>sync</mat-icon>
-  </span>
-
-  <span *ngSwitchDefault class="value-control">
-    <senergy-characteristic-input [characteristic]="control.characteristic" [value]="draft" [disabled]="disabled"
-      [label]="compact || !showLabel ? '' : control.label" (valueChange)="draft = $event"
-      (commit)="commit($event)"></senergy-characteristic-input>
-    <button *ngIf="needsConfirmation" mat-icon-button color="accent" [disabled]="disabled" (click)="send(draft)"
-      matTooltip="Apply">
-      <mat-icon>send</mat-icon>
-    </button>
-  </span>
-
-</ng-container>
+@if (visible) {
+  @switch (control.input) {
+    @case (inputs.Action) {
+      <button mat-icon-button color="accent" [disabled]="disabled"
+        [ngClass]="{'small-icon-button': compact}" (click)="perform()" [matTooltip]="control.label">
+        <mat-icon>{{control.icon}}</mat-icon>
+      </button>
+    }
+    @case (inputs.Toggle) {
+      <span class="toggle">
+        <mat-slide-toggle color="accent" [checked]="checked" [disabled]="disabled"
+        (change)="toggle($event.checked)"></mat-slide-toggle>
+        @if (syncing) {
+          <mat-icon class="syncing" matTooltip="syncing" inline>sync</mat-icon>
+        }
+      </span>
+    }
+    @default {
+      <span class="value-control">
+        <senergy-characteristic-input [characteristic]="control.characteristic" [value]="draft" [disabled]="disabled"
+          [label]="compact || !showLabel ? '' : control.label" (valueChange)="draft = $event"
+        (commit)="commit($event)"></senergy-characteristic-input>
+        @if (needsConfirmation) {
+          <button mat-icon-button color="accent" [disabled]="disabled" (click)="send(draft)"
+            matTooltip="Apply">
+            <mat-icon>send</mat-icon>
+          </button>
+        }
+      </span>
+    }
+  }
+}

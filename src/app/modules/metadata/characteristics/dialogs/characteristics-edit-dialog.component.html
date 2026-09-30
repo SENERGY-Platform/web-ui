@@ -17,18 +17,22 @@
 <h2 mat-dialog-title>Edit Characteristics</h2>
 
 <mat-dialog-content>
-    <form class="form">
-        <senergy-characteristic-element [data]="baseCharacteristic" [disabled]="disabled" #characteristicElementComponent></senergy-characteristic-element>
-    </form>
+  <form class="form">
+    <senergy-characteristic-element [data]="baseCharacteristic" [disabled]="disabled" #characteristicElementComponent></senergy-characteristic-element>
+  </form>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center" *ngIf="!disabled">
+@if (!disabled) {
+  <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" [disabled]="!this.characteristicElementComponent.isValid()"
-            (click)="save()">Save
+      (click)="save()">Save
     </button>
-</mat-dialog-actions>
+  </mat-dialog-actions>
+}
 
-<mat-dialog-actions fxLayoutAlign="end center" *ngIf="disabled">
+@if (disabled) {
+  <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Close</button>
-</mat-dialog-actions>
+  </mat-dialog-actions>
+}

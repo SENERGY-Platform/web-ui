@@ -17,25 +17,24 @@
 <h2 mat-dialog-title>Dependencies</h2>
 
 <mat-dialog-content>
-    <div *ngIf="missingDependencies !== null">
-        <table mat-table [dataSource]="missingDependencies">
-
-            <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef>Description</th>
-                <td mat-cell *matCellDef="let element"> {{element.description}} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="id">
-                <th mat-header-cell *matHeaderCellDef>Resource Id</th>
-                <td mat-cell *matCellDef="let element"> {{element.id}} </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
+  @if (missingDependencies !== null) {
+    <div>
+      <table mat-table [dataSource]="missingDependencies">
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let element"> {{element.description}} </td>
+        </ng-container>
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>Resource Id</th>
+          <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
     </div>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="accent" (click)="close()">Ok</button>
+  <button mat-raised-button color="accent" (click)="close()">Ok</button>
 </mat-dialog-actions>

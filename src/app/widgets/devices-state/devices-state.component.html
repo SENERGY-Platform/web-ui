@@ -15,50 +15,52 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
-    <mat-card-content class="drag-handler">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready" fxLayout="column" fxFill>
-            <div fxFlex="1 1 calc(33.33% - 12px)" (click)="showOnlineDevices()" class="clickable">
-                <div class="widget-icon-green" fxFill fxFlex="30" fxLayoutAlign="center center">
-                    <mat-icon class="mat-32 white">cloud</mat-icon>
-                </div>
-                <div fxFill fxFlex="70" fxLayout="column">
-                    <div class="kpi-header-1-3">ONLINE</div>
-                    <div fxLayout="row">
-                        <div class="mat-h2 kpi-1-3">{{devicesStatus.connected}}</div>
-                        <div class="kpi-text-1-3">/ {{devicesStatus.count}}</div>
-                    </div>
-                </div>
+  <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
+  <mat-card-content class="drag-handler">
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    @if (ready) {
+      <div fxLayout="column" fxFill>
+        <div fxFlex="1 1 calc(33.33% - 12px)" (click)="showOnlineDevices()" class="clickable">
+          <div class="widget-icon-green" fxFill fxFlex="30" fxLayoutAlign="center center">
+            <mat-icon class="mat-32 white">cloud</mat-icon>
+          </div>
+          <div fxFill fxFlex="70" fxLayout="column">
+            <div class="kpi-header-1-3">ONLINE</div>
+            <div fxLayout="row">
+              <div class="mat-h2 kpi-1-3">{{devicesStatus.connected}}</div>
+              <div class="kpi-text-1-3">/ {{devicesStatus.count}}</div>
             </div>
-            <div fxFlex="8px"></div>
-            <div fxFlex="1 1 calc(33.33% - 12px)" (click)="showOfflineDevices()" class="clickable">
-                <div class="widget-icon-red" fxFill fxFlex="30" fxLayoutAlign="center center">
-                    <mat-icon class="mat-32 white">cloud_off</mat-icon>
-                </div>
-                <div fxFill fxFlex="70" fxLayout="column">
-                    <div class="kpi-header-1-3">OFFLINE</div>
-                    <div fxLayout="row">
-                        <div class="mat-h2 kpi-1-3">{{devicesStatus.disconnected}}</div>
-                        <div class="kpi-text-1-3">/ {{devicesStatus.count}}</div>
-                    </div>
-                </div>
-            </div>
-            <div fxFlex="8px"></div>
-            <div fxFlex="1 1 calc(33.33% - 12px)" (click)="showUnknownDevices()" class="clickable">
-                <div class="widget-icon-orange" fxFill fxFlex="30" fxLayoutAlign="center center">
-                    <mat-icon class="white mat-32">help outline</mat-icon>
-                </div>
-                <div fxFill fxFlex="70" fxLayout="column">
-                    <div class="kpi-header-1-3">UNKNOWN</div>
-                    <div fxLayout="row">
-                        <div class="mat-h2 kpi-1-3">{{devicesStatus.unknown}}</div>
-                        <div class="kpi-text-1-3">/ {{devicesStatus.count}}</div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-    </mat-card-content>
-    <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+        <div fxFlex="8px"></div>
+        <div fxFlex="1 1 calc(33.33% - 12px)" (click)="showOfflineDevices()" class="clickable">
+          <div class="widget-icon-red" fxFill fxFlex="30" fxLayoutAlign="center center">
+            <mat-icon class="mat-32 white">cloud_off</mat-icon>
+          </div>
+          <div fxFill fxFlex="70" fxLayout="column">
+            <div class="kpi-header-1-3">OFFLINE</div>
+            <div fxLayout="row">
+              <div class="mat-h2 kpi-1-3">{{devicesStatus.disconnected}}</div>
+              <div class="kpi-text-1-3">/ {{devicesStatus.count}}</div>
+            </div>
+          </div>
+        </div>
+        <div fxFlex="8px"></div>
+        <div fxFlex="1 1 calc(33.33% - 12px)" (click)="showUnknownDevices()" class="clickable">
+          <div class="widget-icon-orange" fxFill fxFlex="30" fxLayoutAlign="center center">
+            <mat-icon class="white mat-32">help outline</mat-icon>
+          </div>
+          <div fxFill fxFlex="70" fxLayout="column">
+            <div class="kpi-header-1-3">UNKNOWN</div>
+            <div fxLayout="row">
+              <div class="mat-h2 kpi-1-3">{{devicesStatus.unknown}}</div>
+              <div class="kpi-text-1-3">/ {{devicesStatus.count}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </mat-card-content>
+  <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

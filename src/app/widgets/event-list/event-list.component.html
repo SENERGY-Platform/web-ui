@@ -15,19 +15,23 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
-    <mat-card-content class="mat-card-image content-size drag-handler">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready" fxLayout="column" fxFill>
-            <mat-list>
-                <mat-list-item *ngFor="let event of events">
-                    <mat-icon matListItemIcon>{{event.icon}}</mat-icon>
-                    <div matListItemTitle>{{event.event}}</div>
-                    <div matListItemLine>{{event.time | date:'dd.MM.yyyy, HH:mm'}}</div>
-                </mat-list-item>
-            </mat-list>
-        </div>
-    </mat-card-content>
-    <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+  <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
+  <mat-card-content class="mat-card-image content-size drag-handler">
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    @if (ready) {
+      <div fxLayout="column" fxFill>
+        <mat-list>
+          @for (event of events; track event) {
+            <mat-list-item>
+              <mat-icon matListItemIcon>{{event.icon}}</mat-icon>
+              <div matListItemTitle>{{event.event}}</div>
+              <div matListItemLine>{{event.time | date:'dd.MM.yyyy, HH:mm'}}</div>
+            </mat-list-item>
+          }
+        </mat-list>
+      </div>
+    }
+  </mat-card-content>
+  <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

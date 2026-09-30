@@ -19,13 +19,15 @@
 
 <mat-dialog-content>
   <form class="form">
-    <div *ngFor="let output of outputs; let i = index;">
-      <mat-form-field appearance="outline" color="accent">
-        <input matInput type="text" [(ngModel)]="outputs[i].name" name="outputs_{{i}}_name_input">
-        <mat-label>{{output.value | shortOutputVariableName}}</mat-label>
-        <mat-error senergyError label="{{output.value | shortOutputVariableName}}"></mat-error>
-      </mat-form-field>
-    </div>
+    @for (output of outputs; track output; let i = $index) {
+      <div>
+        <mat-form-field appearance="outline" color="accent">
+          <input matInput type="text" [(ngModel)]="outputs[i].name" name="outputs_{{i}}_name_input">
+          <mat-label>{{output.value | shortOutputVariableName}}</mat-label>
+          <mat-error senergyError label="{{output.value | shortOutputVariableName}}"></mat-error>
+        </mat-form-field>
+      </div>
+    }
   </form>
 </mat-dialog-content>
 

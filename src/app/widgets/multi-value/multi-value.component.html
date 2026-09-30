@@ -15,55 +15,72 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content class="content-size drag-handler">
-        <div *ngIf="!configured" fxFill fxLayout="column" fxLayoutAlign="center center">
-            <div>Widget not configured correctly!</div>
-            <div>Check if exports, columns and types are set.</div>
-        </div>
-        <senergy-widget-spinner [show]="configured && !dataReady"></senergy-widget-spinner>
-        <div *ngIf="configured && dataReady" class="table-container" fxLayout="column" fxFill>
-            <table mat-table [dataSource]="orderedValues" matSort (matSortChange)="matSortChange($event)">
-                <ng-container matColumnDef="name">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
-                    <td mat-cell *matCellDef="let m">
-                        {{m.name}}
-                    </td>
-                </ng-container>
-                <ng-container matColumnDef="value">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>{{widget.properties.valueAlias || 'Value'}}</th>
-
-                    <td mat-cell *matCellDef="let m">
-                        <span *ngIf="m.type === 'String' || m.type === 'Boolean'">
-                            {{m.data}} {{m.unit}}
-                        </span>
-                        <span *ngIf="m.type !== 'String' && m.data !== null && m.data !== undefined"
-                              [ngClass]="{'color-warn': checkWarning(m)}">
-                            <span *ngIf="m.type === 'Number'">
-                                {{m.data | number: m.format}}
-                            </span>
-                            <span *ngIf="m.type === 'Date'">
-                                {{m.data | date: m.format}}
-                            </span>
-                            <span *ngIf="m.type === 'Currency'">
-                                    {{m.data | currency: m.format}}
-                            </span>
-                            <span *ngIf="m.type === 'Percent'">
-                                {{m.data | percent: m.format}}
-                            </span>
-                            {{m.unit}}
-                        </span>
-                    </td>
-                </ng-container>
-                <ng-container matColumnDef="time">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Time</th>
-                    <td mat-cell *matCellDef="let m"><span *ngIf="m.time !== null && m.time !== undefined && m.time !== 'null'">{{m.time | date:'short'}}</span></td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="['name', 'value', 'time']; sticky: true"></tr>
-                <tr mat-row *matRowDef="let m; columns: ['name', 'value', 'time'];"></tr>
-            </table>
-        </div>
-    </mat-card-content>
-    <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+  <senergy-widget-header [widget]="widget"></senergy-widget-header>
+  <mat-card-content class="content-size drag-handler">
+    @if (!configured) {
+      <div fxFill fxLayout="column" fxLayoutAlign="center center">
+        <div>Widget not configured correctly!</div>
+        <div>Check if exports, columns and types are set.</div>
+      </div>
+    }
+    <senergy-widget-spinner [show]="configured && !dataReady"></senergy-widget-spinner>
+    @if (configured && dataReady) {
+      <div class="table-container" fxLayout="column" fxFill>
+        <table mat-table [dataSource]="orderedValues" matSort (matSortChange)="matSortChange($event)">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let m">
+              {{m.name}}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="value">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef>{{widget.properties.valueAlias || 'Value'}}</th>
+            <td mat-cell *matCellDef="let m">
+              @if (m.type === 'String' || m.type === 'Boolean') {
+                <span>
+                  {{m.data}} {{m.unit}}
+                </span>
+              }
+              @if (m.type !== 'String' && m.data !== null && m.data !== undefined) {
+                <span
+                  [ngClass]="{'color-warn': checkWarning(m)}">
+                  @if (m.type === 'Number') {
+                    <span>
+                      {{m.data | number: m.format}}
+                    </span>
+                  }
+                  @if (m.type === 'Date') {
+                    <span>
+                      {{m.data | date: m.format}}
+                    </span>
+                  }
+                  @if (m.type === 'Currency') {
+                    <span>
+                      {{m.data | currency: m.format}}
+                    </span>
+                  }
+                  @if (m.type === 'Percent') {
+                    <span>
+                      {{m.data | percent: m.format}}
+                    </span>
+                  }
+                  {{m.unit}}
+                </span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="time">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef>Time</th>
+            <td mat-cell *matCellDef="let m">@if (m.time !== null && m.time !== undefined && m.time !== 'null') {
+              <span>{{m.time | date:'short'}}</span>
+            }</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['name', 'value', 'time']; sticky: true"></tr>
+          <tr mat-row *matRowDef="let m; columns: ['name', 'value', 'time'];"></tr>
+        </table>
+      </div>
+    }
+  </mat-card-content>
+  <senergy-widget-footer [widgetHasUpdateableProperties]="true" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

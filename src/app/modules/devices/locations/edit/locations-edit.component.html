@@ -14,81 +14,91 @@
   ~ limitations under the License.
   -->
 <div class="location-edit-container" fxLayout="column">
-    <h2>Location</h2>
+  <h2>Location</h2>
 
-    <div *ngIf="locationForm" [formGroup]="locationForm">
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Name</mat-label>
-            <input matInput formControlName="name" required>
-            <mat-error senergyError label="Name"></mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description"></textarea>
-            <mat-error senergyError label="Description"></mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Image</mat-label>
-            <input matInput formControlName="image">
-            <mat-error senergyError label="Image"></mat-error>
-        </mat-form-field>
+  @if (locationForm) {
+    <div [formGroup]="locationForm">
+      <mat-form-field appearance="outline" class="full-width" color="accent">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error senergyError label="Name"></mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width" color="accent">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description"></textarea>
+        <mat-error senergyError label="Description"></mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width" color="accent">
+        <mat-label>Image</mat-label>
+        <input matInput formControlName="image">
+        <mat-error senergyError label="Image"></mat-error>
+      </mat-form-field>
     </div>
+  }
 
-    <div class="devices-container">
-        <h2>Device-Groups</h2>
-        <div *ngIf="deviceGroupsForm.value.length > 0">
-            <mat-card appearance="outlined" *ngFor="let item of deviceGroupsForm.value" fxLayout="row"
-                      fxLayoutAlign="space-between center" class="device-card">
-                <mat-card-title>
-                    <div class="device-info">
-                        <div matTooltip="{{item.name}}" class="device-name">
-                            {{item.name}}
-                        </div>
-                    </div>
-                </mat-card-title>
-                <mat-card-actions>
-                    <div class="device-ctrl">
-                        <button mat-icon-button color="accent" (click)="removeDeviceGroup(item.id)" matTooltip="Remove">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
-                </mat-card-actions>
-            </mat-card>
-        </div>
-        <button mat-raised-button color="accent" (click)="selectAndAddGroups()">Add Groups</button>
-    </div>
-    <mat-divider></mat-divider>
-    <div class="devices-container">
-        <h2>Devices</h2>
-        <div *ngIf="devicesForm.value.length > 0">
-            <mat-card appearance="outlined" *ngFor="let item of devicesForm.value" fxLayout="row"
-                      fxLayoutAlign="space-between center" class="device-card">
-                <mat-card-title>
-                    <div class="device-info">
-                        <div matTooltip="{{item.name}}" class="device-name">
-                            {{item.name}}
-                        </div>
-                    </div>
-                </mat-card-title>
-                <mat-card-actions>
-                    <div class="device-ctrl">
-                        <button mat-icon-button color="accent" (click)="removeDevice(item.id)" matTooltip="Remove">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
-                </mat-card-actions>
-            </mat-card>
-        </div>
-        <button mat-raised-button color="accent" (click)="selectAndAddDevices()">Add Devices</button>
-    </div>
+  <div class="devices-container">
+    <h2>Device-Groups</h2>
+    @if (deviceGroupsForm.value.length > 0) {
+      <div>
+        @for (item of deviceGroupsForm.value; track item) {
+          <mat-card appearance="outlined" fxLayout="row"
+            fxLayoutAlign="space-between center" class="device-card">
+            <mat-card-title>
+              <div class="device-info">
+                <div matTooltip="{{item.name}}" class="device-name">
+                  {{item.name}}
+                </div>
+              </div>
+            </mat-card-title>
+            <mat-card-actions>
+              <div class="device-ctrl">
+                <button mat-icon-button color="accent" (click)="removeDeviceGroup(item.id)" matTooltip="Remove">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    }
+    <button mat-raised-button color="accent" (click)="selectAndAddGroups()">Add Groups</button>
+  </div>
+  <mat-divider></mat-divider>
+  <div class="devices-container">
+    <h2>Devices</h2>
+    @if (devicesForm.value.length > 0) {
+      <div>
+        @for (item of devicesForm.value; track item) {
+          <mat-card appearance="outlined" fxLayout="row"
+            fxLayoutAlign="space-between center" class="device-card">
+            <mat-card-title>
+              <div class="device-info">
+                <div matTooltip="{{item.name}}" class="device-name">
+                  {{item.name}}
+                </div>
+              </div>
+            </mat-card-title>
+            <mat-card-actions>
+              <div class="device-ctrl">
+                <button mat-icon-button color="accent" (click)="removeDevice(item.id)" matTooltip="Remove">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    }
+    <button mat-raised-button color="accent" (click)="selectAndAddDevices()">Add Devices</button>
+  </div>
 
-    <div class="controls" fxLayoutAlign="end center">
-        <button mat-raised-button color="accent"
-                [class.spinner]="isSaving"
-                [disabled]="isSaving"
-                (click)="save()">Save
-        </button>
-    </div>
+  <div class="controls" fxLayoutAlign="end center">
+    <button mat-raised-button color="accent"
+      [class.spinner]="isSaving"
+      [disabled]="isSaving"
+      (click)="save()">Save
+    </button>
+  </div>
 </div>
 
 

@@ -18,74 +18,92 @@
 <h2 mat-dialog-title>Task Configuration</h2>
 
 <mat-dialog-content>
-    <mat-radio-group [formControl]="optionsFormControl">
-        <mat-radio-button class="radio-button" value="Controlling">Controlling</mat-radio-button>
-        <mat-radio-button class="radio-button" value="Measuring">Measuring</mat-radio-button>
-    </mat-radio-group>
+  <mat-radio-group [formControl]="optionsFormControl">
+    <mat-radio-button class="radio-button" value="Controlling">Controlling</mat-radio-button>
+    <mat-radio-button class="radio-button" value="Measuring">Measuring</mat-radio-button>
+  </mat-radio-group>
 
-    <form class="form">
-        <mat-form-field appearance="outline" class="form-field" color="accent"
-            *ngIf="optionsFormControl.value === 'Controlling'">
-            <mat-label>Device Class</mat-label>
-            <mtx-select [compareWith]="compare" [formControl]="deviceClassFormControl" required [items]="deviceClasses"
-                bindLabel="name" appendTo=".ng-select-anchor">
-                <ng-template ng-label-tmp let-item="item">
-                    <span class="ng-value-label">{{item.name}}<span class="not-offered"
-                            *ngIf="item.id === unlistedDeviceClass?.id"> (no longer offered)</span></span>
-                </ng-template>
-                <ng-template ng-option-tmp let-item="item">
-                    {{item.name}}<span class="not-offered" *ngIf="item.id === unlistedDeviceClass?.id"> (no longer offered)</span>
-                </ng-template>
-            </mtx-select>
-            <mat-hint *ngIf="unlistedDeviceClass">A deployment will probably find no devices for this device class.</mat-hint>
-            <mat-error senergyError label="Device Class"></mat-error>
-        </mat-form-field>
+  <form class="form">
+    @if (optionsFormControl.value === 'Controlling') {
+      <mat-form-field appearance="outline" class="form-field" color="accent"
+        >
+        <mat-label>Device Class</mat-label>
+        <mtx-select [compareWith]="compare" [formControl]="deviceClassFormControl" required [items]="deviceClasses"
+          bindLabel="name" appendTo=".ng-select-anchor">
+          <ng-template ng-label-tmp let-item="item">
+            <span class="ng-value-label">{{item.name}}@if (item.id === unlistedDeviceClass?.id) {
+              <span class="not-offered"
+              > (no longer offered)</span>
+            }</span>
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item">
+            {{item.name}}@if (item.id === unlistedDeviceClass?.id) {
+            <span class="not-offered"> (no longer offered)</span>
+          }
+        </ng-template>
+      </mtx-select>
+      @if (unlistedDeviceClass) {
+        <mat-hint>A deployment will probably find no devices for this device class.</mat-hint>
+      }
+      <mat-error senergyError label="Device Class"></mat-error>
+    </mat-form-field>
+  }
 
-        <senergy-aspect-select *ngIf="optionsFormControl.value === 'Measuring'"
-            [formControl]="aspectFormControl" [aspects]="aspects" [aspectClasses]="[]" label="Aspects"
-            [showCollisionUntouched]="true">
-        </senergy-aspect-select>
+  @if (optionsFormControl.value === 'Measuring') {
+    <senergy-aspect-select
+      [formControl]="aspectFormControl" [aspects]="aspects" [aspectClasses]="[]" label="Aspects"
+      [showCollisionUntouched]="true">
+    </senergy-aspect-select>
+  }
 
-        <mat-form-field appearance="outline" class="form-field" color="accent" *ngIf="optionsFormControl.value !== ''">
-            <mat-label>Function</mat-label>
-            <mtx-select [compareWith]="compare" [formControl]="functionFormControl" required [items]="functions"
-                bindLabel="name" appendTo=".ng-select-anchor">
-                <ng-template ng-label-tmp let-item="item">
-                    <span class="ng-value-label">{{item.name}}<span class="not-offered"
-                            *ngIf="item.id === unlistedFunction?.id"> (no longer offered for this {{unlistedFor}})</span></span>
-                </ng-template>
-                <ng-template ng-option-tmp let-item="item">
-                    {{item.name}}<span class="not-offered"
-                        *ngIf="item.id === unlistedFunction?.id"> (no longer offered for this {{unlistedFor}})</span>
-                </ng-template>
-            </mtx-select>
-            <mat-hint *ngIf="unlistedFunction">A deployment will probably find no devices for this combination.</mat-hint>
-            <mat-error senergyError label="Function"></mat-error>
-        </mat-form-field>
-    </form>
+  @if (optionsFormControl.value !== '') {
+    <mat-form-field appearance="outline" class="form-field" color="accent">
+      <mat-label>Function</mat-label>
+      <mtx-select [compareWith]="compare" [formControl]="functionFormControl" required [items]="functions"
+        bindLabel="name" appendTo=".ng-select-anchor">
+        <ng-template ng-label-tmp let-item="item">
+          <span class="ng-value-label">{{item.name}}@if (item.id === unlistedFunction?.id) {
+            <span class="not-offered"
+            > (no longer offered for this {{unlistedFor}})</span>
+          }</span>
+        </ng-template>
+        <ng-template ng-option-tmp let-item="item">
+          {{item.name}}@if (item.id === unlistedFunction?.id) {
+          <span class="not-offered"
+          > (no longer offered for this {{unlistedFor}})</span>
+        }
+      </ng-template>
+    </mtx-select>
+    @if (unlistedFunction) {
+      <mat-hint>A deployment will probably find no devices for this combination.</mat-hint>
+    }
+    <mat-error senergyError label="Function"></mat-error>
+  </mat-form-field>
+}
+</form>
 
-    <mat-radio-group [formControl]="completionStrategyFormControl">
-        <mat-radio-button class="radio-button" value="optimistic">Optimistic</mat-radio-button>
-        <mat-radio-button class="radio-button" value="pessimistic">Pessimistic</mat-radio-button>
-    </mat-radio-group>
+<mat-radio-group [formControl]="completionStrategyFormControl">
+  <mat-radio-button class="radio-button" value="optimistic">Optimistic</mat-radio-button>
+  <mat-radio-button class="radio-button" value="pessimistic">Pessimistic</mat-radio-button>
+</mat-radio-group>
 
-    <form>
-        <mat-form-field appearance="outline" class="form-field" color="accent">
-            <mat-label>Retries</mat-label>
-            <input type="number" matInput [formControl]="retriesFormControl">
-            <mat-error senergyError label="Retries"></mat-error>
-        </mat-form-field>
-    </form>
+<form>
+  <mat-form-field appearance="outline" class="form-field" color="accent">
+    <mat-label>Retries</mat-label>
+    <input type="number" matInput [formControl]="retriesFormControl">
+    <mat-error senergyError label="Retries"></mat-error>
+  </mat-form-field>
+</form>
 
-    <mat-checkbox class="form-filed-checkbox" [formControl]="preferEventsFormControl"
-        matTooltip="check if you prefer stored event values before device requests" matTooltipPosition="right">Prefer
-        Events
-    </mat-checkbox>
+<mat-checkbox class="form-filed-checkbox" [formControl]="preferEventsFormControl"
+  matTooltip="check if you prefer stored event values before device requests" matTooltipPosition="right">Prefer
+  Events
+</mat-checkbox>
 </mat-dialog-content>
 
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="functionFormControl.value === '' || aspectClassCollision" (click)="save()">Save
-    </button>
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" [disabled]="functionFormControl.value === '' || aspectClassCollision" (click)="save()">Save
+  </button>
 </mat-dialog-actions>

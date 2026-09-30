@@ -14,72 +14,92 @@
   ~ limitations under the License.
   -->
 
-<div *ngIf="anomalyDetected != null && anomaly != null">
-    <div *ngIf="anomaly.type === 'time'" class="anomaly-container">
+@if (anomalyDetected != null && anomaly != null) {
+  <div>
+    @if (anomaly.type === 'time') {
+      <div class="anomaly-container">
         <div>
-            <mat-icon>schedule</mat-icon>
+          <mat-icon>schedule</mat-icon>
         </div>
         <div>
-            <h2 *ngIf="anomaly.subType === 'high'">Time between inputs was too long!</h2>
-            <h2 *ngIf="anomaly.subType === 'low'">Time between inputs was too short!</h2>
+          @if (anomaly.subType === 'high') {
+            <h2>Time between inputs was too long!</h2>
+          }
+          @if (anomaly.subType === 'low') {
+            <h2>Time between inputs was too short!</h2>
+          }
         </div>
         <div class="text-container">
-            <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
-            <p><b>Waiting time: </b>{{anomaly.value | number:'1.2-3'}} min.</p>
-            <div *ngIf="showDebug === true" class="text-container">
-                <p><b>Threshold: </b>{{anomaly.threshold}}</p>
-                <p><b>Current Mean: </b>{{anomaly.mean}}</p>
+          <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
+          <p><b>Waiting time: </b>{{anomaly.value | number:'1.2-3'}} min.</p>
+          @if (showDebug === true) {
+            <div class="text-container">
+              <p><b>Threshold: </b>{{anomaly.threshold}}</p>
+              <p><b>Current Mean: </b>{{anomaly.mean}}</p>
             </div>
+          }
         </div>
-
-    </div>
-
-    <div *ngIf="anomaly.type === 'schema'" class="anomaly-container">
+      </div>
+    }
+    @if (anomaly.type === 'schema') {
+      <div class="anomaly-container">
         <div>
-            <mat-icon>schema</mat-icon>
+          <mat-icon>schema</mat-icon>
         </div>
         <div>
-            <h2>Input data did not follow the schema!</h2>
+          <h2>Input data did not follow the schema!</h2>
         </div>
         <div class="text-container">
-            <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
-            <p><b>Value: </b>{{anomaly.value}}</p>
+          <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
+          <p><b>Value: </b>{{anomaly.value}}</p>
         </div>
-    </div>
-
-    <div *ngIf="anomaly.type === 'extreme_value'" class="anomaly-container">
+      </div>
+    }
+    @if (anomaly.type === 'extreme_value') {
+      <div class="anomaly-container">
         <div>
-            <mat-icon>error</mat-icon>
+          <mat-icon>error</mat-icon>
         </div>
         <div>
-            <h2 *ngIf="anomaly.subType === 'high'">Input is too high!</h2>
-            <h2 *ngIf="anomaly.subType === 'low'">Input is too low!</h2>
+          @if (anomaly.subType === 'high') {
+            <h2>Input is too high!</h2>
+          }
+          @if (anomaly.subType === 'low') {
+            <h2>Input is too low!</h2>
+          }
         </div>
         <div class="text-container">
-            <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
-            <p><b>Value: </b>{{anomaly.value | number:'1.0-2'}}</p>
-            <div *ngIf="showDebug === true">
-                <p><b>Threshold: </b>{{anomaly.threshold}}</p>
-                <p><b>Current Mean: </b>{{anomaly.mean}}</p>
+          <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
+          <p><b>Value: </b>{{anomaly.value | number:'1.0-2'}}</p>
+          @if (showDebug === true) {
+            <div>
+              <p><b>Threshold: </b>{{anomaly.threshold}}</p>
+              <p><b>Current Mean: </b>{{anomaly.mean}}</p>
             </div>
+          }
         </div>
-    </div>
-
-    <div *ngIf="anomaly.type === 'curve_anomaly'" class="anomaly-container">
+      </div>
+    }
+    @if (anomaly.type === 'curve_anomaly') {
+      <div class="anomaly-container">
         <div>
-            <mat-icon>error</mat-icon>
+          <mat-icon>error</mat-icon>
         </div>
         <div>
-            <h2>Value is anomalous!</h2>
+          <h2>Value is anomalous!</h2>
         </div>
         <div class="text-container">
-            <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
-            <p><b>Value: </b>{{anomaly.value}}</p>
+          <p><b>At: </b>{{anomaly.timestamp | date:'medium'}}</p>
+          <p><b>Value: </b>{{anomaly.value}}</p>
         </div>
-    </div>
-</div>
+      </div>
+    }
+  </div>
+}
 
 <!-- sometimes there are null rows in the timescale response -->
-<div *ngIf="anomalyDetected === false" class="text-container">
+@if (anomalyDetected === false) {
+  <div class="text-container">
     <h2>No anomaly detected!</h2>
-</div>
+  </div>
+}

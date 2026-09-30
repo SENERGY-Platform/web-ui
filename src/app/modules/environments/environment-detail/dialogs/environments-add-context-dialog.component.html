@@ -17,29 +17,37 @@
 <h2 mat-dialog-title>Add context</h2>
 
 <mat-dialog-content>
-    <div class="preset-list">
-        <div class="preset-row" *ngFor="let preset of presets" [class.selected]="preset.id === selected.id"
-            (click)="selectPreset(preset)">
-            <div class="preset-label">{{preset.label}}</div>
-            <div class="preset-description">{{preset.description}}</div>
-        </div>
-    </div>
+  <div class="preset-list">
+    @for (preset of presets; track preset) {
+      <div class="preset-row" [class.selected]="preset.id === selected.id"
+        (click)="selectPreset(preset)">
+        <div class="preset-label">{{preset.label}}</div>
+        <div class="preset-description">{{preset.description}}</div>
+      </div>
+    }
+  </div>
 
-    <div class="preset-preview" *ngIf="chart">
-        <apx-chart [series]="chart.series" [chart]="chart.chart" [xaxis]="chart.xaxis" [yaxis]="chart.yaxis"
-            [dataLabels]="chart.dataLabels" [stroke]="chart.stroke" [legend]="chart.legend" [colors]="chart.colors">
-        </apx-chart>
+  @if (chart) {
+    <div class="preset-preview">
+      <apx-chart [series]="chart.series" [chart]="chart.chart" [xaxis]="chart.xaxis" [yaxis]="chart.yaxis"
+        [dataLabels]="chart.dataLabels" [stroke]="chart.stroke" [legend]="chart.legend" [colors]="chart.colors">
+      </apx-chart>
     </div>
+  }
 
-    <mat-form-field appearance="outline" color="accent" class="full-width">
-        <mat-label>Context key</mat-label>
-        <input matInput [(ngModel)]="key" name="context-key">
-        <mat-hint *ngIf="!keyError">Read from a formula or any zone as context.{{key || '...'}}.</mat-hint>
-    </mat-form-field>
-    <p class="key-error" *ngIf="keyError">{{keyError}}</p>
+  <mat-form-field appearance="outline" color="accent" class="full-width">
+    <mat-label>Context key</mat-label>
+    <input matInput [(ngModel)]="key" name="context-key">
+    @if (!keyError) {
+      <mat-hint>Read from a formula or any zone as context.{{key || '...'}}.</mat-hint>
+    }
+  </mat-form-field>
+  @if (keyError) {
+    <p class="key-error">{{keyError}}</p>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions style="display: flex; justify-content: end;">
-    <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="add()" [disabled]="!!keyError">Add</button>
+  <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="add()" [disabled]="!!keyError">Add</button>
 </mat-dialog-actions>
