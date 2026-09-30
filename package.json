@@ -11,7 +11,6 @@
     "test": "NODE_OPTIONS=\"--max-old-space-size=8192\" ng test --browsers=ChromeHeadlessCI --watch=false",
     "test:watch": "NODE_OPTIONS=\"--max-old-space-size=8192\" ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
     "vendor:scriptenv-types": "node scripts/vendor-scriptenv-types.mjs"
   },
   "private": true,
@@ -46,7 +45,6 @@
     "cronstrue": "^1.96.0",
     "cytoscape": "^3.34.3",
     "cytoscape-dagre": "^4.0.1",
-    "dotenv": "^8.2.0",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "gridstack": "^12.1.2",
@@ -70,7 +68,6 @@
     "swagger-ui": "^5.32.13",
     "tslib": "^2.0.0",
     "uuid": "^11.1.0",
-    "yargs": "^15.4.1",
     "zone.js": "^0.14.10"
   },
   "devDependencies": {
@@ -85,10 +82,8 @@
     "@angular/language-service": "^18.2.13",
     "@types/file-saver": "^2.0.1",
     "@types/jasmine": "~3.6.0",
-    "@types/jasminewd2": "^2.0.8",
     "@types/node": "^13.5.0",
     "@types/swagger-ui": "^3.52.0",
-    "@types/yargs": "^15.0.1",
     "@typescript-eslint/eslint-plugin": "^8.24.0",
     "@typescript-eslint/parser": "^8.24.0",
     "env-cmd": "^10.1.0",
@@ -99,7 +94,6 @@
     "eslint-plugin-jsdoc": "^50.6.3",
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-prettier": "^5.2.3",
-    "install": "^0.13.0",
     "jasmine-auto-spies": "^7.0.0",
     "jasmine-core": "~4.6.0",
     "jasmine-spec-reporter": "~5.0.0",
@@ -109,9 +103,6 @@
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
     "karma-mocha-reporter": "^2.2.5",
-    "npm": "^9.6.5",
-    "protractor": "~7.0.0",
-    "ts-node": "^8.6.2",
     "typescript": "5.4"
   },
   "overrides": {

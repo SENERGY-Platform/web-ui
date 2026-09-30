@@ -26,16 +26,11 @@ that flips `production: false`. So a key added to `environment.ts` is
 automatically in the file `fileReplacements` swaps in, and there is nothing else
 to keep in sync for the build.
 
-## `set-env.ts` is not part of the chain
+## There is no third renderer
 
-`set-env.ts` looks like the renderer that fills the template, and this document
-listed it as a third required file until 2026-09-01. **Nothing invokes it** — not
-`package.json`, not `.github/workflows/`, not `angular.json`, not `build-env.sh`
-or `build-env.cmd`. Its own header comment still describes a manual
-`ts-node set-env.ts --environment=dev`.
-
-Editing it is therefore harmless and pointless; skipping it breaks nothing. The
-file is tracked, so a `grep` for a URL key finds it and suggests otherwise.
+The template is filled by `build-env.sh` (`build-env.cmd` on Windows) and the
+production file by the Dockerfile `sed`. An old `set-env.ts` that looked like a
+renderer was removed; nothing invoked it.
 
 ## The generated files are not the source
 
