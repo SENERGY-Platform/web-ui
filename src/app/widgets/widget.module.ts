@@ -34,7 +34,6 @@ import { RankingListComponent } from './ranking-list/ranking-list.component';
 import { CoreModule } from '../core/core.module';
 import { WidgetSpinnerComponent } from './components/widget-spinner/widget-spinner.component';
 import { RankingListEditDialogComponent } from './ranking-list/dialogs/ranking-list-edit-dialog.component';
-import { Gridster, GridsterItem } from 'angular-gridster2';
 import { WidgetComponent } from './widget.component';
 import { ChartsProcessDeploymentsComponent } from './charts/process/process-deployments/charts-process-deployments.component';
 import { ChartsProcessDeploymentsEditDialogComponent } from './charts/process/process-deployments/dialogs/charts-process-deployments-edit-dialog.component';
@@ -165,8 +164,6 @@ registerLocaleData(localeDe, 'de');
         Ng2GoogleChartsModule,
         CoreModule,
         MatProgressSpinnerModule,
-        Gridster,
-        GridsterItem,
         MatTooltipModule,
         MatCheckboxModule,
         RouterModule,

@@ -33,7 +33,6 @@ import { AUTO_COLUMNS, DashboardModel, DEFAULT_LAYOUT_MODE, LayoutMode, MAX_COLU
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
-import { Gridster, GridsterItem } from 'angular-gridster2';
 import { MatButtonModule } from '@angular/material/button';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
@@ -88,8 +87,6 @@ describe('DashboardComponent', () => {
         ReactiveFormsModule,
         MatTabsModule,
         MatDividerModule,
-        Gridster,
-        GridsterItem,
         NoopAnimationsModule,
         MatButtonModule],
     providers: [

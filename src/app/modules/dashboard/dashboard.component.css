@@ -24,10 +24,6 @@
   margin-bottom: 72px;
 }
 
-.dashboard-container ::ng-deep gridster-item.gridster-item-resizing,
-gridster-item.gridster-item-moving {
-}
-
 
 .truncate {
   white-space: nowrap;
