@@ -86,7 +86,7 @@ export class DesignerHelperService {
 
     checkConstraints(modeler: any): Observable<DesignerErrorModel[][]> {
         const array: Observable<DesignerErrorModel[]>[] = [];
-        const elements = modeler.injector.get('elementRegistry');
+        const elements = modeler.get('elementRegistry');
         elements.forEach((el: DesignerElementModel) => {
             if (el.type === 'bpmn:Collaboration') {
                 el.businessObject.participants.forEach((participant: DesignerElementParticipantsModel) => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { processIncident, external, io, msgevent, email, notification, influx, info, timeHelper, description, order } from './IotProps';
+import { processIncident, external, io, msgevent, notification, influx, info, timeHelper, description, order } from './IotProps';
 import { augmentScriptEntries } from './ScriptEditorEntry';
 
 import { is } from 'bpmn-js/lib/util/ModelUtil';
@@ -33,12 +33,12 @@ function SenergyPropertiesProvider(eventBus, canvas, bpmnFactory, elementRegistr
         camundaTabs[0].groups.unshift(createOrderGroup());
         camundaTabs[0].groups.unshift(createIotInfoGroup(element, bpmnjs));
         camundaTabs[0].groups.unshift(createIotMsgEventGroup(element, bpmnjs, eventBus, modeling));
-        camundaTabs[0].groups.unshift(createIotExternalTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
-        camundaTabs[0].groups.unshift(createProcessIoTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
-        camundaTabs[0].groups.unshift(createHelperGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
-        camundaTabs[0].groups.unshift(createInfluxTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
-        camundaTabs[0].groups.unshift(createTimeEventHelperGroup(element, bpmnjs, eventBus, modeling));
-        camundaTabs[0].groups.unshift(createIncidentTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
+        camundaTabs[0].groups.unshift(createIotExternalTaskGroup(element, bpmnjs, eventBus));
+        camundaTabs[0].groups.unshift(createProcessIoTaskGroup(element, bpmnjs));
+        camundaTabs[0].groups.unshift(createHelperGroup(element, bpmnjs));
+        camundaTabs[0].groups.unshift(createInfluxTaskGroup(element, bpmnjs, eventBus));
+        camundaTabs[0].groups.unshift(createTimeEventHelperGroup(element, bpmnjs));
+        camundaTabs[0].groups.unshift(createIncidentTaskGroup(element, bpmnjs));
 
         // must run over the camunda tabs, whose entries hold the script fields
         augmentScriptEntries(camundaTabs, bpmnjs);
@@ -49,10 +49,6 @@ function SenergyPropertiesProvider(eventBus, canvas, bpmnFactory, elementRegistr
 
 var isTask = function(element){
   return is(element, "bpmn:Task") && !is(element, "bpmn:ReceiveTask")
-};
-
-var isEvent = function(element) {
-    return element.type == "bpmn:StartEvent"  || element.type == "bpmn:IntermediateCatchEvent";
 };
 
 var isMsgEvent = function (element) {
@@ -70,39 +66,38 @@ var isTimeEvent = function (element) {
 
 var isCollaborationOrProcess = function (element) {
     return is(element, "bpmn:Collaboration") || is(element, "bpmn:Process")
-    // return element.businessObject && element.businessObject.eventDefinitions && element.businessObject.eventDefinitions[0] && element.businessObject.eventDefinitions[0].$type == "bpmn:TimerEventDefinition"
 };
 
-function createIncidentTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
+function createIncidentTaskGroup(element, bpmnjs) {
     var iotGroup = {
         id: 'incident',
         label: 'Incident',
         entries: [],
         enabled: isTask
     };
-    processIncident(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    processIncident(iotGroup, element, bpmnjs);
     return iotGroup;
 }
 
-function createIotExternalTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
+function createIotExternalTaskGroup(element, bpmnjs, eventBus) {
     var iotGroup = {
         id: 'iot-extern',
         label: 'Function',
         entries: [],
         enabled: isTask
     };
-    external(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    external(iotGroup, element, bpmnjs, eventBus);
     return iotGroup;
 }
 
-function createProcessIoTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
+function createProcessIoTaskGroup(element, bpmnjs) {
     var iotGroup = {
         id: 'process-io',
         label: 'Process-IO',
         entries: [],
         enabled: isTask
     };
-    io(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    io(iotGroup, element, bpmnjs);
     return iotGroup;
 }
 
@@ -117,27 +112,26 @@ function createIotMsgEventGroup(element, bpmnjs, eventBus, modeling) {
     return iotGroup;
 }
 
-function createHelperGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
+function createHelperGroup(element, bpmnjs) {
     var helperGroup = {
         id: 'iot-helper',
         label: 'IoT-Helper',
         entries: [],
         enabled: isTask
     };
-    //email(helperGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
-    notification(helperGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    notification(helperGroup, element, bpmnjs);
     return helperGroup;
 }
 
 
-function createInfluxTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
+function createInfluxTaskGroup(element, bpmnjs, eventBus) {
     var iotGroup = {
         id: 'iot-influx',
         label: 'Historic Data',
         entries: [],
         enabled: isTask
     };
-    influx(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    influx(iotGroup, element, bpmnjs, eventBus);
     return iotGroup;
 }
 
@@ -153,14 +147,14 @@ function createIotInfoGroup(element, bpmnjs) {
     return infoGroup;
 }
 
-function createTimeEventHelperGroup(element, bpmnjs, eventBus, modeling){
+function createTimeEventHelperGroup(element, bpmnjs){
     var timeEventGroup = {
         id: 'time-event-helper',
         label: 'Time-Event-Helper',
         entries: [],
         enabled: isTimeEvent
     };
-    timeHelper(timeEventGroup, element, bpmnjs, eventBus, modeling);
+    timeHelper(timeEventGroup, element, bpmnjs);
     return timeEventGroup;
 }
 

@@ -17,6 +17,7 @@
 import { createProcessModeler } from './bpmn-js';
 import { createSmartServiceModeler } from '../../../smart-services/designer/smart-service-modeler';
 import { canonicalBpmn, diffCanonical, namespaceDeclarations, prefixesInUse, senergyAttributes } from '../../../../../testing/bpmn-xml-compare';
+import { fetchText, importXml, mountModeler, MountedModeler, saveSvg, saveXml } from '../../../../../testing/bpmn-modeler';
 
 /*
  * Models the backends parse with literal prefixed paths (process-deployment,
@@ -80,57 +81,24 @@ const smartServiceFixtures: Fixture[] = [
     { file: 'invalid_conditional_start.bpmn', covers: 'conditional start event outside an event subprocess' },
 ];
 
-async function fetchText(url: string): Promise<string> {
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`${url}: ${response.status}`);
-    }
-    return response.text();
-}
-
 // senergy:* (and the stray unprefixed description) are untyped by design; the specs below assert they survive
 const UNTYPED_ATTRIBUTE = /^unknown attribute <(senergy:[a-z_]+|description)>$/;
 
-function importXml(modeler: any, xml: string): Promise<string[]> {
-    return new Promise((resolve, reject) =>
-        modeler.importXML(xml, (err: any, warnings: any[]) =>
-            err ? reject(err) : resolve((warnings || []).map((w) => w.message).filter((message) => !UNTYPED_ATTRIBUTE.test(message))),
-        ),
-    );
-}
-
-function saveXml(modeler: any): Promise<string> {
-    return new Promise((resolve, reject) => modeler.saveXML((err: any, xml: string) => (err ? reject(err) : resolve(xml))));
-}
-
-function saveSvg(modeler: any): Promise<string> {
-    return new Promise((resolve, reject) => modeler.saveSVG((err: any, svg: string) => (err ? reject(err) : resolve(svg))));
+async function importWarnings(modeler: any, xml: string): Promise<string[]> {
+    return (await importXml(modeler, xml)).filter((message) => !UNTYPED_ATTRIBUTE.test(message));
 }
 
 function roundTrip(name: string, createModeler: (canvas: HTMLElement, panel: HTMLElement) => any, url: (file: string) => string, fixtures: Fixture[]) {
     describe(`${name} round trip`, () => {
-        let host: HTMLElement;
+        let mounted: MountedModeler;
         let modeler: any;
 
         beforeEach(() => {
-            host = document.createElement('div');
-            host.style.cssText = 'position:fixed;left:0;top:0;width:1200px;height:800px;display:flex';
-            const canvas = document.createElement('div');
-            canvas.style.cssText = 'flex:1;height:100%';
-            const panel = document.createElement('div');
-            panel.style.cssText = 'width:260px;height:100%';
-            host.appendChild(canvas);
-            host.appendChild(panel);
-            document.body.appendChild(host);
-            modeler = createModeler(canvas, panel);
-            // the components always set these; the panel renders the info entry from it
-            modeler.designerCallbacks = { getInfoHtml: () => '' };
+            mounted = mountModeler(createModeler);
+            modeler = mounted.modeler;
         });
 
-        afterEach(() => {
-            modeler.destroy();
-            host.remove();
-        });
+        afterEach(() => mounted.destroy());
 
         fixtures.forEach((fixture) => {
             describe(`${fixture.file} (${fixture.covers})`, () => {
@@ -140,7 +108,7 @@ function roundTrip(name: string, createModeler: (canvas: HTMLElement, panel: HTM
 
                 beforeEach(async () => {
                     original = await fetchText(url(fixture.file));
-                    warnings = await importXml(modeler, original);
+                    warnings = await importWarnings(modeler, original);
                     saved = await saveXml(modeler);
                 });
 
@@ -171,7 +139,7 @@ function roundTrip(name: string, createModeler: (canvas: HTMLElement, panel: HTM
                 });
 
                 it('saves its own output unchanged', async () => {
-                    expect(await importXml(modeler, saved)).toEqual([]);
+                    expect(await importWarnings(modeler, saved)).toEqual([]);
                     expect(await saveXml(modeler)).toBe(saved);
                 });
 

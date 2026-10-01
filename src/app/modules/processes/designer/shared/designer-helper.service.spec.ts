@@ -171,14 +171,15 @@ describe('DesignerHelperService.checkConstraints device-type filter', () => {
     });
 
     const modelerWith = (...tasks: any[]) => ({
-        injector: {
-            get: () => [
-                {
-                    type: 'bpmn:Collaboration',
-                    businessObject: { participants: [{ id: 'Participant_1', name: 'Pool', processRef: { flowElements: tasks } }] },
-                },
-            ],
-        },
+        get: (name: string) =>
+            name === 'elementRegistry'
+                ? [
+                    {
+                        type: 'bpmn:Collaboration',
+                        businessObject: { participants: [{ id: 'Participant_1', name: 'Pool', processRef: { flowElements: tasks } }] },
+                    },
+                ]
+                : undefined,
     });
 
     /** The filter the existence check sends to the device-repository for the given tasks. */
