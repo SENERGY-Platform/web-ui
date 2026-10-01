@@ -9,6 +9,7 @@ import { MockKeycloakService } from '../app/core/services/keycloak.mock';
 import { LadonService } from '../app/modules/admin/permissions/shared/services/ladom.service';
 import { EnvironmentsModule } from '../app/modules/environments/environments.module';
 import { FixtureInterceptor } from './fixture.interceptor';
+import { provideIconFontSet } from '../app/core/icon-font-set';
 import { PermissionTestResponse } from '../app/modules/admin/permissions/shared/permission.model';
 
 @Component({
@@ -46,6 +47,7 @@ class PreviewLadonService {
         { provide: KeycloakService, useClass: MockKeycloakService },
         { provide: LadonService, useClass: PreviewLadonService },
         { provide: HTTP_INTERCEPTORS, useClass: FixtureInterceptor, multi: true },
+        provideIconFontSet(),
     ],
     bootstrap: [PreviewRootComponent],
 })
