@@ -2,7 +2,7 @@
 import { Component, NgModule, ChangeDetectionStrategy } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { MockKeycloakService } from '../app/core/services/keycloak.mock';
@@ -10,6 +10,9 @@ import { LadonService } from '../app/modules/admin/permissions/shared/services/l
 import { EnvironmentsModule } from '../app/modules/environments/environments.module';
 import { FixtureInterceptor } from './fixture.interceptor';
 import { provideIconFontSet } from '../app/core/icon-font-set';
+import { AuthorizationService } from '../app/core/services/authorization.service';
+import { ErrorHandlerService } from '../app/core/services/error-handler.service';
+import { PreviewKeycloakService } from './preview-keycloak.service';
 import { PermissionTestResponse } from '../app/modules/admin/permissions/shared/permission.model';
 
 @Component({
@@ -45,6 +48,13 @@ class PreviewLadonService {
     ],
     providers: [
         { provide: KeycloakService, useClass: MockKeycloakService },
+        // AuthorizationService picks its Keycloak from keycloakServiceToken, which CoreModule fills with the real service.
+        {
+            provide: AuthorizationService,
+            useFactory: (errorHandler: ErrorHandlerService, http: HttpClient) =>
+                new AuthorizationService([new PreviewKeycloakService()], errorHandler, http),
+            deps: [ErrorHandlerService, HttpClient],
+        },
         { provide: LadonService, useClass: PreviewLadonService },
         { provide: HTTP_INTERCEPTORS, useClass: FixtureInterceptor, multi: true },
         provideIconFontSet(),
