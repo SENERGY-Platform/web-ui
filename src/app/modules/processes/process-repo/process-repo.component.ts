@@ -295,7 +295,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.sortAttribute.value,
                 this.sortAttribute.order,
                 this.getOwnerFilter(),
-            ).pipe(concatMap(x => this.permissionsService.getComputedResourcePermissionsV2('processmodel', x.result.map(e => e._id)).pipe(map(perm => this.permissionsPerModel = perm), map(_ => x))))
+            ).pipe(concatMap(x => this.permissionsService.getComputedResourcePermissionsV2('processmodel', x.result.map(e => e._id)).pipe(map(perm => this.permissionsPerModel = this.permissionsPerModel.concat(perm)), map(_ => x))))
             .subscribe(repoItems => {
                 this.loadUserNames(repoItems.result);
                 this.animationDone = true;
@@ -358,6 +358,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private reset() {
         this.repoItems.clear();
+        this.permissionsPerModel = [];
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;

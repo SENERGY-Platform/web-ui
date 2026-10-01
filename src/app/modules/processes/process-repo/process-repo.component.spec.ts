@@ -103,6 +103,16 @@ describe('ProcessRepoComponent', () => {
         expect(ownerFilterOfCall(0)).toBeUndefined();
     });
 
+    it('keeps the permissions of earlier pages after loading the next one', () => {
+        load(0);
+        responses[0].next({ result: [process('a', 'u1'), process('b', 'u2')], total: 3 });
+        component.onScroll();
+        responses[1].next({ result: [process('c', 'u1')], total: 3 });
+
+        expect(component.hasXPermission({ _id: 'a' })).toBeTrue();
+        expect(component.hasXPermission({ _id: 'c' })).toBeTrue();
+    });
+
     it('drops the answer of a superseded listing', () => {
         load(0);
         load(1);
