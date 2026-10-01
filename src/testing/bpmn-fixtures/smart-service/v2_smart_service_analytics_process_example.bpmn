@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions
+        xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+        xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+        xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1"
+        targetNamespace="http://bpmn.io/schema/bpmn">
+    <bpmn:process id="v2_smart_service_analytics_process_example" name="smart-service: v2 analytics process example"
+                  isExecutable="true">
+        <bpmn:startEvent id="StartEvent_1">
+            <bpmn:extensionElements>
+                <camunda:formData>
+                    <camunda:formField id="device" label="device" type="string">
+                        <camunda:properties>
+                            <camunda:property id="iot" value="device"/>
+                            <camunda:property id="criteria_list"
+                                              value="[{&#34;interaction&#34;:&#34;event&#34;, &#34;function_id&#34;: &#34;urn:infai:ses:measuring-function:826e5a04-71cc-4935-9fd4-92c930dc06bb&#34;},{&#34;interaction&#34;:&#34;event&#34;, &#34;function_id&#34;: &#34;urn:infai:ses:measuring-function:3b4e0766-0d67-4658-b249-295902cd3290&#34;}]"/>
+                            <camunda:property id="description"
+                                              value="a cycle analysis and with export will be performed on this device"/>
+                            <camunda:property id="entity_only" value="true"/>
+                        </camunda:properties>
+                    </camunda:formField>
+                </camunda:formData>
+            </bpmn:extensionElements>
+            <bpmn:outgoing>SequenceFlow_1xwyb9z</bpmn:outgoing>
+        </bpmn:startEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_1xwyb9z" sourceRef="StartEvent_1" targetRef="Task_18bc8av"/>
+        <bpmn:sequenceFlow id="SequenceFlow_0gnmnhz" sourceRef="Task_18bc8av" targetRef="Task_1xbki89"/>
+        <bpmn:serviceTask id="Task_18bc8av" name="cycle analyse" camunda:type="external" camunda:topic="analytics">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="analytics.flow_id">62bd43205e353260a94ad6cd</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.name">smart-service cycle analytics</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.desc">cycle analytics</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.selection.44bdd4c9-f2dd-4f3d-bcf5-22164bd77e67.value">
+                        ${device}
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.44bdd4c9-f2dd-4f3d-bcf5-22164bd77e67.Threshold">-1
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.44bdd4c9-f2dd-4f3d-bcf5-22164bd77e67.minDuration">0
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.44bdd4c9-f2dd-4f3d-bcf5-22164bd77e67.Timezone">+02:00
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.selection.44bdd4c9-f2dd-4f3d-bcf5-22164bd77e67.timestamp">
+                        ${device}
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.criteria.44bdd4c9-f2dd-4f3d-bcf5-22164bd77e67.value">
+                        [{"interaction":"event", "function_id":
+                        "urn:infai:ses:measuring-function:826e5a04-71cc-4935-9fd4-92c930dc06bb"}]
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.criteria.44bdd4c9-f2dd-4f3d-bcf5-22164bd77e67.timestamp">
+                        [{"interaction":"event", "function_id":
+                        "urn:infai:ses:measuring-function:3b4e0766-0d67-4658-b249-295902cd3290"}]
+                    </camunda:inputParameter>
+                    <camunda:outputParameter name="pipelineId">${pipeline_id}</camunda:outputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_1xwyb9z</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_0gnmnhz</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:serviceTask id="Task_1xbki89" name="process" camunda:type="external" camunda:topic="process_deployment">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="process_deployment.process_model_id">
+                        2b93d779-7834-4aad-9d44-9723ae0953ca
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="process_deployment.name">smart service notification
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="process_deployment.StartEvent_1.selection">
+                        <camunda:script scriptFormat="JavaScript">JSON.stringify({
+                            "generic_event_source":{
+                            "filter_type":"operatorId",
+                            "filter_ids": "44bdd4c9-f2dd-4f3d-bcf5-22164bd77e67:"+pipelineId,
+                            "topic":"analytics-cyclecounter",
+                            "path":"analytics.DayCounter"
+                            }
+                            })
+                        </camunda:script>
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="process_deployment.StartEvent_1.event.value">10
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="process_deployment.StartEvent_1.event.flow_id">
+                        60a757c5e65bbb7c58b61da0
+                    </camunda:inputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_0gnmnhz</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_0y04il1</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:endEvent id="EndEvent_13rztj5">
+            <bpmn:incoming>SequenceFlow_0y04il1</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_0y04il1" sourceRef="Task_1xbki89" targetRef="EndEvent_13rztj5"/>
+    </bpmn:process>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="v2_smart_service_analytics_process_example">
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+                <dc:Bounds x="322" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_1xwyb9z_di" bpmnElement="SequenceFlow_1xwyb9z">
+                <di:waypoint x="358" y="120"/>
+                <di:waypoint x="420" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_0gnmnhz_di" bpmnElement="SequenceFlow_0gnmnhz">
+                <di:waypoint x="520" y="120"/>
+                <di:waypoint x="580" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="ServiceTask_0t62bc6_di" bpmnElement="Task_18bc8av">
+                <dc:Bounds x="420" y="80" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="ServiceTask_17svsle_di" bpmnElement="Task_1xbki89">
+                <dc:Bounds x="580" y="80" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="EndEvent_13rztj5_di" bpmnElement="EndEvent_13rztj5">
+                <dc:Bounds x="742" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_0y04il1_di" bpmnElement="SequenceFlow_0y04il1">
+                <di:waypoint x="680" y="120"/>
+                <di:waypoint x="742" y="120"/>
+            </bpmndi:BPMNEdge>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:senergy="https://senergy.infai.org"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+    <bpmn:process id="events_exmple" name="Events Example" isExecutable="true">
+        <bpmn:startEvent id="StartEvent_1" senergy:script="value == 42" senergy:characteristic="urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43" senergy:function="urn:infai:ses:measuring-function:bdb6a7c8-4a3d-4fe0-bab3-ce02e09b5869" senergy:aspect="urn:infai:ses:aspect:a7470d73-dde3-41fc-92bd-f16bb28f2da6" >
+            <bpmn:outgoing>SequenceFlow_13oib91</bpmn:outgoing>
+            <bpmn:messageEventDefinition/>
+        </bpmn:startEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_13oib91" sourceRef="StartEvent_1"
+                           targetRef="IntermediateThrowEvent_1cypyy9"/>
+        <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_1cypyy9" name="5 Minuten">
+            <bpmn:incoming>SequenceFlow_13oib91</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_1asg2h0</bpmn:outgoing>
+            <bpmn:timerEventDefinition>
+                <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
+            </bpmn:timerEventDefinition>
+        </bpmn:intermediateCatchEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_1asg2h0" sourceRef="IntermediateThrowEvent_1cypyy9"
+                           targetRef="IntermediateThrowEvent_1gein4s"/>
+        <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_1gein4s" name="13.5.2020, 01:13:00">
+            <bpmn:incoming>SequenceFlow_1asg2h0</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_1yaxp6o</bpmn:outgoing>
+            <bpmn:timerEventDefinition>
+                <bpmn:timeDate xsi:type="bpmn:tFormalExpression">2020-05-12T23:13:00.000Z</bpmn:timeDate>
+            </bpmn:timerEventDefinition>
+        </bpmn:intermediateCatchEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_1yaxp6o" sourceRef="IntermediateThrowEvent_1gein4s"
+                           targetRef="IntermediateThrowEvent_1qm1az0"/>
+        <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_1qm1az0" name="* * * * * ?">
+            <bpmn:incoming>SequenceFlow_1yaxp6o</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_1brtu7w</bpmn:outgoing>
+            <bpmn:timerEventDefinition>
+                <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">* * * * * ?</bpmn:timeCycle>
+            </bpmn:timerEventDefinition>
+        </bpmn:intermediateCatchEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_1brtu7w" sourceRef="IntermediateThrowEvent_1qm1az0"
+                           targetRef="IntermediateThrowEvent_0y8pjps"/>
+        <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_0y8pjps">
+            <bpmn:incoming>SequenceFlow_1brtu7w</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_0rzf5oj</bpmn:outgoing>
+            <bpmn:timerEventDefinition/>
+        </bpmn:intermediateCatchEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_0rzf5oj" sourceRef="IntermediateThrowEvent_0y8pjps"
+                           targetRef="IntermediateThrowEvent_0qca317"/>
+        <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_0qca317">
+            <bpmn:incoming>SequenceFlow_0rzf5oj</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_1c03lw7</bpmn:outgoing>
+            <bpmn:messageEventDefinition messageRef="Message_0xda5hy"/>
+        </bpmn:intermediateCatchEvent>
+        <bpmn:endEvent id="EndEvent_0rabb89">
+            <bpmn:incoming>SequenceFlow_1c03lw7</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_1c03lw7" sourceRef="IntermediateThrowEvent_0qca317"
+                           targetRef="EndEvent_0rabb89"/>
+    </bpmn:process>
+    <bpmn:message id="Message_0xda5hy" name="predefined"/>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="events_exmple">
+            <bpmndi:BPMNShape id="StartEvent_1nenany_di" bpmnElement="StartEvent_1">
+                <dc:Bounds x="173" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_13oib91_di" bpmnElement="SequenceFlow_13oib91">
+                <di:waypoint x="209" y="120"/>
+                <di:waypoint x="272" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="IntermediateCatchEvent_0hpugka_di" bpmnElement="IntermediateThrowEvent_1cypyy9">
+                <dc:Bounds x="272" y="102" width="36" height="36"/>
+                <bpmndi:BPMNLabel>
+                    <dc:Bounds x="266" y="145" width="49" height="14"/>
+                </bpmndi:BPMNLabel>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_1asg2h0_di" bpmnElement="SequenceFlow_1asg2h0">
+                <di:waypoint x="308" y="120"/>
+                <di:waypoint x="372" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="IntermediateCatchEvent_093uy1f_di" bpmnElement="IntermediateThrowEvent_1gein4s">
+                <dc:Bounds x="372" y="102" width="36" height="36"/>
+                <bpmndi:BPMNLabel>
+                    <dc:Bounds x="364" y="145" width="52" height="27"/>
+                </bpmndi:BPMNLabel>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_1yaxp6o_di" bpmnElement="SequenceFlow_1yaxp6o">
+                <di:waypoint x="408" y="120"/>
+                <di:waypoint x="472" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="IntermediateCatchEvent_0s2difq_di" bpmnElement="IntermediateThrowEvent_1qm1az0">
+                <dc:Bounds x="472" y="102" width="36" height="36"/>
+                <bpmndi:BPMNLabel>
+                    <dc:Bounds x="469" y="145" width="43" height="14"/>
+                </bpmndi:BPMNLabel>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_1brtu7w_di" bpmnElement="SequenceFlow_1brtu7w">
+                <di:waypoint x="508" y="120"/>
+                <di:waypoint x="562" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="IntermediateCatchEvent_0oicnnd_di" bpmnElement="IntermediateThrowEvent_0y8pjps">
+                <dc:Bounds x="562" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_0rzf5oj_di" bpmnElement="SequenceFlow_0rzf5oj">
+                <di:waypoint x="598" y="120"/>
+                <di:waypoint x="652" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="IntermediateCatchEvent_09uosgz_di" bpmnElement="IntermediateThrowEvent_0qca317">
+                <dc:Bounds x="652" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="EndEvent_0rabb89_di" bpmnElement="EndEvent_0rabb89">
+                <dc:Bounds x="742" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_1c03lw7_di" bpmnElement="SequenceFlow_1c03lw7">
+                <di:waypoint x="688" y="120"/>
+                <di:waypoint x="742" y="120"/>
+            </bpmndi:BPMNEdge>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</bpmn:definitions>

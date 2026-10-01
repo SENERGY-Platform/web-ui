@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:senergy="https://senergy.infai.org"
+                  id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+    <bpmn:collaboration id="ColabId" senergy:description="ColabDesc">
+        <bpmn:participant id="Lane-test" name="Pool1" processRef="Process_1"/>
+        <bpmn:participant id="Participant_1713q6j" name="Pool2" processRef="Process_0yoxyo9"/>
+        <bpmn:messageFlow id="MessageFlow_18cls8l" sourceRef="Task_0il8t6t" targetRef="Task_0kdvhvm"/>
+    </bpmn:collaboration>
+    <bpmn:process id="Process_1" isExecutable="true">
+        <bpmn:laneSet id="LaneSet_1r30qak">
+            <bpmn:lane id="Lane_0tk4r7z" name="1">
+                <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+                <bpmn:flowNodeRef>Task_0bwmzex</bpmn:flowNodeRef>
+                <bpmn:flowNodeRef>Task_0b0luaw</bpmn:flowNodeRef>
+            </bpmn:lane>
+            <bpmn:lane id="Lane_1j14i0k" name="2">
+                <bpmn:flowNodeRef>Task_0lyspnf</bpmn:flowNodeRef>
+                <bpmn:flowNodeRef>Task_0il8t6t</bpmn:flowNodeRef>
+            </bpmn:lane>
+        </bpmn:laneSet>
+        <bpmn:startEvent id="StartEvent_1">
+            <bpmn:outgoing>SequenceFlow_0m9wpea</bpmn:outgoing>
+        </bpmn:startEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_0m9wpea" sourceRef="StartEvent_1" targetRef="Task_0bwmzex"/>
+        <bpmn:sequenceFlow id="SequenceFlow_06f99wn" sourceRef="Task_0bwmzex" targetRef="Task_0lyspnf"/>
+        <bpmn:sequenceFlow id="SequenceFlow_1r5axm0" sourceRef="Task_0lyspnf" targetRef="Task_0b0luaw"/>
+        <bpmn:sequenceFlow id="SequenceFlow_1ouzas0" sourceRef="Task_0b0luaw" targetRef="Task_0il8t6t"/>
+        <bpmn:serviceTask id="Task_0bwmzex" name="Lamp setOnStateFunction" camunda:type="external"
+                          camunda:topic="optimistic">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="payload">{
+                        "function": {
+                        "id": "urn:infai:ses:controlling-function:79e7914b-f303-4a7d-90af-dee70db05fd9",
+                        "name": "setOnStateFunction",
+                        "concept_id": "",
+                        "rdf_type": "https://senergy.infai.org/ontology/ControllingFunction"
+                        },
+                        "device_class": {
+                        "id": "urn:infai:ses:device-class:14e56881-16f9-4120-bb41-270a43070c86",
+                        "name": "Lamp",
+                        "rdf_type": "https://senergy.infai.org/ontology/DeviceClass"
+                        },
+                        "aspect": null,
+                        "label": "setOnStateFunction",
+                        "retries": 0
+                        }
+                    </camunda:inputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_0m9wpea</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_06f99wn</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:serviceTask id="Task_0lyspnf" name="SmartPlug setOnStateFunction" camunda:type="external"
+                          camunda:topic="optimistic">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="payload">{
+                        "function": {
+                        "id": "urn:infai:ses:controlling-function:79e7914b-f303-4a7d-90af-dee70db05fd9",
+                        "name": "setOnStateFunction",
+                        "concept_id": "",
+                        "rdf_type": "https://senergy.infai.org/ontology/ControllingFunction"
+                        },
+                        "device_class": {
+                        "id": "urn:infai:ses:device-class:79de1bd9-b933-412d-b98e-4cfe19aa3250",
+                        "name": "SmartPlug",
+                        "rdf_type": "https://senergy.infai.org/ontology/DeviceClass"
+                        },
+                        "aspect": null,
+                        "label": "setOnStateFunction",
+                        "retries": 0
+                        }
+                    </camunda:inputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_06f99wn</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_1r5axm0</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:serviceTask id="Task_0b0luaw" name="Lamp setColorFunction" camunda:type="external"
+                          camunda:topic="optimistic">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="payload">{
+                        "function": {
+                        "id": "urn:infai:ses:controlling-function:c54e2a89-1fb8-4ecb-8993-a7b40b355599",
+                        "name": "setColorFunction",
+                        "concept_id": "urn:infai:ses:concept:8b1161d5-7878-4dd2-a36c-6f98f6b94bf8",
+                        "rdf_type": "https://senergy.infai.org/ontology/ControllingFunction"
+                        },
+                        "device_class": {
+                        "id": "urn:infai:ses:device-class:14e56881-16f9-4120-bb41-270a43070c86",
+                        "name": "Lamp",
+                        "rdf_type": "https://senergy.infai.org/ontology/DeviceClass"
+                        },
+                        "aspect": null,
+                        "label": "setColorFunction",
+                        "input": {
+                        "b": 0,
+                        "g": 0,
+                        "r": 0
+                        },
+                        "characteristic_id": "urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43",
+                        "retries": 0
+                        }
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="inputs.b">0</camunda:inputParameter>
+                    <camunda:inputParameter name="inputs.g">255</camunda:inputParameter>
+                    <camunda:inputParameter name="inputs.r">0</camunda:inputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_1r5axm0</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_1ouzas0</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:serviceTask id="Task_0il8t6t" name="SmartPlug setOffStateFunction" camunda:type="external"
+                          camunda:topic="optimistic">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="payload">{
+                        "function": {
+                        "id": "urn:infai:ses:controlling-function:2f35150b-9df7-4cad-95bc-165fa00219fd",
+                        "name": "setOffStateFunction",
+                        "concept_id": "",
+                        "rdf_type": "https://senergy.infai.org/ontology/ControllingFunction"
+                        },
+                        "device_class": {
+                        "id": "urn:infai:ses:device-class:79de1bd9-b933-412d-b98e-4cfe19aa3250",
+                        "name": "SmartPlug",
+                        "rdf_type": "https://senergy.infai.org/ontology/DeviceClass"
+                        },
+                        "aspect": null,
+                        "label": "setOffStateFunction",
+                        "retries": 0
+                        }
+                    </camunda:inputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_1ouzas0</bpmn:incoming>
+        </bpmn:serviceTask>
+    </bpmn:process>
+    <bpmn:process id="Process_0yoxyo9">
+        <bpmn:endEvent id="EndEvent_1m6j0rz">
+            <bpmn:incoming>SequenceFlow_0pq5kwq</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_0pq5kwq" sourceRef="Task_0kdvhvm" targetRef="EndEvent_1m6j0rz"/>
+        <bpmn:serviceTask id="Task_0kdvhvm" name="Siren setOffStateFunction" camunda:type="external"
+                          camunda:topic="optimistic">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="payload">{
+                        "function": {
+                        "id": "urn:infai:ses:controlling-function:2f35150b-9df7-4cad-95bc-165fa00219fd",
+                        "name": "setOffStateFunction",
+                        "concept_id": "",
+                        "rdf_type": "https://senergy.infai.org/ontology/ControllingFunction"
+                        },
+                        "device_class": {
+                        "id": "urn:infai:ses:device-class:3e138d25-d5ee-4a89-9a83-630f4308941d",
+                        "name": "Siren",
+                        "rdf_type": "https://senergy.infai.org/ontology/DeviceClass"
+                        },
+                        "aspect": null,
+                        "label": "setOffStateFunction",
+                        "retries": 0
+                        }
+                    </camunda:inputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:outgoing>SequenceFlow_0pq5kwq</bpmn:outgoing>
+        </bpmn:serviceTask>
+    </bpmn:process>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="ColabId">
+            <bpmndi:BPMNShape id="Participant_0u9dh61_di" bpmnElement="Lane-test" isHorizontal="true">
+                <dc:Bounds x="123" y="82" width="737" height="370"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+                <dc:Bounds x="173" y="152" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="Lane_0tk4r7z_di" bpmnElement="Lane_0tk4r7z" isHorizontal="true">
+                <dc:Bounds x="153" y="82" width="707" height="250"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="Lane_1j14i0k_di" bpmnElement="Lane_1j14i0k" isHorizontal="true">
+                <dc:Bounds x="153" y="332" width="707" height="120"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_0m9wpea_di" bpmnElement="SequenceFlow_0m9wpea">
+                <di:waypoint x="209" y="170"/>
+                <di:waypoint x="260" y="170"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_06f99wn_di" bpmnElement="SequenceFlow_06f99wn">
+                <di:waypoint x="310" y="210"/>
+                <di:waypoint x="310" y="350"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_1r5axm0_di" bpmnElement="SequenceFlow_1r5axm0">
+                <di:waypoint x="360" y="390"/>
+                <di:waypoint x="410" y="390"/>
+                <di:waypoint x="410" y="170"/>
+                <di:waypoint x="460" y="170"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_1ouzas0_di" bpmnElement="SequenceFlow_1ouzas0">
+                <di:waypoint x="510" y="210"/>
+                <di:waypoint x="510" y="280"/>
+                <di:waypoint x="550" y="280"/>
+                <di:waypoint x="550" y="350"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="ServiceTask_1tbm5rw_di" bpmnElement="Task_0bwmzex">
+                <dc:Bounds x="260" y="130" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="ServiceTask_1hr4t8e_di" bpmnElement="Task_0lyspnf">
+                <dc:Bounds x="260" y="350" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="ServiceTask_0i5gl5h_di" bpmnElement="Task_0b0luaw">
+                <dc:Bounds x="460" y="130" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="ServiceTask_1arh8su_di" bpmnElement="Task_0il8t6t">
+                <dc:Bounds x="500" y="350" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="Participant_1713q6j_di" bpmnElement="Participant_1713q6j" isHorizontal="true">
+                <dc:Bounds x="123" y="500" width="600" height="250"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="MessageFlow_18cls8l_di" bpmnElement="MessageFlow_18cls8l">
+                <di:waypoint x="550" y="430"/>
+                <di:waypoint x="550" y="590"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="EndEvent_1m6j0rz_di" bpmnElement="EndEvent_1m6j0rz">
+                <dc:Bounds x="652" y="612" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_0pq5kwq_di" bpmnElement="SequenceFlow_0pq5kwq">
+                <di:waypoint x="600" y="630"/>
+                <di:waypoint x="652" y="630"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="ServiceTask_09fj79u_di" bpmnElement="Task_0kdvhvm">
+                <dc:Bounds x="500" y="590" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+    <bpmn:process id="maintenance_test" isExecutable="true">
+        <bpmn:startEvent id="StartEvent_1">
+            <bpmn:extensionElements>
+                <camunda:formData>
+                    <camunda:formField id="value_input" label="value_input" type="string" defaultValue="">
+                        <camunda:properties>
+                            <camunda:property id="order" value="0"/>
+                        </camunda:properties>
+                    </camunda:formField>
+                    <camunda:formField id="iot_input" label="iot_input" type="string" defaultValue="">
+                        <camunda:properties>
+                            <camunda:property id="iot" value="device"/>
+                            <camunda:property id="order" value="0"/>
+                        </camunda:properties>
+                    </camunda:formField>
+                    <camunda:formField id="auto_input" label="auto_input" type="string" defaultValue="">
+                        <camunda:properties>
+                            <camunda:property id="iot" value="device"/>
+                            <camunda:property id="entity_only" value="true"/>
+                            <camunda:property id="order" value="0"/>
+                            <camunda:property id="multiple" value="true"/>
+                            <camunda:property id="auto_select_all" value="true"/>
+                        </camunda:properties>
+                    </camunda:formField>
+                </camunda:formData>
+            </bpmn:extensionElements>
+            <bpmn:outgoing>SequenceFlow_01yzpi2</bpmn:outgoing>
+        </bpmn:startEvent>
+        <bpmn:startEvent id="StartEvent_0at1j8v">
+            <bpmn:extensionElements>
+                <camunda:formData>
+                    <camunda:formField id="pipeline_id" label="pipeline_id" type="string"/>
+                </camunda:formData>
+            </bpmn:extensionElements>
+            <bpmn:outgoing>SequenceFlow_0yef7cb</bpmn:outgoing>
+            <bpmn:messageEventDefinition messageRef="Message_0ufoygk"/>
+        </bpmn:startEvent>
+        <bpmn:serviceTask id="Task_1lip04d" name="debug_update" camunda:type="external" camunda:topic="info">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="info.module_type">widget</camunda:inputParameter>
+                    <camunda:inputParameter name="info.module_data">{
+
+                        }
+                    </camunda:inputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_0yef7cb</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_1uxoofj</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:endEvent id="EndEvent_1dlwaoc">
+            <bpmn:incoming>SequenceFlow_1uvr3j4</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_0yef7cb" sourceRef="StartEvent_0at1j8v" targetRef="Task_1lip04d"/>
+        <bpmn:endEvent id="EndEvent_0a4n1qv">
+            <bpmn:incoming>SequenceFlow_1uxoofj</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_1uxoofj" sourceRef="Task_1lip04d" targetRef="EndEvent_0a4n1qv"/>
+        <bpmn:sequenceFlow id="SequenceFlow_01yzpi2" sourceRef="StartEvent_1" targetRef="Task_0csw058"/>
+        <bpmn:sequenceFlow id="SequenceFlow_1uvr3j4" sourceRef="Task_0csw058" targetRef="EndEvent_1dlwaoc"/>
+        <bpmn:serviceTask id="Task_0csw058" name="debug_instance" camunda:type="external" camunda:topic="info">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="info.module_type">widget</camunda:inputParameter>
+                    <camunda:inputParameter name="info.module_data">{
+
+                        }
+                    </camunda:inputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_01yzpi2</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_1uvr3j4</bpmn:outgoing>
+        </bpmn:serviceTask>
+    </bpmn:process>
+    <bpmn:message id="Message_0ufoygk" name="update"/>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="maintenance_test">
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+                <dc:Bounds x="173" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="StartEvent_111ut2i_di" bpmnElement="StartEvent_0at1j8v">
+                <dc:Bounds x="173" y="212" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="ServiceTask_1pyl3v7_di" bpmnElement="Task_1lip04d">
+                <dc:Bounds x="260" y="190" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="EndEvent_1dlwaoc_di" bpmnElement="EndEvent_1dlwaoc">
+                <dc:Bounds x="412" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_0yef7cb_di" bpmnElement="SequenceFlow_0yef7cb">
+                <di:waypoint x="209" y="230"/>
+                <di:waypoint x="260" y="230"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="EndEvent_0a4n1qv_di" bpmnElement="EndEvent_0a4n1qv">
+                <dc:Bounds x="412" y="212" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_1uxoofj_di" bpmnElement="SequenceFlow_1uxoofj">
+                <di:waypoint x="360" y="230"/>
+                <di:waypoint x="412" y="230"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_01yzpi2_di" bpmnElement="SequenceFlow_01yzpi2">
+                <di:waypoint x="209" y="120"/>
+                <di:waypoint x="260" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_1uvr3j4_di" bpmnElement="SequenceFlow_1uvr3j4">
+                <di:waypoint x="360" y="120"/>
+                <di:waypoint x="412" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="ServiceTask_1raltee_di" bpmnElement="Task_0csw058">
+                <dc:Bounds x="260" y="80" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</bpmn:definitions>

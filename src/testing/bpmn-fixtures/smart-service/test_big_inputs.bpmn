@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn"><bpmn:process id="test_big_inputs" isExecutable="true"><bpmn:startEvent id="StartEvent_1"><bpmn:extensionElements><camunda:formData><camunda:formField id="meters" label="Electricity Meter" type="string" defaultValue=""><camunda:properties><camunda:property id="description" value="Main electricity meter" /><camunda:property id="iot" value="device" /><camunda:property id="criteria_list" value="[{&#34;function_id&#34;:&#34;urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e&#34;}]" /><camunda:property id="order" value="0" /><camunda:property id="multiple" value="true" /><camunda:property id="auto_select_all" value="true" /></camunda:properties></camunda:formField><camunda:formField id="stats" label="Stats" type="string" defaultValue=""><camunda:properties><camunda:property id="description" value="Time intervals to show statistics for" /><camunda:property id="order" value="0" /><camunda:property id="multiple" value="true" /><camunda:property id="options" value="{&#34;Hourly&#34;:&#34;hourly&#34;,&#34;Daily&#34;:&#34;daily&#34;,&#34;Weekly&#34;:&#34;weekly&#34;,&#34;Monthly&#34;:&#34;monthly&#34;}" /></camunda:properties></camunda:formField></camunda:formData></bpmn:extensionElements><bpmn:outgoing>SequenceFlow_0y5cksr</bpmn:outgoing></bpmn:startEvent><bpmn:sequenceFlow id="SequenceFlow_1u67y97" sourceRef="Task_0eqattt" targetRef="Task_1lpjx4o" /><bpmn:serviceTask id="Task_1lpjx4o" name="Create Widget" camunda:type="external" camunda:topic="info"><bpmn:extensionElements><camunda:inputOutput><camunda:inputParameter name="info.module_type">widget</camunda:inputParameter><camunda:inputParameter name="info.module_data_3">}
+        }
+      }
+    ]
+  }
+}</camunda:inputParameter><camunda:inputParameter name="info.key" /><camunda:inputParameter name="info.module_data_1">{
+  "widget_key": "month_bar",
+  "widget_type": "column",
+  "widget_data": {
+    "children": [
+      {
+        "widget_type": "text",
+        "widget_data": {
+          "text": "Electricity Consumption Last Month"
+        }
+      },
+      {
+        "widget_type": "pie_chart",
+        "widget_data": {
+          "titles": "titles",
+          "request": {
+            "method": "POST",
+            "need_token": true,
+            "url": "https://api.senergy.infai.org/db/v3/queries?format=table&amp;order_column_index=0&amp;order_direction=asc",
+            "body":</camunda:inputParameter></camunda:inputOutput></bpmn:extensionElements><bpmn:incoming>SequenceFlow_1u67y97</bpmn:incoming><bpmn:outgoing>SequenceFlow_0c3i2c1</bpmn:outgoing></bpmn:serviceTask><bpmn:scriptTask id="Task_0eqattt" name="Prepare Body" scriptFormat="javascript"><bpmn:incoming>SequenceFlow_0y5cksr</bpmn:incoming><bpmn:outgoing>SequenceFlow_1u67y97</bpmn:outgoing><bpmn:script>var metersP = JSON.parse(meters);
+
+var metersarr = [];
+for (var i = 0; i &lt; metersP.length; i++) {
+    metersarr.push(JSON.parse(metersP[i]));
+}
+
+var bodyH = [];
+for (var i = 0; i &lt; metersarr.length; i++) {
+    var meter = metersarr[i];
+    bodyH.push({
+        "columns": [{
+            "name": meter.device_selection.path,
+            "groupType": "difference-last"
+        }],
+        "groupTime": "1months",
+        "time": {
+            "last": "1months"
+        },
+        "serviceId": meter.device_selection.service_id,
+        "deviceId": meter.device_selection.device_id
+    });
+}
+var finalStr = JSON.stringify(bodyH);
+
+var strArr = finalStr.match(new RegExp('[^]{1,' + 1000 + '}', 'g'))
+
+for (var i = 0; i &lt; strArr.length; i++) {
+    execution.setVariable("info.module_data_2" + (i &lt; 10 ? '0' : '') + i, strArr[i])
+}</bpmn:script></bpmn:scriptTask><bpmn:endEvent id="EndEvent_0bmh1br"><bpmn:incoming>SequenceFlow_0c3i2c1</bpmn:incoming></bpmn:endEvent><bpmn:sequenceFlow id="SequenceFlow_0c3i2c1" sourceRef="Task_1lpjx4o" targetRef="EndEvent_0bmh1br" /><bpmn:sequenceFlow id="SequenceFlow_0y5cksr" sourceRef="StartEvent_1" targetRef="Task_0eqattt" /></bpmn:process><bpmndi:BPMNDiagram id="BPMNDiagram_1"><bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="test_big_inputs"><bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1"><dc:Bounds x="22" y="102" width="36" height="36" /></bpmndi:BPMNShape><bpmndi:BPMNEdge id="SequenceFlow_1u67y97_di" bpmnElement="SequenceFlow_1u67y97"><di:waypoint x="230" y="120" /><di:waypoint x="310" y="120" /></bpmndi:BPMNEdge><bpmndi:BPMNShape id="ServiceTask_0t1dhbu_di" bpmnElement="Task_1lpjx4o"><dc:Bounds x="310" y="80" width="100" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="ScriptTask_1fc63n4_di" bpmnElement="Task_0eqattt"><dc:Bounds x="130" y="80" width="100" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="EndEvent_0bmh1br_di" bpmnElement="EndEvent_0bmh1br"><dc:Bounds x="492" y="102" width="36" height="36" /></bpmndi:BPMNShape><bpmndi:BPMNEdge id="SequenceFlow_0c3i2c1_di" bpmnElement="SequenceFlow_0c3i2c1"><di:waypoint x="410" y="120" /><di:waypoint x="492" y="120" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="SequenceFlow_0y5cksr_di" bpmnElement="SequenceFlow_0y5cksr"><di:waypoint x="58" y="120" /><di:waypoint x="130" y="120" /></bpmndi:BPMNEdge></bpmndi:BPMNPlane></bpmndi:BPMNDiagram></bpmn:definitions>

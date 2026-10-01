@@ -16,16 +16,7 @@
 
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
-import {
-    Modeler,
-    CamundaPropertiesProvider,
-    PropertiesPanelModule,
-    InjectionNames,
-    PaletteProvider,
-    ElementTemplates,
-    camundaBpmnModdle,
-    SenergyPropertiesProvider,
-} from './bpmn-js/bpmn-js';
+import { createProcessModeler } from './bpmn-js/bpmn-js';
 import { HttpClient } from '@angular/common/http';
 import { BpmnElement, HistoricDataConfig, DurationResult, BpmnParameter, DesignerProcessModel } from './shared/designer.model';
 import {
@@ -83,37 +74,7 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
             const that = this;
             this.id = this.route.snapshot.paramMap.get('id') || '';
 
-            this.modeler = new Modeler({
-                container: '#js-canvas',
-                width: '100%',
-                height: '100%',
-                additionalModules: [
-                    PropertiesPanelModule,
-
-                    // Re-use original bpmn-properties-module, see CustomPropsProvider
-                    { [InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]] },
-                    // {[InjectionNames.propertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
-
-                    // TODO: Implement functions and UI components to use DeviceProvider
-                    { [InjectionNames.propertiesProvider]: ['type', SenergyPropertiesProvider.propertiesProvider[1]] },
-
-                    // Re-use original palette, see CustomPaletteProvider
-                    { [InjectionNames.paletteProvider]: ['type', PaletteProvider] },
-
-                    { [InjectionNames.elementTemplates]: ['type', ElementTemplates.elementTemplates[1]] },
-                ],
-                propertiesPanel: {
-                    parent: '#js-properties-panel',
-                },
-                moddleExtensions: {
-                    camunda: camundaBpmnModdle,
-                    senergy: {
-                        name: 'senergy',
-                        uri: 'https://senergy.infai.org',
-                        prefix: 'senergy',
-                    },
-                },
-            });
+            this.modeler = createProcessModeler('#js-canvas', '#js-properties-panel');
 
             this.modeler.designerCallbacks = {
                 getProcessIoConfigs: (callback: (config: ProcessIoDesignerConfig) => void) => {

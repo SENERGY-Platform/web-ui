@@ -185,6 +185,11 @@
                 "input": "src/img/",
                 "output": "/src/img/"
               },
+              {
+                "glob": "**/*.bpmn",
+                "input": "src/testing/bpmn-fixtures/",
+                "output": "/bpmn-fixtures/"
+              },
               "src/manifest.webmanifest"
             ]
           }

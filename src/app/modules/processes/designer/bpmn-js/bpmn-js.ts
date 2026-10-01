@@ -48,6 +48,36 @@ export const ElementTemplates = _ElementTemplates;
 export const SenergyPropertiesProvider = _SenergyPropertiesProvider;
 export const camundaBpmnModdle = _CamundaBpmnModdle.default;
 
+// senergy:* attributes are untyped, so moddle keeps them in $attrs under their prefixed names.
+export const senergyModdleExtensions = {
+    camunda: camundaBpmnModdle,
+    senergy: {
+        name: 'senergy',
+        uri: 'https://senergy.infai.org',
+        prefix: 'senergy',
+    },
+};
+
+/** The modeler of the process designer; the round-trip spec boots the same one. */
+export function createProcessModeler(container: string | HTMLElement, propertiesParent: string | HTMLElement): any {
+    return new Modeler({
+        container,
+        width: '100%',
+        height: '100%',
+        additionalModules: [
+            PropertiesPanelModule,
+            { [InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]] },
+            { [InjectionNames.propertiesProvider]: ['type', SenergyPropertiesProvider.propertiesProvider[1]] },
+            { [InjectionNames.paletteProvider]: ['type', PaletteProvider] },
+            { [InjectionNames.elementTemplates]: ['type', ElementTemplates.elementTemplates[1]] },
+        ],
+        propertiesPanel: {
+            parent: propertiesParent,
+        },
+        moddleExtensions: senergyModdleExtensions,
+    });
+}
+
 export interface IPaletteProvider {
     getPaletteEntries(): any;
 }

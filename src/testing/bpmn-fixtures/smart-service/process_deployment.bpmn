@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions
+        xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+        xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+        xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1"
+        targetNamespace="http://bpmn.io/schema/bpmn">
+    <bpmn:process id="smart_service_process_deployment_example" isExecutable="true">
+        <bpmn:startEvent id="StartEvent_1">
+            <bpmn:extensionElements>
+                <camunda:formData>
+                    <camunda:formField id="device_selection" label="device selection" type="string">
+                        <camunda:properties>
+                            <camunda:property id="iot" value="device"/>
+                            <camunda:property id="criteria"
+                                              value="{&#34;interaction&#34;: &#34;request&#34; ,&#34;function_id&#34;: &#34;foo&#34;}"/>
+                        </camunda:properties>
+                    </camunda:formField>
+                    <camunda:formField id="color_hex" label="Hex Color" type="string" defaultValue="#ff00ff"/>
+                </camunda:formData>
+            </bpmn:extensionElements>
+            <bpmn:outgoing>SequenceFlow_1lcbcbo</bpmn:outgoing>
+        </bpmn:startEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_1lcbcbo" sourceRef="StartEvent_1" targetRef="Task_0j7qtjp"/>
+        <bpmn:endEvent id="EndEvent_0bgheo8">
+            <bpmn:incoming>SequenceFlow_0c2b0sf</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_0c2b0sf" sourceRef="Task_0j7qtjp" targetRef="EndEvent_0bgheo8"/>
+        <bpmn:serviceTask id="Task_0j7qtjp" name="process deployment" camunda:type="external"
+                          camunda:topic="process_deployment">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="Task_foo.selection">${device_selection}</camunda:inputParameter>
+                    <camunda:inputParameter name="Task_foo.parameter">{"inputs.on": true, "inputs.hex": ${color_hex}}
+                    </camunda:inputParameter>
+                    <camunda:inputParameter name="process_model_id">76e6f65c-c3c1-47c0-a999-4675baace425
+                    </camunda:inputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_1lcbcbo</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_0c2b0sf</bpmn:outgoing>
+        </bpmn:serviceTask>
+    </bpmn:process>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="smart_service_process_deployment_example">
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+                <dc:Bounds x="173" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_1lcbcbo_di" bpmnElement="SequenceFlow_1lcbcbo">
+                <di:waypoint x="209" y="120"/>
+                <di:waypoint x="260" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="EndEvent_0bgheo8_di" bpmnElement="EndEvent_0bgheo8">
+                <dc:Bounds x="412" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_0c2b0sf_di" bpmnElement="SequenceFlow_0c2b0sf">
+                <di:waypoint x="360" y="120"/>
+                <di:waypoint x="412" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="ServiceTask_087iyca_di" bpmnElement="Task_0j7qtjp">
+                <dc:Bounds x="260" y="80" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</bpmn:definitions>

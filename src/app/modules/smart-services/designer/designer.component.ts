@@ -21,18 +21,9 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SmartServiceDesignsService } from '../designs/shared/designs.service';
-import {
-    camundaBpmnModdle,
-    CamundaPropertiesProvider,
-    ElementTemplates,
-    InjectionNames,
-    Modeler,
-    PropertiesPanelModule,
-    PaletteProvider
-} from '../../processes/designer/bpmn-js/bpmn-js';
+import { createSmartServiceModeler } from './smart-service-modeler';
 import { SmartServiceDesignModel } from '../designs/shared/design.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import * as ServicePropertiesProvider from './smart-service-properties-provider';
 import {
     SmartServiceInputsDescription, SmartServiceTaskDescription,
     SmartServiceTaskInputOutputDescription
@@ -97,35 +88,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
             this.id = this.route.snapshot.paramMap.get('id') || '';
             this.releaseId =this.route.snapshot.paramMap.get('releaseId') || '';
 
-            this.modeler = new Modeler({
-                container: '#js-canvas',
-                width: '100%',
-                height: '100%',
-                additionalModules: [
-                    PropertiesPanelModule,
-
-                    // Re-use original bpmn-properties-module, see CustomPropsProvider
-                    { [InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]] },
-
-                    { [InjectionNames.propertiesProvider]: ['type', ServicePropertiesProvider.propertiesProvider[1]] },
-
-                    // Re-use original palette, see CustomPaletteProvider
-                    { [InjectionNames.paletteProvider]: ['type', PaletteProvider] },
-
-                    { [InjectionNames.elementTemplates]: ['type', ElementTemplates.elementTemplates[1]] },
-                ],
-                propertiesPanel: {
-                    parent: '#js-properties-panel',
-                },
-                moddleExtensions: {
-                    camunda: camundaBpmnModdle,
-                    senergy: {
-                        name: 'senergy',
-                        uri: 'https://senergy.infai.org',
-                        prefix: 'senergy',
-                    },
-                },
-            });
+            this.modeler = createSmartServiceModeler('#js-canvas', '#js-properties-panel');
 
             this.modeler.designerCallbacks = {
                 openTaskEditDialog(initInfo: SmartServiceTaskDescription, element: BpmnElement, callback: (info: SmartServiceTaskDescription) => void ) {

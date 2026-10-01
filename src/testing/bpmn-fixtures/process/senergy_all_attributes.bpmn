@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:senergy="https://senergy.infai.org" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="senergy_all_attributes" name="All Senergy attributes" isExecutable="true" senergy:description="every attribute the designer writes">
+    <bpmn:startEvent id="StartEvent_1" name="Temperature above 20" senergy:aspect="urn:infai:ses:aspect:air" senergy:aspects="urn:infai:ses:aspect:air,urn:infai:ses:aspect:water" senergy:function="urn:infai:ses:measuring-function:temperature" senergy:characteristic="urn:infai:ses:characteristic:celsius" senergy:script="x &gt; limit" senergy:value_variable_name="x" senergy:variables="{&quot;limit&quot;: &quot;20&quot;}" senergy:qos="1" senergy:order="2" senergy:use_marshaller="true">
+      <bpmn:outgoing>Flow_start</bpmn:outgoing>
+      <bpmn:messageEventDefinition />
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Task_device" name="Air, Water Get Temperature" camunda:type="external" camunda:topic="pessimistic" senergy:order="1">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="payload">{
+    "version": 2,
+    "function": {
+        "id": "urn:infai:ses:measuring-function:temperature",
+        "name": "Get Temperature",
+        "rdf_type": "https://senergy.infai.org/ontology/MeasuringFunction"
+    },
+    "device_class": null,
+    "aspect": {
+        "id": "urn:infai:ses:aspect:air",
+        "name": "Air"
+    },
+    "aspects": [
+        {
+            "id": "urn:infai:ses:aspect:air",
+            "name": "Air"
+        },
+        {
+            "id": "urn:infai:ses:aspect:water",
+            "name": "Water"
+        }
+    ],
+    "label": "Get Temperature",
+    "input": {},
+    "characteristic_id": "urn:infai:ses:characteristic:celsius",
+    "retries": 1,
+    "prefer_event": true
+}</camunda:inputParameter>
+          <camunda:outputParameter name="temperature">${result}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_start</bpmn:incoming>
+      <bpmn:outgoing>Flow_task</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="Timer_wait" name="5 minutes" senergy:order="3">
+      <bpmn:incoming>Flow_task</bpmn:incoming>
+      <bpmn:outgoing>Flow_timer</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="Gateway_hot" default="Flow_default">
+      <bpmn:incoming>Flow_timer</bpmn:incoming>
+      <bpmn:outgoing>Flow_hot</bpmn:outgoing>
+      <bpmn:outgoing>Flow_default</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_start" sourceRef="StartEvent_1" targetRef="Task_device" />
+    <bpmn:sequenceFlow id="Flow_task" sourceRef="Task_device" targetRef="Timer_wait" />
+    <bpmn:sequenceFlow id="Flow_timer" sourceRef="Timer_wait" targetRef="Gateway_hot" />
+    <bpmn:sequenceFlow id="Flow_hot" sourceRef="Gateway_hot" targetRef="Task_script">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="JavaScript">temperature &gt; 20 &amp;&amp; temperature &lt; 90</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_default" sourceRef="Gateway_hot" targetRef="EndEvent_1" />
+    <bpmn:scriptTask id="Task_script" name="Compute" scriptFormat="Javascript">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="Javascript">execution.setVariable("started", true);</camunda:script>
+        </camunda:executionListener>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="limit">
+            <camunda:script scriptFormat="Javascript">20 + 1</camunda:script>
+          </camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_hot</bpmn:incoming>
+      <bpmn:outgoing>Flow_script</bpmn:outgoing>
+      <bpmn:script>var hot = temperature &gt; limit;
+execution.setVariable("hot", hot);</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_script" sourceRef="Task_script" targetRef="EndEvent_1" />
+    <bpmn:endEvent id="EndEvent_1">
+      <bpmn:incoming>Flow_default</bpmn:incoming>
+      <bpmn:incoming>Flow_script</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="StartEvent_conditional" name="Variable changed">
+      <bpmn:outgoing>Flow_conditional</bpmn:outgoing>
+      <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_1" camunda:variableName="mode" camunda:variableEvents="create, update">
+        <bpmn:condition xsi:type="bpmn:tFormalExpression">${mode == 'on'}</bpmn:condition>
+      </bpmn:conditionalEventDefinition>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Task_incident" name="Incident" camunda:type="external" camunda:topic="optimistic">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="incident">mode switched on</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_conditional</bpmn:incoming>
+      <bpmn:outgoing>Flow_incident</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_conditional" sourceRef="StartEvent_conditional" targetRef="Task_incident" />
+    <bpmn:endEvent id="EndEvent_2">
+      <bpmn:incoming>Flow_incident</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_incident" sourceRef="Task_incident" targetRef="EndEvent_2" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="senergy_all_attributes">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_device_di" bpmnElement="Task_device">
+        <dc:Bounds x="240" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Timer_wait_di" bpmnElement="Timer_wait">
+        <dc:Bounds x="392" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_hot_di" bpmnElement="Gateway_hot" isMarkerVisible="true">
+        <dc:Bounds x="475" y="95" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_script_di" bpmnElement="Task_script">
+        <dc:Bounds x="580" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="732" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_conditional_di" bpmnElement="StartEvent_conditional">
+        <dc:Bounds x="152" y="262" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_incident_di" bpmnElement="Task_incident">
+        <dc:Bounds x="240" y="240" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_2_di" bpmnElement="EndEvent_2">
+        <dc:Bounds x="392" y="262" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_start_di" bpmnElement="Flow_start">
+        <di:waypoint x="188" y="120" />
+        <di:waypoint x="240" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_task_di" bpmnElement="Flow_task">
+        <di:waypoint x="340" y="120" />
+        <di:waypoint x="392" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_timer_di" bpmnElement="Flow_timer">
+        <di:waypoint x="428" y="120" />
+        <di:waypoint x="475" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_hot_di" bpmnElement="Flow_hot">
+        <di:waypoint x="525" y="120" />
+        <di:waypoint x="580" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_default_di" bpmnElement="Flow_default">
+        <di:waypoint x="500" y="145" />
+        <di:waypoint x="500" y="200" />
+        <di:waypoint x="750" y="200" />
+        <di:waypoint x="750" y="138" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_script_di" bpmnElement="Flow_script">
+        <di:waypoint x="680" y="120" />
+        <di:waypoint x="732" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_conditional_di" bpmnElement="Flow_conditional">
+        <di:waypoint x="188" y="280" />
+        <di:waypoint x="240" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_incident_di" bpmnElement="Flow_incident">
+        <di:waypoint x="340" y="280" />
+        <di:waypoint x="392" y="280" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<bpmn:definitions
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+        xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+        xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+        xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+    <bpmn:process id="PV_Action" isExecutable="true">
+        <bpmn:startEvent id="StartEvent_1">
+            <bpmn:extensionElements>
+                <camunda:formData>
+                    <camunda:formField id="pv" label="Photovoltaik" type="string" defaultValue="">
+                        <camunda:properties>
+                            <camunda:property id="iot" value="device" />
+                            <camunda:property id="criteria_list" value="[{&#34;interaction&#34;:&#34;event&#34;,&#34;function_id&#34;:&#34;urn:infai:ses:measuring-function:1c7c90fb-73b6-4690-aac2-72e9735e68d0&#34;,&#34;aspect_id&#34;:&#34;urn:infai:ses:aspect:fa09fdeb-3dbe-42ca-9404-1ee9380bce2f&#34;}]" />
+                            <camunda:property id="order" value="0" />
+                        </camunda:properties>
+                    </camunda:formField>
+                    <camunda:formField id="location" label="Location" type="string" defaultValue="">
+                        <camunda:properties>
+                            <camunda:property id="description" value="Location of the PV" />
+                            <camunda:property id="order" value="0" />
+                            <camunda:property id="characteristic_id" value="urn:infai:ses:characteristic:0b041ea3-8efd-4ce4-8130-d8af320326a4" />
+                        </camunda:properties>
+                    </camunda:formField>
+                </camunda:formData>
+            </bpmn:extensionElements>
+            <bpmn:outgoing>SequenceFlow_1lmegde</bpmn:outgoing>
+        </bpmn:startEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_08azs2j" sourceRef="Task_0up5hod" targetRef="Task_0bfj2ub" />
+        <bpmn:sequenceFlow id="SequenceFlow_0xqqc1j" sourceRef="Task_0bfj2ub" targetRef="Task_04moup8" />
+        <bpmn:sequenceFlow id="SequenceFlow_1ooymnx" sourceRef="Task_04moup8" targetRef="Task_1elw298" />
+        <bpmn:endEvent id="EndEvent_1ebgi10">
+            <bpmn:incoming>SequenceFlow_0z6e067</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_0z6e067" sourceRef="Task_0n5yi0u" targetRef="EndEvent_1ebgi10" />
+        <bpmn:sequenceFlow id="SequenceFlow_0wu9u74" sourceRef="Task_1elw298" targetRef="Task_0n5yi0u" />
+        <bpmn:task id="Task_0up5hod" name="Extract Location">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:outputParameter name="lat">
+                        <camunda:script scriptFormat="JavaScript">JSON.parse(location).Latitude</camunda:script>
+                    </camunda:outputParameter>
+                    <camunda:outputParameter name="lon">
+                        <camunda:script scriptFormat="JavaScript">JSON.parse(location).Longitude</camunda:script>
+                    </camunda:outputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_1lmegde</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_08azs2j</bpmn:outgoing>
+        </bpmn:task>
+        <bpmn:sequenceFlow id="SequenceFlow_1lmegde" sourceRef="StartEvent_1" targetRef="Task_0up5hod" />
+        <bpmn:serviceTask id="Task_0bfj2ub" name="Deploy Weather import" camunda:type="external" camunda:topic="import">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="import.request">{"name":"Weather Import","import_type_id":"urn:infai:ses:import-type:a93420ae-ff5f-4c44-ee6b-5d3313f946d2","image":"ghcr.io/senergy-platform/import-yr-forecast:prod","restart":true,"configs":[{"name":"lat","value":51.34},{"name":"long","value":12.38},{"name":"altitude","value":-1},{"name":"max_forecasts","value":3}],"generated":true}</camunda:inputParameter>
+                    <camunda:inputParameter name="import.config.json_overwrite.lat">${lat}</camunda:inputParameter>
+                    <camunda:inputParameter name="import.config.json_overwrite.long">${lon}</camunda:inputParameter>
+                    <camunda:outputParameter name="Task_0bfj2ub_import_id">${import_id}</camunda:outputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_08azs2j</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_0xqqc1j</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:serviceTask id="Task_1elw298" name="Create Export" camunda:type="external" camunda:topic="export">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="export.request">{"FilterType":"operatorId","Filter":"${Task_04moup8_pipeline_id}:18fcf413-b7d1-4bf0-aa60-da4e3d222cf4","Topic":"analytics-valuemapper","ExportDatabaseID":"urn:infai:ses:export-db:ac535dbb-4600-4b84-8660-2f40de034644","TimePath":"analytics.timestamp","Generated":true,"Values":[{"Name":"value","Path":"analytics.value","Type":"float","Tag":false,"LastValue":null,"InstanceID":""}],"Name":"PV Smart Service","EntityName":"-","ServiceName":"-","Offset":"largest","TimestampFormat":"","generated":true}</camunda:inputParameter>
+                    <camunda:outputParameter name="Task_1elw298_export_id">${export_id}</camunda:outputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_1ooymnx</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_0wu9u74</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:serviceTask id="Task_04moup8" name="Deploy PV Pipeline" camunda:type="external" camunda:topic="analytics">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="analytics.flow_id">62fb57e16a67975abf2c2dbf</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.name">PV Smart Service</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.desc" />
+                    <camunda:inputParameter name="analytics.window_time">30</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.persistData.f133fef7-3765-4dae-9d81-b5f5951dd061">false</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.selection.f133fef7-3765-4dae-9d81-b5f5951dd061.value">${pv}</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.criteria.f133fef7-3765-4dae-9d81-b5f5951dd061.value">[{"interaction":"event","function_id":"urn:infai:ses:measuring-function:826e5a04-71cc-4935-9fd4-92c930dc06bb","aspect_id":"urn:infai:ses:aspect:412a48ad-3a80-46f7-8b99-408c4b9c3528"}]</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.f133fef7-3765-4dae-9d81-b5f5951dd061.interval">10000000000</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.persistData.bbae565b-76e7-4c47-ad1c-b195de153fb0">false</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.bbae565b-76e7-4c47-ad1c-b195de153fb0.filter">0</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.persistData.51937417-305e-4beb-9636-78e6918eeb3f">false</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.51937417-305e-4beb-9636-78e6918eeb3f.filter">1</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.persistData.9ec904e3-9dc3-4e2e-80ac-b1795b1804de">false</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.9ec904e3-9dc3-4e2e-80ac-b1795b1804de.message">In der nächsten Zeit steht wenig Solarstrom zur Verfügung</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.9ec904e3-9dc3-4e2e-80ac-b1795b1804de.title">Großverbraucher nach Möglichkeit abschalten!</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.persistData.677adaa7-25dc-460a-b654-5c824d96411b">false</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.677adaa7-25dc-460a-b654-5c824d96411b.message">In der nächsten Zeit steht viel Solarstrom zur Verfügung</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.677adaa7-25dc-460a-b654-5c824d96411b.title">Großverbraucher jetzt einschalten!</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.persistData.4eeb3770-c73b-44d3-992a-1a160024def3">false</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.4eeb3770-c73b-44d3-992a-1a160024def3.filter">1s</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.persistData.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4">true</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.selection.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.forecasted_for">{"import_selection": {"id":"${Task_0bfj2ub_import_id}", "path": "value.forecasted_for"}}</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.criteria.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.forecasted_for">[]</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.selection.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.instant_air_temperature">{"import_selection": {"id":"${Task_0bfj2ub_import_id}", "path": "value.instant_air_temperature"}}</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.criteria.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.instant_air_temperature">[]</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.selection.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.instant_ultraviolet_index_clear_sky">{"import_selection": {"id":"${Task_0bfj2ub_import_id}", "path": "value.instant_ultraviolet_index_clear_sky"}}</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.criteria.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.instant_ultraviolet_index_clear_sky">[]</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.selection.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.1_hours_precipitation_amount">{"import_selection": {"id":"${Task_0bfj2ub_import_id}", "path": "value.1_hours_precipitation_amount"}}</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.criteria.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.1_hours_precipitation_amount">[]</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.selection.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.weather_time">{"import_selection": {"id":"${Task_0bfj2ub_import_id}", "path": "time"}}</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.criteria.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.weather_time">[]</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.selection.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.instant_relative_humidity">{"import_selection": {"id":"${Task_0bfj2ub_import_id}", "path": "value.instant_relative_humidity"}}</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.criteria.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.instant_relative_humidity">[]</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.selection.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.instant_cloud_area_fraction">{"import_selection": {"id":"${Task_0bfj2ub_import_id}", "path": "value.instant_cloud_area_fraction"}}</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.criteria.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.instant_cloud_area_fraction">[]</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.energy_src_id" />
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.weather_src_id" />
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.logger_level">debug</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.selectors">[{"name":"power_func","args":["energy","energy_time"]},{"name":"weather_func","args":["forecasted_for","weather_time","instant_air_temperature","instant_relative_humidity","instant_ultraviolet_index_clear_sky","1_hours_precipitation_amount","instant_cloud_area_fraction"]}]</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.buffer_len">48</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.p_1">1</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.p_0">1</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.history_modus">daylight</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.power_td">0.17</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.power_history_start_stop">2</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.lat">${lat}</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.18fcf413-b7d1-4bf0-aa60-da4e3d222cf4.long">${lon}</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.persistData.7d6f2ae7-c970-4cbc-968d-1dac28abc0c5">false</camunda:inputParameter>
+                    <camunda:inputParameter name="analytics.conf.7d6f2ae7-c970-4cbc-968d-1dac28abc0c5.rules" />
+                    <camunda:inputParameter name="analytics.conf.7d6f2ae7-c970-4cbc-968d-1dac28abc0c5.intervalRules">[{"from": "[0, 0.5]", "to": 0},{"from": "(0.5,1]", "to": 1}]</camunda:inputParameter>
+                    <camunda:outputParameter name="Task_04moup8_pipeline_id">${pipeline_id}</camunda:outputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_0xqqc1j</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_1ooymnx</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:serviceTask id="Task_0n5yi0u" name="Create Widget" camunda:type="external" camunda:topic="info">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="info.module_type">widget</camunda:inputParameter>
+                    <camunda:inputParameter name="info.module_data">{
+                        "widget_key": "pv_forecast",
+                        "widget_type": "column",
+                        "widget_data": {
+                        "children": [
+                        {
+                        "widget_type": "text",
+                        "widget_data": {
+                        "text": "PV Vorhersage"
+                        }
+                        },
+                        {
+                        "widget_type": "pv_forecast",
+                        "widget_data": {
+                        "request": {
+                        "method": "POST",
+                        "need_token": true,
+                        "url": "https://api.senergy.infai.org/db/v2/queries?format=per_query",
+                        "body": [
+                        {
+                        "columns": [
+                        {
+                        "name": "value"
+                        }
+                        ],
+                        "time": {
+                        "ahead": "3d"
+                        },
+                        "measurement": "${Task_1elw298_export_id}"
+                        }
+                        ]
+                        }
+                        }
+                        }
+                        ]
+                        }
+                        }</camunda:inputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_0wu9u74</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_0z6e067</bpmn:outgoing>
+        </bpmn:serviceTask>
+    </bpmn:process>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="PV_Action">
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+                <dc:Bounds x="12" y="102" width="36" height="36" />
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_08azs2j_di" bpmnElement="SequenceFlow_08azs2j">
+                <di:waypoint x="180" y="120" />
+                <di:waypoint x="290" y="120" />
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_0xqqc1j_di" bpmnElement="SequenceFlow_0xqqc1j">
+                <di:waypoint x="390" y="120" />
+                <di:waypoint x="480" y="120" />
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_1ooymnx_di" bpmnElement="SequenceFlow_1ooymnx">
+                <di:waypoint x="580" y="120" />
+                <di:waypoint x="660" y="120" />
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="EndEvent_1ebgi10_di" bpmnElement="EndEvent_1ebgi10">
+                <dc:Bounds x="1052" y="102" width="36" height="36" />
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_0z6e067_di" bpmnElement="SequenceFlow_0z6e067">
+                <di:waypoint x="970" y="120" />
+                <di:waypoint x="1052" y="120" />
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_0wu9u74_di" bpmnElement="SequenceFlow_0wu9u74">
+                <di:waypoint x="760" y="120" />
+                <di:waypoint x="870" y="120" />
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="Task_0up5hod_di" bpmnElement="Task_0up5hod">
+                <dc:Bounds x="80" y="80" width="100" height="80" />
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_1lmegde_di" bpmnElement="SequenceFlow_1lmegde">
+                <di:waypoint x="48" y="120" />
+                <di:waypoint x="80" y="120" />
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="ServiceTask_1ckan21_di" bpmnElement="Task_0bfj2ub">
+                <dc:Bounds x="290" y="80" width="100" height="80" />
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="ServiceTask_0q2tyvx_di" bpmnElement="Task_1elw298">
+                <dc:Bounds x="660" y="80" width="100" height="80" />
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="ServiceTask_09g73at_di" bpmnElement="Task_04moup8">
+                <dc:Bounds x="480" y="80" width="100" height="80" />
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="ServiceTask_06beh0z_di" bpmnElement="Task_0n5yi0u">
+                <dc:Bounds x="870" y="80" width="100" height="80" />
+            </bpmndi:BPMNShape>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</bpmn:definitions>

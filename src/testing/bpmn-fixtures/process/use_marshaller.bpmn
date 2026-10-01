@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+        xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+        xmlns:senergy="https://senergy.infai.org"
+        xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+    <bpmn:process id="use_marshaller_test" isExecutable="true">
+        <bpmn:startEvent id="StartEvent_1">
+            <bpmn:outgoing>SequenceFlow_19e5g6r</bpmn:outgoing>
+        </bpmn:startEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_19e5g6r" sourceRef="StartEvent_1" targetRef="IntermediateThrowEvent_01fl1l6" />
+        <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_01fl1l6" name="Get Battery Level Percentage" senergy:aspect="urn:infai:ses:aspect:d4625151-ce27-4620-9b7e-93ded78484f8" senergy:function="urn:infai:ses:measuring-function:00549f18-88b5-44c7-adb1-f558e8d53d1d" senergy:characteristic="urn:infai:ses:characteristic:46f808f4-bb9e-4cc2-bd50-dc33ca74f273" senergy:use_marshaller="true">
+            <bpmn:incoming>SequenceFlow_19e5g6r</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_1mtnpwg</bpmn:outgoing>
+            <bpmn:messageEventDefinition />
+        </bpmn:intermediateCatchEvent>
+        <bpmn:endEvent id="EndEvent_0n4y7ni">
+            <bpmn:incoming>SequenceFlow_1mtnpwg</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_1mtnpwg" sourceRef="IntermediateThrowEvent_01fl1l6" targetRef="EndEvent_0n4y7ni" />
+    </bpmn:process>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="use_marshaller_test">
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+                <dc:Bounds x="173" y="102" width="36" height="36" />
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_19e5g6r_di" bpmnElement="SequenceFlow_19e5g6r">
+                <di:waypoint x="209" y="120" />
+                <di:waypoint x="262" y="120" />
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="IntermediateCatchEvent_0akvo6w_di" bpmnElement="IntermediateThrowEvent_01fl1l6">
+                <dc:Bounds x="262" y="102" width="36" height="36" />
+                <bpmndi:BPMNLabel>
+                    <dc:Bounds x="238" y="145" width="85" height="27" />
+                </bpmndi:BPMNLabel>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="EndEvent_0n4y7ni_di" bpmnElement="EndEvent_0n4y7ni">
+                <dc:Bounds x="352" y="102" width="36" height="36" />
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_1mtnpwg_di" bpmnElement="SequenceFlow_1mtnpwg">
+                <di:waypoint x="298" y="120" />
+                <di:waypoint x="352" y="120" />
+            </bpmndi:BPMNEdge>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</bpmn:definitions>

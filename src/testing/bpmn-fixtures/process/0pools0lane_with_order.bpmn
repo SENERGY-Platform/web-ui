@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:senergy="https://senergy.infai.org" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+        <bpmn:process id="Process_1" isExecutable="true">
+        <bpmn:startEvent id="StartEvent_1">
+            <bpmn:outgoing>SequenceFlow_01rumtx</bpmn:outgoing>
+        </bpmn:startEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_01rumtx" sourceRef="StartEvent_1" targetRef="Task_158xr4q"/>
+        <bpmn:sequenceFlow id="SequenceFlow_138hi5j" sourceRef="Task_158xr4q" targetRef="IntermediateThrowEvent_164ft4m"/>
+        <bpmn:sequenceFlow id="SequenceFlow_1s3ajt7" sourceRef="IntermediateThrowEvent_164ft4m" targetRef="IntermediateThrowEvent_0jbrrmw"/>
+        <bpmn:sequenceFlow id="SequenceFlow_02httd0" sourceRef="IntermediateThrowEvent_0jbrrmw" targetRef="Task_0ttcmen"/>
+        <bpmn:endEvent id="EndEvent_0g3whui">
+            <bpmn:incoming>SequenceFlow_02kmr9g</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="SequenceFlow_02kmr9g" sourceRef="Task_0ttcmen" targetRef="EndEvent_0g3whui"/>
+        <bpmn:serviceTask id="Task_158xr4q" name="Lamp setColorFunction" camunda:type="external" camunda:topic="optimistic" senergy:order="3">
+            <bpmn:extensionElements>
+                <camunda:inputOutput>
+                    <camunda:inputParameter name="payload">{
+                        "function": {
+                        "id": "urn:infai:ses:controlling-function:c54e2a89-1fb8-4ecb-8993-a7b40b355599",
+                        "name": "setColorFunction",
+                        "concept_id": "urn:infai:ses:concept:8b1161d5-7878-4dd2-a36c-6f98f6b94bf8",
+                        "rdf_type": "https://senergy.infai.org/ontology/ControllingFunction"
+                        },
+                        "device_class": {
+                        "id": "urn:infai:ses:device-class:14e56881-16f9-4120-bb41-270a43070c86",
+                        "name": "Lamp",
+                        "rdf_type": "https://senergy.infai.org/ontology/DeviceClass"
+                        },
+                        "aspect": null,
+                        "label": "setColorFunction",
+                        "input": {
+                        "b": 0,
+                        "g": 0,
+                        "r": 0
+                        },
+                        "characteristic_id": "urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43",
+                        "retries": 0
+                        }</camunda:inputParameter>
+                    <camunda:inputParameter name="inputs.b">0</camunda:inputParameter>
+                    <camunda:inputParameter name="inputs.g">0</camunda:inputParameter>
+                    <camunda:inputParameter name="inputs.r">0</camunda:inputParameter>
+                </camunda:inputOutput>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_01rumtx</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_138hi5j</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_164ft4m" senergy:order="0" senergy:characteristic="urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43" senergy:function="urn:infai:ses:measuring-function:bdb6a7c8-4a3d-4fe0-bab3-ce02e09b5869" senergy:aspect="urn:infai:ses:aspect:a7470d73-dde3-41fc-92bd-f16bb28f2da6">
+            <bpmn:incoming>SequenceFlow_138hi5j</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_1s3ajt7</bpmn:outgoing>
+            <bpmn:messageEventDefinition/>
+        </bpmn:intermediateCatchEvent>
+        <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_0jbrrmw" senergy:order="1">
+            <bpmn:incoming>SequenceFlow_1s3ajt7</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_02httd0</bpmn:outgoing>
+            <bpmn:timerEventDefinition/>
+        </bpmn:intermediateCatchEvent>
+        <bpmn:serviceTask id="Task_0ttcmen" name="send notification" senergy:order="2">
+            <bpmn:extensionElements>
+                <camunda:connector>
+                    <camunda:inputOutput>
+                        <camunda:inputParameter name="payload">{"message": "test", "title": "test"}</camunda:inputParameter>
+                        <camunda:inputParameter name="deploymentIdentifier">notification</camunda:inputParameter>
+                    </camunda:inputOutput>
+                    <camunda:connectorId>http-connector</camunda:connectorId>
+                </camunda:connector>
+            </bpmn:extensionElements>
+            <bpmn:incoming>SequenceFlow_02httd0</bpmn:incoming>
+            <bpmn:outgoing>SequenceFlow_02kmr9g</bpmn:outgoing>
+        </bpmn:serviceTask>
+    </bpmn:process>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+                <dc:Bounds x="173" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_01rumtx_di" bpmnElement="SequenceFlow_01rumtx">
+                <di:waypoint x="209" y="120"/>
+                <di:waypoint x="260" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_138hi5j_di" bpmnElement="SequenceFlow_138hi5j">
+                <di:waypoint x="360" y="120"/>
+                <di:waypoint x="412" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_1s3ajt7_di" bpmnElement="SequenceFlow_1s3ajt7">
+                <di:waypoint x="448" y="120"/>
+                <di:waypoint x="502" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="SequenceFlow_02httd0_di" bpmnElement="SequenceFlow_02httd0">
+                <di:waypoint x="538" y="120"/>
+                <di:waypoint x="600" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="EndEvent_0g3whui_di" bpmnElement="EndEvent_0g3whui">
+                <dc:Bounds x="762" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="SequenceFlow_02kmr9g_di" bpmnElement="SequenceFlow_02kmr9g">
+                <di:waypoint x="700" y="120"/>
+                <di:waypoint x="762" y="120"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNShape id="ServiceTask_07u43su_di" bpmnElement="Task_158xr4q">
+                <dc:Bounds x="260" y="80" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="IntermediateCatchEvent_1rj7uj8_di" bpmnElement="IntermediateThrowEvent_164ft4m">
+                <dc:Bounds x="412" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="IntermediateCatchEvent_1ws5ws5_di" bpmnElement="IntermediateThrowEvent_0jbrrmw">
+                <dc:Bounds x="502" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="ServiceTask_0s4dy1o_di" bpmnElement="Task_0ttcmen">
+                <dc:Bounds x="600" y="80" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</bpmn:definitions>
