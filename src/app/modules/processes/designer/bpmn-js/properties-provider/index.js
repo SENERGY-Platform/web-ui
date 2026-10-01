@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-module.exports = {
-    __init__: [ 'propertiesProvider' ],
-    propertiesProvider: [ 'type', require('./SenergyPropertiesProvider').default ]
+
+import SenergyPropertiesProvider from './SenergyPropertiesProvider';
+
+export default {
+    __init__: ['senergyPropertiesProvider'],
+    senergyPropertiesProvider: ['type', SenergyPropertiesProvider],
 };

@@ -15,102 +15,108 @@
  */
 
 /*
- * The camunda properties panel renders every script as a textarea a few lines tall,
- * which is awkward for anything longer than a one-line condition. This adds a button
- * that opens the same script in a real editor.
+ * The camunda properties panel renders every script as a small textarea, awkward for anything
+ * longer than a one-line condition. This adds a button under the panel's own (still editable)
+ * field that opens the same script in the designer's editor.
  *
- * The panel's own textarea is left exactly as it was, fully editable -- the editor is
- * an extra way in, not a replacement. It is also the write path: setting its value
- * and firing a 'change' event hands the new script to the panel's own handler, which
- * persists it through camunda's validated set(). That avoids reimplementing where
- * each of the three sites stores its script -- a condition keeps it on a
- * bpmn:FormalExpression, a script task on the task itself, a listener on a
- * camunda:Script.
- *
- * All three sites come from the same helper (parts/implementation/Script.js), so they
- * are handled identically -- only the id and whether the row is conditionally shown
- * differ.
+ * The edited script is written the way the panel's field writes it: one
+ * element.updateModdleProperties on the moddle element that holds the script, so it is undoable
+ * and goes through the same command as typing would.
  */
+
+import { Fragment, h } from '@bpmn-io/properties-panel/preact';
+import { useService } from 'bpmn-js-properties-panel';
+import { getBusinessObject, is } from 'bpmn-js/lib/util/ModelUtil';
 
 /*
- * Keyed by the entry ids the camunda provider gives its script entries.
- * showWhen names an existing predicate on the entry, used as the row's data-show so
- * the button only appears when the script field itself does.
+ * Where an entry's script lives. Covers the three sites the designers always offered the editor
+ * for: conditions, script tasks and listener scripts (not input/output parameter scripts).
  */
-const scriptEntries = {
-    // parts/ConditionalProps.js -- sequence flow conditions and conditional events
-    condition: { showWhen: 'isScript' },
-    // parts/ScriptTaskProps.js -- bpmn:ScriptTask
-    'script-implementation': {},
-    // parts/ListenerDetailProps.js -- execution and task listeners
-    'listener-script-value': {},
-};
-
-/**
- * Walks the tabs the camunda provider produced and augments every script entry.
- * Returns the same tabs, mutated, so it can be dropped into a getTabs() chain.
- */
-export function augmentScriptEntries(tabs, bpmnjs) {
-    (tabs || []).forEach(function (tab) {
-        (tab.groups || []).forEach(function (group) {
-            (group.entries || []).forEach(function (entry) {
-                const options = entry && Object.prototype.hasOwnProperty.call(scriptEntries, entry.id) ? scriptEntries[entry.id] : null;
-                if (options && !entry.senergyScriptEditor) {
-                    augmentScriptEntry(entry, options, bpmnjs);
-                }
-            });
-        });
-    });
-    return tabs;
+function scriptSite(entry) {
+    if (entry.id === 'conditionScriptValue') {
+        return function (element) {
+            var bo = getBusinessObject(element);
+            var expression = is(bo, 'bpmn:SequenceFlow')
+                ? bo.get('conditionExpression')
+                : bo.get('eventDefinitions').find(function (definition) {
+                    return is(definition, 'bpmn:ConditionalEventDefinition');
+                }).get('condition');
+            return { moddleElement: expression, property: 'body', scriptFormat: expression.get('language') };
+        };
+    }
+    if (entry.id === 'scriptValue' && !entry.script) {
+        return function (element) {
+            var bo = getBusinessObject(element);
+            return { moddleElement: bo, property: 'script', scriptFormat: bo.get('scriptFormat') };
+        };
+    }
+    if (entry.script && /-(executionListener|taskListener)-\d+-?scriptValue$/.test(entry.id)) {
+        var script = entry.script;
+        return function () {
+            return { moddleElement: script, property: 'value', scriptFormat: script.get('scriptFormat') };
+        };
+    }
+    return null;
 }
 
-function augmentScriptEntry(entry, options, bpmnjs) {
-    entry.senergyScriptEditor = true;
+function ScriptEntryWithEditor(props) {
+    var Original = props.senergyScriptComponent;
+    var bpmnjs = useService('bpmnjs');
+    var commandStack = useService('commandStack');
 
-    const dataShow = options.showWhen ? ' data-show="' + options.showWhen + '"' : '';
-    entry.html =
-        '<div class="senergy-script-entry">' +
-        entry.html +
-        '<div class="bpp-row"' + dataShow + '>' +
-        '<button class="bpmn-iot-button" data-action="openScriptEditor">Open in Editor</button>' +
-        '</div>' +
-        '</div>';
-
-    entry.openScriptEditor = function (element, node) {
-        const editScript = bpmnjs.designerCallbacks && bpmnjs.designerCallbacks.editScript;
+    var open = function () {
+        var editScript = bpmnjs.designerCallbacks && bpmnjs.designerCallbacks.editScript;
         if (!editScript) {
             console.log('missing bpmnjs.designerCallbacks.editScript()');
             return;
         }
-
-        const scriptField = node.querySelector('textarea[name=scriptValue]');
-        if (!scriptField) {
-            console.log('unable to find the script field of entry', entry.id);
-            return;
-        }
-        const formatField = node.querySelector('input[name=scriptFormat]');
-
+        var element = props.element;
+        var site = props.senergyScriptSite(element);
         editScript(
             {
-                script: scriptField.value || '',
-                scriptFormat: formatField ? formatField.value || '' : '',
+                script: site.moddleElement.get(site.property) || '',
+                scriptFormat: site.scriptFormat || '',
                 label: (element.businessObject && element.businessObject.name) || '',
             },
-            // the element is what the process flow analysis walks to work out which
-            // variables exist at this point
+            // the element is what the process flow analysis walks to work out which variables exist here
             element,
             function (result) {
-                scriptField.value = result.script;
-
-                // Hands the value to the panel's own change handler, which runs the
-                // camunda set() for this entry. Must bubble: the panel listens on
-                // its container, not on the field.
-                scriptField.dispatchEvent(new Event('change', { bubbles: true }));
+                commandStack.execute('element.updateModdleProperties', {
+                    element: element,
+                    moddleElement: site.moddleElement,
+                    properties: { [site.property]: result.script || '' },
+                });
             },
         );
-
-        // Nothing to apply yet -- the dialog is asynchronous, and the change event
-        // fired in the callback is what marks the entry dirty.
-        return false;
     };
+
+    return h(Fragment, null,
+        h(Original, props),
+        h('div', { class: 'bio-properties-panel-entry senergy-script-entry' },
+            h('button', { type: 'button', class: 'bpmn-iot-button', onClick: open }, 'Open in Editor')));
+}
+
+function augmentEntries(entries) {
+    (entries || []).forEach(function (entry) {
+        if (entry.component === ScriptEntryWithEditor) {
+            return;
+        }
+        var site = scriptSite(entry);
+        if (site) {
+            entry.senergyScriptComponent = entry.component;
+            entry.senergyScriptSite = site;
+            entry.component = ScriptEntryWithEditor;
+        }
+    });
+}
+
+/** Gives every script entry of the groups the editor button; returns the same groups. */
+export function augmentScriptEntries(groups) {
+    (groups || []).forEach(function (group) {
+        augmentEntries(group.entries);
+        (group.items || []).forEach(function (item) {
+            augmentEntries(item.entries);
+        });
+    });
+    return groups;
 }

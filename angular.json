@@ -69,8 +69,9 @@
                 "inject": false
               },
               "node_modules/bpmn-js/dist/assets/diagram-js.css",
+              "node_modules/bpmn-js/dist/assets/bpmn-js.css",
               "node_modules/bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css",
-              "node_modules/bpmn-js-properties-panel/styles/properties.less",
+              "node_modules/@bpmn-io/properties-panel/dist/assets/properties-panel.css",
               "node_modules/gridstack/dist/gridstack.min.css",
               {
                 "input": "node_modules/swagger-ui/dist/swagger-ui.css",

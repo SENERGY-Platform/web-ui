@@ -144,6 +144,9 @@ export function diffCanonical(expected: CanonicalNode, actual: CanonicalNode, pa
     if (stableJson(expected.json) !== stableJson(actual.json)) {
         diffs.push(`${here}: JSON ${stableJson(actual.json)} instead of ${stableJson(expected.json)}`);
     }
+    if (expected.name === 'bpmndi:BPMNPlane') {
+        return diffs.concat(diffById(expected.children, actual.children, here));
+    }
     const count = Math.max(expected.children.length, actual.children.length);
     for (let i = 0; i < count; i++) {
         const e = expected.children[i];
@@ -156,6 +159,27 @@ export function diffCanonical(expected: CanonicalNode, actual: CanonicalNode, pa
             diffs.push(...diffCanonical(e, a, here));
         }
     }
+    return diffs;
+}
+
+/*
+ * bpmn-js 18 writes the shapes and edges of a plane in canvas order (BpmnDiOrdering), so they
+ * are matched by id; the backends only check that the diagram exists.
+ */
+function diffById(expected: CanonicalNode[], actual: CanonicalNode[], path: string): string[] {
+    const idOf = (node: CanonicalNode) => (node.attrs.find((attr) => attr[0] === 'id') || ['', label(node)])[1];
+    const actualById = new Map(actual.map((node) => [idOf(node), node] as [string, CanonicalNode]));
+    const diffs: string[] = [];
+    expected.forEach((node) => {
+        const match = actualById.get(idOf(node));
+        if (!match) {
+            diffs.push(`${path}: element ${label(node)} lost`);
+        } else {
+            diffs.push(...diffCanonical(node, match, path));
+            actualById.delete(idOf(node));
+        }
+    });
+    actualById.forEach((node) => diffs.push(`${path}: element ${label(node)} added`));
     return diffs;
 }
 

@@ -16,7 +16,7 @@
 
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
-import { createProcessModeler } from './bpmn-js/bpmn-js';
+import { createProcessModeler, exportDiagram } from './bpmn-js/bpmn-js';
 import { HttpClient } from '@angular/common/http';
 import { BpmnElement, HistoricDataConfig, DurationResult, BpmnParameter, DesignerProcessModel } from './shared/designer.model';
 import {
@@ -208,7 +208,7 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
         this.processRepoService.getProcessModel(id).subscribe((resp: DesignerProcessModel | null) => {
             if (resp !== null) {
                 const xml = resp.bpmn_xml;
-                this.modeler.importXML(xml, this.handleError);
+                this.modeler.importXML(xml).catch(this.handleError);
             }
         });
     }
@@ -227,7 +227,7 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
                 responseType: 'text',
             })
             .subscribe((x: any) => {
-                this.modeler.importXML(x, this.handleError);
+                this.modeler.importXML(x).catch(this.handleError);
             }, this.handleError);
     }
 
@@ -245,21 +245,14 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
                 if (this.countErrors(responses) > 0) {
                     this.showDeviceClassError(responses);
                 } else {
-                    this.saveXML((errXML, processXML) => {
-                        if (errXML) {
-                            this.snackBar.open('Error XML! ' + errXML, 'close', { panelClass: 'snack-bar-error' });
-                        } else {
-                            this.saveSVG((errSVG, svgXML) => {
-                                if (errSVG) {
-                                    this.snackBar.open('Error SVG! ' + errSVG, 'close', { panelClass: 'snack-bar-error' });
-                                } else {
-                                    this.processRepoService.saveProcess(this.id, processXML, svgXML).subscribe(() => {
-                                        this.snackBar.open('Model saved.', undefined, { duration: 2000 });
-                                    });
-                                }
+                    exportDiagram(this.modeler).then(
+                        ({ xml, svg }) => {
+                            this.processRepoService.saveProcess(this.id, xml, svg).subscribe(() => {
+                                this.snackBar.open('Model saved.', undefined, { duration: 2000 });
                             });
-                        }
-                    });
+                        },
+                        (err: Error) => this.snackBar.open(err.message, 'close', { panelClass: 'snack-bar-error' }),
+                    );
                 }
             });
     }
@@ -269,21 +262,13 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
         if (file) {
             const fileReader = new FileReader();
             fileReader.onload = () => {
-                this.modeler.importXML(fileReader.result, this.handleError);
+                this.modeler.importXML(fileReader.result).catch(this.handleError);
                 this.snackBar.open('Import finished.', undefined, { duration: 2000 });
             };
             fileReader.readAsText(file);
         } else {
             this.snackBar.open('Failed to load file!', undefined, { duration: 2000 });
         }
-    }
-
-    private saveXML(callback: (error: Error, processXML: string) => void) {
-        this.modeler.saveXML(callback);
-    }
-
-    private saveSVG(callback: (error: Error, svgXML: string) => void) {
-        this.modeler.saveSVG(callback);
     }
 
     private getInfoHtmlTableRows(outputs: BpmnParameter[], index: number = 0): string {

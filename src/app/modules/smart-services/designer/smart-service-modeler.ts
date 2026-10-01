@@ -14,33 +14,10 @@
  * limitations under the License.
  */
 
-import {
-    CamundaPropertiesProvider,
-    ElementTemplates,
-    InjectionNames,
-    Modeler,
-    PaletteProvider,
-    PropertiesPanelModule,
-    senergyModdleExtensions,
-} from '../../processes/designer/bpmn-js/bpmn-js';
-import * as ServicePropertiesProvider from './smart-service-properties-provider';
+import { createModeler } from '../../processes/designer/bpmn-js/bpmn-js';
+import SmartServicePropertiesProviderModule from './smart-service-properties-provider';
 
 /** The modeler of the smart-service designer; the round-trip spec boots the same one. */
 export function createSmartServiceModeler(container: string | HTMLElement, propertiesParent: string | HTMLElement): any {
-    return new Modeler({
-        container,
-        width: '100%',
-        height: '100%',
-        additionalModules: [
-            PropertiesPanelModule,
-            { [InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]] },
-            { [InjectionNames.propertiesProvider]: ['type', ServicePropertiesProvider.propertiesProvider[1]] },
-            { [InjectionNames.paletteProvider]: ['type', PaletteProvider] },
-            { [InjectionNames.elementTemplates]: ['type', ElementTemplates.elementTemplates[1]] },
-        ],
-        propertiesPanel: {
-            parent: propertiesParent,
-        },
-        moddleExtensions: senergyModdleExtensions,
-    });
+    return createModeler(container, propertiesParent, SmartServicePropertiesProviderModule);
 }

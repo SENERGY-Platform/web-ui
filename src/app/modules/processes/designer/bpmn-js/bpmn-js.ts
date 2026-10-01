@@ -14,43 +14,16 @@
  * limitations under the License.
  */
 
-import _Modeler from 'bpmn-js/dist/bpmn-modeler.production.min.js';
-import * as _PropertiesPanelModule from 'bpmn-js-properties-panel';
-import * as _CamundaPropertiesProvider from 'bpmn-js-properties-panel/lib/provider/camunda';
-import * as _ElementTemplates from 'bpmn-js-properties-panel/lib/provider/camunda/element-templates';
-import _PaletteProvider from 'bpmn-js/lib/features/palette/PaletteProvider';
-import * as _CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json';
-import * as _SenergyPropertiesProvider from './properties-provider';
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const InjectionNames = {
-    eventBus: 'eventBus',
-    bpmnFactory: 'bpmnFactory',
-    elementRegistry: 'elementRegistry',
-    translate: 'translate',
-    propertiesProvider: 'propertiesProvider',
-    camundaPropertiesProvider: 'camundaPropertiesProvider',
-    paletteProvider: 'paletteProvider',
-    elementTemplates: 'elementTemplates',
-};
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const Modeler = _Modeler;
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const PropertiesPanelModule = _PropertiesPanelModule;
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const PaletteProvider = _PaletteProvider;
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const CamundaPropertiesProvider = _CamundaPropertiesProvider;
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const ElementTemplates = _ElementTemplates;
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const SenergyPropertiesProvider = _SenergyPropertiesProvider;
-export const camundaBpmnModdle = _CamundaBpmnModdle.default;
+import Modeler from 'bpmn-js/lib/Modeler';
+import { BpmnPropertiesPanelModule, BpmnPropertiesProviderModule, CamundaPlatformPropertiesProviderModule } from 'bpmn-js-properties-panel';
+import camundaModdle from 'camunda-bpmn-moddle/resources/camunda.json';
+import SenergyPropertiesProviderModule from './properties-provider';
+import { trimTextOnImportModule } from './trim-text-on-import';
+import { extensionCopyRulesModule } from './extension-copy-rules';
 
 // senergy:* attributes are untyped, so moddle keeps them in $attrs under their prefixed names.
 export const senergyModdleExtensions = {
-    camunda: camundaBpmnModdle,
+    camunda: camundaModdle,
     senergy: {
         name: 'senergy',
         uri: 'https://senergy.infai.org',
@@ -58,34 +31,51 @@ export const senergyModdleExtensions = {
     },
 };
 
-/** The modeler of the process designer; the round-trip spec boots the same one. */
-export function createProcessModeler(container: string | HTMLElement, propertiesParent: string | HTMLElement): any {
+/*
+ * The modules both designers share. camunda-bpmn-js-behaviors is deliberately not loaded: the
+ * designers ran without such behaviours, and some of them rewrite the model on ordinary edits.
+ */
+export const designerModules = [
+    BpmnPropertiesPanelModule,
+    BpmnPropertiesProviderModule,
+    CamundaPlatformPropertiesProviderModule,
+    trimTextOnImportModule,
+    extensionCopyRulesModule,
+];
+
+export function createModeler(container: string | HTMLElement, propertiesParent: string | HTMLElement, providerModule: any): any {
     return new Modeler({
         container,
         width: '100%',
         height: '100%',
-        additionalModules: [
-            PropertiesPanelModule,
-            { [InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]] },
-            { [InjectionNames.propertiesProvider]: ['type', SenergyPropertiesProvider.propertiesProvider[1]] },
-            { [InjectionNames.paletteProvider]: ['type', PaletteProvider] },
-            { [InjectionNames.elementTemplates]: ['type', ElementTemplates.elementTemplates[1]] },
-        ],
+        additionalModules: [...designerModules, providerModule],
         propertiesPanel: {
             parent: propertiesParent,
         },
+        // the designers never had keyboard shortcuts; diagram-js 15 would bind them to the canvas
+        keyboard: { bind: false },
         moddleExtensions: senergyModdleExtensions,
     });
 }
 
-export interface IPaletteProvider {
-    getPaletteEntries(): any;
+/** The modeler of the process designer; the round-trip spec boots the same one. */
+export function createProcessModeler(container: string | HTMLElement, propertiesParent: string | HTMLElement): any {
+    return createModeler(container, propertiesParent, SenergyPropertiesProviderModule);
 }
 
-export interface IPalette {
-    registerProvider(provider: IPaletteProvider): any;
-}
-
-export interface IPropertiesProvider {
-    getTabs(element: any): any;
+/** The model as the repositories store it: unformatted XML and the SVG preview; rejects with the message to show. */
+export async function exportDiagram(modeler: any): Promise<{ xml: string; svg: string }> {
+    let xml: string;
+    let svg: string;
+    try {
+        xml = (await modeler.saveXML()).xml;
+    } catch (err) {
+        throw new Error('Error XML! ' + err);
+    }
+    try {
+        svg = (await modeler.saveSVG()).svg;
+    } catch (err) {
+        throw new Error('Error SVG! ' + err);
+    }
+    return { xml, svg };
 }

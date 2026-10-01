@@ -14,186 +14,208 @@
  * limitations under the License.
  */
 
-import { processIncident, external, io, msgevent, notification, influx, info, timeHelper, description, order } from './IotProps';
-import { augmentScriptEntries } from './ScriptEditorEntry';
 
 import { is } from 'bpmn-js/lib/util/ModelUtil';
-import inherits from 'inherits';
-import PropertiesActivator from 'bpmn-js-properties-panel/lib/PropertiesActivator';
+import { augmentScriptEntries } from './ScriptEditorEntry';
+import { attributeSelectEntry, attributeTextEntry, buttonEntry, htmlEntry } from './senergy-entries';
+import { modelServices, refresh } from '../model/bpmn-elements';
+import {
+    hasEditableInputs,
+    hasOutputsForTopic,
+    orderOptions,
+    readConditionalEvent,
+    readDeviceTask,
+    readHistoricDataConfig,
+    readIncident,
+    readNotification,
+    readProcessIo,
+    readTimer,
+    taskOutputParameters,
+    writeConditionalEvent,
+    writeDeviceTask,
+    writeHistoricDataConfig,
+    writeIncident,
+    writeNotification,
+    writeProcessIo,
+    writeTimer,
+} from '../model/process-writers';
 
-import propertiesProvider from 'bpmn-js-properties-panel/lib/provider/camunda';
+// after the Camunda Platform provider (500), so the script entries it adds can be augmented
+const LOW_PRIORITY = 400;
 
-var CamundaProvider = propertiesProvider.propertiesProvider[1];
+var isTask = function (element) {
+    return is(element, 'bpmn:Task') && !is(element, 'bpmn:ReceiveTask');
+};
 
-function SenergyPropertiesProvider(eventBus, canvas, bpmnFactory, elementRegistry, elementTemplates, bpmnjs, replace, selection, modeling, translate) {
-    this.getTabs = function(element) {
-        var camunda = new CamundaProvider(eventBus, canvas, bpmnFactory, elementRegistry, elementTemplates, translate);
-        var camundaTabs = camunda.getTabs(element);
-        camundaTabs[0].groups.unshift(createDescriptionGroup());
-        camundaTabs[0].groups.unshift(createOrderGroup());
-        camundaTabs[0].groups.unshift(createIotInfoGroup(element, bpmnjs));
-        camundaTabs[0].groups.unshift(createIotMsgEventGroup(element, bpmnjs, eventBus, modeling));
-        camundaTabs[0].groups.unshift(createIotExternalTaskGroup(element, bpmnjs, eventBus));
-        camundaTabs[0].groups.unshift(createProcessIoTaskGroup(element, bpmnjs));
-        camundaTabs[0].groups.unshift(createHelperGroup(element, bpmnjs));
-        camundaTabs[0].groups.unshift(createInfluxTaskGroup(element, bpmnjs, eventBus));
-        camundaTabs[0].groups.unshift(createTimeEventHelperGroup(element, bpmnjs));
-        camundaTabs[0].groups.unshift(createIncidentTaskGroup(element, bpmnjs));
-
-        // must run over the camunda tabs, whose entries hold the script fields
-        augmentScriptEntries(camundaTabs, bpmnjs);
-
-        return camundaTabs;
-    };
-}
-
-var isTask = function(element){
-  return is(element, "bpmn:Task") && !is(element, "bpmn:ReceiveTask")
+var firstEventDefinitionType = function (element) {
+    var definitions = element.businessObject && element.businessObject.eventDefinitions;
+    return definitions && definitions[0] && definitions[0].$type;
 };
 
 var isMsgEvent = function (element) {
-    return element.businessObject && element.businessObject.eventDefinitions && element.businessObject.eventDefinitions[0] && element.businessObject.eventDefinitions[0].$type == "bpmn:MessageEventDefinition"
+    return firstEventDefinitionType(element) === 'bpmn:MessageEventDefinition';
+};
+
+var isTimeEvent = function (element) {
+    return firstEventDefinitionType(element) === 'bpmn:TimerEventDefinition';
 };
 
 var isOrderElement = function (element) {
-    return isTask(element) || isMsgEvent(element) || isTimeEvent(element)
-};
-
-
-var isTimeEvent = function (element) {
-    return element.businessObject && element.businessObject.eventDefinitions && element.businessObject.eventDefinitions[0] && element.businessObject.eventDefinitions[0].$type == "bpmn:TimerEventDefinition"
+    return isTask(element) || isMsgEvent(element) || isTimeEvent(element);
 };
 
 var isCollaborationOrProcess = function (element) {
-    return is(element, "bpmn:Collaboration") || is(element, "bpmn:Process")
+    return is(element, 'bpmn:Collaboration') || is(element, 'bpmn:Process');
 };
 
-function createIncidentTaskGroup(element, bpmnjs) {
-    var iotGroup = {
-        id: 'incident',
-        label: 'Incident',
-        entries: [],
-        enabled: isTask
+/**
+ * The Senergy groups for the element, top to bottom. Every button reads designerCallbacks when
+ * clicked and hands the dialog's answer to the writers in ../model/process-writers.
+ */
+export function senergyGroups(element, bpmnjs) {
+    var callbacks = function () {
+        return bpmnjs.designerCallbacks || {};
     };
-    processIncident(iotGroup, element, bpmnjs);
-    return iotGroup;
+    var services = function () {
+        return modelServices(bpmnjs);
+    };
+    var groups = [];
+    var add = function (id, label, enabled, entries) {
+        if (enabled && entries.length) {
+            groups.push({ id: id, label: label, entries: entries, shouldOpen: true });
+        }
+    };
+
+    var task = isTask(element);
+
+    add('incident', 'Incident', task, callbacks().processIncident != null ? [
+        buttonEntry('process-incident-helper', 'Incident', function (el) {
+            callbacks().processIncident(readIncident(el), function (config) {
+                writeIncident(services(), el, config);
+            });
+        }),
+    ] : []);
+
+    var timerEntry = function (id, label, kind, dialog, body) {
+        return buttonEntry(id, label, function (el) {
+            callbacks()[dialog](readTimer(el, kind)).then(function (result) {
+                writeTimer(services(), el, kind, body(result), result.text);
+            }, function () {
+            });
+        });
+    };
+    add('time-event-helper', 'Time-Event-Helper', isTimeEvent(element), [
+        timerEntry('set-duration', 'set Duration', 'timeDuration', 'durationDialog', function (result) { return result.iso.string; }),
+        timerEntry('set-date', 'set Date', 'timeDate', 'dateDialog', function (result) { return result.iso; }),
+        timerEntry('set-cycle', 'set Cycle', 'timeCycle', 'cycleDialog', function (result) { return result.cron; }),
+    ]);
+
+    var outputsButton = function (id) {
+        return buttonEntry(id, 'Select Output-Variables', function (el) {
+            callbacks().editOutput(taskOutputParameters(el), function () {
+                refresh(services(), el);
+            });
+        });
+    };
+
+    var influx = [
+        buttonEntry('iot-influx-device-type-select-button', 'Add data analysis', function (el) {
+            callbacks().editHistoricDataConfig(readHistoricDataConfig(el), function (config) {
+                writeHistoricDataConfig(services(), el, config);
+            });
+        }),
+    ];
+    if (task && hasOutputsForTopic(element, 'export')) {
+        influx.push(outputsButton('iot-influx-device-output-edit-button'));
+    }
+    add('iot-influx', 'Historic Data', task, influx);
+
+    add('iot-helper', 'IoT-Helper', task, callbacks().configNotification ? [
+        buttonEntry('send-notification-helper', 'Notification', function (el) {
+            var current = readNotification(el);
+            callbacks().configNotification(current.subject, current.content, function (subject, content) {
+                writeNotification(services(), el, subject, content);
+            }, function () {
+            });
+        }),
+    ] : []);
+
+    add('process-io', 'Process-IO', task, [
+        buttonEntry('process-io-button', 'Process-IO', function (el) {
+            callbacks().getProcessIoConfigs(function (config) {
+                callbacks().openProcessIoDialog(readProcessIo(config, el), function (infos) {
+                    writeProcessIo(services(), el, config, infos);
+                });
+            });
+        }, 'process-io-button'),
+    ]);
+
+    var external = [
+        buttonEntry('iot-extern-device-type-select-button', 'Select Function', function (el) {
+            callbacks().findIotDeviceType(readDeviceTask(el), function (connectorInfo) {
+                writeDeviceTask(services(), el, connectorInfo);
+            });
+        }),
+    ];
+    if (task && hasEditableInputs(element)) {
+        external.push(buttonEntry('iot-extern-device-input-edit-button', 'Edit Input', function (el) {
+            callbacks().editInput(el, function () {
+                refresh(services(), el);
+            });
+        }));
+    }
+    if (task && hasOutputsForTopic(element, 'pessimistic')) {
+        external.push(outputsButton('iot-extern-device-output-edit-button'));
+    }
+    add('iot-extern', 'Function', task, external);
+
+    add('iot-event', 'Event', isMsgEvent(element), [
+        buttonEntry('iot-conditional-event-button', 'Edit Conditional Event', function (el) {
+            var edit = callbacks().editConditionalEvent;
+            if (!edit) {
+                console.log('missing bpmnjs.designerCallbacks.editConditionalEvent()');
+                return;
+            }
+            edit(readConditionalEvent(el), function (response) {
+                writeConditionalEvent(services(), el, response);
+            });
+        }),
+        attributeTextEntry('aspect-field', 'Aspect', 'senergy:aspect'),
+        attributeTextEntry('aspects-field', 'Aspects', 'senergy:aspects'),
+        attributeTextEntry('function-field', 'Function', 'senergy:function'),
+        attributeTextEntry('characteristic-field', 'Characteristic', 'senergy:characteristic'),
+        attributeTextEntry('script-field', 'Script', 'senergy:script'),
+        attributeTextEntry('value-variable-field', 'Value Variable Name', 'senergy:value_variable_name'),
+        attributeTextEntry('variables-field', 'Variables', 'senergy:variables'),
+        attributeTextEntry('qos-field', 'Qos', 'senergy:qos'),
+    ]);
+
+    add('iot-info', 'IoT-Info', task, task && callbacks().getInfoHtml ? [
+        htmlEntry('iot-extern-device-variable-list', callbacks().getInfoHtml(element)),
+    ] : []);
+
+    add('order', 'Deployment-Order', isOrderElement(element), [
+        attributeSelectEntry('order-field', 'Order', 'senergy:order', orderOptions().map(function (option) {
+            return { value: option.value, label: option.name };
+        })),
+    ]);
+
+    add('description', 'Process Description', isCollaborationOrProcess(element), [
+        attributeTextEntry('desc-field', 'Description', 'senergy:description'),
+    ]);
+
+    return groups;
 }
 
-function createIotExternalTaskGroup(element, bpmnjs, eventBus) {
-    var iotGroup = {
-        id: 'iot-extern',
-        label: 'Function',
-        entries: [],
-        enabled: isTask
-    };
-    external(iotGroup, element, bpmnjs, eventBus);
-    return iotGroup;
+export default class SenergyPropertiesProvider {
+    constructor(propertiesPanel, bpmnjs) {
+        propertiesPanel.registerProvider(LOW_PRIORITY, this);
+        this._bpmnjs = bpmnjs;
+    }
+
+    getGroups(element) {
+        return (groups) => senergyGroups(element, this._bpmnjs).concat(augmentScriptEntries(groups));
+    }
 }
 
-function createProcessIoTaskGroup(element, bpmnjs) {
-    var iotGroup = {
-        id: 'process-io',
-        label: 'Process-IO',
-        entries: [],
-        enabled: isTask
-    };
-    io(iotGroup, element, bpmnjs);
-    return iotGroup;
-}
-
-function createIotMsgEventGroup(element, bpmnjs, eventBus, modeling) {
-    var iotGroup = {
-        id: 'iot-event',
-        label: 'Event',
-        entries: [],
-        enabled: isMsgEvent
-    };
-    msgevent(iotGroup, element, bpmnjs, eventBus, modeling);
-    return iotGroup;
-}
-
-function createHelperGroup(element, bpmnjs) {
-    var helperGroup = {
-        id: 'iot-helper',
-        label: 'IoT-Helper',
-        entries: [],
-        enabled: isTask
-    };
-    notification(helperGroup, element, bpmnjs);
-    return helperGroup;
-}
-
-
-function createInfluxTaskGroup(element, bpmnjs, eventBus) {
-    var iotGroup = {
-        id: 'iot-influx',
-        label: 'Historic Data',
-        entries: [],
-        enabled: isTask
-    };
-    influx(iotGroup, element, bpmnjs, eventBus);
-    return iotGroup;
-}
-
-
-function createIotInfoGroup(element, bpmnjs) {
-    var infoGroup = {
-        id: 'iot-info',
-        label: 'IoT-Info',
-        entries: [],
-        enabled: isTask
-    };
-    info(infoGroup, element, bpmnjs);
-    return infoGroup;
-}
-
-function createTimeEventHelperGroup(element, bpmnjs){
-    var timeEventGroup = {
-        id: 'time-event-helper',
-        label: 'Time-Event-Helper',
-        entries: [],
-        enabled: isTimeEvent
-    };
-    timeHelper(timeEventGroup, element, bpmnjs);
-    return timeEventGroup;
-}
-
-function createDescriptionGroup(){
-    var descGroup = {
-        id: 'description',
-        label: 'Process Description',
-        entries: [],
-        enabled: isCollaborationOrProcess
-    };
-    description(descGroup);
-    return descGroup;
-}
-
-
-function createOrderGroup(){
-    var group = {
-        id: 'order',
-        label: 'Deployment-Order',
-        entries: [],
-        enabled: isOrderElement
-    };
-    order(group);
-    return group;
-}
-
-SenergyPropertiesProvider.$inject = [
-    'eventBus',
-    'canvas',
-    'bpmnFactory',
-    'elementRegistry',
-    'elementTemplates',
-    'bpmnjs',
-    'replace',
-    'selection',
-    'modeling',
-    'translate'
-];
-
-inherits(SenergyPropertiesProvider, PropertiesActivator);
-
-export default SenergyPropertiesProvider;
+SenergyPropertiesProvider.$inject = ['propertiesPanel', 'bpmnjs'];

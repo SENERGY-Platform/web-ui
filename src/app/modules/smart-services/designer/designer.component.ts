@@ -22,6 +22,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SmartServiceDesignsService } from '../designs/shared/designs.service';
 import { createSmartServiceModeler } from './smart-service-modeler';
+import { exportDiagram } from '../../processes/designer/bpmn-js/bpmn-js';
 import { SmartServiceDesignModel } from '../designs/shared/design.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import {
@@ -163,7 +164,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
                 const xml = resp.bpmn_xml;
                 this.name = resp.name;
                 this.description = resp.description;
-                this.modeler.importXML(xml, this.handleError);
+                this.modeler.importXML(xml).catch(this.handleError);
             }
         });
     }
@@ -174,7 +175,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
                 const xml = resp.bpmn_xml;
                 this.name = resp.name;
                 this.description = resp.description;
-                this.modeler.importXML(xml, this.handleError);
+                this.modeler.importXML(xml).catch(this.handleError);
             }
         });
     }
@@ -193,7 +194,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
                 responseType: 'text',
             })
             .subscribe((x: any) => {
-                this.modeler.importXML(x, this.handleError);
+                this.modeler.importXML(x).catch(this.handleError);
             }, this.handleError);
     }
 
@@ -222,28 +223,21 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
     }
 
     saveThen(then: ((design: SmartServiceDesignModel | null) => void)): void {
-        this.saveXML((errXML, processXML) => {
-            if (errXML) {
-                this.snackBar.open('Error XML! ' + errXML, 'close', { panelClass: 'snack-bar-error' });
-            } else {
-                this.saveSVG((errSVG, svgXML) => {
-                    if (errSVG) {
-                        this.snackBar.open('Error SVG! ' + errSVG, 'close', { panelClass: 'snack-bar-error' });
-                    } else {
-                        this.dialogService.openInputDialog('Design Name and Description', {name: this.name, description: this.description}, ['name'])
-                            .afterClosed()
-                            .subscribe((result: {name: string; description: string}) => {
-                                if(result){
-                                    this.name = result.name;
-                                    this.description = result.description;
-                                    const model = { id: this.id, svg_xml: svgXML, bpmn_xml: processXML, name: result.name, description: result.description, user_id: '' };
-                                    this.designsService.saveDesign(model).subscribe(then);
-                                }
-                            });
-                    }
-                });
-            }
-        });
+        exportDiagram(this.modeler).then(
+            ({ xml, svg }) => {
+                this.dialogService.openInputDialog('Design Name and Description', {name: this.name, description: this.description}, ['name'])
+                    .afterClosed()
+                    .subscribe((result: {name: string; description: string}) => {
+                        if(result){
+                            this.name = result.name;
+                            this.description = result.description;
+                            const model = { id: this.id, svg_xml: svg, bpmn_xml: xml, name: result.name, description: result.description, user_id: '' };
+                            this.designsService.saveDesign(model).subscribe(then);
+                        }
+                    });
+            },
+            (err: Error) => this.snackBar.open(err.message, 'close', { panelClass: 'snack-bar-error' }),
+        );
     }
 
     releaseDesign(design: SmartServiceDesignModel, then: () => void): void {
@@ -270,20 +264,12 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
         if (file) {
             const fileReader = new FileReader();
             fileReader.onload = () => {
-                this.modeler.importXML(fileReader.result, this.handleError);
+                this.modeler.importXML(fileReader.result).catch(this.handleError);
                 this.snackBar.open('Import finished.', undefined, { duration: 2000 });
             };
             fileReader.readAsText(file);
         } else {
             this.snackBar.open('Failed to load file!', undefined, { duration: 2000 });
         }
-    }
-
-    private saveXML(callback: (error: Error, processXML: string) => void) {
-        this.modeler.saveXML(callback);
-    }
-
-    private saveSVG(callback: (error: Error, svgXML: string) => void) {
-        this.modeler.saveSVG(callback);
     }
 }

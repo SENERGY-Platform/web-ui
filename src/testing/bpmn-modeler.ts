@@ -51,17 +51,46 @@ export async function fetchText(url: string): Promise<string> {
     return response.text();
 }
 
-/** Imports the diagram and resolves with the messages of its import warnings. */
-export function importXml(modeler: any, xml: string): Promise<string[]> {
-    return new Promise((resolve, reject) =>
-        modeler.importXML(xml, (err: any, warnings: any[]) => (err ? reject(err) : resolve((warnings || []).map((w) => w.message)))),
-    );
+/**
+ * Resolves once the properties panel has run its effects: it subscribes to selection changes in
+ * one, which preact runs after the next frame (or after 100 ms without frames).
+ */
+export function panelSettled(): Promise<void> {
+    return new Promise((resolve) => {
+        let done = false;
+        const finish = () => {
+            if (!done) {
+                done = true;
+                setTimeout(resolve, 0);
+            }
+        };
+        requestAnimationFrame(finish);
+        setTimeout(finish, 150);
+    });
 }
 
-export function saveXml(modeler: any): Promise<string> {
-    return new Promise((resolve, reject) => modeler.saveXML((err: any, xml: string) => (err ? reject(err) : resolve(xml))));
+/** Imports the diagram and resolves with the messages of its import warnings once the panel shows it. */
+export async function importXml(modeler: any, xml: string): Promise<string[]> {
+    const { warnings } = await modeler.importXML(xml);
+    await panelSettled();
+    return (warnings || []).map((w: any) => w.message);
 }
 
-export function saveSvg(modeler: any): Promise<string> {
-    return new Promise((resolve, reject) => modeler.saveSVG((err: any, svg: string) => (err ? reject(err) : resolve(svg))));
+export async function saveXml(modeler: any): Promise<string> {
+    return (await modeler.saveXML()).xml;
+}
+
+export async function saveSvg(modeler: any): Promise<string> {
+    return (await modeler.saveSVG()).svg;
+}
+
+/** Waits for a condition reached asynchronously, failing after `ms`. */
+export async function until(condition: () => boolean, ms = 3000): Promise<void> {
+    const start = Date.now();
+    while (!condition()) {
+        if (Date.now() - start > ms) {
+            throw new Error('condition not reached within ' + ms + ' ms');
+        }
+        await new Promise((resolve) => setTimeout(resolve, 20));
+    }
 }
