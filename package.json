@@ -47,7 +47,7 @@
     "cytoscape-dagre": "^4.0.1",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
-    "gridstack": "^12.1.2",
+    "gridstack": "^14.0.0",
     "jointjs": "^3.7.7",
     "jsqr": "^1.4.0",
     "keycloak-angular": "^22.0.0",

@@ -87,7 +87,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             // this.grid from calling a destroyed instance, whose engine and element are already gone
             this.grid = undefined;
         } else {
-            this.grid = GridStack.init(undefined, component.el);
+            this.grid = GridStack.init(undefined, component.el) ?? undefined;
             // the grid derives its column count from the bands as it is built, but that happens while it
             // is still empty - before its own items can put a scrollbar on the wrapper and take a few
             // pixels off the width. Re-measuring settles the count when those pixels cross a band edge,
