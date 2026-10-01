@@ -111,9 +111,9 @@ export class DeviceInstancesService {
         );
     }
 
-    updateDeviceInstance(device: DeviceInstanceModel): Observable<DeviceInstanceModel | null> {
+    updateDeviceInstance(device: DeviceInstanceModel, updateOnlySameOriginAttributes = false): Observable<DeviceInstanceModel | null> {
         return this.http
-            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(device.id)+'?update-only-same-origin-attributes=shared,web-ui', device)
+            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(device.id) + this.sameOriginAttributesQuery(updateOnlySameOriginAttributes), device)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', null)));
     }
 
@@ -123,10 +123,14 @@ export class DeviceInstancesService {
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
     }
 
-    updateDeviceInstanceAttributes(deviceId: string, attributes: Attribute[]) {
+    updateDeviceInstanceAttributes(deviceId: string, attributes: Attribute[], updateOnlySameOriginAttributes = false) {
         return this.http
-            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes?update-only-same-origin-attributes=shared,web-ui', attributes)
+            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes' + this.sameOriginAttributesQuery(updateOnlySameOriginAttributes), attributes)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
+    }
+
+    private sameOriginAttributesQuery(updateOnlySameOriginAttributes: boolean): string {
+        return updateOnlySameOriginAttributes ? '?update-only-same-origin-attributes=shared,web-ui' : '';
     }
 
     saveDeviceInstance(device: DeviceInstanceModel): Observable<DeviceInstanceModel | null> {
