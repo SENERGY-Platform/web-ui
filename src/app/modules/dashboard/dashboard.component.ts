@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { afterNextRender, ChangeDetectorRef, Component, Injector, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { DashboardService } from './shared/dashboard.service';
 import { DashboardModel } from './shared/dashboard.model';
 import { WidgetModel, WidgetUpdatePosition } from './shared/dashboard-widget.model';
@@ -127,6 +127,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private router: Router,
         private errorHandlerService: ErrorHandlerService,
         private cd: ChangeDetectorRef,
+        private injector: Injector,
     ) { }
 
     ngOnInit() {
@@ -410,6 +411,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.dashboardService.getDashboards().subscribe((dashboards: DashboardModel[]) => {
             this.dashboards = dashboards;
             this.dashboardsRetrieved = true;
+            // Material 22 fires no animationDone for a tab that is active from creation, so the first
+            // dashboard's widgets would never get their load signal. After render, they have subscribed.
+            afterNextRender(() => this.initAllWidgets(), { injector: this.injector });
             this.route.url.subscribe((url) => {
                 const id = url[url.length - 1].toString();
                 const idx = this.dashboards.findIndex((d) => d.id === id);
