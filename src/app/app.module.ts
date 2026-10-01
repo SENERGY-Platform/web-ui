@@ -35,6 +35,7 @@ import { LadonService } from './modules/admin/permissions/shared/services/ladom.
 import {MatNativeDateModule} from '@angular/material/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { provideIconFontSet } from './core/icon-font-set';
+import { provideOverlayDefaults } from './core/overlay-defaults';
 
 registerLocaleData(localeDe);
 
@@ -71,6 +72,7 @@ registerLocaleData(localeDe);
         provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideNativeDateAdapter(),
         provideIconFontSet(),
+        provideOverlayDefaults(),
     ]
 })
 export class AppModule { }

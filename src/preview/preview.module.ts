@@ -10,6 +10,7 @@ import { LadonService } from '../app/modules/admin/permissions/shared/services/l
 import { EnvironmentsModule } from '../app/modules/environments/environments.module';
 import { FixtureInterceptor } from './fixture.interceptor';
 import { provideIconFontSet } from '../app/core/icon-font-set';
+import { provideOverlayDefaults } from '../app/core/overlay-defaults';
 import { AuthorizationService } from '../app/core/services/authorization.service';
 import { ErrorHandlerService } from '../app/core/services/error-handler.service';
 import { PreviewKeycloakService } from './preview-keycloak.service';
@@ -58,6 +59,7 @@ class PreviewLadonService {
         { provide: LadonService, useClass: PreviewLadonService },
         { provide: HTTP_INTERCEPTORS, useClass: FixtureInterceptor, multi: true },
         provideIconFontSet(),
+        provideOverlayDefaults(),
     ],
     bootstrap: [PreviewRootComponent],
 })
