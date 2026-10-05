@@ -28,8 +28,7 @@ import { ChartsService } from '../shared/charts.service';
 import { ChartsExportDeviceGroupMergingStrategy, ChartsExportVAxesModel } from './shared/charts-export-properties.model';
 import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartTypeRegistry, Point, TooltipModel, Plugin, LegendElement, LegendItem, ChartEvent } from 'chart.js';
 import { DatePipe } from '@angular/common';
-import zoomPlugin from 'chartjs-plugin-zoom';
-import annotationPlugin, { AnnotationOptions } from 'chartjs-plugin-annotation';
+import { AnnotationOptions } from 'chartjs-plugin-annotation';
 import {
     columnDatasets,
     columnDateFormat,
@@ -167,7 +166,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         private cd: ChangeDetectorRef,
         private el: ElementRef,
     ) {
-        Chart.register(zoomPlugin, annotationPlugin);
     }
 
     ngOnDestroy() {

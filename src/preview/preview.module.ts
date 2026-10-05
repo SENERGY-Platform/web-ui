@@ -12,6 +12,8 @@ import { ProcessesModule } from '../app/modules/processes/processes.module';
 import { SmartServicesModule } from '../app/modules/smart-services/smart-services.module';
 import { FlowDesignerModule } from '../app/modules/data/flow-designer/flow-designer.module';
 import { FixtureInterceptor } from './fixture.interceptor';
+import { WidgetModule } from '../app/widgets/widget.module';
+import { ChartsPreviewComponent } from './charts-preview.component';
 import { provideIconFontSet } from '../app/core/icon-font-set';
 import { provideOverlayDefaults } from '../app/core/overlay-defaults';
 import { AuthorizationService } from '../app/core/services/authorization.service';
@@ -43,7 +45,7 @@ class PreviewLadonService {
 }
 
 @NgModule({
-    declarations: [PreviewRootComponent],
+    declarations: [PreviewRootComponent, ChartsPreviewComponent],
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
@@ -52,7 +54,11 @@ class PreviewLadonService {
         ProcessesModule,
         SmartServicesModule,
         FlowDesignerModule,
-        RouterModule.forRoot([{ path: '', redirectTo: 'environments', pathMatch: 'full' }]),
+        WidgetModule,
+        RouterModule.forRoot([
+            { path: '', redirectTo: 'environments', pathMatch: 'full' },
+            { path: 'charts/:name', component: ChartsPreviewComponent },
+        ]),
     ],
     providers: [
         { provide: KeycloakService, useClass: MockKeycloakService },

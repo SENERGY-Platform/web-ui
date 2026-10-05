@@ -5,6 +5,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Environment } from '../app/modules/environments/shared/environments.model';
 import { designerAnswer } from './designer-fixtures';
+import { chartAnswer } from './chart-fixtures';
 
 const industry: Environment = {
     id: 'env-industry',
@@ -230,6 +231,10 @@ export class FixtureInterceptor implements HttpInterceptor {
         const answerError = (body: unknown, status: number): Observable<HttpEvent<unknown>> =>
             throwError(() => new HttpErrorResponse({ status, error: body, url })).pipe(delay(80));
 
+        const chart = chartAnswer(request);
+        if (chart) {
+            return of(new HttpResponse({ status: 200, body: chart.body as object, headers: new HttpHeaders(chart.headers || {}) })).pipe(delay(80));
+        }
         const designer = designerAnswer(request);
         if (designer) {
             return of(new HttpResponse({ status: 200, body: designer.body as object, headers: new HttpHeaders(designer.headers || {}) })).pipe(delay(80));

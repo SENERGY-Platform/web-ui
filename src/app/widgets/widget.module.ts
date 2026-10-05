@@ -128,7 +128,8 @@ import { AxisConfigComponent } from './charts/export/dialog/axis-config/axis-con
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
-import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
+import { provideAppCharts } from '../core/charts/provide-app-charts';
 import { FloorplanComponent } from './floorplan/floorplan.component';
 import { FloorplanEditDialogComponent } from './floorplan/floorplan-edit-dialog/floorplan-edit-dialog.component';
 import { FloorplanControlDialogComponent } from './floorplan/floorplan-control-dialog/floorplan-control-dialog.component';
@@ -290,7 +291,7 @@ registerLocaleData(localeDe, 'de');
         { provide: LOCALE_ID, useValue: 'de' },
         DecimalPipe,
         DatePipe,
-        provideCharts(withDefaultRegisterables()),
+        provideAppCharts(),
     ],
 })
 export class WidgetModule {
