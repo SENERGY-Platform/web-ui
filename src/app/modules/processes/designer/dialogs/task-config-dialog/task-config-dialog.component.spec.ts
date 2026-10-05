@@ -67,7 +67,7 @@ describe('TaskConfigDialogComponent', () => {
     function init(
         selection: DeviceTypeSelectionRefModel | null,
         functionsByAspect: { [id: string]: DeviceTypeFunctionModel[] | Observable<DeviceTypeFunctionModel[]> },
-        listing: DeviceTypeAspectNodeModel[] = [air, water],
+        listing: DeviceTypeAspectNodeModel[] | Observable<DeviceTypeAspectNodeModel[]> = [air, water],
         deviceClasses: DeviceTypeDeviceClassModel[] = [],
         controllingFunctions: DeviceTypeFunctionModel[] = [],
     ) {
@@ -75,7 +75,7 @@ describe('TaskConfigDialogComponent', () => {
         deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getDeviceClassesWithControllingFunction.and.returnValue(of(deviceClasses));
         deviceTypeService.getDeviceClassesControllingFunctions.and.returnValue(of(controllingFunctions));
-        deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly.and.returnValue(of(listing));
+        deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly.and.returnValue(Array.isArray(listing) ? of(listing) : listing);
         deviceTypeService.getAspectsMeasuringFunctions.and.callFake((id: string) => {
             const functions = functionsByAspect[id] || [];
             return Array.isArray(functions) ? of(functions) : functions;
@@ -205,6 +205,16 @@ describe('TaskConfigDialogComponent', () => {
         init(measuringSelection({ aspect: air, aspects: [air, water] }), { [air.id]: [temperature, humidity], [water.id]: [temperature] });
         expect(component.aspectFormControl.value).toEqual([air.id, water.id]);
         expect(functionIds()).toEqual([temperature.id]);
+    });
+
+    it('keeps the stored function of several aspects when the aspect listing answers after the dialog opened', () => {
+        const listing = new Subject<DeviceTypeAspectNodeModel[]>();
+        init(measuringSelection({ aspect: air, aspects: [air, water] }), { [air.id]: [temperature, humidity], [water.id]: [temperature] }, listing);
+        listing.next([air, water]);
+        fixture.detectChanges();
+        expect(component.aspectFormControl.value).toEqual([air.id, water.id]);
+        expect(component.functionFormControl.value).toEqual(temperature);
+        expect(savedResult().function).toEqual(temperature);
     });
 
     it('keeps a selected aspect that the listing no longer offers', () => {

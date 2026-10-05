@@ -261,5 +261,18 @@ describe('AspectSelectComponent', () => {
 
             expect(outer().errors?.['aspectClassCollision'].aspects).toEqual(['inside_air', 'outside_air']);
         });
+
+        it('re-validates without reporting a value change, since the value stays the same', () => {
+            host.componentInstance.aspects = [];
+            render();
+            const changes: unknown[] = [];
+            outer().valueChanges.subscribe((value) => changes.push(value));
+
+            host.componentInstance.aspects = classifiedAspects;
+            render();
+
+            expect(outer().invalid).toBeTrue();
+            expect(changes).toEqual([]);
+        });
     });
 });

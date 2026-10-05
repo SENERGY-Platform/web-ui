@@ -74,7 +74,6 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
     private aspectClassNames = new Map<string, string>();
     private onChange: (value: string[]) => void = () => {};
     private onTouched: () => void = () => {};
-    private onValidatorChange: () => void = () => {};
     // undefined until first looked up; injected lazily because NgControl depends on the NG_VALIDATORS provided above.
     private outerNgControl?: NgControl | null;
 
@@ -123,10 +122,6 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
 
     registerOnTouched(fn: () => void): void {
         this.onTouched = fn;
-    }
-
-    registerOnValidatorChange(fn: () => void): void {
-        this.onValidatorChange = fn;
     }
 
     setDisabledState(isDisabled: boolean): void {
@@ -179,7 +174,9 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
         options.sort((a, b) => (a.aspect_class_name || '').localeCompare(b.aspect_class_name || ''));
         this.aspectOptions = options;
         this.control.updateValueAndValidity({ emitEvent: false });
-        this.onValidatorChange();
+        // Not through registerOnValidatorChange: Angular re-validates with events there, and a caller resetting what
+        // depends on the aspects on valueChanges would lose it although the value is unchanged.
+        this.outerControl()?.updateValueAndValidity({ emitEvent: false });
     }
 
     private outerControl(): AbstractControl | null {
