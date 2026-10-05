@@ -239,7 +239,7 @@ export class DataTableHelperService {
     }
 
     preloadAllOperators(): Observable<OperatorModel[]> {
-        return this.operatorRepoService.getOperators('', 9999, 0, 'name', 'asc').pipe(
+        return this.operatorRepoService.getAllOperators().pipe(
             map((operators) => {
                 operators.operators.forEach((operator) => this.operatorCache.set(operator._id || '', operator));
                 return operators.operators;
