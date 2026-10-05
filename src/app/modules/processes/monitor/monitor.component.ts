@@ -148,6 +148,9 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     ngAfterViewInit(): void {
         this.viewInitialized = true;
         this.tryInitializeTables();
+        // Material 22 fires no animationDone for the tab that is active from creation, which
+        // would keep the tables hidden behind the spinner; the old tab animation ended right after render.
+        setTimeout(() => this.animationDone());
     }
 
     ngOnDestroy() {
