@@ -19,10 +19,13 @@ import { HttpRequest } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import processXml from '../testing/bpmn-fixtures/process/senergy_all_attributes.bpmn';
 import smartServiceXml from '../testing/bpmn-fixtures/smart-service/json_location_input.bpmn';
+import { estimatorFlow, localFlow } from '../app/modules/data/flow-designer/testing/stored-flows';
 
 /** Open /processes/designer/<previewProcessId> and /smart-services/designer/<previewDesignId>. */
 export const previewProcessId = 'senergy_all_attributes';
 export const previewDesignId = 'json_location_input';
+/** Open /data/designer/<id> for one of these stored analytics flows. */
+const previewFlows = [estimatorFlow, localFlow];
 
 export interface DesignerAnswer {
     body: unknown;
@@ -69,6 +72,28 @@ export function designerAnswer(request: HttpRequest<unknown>): DesignerAnswer | 
     const processRepo = environment.processRepoUrl;
     const designs = environment.smartServiceRepoUrl + '/designs';
     const deviceRepo = environment.deviceRepoUrl;
+
+    const flowRepo = environment.flowRepoUrl + '/flow/';
+    if (url.startsWith(environment.operatorRepoUrl + '/operator?') && request.method === 'GET') {
+        const operators = previewFlows.flatMap((flow) => flow.model.cells)
+            .filter((cell: any) => cell.type === 'senergy.NodeElement')
+            .map((cell: any) => ({
+                _id: cell.operatorId, name: cell.name, image: cell.image, deploymentType: cell.deploymentType, version: cell.version,
+                inputs: (cell.inPorts || []).map((name: string) => ({ name, type: 'string' })),
+                outputs: (cell.outPorts || []).map((name: string) => ({ name, type: 'string' })),
+                config_values: cell.config,
+            }))
+            .filter((op, i, all) => all.findIndex((o) => o._id === op._id) === i);
+        return { body: { operators, totalCount: operators.length } };
+    }
+    const flow = previewFlows.find((f) => url === flowRepo + f._id);
+    if (flow && request.method === 'GET') {
+        return { body: JSON.parse(JSON.stringify(flow)) };
+    }
+    if (url.startsWith(flowRepo) && (request.method === 'POST' || request.method === 'PUT')) {
+        record(request);
+        return { body: request.method === 'PUT' ? { _id: 'preview-new-flow' } : null };
+    }
 
     if (url === processRepo + '/' + previewProcessId && request.method === 'GET') {
         return { body: { _id: previewProcessId, owner: '', date: 0, svgXML: '', bpmn_xml: processXml } };

@@ -15,7 +15,8 @@
  */
 
 import { Injectable } from '@angular/core';
-import { dia } from 'jointjs';
+import { dia, g } from '@joint/core';
+import { createLinkTools, LinkDefinition } from './link-definition';
 
 @Injectable({
     providedIn: 'root'
@@ -23,10 +24,6 @@ import { dia } from 'jointjs';
 export class PaperService {
     private paper!: dia.Paper;
     private readonly GRID_SIZE = 20;
-
-    private readonly DEFAULT_LINK_ATTRS = {
-        '.marker-target': { d: 'M 10 0 L 0 5 L 10 10 z' }
-    };
 
     /**
      * Initialize the paper
@@ -56,7 +53,63 @@ export class PaperService {
             embeddingMode: false,
             validateConnection: this.validateConnection,
             markAvailable: true,
+            // JointJS 3 defaults, changed in @joint/core 4: DOM order follows z without comment pivots, links end at the port bbox
+            sorting: dia.Paper.sorting.EXACT,
+            defaultConnectionPoint: { name: 'bbox' },
+            // dragging a link body adds a vertex (see createLinkTools) instead of moving the link
+            interactive: { labelMove: false, linkMove: false },
         });
+        const paper = this.paper;
+        paper.findClosestMagnetToPoint = (point, opt) => this.findClosestMagnet(paper, point, opt);
+        this.addToolsOnFirstHover(paper);
+    }
+
+    /**
+     * Gives a link its tools the first time the pointer is over it and never removes them: as in JointJS 3 the
+     * stylesheet shows them only while the link is hovered, so no drag can lose a tool that is handling it.
+     */
+    private addToolsOnFirstHover(paper: dia.Paper): void {
+        paper.el.addEventListener('mouseover', (evt) => {
+            const view = paper.findView(evt.target as SVGElement);
+            if (view?.model.isLink() && !view.hasTools()) {
+                view.addTools(createLinkTools());
+            }
+        });
+    }
+
+    /**
+     * Snapping as in JointJS 3: the valid magnet nearest by its centre, of any element whose view reaches into the radius.
+     * @joint/core 4.2 also requires the magnet itself to lie within the radius.
+     */
+    private findClosestMagnet(
+        paper: dia.Paper,
+        point: dia.Point,
+        opt: dia.Paper.FindClosestMagnetToPointOptions = {}
+    ): dia.Paper.ClosestMagnet | null {
+        const radius = opt.radius || 50;
+        const area = new g.Rect(point.x - radius, point.y - radius, 2 * radius, 2 * radius);
+        const pointer = new g.Point(point);
+        let closest: dia.Paper.ClosestMagnet | null = null;
+        let minDistance = Number.MAX_VALUE;
+        for (const element of paper.model.getElements()) {
+            const view = paper.findViewByModel(element);
+            if (!view || !area.intersect(view.vel.getBBox({ target: paper.layers }))) {
+                continue;
+            }
+            const candidates: { magnet: SVGElement; bbox: g.Rect }[] = [];
+            if (view.el.getAttribute('magnet') !== 'false') {
+                candidates.push({ magnet: view.el as SVGElement, bbox: element.getBBox() });
+            }
+            view.el.querySelectorAll<SVGElement>('[magnet]').forEach((magnet) => candidates.push({ magnet, bbox: view.getNodeBBox(magnet) }));
+            for (const { magnet, bbox } of candidates) {
+                const distance = bbox.center().squaredDistance(pointer);
+                if (distance < minDistance && (!opt.filter || opt.filter(view, magnet))) {
+                    minDistance = distance;
+                    closest = { view, magnet };
+                }
+            }
+        }
+        return closest;
     }
 
     /**
@@ -70,9 +123,7 @@ export class PaperService {
      * Create a default link with standard styling
      */
     private createDefaultLink(): dia.Link {
-        return new dia.Link({
-            attrs: this.DEFAULT_LINK_ATTRS,
-        });
+        return new LinkDefinition();
     }
 
     /**

@@ -68,6 +68,9 @@ describe('FlowDesignerComponent', () => {
         paperSvg = document.createElementNS(SVG_NAMESPACE, 'svg');
         const layers = document.createElementNS(SVG_NAMESPACE, 'g');
         layers.setAttribute('class', 'joint-layers');
+        const cells = document.createElementNS(SVG_NAMESPACE, 'g');
+        cells.setAttribute('class', 'joint-cells-layer');
+        layers.appendChild(cells);
         paperSvg.appendChild(layers);
         document.body.appendChild(paperSvg);
 

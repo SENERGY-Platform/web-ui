@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-import { dia, shapes, util } from 'jointjs';
+import { dia, util } from '@joint/core';
 
 /**
  * Custom JointJS Element Definition for Senergy Nodes
@@ -199,7 +199,7 @@ export const NodeElementDefinition = dia.Element.define(
 
         initialize() {
             // eslint-disable-next-line prefer-rest-params
-            shapes.basic.Generic.prototype.initialize.apply(this, arguments as any);
+            dia.Element.prototype.initialize.apply(this, arguments as any);
             this.updatePortItems();
         },
 

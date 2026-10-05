@@ -1,0 +1,72 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Diagram editor paper: white background, cursors, a hover strip along each link, link tools shown only on hover. */
+
+.joint-paper {
+    background-color: #ffffff;
+}
+
+/* operators are dragged, their ports start links */
+.joint-element {
+    cursor: move;
+}
+
+.joint-paper .joint-port-body {
+    cursor: crosshair;
+}
+
+.joint-paper .joint-port-body:hover {
+    opacity: 0.7;
+}
+
+/* links: a thin line, plus an invisible 15px strip that catches the pointer and greys on hover */
+.joint-link .connection {
+    fill: none;
+    stroke-linejoin: round;
+}
+
+.joint-link .connection-wrap {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 15px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+    cursor: move;
+}
+
+.joint-link .connection-wrap:hover {
+    opacity: 0.4;
+    stroke-opacity: 0.4;
+}
+
+/* link tools stay in the link and are only visible while the link is hovered */
+.joint-link .joint-tools {
+    opacity: 0;
+}
+
+.joint-link:hover .joint-tools {
+    opacity: 1;
+}
+
+.joint-link .marker-arrowhead:hover {
+    fill: #f39c12;
+}
+
+.joint-link .marker-vertex:hover {
+    fill: #34495e;
+}

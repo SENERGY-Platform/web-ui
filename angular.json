@@ -89,7 +89,7 @@
                 "inject": false
               },
               {
-                "input": "node_modules/jointjs/dist/joint.min.css",
+                "input": "src/app/modules/data/diagram-editor/joint.css",
                 "bundleName": "joint",
                 "inject": false
               },
@@ -176,7 +176,8 @@
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "src/karma.conf.js",
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/app/modules/data/diagram-editor/joint.css"
             ],
             "scripts": [],
             "assets": [

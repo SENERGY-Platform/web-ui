@@ -15,10 +15,11 @@
  */
 
 import { Injectable } from '@angular/core';
-import { dia } from 'jointjs';
+import { dia } from '@joint/core';
 import { LinkIOModel } from './diagram.model';
 import { IOModel } from '../../operator-repo/shared/operator.model';
 import { NodeElementDefinition } from './node-element-definition';
+import { LinkDefinition } from './link-definition';
 
 export interface NodeConfig {
     id?: string;
@@ -54,10 +55,6 @@ export class NodeFactory {
 
     private readonly CLOUD_COLOR = '#4484ce';
     private readonly LOCAL_COLOR = '#ddd';
-
-    private readonly LINK_ATTRS = {
-        '.marker-target': { d: 'M 10 0 L 0 5 L 10 10 z' }
-    };
 
     public createNode(config: NodeConfig): any {
         const size = this.calculateNodeSize(config.inputs, config.outputs);
@@ -158,9 +155,7 @@ export class NodeFactory {
      * Create a link between two nodes
      */
     public createLink(source: LinkIOModel, target: LinkIOModel): dia.Link {
-        const link = new dia.Link({
-            attrs: this.LINK_ATTRS,
-        });
+        const link: dia.Link = new LinkDefinition();
 
         link.source({ id: source.id, port: source.port });
         link.target({ id: target.id, port: target.port });

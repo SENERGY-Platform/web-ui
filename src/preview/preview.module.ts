@@ -10,6 +10,7 @@ import { LadonService } from '../app/modules/admin/permissions/shared/services/l
 import { EnvironmentsModule } from '../app/modules/environments/environments.module';
 import { ProcessesModule } from '../app/modules/processes/processes.module';
 import { SmartServicesModule } from '../app/modules/smart-services/smart-services.module';
+import { FlowDesignerModule } from '../app/modules/data/flow-designer/flow-designer.module';
 import { FixtureInterceptor } from './fixture.interceptor';
 import { provideIconFontSet } from '../app/core/icon-font-set';
 import { provideOverlayDefaults } from '../app/core/overlay-defaults';
@@ -50,6 +51,7 @@ class PreviewLadonService {
         EnvironmentsModule,
         ProcessesModule,
         SmartServicesModule,
+        FlowDesignerModule,
         RouterModule.forRoot([{ path: '', redirectTo: 'environments', pathMatch: 'full' }]),
     ],
     providers: [

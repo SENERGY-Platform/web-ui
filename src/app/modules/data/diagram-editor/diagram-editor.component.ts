@@ -15,13 +15,14 @@
  */
 
 import {AfterViewInit, Component, HostListener, OnDestroy, ChangeDetectionStrategy} from '@angular/core';
-import {dia, shapes, util, Vectorizer} from 'jointjs';
+import {dia, shapes, util, Vectorizer} from '@joint/core';
 import {DiagramModel, LinkIOModel} from './shared/diagram.model';
 import {IOModel} from '../operator-repo/shared/operator.model';
 import uuid = util.uuid;
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Clipboard} from '@angular/cdk/clipboard';
 import {NodeElementDefinition} from './shared/node-element-definition';
+import {LinkDefinition} from './shared/link-definition';
 import {PaperService} from './shared/paper.service';
 import {NodeFactory, NodePosition} from './shared/node-factory.service';
 
@@ -40,8 +41,6 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     NodeElement: any = NodeElementDefinition;
     paperWidth = 500;
     paperHeight = 600;
-
-    private linkAttrs = {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}};
 
     public dragStartPosition: { x: number; y: number } | null = null;
 
@@ -76,13 +75,13 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     }
 
     reinitializePaper() {
-        const {standard, devs} = shapes;
+        const {standard} = shapes;
         this.graph = new dia.Graph(
             {},
             {
                 cellNamespace: {
                     standard,
-                    devs,
+                    link: LinkDefinition,
                     senergy: {NodeElement: this.NodeElement},
                 },
             },
@@ -111,9 +110,7 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     }
 
     public prepareLink(source: LinkIOModel, target: LinkIOModel) {
-        const link = new dia.Link({
-            attrs: this.linkAttrs,
-        });
+        const link: dia.Link = new LinkDefinition();
         link.source({id: source.id, port: source.port});
         link.target({id: target.id, port: target.port});
         return link;
@@ -170,7 +167,8 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     }
 
     calculateNodePosition(): NodePosition {
-        const box = (document.getElementsByClassName('joint-layers')[0] as any).getBBox();
+        // the cells layer only: in @joint/core the layers group also holds the grid
+        const box = (document.getElementsByClassName('joint-cells-layer')[0] as any).getBBox();
         return {x: box.x + box.width + 100, y: 200};
     }
 

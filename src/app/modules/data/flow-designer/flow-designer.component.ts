@@ -230,7 +230,7 @@ export class FlowDesignerComponent implements AfterViewInit {
         const serializer = new XMLSerializer();
 
         // Get minimal coordinates to include everything + some space at the sides
-        const box = (document.getElementsByClassName('joint-layers')[0] as any).getBBox();
+        const box = (document.getElementsByClassName('joint-cells-layer')[0] as any).getBBox();
         const viewbox = [box.x - 10, box.y, box.width + 20, box.height];
 
         const tags = ['text', 'g', 'circle', 'rect', 'tspan', 'path'];
@@ -242,6 +242,11 @@ export class FlowDesignerComponent implements AfterViewInit {
             'marker-arrowhead-group',
             'marker-arrowheads',
         ];
+        // @joint/core draws the grid, its stylesheet and hovered link tools into the paper SVG and positions it absolutely; the image never had any of that
+        svg.querySelectorAll('style, .joint-grid-layer, .joint-tools').forEach((node) => node.remove());
+        svg.querySelectorAll('.joint-vertices-path').forEach((node) => node.classList.remove('joint-vertices-path'));
+        svg.style.removeProperty('position');
+        svg.style.removeProperty('inset');
         this.removeSVGNodesByClassNames(svg, tags, classes);
         this.removeSVGAttributesByTagNames(svg, tags);
         source = serializer.serializeToString(svg);
