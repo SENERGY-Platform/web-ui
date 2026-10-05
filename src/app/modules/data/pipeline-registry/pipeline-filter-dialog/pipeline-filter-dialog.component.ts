@@ -28,7 +28,7 @@ export class PipelineFilterDialogComponent implements OnInit {
             fields: [
                 {
                     key: 'operators', label: 'Operator', type: 'multiselect', icon: 'settings', section: 'Pipeline',
-                    items$: this.operatorService.getOperators('', 9999, 0, 'name', 'asc').pipe(map(value => value.operators)),
+                    items$: this.operatorService.getAllOperators().pipe(map(value => value.operators)),
                     bindLabel: 'name', bindValue: '_id', value: this.savedFilterSelection?.operators,
                 },
                 {

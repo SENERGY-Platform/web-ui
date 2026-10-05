@@ -108,7 +108,7 @@ export class CostOverviewComponent implements OnInit {
             this.tree = res;
             if ((this.tree as any)['analytics'] !== undefined){
                 obs[0] = this.pipelineService.getPipelines('id:asc',undefined, undefined, userId);
-                obs[1] = this.operatorService.getOperators('', 9999, 0, 'name', 'asc', userId).pipe(map(r => r.operators));
+                obs[1] = this.operatorService.getAllOperators(userId).pipe(map(r => r.operators));
             } else {
                 obs[0] = of([]);
                 obs[1] = of([]);

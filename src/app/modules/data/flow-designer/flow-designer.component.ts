@@ -51,7 +51,7 @@ export class FlowDesignerComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.operatorRepoService.getOperators('', 9999, 0, 'name', 'asc').subscribe((ops: {
+        this.operatorRepoService.getAllOperators().subscribe((ops: {
             operators: OperatorModel[]
         }) => {
             this.operators = ops.operators;

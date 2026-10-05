@@ -69,6 +69,11 @@ export class OperatorRepoService {
             );
     }
 
+    /** Every operator, name ascending; the repository caps limit at 1000 and reads 0 as no limit. */
+    getAllOperators(userId: string | undefined = undefined): Observable<{ operators: OperatorModel[]; totalCount: number }> {
+        return this.getOperators('', 0, 0, 'name', 'asc', userId);
+    }
+
     getOperator(id: string): Observable<OperatorModel | null> {
         return this.http.get<OperatorModel>(environment.operatorRepoUrl + '/operator/' + id).pipe(
             map((resp) => resp),

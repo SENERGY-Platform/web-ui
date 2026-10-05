@@ -420,7 +420,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     private getOperators(): void {
-        this.operatorRepoService.getOperators('', 9999, 0, 'name', 'asc').subscribe((resp: { operators: OperatorModel[] }) => {
+        this.operatorRepoService.getAllOperators().subscribe((resp: { operators: OperatorModel[] }) => {
             const newList: { _id?: string; name: string }[] = [];
             resp.operators.forEach((value) => {
                 if ((value.deploymentType === 'local' || value.deploymentType === 'both') && (value.name || value.image)) {
