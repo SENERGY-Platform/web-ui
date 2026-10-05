@@ -61,6 +61,7 @@ import {
 } from '../../charts/export/shared/charts-export.service';
 import { ChartsExportRangeTimeTypeEnum } from '../../charts/export/shared/charts-export-range-time-type.enum';
 import { environment } from 'src/environments/environment';
+import { phaseWindows } from './anomaly-phases';
 
 @Injectable({
     providedIn: 'root'
@@ -280,78 +281,8 @@ export class AnomalyService {
         return anomaliesPerDevices;
     }
 
-    private createIntervalsPerAnomaly(anomalies: AnomalyResultModel[]) {
-        const anomalyPhases: any[][] = [];
-        for (let index = 0; index < anomalies.length; index++) {
-            const anomaly = anomalies[index];
-            const anomalyStartTime = anomaly.start_time;
-            const anomalyEndTime = anomaly.end_time;
-            anomalyPhases.push([anomalyStartTime, 1]);
-            anomalyPhases.push([anomalyEndTime, 1]);
-
-            if(index === anomalies.length-1) {
-                break;
-            }
-            const nextAnomaly = anomalies[index + 1];
-            const nextAnomalyStartTime = nextAnomaly.start_time;
-            // only add normal phase when start time of next anomaly is after end time of current anomaly
-            if(new Date(nextAnomalyStartTime).getTime() <= new Date(anomalyEndTime).getTime()) {
-                continue;
-            }
-            anomalyPhases.push([anomalyEndTime, 0]);
-            anomalyPhases.push([nextAnomalyStartTime, 0]);
-        }
-        return anomalyPhases;
-    }
-
-    private createIntervalsPerDevice(anomalies: AnomalyResultModel[], earliestStartTime: Date) {
-        /* Create time windows based on the found anomalies of one device.
-           For each anomaly, a window from start to end will be created.
-           For time between anomalies a normal window will be created.
-           Edge Cases:
-           - No anomalies
-           - First anomaly started after the time window history (e.g. the last 2 days, anomaly started yesterday)
-           - Last anomaly ended 1 day before. Everything normal until now()
-        */
-        let anomalyPhases: any[][] = [];
-        const now = new Date();
-        const nowStr = now.toISOString();
-
-        if(anomalies.length === 0) {
-            anomalyPhases.push([earliestStartTime, 0]);
-            anomalyPhases.push([nowStr, 0]);
-            return anomalyPhases;
-        }
-
-        const firstAnomaly = anomalies[0];
-        if (new Date(firstAnomaly.start_time) > new Date(earliestStartTime)) {
-            anomalyPhases.push([earliestStartTime, 0]);
-            anomalyPhases.push([firstAnomaly.start_time, 0]);
-        }
-
-        anomalyPhases = anomalyPhases.concat(this.createIntervalsPerAnomaly(anomalies));
-
-        const lastAnomaly = anomalies[0];
-        if (new Date(lastAnomaly.end_time) < now) {
-            anomalyPhases.push([lastAnomaly.end_time, 0]);
-            anomalyPhases.push([nowStr, 0]);
-        }
-
-        return anomalyPhases;
-    }
-
     createPhaseWindows(anomalies: AnomaliesPerDevice, earliestStartTime: Date) {
-        /* Based on anomalies per device, the corresponding time windows are built
-           Returns: Time windows per device ID
-        */
-        const anomalyPhases: any[][][] = [];
-        let deviceIndex = 0;
-        for (const [_, anomaliesPerDevice] of Object.entries(anomalies)) {
-            const intervals = this.createIntervalsPerDevice(anomaliesPerDevice, earliestStartTime);
-            anomalyPhases[deviceIndex] = intervals;
-            deviceIndex += 1;
-        }
-        return anomalyPhases;
+        return phaseWindows(anomalies, earliestStartTime, new Date());
     }
 
     getDeviceCurve(deviceID: string, serviceID: string, pathToColumn: string, lastTimeRange: string, groupTime?: string) {

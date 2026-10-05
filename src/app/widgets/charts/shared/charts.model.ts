@@ -88,3 +88,11 @@ export class ChartsModel {
     ) {
     }
 }
+
+/** The size of a widget's chart area as ElementSizeService reports it. */
+export interface ChartElementSize {
+    height: number;
+    width: number;
+    heightPercentage: string;
+    widthPercentage: string;
+}

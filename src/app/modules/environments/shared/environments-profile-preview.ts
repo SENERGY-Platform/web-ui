@@ -60,6 +60,11 @@ export function mondayStartWeekday(date: Date): number {
     return (date.getDay() + 6) % 7;
 }
 
+/** The value axis label: browser locale, at most one decimal, since unformatted floats render as 25.0000000000000000 on the axis. */
+export function profileValueLabel(value: number): string {
+    return value.toLocaleString(undefined, { maximumFractionDigits: 1 });
+}
+
 /**
  * Builds the apx-chart config for a profile's 24-hour preview, shared by every place that
  * shows this curve (the channel/context source editor, the "add context" preset picker) so
@@ -76,8 +81,7 @@ export function profileChartOptions(profile: ProfileSource, weekday: number): Pr
         series,
         chart: { type: 'line', height: 220, toolbar: { show: false }, animations: { enabled: false } },
         xaxis: { categories: points.map((p) => p.hour + ':00') },
-        // unformatted floats render as 25.0000000000000000 on the axis
-        yaxis: { labels: { formatter: (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: 1 }) } },
+        yaxis: { labels: { formatter: profileValueLabel } },
         dataLabels: { enabled: false },
         stroke: { width: hasSpread ? [3, 1, 1] : [3], dashArray: hasSpread ? [0, 4, 4] : [0], curve: 'smooth' },
         legend: { show: hasSpread },

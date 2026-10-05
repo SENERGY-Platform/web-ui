@@ -26,17 +26,10 @@ import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shar
 import { ChartDataTableModel } from '../../../../../core/model/chart/chart-data-table.model';
 import { DeviceDowntimeGatewayEditDialogComponent } from '../dialogs/device-downtime-gateway-edit-dialog.component';
 import { NetworksService } from '../../../../../modules/devices/networks/shared/networks.service';
-import { DeviceDowntimeGatewayModel } from './device-downtime-gateway.model';
 import { NetworksHistoryModel } from '../../../../../modules/devices/networks/shared/networks-history.model';
+import { downtimePerGateway, downtimePerGatewayChart, downtimePerGatewayTable } from './device-downtime-gateway-chart';
 
-const stateConnected = 'online';
-const stateDisconnected = 'offline';
-const stateTrue = true;
-const stateFalse = false;
-const dayInMs = 86400000;
-const failureTimeInMs = dayInMs * 7;
 const today = new Date();
-const customColor = '#4484ce'; // /* cc */
 
 @Injectable({
     providedIn: 'root',
@@ -87,97 +80,10 @@ export class DeviceDowntimeGatewayService {
     }
 
     private setDevicesDowntimePerGatewayChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
-        const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId, 10);
-        return new ChartsModel('ColumnChart', dataTable.data, {
-            chartArea: { width: element.widthPercentage, height: element.heightPercentage },
-            width: element.width,
-            height: element.height,
-            legend: 'none',
-            vAxis: { format: '#.## %' },
-            tooltip: { trigger: 'none' },
-        });
+        return downtimePerGatewayChart(dataTable, this.elementSizeService.getHeightAndWidthByElementId(widgetId, 10));
     }
 
     private getGatewayDowntimeDataTableArray(hideZeroPercentage: boolean, gateways: NetworksHistoryModel[]): ChartDataTableModel {
-        const dataTable = new ChartDataTableModel([['Name', 'Percentage', { role: 'annotation' }, { role: 'style' }]]);
-        gateways.forEach((gateway) => {
-            const failureRatio = Math.round(this.calcDisconnectedTime(gateway).failureRatio * 10000) / 10000;
-            const text = Math.round(failureRatio * 10000) / 100 + '%';
-            if (hideZeroPercentage) {
-                if (failureRatio > 0) {
-                    dataTable.data.push([gateway.network.name, failureRatio, text, customColor]);
-                }
-            } else {
-                dataTable.data.push([gateway.network.name, failureRatio, text, customColor]);
-            }
-        });
-        return dataTable;
-    }
-
-    private calcDisconnectedTime(item: NetworksHistoryModel): DeviceDowntimeGatewayModel {
-        const itemStatus = new DeviceDowntimeGatewayModel(0, 0, 0, 0, 0, 0, item.network.name);
-
-        /** connection state changes within the window, ascending as [time in ms, connected];
-         *  prev_state covers the time between the window start and the first change */
-        const timeline: [number, boolean][] = [];
-        if (item.history?.prev_state) {
-            timeline.push([today.getTime() - failureTimeInMs, item.history.prev_state.connected]);
-        }
-        (item.history?.states || []).forEach((state) => {
-            timeline.push([new Date(state.time).getTime(), state.connected]);
-        });
-
-        if (timeline.length === 0) {
-            switch (item.network.connection_state) {
-            case stateConnected: {
-                addTimeConnected(failureTimeInMs);
-                break;
-            }
-            case stateDisconnected: {
-                addTimeDisconnected(failureTimeInMs);
-                break;
-            }
-            }
-        } else {
-            /** calculate delta from last index time till now*/
-            const lastIndex: number = timeline.length - 1;
-            const diffToday = today.getTime() - timeline[lastIndex][0];
-            addTimeToConnectionStatus(timeline[lastIndex][1], diffToday);
-
-            for (let x = lastIndex; x >= 1; x--) {
-                const diff = timeline[x][0] - timeline[x - 1][0];
-                addTimeToConnectionStatus(timeline[x - 1][1], diff);
-            }
-        }
-        itemStatus.timeConnectedInS = Math.round(itemStatus.timeConnectedInMs / 60000);
-        itemStatus.timeDisconnectedInMin = Math.round(itemStatus.timeDisconnectedInMs / 60000);
-        itemStatus.failureRatio = itemStatus.timeDisconnectedInMs / (itemStatus.timeDisconnectedInMs + itemStatus.timeConnectedInMs);
-
-        return itemStatus;
-
-        function addTimeConnected(time: number) {
-            itemStatus.timeConnectedInMs += time;
-        }
-
-        function addTimeDisconnected(time: number) {
-            itemStatus.timeDisconnectedInMs += time;
-            itemStatus.failureRate++;
-        }
-
-        function addTimeToConnectionStatus(status: boolean, time: number) {
-            switch (status) {
-            case stateTrue: {
-                addTimeConnected(time);
-                break;
-            }
-            case stateFalse: {
-                addTimeDisconnected(time);
-                break;
-            }
-            default: {
-                throw new Error('Unknown state.');
-            }
-            }
-        }
+        return downtimePerGatewayTable(downtimePerGateway(gateways, hideZeroPercentage, today));
     }
 }

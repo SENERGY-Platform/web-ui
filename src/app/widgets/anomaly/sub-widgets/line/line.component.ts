@@ -15,20 +15,12 @@
  */
 
 import { Component, Input, OnChanges, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
-import { ChartType } from 'ng-apexcharts';
 import { forkJoin, map, Observable, of } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
-import { ApexChartOptions } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
 import { AnomaliesPerDevice, AnomalyResultModel, DeviceValue } from '../../shared/anomaly.model';
 import { AnomalyService } from '../../shared/anomaly.service';
 import { ChangeDetectorRef } from '@angular/core';
-
-const anomalyPointSize = 7;
-const anomalyPointColor = '#FF0000';
-const normalPointSize = 1;
-const normalPointColor = '#008FFB';
-const debugPointSize = 0;
-const normalWaitingPointSize = 5;
+import { apexAnomalyChartOptions, applyApexSeries, chartAnomalies, timeChartSeries, valueChartSeries, valueTooltipMessage, waitingTimes } from './anomaly-line-chart';
 
 @Component({
     selector: 'anomaly-line',
@@ -54,61 +46,6 @@ export class LineComponent implements OnInit, OnChanges {
     extremeOutliers: AnomalyResultModel[] = [];
 
     valueChartData: any;
-    private createApexChartOptions(chartType: ChartType): ApexChartOptions {
-        const chartData = {
-            series: [],
-            chart: {
-                redrawOnParentResize: true,
-                redrawOnWindowResize: true,
-                width: '100%',
-                height: 'auto',
-                animations: {
-                    enabled: false
-                },
-                type: chartType,
-                toolbar: {
-                    show: true
-                },
-                events: {}
-            },
-            title: {},
-            plotOptions: {},
-            xaxis: {
-                type: 'datetime' as 'datetime' | 'category',
-                labels: {
-                    datetimeUTC: false,
-                },
-                title: {
-                    text: ''
-                }
-            },
-            yaxis: {
-                title: {
-                    text: ''
-                },
-                decimalsInFloat: 3
-            },
-            colors: [],
-            legend: {
-                show: true
-            },
-            annotations: {
-                points: [],
-                xaxis: []
-            },
-            tooltip:{
-                enabled: true,
-                x: {
-                    format: 'dd.MM HH:mm:ss.fff',
-                }
-            },
-            markers: {
-            },
-        };
-
-        return chartData;
-    };
-
     constructor(
       private anomalyService: AnomalyService,
       private cdr: ChangeDetectorRef
@@ -193,98 +130,6 @@ export class LineComponent implements OnInit, OnChanges {
         );
     }
 
-    private combineCurveAnomalies(curveAnomalies: AnomalyResultModel[]) {
-        /* Curve Anomalies can overlap. The interval bounds and reconstructions need to be merged
-           Assumption: curveAnomalies is sorted by ascending occurence
-        */
-        let anomalyIntervals: any[] = [];
-        let overlapFound = false;
-        const anomaliesWithOverlap: AnomalyResultModel[] = [];
-        const startTimesOfFirstOverlaps: any[] = [];
-
-        const point = {
-            x: 0,
-            x2: 0,
-            fillColor: '#FF4C4C',
-            opacity: 0.4,
-        };
-
-        for (let index = 0; index < curveAnomalies.length; index++) {
-            const currentAnomaly = curveAnomalies[index];
-            if(index === curveAnomalies.length-1) {
-                if(overlapFound) {
-                    break;
-                }
-                // console.log('last anomaly without overlap');
-
-                point.x = new Date(currentAnomaly.start_time).getTime();
-                point.x2 = new Date(currentAnomaly.end_time).getTime();
-                anomalyIntervals.push(point);
-                break;
-            }
-
-            const nextAnomaly = curveAnomalies[index+1];
-            if(new Date(nextAnomaly.start_time).getTime() < new Date(currentAnomaly.end_time).getTime()) {
-                // Case: Overlap with the next anomaly
-                // console.log('overlap');
-                overlapFound = true;
-                currentAnomaly.end_time = nextAnomaly.end_time;
-                anomaliesWithOverlap.push(currentAnomaly);
-                startTimesOfFirstOverlaps.push(nextAnomaly.start_time);
-            } else {
-                // Case: No Overlap, Interval can be directly created from anomaly
-                // console.log('no overlap');
-                point.x = new Date(currentAnomaly.start_time).getTime();
-                point.x2 = new Date(currentAnomaly.end_time).getTime();
-                anomalyIntervals.push(point);
-            }
-        }
-
-        if(!overlapFound) {
-            return [anomalyIntervals, []];
-        } else {
-            const result = this.combineCurveAnomalies(anomaliesWithOverlap);
-            anomalyIntervals = anomalyIntervals.concat(result[0]);
-        }
-
-        const points: any[] = this.createReconstructionPoints(curveAnomalies, startTimesOfFirstOverlaps);
-        return [anomalyIntervals, points];
-    }
-
-    private createReconstructionPoints(anomalies: AnomalyResultModel[], startTimesOfFirstOverlaps: any[]) {
-        /* Assumption: Reconstruction are sorted asc by timestamp
-           startTimesOfFirstOverlaps contains start times of overlapping intervals. These are end bounds for reconstructions from single anomalies.
-        */
-        const reconstrucedPoints: any[] = [];
-        const reconstructionInputPoints: any[] = [];
-
-        anomalies.forEach((anomaly, anomalyIndex) => {
-            const reconstructions: any[] = anomaly.original_reconstructed_curves;
-            const endTimeOfAnomalyPhase = new Date(startTimesOfFirstOverlaps[anomalyIndex]); // will be undefined for anomalies that are not overlapping
-            for (let index = 0; index < reconstructions.length; index++) {
-                const reconstruction = reconstructions[index];
-                const ts = reconstruction[0];
-                if(endTimeOfAnomalyPhase != null && new Date(ts).getTime() > endTimeOfAnomalyPhase.getTime()) {
-                    // Outside of anomaly interval
-                    break;
-                }
-
-                const inputValue = reconstruction[1];
-                const reconstructedValue = reconstruction[2];
-                reconstrucedPoints.push({
-                    x: new Date(ts).getTime(),
-                    y: parseFloat(reconstructedValue)
-                });
-                reconstructionInputPoints.push({
-                    x: new Date(ts).getTime(),
-                    y: parseFloat(inputValue)
-                });
-            }
-        });
-
-        return [reconstrucedPoints, reconstructionInputPoints];
-    }
-
     private getDeviceAnomalies(deviceId: string) {
         let anomaliesOfDevice: AnomalyResultModel[] = [];
         if(this.anomalies != null && this.anomalies[deviceId] != null) {
@@ -293,85 +138,15 @@ export class LineComponent implements OnInit, OnChanges {
         return anomaliesOfDevice;
     }
 
-    private getChartAnomalies(deviceId: string) {
-        const anomalyPoints: any[] = [];
-        const curveAnomalies: any[] = [];
-        const extremeBoundIntervals: any[] = [];
-        this.getDeviceAnomalies(deviceId).forEach(anomaly => {
-            const ts = new Date(anomaly.timestamp).getTime();
-            if(anomaly.type === 'extreme_value') {
-                this.extremeOutliers.push(anomaly);
-                anomalyPoints.push({
-                    x: ts,
-                    y: parseFloat(anomaly.value)
-                });
-
-                extremeBoundIntervals.push({
-                    x: ts,
-                    y: [anomaly.lower_bound, anomaly.upper_bound]
-                });
-            } else if(anomaly.type === 'curve') {
-                curveAnomalies.push(anomaly);
-            }
-        });
-
-        const result = this.combineCurveAnomalies(curveAnomalies);
-        const anomalyIntervals = result[0];
-        const points = result[1];
-        const reconstrucedPoints = points[0];
-        const reconstructionInputPoints: any[] = points[1];
-        return [anomalyPoints, reconstrucedPoints, reconstructionInputPoints, anomalyIntervals];
-    }
-
     private createValueChartModel(deviceId: string, serviceId: string, pathToColumn: string, lastTimeRange: string) {
         // Anomaly Operator works on 1 minute sampling for curve anomalies
         return this.anomalyService.getDeviceCurve(deviceId, serviceId, pathToColumn, lastTimeRange, '1m').pipe(
             map(data => {
-                const chartData = this.createApexChartOptions('line');
-                const points: any[] = [];
-                data.forEach(deviceValue => {
-                    points.push({
-                        x: new Date(deviceValue.timestamp).getTime(),
-                        y: deviceValue.value
-                    });
-                });
-
-                const colors = [normalPointColor];
-                const sizes = [normalPointSize];
-
-                chartData.series?.push({data: points, name: 'Original', type:'line'});
-                const anomalies = this.getChartAnomalies(deviceId);
-
-                const outlierPoints = anomalies[0];
-                if(chartData.annotations.points != null) {
-                    // Anomaly Points can be drawn as annotations -> Unfortunately ApexCahrt has no tooltip on annotations
-                    // Can be drawn as scatter plot -> but marker size is not configurable when combi chart line+scatter is done
-                    // chartData.annotations.points = anomalyPoints;
-                    chartData.series?.push({data: outlierPoints, name: 'Outlier', type:'scatter'});
-                    colors.push(anomalyPointColor);
-                    sizes.push(anomalyPointSize);
-                }
-
-                if(this.showDebug) {
-                    const reconstrucedPoints = anomalies[1];
-                    chartData.series?.push({data: reconstrucedPoints, name: 'Prediction', type:'line'});
-                    colors.push('#228B22');
-                    sizes.push(debugPointSize);
-
-                    const reconstructionInputPoints = anomalies[2];
-                    chartData.series?.push({data: reconstructionInputPoints, name: 'Processed', type:'line'});
-                    colors.push('#AFE1AF');
-                    sizes.push(debugPointSize);
-                }
-
-                const anomalyIntervals = anomalies[3];
-                if(chartData.annotations.xaxis != null) {
-                    chartData.annotations.xaxis = anomalyIntervals;
-                }
-
-                chartData.markers.colors = colors;
-                chartData.colors = colors;
-                chartData.markers.size = sizes;
+                const chartData = apexAnomalyChartOptions('line');
+                const anomalies = chartAnomalies(this.getDeviceAnomalies(deviceId));
+                this.extremeOutliers.push(...anomalies.extremeOutliers);
+                applyApexSeries(chartData, valueChartSeries(data, anomalies, this.showDebug));
+                chartData.annotations.xaxis = anomalies.intervals;
 
                 if(chartData.yaxis.title != null) {
                     chartData.yaxis.title.text = 'Device Output';
@@ -379,27 +154,7 @@ export class LineComponent implements OnInit, OnChanges {
                 const extremeOutliers = this.extremeOutliers;
 
                 chartData.tooltip.custom = function({series, seriesIndex, dataPointIndex}) {
-                    // console.log(w)
-                    const value = series[seriesIndex][dataPointIndex].toFixed(2);
-                    let tooltipMsg;
-                    switch(seriesIndex) {
-                    case 0:
-                        tooltipMsg = '<b>Device Output:</b> ' + value;
-                        break;
-                    case 1:
-                        const anomaly = extremeOutliers[dataPointIndex];
-                        tooltipMsg = '<b>Extreme Outlier:</b> ' + anomaly.value + ' [' + anomaly.lower_bound + '-' + anomaly.upper_bound + ']';
-                        break;
-                    case 2:
-                        tooltipMsg = '<b>Predicted Value:</b> ' + value;
-                        break;
-                    case 3:
-                        tooltipMsg = '<b>Preprocessed Value:</b> ' + value;
-                        break;
-                    default:
-                        tooltipMsg = value;
-                    }
-
+                    const tooltipMsg = valueTooltipMessage(seriesIndex, dataPointIndex, series[seriesIndex][dataPointIndex], extremeOutliers);
                     return '<div class="arrow_box">' +
                       '<span>' + tooltipMsg + '</span>' +
                       '</div>';
@@ -591,115 +346,22 @@ export class LineComponent implements OnInit, OnChanges {
     */
 
 
-    private parseFrequencyAnomalies(deviceId: string) {
-        const frequencyAnomalies: any[] = [];
-        this.getDeviceAnomalies(deviceId).forEach(anomaly => {
-            if(anomaly.type === 'freq') {
-                frequencyAnomalies.push({
-                    x: new Date(anomaly.timestamp).getTime(),
-                    y: parseFloat(anomaly.value)
-                });
-            }
-        });
-        return frequencyAnomalies;
-    }
-
     private createTimeChartModel(deviceId: string, serviceId: string, pathToColumn: string, _: string) {
         return this.anomalyService.getDeviceCurve(deviceId, serviceId, pathToColumn, '10m').pipe(
             map(data => {
-                const chartData = this.createApexChartOptions('scatter');
-                const points: any[] = [];
-                const waitingTimesInMs = this.calcWaitingTimes(data);
-                const level = this.detectLevelOfTimestamps(waitingTimesInMs);
+                const chartData = apexAnomalyChartOptions('scatter');
+                const timeChart = timeChartSeries(data, this.getDeviceAnomalies(deviceId));
                 if(chartData.yaxis.title != null) {
-                    chartData.yaxis.title.text = 'Waiting time in ' + level;
+                    chartData.yaxis.title.text = timeChart.yTitle;
                 }
-                waitingTimesInMs.forEach((waitingTime, index) => {
-                    const row = data[index];
-                    const roundedWaitingTime = this.roundMilliseconds(waitingTime, level);
-                    points.push({
-                        x: new Date(row.timestamp).getTime(),
-                        y: roundedWaitingTime,
-                    });
-                });
-
-                chartData.series?.push({data: points, name: 'Waiting Time'});
-                const colors = [normalPointColor];
-                const sizes = [normalWaitingPointSize];
-
-                const outlierPoints = this.parseFrequencyAnomalies(deviceId);
-                chartData.series?.push({data: outlierPoints, name: 'Outlier', type:'scatter'});
-                colors.push(anomalyPointColor);
-                sizes.push(anomalyPointSize);
-
-                chartData.markers.colors = colors;
-                chartData.colors = colors;
-                chartData.markers.size = sizes;
+                applyApexSeries(chartData, timeChart.series);
                 return chartData;
             })
         );
     }
 
-    private roundMilliseconds(miliseconds: number, to: string) {
-        switch (to) {
-        case 'seconds':
-            return miliseconds/1000;
-        case 'minutes':
-            return miliseconds/1000/60;
-        case 'hours':
-            return miliseconds/1000/60/60;
-        case 'days':
-            return miliseconds/1000/60/60/24;
-        }
-
-        return miliseconds;
-    }
-
-    private detectLevelOfTimestamps(timesInMs: number[]) {
-        const sum = timesInMs.reduce((a,b) => a+b, 0);
-        const avg = sum / timesInMs.length;
-        let level = 'seconds';
-        let time = avg/1000;
-
-        if(time > 60) {
-            level = 'minutes';
-            time = time/60;
-
-            if(time > 60) {
-                time = time/60;
-                level = 'hours';
-
-                if(time > 24) {
-                    time = time/24;
-                    level = 'days';
-
-                    if(time > 30) {
-                        time = time/30;
-                        level = 'Months';
-                    }
-                }
-            }
-        }
-        return level;
-    }
-
     calcWaitingTimes(data: DeviceValue[]) {
-        /* Calculate the waiting time between data points.
-           Data is sorted by descending time.
-        */
-        const waitingTimesInMs: number[] = [];
-        for (let index = 0; index < data.length; index++) {
-            const nextIndex = index+1;
-            if(nextIndex > data.length-1) {
-                waitingTimesInMs.push(0);
-                break;
-            }
-            const currentRow = data[index];
-            const nextRow = data[nextIndex];
-            const waitingTime = new Date(currentRow.timestamp).getTime() - new Date(nextRow.timestamp).getTime();
-            waitingTimesInMs.push(waitingTime);
-        }
-        return waitingTimesInMs;
+        return waitingTimes(data);
     }
 
 }

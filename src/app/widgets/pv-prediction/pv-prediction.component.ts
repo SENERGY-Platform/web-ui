@@ -21,7 +21,7 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { PvPredictionService } from './shared/pv-load.service';
 import { PVPredictionResult } from './shared/prediction.model';
-import { ChartsModel } from '../charts/shared/charts.model';
+import { nextPvPredictionText, pvPredictionChart, pvPredictionPoints } from './shared/pv-prediction-chart';
 import { SingleValueModel } from '../single-value/shared/single-value.model';
 
 @Component({
@@ -107,28 +107,13 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
     }
 
     setupChartData(data: PVPredictionResult) {
-        const dataTable: any = [['time', 'energy']];
-        data.predictions.forEach(row => {
-            dataTable.push([new Date(row.timestamp), row.value]);
-        });
-        this.chartExportData = new ChartsModel('LineChart', dataTable, {
-            legend: { position: 'none' },
-            vAxis: {
-                title: 'Average Power in W'
-            }
-        });
+        this.chartExportData = pvPredictionChart(pvPredictionPoints(data));
         this.chartExport?.draw();
     }
 
     calcNextPVPrediction(data: PVPredictionResult, level: string, time: number) {
-        // predictions are hourly
-        if (level === 'd') {
-            time = time * 24;
-        }
-        const filteredData = data.predictions.slice(-time);
-        const aggregatedPrediction = filteredData.reduce((accumulator, current) => accumulator + current.value, 0);
         this.nextPrediction = {
-            value: Math.round(aggregatedPrediction * 100) / 100 + ' Wh',
+            value: nextPvPredictionText(data, level, time),
             type: 'String',
             date: new Date()
         };

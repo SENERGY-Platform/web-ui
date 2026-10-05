@@ -22,6 +22,7 @@ import { AnomalyReconstructionComponent } from '../../reconstruction/reconstruct
 import { AnomalyService } from '../../shared/anomaly.service';
 import moment, { DurationInputArg1, unitOfTime } from 'moment';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
+import { curveAnomaliesPerDevice, phaseTimelineData, phaseVAxes } from '../../shared/anomaly-phases';
 
 @Component({
     selector: 'anomaly-phases',
@@ -68,11 +69,7 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
 
 
     filterCurveAnomalies() {
-        this.deviceIDs.forEach(deviceID => {
-            const anomalies = this.anomalies[deviceID];
-            const curveAnomalies = anomalies.filter((anomaly) => anomaly.type === 'curve');
-            this.curveAnomaliesPerDevice[deviceID] = curveAnomalies;
-        });
+        this.curveAnomaliesPerDevice = curveAnomaliesPerDevice(this.anomalies, this.deviceIDs);
     }
 
     ngOnInit(): void {
@@ -87,42 +84,13 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
         const time = timeRangeConfig.time || '1';
         const level = timeRangeConfig.level || 'd';
         const earliestStartTime = moment().subtract(time as DurationInputArg1, level as unitOfTime.DurationConstructor).toDate();
-        this.anomaliePhases = this.anomalyService.createPhaseWindows(this.curveAnomaliesPerDevice, earliestStartTime);
-        this.anomaliePhases.sort((a: any,b: any) => new Date(b[0] as string).getTime() - new Date(a[0] as string).getTime());
-
-        const phasesTimescale: any = [];
-        this.anomaliePhases.forEach((phase: any) => {
-            phasesTimescale.push([phase]);
-        });
-
-        this.anomaliePhases = phasesTimescale;
+        this.anomaliePhases = phaseTimelineData(this.anomalyService.createPhaseWindows(this.curveAnomaliesPerDevice, earliestStartTime));
         this.createVAxes();
         this.chartDataReady = true;
     }
 
     createVAxes() {
-        this.deviceIDs.forEach(deviceID => {
-            this.vAxes.push({
-                exportName: '',
-                instanceId: '',
-                math: '',
-                color: '',
-                valueName: '',
-                valueType: '',
-                valueAlias: deviceID,
-                conversions: [{
-                    from: '1',
-                    to: '1',
-                    color: '#ff0000',
-                    alias: 'auffaellig'
-                }, {
-                    from: '0',
-                    to: '0',
-                    color: '#008000',
-                    alias: 'normal'
-                }]
-            });
-        });
+        this.vAxes.push(...phaseVAxes(this.deviceIDs));
     }
 
     // I have to use arrow function, so that `this` is accesible from within the timeline apex chart code

@@ -26,6 +26,7 @@ import { ChartsProcessInstancesEditDialogComponent } from '../dialogs/charts-pro
 import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { processStatusChart, processStatusCounts, processStatusTable } from './charts-process-instances-chart';
 
 @Injectable({
     providedIn: 'root',
@@ -70,54 +71,10 @@ export class ChartsProcessInstancesService {
     }
 
     private sumUpProcessStatuses(processes: MonitorProcessModel[]): ChartsDataTableModel {
-        const dataTable = new ChartsDataTableModel([['Status', 'Count']]);
-        const status = { active: 0, suspended: 0, completed: 0, externallyTerminated: 0, internallyTerminated: 0 };
-        processes.forEach((process) => {
-            switch (process.state) {
-            case 'ACTIVE': {
-                status.active++;
-                break;
-            }
-            case 'SUSPENDED': {
-                status.suspended++;
-                break;
-            }
-            case 'COMPLETED': {
-                status.completed++;
-                break;
-            }
-            case 'EXTERNALLY_TERMINATED': {
-                status.externallyTerminated++;
-                break;
-            }
-            case 'INTERNALLY_TERMINATED': {
-                status.internallyTerminated++;
-                break;
-            }
-            default: {
-                throw new Error('Unknown process state.');
-            }
-            }
-        });
-        dataTable.data.push(['Active', status.active]);
-        dataTable.data.push(['Suspended', status.suspended]);
-        dataTable.data.push(['Completed', status.completed]);
-        dataTable.data.push(['ExternallyTerminated', status.externallyTerminated]);
-        dataTable.data.push(['InternallyTerminated', status.internallyTerminated]);
-        return dataTable;
+        return processStatusTable(processStatusCounts(processes));
     }
 
     private setProcessInstancesStatusValues(widgetId: string, dataTable: ChartsDataTableModel): ChartsModel {
-        const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId);
-
-        return new ChartsModel('PieChart', dataTable.data, {
-            chartArea: { width: element.widthPercentage, height: element.heightPercentage },
-            height: element.height,
-            width: element.width,
-            pieSliceText: 'none',
-            legend: {
-                position: 'labeled',
-            }
-        });
+        return processStatusChart(dataTable, this.elementSizeService.getHeightAndWidthByElementId(widgetId));
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { mondayStartWeekday, profileChartOptions, profilePreviewPoints } from './environments-profile-preview';
+import { mondayStartWeekday, profileChartOptions, profilePreviewPoints, profileValueLabel } from './environments-profile-preview';
 import { ProfileSource } from './environments.model';
 
 describe('profilePreviewPoints', () => {
@@ -73,6 +73,43 @@ describe('profileChartOptions', () => {
     it('labels the x-axis with hour categories', () => {
         const options = profileChartOptions({ base: 1 }, 0);
         expect(options.xaxis.categories).toEqual(Array.from({ length: 24 }, (_, i) => i + ':00'));
+    });
+});
+
+describe('profile preview look', () => {
+    it('draws the value as solid blue line and the band as thin dashed grey lines', () => {
+        const options = profileChartOptions({ base: 100, spread_percent: 10 }, 0);
+        expect(options.series.map((s) => s.name)).toEqual(['Value', 'Low', 'High']);
+        expect(options.series[1].data as number[]).toEqual(new Array(24).fill(90));
+        expect((options.series[2].data as number[])[0]).toBeCloseTo(110);
+        expect(options.colors).toEqual(['#008FFB', '#999999', '#999999']);
+        expect(options.stroke.width).toEqual([3, 1, 1]);
+        expect(options.stroke.dashArray).toEqual([0, 4, 4]);
+    });
+
+    it('draws a single solid blue line without band', () => {
+        const options = profileChartOptions({ base: 10 }, 0);
+        expect(options.series[0].name).toBe('Value');
+        expect(options.colors).toEqual(['#008FFB']);
+        expect(options.stroke.width).toEqual([3]);
+        expect(options.stroke.dashArray).toEqual([0]);
+    });
+
+    it('labels the value axis through profileValueLabel', () => {
+        const formatter = (options: any) => options.yaxis.labels.formatter;
+        expect(formatter(profileChartOptions({ base: 1 }, 0))).toBe(profileValueLabel);
+    });
+});
+
+describe('profileValueLabel', () => {
+    it('cuts float noise off whole values', () => {
+        expect(profileValueLabel(25.0000000000001)).toBe('25');
+        expect(profileValueLabel(0)).toBe('0');
+    });
+
+    it('rounds to one decimal with the separators of the browser locale', () => {
+        expect(profileValueLabel(1234.56)).toMatch(/^1[.,\u00a0\u202f]?234[.,]6$/);
+        expect(profileValueLabel(2.25)).toMatch(/^2[.,]3$/);
     });
 });
 

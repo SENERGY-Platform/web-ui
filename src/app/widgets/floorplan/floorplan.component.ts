@@ -63,6 +63,7 @@ import { DeviceInstancesService } from 'src/app/modules/devices/device-instances
 import { ConnectionHistoryDialogComponent } from '../shared/connection-history-dialog/connection-history-dialog.component';
 import { FloorplanControlDialogComponent, FloorplanControlDialogData } from './floorplan-control-dialog/floorplan-control-dialog.component';
 import { CapabilityCommandModel } from './shared/capability-control/capability-control.component';
+import { markerText, placementMarker, placementPosition, tooltipValueLabel } from './shared/floorplan-markers';
 
 @Component({
     selector: 'senergy-floorplan',
@@ -155,17 +156,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
                     if (c.value === undefined || c.value === null || c.value.status_code !== 200) {
                       return;
                     }
-                    let label = '' + c.value.message;
-                    if (Array.isArray(c.value.message)) {
-                      if (c.value.message.length > 1) {
-                        label = c.value.message.join(', ');
-                      } else {
-                        label = c.value.message[0];
-                      }
-                    }
-                    if (this.functionIdToUnit.has(c.function_id)) {
-                      label += ' ' + this.functionIdToUnit.get(c.function_id);
-                    }
+                    const label = tooltipValueLabel(c.value.message, this.unitOf(c.function_id));
                     tc.values.push({ label, description: this.describeCriteria(c), criteria: c });
                   });
                   this.chartjs.tooltipCriteria.push(tc);
@@ -259,14 +250,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
               canvasCtx.fillStyle = ds.backgroundColor as string;
 
 
-              const texts: string[] = [];
-              if ((this.zoom && placement.showAliasWhenZoomed) || (!this.zoom && placement.showAlias)) {
-                texts.push(placement.alias);
-              }
-              if ((this.zoom && this.chartjs.showValueWhenZoomed[dsIndex]) || (!this.zoom && this.chartjs.showValue[dsIndex])) {
-                texts.push(ds.label || '');
-              }
-              const text = texts.join(': ');
+              const text = markerText(placement, ds.label || '', this.zoom, this.chartjs.showValue[dsIndex], this.chartjs.showValueWhenZoomed[dsIndex]);
 
               if (text.length > 0) {
                 const originWidth = canvas.width;
@@ -440,55 +424,8 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.widget.properties.floorplan === undefined || this.widget.properties.floorplan.placements === null || this.img === undefined) {
         return;
       }
-      const x = (this.widget.properties.floorplan.placements[i].position.x || 0) * this.img.naturalWidth * this.drawShift.ratio + this.drawShift.centerShiftX;
-      const y = (this.widget.properties.floorplan.placements[i].position.y || 0) * this.img.naturalHeight * this.drawShift.ratio + this.drawShift.centerShiftY;
-      let color = 'grey';
-      let zoom = false;
-      let notZoom = false;
-      let icon = 'circle';
-      let value = p.criteria.value?.message;
-      if (this.widget.properties.floorplan.placements[i].coloring !== undefined && this.widget.properties.floorplan.placements[i].coloring.length > 0) {
-        if (Array.isArray(value)) {
-          if (value.length > 1) {
-            value = value.join(', ');
-          } else {
-            value = value[0];
-          }
-        }
-
-        if (typeof (value) === 'number' && !isNaN(value)) {
-          icon = this.widget.properties.floorplan.placements[i].coloring[0].icon;
-          color = this.widget.properties.floorplan.placements[i].coloring[0].color;
-          zoom = this.widget.properties.floorplan.placements[i].coloring[0].showValueWhenZoomed;
-          notZoom = this.widget.properties.floorplan.placements[i].coloring[0].showValue;
-          for (let j = 1; j < this.widget.properties.floorplan.placements[i].coloring.length && value > (this.widget.properties.floorplan.placements[i].coloring[j - 1].value as number); j++) {
-            icon = this.widget.properties.floorplan.placements[i].coloring[j].icon;
-            color = this.widget.properties.floorplan.placements[i].coloring[j].color;
-            zoom = this.widget.properties.floorplan.placements[i].coloring[j].showValueWhenZoomed;
-            notZoom = this.widget.properties.floorplan.placements[i].coloring[j].showValue;
-          }
-        } else {
-          const l = this.widget.properties.floorplan.placements[i].coloring.length;
-          icon = this.widget.properties.floorplan.placements[i].coloring[l - 1].icon;
-          color = this.widget.properties.floorplan.placements[i].coloring[l - 1].color;
-          zoom = this.widget.properties.floorplan.placements[i].coloring[l - 1].showValueWhenZoomed;
-          notZoom = this.widget.properties.floorplan.placements[i].coloring[l - 1].showValue;
-
-          for (let j = 0; j < l; j++) {
-            if (('' + value).match(new RegExp('' + this.widget.properties.floorplan.placements[i].coloring[j].value)) !== null) {
-              icon = this.widget.properties.floorplan.placements[i].coloring[j].icon;
-              color = this.widget.properties.floorplan.placements[i].coloring[j].color;
-              zoom = this.widget.properties.floorplan.placements[i].coloring[j].showValueWhenZoomed;
-              notZoom = this.widget.properties.floorplan.placements[i].coloring[j].showValue;
-              break;
-            }
-          }
-        }
-      }
-      let label = value === undefined || value === null ? '' : '' + value;
-      if (label.length > 0 && this.functionIdToUnit.has(this.widget.properties.floorplan.placements[i].criteria.function_id)) {
-        label += ' ' + this.functionIdToUnit.get(this.widget.properties.floorplan.placements[i].criteria.function_id);
-      }
+      const { x, y } = placementPosition(p, this.img, this.drawShift);
+      const { icon, color, showValue: notZoom, showValueWhenZoomed: zoom, label } = placementMarker(p, this.unitOf(p.criteria.function_id));
       icons[i] = icon;
       showValueWhenZoomed[i] = zoom;
       showValue[i] = notZoom;
@@ -599,6 +536,10 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
         this.cd.detectChanges();
       }));
     }));
+  }
+
+  private unitOf(functionId: string): string | undefined {
+    return this.functionIdToUnit.has(functionId) ? this.functionIdToUnit.get(functionId) : undefined;
   }
 
   /** Names a function by its display name, falling back to its name before showing the raw id */

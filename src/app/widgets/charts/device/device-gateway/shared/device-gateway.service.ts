@@ -30,8 +30,7 @@ import { ChartsModel } from '../../../shared/charts.model';
 import { NetworksService } from '../../../../../modules/devices/networks/shared/networks.service';
 import { ExtendedHubModel } from '../../../../../modules/devices/networks/shared/networks.model';
 import { ChartsDataTableModel } from '../../../shared/charts-data-table.model';
-
-const customColor = '#4484ce'; // /* cc */
+import { devicesPerGateway, devicesPerGatewayChart, devicesPerGatewayTable } from './device-gateway-chart';
 
 @Injectable({
     providedIn: 'root',
@@ -79,23 +78,10 @@ export class DeviceGatewayService {
     }
 
     private setDevicesPerGatewayChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
-        const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId, 10);
-        return new ChartsModel('ColumnChart', dataTable.data, {
-            chartArea: { width: element.widthPercentage, height: element.heightPercentage },
-            width: element.width,
-            height: element.height,
-            legend: 'none',
-            tooltip: { trigger: 'focus' },
-            vAxis: { format: 'decimal', gridlines: { count: -1 }, viewWindow: { min: 0 } },
-        });
+        return devicesPerGatewayChart(dataTable, this.elementSizeService.getHeightAndWidthByElementId(widgetId, 10));
     }
 
     private getGatewayDataTableArray(gateways: ExtendedHubModel[]): ChartDataTableModel {
-        const dataTable = new ChartDataTableModel([['Name', 'Count', { role: 'annotation' }, { role: 'style' }]]);
-        gateways.forEach((gateway) => {
-            const count = gateway.device_local_ids === null ? 0 : gateway.device_local_ids.length;
-            dataTable.data.push([gateway.name, count, count, customColor]);
-        });
-        return dataTable;
+        return devicesPerGatewayTable(devicesPerGateway(gateways));
     }
 }

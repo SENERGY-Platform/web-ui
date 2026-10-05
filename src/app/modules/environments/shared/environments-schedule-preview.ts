@@ -79,7 +79,7 @@ export function schedulePreviewBlocks(schedule: ScheduleSource): ScheduleBlock[]
 }
 
 /** Formats seconds elapsed since the programme started as "H:mm", not wrapped at 24h -- this is elapsed time, not a clock. */
-function formatElapsed(totalSeconds: number): string {
+export function formatElapsed(totalSeconds: number): string {
     const totalMinutes = Math.round(totalSeconds / 60);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;

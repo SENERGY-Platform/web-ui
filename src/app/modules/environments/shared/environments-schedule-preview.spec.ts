@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { schedulePreviewBlocks, scheduleChartOptions } from './environments-schedule-preview';
+import { formatElapsed, schedulePreviewBlocks, scheduleChartOptions } from './environments-schedule-preview';
 import { ScheduleSource } from './environments.model';
 
 describe('schedulePreviewBlocks', () => {
@@ -108,5 +108,35 @@ describe('scheduleChartOptions', () => {
     it('is undefined when there is nothing to lay out', () => {
         expect(scheduleChartOptions({})).toBeUndefined();
         expect(scheduleChartOptions({ states: [{ name: 'stuck', duration_seconds: 0, value: 1 }] })).toBeUndefined();
+    });
+});
+
+describe('schedule preview look', () => {
+    it('draws every block in one blue series named Schedule', () => {
+        const options = scheduleChartOptions({ states: [{ name: 'run', duration_seconds: 60, value: 1 }] })!;
+        expect(options.series.map((s) => s.name)).toEqual(['Schedule']);
+        expect(options.colors).toEqual(['#008FFB']);
+    });
+
+    it('labels the time axis with the elapsed time of the millisecond tick value', () => {
+        const options = scheduleChartOptions({ states: [{ name: 'run', duration_seconds: 60, value: 1 }] })!;
+        const formatter = (options.xaxis.labels as any).formatter;
+        expect(formatter('5400000')).toBe('1:30');
+        expect(formatter('0')).toBe('0:00');
+    });
+});
+
+describe('formatElapsed', () => {
+    it('shows hours and zero-padded minutes, without wrapping at 24h', () => {
+        expect(formatElapsed(0)).toBe('0:00');
+        expect(formatElapsed(5 * 60)).toBe('0:05');
+        expect(formatElapsed(90 * 60)).toBe('1:30');
+        expect(formatElapsed(25 * 3600)).toBe('25:00');
+    });
+
+    it('rounds to the nearest minute, half a minute up', () => {
+        expect(formatElapsed(29)).toBe('0:00');
+        expect(formatElapsed(30)).toBe('0:01');
+        expect(formatElapsed(59 * 60 + 40)).toBe('1:00');
     });
 });

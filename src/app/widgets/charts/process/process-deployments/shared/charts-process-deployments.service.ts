@@ -27,8 +27,7 @@ import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shar
 import { ChartsProcessDeploymentsEditDialogComponent } from '../dialogs/charts-process-deployments-edit-dialog.component';
 import { ChartDataTableModel } from '../../../../../core/model/chart/chart-data-table.model';
 import { ChartsDataTableModel } from '../../../shared/charts-data-table.model';
-
-const customColor = '#4484ce'; // /* cc */
+import { deploymentsChart, deploymentsPerDay, deploymentsTable } from './charts-process-deployments-chart';
 
 @Injectable({
     providedIn: 'root',
@@ -73,44 +72,10 @@ export class ChartsProcessDeploymentsService {
     }
 
     private sumUpProcessDeployments(processes: MonitorProcessModel[]): ChartDataTableModel {
-        processes.sort((a, b) => {
-            if (a.startTime > b.startTime) {
-                return 1;
-            }
-            if (a.startTime < b.startTime) {
-                return -1;
-            }
-            return 0;
-        });
-
-        const dateCount: Map<string, number> = new Map();
-        processes.forEach((process: MonitorProcessModel) => {
-            const key = process.startTime.substring(0, 10);
-            const value = (dateCount.get(key) || 0) + 1;
-            dateCount.set(key, value);
-        });
-
-        const dataTable = new ChartDataTableModel([['Date', 'Count', { role: 'tooltip' }]]);
-        dateCount.forEach((count, date) => {
-            const dateNew = new Date(date);
-            dataTable.data.push([dateNew, count, getTooltipText(dateNew, count)]);
-        });
-        return dataTable;
-
-        function getTooltipText(date: Date, count: number): string {
-            return date.toLocaleDateString() + '\n' + 'count: ' + count;
-        }
+        return deploymentsTable(deploymentsPerDay(processes));
     }
 
     private setProcessDeploymentValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
-        const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId);
-        return new ChartsModel('ColumnChart', dataTable.data, {
-            chartArea: { width: element.widthPercentage, height: element.heightPercentage },
-            width: element.width,
-            height: element.height,
-            legend: 'none',
-            hAxis: { gridlines: { count: -1 } },
-            colors: [customColor],
-        });
+        return deploymentsChart(dataTable, this.elementSizeService.getHeightAndWidthByElementId(widgetId));
     }
 }

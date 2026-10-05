@@ -21,6 +21,7 @@ import { ApexChartOptions } from '../charts/export/shared/charts-export-properti
 import { LeackageDetectionProperties, LeakageDetectionResponse } from './shared/leakage-detction.model';
 import { LeakageDetectionService } from './shared/leakage-detection.service';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
+import { consumptionColors, consumptionSeries } from '../shared/consumption-series';
 
 @Component({
     selector: 'senergy-leakage-detection-widget',
@@ -171,28 +172,8 @@ export class LeakageDetectionComponent implements OnInit, OnDestroy {
             this.chartData.colors = [];
         }
 
-        const points: any[] = [];
-        const anomalyPoints: any[] = [];
-        data.last_consumptions.forEach(row => {
-            const ts = new Date(row[0]).getTime();
-            const value = row[1];
-            const pointIsAnomaly = row[2];
-
-            if (pointIsAnomaly === 1) {
-                anomalyPoints.push({
-                    x: ts,
-                    y: value
-                });
-            } else {
-                points.push({
-                    x: ts,
-                    y: value
-                });
-            }
-        });
-        this.chartData?.series.push({ data: points, name: 'Normal Consumption' });
-        this.chartData?.series.push({ data: anomalyPoints, name: 'Anomalous Consumption' });
-        this.chartData.colors = ['#008FFB', '#FF0000'];
+        consumptionSeries(data.last_consumptions).forEach((series) => this.chartData?.series.push(series));
+        this.chartData.colors = [...consumptionColors];
     }
 
     edit() {

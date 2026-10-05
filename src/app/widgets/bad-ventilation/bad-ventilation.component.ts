@@ -22,6 +22,7 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 import { ApexChartOptions } from '../charts/export/shared/charts-export-properties.model';
 import { BadVentilationService } from './shared/bad-ventilation.service';
 import { VentilationResult } from './shared/model';
+import { apexRangeAnnotation, humidityPoints, ventilationRanges } from './shared/bad-ventilation-chart';
 
 @Component({
     selector: 'senergy-bad-ventilation',
@@ -183,68 +184,7 @@ export class BadVentilationComponent implements OnInit {
     }
 
     addRangeAnnotations() {
-        // Loop through results in desc order and annotate windows 
-        // Window 1: where window was closed until high humidity was detected
-        // Window 2: where window was open until closed
-        if(this.ventilationResults.length === 0) {
-            return;
-        }
-        for (let index = 0; index < this.ventilationResults.length; index++) {
-            const result = this.ventilationResults[index];
-            const nextResult = this.ventilationResults[index+1];
-            if(nextResult == null) {
-                return;
-            }
-
-            const dateStrOfHighHumidty = result.humidity_too_fast_too_high;
-            if(dateStrOfHighHumidty !== '') {
-                const dateOfHighHumidty = new Date(dateStrOfHighHumidty);
-                if(nextResult.window_open === true) {
-                    // if next result was a open window, we skip as high humidity can only be detected after an closed window
-                    continue;
-                };
-                const dateStrOfLastClosedWindow = nextResult.timestamp;
-
-                const annotation = {
-                    x: new Date(dateStrOfLastClosedWindow).getTime(),
-                    x2: new Date(dateOfHighHumidty).getTime(),
-                    fillColor: '#EE4B2B',
-                    label: {
-                        text: 'High Humidity Increase',
-                        borderColor: '#EE4B2B',
-                        style: {
-                            background: '#EE4B2B',
-                            color: '#fff'
-                        }
-                    }
-                };
-                this.chartData.annotations.xaxis?.push(annotation);
-                continue;
-            }
-
-            const windowOpen = result.window_open;
-            if(windowOpen === false) {
-                if(nextResult.window_open === false) {
-                    // if next result was a closed window, we skip as closed windows can only be detected after an opened window
-                    continue;
-                }
-                const annotation = {
-                    x: new Date(nextResult.timestamp).getTime(),
-                    x2: new Date(result.timestamp).getTime(),
-                    fillColor: '#097969',
-                    label: {
-                        text: 'Open Window',
-                        borderColor: '#097969',
-                        style: {
-                            background: '#097969',
-                            color: '#fff'
-                        }
-                    }
-                };
-                this.chartData.annotations.xaxis?.push(annotation);
-            }
-
-        };
+        ventilationRanges(this.ventilationResults).forEach((range) => this.chartData.annotations.xaxis?.push(apexRangeAnnotation(range)));
     }
 
     getTimeRange() {
@@ -278,14 +218,7 @@ export class BadVentilationComponent implements OnInit {
 
         return this.ventilationService.getDeviceCurve(deviceId, serviceId, pathToColumn, timeRange, '1m').pipe(
             map(data => {
-                const points: any[] = [];
-                data.forEach((row) => {
-                    points.push({
-                        x: new Date(row.timestamp).getTime(),
-                        y: row.value,
-                    });
-                });
-                this.chartData.series?.push({data: points, name: 'Humidity'});
+                this.chartData.series?.push({data: humidityPoints(data), name: 'Humidity'});
             })
         );
     }

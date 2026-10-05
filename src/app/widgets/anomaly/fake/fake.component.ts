@@ -20,6 +20,7 @@ import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportService } from '../../charts/export/shared/charts-export.service';
+import { thresholdTimeline } from './fake-timeline';
 
 @Component({
     selector: 'fake-senergy-anomaly-detection',
@@ -200,36 +201,7 @@ export class FakeAnomalyComponent implements AfterViewInit, AfterViewChecked {
     }
 
     parseSingleExportData(data: any, threshold: any) {
-        const chartData: any[] = [];
-
-        data.sort((a: any, b: any) => new Date(b[0] as string).getTime() - new Date(a[0] as string).getTime());
-
-        let intervalFound = true;
-        for (let index = 0; index < data.length; index++) {
-            const row = data[index];
-            const currentValue = row[1];
-            const ts = row[0];
-            let prevTs = new Date().toDateString();
-            if (index > 0) {
-                const prevRow = data[index - 1];
-                prevTs = prevRow[0];
-            }
-
-            if (currentValue > threshold && intervalFound) {
-                chartData.push([ts, 1]);
-                intervalFound = false;
-            } else if (currentValue < threshold && !intervalFound) {
-                chartData.push([prevTs, 1]);
-                intervalFound = true;
-            } else if (intervalFound) {
-                chartData.push([ts, 0]);
-            } else if (!intervalFound && index === data.length - 1) {
-                // anomaly at the beggining of the data history
-                chartData.push([ts, 1]);
-            }
-        }
-
-        return chartData;
+        return thresholdTimeline(data, threshold);
     }
 
     loadTimelineData(properties: any) {

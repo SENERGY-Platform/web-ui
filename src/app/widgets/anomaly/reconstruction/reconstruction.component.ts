@@ -17,7 +17,7 @@
 import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { GoogleChartComponent } from 'ng2-google-charts';
-import { ChartsModel } from 'src/app/widgets/charts/shared/charts.model';
+import { reconstructionChart, reconstructionPoints } from './reconstruction-chart';
 import { AnomalyResultModel } from '../shared/anomaly.model';
 
 @Component({
@@ -74,27 +74,7 @@ export class AnomalyReconstructionComponent implements OnInit {
     }
 
     setupChartData() {
-        let dataTable: any = [['time', 'expected', 'true']];
-        const valueList: any = [];
-        this.values.forEach(value => {
-            valueList.push([new Date(value[0]), value[1], value[2]]);
-        });
-
-        valueList.sort((a: any,b: any) => new Date(b[0] as string).getTime() - new Date(a[0] as string).getTime());
-
-
-        // console.log(valueList)
-
-        dataTable = dataTable.concat(valueList);
-
-        this.chartData = new ChartsModel('LineChart', dataTable, {
-            legend: {position: 'none'},
-            vAxis: {
-                title: 'Expected Value'
-            },
-            width: 1000,
-            height: 500
-        });
+        this.chartData = reconstructionChart(reconstructionPoints(this.values));
         this.chartExport?.draw();
         this.ready = true;
     }
