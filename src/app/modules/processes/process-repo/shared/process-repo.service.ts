@@ -46,12 +46,19 @@ export class ProcessRepoService {
         offset: number,
         sortBy: string,
         order: string,
+        ownerFilter?: { owner?: string; notOwner?: string },
     ): Observable<{result: ProcessModel[]; total: number}> {
         let params = new HttpParams();
         params = params.set('search', query);
         params = params.set('limit', limit);
         params = params.set('offset', offset);
         params = params.set('sort', sortBy + '.' + order);
+        if (ownerFilter?.owner) {
+            params = params.set('owner', ownerFilter.owner);
+        }
+        if (ownerFilter?.notOwner) {
+            params = params.set('not-owner', ownerFilter.notOwner);
+        }
 
         return this.http
             .get<ProcessModel[]>(environment.processRepoUrl.slice(0, -10) + '/v2/processes', { observe: 'response', params }).pipe(

@@ -29,7 +29,6 @@ import { DesignerProcessModel } from '../designer/shared/designer.model';
 import { saveAs } from 'file-saver';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ProcessRepoConditionModel, ProcessRepoConditionsModel } from './shared/process-repo-conditions.model';
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
@@ -76,6 +75,8 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
+    // one listing in flight at a time: an answer for a previous tab or search must not be appended
+    private loadSub: Subscription = new Subscription();
     private allDataLoaded = false;
     private gridColChangeTimeout: number | undefined;
     private knownMainPanelOffsetHeight = 0;
@@ -125,6 +126,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+        this.loadSub.unsubscribe();
     }
 
     onScroll() {
@@ -286,30 +288,19 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
             this.reset();
         }
 
-        this.processRepoService
+        this.loadSub.unsubscribe();
+        this.loadSub = this.processRepoService
             .getProcessModels(
                 this.searchText,
                 this.limit,
                 this.offset,
                 this.sortAttribute.value,
-                this.sortAttribute.order
-            ).pipe(concatMap(x => this.permissionsService.getComputedResourcePermissionsV2('processmodel', x.result.map(e => e._id)).pipe(map(perm => this.permissionsPerModel = perm), map(_ => x))))
+                this.sortAttribute.order,
+                this.getOwnerFilter(),
+            ).pipe(concatMap(x => this.permissionsService.getComputedResourcePermissionsV2('processmodel', x.result.map(e => e._id)).pipe(map(perm => this.permissionsPerModel = this.permissionsPerModel.concat(perm)), map(_ => x))))
             .subscribe(repoItems => {
                 this.loadUserNames(repoItems.result);
                 this.animationDone = true;
-                switch (this.activeIndex) {
-                case 0:
-                    // all
-                    break;
-                case 1:
-                    // own
-                    repoItems.result = repoItems.result.filter(r => r.owner === this.userID);
-                    break;
-                case 2:
-                    // shared
-                    repoItems.result = repoItems.result.filter(r => r.owner !== this.userID);
-                    break;
-                }
                 this.addToFormArray(repoItems.result);
                 if (repoItems.result.length !== this.limit) {
                     this.allDataLoaded = true;
@@ -369,6 +360,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private reset() {
         this.repoItems.clear();
+        this.permissionsPerModel = [];
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
@@ -380,39 +372,18 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         return this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + base64);
     }
 
-    private getConditions(): ProcessRepoConditionsModel | null {
-        let conditions: ProcessRepoConditionsModel | null = {};
+    private getOwnerFilter(): { owner?: string; notOwner?: string } | undefined {
         switch (this.activeIndex) {
-        case 0:
-            // all
-            conditions = null;
-            break;
         case 1:
             // own
-            conditions.and = [
-                { condition: this.setCondition('creator', '==', 'jwt.user') },
-                { condition: this.setCondition('features.parent_id', '==', 'null') },
-            ];
-            break;
-            /** case 2:
-             //marketplace
-             conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
-             {'condition': this.setCondition('features.parent_id', '!=', 'null')}];
-             break; */
+            return { owner: this.userID };
         case 2:
             // shared
-            conditions.condition = this.setCondition('creator', '!=', 'jwt.user');
-            break;
+            return { notOwner: this.userID };
+        default:
+            // all
+            return undefined;
         }
-        return conditions;
-    }
-
-    private setCondition(feature: string, operation: string, ref: string): ProcessRepoConditionModel {
-        const condition = {} as ProcessRepoConditionModel;
-        condition.feature = feature;
-        condition.operation = operation;
-        condition.ref = ref;
-        return condition;
     }
 
     private setRepoItemsParams(limit: number) {
