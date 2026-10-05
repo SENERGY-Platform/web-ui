@@ -107,7 +107,8 @@
             ],
             "browser": "src/main.ts",
             "loader": {
-              ".ttf": "file"
+              ".ttf": "file",
+              ".bpmn": "text"
             }
           },
           "configurations": {

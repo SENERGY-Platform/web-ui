@@ -17,7 +17,7 @@
 import { of } from 'rxjs';
 import { ProcessDesignerComponent } from './designer.component';
 import { createProcessModeler } from './bpmn-js/bpmn-js';
-import { fetchText, mountModeler, MountedModeler, until } from '../../../../testing/bpmn-modeler';
+import { fetchText, importXml, mountModeler, MountedModeler, panelSettled, until } from '../../../../testing/bpmn-modeler';
 
 /*
  * Runs the component's own load and save code against the real modeler: bpmn-js 18 ignores the
@@ -77,5 +77,49 @@ describe('ProcessDesignerComponent load and save', () => {
 
         expect(snackBar.open).toHaveBeenCalledWith('Error XML! Error: broken', 'close', { panelClass: 'snack-bar-error' });
         expect(saveProcess).not.toHaveBeenCalled();
+    });
+});
+
+describe('ProcessDesignerComponent IoT-Info', () => {
+    const malicious = '<img src=x onerror="window.__senergyXss = true">';
+    let outputs: any[];
+    let component: ProcessDesignerComponent;
+
+    beforeEach(() => {
+        outputs = [];
+        const designerService = { getIncomingOutputs: () => outputs };
+        component = new ProcessDesignerComponent({} as any, {} as any, {} as any, {} as any, designerService as any, {} as any, {} as any, {} as any);
+        (window as any).__senergyXss = undefined;
+    });
+
+    it('lists the incoming variables as before', () => {
+        outputs = [{ name: 'temperature', value: '${result}' }, { name: 'lat' }];
+        expect(component.getInfoHtml({} as any)).toBe(
+            '<table><tr><th>Variable</th><th>Orig-Ref</th></tr><tr><td>temperature</td><td>${result}</td></tr><tr><td>lat</td><td>undefined</td></tr></table>',
+        );
+    });
+
+    it('shows markup in a variable name or value as text', async () => {
+        outputs = [{ name: malicious, value: malicious }];
+        let panel: HTMLElement | undefined;
+        const mounted = mountModeler((canvas, panelNode) => {
+            panel = panelNode;
+            return createProcessModeler(canvas, panelNode);
+        });
+        try {
+            mounted.modeler.designerCallbacks = { getInfoHtml: (element: any) => component.getInfoHtml(element) };
+            await importXml(mounted.modeler, await fetchText('/bpmn-fixtures/process/writers.bpmn'));
+            mounted.modeler.get('selection').select(mounted.modeler.get('elementRegistry').get('Task_1'));
+            await panelSettled();
+
+            const info = panel!.querySelector('[data-entry-id="iot-extern-device-variable-list"]') as HTMLElement;
+            expect(info.querySelector('img')).toBeNull();
+            expect(info.querySelectorAll('td')[0].textContent).toBe(malicious);
+            expect(info.querySelectorAll('td')[1].textContent).toBe(malicious);
+            await new Promise((resolve) => setTimeout(resolve, 50));
+            expect((window as any).__senergyXss).toBeUndefined();
+        } finally {
+            mounted.destroy();
+        }
     });
 });

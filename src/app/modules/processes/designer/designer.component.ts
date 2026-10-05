@@ -37,6 +37,10 @@ import { ProcessIncidentsConfig } from '../incidents/shared/process-incidents.mo
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { MissingMetadataOverlays } from '../../metadata/shared/missing-metadata-overlays';
 
+/** Model text shown in the IoT-Info table; parameter names and values come from the user's model. */
+const escapeHtml = (text: string): string =>
+    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
 @Component({
     selector: 'senergy-process-designer',
     templateUrl: './designer.component.html',
@@ -275,8 +279,8 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
         if (outputs.length > index) {
             const element: BpmnParameter = outputs[index];
             const rest: string = this.getInfoHtmlTableRows(outputs, index + 1);
-            const name: string = element.name;
-            const value: string = element.value;
+            const name: string = escapeHtml(`${element.name}`);
+            const value: string = escapeHtml(`${element.value}`);
             return `<tr><td>${name}</td><td>${value}</td></tr>${rest}`;
         } else {
             return '';

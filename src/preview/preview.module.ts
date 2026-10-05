@@ -8,6 +8,8 @@ import { KeycloakService } from 'keycloak-angular';
 import { MockKeycloakService } from '../app/core/services/keycloak.mock';
 import { LadonService } from '../app/modules/admin/permissions/shared/services/ladom.service';
 import { EnvironmentsModule } from '../app/modules/environments/environments.module';
+import { ProcessesModule } from '../app/modules/processes/processes.module';
+import { SmartServicesModule } from '../app/modules/smart-services/smart-services.module';
 import { FixtureInterceptor } from './fixture.interceptor';
 import { provideIconFontSet } from '../app/core/icon-font-set';
 import { provideOverlayDefaults } from '../app/core/overlay-defaults';
@@ -27,7 +29,8 @@ export class PreviewRootComponent {
         //the real app loads its theme bundle at runtime via the theme service
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = 'senergy.css';
+        // ?theme=<bundle> previews another theme
+        link.href = (new URLSearchParams(location.search).get('theme') || 'senergy') + '.css';
         document.head.appendChild(link);
     }
 }
@@ -45,6 +48,8 @@ class PreviewLadonService {
         BrowserAnimationsModule,
         HttpClientModule,
         EnvironmentsModule,
+        ProcessesModule,
+        SmartServicesModule,
         RouterModule.forRoot([{ path: '', redirectTo: 'environments', pathMatch: 'full' }]),
     ],
     providers: [

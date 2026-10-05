@@ -35,14 +35,47 @@
     overflow: auto;
 }
 
-#js-properties-panel ::ng-deep .bpmn-iot-button {
-    position: static !important;
-    width: 160px !important;
+/* the panel at the size and font of the designer, as before the bpmn-js upgrade */
+#js-properties-panel ::ng-deep .bio-properties-panel {
+    font-family: inherit;
+    --text-size-base: 12px;
+    --text-size-small: 12px;
+    --text-size-smallest: 11px;
+    --text-line-height: 18px;
+    --line-height-condensed: 16px;
 }
 
-#js-properties-panel ::ng-deep .process-io-button {
-    position: static !important;
-    width: 160px !important;
+#js-properties-panel ::ng-deep .bio-properties-panel * {
+    font-family: inherit;
+}
+
+/* the Senergy buttons keep the look of the old panel's buttons; colours follow the app theme */
+#js-properties-panel ::ng-deep button.bpmn-iot-button,
+#js-properties-panel ::ng-deep button.process-io-button {
+    display: block;
+    width: 160px;
+    height: 23px;
+    padding: 3px 6px;
+    overflow: hidden;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 15px;
+    color: inherit;
+    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    border-radius: 0;
+}
+
+#js-properties-panel ::ng-deep button.bpmn-iot-button:hover,
+#js-properties-panel ::ng-deep button.process-io-button:hover {
+    color: var(--bio-primary);
+}
+
+#js-properties-panel ::ng-deep button.bpmn-iot-button:focus-visible,
+#js-properties-panel ::ng-deep button.process-io-button:focus-visible {
+    outline: none;
+    border-color: var(--bio-primary);
+    box-shadow: 0 0 1px 2px var(--bio-focus-ring);
 }
 
 .process-designer-container ::ng-deep .djs-palette.two-column.open {

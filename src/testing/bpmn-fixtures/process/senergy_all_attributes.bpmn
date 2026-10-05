@@ -29,6 +29,7 @@
     "function": {
         "id": "urn:infai:ses:measuring-function:temperature",
         "name": "Get Temperature",
+        "concept_id": "urn:infai:ses:concept:temperature",
         "rdf_type": "https://senergy.infai.org/ontology/MeasuringFunction"
     },
     "device_class": null,

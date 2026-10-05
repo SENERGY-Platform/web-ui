@@ -15,6 +15,7 @@
  */
 @use '@angular/material' as mat;
 @use '@ng-matero/extensions' as mtx;
+@use 'designer-panel';
 
 @include mat.all-component-typographies();
 @include mat.elevation-classes();
@@ -254,3 +255,5 @@ $my-app-theme: mat.m2-define-light-theme((
 .mdc-list-item--selected .mdc-list-item__primary-text, .mdc-list-item--activated .mdc-list-item__primary-text {
   color: mat.m2-get-color-from-palette($my-app-accent) !important;
 }
+
+@include designer-panel.colors($my-app-accent);

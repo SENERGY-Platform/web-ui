@@ -1,0 +1,32 @@
+/*!
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@use 'sass:color';
+@use '@angular/material' as mat;
+
+// The process and smart-service designers' properties panel takes its accent from the app theme.
+@mixin colors($accent) {
+  $primary: mat.m2-get-color-from-palette($accent);
+
+  .bio-theme-parent {
+    --bio-primary: #{$primary};
+    --bio-primary-hover: #{mat.m2-get-color-from-palette($accent, 700)};
+    --bio-primary-surface: #{mat.m2-get-color-from-palette($accent, 50)};
+    --bio-primary-surface-strong: #{mat.m2-get-color-from-palette($accent, 100)};
+    --bio-info: #{$primary};
+    --bio-focus: #{$primary};
+    --bio-focus-ring: #{color.change($primary, $alpha: 0.35)};
+  }
+}

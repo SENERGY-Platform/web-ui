@@ -1,9 +1,10 @@
 /* Preview harness fixtures - local only. Answers every backend call locally. */
 import { Injectable } from '@angular/core';
-import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpHandler, HttpHeaders, HttpInterceptor, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Environment } from '../app/modules/environments/shared/environments.model';
+import { designerAnswer } from './designer-fixtures';
 
 const industry: Environment = {
     id: 'env-industry',
@@ -214,8 +215,12 @@ function liveEnvironmentState(): unknown {
 
 @Injectable()
 export class FixtureInterceptor implements HttpInterceptor {
-    intercept(request: HttpRequest<unknown>, _next: HttpHandler): Observable<HttpEvent<unknown>> {
+    intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
         const url = request.url;
+        // static files of the build, e.g. the template a new diagram starts from
+        if (url.startsWith('/assets/')) {
+            return next.handle(request);
+        }
         const answer = (body: unknown, status = 200): Observable<HttpEvent<unknown>> =>
             of(new HttpResponse({ status, body: body as object })).pipe(delay(80));
         // HttpResponse (above) is always a *successful* event as far as HttpClient is
@@ -225,6 +230,10 @@ export class FixtureInterceptor implements HttpInterceptor {
         const answerError = (body: unknown, status: number): Observable<HttpEvent<unknown>> =>
             throwError(() => new HttpErrorResponse({ status, error: body, url })).pipe(delay(80));
 
+        const designer = designerAnswer(request);
+        if (designer) {
+            return of(new HttpResponse({ status: 200, body: designer.body as object, headers: new HttpHeaders(designer.headers || {}) })).pipe(delay(80));
+        }
         if (url.endsWith('/environments') && request.method === 'GET') {
             return answer([industry]);
         }
