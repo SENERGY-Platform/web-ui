@@ -16,7 +16,8 @@
 
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Chart } from 'chart.js';
+import { _adapters, Chart } from 'chart.js';
+import { de } from 'date-fns/locale';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { BaseChartDirective } from 'ng2-charts';
@@ -42,5 +43,11 @@ describe('provideAppCharts', () => {
 
         expect(Chart.registry.getPlugin('zoom')?.id).toBe('zoom');
         expect(Chart.registry.getPlugin('annotation')?.id).toBe('annotation');
+    });
+
+    // without a date adapter every time-scale chart throws when it draws
+    it('provides the date-fns adapter for time scales', () => {
+        const adapter = new _adapters._date({ locale: de });
+        expect(adapter.format(Date.UTC(2026, 9, 1, 12), 'EEE d. MMM')).toBe('Do. 1. Okt.');
     });
 });

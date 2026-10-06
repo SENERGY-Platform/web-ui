@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import 'chartjs-adapter-date-fns';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
-/** chart.js with every plugin the app's charts use; registered by the first chart drawn, whichever module it belongs to. */
+/** chart.js with the date-fns time adapter and every plugin the app's charts use; registered by the first chart drawn, whichever module it belongs to. */
 export function provideAppCharts() {
     return provideCharts(withDefaultRegisterables(zoomPlugin, annotationPlugin));
 }

@@ -21,7 +21,7 @@ import {
     OnInit,
     ChangeDetectionStrategy
 } from '@angular/core';
-import moment from 'moment';
+import { subMinutes } from 'date-fns';
 import { Subscription, concatMap, map, of, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -84,14 +84,14 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
 
     private createMockAnomalies(): AnomaliesPerDevice {
         // Mock Anomalies.
-        const extreme1 = moment().subtract(8, 'minutes').toISOString();
-        const curve1Start = moment().subtract(30, 'minutes').toISOString();
-        const curve1End = moment().subtract(10, 'minutes').toISOString();
-        const curve2Start = moment().subtract(20, 'minutes').toISOString();
-        const curve2End = moment().subtract(5, 'minutes').toISOString();
-        const curve3Start = moment().subtract(50, 'minutes').toISOString();
-        const curve3End = moment().subtract(40, 'minutes').toISOString();
-        const freq1 = moment().subtract(1, 'minutes').toISOString();
+        const extreme1 = subMinutes(new Date(), 8).toISOString();
+        const curve1Start = subMinutes(new Date(), 30).toISOString();
+        const curve1End = subMinutes(new Date(), 10).toISOString();
+        const curve2Start = subMinutes(new Date(), 20).toISOString();
+        const curve2End = subMinutes(new Date(), 5).toISOString();
+        const curve3Start = subMinutes(new Date(), 50).toISOString();
+        const curve3End = subMinutes(new Date(), 40).toISOString();
+        const freq1 = subMinutes(new Date(), 1).toISOString();
 
         return {
             'urn:infai:ses:device:b06a0104-95ae-4d8d-8811-af4bcff455e6': [{

@@ -18,7 +18,6 @@
 declare let module: NodeModule;
 declare module 'bpmn-js-properties-panel';
 declare module 'camunda-bpmn-moddle/resources/camunda.json';
-declare module 'moment/min/locales.min';
 
 interface NodeModule {
     id: string;

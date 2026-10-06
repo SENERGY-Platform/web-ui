@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, LOCALE_ID, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DeviceDowntimeListService } from './shared/device-downtime-list.service';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import moment from 'moment';
+import { duration } from '../../core/time/iso-duration';
+import { humanizeDuration } from '../../core/time/humanize-duration';
 import { OfflineSinceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { ConnectionHistoryDialogComponent } from '../shared/connection-history-dialog/connection-history-dialog.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+
+function minutesSince(d: Date): number {
+    return (Date.now() - new Date(d).getTime()) / 6e4;
+}
 
 @Component({
     selector: 'senergy-device-downtime-list',
@@ -43,6 +48,8 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
+
+    private localeId = inject(LOCALE_ID);
 
     constructor(
         private deviceDowntimeListService: DeviceDowntimeListService,
@@ -72,12 +79,11 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     }
 
     humanizeDuration(d: Date): string {
-        const durationInMin = moment.duration(moment(new Date()).diff(moment(d))).asMinutes();
-        return moment.duration(durationInMin, 'minutes').humanize();
+        return humanizeDuration(duration(minutesSince(d), 'minutes'), this.localeId);
     }
 
     format(d: Date): {icon: string; color: string} {
-        const durationInMin = moment.duration(moment(new Date()).diff(moment(d))).asMinutes();
+        const durationInMin = minutesSince(d);
         if (durationInMin < (this.widget.properties?.deviceDowntimeList?.minutes_green || 60)) {
             return { icon: 'sentiment_very_satisfied', color: 'green' };
         } else if (durationInMin < (this.widget.properties?.deviceDowntimeList?.minutes_yellow || 240)) {

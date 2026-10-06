@@ -16,13 +16,13 @@
 
 import { ChartDataset } from 'chart.js';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
-import moment from 'moment';
-import 'moment/min/locales.min';
+import { format, Locale } from 'date-fns';
+import { de, enUS } from 'date-fns/locale';
 import { ChartsExportVAxesModel } from './shared/charts-export-properties.model';
 import { describeBucketGap, findBucketGaps } from './chartjs-bucket-gaps';
 
-// Sets the locale for every moment user in the app, the axis labels and tooltips of this chart included.
-moment.locale('de');
+/** The locale of the time axis labels and the tooltip title; AM/PM stay English, as moment's German locale had them. */
+export const chartDateLocale: Locale = { ...de, localize: { ...de.localize, dayPeriod: enUS.localize.dayPeriod } };
 
 export enum DetailLevel {
     ms = 6,
@@ -89,13 +89,38 @@ export function xAxisFormat(level: DetailLevel): string {
     }
 }
 
+/** The format when neither a format is stored nor a group time is known, e.g. "5. Oktober 2026 10:07". */
+export const fallbackDateFormat = 'd. MMMM yyyy HH:mm';
+
+// moment tokens a stored format may carry from when the column chart formatted with moment, by their Unicode equivalent;
+// the localized ones as moment's German locale expanded them
+const momentTokens: Record<string, string> = {
+    LLLL: 'EEEE, d. MMMM yyyy HH:mm', LLL: 'd. MMMM yyyy HH:mm', LTS: 'HH:mm:ss', LT: 'HH:mm', LL: 'd. MMMM yyyy', L: 'dd.MM.yyyy',
+    llll: 'EEE, d. MMM yyyy HH:mm', lll: 'd. MMM yyyy HH:mm', ll: 'd. MMM yyyy', l: 'd.M.yyyy',
+    dddd: 'EEEE', ddd: 'EEE', Do: 'do', D: 'd', Y: 'y', A: 'a', a: 'aaa',
+};
+const momentTokenRgx = new RegExp(Object.keys(momentTokens).join('|'), 'g');
+
+/** A stored format in Unicode tokens: moment tokens translated outside quotes, [text] quoted as 'text'. */
+function unicodeFormat(stored: string): string {
+    return stored.split(/('[^']*'|\[[^\]]*\])/).map((part) => {
+        if (part.startsWith('[')) {
+            return "'" + part.slice(1, -1).replace(/'/g, "''") + "'";
+        }
+        if (part.startsWith("'")) {
+            return part;
+        }
+        return part.replace(momentTokenRgx, (token) => momentTokens[token]);
+    }).join('');
+}
+
 /**
- * The moment format of the column chart's time axis and tooltip title: the stored format, or for '' and null
- * the one of the group time's unit (LLL without group time); weekday and 'dd.MM.' are translated to moment tokens.
+ * The date-fns format of the column chart's time axis and tooltip title: the stored format (Unicode tokens, as in the
+ * Google charts), or without one the format of the group time's unit. A format date-fns cannot use falls back.
  */
-export function columnDateFormat(hAxisFormat: string | null | undefined, groupTime: string | null): string | undefined {
+export function columnDateFormat(hAxisFormat: string | null | undefined, groupTime: string | null): string {
     let dateFormat = hAxisFormat;
-    if (dateFormat === '' || dateFormat === null) {
+    if (dateFormat === '' || dateFormat === null || dateFormat === undefined) {
         const rgxRes = timeRgx.exec(groupTime || '');
         if (rgxRes !== null) {
             const timeUnit = rgxRes[2];
@@ -124,25 +149,21 @@ export function columnDateFormat(hAxisFormat: string | null | undefined, groupTi
                     break;
             }
         } else {
-            dateFormat = 'LLL';
+            dateFormat = fallbackDateFormat;
         }
     }
-    switch (dateFormat) {
-        case 'EEE':
-        case 'EE':
-        case 'E':
-            dateFormat = 'ddd';
-            break;
-        case 'dd.MM.':
-            dateFormat = 'DD.MM.';
-            break;
+    const unicode = unicodeFormat(dateFormat || fallbackDateFormat);
+    try {
+        format(0, unicode, { locale: chartDateLocale });
+        return unicode;
+    } catch {
+        return fallbackDateFormat;
     }
-    return dateFormat === null ? undefined : dateFormat;
 }
 
-/** A timestamp in a moment format and the global moment locale, as the axis labels and the tooltip title show it. */
-export function momentLabel(ms: number, format: string | undefined): string {
-    return moment(ms).format(format);
+/** A timestamp in the column chart's format and locale, as the axis labels and the tooltip title show it. */
+export function chartDateLabel(ms: number, dateFormat: string): string {
+    return format(ms, dateFormat, { locale: chartDateLocale });
 }
 
 /** One bar dataset per table column, on the second y axis where its axis says so; missing (null) values are left out. */

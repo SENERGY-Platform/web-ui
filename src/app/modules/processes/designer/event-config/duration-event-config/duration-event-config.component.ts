@@ -17,7 +17,8 @@
 import { Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { DurationIso, DurationResult } from '../../shared/designer.model';
-import * as moment from 'moment';
+import { duration as toDuration, durationParts, durationToIsoString } from '../../../../../core/time/iso-duration';
+import { humanizeDuration } from '../../../../../core/time/humanize-duration';
 
 @Component({
     selector: 'senergy-duration-event-config',
@@ -41,13 +42,13 @@ export class DurationEventConfigComponent implements OnInit {
 
     ngOnInit() {
         if (this.initial) {
-            const duration = moment.duration(this.initial);
-            this.year.setValue(duration.years());
-            this.month.setValue(duration.months());
-            this.day.setValue(duration.days());
-            this.hour.setValue(duration.hours());
-            this.minute.setValue(duration.minutes());
-            this.second.setValue(duration.seconds());
+            const parts = durationParts(toDuration(this.initial));
+            this.year.setValue(parts.years);
+            this.month.setValue(parts.months);
+            this.day.setValue(parts.days);
+            this.hour.setValue(parts.hours);
+            this.minute.setValue(parts.minutes);
+            this.second.setValue(parts.seconds);
         }
         this.year.valueChanges.subscribe(() => this.updateResult());
         this.month.valueChanges.subscribe(() => this.updateResult());
@@ -81,14 +82,12 @@ export class DurationEventConfigComponent implements OnInit {
     }
 
     private setDurationNaturalText(duration: DurationResult): DurationResult {
-        moment.locale(this.localeId);
-        duration.text = moment.duration(JSON.parse(JSON.stringify(duration.iso))).humanize();
+        duration.text = humanizeDuration(toDuration(JSON.parse(JSON.stringify(duration.iso))), this.localeId);
         return duration;
     }
 
     private setIsoString(duration: DurationIso): DurationIso {
-        moment.locale(this.localeId);
-        duration.string = moment.duration(JSON.parse(JSON.stringify(duration))).toISOString();
+        duration.string = durationToIsoString(toDuration(JSON.parse(JSON.stringify(duration))));
         return duration;
     }
 }

@@ -17,7 +17,7 @@
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DurationResult } from '../../shared/designer.model';
-import { duration, Duration } from 'moment';
+import { duration, Duration, durationAs } from '../../../../../core/time/iso-duration';
 
 @Component({
     templateUrl: './duration-dialog.component.html',
@@ -48,7 +48,7 @@ export class DurationDialogComponent {
     }
 
     isValid(dur: Duration): boolean {
-        return dur.asSeconds() >= 5;
+        return durationAs(dur, 'seconds') >= 5;
     }
 
     ok(): void {

@@ -23,7 +23,7 @@ import {
     detailLevel,
     gapAnnotations,
     groupTimeFromDetailLevel,
-    momentLabel,
+    chartDateLabel,
     periodAnnotations,
     withOpacityPercent,
     xAxisFormat,
@@ -53,56 +53,72 @@ describe('detail levels', () => {
     });
 });
 
-describe('columnDateFormat', () => {
-    it('derives the format from the group time when none is stored', () => {
-        expect(columnDateFormat('', '1h')).toBe('HH');
-        expect(columnDateFormat('', '1d')).toBe('DD.MM.');
-        expect(columnDateFormat('', '2w')).toBe('DD.MM.');
-        expect(columnDateFormat('', '1months')).toBe('MMM');
-        expect(columnDateFormat('', '1y')).toBe('yyyy');
-        expect(columnDateFormat('', '15m')).toBe('mm');
-        expect(columnDateFormat('', '1s')).toBe('ss');
-        expect(columnDateFormat(null, '1ms')).toBe('ss');
-    });
-
-    it('falls back to LLL without group time', () => {
-        expect(columnDateFormat('', null)).toBe('LLL');
-    });
-
-    it('translates weekday and day.month formats to moment tokens and passes others through', () => {
-        expect(columnDateFormat('EEE', '1d')).toBe('ddd');
-        expect(columnDateFormat('EE', null)).toBe('ddd');
-        expect(columnDateFormat('E', null)).toBe('ddd');
-        expect(columnDateFormat('dd.MM.', null)).toBe('DD.MM.');
-        expect(columnDateFormat('dd.MM.yyyy HH:mm', null)).toBe('dd.MM.yyyy HH:mm');
-    });
-
-    // Only '' and null count as "not stored"; a widget without hAxisFormat has undefined.
-    it('ignores the group time when no format is configured at all', () => {
-        expect(columnDateFormat(undefined, '1h')).toBeUndefined();
-    });
-});
-
-describe('momentLabel', () => {
+describe('column chart dates', () => {
     const at = local(10, 5, 10, 7).getTime();
+    const label = (stored: string | null | undefined, groupTime: string | null) => chartDateLabel(at, columnDateFormat(stored, groupTime));
 
-    it('formats in German', () => {
-        expect(momentLabel(at, 'DD.MM.')).toBe('05.10.');
-        expect(momentLabel(at, 'ddd')).toBe('Mo.');
-        expect(momentLabel(at, 'MMM')).toBe('Okt.');
-        expect(momentLabel(at, 'yyyy')).toBe('2026');
-        expect(momentLabel(at, 'HH')).toBe('10');
-        expect(momentLabel(at, 'mm')).toBe('07');
-        expect(momentLabel(at, 'LLL')).toBe('5. Oktober 2026 10:07');
+    it('derives the format from the group time when none is stored', () => {
+        expect(label('', '1h')).toBe('10');
+        expect(label('', '1d')).toBe('05.10.');
+        expect(label('', '2w')).toBe('05.10.');
+        expect(label('', '1months')).toBe('Okt.');
+        expect(label('', '1y')).toBe('2026');
+        expect(label('', '15m')).toBe('07');
+        expect(label('', '1s')).toBe('00');
+        expect(label(null, '1ms')).toBe('00');
     });
 
-    // moment reads 'dd' as the short weekday, so a stored 'dd.MM.yyyy' does not show the day of month.
-    it('shows the weekday for a stored dd.MM.yyyy', () => {
-        expect(momentLabel(at, 'dd.MM.yyyy')).toBe('Mo.10.2026');
+    it('shows date and time in full German without group time', () => {
+        expect(label('', null)).toBe('5. Oktober 2026 10:07');
     });
 
-    it('falls back to ISO 8601 with offset without format', () => {
-        expect(momentLabel(at, undefined)).toMatch(/^2026-10-05T10:07:00[+-]\d\d:\d\d$/);
+    it('formats a stored format in Unicode tokens, in German', () => {
+        expect(label('EEE', '1d')).toBe('Mo.');
+        expect(label('E', null)).toBe('Mo.');
+        expect(label('EEEE, d. MMMM', null)).toBe('Montag, 5. Oktober');
+        expect(label('dd.MM. HH:mm', null)).toBe('05.10. 10:07');
+    });
+
+    // SNRGY-4848: moment read 'dd' as the weekday, so 'dd.MM.yyyy' showed "Mo.10.2026".
+    it('shows the day of month for a stored dd.MM.yyyy', () => {
+        expect(label('dd.MM.yyyy', null)).toBe('05.10.2026');
+    });
+
+    // SNRGY-4848: only '' and null counted as not stored, a widget without hAxisFormat ignored its group time.
+    it('derives the format from the group time when the widget has no format at all', () => {
+        expect(label(undefined, '1h')).toBe('10');
+        expect(label(undefined, null)).toBe('5. Oktober 2026 10:07');
+    });
+
+    it('still reads formats written for moment', () => {
+        expect(label('DD.MM.YYYY', null)).toBe('05.10.2026');
+        expect(label('ddd, Do MMM', null)).toBe('Mo., 5. Okt.');
+        expect(label('[Woche] HH:mm', null)).toBe('Woche 10:07');
+    });
+
+    it('expands moment\'s localized formats as its German locale did', () => {
+        expect(label('LLLL', null)).toBe('Montag, 5. Oktober 2026 10:07');
+        expect(label('LLL', null)).toBe('5. Oktober 2026 10:07');
+        expect(label('LTS', null)).toBe('10:07:00');
+        expect(label('LT', null)).toBe('10:07');
+        expect(label('LL', null)).toBe('5. Oktober 2026');
+        expect(label('[Tag] L', null)).toBe('Tag 05.10.2026');
+        expect(label('llll', null)).toBe('Mo., 5. Okt. 2026 10:07');
+        expect(label('lll', null)).toBe('5. Okt. 2026 10:07');
+        expect(label('ll', null)).toBe('5. Okt. 2026');
+        expect(label('l', null)).toBe('5.10.2026');
+    });
+
+    it('keeps moment\'s English AM/PM', () => {
+        const pm = local(10, 5, 15, 7).getTime();
+        expect(label('h:mm A', null)).toBe('10:07 AM');
+        expect(chartDateLabel(pm, columnDateFormat('h:mm A', null))).toBe('3:07 PM');
+        expect(chartDateLabel(pm, columnDateFormat('h:mm a', null))).toBe('3:07 pm');
+    });
+
+    it('falls back to the full format for one date-fns cannot use', () => {
+        expect(columnDateFormat('HH:mm Uhr', null)).toBe('d. MMMM yyyy HH:mm');
+        expect(label('Uhrzeit', null)).toBe('5. Oktober 2026 10:07');
     });
 });
 

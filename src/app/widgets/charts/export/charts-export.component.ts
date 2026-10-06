@@ -36,13 +36,13 @@ import {
     detailLevel,
     gapAnnotations,
     groupTimeFromDetailLevel,
-    momentLabel,
+    chartDateLabel,
+    chartDateLocale,
     periodAnnotations,
     withOpacityPercent,
     xAxisFormat,
     zoomStartTime,
 } from './charts-export-chartjs';
-import 'chartjs-adapter-moment';
 import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
 import { findLabel, getLabelHitBoxes } from './chartjs-axis-click';
 import { bucketTimes } from './chartjs-bucket-gaps';
@@ -334,7 +334,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         },
                         external: (context) => {
                             if (context.tooltip.dataPoints !== undefined && context.tooltip.dataPoints.length > 0) {
-                                context.tooltip.title = [momentLabel((context.tooltip.dataPoints[0].raw as { x: number }).x, dateFormat)];
+                                context.tooltip.title = [chartDateLabel((context.tooltip.dataPoints[0].raw as { x: number }).x, dateFormat)];
                             }
                             this.chartjs.tooltipContext = context;
                             this.chartjs.tooltipDisplay = 'initial';
@@ -377,6 +377,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                             display: (this.widget.properties.hAxisLabel || '').length > 0,
                         },
                         type: 'timeseries',
+                        adapters: { date: { locale: chartDateLocale } },
                         min: this.chartjs.minDateMs,
                         max: this.chartjs.maxDateMs,
                         time: {

@@ -16,7 +16,7 @@
 
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import * as moment from 'moment';
+import { duration, durationToIsoString } from '../../../../../../core/time/iso-duration';
 
 @Component({
     selector: 'senergy-process-deployments-config-time-event',
@@ -32,6 +32,6 @@ export class DeploymentsConfigTimeEventComponent {
 
     changeDuration(): void {
         const durationUnits = this.time_event.get('durationUnits') as FormGroup;
-        this.time_event.patchValue({ time: moment.duration(JSON.parse(JSON.stringify(durationUnits.value))).toISOString() });
+        this.time_event.patchValue({ time: durationToIsoString(duration(JSON.parse(JSON.stringify(durationUnits.value)))) });
     }
 }

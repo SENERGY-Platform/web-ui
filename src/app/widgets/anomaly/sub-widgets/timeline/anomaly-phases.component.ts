@@ -20,7 +20,7 @@ import { ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/cha
 import { AnomaliesPerDevice } from '../../shared/anomaly.model';
 import { AnomalyReconstructionComponent } from '../../reconstruction/reconstruction.component';
 import { AnomalyService } from '../../shared/anomaly.service';
-import moment, { DurationInputArg1, unitOfTime } from 'moment';
+import { subtractDuration } from '../../../../core/time/iso-duration';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { curveAnomaliesPerDevice, phaseTimelineData, phaseVAxes } from '../../shared/anomaly-phases';
 
@@ -83,7 +83,7 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
         }
         const time = timeRangeConfig.time || '1';
         const level = timeRangeConfig.level || 'd';
-        const earliestStartTime = moment().subtract(time as DurationInputArg1, level as unitOfTime.DurationConstructor).toDate();
+        const earliestStartTime = subtractDuration(new Date(), time, level);
         this.anomaliePhases = phaseTimelineData(this.anomalyService.createPhaseWindows(this.curveAnomaliesPerDevice, earliestStartTime));
         this.createVAxes();
         this.chartDataReady = true;

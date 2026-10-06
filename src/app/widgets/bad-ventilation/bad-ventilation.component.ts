@@ -15,7 +15,7 @@
  */
 
 import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import moment from 'moment';
+import { subMinutes } from 'date-fns';
 import { concatMap, map, of, Subscription, throwError } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
@@ -149,9 +149,9 @@ export class BadVentilationComponent implements OnInit {
     }
 
     createMockResult() {
-        const highHumidity = moment().subtract(8, 'minutes').toISOString();
-        const closed = moment().subtract(10, 'minutes').toISOString();
-        const opened = moment().subtract(11, 'minutes').toISOString();
+        const highHumidity = subMinutes(new Date(), 8).toISOString();
+        const closed = subMinutes(new Date(), 10).toISOString();
+        const opened = subMinutes(new Date(), 11).toISOString();
 
         return [{
             timestamp: highHumidity,
