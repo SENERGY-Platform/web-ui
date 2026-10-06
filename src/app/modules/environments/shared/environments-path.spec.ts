@@ -33,6 +33,19 @@ describe('problemPath', () => {
         expect(problemPath('zones[2].zones[1].zones[0].type')).toEqual({ zoneIndexes: [2, 1, 0], suffix: 'type' });
     });
 
+    it('keeps a meter graph path on the asset it belongs to, with the field and row as the suffix', () => {
+        expect(problemPath('zones[0].assets[2].meter_parents[1]')).toEqual({ zoneIndexes: [0], assetIndex: 2, suffix: 'meter_parents[1]' });
+        expect(problemPath('zones[0].assets[2].meter_parents[1].weight')).toEqual({
+            zoneIndexes: [0],
+            assetIndex: 2,
+            suffix: 'meter_parents[1].weight',
+        });
+    });
+
+    it('places a meter group path on the environment itself, keeping the whole path as the suffix', () => {
+        expect(problemPath('meter_groups[0].parents[0]')).toEqual({ zoneIndexes: [], suffix: 'meter_groups[0].parents[0]' });
+    });
+
     it('parses an asset below a nested zone', () => {
         expect(problemPath('zones[1].zones[0].assets[2].name')).toEqual({
             zoneIndexes: [1, 0],

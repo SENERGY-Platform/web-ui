@@ -51,6 +51,7 @@ import { EnvironmentsProfileEditorComponent } from './profile-editor/environment
 import { EnvironmentsScheduleEditorComponent } from './schedule-editor/environments-schedule-editor.component';
 import { EnvironmentsTimelineEditorComponent, TIMELINE_DEFAULT_PAGE_SIZE } from './timeline-editor/environments-timeline-editor.component';
 import { EnvironmentsFaultsEditorComponent } from './faults-editor/environments-faults-editor.component';
+import { EnvironmentsMeterParentsEditorComponent } from './meter-parents-editor/environments-meter-parents-editor.component';
 import { EnvironmentsFactorBarsComponent } from './factor-bars/environments-factor-bars.component';
 import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
@@ -211,6 +212,36 @@ const submeteringEnvironment: Environment = {
     ],
 };
 
+// Site A: a1 is the main meter, a2 hangs below it twice over (sub-metered by a1, and in the meter
+// graph a medium change from a1 plus a share of group g1), a3 is a member of g1. g1 itself is
+// supplied by a1. Site B only exists to pin the site boundary of the asset targets.
+const meterGraphEnvironment: Environment = {
+    id: 'e1',
+    name: 'Plant A',
+    type: 'industrial_site',
+    seed: 1,
+    meter_groups: [{ id: 'g1', name: 'Feeders', parents: [{ id: 'a1' }] }],
+    zones: [
+        {
+            id: 'z1',
+            name: 'Site A',
+            type: 'site',
+            assets: [
+                { id: 'a1', name: 'Main meter', kind: 'meter' },
+                {
+                    id: 'a2',
+                    name: 'Feeder',
+                    kind: 'meter',
+                    submetered_by: 'a1',
+                    meter_parents: [{ id: 'a1', weight: 40, conversion: true }, { id: 'g1', weight: 60 }],
+                },
+                { id: 'a3', name: 'Boiler', kind: 'meter', meter_parents: [{ id: 'g1' }] },
+            ],
+        },
+        { id: 'z2', name: 'Site B', type: 'site', assets: [{ id: 'b1', name: 'Other site meter', kind: 'meter' }] },
+    ],
+};
+
 describe('EnvironmentDetailComponent', () => {
     let component: EnvironmentDetailComponent;
     let fixture: ComponentFixture<EnvironmentDetailComponent>;
@@ -236,6 +267,7 @@ describe('EnvironmentDetailComponent', () => {
                 EnvironmentsScheduleEditorComponent,
                 EnvironmentsTimelineEditorComponent,
                 EnvironmentsFaultsEditorComponent,
+                EnvironmentsMeterParentsEditorComponent,
                 EnvironmentsFactorBarsComponent,
                 EnvironmentsDatasetEditorComponent,
                 EnvironmentsLiveStateTilesComponent,
@@ -691,6 +723,437 @@ describe('EnvironmentDetailComponent', () => {
             component.select(aggregateChannelNode);
 
             expect(component.selectedAggregateChildren.map((c) => c.name)).toContain('Renamed sub meter');
+        });
+    });
+
+    describe('meter graph', () => {
+        const clone = (): Environment => JSON.parse(JSON.stringify(meterGraphEnvironment));
+        const siteA = (): any => component.root!.children[0];
+        const assetNode = (index: number) => siteA().children[index]; // 0 a1, 1 a2, 2 a3
+        const hasKey = (obj: object, key: string): boolean => Object.prototype.hasOwnProperty.call(obj, key);
+
+        /** The Meter parents editor of the form currently shown (the asset's, or the first meter group's). */
+        function parentsEditor(index = 0): EnvironmentsMeterParentsEditorComponent {
+            return fixture.debugElement.queryAll(By.directive(EnvironmentsMeterParentsEditorComponent))[index].componentInstance;
+        }
+
+        /** PUTs the document and answers the PUT and the reload that follows; returns the body that was sent. */
+        function saveAndCapture(): any {
+            component.save();
+            const putReq = httpMock.expectOne(environmentsUrl + '/e1');
+            const body = JSON.parse(JSON.stringify(putReq.request.body));
+            putReq.flush(clone());
+            httpMock.expectOne(environmentsUrl + '/e1').flush(clone());
+            return body;
+        }
+
+        function confirmDeleteDialog(confirmed = true): jasmine.Spy {
+            return spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({
+                afterClosed: () => ({ subscribe: (cb: any) => cb(confirmed) }),
+            } as any);
+        }
+
+        describe('asset form: Meter parents', () => {
+            it('offers the assets of the same top level zone without itself, then the meter groups labelled as groups', () => {
+                loadWith(clone());
+                component.select(assetNode(1)); // a2
+
+                expect(component.meterParentOptions).toEqual([
+                    { id: 'a1', label: 'Main meter (Site A)' },
+                    { id: 'a3', label: 'Boiler (Site A)' },
+                    { id: 'g1', label: 'Meter group: Feeders' },
+                ]);
+            });
+
+            it('does not offer an asset of another top level zone', () => {
+                loadWith(clone());
+                component.select(assetNode(0));
+
+                expect(component.meterParentOptions.some((o) => o.id === 'b1')).toBe(false);
+            });
+
+            it('keeps the same options array across an unrelated change-detection pass', () => {
+                loadWith(clone());
+                component.select(assetNode(0));
+                const first = component.meterParentOptions;
+
+                fixture.detectChanges();
+                fixture.detectChanges();
+
+                expect(component.meterParentOptions).toBe(first);
+            });
+
+            it('renders the section under Sub-metered by with one row per stored parent and the fallback hint', () => {
+                loadWith(clone());
+                component.select(assetNode(1));
+                fixture.detectChanges();
+
+                const element: HTMLElement = fixture.nativeElement;
+                expect(element.querySelectorAll('senergy-environments-meter-parents-editor .meter-parent-row').length).toBe(2);
+                const headings = Array.from(element.querySelectorAll('h3')).map((h) => h.textContent?.trim());
+                expect(headings.indexOf('Meter parents')).toBeGreaterThan(-1);
+                expect(headings.indexOf('Meter parents')).toBeLessThan(headings.indexOf('Platform device'));
+                expect(element.textContent).toContain('the meter graph follows "Sub-metered by"');
+            });
+
+            it('adds a row without touching other fields, and writes target, weight and medium change into the saved asset', () => {
+                loadWith(clone());
+                component.select(assetNode(0)); // a1, no meter_parents yet
+                fixture.detectChanges();
+                expect(hasKey(component.selectedAsset!, 'meter_parents')).toBe(false);
+
+                parentsEditor().add();
+                fixture.detectChanges();
+                expect(component.isDirty).toBe(true);
+                expect(component.selectedAsset!.meter_parents).toEqual([{ id: '' }]);
+
+                const editor = parentsEditor();
+                const row = component.selectedAsset!.meter_parents![0];
+                editor.setTarget(row, 'a3');
+                editor.setWeight(row, 100);
+
+                const sent = saveAndCapture().zones[0].assets[0];
+                expect(sent.meter_parents).toEqual([{ id: 'a3', weight: 100 }]);
+                expect(hasKey(sent.meter_parents[0], 'conversion')).toBe(false);
+            });
+
+            it('leaves weight and conversion out of the saved parent while they are empty and unchecked', () => {
+                loadWith(clone());
+                component.select(assetNode(1)); // a2: a1 with weight and conversion, g1 with weight
+                fixture.detectChanges();
+
+                const editor = parentsEditor();
+                const [first, second] = component.selectedAsset!.meter_parents!;
+                editor.setWeight(first, null);
+                editor.setWeight(second, '');
+                editor.setConversion(first, false);
+
+                const sent = saveAndCapture().zones[0].assets[1];
+                expect(sent.meter_parents).toEqual([{ id: 'a1' }, { id: 'g1' }]);
+            });
+
+            it('removes a row, and deletes the field with the last one so the meter graph follows Sub-metered by again', () => {
+                loadWith(clone());
+                component.select(assetNode(1)); // a2
+                fixture.detectChanges();
+
+                parentsEditor().remove(0);
+                fixture.detectChanges();
+                expect(component.selectedAsset!.meter_parents).toEqual([{ id: 'g1', weight: 60 }]);
+
+                parentsEditor().remove(0);
+                fixture.detectChanges();
+                expect(hasKey(component.selectedAsset!, 'meter_parents')).toBe(false);
+                expect(component.selectedAsset!.submetered_by).toBe('a1');
+                expect(hasKey(saveAndCapture().zones[0].assets[1], 'meter_parents')).toBe(false);
+            });
+
+            it('drops stale problems when a row is added or removed, since their indexes shift', () => {
+                loadWith(clone());
+                component.select(assetNode(1));
+                component.problems = [{ path: 'zones[0].assets[1].meter_parents[1]', message: 'unknown parent' }];
+                fixture.detectChanges();
+
+                parentsEditor().remove(0);
+
+                expect(component.problems).toEqual([]);
+            });
+
+            it('shows the weight hint for weights that do not add up, without blocking the save', () => {
+                const env = clone();
+                env.zones![0].assets![1].meter_parents = [{ id: 'a1', weight: 30 }, { id: 'g1', weight: 60 }];
+                loadWith(env);
+                component.select(assetNode(1));
+                fixture.detectChanges();
+
+                expect(fixture.nativeElement.querySelector('.weight-hint').textContent).toContain('add up to 90');
+                component.markDirty();
+                expect(saveAndCapture().zones[0].assets[1].meter_parents.length).toBe(2);
+            });
+        });
+
+        describe('environment form: Meter groups', () => {
+            it('lists the groups with their name and id and a parents editor each', fakeAsync(() => {
+                loadWith(clone());
+                fixture.detectChanges();
+                tick();
+
+                const groups = fixture.nativeElement.querySelectorAll('.meter-group');
+                expect(groups.length).toBe(1);
+                expect(groups[0].querySelector('input').value).toBe('Feeders');
+                expect(groups[0].textContent).toContain('Id g1');
+                expect(groups[0].querySelectorAll('.meter-parent-row').length).toBe(1);
+            }));
+
+            it('says so when there is no group yet', () => {
+                const env = clone();
+                delete env.meter_groups;
+                loadWith(env);
+                fixture.detectChanges();
+
+                expect(fixture.nativeElement.querySelectorAll('.meter-group').length).toBe(0);
+                expect(fixture.nativeElement.textContent).toContain('No meter groups yet.');
+            });
+
+            it('offers a group every asset of every top level zone and every other group, but not itself', () => {
+                const env = clone();
+                env.meter_groups!.push({ id: 'g2', name: 'Second', parents: [{ id: 'b1' }] });
+                loadWith(env);
+
+                expect(component.meterGroupParentOptions.get('g1')).toEqual([
+                    { id: 'a1', label: 'Main meter (Site A)' },
+                    { id: 'a2', label: 'Feeder (Site A)' },
+                    { id: 'a3', label: 'Boiler (Site A)' },
+                    { id: 'b1', label: 'Other site meter (Site B)' },
+                    { id: 'g2', label: 'Meter group: Second' },
+                ]);
+            });
+
+            it('adds a group with a fresh uuid id and no parents, makes it pickable for assets and marks the document dirty', () => {
+                loadWith(clone());
+
+                component.addMeterGroup(component.environment!);
+                fixture.detectChanges();
+
+                const added = component.environment!.meter_groups![1];
+                expect(added.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+                expect(added.name).toBe('New meter group');
+                expect(added.parents).toEqual([]);
+                expect(component.isDirty).toBe(true);
+                expect(fixture.nativeElement.querySelectorAll('.meter-group').length).toBe(2);
+
+                component.select(assetNode(0));
+                expect(component.meterParentOptions.map((o) => o.id)).toContain(added.id);
+            });
+
+            it('creates the field for the first group of an environment that had none', () => {
+                const env = clone();
+                delete env.meter_groups;
+                loadWith(env);
+
+                component.addMeterGroup(component.environment!);
+
+                expect(component.environment!.meter_groups!.length).toBe(1);
+            });
+
+            it('renames a group from its Name field and carries the new name into the assets\' option labels', () => {
+                loadWith(clone());
+                fixture.detectChanges();
+
+                const input: HTMLInputElement = fixture.nativeElement.querySelector('.meter-group input');
+                input.value = 'Outgoing feeders';
+                input.dispatchEvent(new Event('input'));
+
+                expect(component.environment!.meter_groups![0].name).toBe('Outgoing feeders');
+                expect(component.isDirty).toBe(true);
+                expect(component.meterGroupParentOptions.size).toBe(1);
+                component.select(assetNode(0));
+                expect(component.meterParentOptions.find((o) => o.id === 'g1')!.label).toBe('Meter group: Outgoing feeders');
+            });
+
+            it('edits a group\'s parents through the shared row editor and saves them under meter_groups', () => {
+                loadWith(clone());
+                fixture.detectChanges();
+
+                const editor = parentsEditor();
+                editor.add();
+                fixture.detectChanges();
+                const row = component.environment!.meter_groups![0].parents[1];
+                parentsEditor().setTarget(row, 'a3');
+                parentsEditor().setConversion(row, true);
+
+                expect(saveAndCapture().meter_groups).toEqual([
+                    { id: 'g1', name: 'Feeders', parents: [{ id: 'a1' }, { id: 'a3', conversion: true }] },
+                ]);
+            });
+
+            it('removes a group after confirming, with every reference to it, and deletes the emptied lists and the groups field', () => {
+                loadWith(clone());
+                const openDeleteDialog = confirmDeleteDialog();
+
+                component.removeMeterGroup(component.environment!, component.environment!.meter_groups![0]);
+
+                expect(openDeleteDialog).toHaveBeenCalledWith('meter group "Feeders"', {
+                    note: '2 assets or meter groups list this group as a meter parent. Deleting it removes those entries.',
+                });
+                const assets = component.environment!.zones![0].assets!;
+                expect(assets[1].meter_parents).toEqual([{ id: 'a1', weight: 40, conversion: true }]);
+                expect(hasKey(assets[2], 'meter_parents')).toBe(false);
+                expect(hasKey(component.environment!, 'meter_groups')).toBe(false);
+                expect(component.isDirty).toBe(true);
+                expect(hasKey(saveAndCapture(), 'meter_groups')).toBe(false);
+            });
+
+            it('removes a reference from another group and keeps the others', () => {
+                const env = clone();
+                env.meter_groups!.push({ id: 'g2', name: 'Second', parents: [{ id: 'g1' }, { id: 'a3' }] });
+                loadWith(env);
+                confirmDeleteDialog();
+
+                component.removeMeterGroup(component.environment!, component.environment!.meter_groups![0]);
+
+                expect(component.environment!.meter_groups).toEqual([{ id: 'g2', name: 'Second', parents: [{ id: 'a3' }] }]);
+            });
+
+            it('asks without a note for a group nothing refers to, and changes nothing when the user cancels', () => {
+                const env = clone();
+                env.meter_groups!.push({ id: 'g2', name: 'Unused', parents: [{ id: 'a1' }] });
+                loadWith(env);
+                const openDeleteDialog = confirmDeleteDialog(false);
+
+                component.removeMeterGroup(component.environment!, component.environment!.meter_groups![1]);
+
+                expect(openDeleteDialog).toHaveBeenCalledWith('meter group "Unused"', undefined);
+                expect(component.environment!.meter_groups).toEqual(env.meter_groups);
+                expect(component.environment!.zones).toEqual(env.zones);
+                expect(component.isDirty).toBe(false);
+            });
+        });
+
+        describe('deleting an asset or a zone', () => {
+            it('warns about the meter references next to the sub-metering note and removes the entries naming the asset', () => {
+                loadWith(clone());
+                const openDeleteDialog = confirmDeleteDialog();
+
+                component.deleteNode(assetNode(0)); // a1: sub-metered a2, listed by a2 and by group g1
+
+                expect(openDeleteDialog.calls.mostRecent().args[1]!.note).toBe(
+                    '1 asset is sub-metered by this asset. Deleting it clears their Sub-metered by field. ' +
+                        '2 assets or meter groups list this asset as a meter parent. Deleting removes those entries.',
+                );
+                const a2 = component.environment!.zones![0].assets![0];
+                expect(a2.id).toBe('a2');
+                expect(a2.meter_parents).toEqual([{ id: 'g1', weight: 60 }]);
+                expect(component.environment!.meter_groups![0].parents).toEqual([]);
+            });
+
+            it('deletes the field of an asset whose only parent was removed instead of leaving an empty list', () => {
+                const env = clone();
+                env.zones![0].assets![2].meter_parents = [{ id: 'a1' }]; // a3
+                loadWith(env);
+                confirmDeleteDialog();
+
+                component.deleteNode(assetNode(0)); // a1
+
+                const a3 = component.environment!.zones![0].assets![1];
+                expect(a3.id).toBe('a3');
+                expect(hasKey(a3, 'meter_parents')).toBe(false);
+            });
+
+            it('adds no meter note when nothing lists the asset', () => {
+                loadWith(clone());
+                const openDeleteDialog = confirmDeleteDialog();
+
+                component.deleteNode(assetNode(2)); // a3, nobody lists it
+
+                expect(openDeleteDialog.calls.mostRecent().args[1]).toBeUndefined();
+            });
+
+            it('does not count the entries of the assets that are deleted along with a zone', () => {
+                loadWith(clone());
+                const openDeleteDialog = confirmDeleteDialog();
+
+                component.deleteNode(siteA());
+
+                // a2 and a3 go with the zone; only group g1 still names an asset (a1) of it
+                expect(openDeleteDialog.calls.mostRecent().args[1]!.note).toBe(
+                    '1 asset or meter group lists assets in this zone as a meter parent. Deleting removes those entries.',
+                );
+                expect(component.environment!.meter_groups![0].parents).toEqual([]);
+            });
+        });
+
+        describe('weights outside 1..100 block the save', () => {
+            it('refuses a weight of 0 on an asset parent, names its path and sends nothing', () => {
+                loadWith(clone());
+                const snackBarSpy = spyOn((component as any).snackBar, 'open');
+                component.environment!.zones![0].assets![1].meter_parents![0].weight = 0;
+
+                component.save();
+
+                httpMock.expectNone(environmentsUrl + '/e1');
+                expect(component.isSaving).toBe(false);
+                expect(snackBarSpy).toHaveBeenCalledWith(
+                    'These meter parent weights must be whole numbers from 1 to 100: zones[0].assets[1].meter_parents[0].weight',
+                    'close',
+                    { panelClass: 'snack-bar-error' },
+                );
+            });
+
+            it('refuses a negative and an oversized weight on a group parent, with the group path', () => {
+                const env = clone();
+                env.meter_groups![0].parents = [{ id: 'a1', weight: -1 }, { id: 'a2', weight: 101 }];
+                loadWith(env);
+                const snackBarSpy = spyOn((component as any).snackBar, 'open');
+
+                component.save();
+
+                httpMock.expectNone(environmentsUrl + '/e1');
+                expect((snackBarSpy.calls.mostRecent().args[0] as string)).toContain('meter_groups[0].parents[0].weight, meter_groups[0].parents[1].weight');
+            });
+
+            it('still saves weights at the bounds', () => {
+                const env = clone();
+                env.zones![0].assets![1].meter_parents = [{ id: 'a1', weight: 1 }, { id: 'g1', weight: 100 }];
+                loadWith(env);
+
+                expect(saveAndCapture().zones[0].assets[1].meter_parents).toEqual([{ id: 'a1', weight: 1 }, { id: 'g1', weight: 100 }]);
+            });
+        });
+
+        describe('server problems', () => {
+            function saveRejected(): void {
+                component.markDirty();
+                component.save();
+                httpMock.expectOne(environmentsUrl + '/e1').flush(
+                    {
+                        problems: [
+                            { path: 'zones[0].assets[1].meter_parents[1]', message: 'weights must add up to 100' },
+                            { path: 'meter_groups[0].parents[0]', message: 'must lie in the same top level zone as its members' },
+                        ],
+                    },
+                    { status: 400, statusText: 'Bad Request' },
+                );
+                fixture.detectChanges();
+            }
+
+            it('lists both paths above the editor whatever node is selected', () => {
+                loadWith(clone());
+                saveRejected();
+
+                const text = fixture.nativeElement.querySelector('.problems-list').textContent;
+                expect(text).toContain('zones[0].assets[1].meter_parents[1]: weights must add up to 100');
+                expect(text).toContain('meter_groups[0].parents[0]: must lie in the same top level zone as its members');
+            });
+
+            it('puts a meter_parents path on the asset node and marks the row', () => {
+                loadWith(clone());
+                saveRejected();
+                const a2 = assetNode(1);
+                expect(component.problemNodeKeys.has(a2.key)).toBe(true);
+
+                component.select(a2);
+                fixture.detectChanges();
+
+                expect(component.selectedNodeProblems).toEqual([{ message: 'weights must add up to 100', suffix: 'meter_parents[1]' }]);
+                const rows = fixture.nativeElement.querySelectorAll('.meter-parent-row');
+                expect(rows[0].classList.contains('problem-row')).toBe(false);
+                expect(rows[1].classList.contains('problem-row')).toBe(true);
+            });
+
+            it('puts a meter_groups path on the environment node and marks the group\'s row', () => {
+                loadWith(clone());
+                saveRejected();
+                expect(component.problemNodeKeys.has(component.root!.key)).toBe(true);
+
+                component.select(component.root!);
+                fixture.detectChanges();
+
+                expect(component.selectedNodeProblems).toEqual([
+                    { message: 'must lie in the same top level zone as its members', suffix: 'meter_groups[0].parents[0]' },
+                ]);
+                expect(fixture.nativeElement.querySelector('.meter-group .meter-parent-row').classList.contains('problem-row')).toBe(true);
+            });
         });
     });
 

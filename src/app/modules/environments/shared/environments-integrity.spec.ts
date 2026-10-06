@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { findNonIntegerFields } from './environments-integrity';
+import { findNonIntegerFields, findOutOfRangeMeterWeights } from './environments-integrity';
 import { Environment } from './environments.model';
 
 describe('findNonIntegerFields', () => {
@@ -165,11 +165,62 @@ describe('findNonIntegerFields', () => {
         expect(findNonIntegerFields(env)).toEqual(['zones[0].assets[0].channels[0].faults[0].duration_seconds']);
     });
 
+    it('flags a non-integer meter parent weight on an asset and on a meter group with their paths', () => {
+        const env: Environment = {
+            id: 'e1',
+            meter_groups: [{ id: 'g1', name: 'G', parents: [{ id: 'a1', weight: 50 }, { id: 'a2', weight: 33.3 }] }],
+            zones: [{ id: 'z1', zones: [{ id: 'z2', assets: [{ id: 'a1', meter_parents: [{ id: 'g1', weight: 60 }, { id: 'a2', weight: 40.5 }] }] }] }],
+        };
+        expect(findNonIntegerFields(env)).toEqual([
+            'meter_groups[0].parents[1].weight',
+            'zones[0].zones[0].assets[0].meter_parents[1].weight',
+        ]);
+    });
+
+    it('does not flag whole, unset or decimal-point-written meter parent weights', () => {
+        const env: Environment = {
+            id: 'e1',
+            meter_groups: [{ id: 'g1', name: 'G', parents: [{ id: 'a1' }, { id: 'a2', weight: 100.0 }] }],
+            zones: [{ id: 'z1', assets: [{ id: 'a1', meter_parents: [{ id: 'g1', weight: 100 }] }] }],
+        };
+        expect(findNonIntegerFields(env)).toEqual([]);
+    });
+
     it('does not flag fields that are simply unset', () => {
         const env: Environment = {
             id: 'e1',
             zones: [{ id: 'z1', assets: [{ id: 'a1', channels: [{ id: 'c1' }] }] }],
         };
         expect(findNonIntegerFields(env)).toEqual([]);
+    });
+});
+
+describe('findOutOfRangeMeterWeights', () => {
+    it('flags weights below 1 and above 100 on assets and groups, with their paths', () => {
+        const env: Environment = {
+            id: 'e1',
+            meter_groups: [{ id: 'g1', name: 'G', parents: [{ id: 'a1', weight: 0 }, { id: 'a2', weight: 101 }] }],
+            zones: [{ id: 'z1', zones: [{ id: 'z2', assets: [{ id: 'a1', meter_parents: [{ id: 'g1', weight: -5 }, { id: 'a2', weight: 100 }] }] }] }],
+        };
+        expect(findOutOfRangeMeterWeights(env)).toEqual([
+            'meter_groups[0].parents[0].weight',
+            'meter_groups[0].parents[1].weight',
+            'zones[0].zones[0].assets[0].meter_parents[0].weight',
+        ]);
+    });
+
+    it('accepts the bounds 1 and 100 and ignores unset weights', () => {
+        const env: Environment = {
+            id: 'e1',
+            meter_groups: [{ id: 'g1', name: 'G', parents: [{ id: 'a1' }, { id: 'a2', weight: 1 }] }],
+            zones: [{ id: 'z1', assets: [{ id: 'a1', meter_parents: [{ id: 'g1', weight: 100 }] }] }],
+        };
+        expect(findOutOfRangeMeterWeights(env)).toEqual([]);
+    });
+
+    it('flags NaN as outside the range', () => {
+        expect(findOutOfRangeMeterWeights({ id: 'e1', meter_groups: [{ id: 'g1', name: 'G', parents: [{ id: 'a1', weight: NaN }] }] })).toEqual([
+            'meter_groups[0].parents[0].weight',
+        ]);
     });
 });

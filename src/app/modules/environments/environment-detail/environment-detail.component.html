@@ -220,6 +220,40 @@
                         [(pageIndex)]="timelinePageIndex" [(pageSize)]="timelinePageSize" (timelineChange)="onTimelineChange()"
                         (timelineRestructured)="onTimelineRestructured()">
                     </senergy-environments-timeline-editor>
+
+                    <h3>Meter groups</h3>
+                    <p class="section-hint">
+                        A meter group stands for a quantity that is only known as the sum of its members, e.g. all outgoing
+                        feeders supplied jointly by grid, PV, battery and CHP. An asset becomes a member by naming the group
+                        under its Meter parents; the group's own parents are what supplies that sum, and they and the members
+                        must lie in one top-level zone.
+                    </p>
+                    <p class="empty-hint" *ngIf="!selectedEnvironment!.meter_groups?.length">No meter groups yet.</p>
+                    <div class="meter-group" *ngFor="let group of selectedEnvironment!.meter_groups; let groupIndex = index; trackBy: trackByMeterGroup">
+                        <div class="meter-group-header">
+                            <mat-form-field appearance="outline" color="accent" class="meter-group-name-field">
+                                <mat-label>Name</mat-label>
+                                <input matInput [(ngModel)]="group.name" (ngModelChange)="onMeterGroupNameChange()"
+                                    [ngModelOptions]="{standalone: true}" name="meter-group-name">
+                                <mat-hint>Id {{group.id}}</mat-hint>
+                            </mat-form-field>
+                            <button mat-icon-button type="button" color="warn" matTooltip="Delete meter group"
+                                (click)="removeMeterGroup(selectedEnvironment!, group)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                        <h4>Parents</h4>
+                        <p class="section-hint">A group needs at least one parent.</p>
+                        <senergy-environments-meter-parents-editor [parents]="group.parents"
+                            [options]="meterGroupParentOptions.get(group.id) || noOptions" [problems]="selectedNodeProblems"
+                            [problemPrefix]="'meter_groups[' + groupIndex + '].parents'"
+                            (parentsChange)="setMeterGroupParents(group, $event)" (parentsRestructured)="onMeterParentsRestructured()">
+                        </senergy-environments-meter-parents-editor>
+                    </div>
+                    <button mat-stroked-button color="accent" type="button" class="add-meter-group-button"
+                        (click)="addMeterGroup(selectedEnvironment!)">
+                        <mat-icon>add</mat-icon> Add meter group
+                    </button>
                 </ng-container>
 
                 <ng-container *ngSwitchCase="'zone'">
@@ -279,6 +313,17 @@
                         </mtx-select>
                         <mat-hint>Which meter's reading already includes this asset. Only assets in the same top-level zone can be picked.</mat-hint>
                     </mat-form-field>
+
+                    <h3>Meter parents</h3>
+                    <p class="section-hint">
+                        The meters that supply this asset in the meter graph, each with an optional weight and a flag for a
+                        medium change (gas to heat, for example). Pick another asset in the same top-level zone, or a meter
+                        group. Leave the list empty and the meter graph follows "Sub-metered by" above.
+                    </p>
+                    <senergy-environments-meter-parents-editor [parents]="selectedAsset!.meter_parents" [options]="meterParentOptions"
+                        [problems]="selectedNodeProblems" problemPrefix="meter_parents"
+                        (parentsChange)="setMeterParents(selectedAsset!, $event)" (parentsRestructured)="onMeterParentsRestructured()">
+                    </senergy-environments-meter-parents-editor>
 
                     <h3>Platform device</h3>
                     <ng-container *ngIf="selectedAsset!.external_ref; else pendingOrNoPlatformDevice">

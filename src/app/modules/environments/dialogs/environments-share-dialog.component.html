@@ -26,13 +26,13 @@
     </div>
 
     <ng-container *ngIf="!loading && !loadFailed">
-        <p class="hint">Grants read and execute rights on the environment's managed devices and its graph. "May edit the graph" adds write on the graph only; the graph is rebuilt on every save of the environment, so such edits last until then.</p>
+        <p class="hint">Grants read and execute rights on the environment's managed devices and its two graphs, the location graph and the meter graph. The checkbox "may edit the graphs" adds write on both graphs only; the graphs are rebuilt on every save of the environment, so such edits last until then.</p>
 
         <h3>Users</h3>
         <div class="share-row" *ngFor="let id of users">
             <span class="share-name">{{userName(id)}}</span>
             <mat-checkbox class="graph-writer" [checked]="isUserGraphWriter(id)"
-                (change)="setUserGraphWriter(id, $event.checked)">may edit the graph</mat-checkbox>
+                (change)="setUserGraphWriter(id, $event.checked)">may edit the graphs</mat-checkbox>
             <button mat-icon-button color="warn" (click)="removeUser(id)" matTooltip="Remove">
                 <mat-icon>close</mat-icon>
             </button>
@@ -56,7 +56,7 @@
         <div class="share-row" *ngFor="let path of groups">
             <span class="share-name">{{path}}</span>
             <mat-checkbox class="graph-writer" [checked]="isGroupGraphWriter(path)"
-                (change)="setGroupGraphWriter(path, $event.checked)">may edit the graph</mat-checkbox>
+                (change)="setGroupGraphWriter(path, $event.checked)">may edit the graphs</mat-checkbox>
             <button mat-icon-button color="warn" (click)="removeGroup(path)" matTooltip="Remove">
                 <mat-icon>close</mat-icon>
             </button>
