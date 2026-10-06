@@ -58,7 +58,7 @@ describe('CriteriaListComponent', () => {
     // ngModel hands its value to the aspect select in a microtask, hence the wait for stability
     async function init(criteriaJson: string, listing: DeviceTypeAspectNodeModel[] = [air, water]) {
         const deviceTypeService = createSpyFromClass(DeviceTypeService);
-        deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly.and.returnValue(of(listing));
+        deviceTypeService.getAspectNodesWithFunctionOfDevicesOnly.and.returnValue(of(listing));
         const functionsService = createSpyFromClass(FunctionsService);
         functionsService.getFunctions.and.returnValue(of({ result: [], total: 0 }));
         const deviceClassesService = createSpyFromClass(DeviceClassesService);

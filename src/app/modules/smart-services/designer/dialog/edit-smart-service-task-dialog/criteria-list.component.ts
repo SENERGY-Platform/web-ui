@@ -65,7 +65,7 @@ export class CriteriaListComponent implements OnInit {
         this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.deviceClasses = value.result;
         });
-        this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
+        this.deviceTypesService.getAspectNodesWithFunctionOfDevicesOnly().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
             this.aspectNodes = nodes;
             this.aspectNames = new Map(nodes.map((node) => [node.id, node.name]));
             this.rebuildAspects();
@@ -129,8 +129,8 @@ export class CriteriaListComponent implements OnInit {
     }
 
     /**
-     * The listing only holds aspects used with measuring functions, so a stored aspect it lacks (a controlling
-     * criteria's, or a deleted one) is offered under its id: this list is re-emitted whole on every edit, and
+     * The listing only holds aspects some device uses with a function, so a stored aspect it lacks (a deleted one,
+     * or one no device uses anymore) is offered under its id: this list is re-emitted whole on every edit, and
      * opening it empty would drop that aspect on an unrelated change.
      */
     private rebuildAspects() {

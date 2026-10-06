@@ -277,6 +277,34 @@ export class DeviceTypeService {
         );
     }
 
+    /**
+     * Returns aspect-nodes used with measuring- or controlling-functions by devices, including their ancestors: a
+     * criteria combines either kind of function with aspects.
+     */
+    getAspectNodesWithFunctionOfDevicesOnly(): Observable<DeviceTypeAspectNodeModel[]> {
+        return forkJoin([this.getAspectNodesWithMeasuringFunctionOfDevicesOnly(), this.getAspectNodesWithControllingFunction()]).pipe(
+            map(([measuring, controlling]) => {
+                const known = new Set(measuring.map((node) => node.id));
+                return measuring.concat(controlling.filter((node) => !known.has(node.id)));
+            }),
+        );
+    }
+
+    /** Returns aspect-nodes used with controlling-functions, including their ancestors. Imports have no controlling-functions. */
+    getAspectNodesWithControllingFunction(): Observable<DeviceTypeAspectNodeModel[]> {
+        return this.http.get<DeviceTypeAspectNodeModel[] | null>(environment.deviceRepoUrl + '/aspect-nodes?function=controlling-function').pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectNodesWithControllingFunction', [])),
+        );
+    }
+
+    getAspectsControllingFunctions(aspectId: string): Observable<DeviceTypeFunctionModel[]> {
+        return this.http.get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/aspects/' + aspectId + '/controlling-functions').pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectsControllingFunctions', [])),
+        );
+    }
+
     getAspectsMeasuringFunctions(aspectId: string): Observable<DeviceTypeFunctionModel[]> {
         return this.http.get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/aspects/' + aspectId + '/measuring-functions').pipe(
             map((resp) => resp || []),

@@ -70,6 +70,8 @@ describe('TaskConfigDialogComponent', () => {
         listing: DeviceTypeAspectNodeModel[] | Observable<DeviceTypeAspectNodeModel[]> = [air, water],
         deviceClasses: DeviceTypeDeviceClassModel[] = [],
         controllingFunctions: DeviceTypeFunctionModel[] = [],
+        controllingListing: DeviceTypeAspectNodeModel[] = [],
+        controllingFunctionsByAspect: { [id: string]: DeviceTypeFunctionModel[] } = {},
     ) {
         dialogRef = createSpyFromClass<MatDialogRef<TaskConfigDialogComponent>>(MatDialogRef);
         deviceTypeService = createSpyFromClass(DeviceTypeService);
@@ -80,6 +82,8 @@ describe('TaskConfigDialogComponent', () => {
             const functions = functionsByAspect[id] || [];
             return Array.isArray(functions) ? of(functions) : functions;
         });
+        deviceTypeService.getAspectNodesWithControllingFunction.and.returnValue(of(controllingListing));
+        deviceTypeService.getAspectsControllingFunctions.and.callFake((id: string) => of(controllingFunctionsByAspect[id] || []));
         const conceptsService = createSpyFromClass(ConceptsService);
         conceptsService.getConceptWithCharacteristics.and.returnValue(of(null));
 
@@ -183,7 +187,7 @@ describe('TaskConfigDialogComponent', () => {
         expect(result.aspect).toEqual(water);
     });
 
-    it('returns no aspect for a controlling task', () => {
+    it('returns no aspect for a controlling task without aspects', () => {
         init(null, {});
         const result = savedResult();
         expect(result.aspect).toBeNull();
@@ -232,6 +236,73 @@ describe('TaskConfigDialogComponent', () => {
         selectMeasuring([]);
         const select: AspectSelectComponent = fixture.debugElement.query(By.directive(AspectSelectComponent)).componentInstance;
         expect(select.aspectOptions.map((o) => o.id)).toEqual([insideAir.id]);
+    });
+
+    describe('controlling task combined with aspects', () => {
+        const heater = { id: 'urn:infai:ses:device-class:heater', name: 'Heater' } as DeviceTypeDeviceClassModel;
+        const insideAir = node('urn:infai:ses:aspect:inside-air', 'Inside Air', air.id);
+        const setTemperature = { ...fn('urn:infai:ses:controlling-function:set-temperature', 'Set-Temperature'), rdf_type: CONTROLLING };
+        const setOn = { ...fn('urn:infai:ses:controlling-function:set-on', 'Set-On'), rdf_type: CONTROLLING };
+
+        function initControlling(selection: DeviceTypeSelectionRefModel | null = null) {
+            init(selection, {}, [water], [heater], [setTemperature, setOn], [air, insideAir], {
+                [air.id]: [setTemperature],
+                [insideAir.id]: [setTemperature, setOn],
+            });
+        }
+
+        it('offers the aspects used with controlling functions, not those used with measuring functions', () => {
+            initControlling();
+            fixture.detectChanges();
+            const select: AspectSelectComponent = fixture.debugElement.query(By.directive(AspectSelectComponent)).componentInstance;
+            expect(select.aspectOptions.map((o) => o.id)).toEqual([air.id]);
+            component.optionsFormControl.setValue('Measuring');
+            fixture.detectChanges();
+            expect(select.aspectOptions.map((o) => o.id)).toEqual([water.id]);
+        });
+
+        it('offers the controlling functions of the aspects without a device class', () => {
+            initControlling();
+            component.aspectFormControl.setValue([insideAir.id]);
+            expect(deviceTypeService.getAspectsControllingFunctions).toHaveBeenCalledWith(insideAir.id);
+            expect(deviceTypeService.getAspectsMeasuringFunctions).not.toHaveBeenCalled();
+            expect(functionIds()).toEqual([setTemperature.id, setOn.id]);
+            component.functionFormControl.setValue(setOn);
+            const result = savedResult();
+            expect(result.aspects).toEqual([insideAir]);
+            expect(result.device_class).toBeNull();
+            expect(result.function).toEqual(setOn);
+        });
+
+        it('offers only the functions both the device class and the aspects offer', () => {
+            initControlling();
+            component.deviceClassFormControl.setValue(heater);
+            component.aspectFormControl.setValue([air.id]);
+            expect(functionIds()).toEqual([setTemperature.id]);
+            component.functionFormControl.setValue(setTemperature);
+            const result = savedResult();
+            expect(result.device_class).toBe(heater);
+            expect(result.aspects).toEqual([air]);
+        });
+
+        it('offers no function without device class and aspect', () => {
+            initControlling();
+            component.deviceClassFormControl.setValue(heater);
+            component.deviceClassFormControl.setValue(null);
+            expect(functionIds()).toEqual([]);
+            expect(component.functionFormControl.disabled).toBe(true);
+        });
+
+        it('opens a stored controlling selection with its aspects and their common functions', () => {
+            initControlling(
+                measuringSelection({ function: setTemperature, device_class: heater, aspect: air, aspects: [air], completionStrategy: 'optimistic' }),
+            );
+            expect(component.optionsFormControl.value).toBe('Controlling');
+            expect(component.aspectFormControl.value).toEqual([air.id]);
+            expect(functionIds()).toEqual([setTemperature.id]);
+            expect(component.unlistedFor).toBe('device class and aspect');
+            expect(savedResult().aspects).toEqual([air]);
+        });
     });
 
     describe('selection stored before functions and device classes were renamed', () => {
@@ -351,7 +422,8 @@ describe('TaskConfigDialogComponent', () => {
                 await settle();
                 expect(component.functionFormControl.value.id).toBe(setColor.id);
                 expect(functionIds()).toEqual([setTemperature.id, setColor.id]);
-                expect(label(1)).toBe('Set-Color (no longer offered for this device class)');
+                //the aspect select sits between device class and function
+                expect(label(2)).toBe('Set-Color (no longer offered for this device class)');
                 expect(hints()).toEqual(['A deployment will probably find no devices for this combination.']);
                 expect(savedResult().function.id).toBe(setColor.id);
             });
@@ -368,7 +440,8 @@ describe('TaskConfigDialogComponent', () => {
             it('drops the marked device class and its function once another device class is picked', async () => {
                 init(measuringSelection({ function: setColor, device_class: lamp }), {}, [air, water], [heater], [setTemperature]);
                 await settle();
-                expect(label(1)).toBe('Set-Color (no longer offered for this device class)');
+                //the aspect select sits between device class and function
+                expect(label(2)).toBe('Set-Color (no longer offered for this device class)');
                 component.deviceClassFormControl.setValue(heater);
                 await settle();
                 expect(component.deviceClasses.map((c) => c.id)).toEqual([heater.id]);

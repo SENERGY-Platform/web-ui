@@ -27,8 +27,8 @@
         <mat-form-field appearance="outline" class="form-field" color="accent"
             *ngIf="optionsFormControl.value === 'Controlling'">
             <mat-label>Device Class</mat-label>
-            <mtx-select [compareWith]="compare" [formControl]="deviceClassFormControl" required [items]="deviceClasses"
-                bindLabel="name" appendTo=".ng-select-anchor">
+            <mtx-select [compareWith]="compare" [formControl]="deviceClassFormControl" [items]="deviceClasses"
+                bindLabel="name" appendTo=".ng-select-anchor" [clearable]="true">
                 <ng-template ng-label-tmp let-item="item">
                     <span class="ng-value-label">{{item.name}}<span class="not-offered"
                             *ngIf="item.id === unlistedDeviceClass?.id"> (no longer offered)</span></span>
@@ -41,7 +41,7 @@
             <mat-error senergyError label="Device Class"></mat-error>
         </mat-form-field>
 
-        <senergy-aspect-select *ngIf="optionsFormControl.value === 'Measuring'"
+        <senergy-aspect-select *ngIf="optionsFormControl.value !== ''"
             [formControl]="aspectFormControl" [aspects]="aspects" [aspectClasses]="[]" label="Aspects"
             [showCollisionUntouched]="true">
         </senergy-aspect-select>

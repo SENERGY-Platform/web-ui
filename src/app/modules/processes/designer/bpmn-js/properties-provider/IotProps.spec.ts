@@ -90,7 +90,7 @@ describe('IotProps task payload', () => {
         expect(selection.aspects).toEqual([air]);
     });
 
-    it('reads no aspects for a controlling task', () => {
+    it('reads no aspects for a controlling task without aspects', () => {
         const selection: any = getDeviceTypeServiceFromServiceElement(
             serviceElement({ function: controlling, device_class: deviceClass, aspect: null }, 'optimistic'),
         );
@@ -101,6 +101,16 @@ describe('IotProps task payload', () => {
 describe('IotProps task name', () => {
     it('names the device class of a controlling task', () => {
         expect(getTaskName(connectorInfo({ function: controlling, device_class: deviceClass }), 'Task')).toBe('Lamp Set On');
+    });
+
+    it('names device class and aspects of a controlling task', () => {
+        expect(getTaskName(connectorInfo({ function: controlling, device_class: deviceClass, aspect: air, aspects: [air] }), 'Task')).toBe(
+            'Lamp Air Set On',
+        );
+    });
+
+    it('names the aspects of a controlling task without device class', () => {
+        expect(getTaskName(connectorInfo({ function: controlling, aspect: air, aspects: [air] }), 'Task')).toBe('Air Set On');
     });
 
     it('names a single aspect as before', () => {

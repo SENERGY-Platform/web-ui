@@ -129,7 +129,12 @@ export class DesignerHelperService {
                     aspect_id: '',
                 };
                 if (newMeta) {
-                    if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/ControllingFunction') {
+                    const isControlling = newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/ControllingFunction';
+                    const aspectIds = selectedAspectNodes(newMeta).map((node) => node.id);
+
+                    // a controlling task may name a device class, aspects, or both; only tasks naming a
+                    // device class are held to the device class of the lane
+                    if (isControlling && newMeta.device_class) {
                         if (!meta) {
                             meta = newMeta;
                         }
@@ -141,10 +146,10 @@ export class DesignerHelperService {
                         filter.device_class_id = newMeta.device_class.id;
                     }
 
-                    if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/MeasuringFunction') {
+                    if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/MeasuringFunction' || (isControlling && aspectIds.length > 0)) {
                         // the device-repository folds aspect_id into aspect_ids, as the deployment of this task will
                         filter.aspect_id = newMeta.aspect?.id || '';
-                        filter.aspect_ids = selectedAspectNodes(newMeta).map((node) => node.id);
+                        filter.aspect_ids = aspectIds;
                     }
                     filter.function_id = newMeta.function.id;
                     filterArray.push(filter);

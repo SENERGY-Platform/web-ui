@@ -77,7 +77,7 @@ export class EditSmartServiceInputDialogComponent {
             this.deviceClasses = value.result;
         });
         this.setAbstractByDescription(dialogParams.info);
-        this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
+        this.deviceTypesService.getAspectNodesWithFunctionOfDevicesOnly().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
             this.aspectNames = new Map(nodes.map((node) => [node.id, node.name]));
             // offered under its id rather than dropped: ok() writes every criteria back, edited or not
             const stored = this.abstract.flatMap((input) => (Array.isArray(input.criteria_list) ? input.criteria_list : []))

@@ -245,16 +245,17 @@ function createTaskResults(bpmnjs, outputs) {
 }
 
 
+// a controlling task may name a device class, aspects, or both; the name carries whatever it names
 export function getTaskName(connectorInfo, currentName) {
-    var name = currentName;
-    if (connectorInfo.device_class !== null) {
-        name = connectorInfo.device_class.name;
-    } else {
-        var label = aspectsLabel(connectorInfo);
-        if (label !== undefined) {
-            name = label;
-        }
+    var parts = [];
+    if (connectorInfo.device_class) {
+        parts.push(connectorInfo.device_class.name);
     }
+    var label = aspectsLabel(connectorInfo);
+    if (label !== undefined) {
+        parts.push(label);
+    }
+    var name = parts.length > 0 ? parts.join(" ") : currentName;
     return name + " " + connectorInfo.function.name;
 }
 
