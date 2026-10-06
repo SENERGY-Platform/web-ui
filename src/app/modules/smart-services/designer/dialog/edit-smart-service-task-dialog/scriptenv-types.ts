@@ -301,6 +301,18 @@ interface ServicePathOption {
     interaction: string;
 }
 
+interface Console {
+    /**
+     * Dump writes all smart-service instance variables, the variables changed by this script, process worker inputs and process worker outputs known at the time of the call to the worker log
+     */
+    dump(): void;
+    /**
+     * Log writes the arguments, separated by spaces, as info message to the worker log; strings are written as they are, everything else as json
+     */
+    log(...args: any[]): void;
+}
+declare var console: Console;
+
 declare const deviceRepo: {
     getAspect(id: string): Aspect;
     getAspectNode(id: string): AspectNode;

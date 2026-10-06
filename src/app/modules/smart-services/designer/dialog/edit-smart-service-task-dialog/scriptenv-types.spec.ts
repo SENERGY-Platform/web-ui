@@ -29,6 +29,13 @@ describe('vendored smart-service scriptenv declarations', () => {
         });
     });
 
+    // console comes from the worker, not from goja, and the goja environment leaves
+    // out lib.dom.d.ts -- without this declaration console.log reads as undefined.
+    it('declares the console the worker injects', () => {
+        expect(smartServiceScriptEnvTypes).toMatch(/interface Console \{[^}]*dump\(\): void;[^}]*log\(\.\.\.args: any\[\]\): void;/);
+        expect(smartServiceScriptEnvTypes).toContain('declare var console: Console;');
+    });
+
     it('names properties as the runtime exposes them, not as the go fields are named', () => {
         expect(smartServiceScriptEnvTypes).toContain('sub_aspects');
         expect(smartServiceScriptEnvTypes).not.toContain('SubAspects');
