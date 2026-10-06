@@ -16,66 +16,73 @@
 
 import { ChartsExportVAxesModel } from '../../charts/export/shared/charts-export-properties.model';
 import { AnomaliesPerDevice, AnomalyResultModel } from './anomaly.model';
+import { TimelineSelection } from '../../charts/shared/chart-types/timeline/timeline-chartjs';
 
 export const anomalyPhaseColor = '#ff0000';
+export const anomalyPhaseName = 'auffaellig';
 export const normalPhaseColor = '#008000';
 
-function createIntervalsPerAnomaly(anomalies: AnomalyResultModel[]) {
-    const anomalyPhases: any[][] = [];
-    for (let index = 0; index < anomalies.length; index++) {
-        const anomaly = anomalies[index];
-        const anomalyStartTime = anomaly.start_time;
-        const anomalyEndTime = anomaly.end_time;
-        anomalyPhases.push([anomalyStartTime, 1]);
-        anomalyPhases.push([anomalyEndTime, 1]);
-
-        if (index === anomalies.length - 1) {
-            break;
-        }
-        const nextAnomaly = anomalies[index + 1];
-        const nextAnomalyStartTime = nextAnomaly.start_time;
-        // only add normal phase when start time of next anomaly is after end time of current anomaly
-        if (new Date(nextAnomalyStartTime).getTime() <= new Date(anomalyEndTime).getTime()) {
-            continue;
-        }
-        anomalyPhases.push([anomalyEndTime, 0]);
-        anomalyPhases.push([nextAnomalyStartTime, 0]);
-    }
-    return anomalyPhases;
+/** A group of curve anomalies that overlap or lie within one another, from the first start to the last end. */
+export interface AnomalyGroup {
+    start: number;
+    end: number;
+    /** sorted by start */
+    anomalies: AnomalyResultModel[];
 }
 
-function createIntervalsPerDevice(anomalies: AnomalyResultModel[], earliestStartTime: Date, now: Date) {
-    /* Create time windows based on the found anomalies of one device.
-       For each anomaly, a window from start to end will be created.
-       For time between anomalies a normal window will be created.
-       Edge Cases:
-       - No anomalies
-       - First anomaly started after the time window history (e.g. the last 2 days, anomaly started yesterday)
-       - Last anomaly ended 1 day before. Everything normal until now()
-    */
-    let anomalyPhases: any[][] = [];
-    const nowStr = now.toISOString();
+const startOf = (anomaly: AnomalyResultModel) => new Date(anomaly.start_time).getTime();
+const endOf = (anomaly: AnomalyResultModel) => new Date(anomaly.end_time).getTime();
 
-    if (anomalies.length === 0) {
+/** The anomalies sorted by start and merged into groups wherever one starts before the group so far ends. */
+export function anomalyGroups(anomalies: AnomalyResultModel[]): AnomalyGroup[] {
+    const groups: AnomalyGroup[] = [];
+    // stable, so that anomalies starting together keep their order
+    [...anomalies].sort((a, b) => startOf(a) - startOf(b)).forEach((anomaly) => {
+        const last = groups[groups.length - 1];
+        if (last !== undefined && startOf(anomaly) < last.end) {
+            last.end = Math.max(last.end, endOf(anomaly));
+            last.anomalies.push(anomaly);
+        } else {
+            groups.push({ start: startOf(anomaly), end: endOf(anomaly), anomalies: [anomaly] });
+        }
+    });
+    return groups;
+}
+
+/**
+ * The phase bounds of one device, oldest first: normal from the earliest start (or the first anomaly) on,
+ * anomalous for every group of overlapping anomalies, normal in between and from the last end until now.
+ */
+function createIntervalsPerDevice(anomalies: AnomalyResultModel[], earliestStartTime: Date, now: Date) {
+    const anomalyPhases: any[][] = [];
+    const nowStr = now.toISOString();
+    const iso = (ms: number) => new Date(ms).toISOString();
+    const groups = anomalyGroups(anomalies);
+
+    if (groups.length === 0) {
         anomalyPhases.push([earliestStartTime, 0]);
         anomalyPhases.push([nowStr, 0]);
         return anomalyPhases;
     }
-
-    const firstAnomaly = anomalies[0];
-    if (new Date(firstAnomaly.start_time) > new Date(earliestStartTime)) {
+    if (groups[0].start > earliestStartTime.getTime()) {
         anomalyPhases.push([earliestStartTime, 0]);
-        anomalyPhases.push([firstAnomaly.start_time, 0]);
+        anomalyPhases.push([iso(groups[0].start), 0]);
     }
-
-    anomalyPhases = anomalyPhases.concat(createIntervalsPerAnomaly(anomalies));
-
-    const lastAnomaly = anomalies[0];
-    if (new Date(lastAnomaly.end_time) < now) {
-        anomalyPhases.push([lastAnomaly.end_time, 0]);
+    groups.forEach((group, index) => {
+        anomalyPhases.push([iso(group.start), 1]);
+        anomalyPhases.push([iso(group.end), 1]);
+        const next = groups[index + 1];
+        // touching groups have no normal phase between them
+        if (next !== undefined && next.start > group.end) {
+            anomalyPhases.push([iso(group.end), 0]);
+            anomalyPhases.push([iso(next.start), 0]);
+        }
+    });
+    const last = groups[groups.length - 1];
+    if (last.end < now.getTime()) {
+        anomalyPhases.push([iso(last.end), 0]);
         anomalyPhases.push([nowStr, 0]);
     }
-
     return anomalyPhases;
 }
 
@@ -100,10 +107,18 @@ export function curveAnomaliesPerDevice(anomalies: AnomaliesPerDevice, deviceIDs
     return result;
 }
 
-/** The timeline input: one request with one column per device. */
+/** The timeline input: one request per device, in device order, with its phase bounds newest first as the timeline expects. */
 export function phaseTimelineData(phases: any[][][]): any[] {
-    phases.sort((a: any, b: any) => new Date(b[0] as string).getTime() - new Date(a[0] as string).getTime());
-    return phases.map((phase) => [phase]);
+    // reversed, not sorted by time: equal bounds of adjacent phases must keep their order to stay a pair
+    return phases.map((phase) => [phase.slice().reverse()]);
+}
+
+/** The first curve anomaly by start lying within a clicked anomaly bar; undefined for a normal phase. */
+export function anomalyOfBar(curveAnomalies: AnomalyResultModel[], bar: TimelineSelection): AnomalyResultModel | undefined {
+    if (bar.seriesName !== anomalyPhaseName) {
+        return undefined;
+    }
+    return anomalyGroups(curveAnomalies).flatMap((group) => group.anomalies).find((anomaly) => startOf(anomaly) >= bar.start && endOf(anomaly) <= bar.end);
 }
 
 /** One timeline row per device, labelled with the device id. */
@@ -120,7 +135,7 @@ export function phaseVAxes(deviceIDs: string[]): ChartsExportVAxesModel[] {
             from: '1',
             to: '1',
             color: anomalyPhaseColor,
-            alias: 'auffaellig'
+            alias: anomalyPhaseName
         }, {
             from: '0',
             to: '0',

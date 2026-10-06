@@ -36,13 +36,15 @@
     }
 
     @if (configured === true && ready === true && error === false && operatorIsInitPhase === false) {
-      <div>
-        <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!"
-          [colors]="chartData.colors!" [series]="chartData.series!" [chart]="chartData.chart!"
-          [plotOptions]="chartData.plotOptions!" [xaxis]="chartData.xaxis!" [yaxis]="chartData.yaxis!"
-          [annotations]="chartData.annotations!" [markers]="chartData.markers!">
-        </apx-chart>
-      </div>
+      @if (chart) {
+        <div>
+          <senergy-chart-toolbar [chart]="humidityChart"></senergy-chart-toolbar>
+          <div class="chart-box">
+            <canvas baseChart #humidityChart="base-chart" type="line" [data]="chart.data" [options]="chart.options"
+              [plugins]="chartPlugins"></canvas>
+          </div>
+        </div>
+      }
     }
 
     @if (configured === true && ready === true && error === false && operatorIsInitPhase === true) {

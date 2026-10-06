@@ -16,7 +16,8 @@
 
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ScheduleSource, ScheduleState } from '../../shared/environments.model';
-import { scheduleChartOptions, ScheduleChartOptions } from '../../shared/environments-schedule-preview';
+import { schedulePreview } from '../../shared/environments-schedule-preview';
+import { scheduleChartConfig, ScheduleChartConfig } from '../../shared/environments-schedule-chartjs';
 
 /**
  * The schedule source editor: state list (name/duration/value, reorder, per-state
@@ -39,7 +40,7 @@ export class EnvironmentsScheduleEditorComponent implements OnChanges {
     @Input() contextKeyOptions: string[] = [];
     @Output() scheduleChange = new EventEmitter<void>();
 
-    chart: ScheduleChartOptions | undefined;
+    chart: ScheduleChartConfig | undefined;
 
     /** Which state rows have their state_writes panel open, by object identity -- an index
      * would point at the wrong row the moment a state above it is removed or reordered. */
@@ -149,6 +150,7 @@ export class EnvironmentsScheduleEditorComponent implements OnChanges {
     }
 
     private refreshChart(): void {
-        this.chart = this.schedule ? scheduleChartOptions(this.schedule) : undefined;
+        const preview = this.schedule ? schedulePreview(this.schedule) : undefined;
+        this.chart = preview ? scheduleChartConfig(preview) : undefined;
     }
 }

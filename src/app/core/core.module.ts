@@ -16,6 +16,7 @@
 
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { provideAppCharts } from './charts/provide-app-charts';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
@@ -154,6 +155,8 @@ export { keycloakServiceToken };
             useClass: KeycloakService,
             multi: true,
         },
+        // at root, as the device and the connection history dialogs draw charts outside the lazy modules
+        provideAppCharts(),
     ]
 })
 export class CoreModule {

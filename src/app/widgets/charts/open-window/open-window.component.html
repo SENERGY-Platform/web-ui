@@ -19,9 +19,9 @@
   <mat-card-content>
     <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
       @if (chartDataReady) {
-        <timeline-chart chartId='openWindow' class="timeline" [data]="timelineChartData"
+        <timeline-chart class="timeline" [data]="timelineChartData"
           [hAxisLabel]="widget?.properties?.hAxisLabel || ''" [vAxisLabel]="widget?.properties?.vAxisLabel || ''"
-          [enableToolbar]="false" [vAxes]="widget?.properties?.vAxes || []" [width]="timelineWidth"
+          [vAxes]="widget?.properties?.vAxes || []" [width]="timelineWidth"
           [height]="timelineHeight"><
         </timeline-chart>
       }

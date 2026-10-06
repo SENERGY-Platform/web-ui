@@ -15,11 +15,12 @@
   -->
 
 <div style="width: 100%; height: 100%;">
-  @if (render) {
-    <apx-chart class="chart" [tooltip]="apexChartOptions.tooltip!" [legend]="apexChartOptions.legend!"
-      [colors]="apexChartOptions.colors!" [series]="apexChartOptions.series!" [chart]="apexChartOptions.chart!"
-      [plotOptions]="apexChartOptions.plotOptions!" [xaxis]="apexChartOptions.xaxis!"
-      [yaxis]="apexChartOptions.yaxis!" (contextmenu)="resetZoom(); false">
-    </apx-chart>
+  @if (config) {
+    <div class="chart">
+      <div class="canvas-box" [style.width.px]="0.9 * width" [style.height.px]="0.9 * height">
+        <canvas baseChart type="bar" [data]="config.data" [options]="config.options" (chartClick)="onChartClick($event.active)"
+          (contextmenu)="resetZoom(); false"></canvas>
+      </div>
+    </div>
   }
 </div>

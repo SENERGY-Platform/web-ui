@@ -29,9 +29,9 @@
 
   @if (chart) {
     <div class="preset-preview">
-      <apx-chart [series]="chart.series" [chart]="chart.chart" [xaxis]="chart.xaxis" [yaxis]="chart.yaxis"
-        [dataLabels]="chart.dataLabels" [stroke]="chart.stroke" [legend]="chart.legend" [colors]="chart.colors">
-      </apx-chart>
+      <div class="preview-canvas">
+        <canvas baseChart type="line" [data]="chart.data" [options]="chart.options" [plugins]="chartPlugins"></canvas>
+      </div>
     </div>
   }
 

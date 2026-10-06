@@ -99,7 +99,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ValueComponent } from './single-value/value/value.component';
 import { AnomalyComponent } from './anomaly/anomaly.component';
 import { EditComponent } from './anomaly/dialog/edit/edit.component';
-import { NgApexchartsModule } from 'ng-apexcharts';
 import { AddRuleComponent } from './charts/export/dialog/add-rule/add-rule.component';
 import { ListRulesComponent } from './charts/export/dialog/list-rules/list-rules.component';
 import { OpenWindowComponent } from './charts/open-window/open-window.component';
@@ -130,6 +129,7 @@ import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { BaseChartDirective } from 'ng2-charts';
 import { provideAppCharts } from '../core/charts/provide-app-charts';
+import { ChartToolbarComponent } from './shared/chart-toolbar/chart-toolbar.component';
 import { FloorplanComponent } from './floorplan/floorplan.component';
 import { FloorplanEditDialogComponent } from './floorplan/floorplan-edit-dialog/floorplan-edit-dialog.component';
 import { FloorplanControlDialogComponent } from './floorplan/floorplan-control-dialog/floorplan-control-dialog.component';
@@ -175,12 +175,12 @@ registerLocaleData(localeDe, 'de');
         MatSortModule,
         MatSliderModule,
         MatDatepickerModule,
-        NgApexchartsModule,
         MatTreeModule,
         DragDropModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
         BaseChartDirective,
+        ChartToolbarComponent,
         ColorPickerComponent,
         ColorPickerDirective,
         ImageCropperComponent, 

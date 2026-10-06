@@ -15,16 +15,17 @@
  */
 
 import {
-    ChangeDetectorRef,
+    ChangeDetectionStrategy,
     Component, Input,
     OnChanges,
-    OnInit, SimpleChanges,
-    ChangeDetectionStrategy
+    SimpleChanges,
+    ViewChild
 } from '@angular/core';
+import { BaseChartDirective } from 'ng2-charts';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
-import { ApexChartOptions, ChartsExportVAxesModel } from '../../../export/shared/charts-export-properties.model';
-import ApexCharts from 'apexcharts';
-import { timelineSeries, timelineXRange } from './timeline-chart-data';
+import { ChartsExportVAxesModel } from '../../../export/shared/charts-export-properties.model';
+import { timelineSeries, TimelineSeries, timelineXRange } from './timeline-chart-data';
+import { timelineChartConfig, TimelineChartConfig, timelineSelection, TimelineSelection } from './timeline-chartjs';
 
 @Component({
     selector: 'timeline-chart',
@@ -33,7 +34,7 @@ import { timelineSeries, timelineXRange } from './timeline-chart-data';
     changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
-export class TimelineComponent implements OnInit, OnChanges {
+export class TimelineComponent implements OnChanges {
     /*
     Data is expected to be in shape
     [NUMBER_TIMELINE_ROWS, NUMBER_COLUMNS, NUMBER_TIMESTAMPS, 2]
@@ -41,185 +42,34 @@ export class TimelineComponent implements OnInit, OnChanges {
     The last dimension is expected to be [timestamp string, value] and has to be sorted descending by timestamp
     */
     @Input() data: any[] = [];
-    @Input() chartId = '';
     @Input() hAxisLabel = '';
     @Input() vAxisLabel = '';
-    @Input() enableToolbar = false;
     @Input() vAxes: ChartsExportVAxesModel[] = [];
     @Input() height = 0;
     @Input() width = 0;
-    @Input() OnClickFnc = (_: any, _2: any, _3: any) => { };
-    render = false;
-    private chartInstance: ApexCharts | null = null;
-    private series: any[] = [];
-    private colors: string[] = [];
-    isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent.toLowerCase());
+    @Input() OnClickFnc = (_: TimelineSelection) => { };
+    @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+    config?: TimelineChartConfig;
+    private series: TimelineSeries[] = [];
+    private isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent.toLowerCase());
 
-    apexChartOptions: Partial<ApexChartOptions> = {
-        series: this.series,
-        chart: {
-            redrawOnParentResize: true,
-            redrawOnWindowResize: true,
-            width: 0.95 * this.width,
-            height: '100%',
-            animations: {
-                enabled: false
-            },
-            type: 'rangeBar',
-            toolbar: {
-                show: false
-            },
-            events: {},
-            zoom: {
-                allowMouseWheelZoom: false,
-            }
-        },
-        plotOptions: {
-            bar: {
-                barHeight: '90%',
-                horizontal: true,
-                rangeBarGroupRows: true
-            }
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                datetimeUTC: false,
-            },
-            title: {
-                text: ''
-            },
-        },
-        yaxis: {
-            title: {
-                text: ''
-            },
-        },
-        colors: this.colors,
-        legend: {
-            position: 'top',
-            show: true,
-            horizontalAlign: this.isSafari ? 'center' : 'right',
-            offsetY: 15,
-            showForSingleSeries: true,
-        },
-        tooltip: {
-            x: {
-                format: 'dd.MM HH:mm:ss',
-            }
-        }
-    };
-
-    constructor(
-        private errorHandlerService: ErrorHandlerService,
-        private cdr: ChangeDetectorRef,
-    ) { }
-
-    ngOnInit() {
-        // id must clearly identify apx-chart in case multiple widgets of the same type are used
-        this.chartId = this.chartId + `_chart_${Math.random().toString(35).substring(2, 7)}`;
-        if (this.apexChartOptions.chart !== undefined) {
-            this.apexChartOptions.chart.id = this.chartId;
-        }
-        this.renderTimelineChart();
-        if (this.apexChartOptions.chart != null && this.apexChartOptions.chart.events != null) {
-            this.apexChartOptions.chart.events['dataPointSelection'] = this.OnClickFnc;
-        }
-    }
+    constructor(private errorHandlerService: ErrorHandlerService) { }
 
     ngOnChanges(changes: SimpleChanges) {
-        let shouldRebuild = false;
-        let shouldReloadData = false;
-
-        if (changes['data']) {
-            shouldRebuild = true;
-            shouldReloadData = true;
+        if (changes['data'] || changes['vAxes'] || changes['hAxisLabel'] || changes['vAxisLabel']) {
+            this.series = this.prepareTimelineChartData();
+            this.config = timelineChartConfig(this.series, timelineXRange(this.data || []), this.hAxisLabel, this.vAxisLabel,
+                this.isSafari ? 'center' : 'end');
         }
-        if (changes['height'] || changes['width']) {
-            shouldRebuild = true;
-        }
-        if (shouldRebuild) {
-            this.rebuildChart(shouldReloadData);
-        }
-    }
-
-    rebuildChart(reloadData = true) {
-        this.chartInstance = null;
-        this.renderTimelineChart(reloadData);
-        this.cdr.markForCheck(); // Ensure Angular detects and applies the changes
-    }
-
-    destroyChart() {
-        if (this.chartInstance) {
-            this.chartInstance.destroy(); // Destroy the ApexCharts instance
-            this.chartInstance = null; // Reset the chart instance
-        }
-    }
-    /*
-    resize(height: number, width: number) {
-        if(this.apexChartOptions.chart !== undefined) {
-            this.apexChartOptions.chart.width = width;
-            this.apexChartOptions.chart.height = height;
-            this.apexChartOptions.series = this.apexChartOptions.series;
-        }
-    }*/
-
-    private getXRange() {
-        return timelineXRange(this.data);
-    }
-
-    private renderTimelineChart(reloadData = true) {
-        if (reloadData || this.series.length === 0) {
-            const chartData = this.prepareTimelineChartData();
-            this.series = chartData.data;
-            this.colors = chartData.colors;
-            this.apexChartOptions.series = chartData.data;
-            this.apexChartOptions.colors = chartData.colors;
-
-            const xRange = this.getXRange();
-            const chartOpt: Partial<ApexChartOptions> = {
-                xaxis: {
-                    type: 'datetime',
-                    labels: {
-                        datetimeUTC: false,
-                    },
-                    title: {
-                        text: ''
-                    },
-                    min: xRange[0],
-                    max: xRange[1],
-                }
-            };
-            this.apexChartOptions.xaxis = chartOpt.xaxis;
-        }
-        if (this.enableToolbar && this.apexChartOptions.chart?.toolbar !== undefined) {
-            this.apexChartOptions.chart.toolbar.show = true;
-        }
-        if (this.apexChartOptions.xaxis?.title !== undefined) {
-            this.apexChartOptions.xaxis.title.text = this.hAxisLabel;
-        }
-        if (this.apexChartOptions.yaxis?.title !== undefined) {
-            this.apexChartOptions.yaxis.title.text = this.vAxisLabel;
-        }
-        // Ensure valid chart dimensions
-        if (this.height && this.width) {
-            this.apexChartOptions.chart!.height = `${0.9 * this.height}px`;
-            this.apexChartOptions.chart!.width = `${0.9 * this.width}px`;
-        } else {
+        if ((changes['height'] || changes['width']) && !(this.height && this.width)) {
             console.error('Chart dimensions are not properly set.');
         }
-
-        this.render = true;
-        this.chartInstance = ApexCharts.getChartByID(this.chartId) || null;
-        if (this.chartInstance !== null) {
-            this.chartInstance.render();
-        }
     }
 
-    prepareTimelineChartData() {
+    prepareTimelineChartData(): TimelineSeries[] {
         if (this.data == null) {
             // no data
-            return { data: [], colors: [] };
+            return [];
         }
 
         if (this.errorHandlerService.checkIfErrorExists(this.data)) {
@@ -229,12 +79,15 @@ export class TimelineComponent implements OnInit, OnChanges {
         return timelineSeries(this.data, this.vAxes);
     }
 
+    onChartClick(active: object[] | undefined) {
+        const element = (active || [])[0] as { datasetIndex: number; index: number } | undefined;
+        const selection = element === undefined ? undefined : timelineSelection(this.series, element.datasetIndex, element.index);
+        if (selection !== undefined) {
+            this.OnClickFnc(selection);
+        }
+    }
+
     resetZoom() {
-        if (!this.chartInstance) {
-            this.chartInstance = ApexCharts.getChartByID(this.chartId) || null;
-        }
-        if (this.chartInstance && this.apexChartOptions.xaxis?.min && this.apexChartOptions.xaxis?.max) {
-            this.chartInstance.zoomX(this.apexChartOptions.xaxis.min, this.apexChartOptions.xaxis.max);
-        }
+        this.chart?.chart?.resetZoom();
     }
 }

@@ -26,9 +26,9 @@
   <mat-card-content>
 
     @if (widget.properties.chartType === 'Timeline' && ready) {
-      <timeline-chart chartId='chartsExport'
+      <timeline-chart
         [data]="timelineChartData" [hAxisLabel]="widget?.properties?.hAxisLabel || ''"
-        [vAxisLabel]="widget?.properties?.vAxisLabel || ''" [enableToolbar]="false"
+        [vAxisLabel]="widget?.properties?.vAxisLabel || ''"
         [vAxes]="widget?.properties?.vAxes || []" [width]="timelineWidth" [height]="timelineHeight">
       </timeline-chart>
     }

@@ -20,7 +20,7 @@ import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportService } from '../../charts/export/shared/charts-export.service';
-import { thresholdTimeline } from './fake-timeline';
+import { fakeTimelineData, thresholdTimeline } from './fake-timeline';
 
 @Component({
     selector: 'fake-senergy-anomaly-detection',
@@ -205,20 +205,13 @@ export class FakeAnomalyComponent implements AfterViewInit, AfterViewChecked {
     }
 
     loadTimelineData(properties: any) {
-        const timelineChartData: any = [];
         return this.chartsExportService.getData(properties).pipe(
             concatMap((r) => {
                 const resp = r.data;
                 if (resp != null && this.errorHandlerService.checkIfErrorExists(resp)) {
                     return throwError(() => new Error('No data'));
                 } else if (resp != null) {
-                    const tempData = resp[0][0];
-                    timelineChartData.push([this.parseSingleExportData(tempData, 100)]);
-
-                    const gasData = resp[0][1];
-                    timelineChartData.push([this.parseSingleExportData(gasData, 3)]);
-
-                    return of(timelineChartData);
+                    return of(fakeTimelineData(resp as any[][][][]));
                 }
                 return of();
             })

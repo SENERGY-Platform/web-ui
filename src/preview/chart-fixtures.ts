@@ -174,9 +174,18 @@ function deviceHistory(): Record<string, any[]> {
     };
 }
 
+/** The demo anomaly widget's two Influx exports, temperature (anomalous above 100) and pressure (above 3), newest first. */
+const influxSeries: Record<string, () => [string, number][]> = {
+    '1ad3994f-c03f-4c7d-9b9c-eec1595fd7f9': () => rows(72, 5 * M, (i) => (i >= 20 && i < 32 ? 120 : 80)),
+    'f53512e9-8427-4d27-a55b-799c4ad418d8': () => rows(72, 5 * M, (i) => (i >= 45 && i < 60 ? 4 : 2)),
+};
+
 /** The backend answer for a chart widget request, undefined for requests the charts do not make. */
 export function chartAnswer(request: HttpRequest<unknown>): { body: unknown; headers?: Record<string, string> } | undefined {
     const url = request.url;
+    if (url.endsWith('/v2/queries?format=per_query') && request.method === 'POST') {
+        return { body: (request.body as any[]).map((element) => (influxSeries[element.measurement] || (() => []))()) };
+    }
     if (url.endsWith('/queries/v2') && request.method === 'POST') {
         return { body: timescaleAnswer(request.body as any[]) };
     }

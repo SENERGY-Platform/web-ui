@@ -16,7 +16,7 @@
 
 import { timelineSeries } from '../../charts/shared/chart-types/timeline/timeline-chart-data';
 import { ChartsExportVAxesModel } from '../../charts/export/shared/charts-export-properties.model';
-import { thresholdTimeline } from './fake-timeline';
+import { fakeTimelineData, thresholdTimeline } from './fake-timeline';
 
 const t1 = '2026-10-05T08:00:00.000Z';
 const t2 = '2026-10-05T09:00:00.000Z';
@@ -49,11 +49,15 @@ describe('fake anomaly timeline', () => {
 
     it('draws the anomaly from its start until the next normal value', () => {
         const data = [[thresholdTimeline([[t1, 50], [t2, 150], [t3, 150], [t4, 50]], 100)]];
-        const result = timelineSeries(data, [vAxis('Temperatur'), vAxis('Druck')]);
-        expect(result.data).toEqual([
-            { name: 'auffällig', data: [{ x: 'Temperatur', y: [Date.parse(t2), Date.parse(t4)] }] },
-            { name: 'normal', data: [{ x: 'Temperatur', y: [Date.parse(t4), Date.parse(t4)] }] },
+        expect(timelineSeries(data, [vAxis('Temperatur'), vAxis('Druck')])).toEqual([
+            { name: 'auffällig', color: '#AA4A44', bars: [{ row: 'Temperatur', start: Date.parse(t2), end: Date.parse(t4) }] },
+            { name: 'normal', color: '#50C878', bars: [{ row: 'Temperatur', start: Date.parse(t4), end: Date.parse(t4) }] },
         ]);
-        expect(result.colors).toEqual(['#AA4A44', '#50C878']);
+    });
+
+    // SNRGY-4848: the pressure rows were read from resp[0][1], which never exists, and the widget stayed empty.
+    it('reads temperature and pressure each from their own request', () => {
+        const resp = [[[[t2, 50], [t1, 50]]], [[[t2, 5], [t1, 5]]]];
+        expect(fakeTimelineData(resp)).toEqual([[[[t2, 0], [t1, 0]]], [[[t2, 1], [t1, 1]]]]);
     });
 });

@@ -73,20 +73,3 @@ export function ventilationRanges(results: VentilationResult[]): VentilationRang
     }
     return ranges;
 }
-
-/** Apex x axis annotation: the range filled and labelled in its colour, white text. */
-export function apexRangeAnnotation(range: VentilationRange) {
-    return {
-        x: range.from,
-        x2: range.to,
-        fillColor: range.color,
-        label: {
-            text: range.label,
-            borderColor: range.color,
-            style: {
-                background: range.color,
-                color: '#fff'
-            }
-        }
-    };
-}

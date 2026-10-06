@@ -22,7 +22,10 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { AnomalyComponent } from './anomaly.component';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { AnomalyWidgetProperties } from './shared/anomaly.model';
+import { AnomalyResultModel, AnomalyWidgetProperties } from './shared/anomaly.model';
+import { of, Subject } from 'rxjs';
+import { AnomalyService } from './shared/anomaly.service';
+import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 
 describe('AnomalyComponent', () => {
     let component: AnomalyComponent;
@@ -45,5 +48,35 @@ describe('AnomalyComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+});
+
+describe('AnomalyComponent init phase', () => {
+    // With the last anomaly finally read (SNRGY-4848), the init phase flag must also go back once the phase is over.
+    it('shows the data again once the operator has left its init phase', async () => {
+        const events = new Subject<string>();
+        const lastAnomalies: (Partial<AnomalyResultModel> | null)[] = [{ initial_phase: 'learning, 3 of 10 days' }, { initial_phase: '' }, { initial_phase: 'again' }, null];
+        const anomalyService = { getAnomaly: () => of(lastAnomalies.shift()), getAnomalyHistory: () => of({}) };
+        await TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            declarations: [AnomalyComponent],
+            providers: [
+                { provide: AnomalyService, useValue: anomalyService },
+                { provide: DashboardService, useValue: { initWidgetObservable: events.asObservable() } },
+            ],
+        }).compileComponents();
+        const fixture = TestBed.createComponent(AnomalyComponent);
+        const component = fixture.componentInstance;
+        component.widget = { properties: { anomalyDetection: { export: 'exp', timeRangeConfig: { timeRange: { time: 1, level: 'h' } } } as AnomalyWidgetProperties }, id: 'w', name: '', type: '' };
+        fixture.detectChanges();
+
+        const states: [boolean, string][] = [];
+        for (let i = 0; i < 4; i++) {
+            events.next('w');
+            states.push([component.operatorIsInitPhase, component.initialPhaseMsg]);
+        }
+
+        expect(states.map((s) => s[0])).toEqual([true, false, true, false]);
+        expect(states[0][1]).toBe('learning, 3 of 10 days');
     });
 });

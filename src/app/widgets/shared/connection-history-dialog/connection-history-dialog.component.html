@@ -20,8 +20,8 @@
 
   @if (ready) {
     @if (connectionHistory !== null) {
-      <timeline-chart chartId='deviceHistory' class="timeline"
-        [data]="connectionHistory" [enableToolbar]="false" [vAxes]="timelineAxes" [width]="width"
+      <timeline-chart class="timeline"
+        [data]="connectionHistory" [vAxes]="timelineAxes" [width]="width"
       [height]="100 * timelineAxes.length + 100"></timeline-chart>
     }
   }

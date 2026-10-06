@@ -42,11 +42,11 @@ function values(...rows: [number, number][]): DeviceValue[] {
     return rows.map(([minutes, value]) => ({ timestamp: iso(minutes), value }));
 }
 
-const shade = { fillColor: '#FF4C4C', opacity: 0.4 };
+const shade = { color: '#FF4C4C', opacity: 0.4 };
 
 describe('chartAnomalies', () => {
     it('shades a single curve anomaly from its start to its end', () => {
-        expect(chartAnomalies([curve(0, 10)]).intervals).toEqual([{ x: at(0), x2: at(10), ...shade }]);
+        expect(chartAnomalies([curve(0, 10)]).intervals).toEqual([{ from: at(0), to: at(10), ...shade }]);
     });
 
     it('turns extreme values into outlier points, in order', () => {
@@ -58,13 +58,19 @@ describe('chartAnomalies', () => {
     });
 
     it('merges overlapping curve anomalies into one interval', () => {
-        expect(chartAnomalies([curve(0, 20), curve(10, 30)]).intervals).toEqual([{ x: at(0), x2: at(30), ...shade }]);
+        expect(chartAnomalies([curve(0, 20), curve(10, 30)]).intervals).toEqual([{ from: at(0), to: at(30), ...shade }]);
     });
 
-    it('rewrites the end of the first of two overlapping anomalies', () => {
+    it('merges an anomaly lying within another one into it', () => {
+        expect(chartAnomalies([curve(0, 30), curve(10, 20)]).intervals).toEqual([{ from: at(0), to: at(30), ...shade }]);
+    });
+
+    // SNRGY-4848: merging overlaps rewrote end_time of the anomalies the widget got from its parent.
+    it('leaves the given anomalies alone', () => {
         const first = curve(0, 20);
-        chartAnomalies([first, curve(10, 30)]);
-        expect(first.end_time).toBe(iso(30));
+        const second = curve(10, 30);
+        chartAnomalies([second, first]);
+        expect([first.end_time, second.end_time]).toEqual([iso(20), iso(30)]);
     });
 
     it('cuts the reconstruction of an overlapped anomaly where the next one starts', () => {
@@ -76,26 +82,42 @@ describe('chartAnomalies', () => {
         expect(result.reconstructionInputPoints).toEqual([{ x: at(0), y: 1 }, { x: at(10), y: 3 }, { x: at(10), y: 7 }, { x: at(30), y: 9 }]);
     });
 
-    // Without any overlap there are no reconstruction points at all, not even empty lists.
-    it('has no reconstruction without overlapping anomalies', () => {
-        const result = chartAnomalies([curve(0, 10, [[at(0), 1, 2]])]);
-        expect(result.reconstructedPoints).toBeUndefined();
-        expect(result.reconstructionInputPoints).toBeUndefined();
+    // SNRGY-4848: the cut-off times were applied by the index among the overlaps, not among all anomalies.
+    it('cuts the reconstruction of the overlapped anomaly, not of an earlier separate one', () => {
+        const result = chartAnomalies([
+            curve(-30, -20, [[at(-30), 1, 2], [at(-20), 3, 4]]),
+            curve(0, 20, [[at(0), 5, 6], [at(15), 7, 8]]),
+            curve(10, 30, [[at(10), 9, 10]]),
+        ]);
+        expect(result.reconstructedPoints).toEqual([{ x: at(-30), y: 2 }, { x: at(-20), y: 4 }, { x: at(-20), y: null }, { x: at(0), y: 6 }, { x: at(10), y: 10 }]);
     });
 
-    // Every interval without overlap is the same object, so all of them end up at the last one.
-    it('shades separate curve anomalies all at the position of the last one', () => {
+    it('shows the reconstruction of an anomaly again once a nested one has ended', () => {
+        const points = (minutes: number[]) => minutes.map((m) => [at(m), 0, m] as [number, number, number]);
+        const result = chartAnomalies([curve(0, 10, points([0, 3, 6, 9])), curve(2, 4, points([2, 3, 4])), curve(8, 12, points([8, 10, 12]))]);
+        expect(result.reconstructedPoints.map((p) => p.y)).toEqual([0, 2, 3, 4, 6, 8, 10, 12]);
+    });
+
+    // SNRGY-4848: without any overlap the prediction and processed series had no data at all. Separate anomalies are not joined by a line.
+    it('draws the reconstruction of anomalies without overlap, broken between them', () => {
+        const result = chartAnomalies([curve(0, 10, [[at(0), 1, 2]]), curve(20, 30, [[at(20), 3, 4]])]);
+        expect(result.reconstructedPoints).toEqual([{ x: at(0), y: 2 }, { x: at(10), y: null }, { x: at(20), y: 4 }]);
+        expect(result.reconstructionInputPoints).toEqual([{ x: at(0), y: 1 }, { x: at(10), y: null }, { x: at(20), y: 3 }]);
+    });
+
+    // SNRGY-4848: every interval without overlap was the same object, so all of them ended up at the last one.
+    it('shades separate curve anomalies each at its own position', () => {
         expect(chartAnomalies([curve(0, 10), curve(20, 30)]).intervals).toEqual([
-            { x: at(20), x2: at(30), ...shade },
-            { x: at(20), x2: at(30), ...shade },
+            { from: at(0), to: at(10), ...shade },
+            { from: at(20), to: at(30), ...shade },
         ]);
     });
 
-    // After an overlap was found the last anomaly is skipped.
-    it('drops the last anomaly when an earlier pair overlapped', () => {
+    // SNRGY-4848: after an overlap the last anomaly was skipped.
+    it('keeps the last anomaly after an overlapping pair', () => {
         expect(chartAnomalies([curve(0, 20), curve(10, 30), curve(40, 50)]).intervals).toEqual([
-            { x: at(10), x2: at(30), ...shade },
-            { x: at(0), x2: at(30), ...shade },
+            { from: at(0), to: at(30), ...shade },
+            { from: at(40), to: at(50), ...shade },
         ]);
     });
 });
@@ -128,14 +150,14 @@ describe('valueTooltipMessage', () => {
     const outliers = [extreme(5, '350', 500, 800)];
 
     it('names the series and rounds the value to 2 decimals', () => {
-        expect(valueTooltipMessage(0, 0, 12.3456, outliers)).toBe('<b>Device Output:</b> 12.35');
-        expect(valueTooltipMessage(2, 0, 3, outliers)).toBe('<b>Predicted Value:</b> 3.00');
-        expect(valueTooltipMessage(3, 0, -1.005001, outliers)).toBe('<b>Preprocessed Value:</b> -1.01');
-        expect(valueTooltipMessage(4, 0, 7, outliers)).toBe('7.00');
+        expect(valueTooltipMessage(0, 0, 12.3456, outliers)).toEqual({ label: 'Device Output:', value: '12.35' });
+        expect(valueTooltipMessage(2, 0, 3, outliers)).toEqual({ label: 'Predicted Value:', value: '3.00' });
+        expect(valueTooltipMessage(3, 0, -1.005001, outliers)).toEqual({ label: 'Preprocessed Value:', value: '-1.01' });
+        expect(valueTooltipMessage(4, 0, 7, outliers)).toEqual({ label: '', value: '7.00' });
     });
 
     it('shows the raw value and the bounds of an extreme outlier', () => {
-        expect(valueTooltipMessage(1, 0, 350, outliers)).toBe('<b>Extreme Outlier:</b> 350 [500-800]');
+        expect(valueTooltipMessage(1, 0, 350, outliers)).toEqual({ label: 'Extreme Outlier:', value: '350 [500-800]' });
     });
 });
 
@@ -161,13 +183,14 @@ describe('waiting times', () => {
         expect(roundMilliseconds(129600000, 'days')).toBe(1.5);
     });
 
-    // There is no conversion for Months, the axis says months while the values stay milliseconds.
-    it('leaves the values in milliseconds for Months', () => {
+    // SNRGY-4848: there was no conversion for Months, the axis said months while the values stayed milliseconds.
+    it('converts into months of 30 days', () => {
         const day = 86400000;
         const data: DeviceValue[] = [{ timestamp: new Date(t0 + 62 * day).toISOString(), value: 1 }, { timestamp: new Date(t0).toISOString(), value: 1 }];
         const chart = timeChartSeries(data, []);
         expect(chart.yTitle).toBe('Waiting time in Months');
-        expect(chart.series[0].data.map((p) => p.y)).toEqual([62 * day, 0]);
+        expect(chart.series[0].data[0].y).toBeCloseTo(62 / 30, 10);
+        expect(chart.series[0].data[1].y).toBe(0);
     });
 });
 

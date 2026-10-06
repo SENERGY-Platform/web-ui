@@ -199,7 +199,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.initialWidgetData != null) {
             if (this.widget.properties.chartType === 'Timeline') {
                 this.timelineChartData = this.initialWidgetData;
-                this.resizeApex();
+                this.resizeTimeline();
             } else if (this.widget.properties.chartType === 'ColumnChart') {
                 this.chartjs = this.initialWidgetData;
                 this.resizeChart();
@@ -405,16 +405,16 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         return Chart.getChart('chartjs-' + this.widget.id);
     }
 
-    private resizeApex() {
+    private resizeTimeline() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
         this.timelineWidth = element.width;
         this.timelineHeight = element.height;
     }
 
-    getTimelineData() {
-        this.resizeApex();
+    getTimelineData(lastOverride?: string) {
+        this.resizeTimeline();
 
-        this.chartsExportService.getData(this.widget.properties, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined).subscribe({
+        this.chartsExportService.getData(this.widget.properties, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, lastOverride).subscribe({
             next: (data) => {
                 this.timelineChartData = data.data;
                 this.ready = true;
@@ -449,7 +449,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             }
 
             if (this.widget.properties.chartType === 'Timeline') {
-                this.getTimelineData();
+                this.getTimelineData(lastOverride);
                 return;
             }
 

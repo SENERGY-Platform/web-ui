@@ -16,7 +16,9 @@
 
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ProfileSource } from '../../shared/environments.model';
-import { profileChartOptions, ProfileChartOptions } from '../../shared/environments-profile-preview';
+import { profilePreview } from '../../shared/environments-profile-preview';
+import { profileChartConfig, ProfileChartConfig } from '../../shared/environments-profile-chartjs';
+import { crosshairPlugin } from 'src/app/core/charts/chart-look';
 
 /**
  * The profile source editor: base/spread/cumulative, hour/weekday factors and the 24-hour
@@ -40,7 +42,8 @@ export class EnvironmentsProfileEditorComponent implements OnChanges {
     @Input() todayWeekday = 0;
     @Output() profileChange = new EventEmitter<void>();
 
-    chart: ProfileChartOptions | undefined;
+    chart: ProfileChartConfig | undefined;
+    readonly chartPlugins = [crosshairPlugin];
     readonly hourIndexes = Array.from({ length: 24 }, (_, i) => i);
     readonly weekdayIndexes = Array.from({ length: 7 }, (_, i) => i);
     readonly hourLabels = this.hourIndexes.map(String);
@@ -75,6 +78,6 @@ export class EnvironmentsProfileEditorComponent implements OnChanges {
     }
 
     private refreshChart(): void {
-        this.chart = this.profile ? profileChartOptions(this.profile, this.todayWeekday) : undefined;
+        this.chart = this.profile ? profileChartConfig(profilePreview(this.profile, this.todayWeekday)) : undefined;
     }
 }

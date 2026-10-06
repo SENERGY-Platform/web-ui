@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { mondayStartWeekday, profileChartOptions, profilePreviewPoints, profileValueLabel } from './environments-profile-preview';
+import { mondayStartWeekday, profilePreview, profilePreviewPoints, profileValueLabel } from './environments-profile-preview';
 import { ProfileSource } from './environments.model';
 
 describe('profilePreviewPoints', () => {
@@ -56,48 +56,37 @@ describe('profilePreviewPoints', () => {
     });
 });
 
-describe('profileChartOptions', () => {
-    it('renders a single series when spread is unset', () => {
-        const options = profileChartOptions({ base: 10 }, 0);
-        expect(options.series.length).toBe(1);
-        expect(options.series[0].data as number[]).toEqual(new Array(24).fill(10));
-        expect(options.legend.show).toBe(false);
+describe('profilePreview', () => {
+    it('shows a single series without legend when spread is unset', () => {
+        const preview = profilePreview({ base: 10 }, 0);
+        expect(preview.series.length).toBe(1);
+        expect(preview.series[0].values).toEqual(new Array(24).fill(10));
+        expect(preview.showLegend).toBe(false);
     });
 
-    it('adds low/high band series when spread is set', () => {
-        const options = profileChartOptions({ base: 100, spread_percent: 10 }, 0);
-        expect(options.series.length).toBe(3);
-        expect(options.legend.show).toBe(true);
+    it('adds low/high band series and the legend when spread is set', () => {
+        const preview = profilePreview({ base: 100, spread_percent: 10 }, 0);
+        expect(preview.series.length).toBe(3);
+        expect(preview.showLegend).toBe(true);
     });
 
-    it('labels the x-axis with hour categories', () => {
-        const options = profileChartOptions({ base: 1 }, 0);
-        expect(options.xaxis.categories).toEqual(Array.from({ length: 24 }, (_, i) => i + ':00'));
+    it('labels the hours of the day', () => {
+        expect(profilePreview({ base: 1 }, 0).hourLabels).toEqual(Array.from({ length: 24 }, (_, i) => i + ':00'));
     });
 });
 
 describe('profile preview look', () => {
     it('draws the value as solid blue line and the band as thin dashed grey lines', () => {
-        const options = profileChartOptions({ base: 100, spread_percent: 10 }, 0);
-        expect(options.series.map((s) => s.name)).toEqual(['Value', 'Low', 'High']);
-        expect(options.series[1].data as number[]).toEqual(new Array(24).fill(90));
-        expect((options.series[2].data as number[])[0]).toBeCloseTo(110);
-        expect(options.colors).toEqual(['#008FFB', '#999999', '#999999']);
-        expect(options.stroke.width).toEqual([3, 1, 1]);
-        expect(options.stroke.dashArray).toEqual([0, 4, 4]);
+        const preview = profilePreview({ base: 100, spread_percent: 10 }, 0);
+        expect(preview.series.map((s) => s.name)).toEqual(['Value', 'Low', 'High']);
+        expect(preview.series[1].values).toEqual(new Array(24).fill(90));
+        expect(preview.series[2].values[0]).toBeCloseTo(110);
+        expect(preview.series.map((s) => [s.color, s.width, s.dashed])).toEqual([['#008FFB', 3, false], ['#999999', 1, true], ['#999999', 1, true]]);
     });
 
     it('draws a single solid blue line without band', () => {
-        const options = profileChartOptions({ base: 10 }, 0);
-        expect(options.series[0].name).toBe('Value');
-        expect(options.colors).toEqual(['#008FFB']);
-        expect(options.stroke.width).toEqual([3]);
-        expect(options.stroke.dashArray).toEqual([0]);
-    });
-
-    it('labels the value axis through profileValueLabel', () => {
-        const formatter = (options: any) => options.yaxis.labels.formatter;
-        expect(formatter(profileChartOptions({ base: 1 }, 0))).toBe(profileValueLabel);
+        const preview = profilePreview({ base: 10 }, 0);
+        expect(preview.series.map((s) => [s.name, s.color, s.width, s.dashed])).toEqual([['Value', '#008FFB', 3, false]]);
     });
 });
 

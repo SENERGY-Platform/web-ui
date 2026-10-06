@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { ChartType } from 'ng-apexcharts';
-import { ApexChartOptions } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
 import { AnomalyResultModel, DeviceValue } from '../../shared/anomaly.model';
+import { AnomalyGroup, anomalyGroups } from '../../shared/anomaly-phases';
 
 export const anomalyPointSize = 7;
 export const anomalyPointColor = '#FF0000';
@@ -42,9 +41,9 @@ export interface AnomalyLineSeries {
 
 /** A shaded x range marking a (merged) curve anomaly. */
 export interface AnomalyInterval {
-    x: number;
-    x2: number;
-    fillColor: string;
+    from: number;
+    to: number;
+    color: string;
     opacity: number;
 }
 
@@ -57,119 +56,66 @@ export interface ChartAnomalies {
     extremeOutliers: AnomalyResultModel[];
 }
 
-function combineCurveAnomalies(curveAnomalies: AnomalyResultModel[]): any[] {
-    /* Curve Anomalies can overlap. The interval bounds and reconstructions need to be merged
-       Assumption: curveAnomalies is sorted by ascending occurence
-    */
-    let anomalyIntervals: any[] = [];
-    let overlapFound = false;
-    const anomaliesWithOverlap: AnomalyResultModel[] = [];
-    const startTimesOfFirstOverlaps: any[] = [];
+const intervalColor = '#FF4C4C';
+const intervalOpacity = 0.4;
 
-    const point = {
-        x: 0,
-        x2: 0,
-        fillColor: '#FF4C4C',
-        opacity: 0.4,
-    };
+const startOf = (anomaly: AnomalyResultModel) => new Date(anomaly.start_time).getTime();
+const endOf = (anomaly: AnomalyResultModel) => new Date(anomaly.end_time).getTime();
 
-    for (let index = 0; index < curveAnomalies.length; index++) {
-        const currentAnomaly = curveAnomalies[index];
-        if (index === curveAnomalies.length - 1) {
-            if (overlapFound) {
-                break;
+/**
+ * The reconstruction (prediction) and its input of every group of curve anomalies. At each time the curve of the
+ * latest started anomaly still running is shown; between groups the line breaks with a point without value.
+ */
+function reconstructionPoints(groups: AnomalyGroup[]): [XYPoint[], XYPoint[]] {
+    const reconstructed: XYPoint[] = [];
+    const inputs: XYPoint[] = [];
+    groups.forEach((group, groupIndex) => {
+        const points: { x: number; reconstructed: number; input: number }[] = [];
+        group.anomalies.forEach((anomaly, index) => {
+            const later = group.anomalies.slice(index + 1).filter((other) => startOf(other) > startOf(anomaly));
+            for (const [ts, inputValue, reconstructedValue] of anomaly.original_reconstructed_curves || []) {
+                const x = new Date(ts).getTime();
+                // a later anomaly takes over right after its start, so both curves share that point
+                if (!later.some((other) => startOf(other) < x && x <= endOf(other))) {
+                    points.push({ x, reconstructed: parseFloat(String(reconstructedValue)), input: parseFloat(String(inputValue)) });
+                }
             }
-            point.x = new Date(currentAnomaly.start_time).getTime();
-            point.x2 = new Date(currentAnomaly.end_time).getTime();
-            anomalyIntervals.push(point);
-            break;
-        }
-
-        const nextAnomaly = curveAnomalies[index + 1];
-        if (new Date(nextAnomaly.start_time).getTime() < new Date(currentAnomaly.end_time).getTime()) {
-            // Case: Overlap with the next anomaly
-            overlapFound = true;
-            currentAnomaly.end_time = nextAnomaly.end_time;
-            anomaliesWithOverlap.push(currentAnomaly);
-            startTimesOfFirstOverlaps.push(nextAnomaly.start_time);
-        } else {
-            // Case: No Overlap, Interval can be directly created from anomaly
-            point.x = new Date(currentAnomaly.start_time).getTime();
-            point.x2 = new Date(currentAnomaly.end_time).getTime();
-            anomalyIntervals.push(point);
-        }
-    }
-
-    if (!overlapFound) {
-        return [anomalyIntervals, []];
-    } else {
-        const result = combineCurveAnomalies(anomaliesWithOverlap);
-        anomalyIntervals = anomalyIntervals.concat(result[0]);
-    }
-
-    const points: any[] = createReconstructionPoints(curveAnomalies, startTimesOfFirstOverlaps);
-    return [anomalyIntervals, points];
-}
-
-function createReconstructionPoints(anomalies: AnomalyResultModel[], startTimesOfFirstOverlaps: any[]) {
-    /* Assumption: Reconstruction are sorted asc by timestamp
-       startTimesOfFirstOverlaps contains start times of overlapping intervals. These are end bounds for reconstructions from single anomalies.
-    */
-    const reconstrucedPoints: any[] = [];
-    const reconstructionInputPoints: any[] = [];
-
-    anomalies.forEach((anomaly, anomalyIndex) => {
-        const reconstructions: any[] = anomaly.original_reconstructed_curves;
-        const endTimeOfAnomalyPhase = new Date(startTimesOfFirstOverlaps[anomalyIndex]); // will be undefined for anomalies that are not overlapping
-        for (let index = 0; index < reconstructions.length; index++) {
-            const reconstruction = reconstructions[index];
-            const ts = reconstruction[0];
-            if (endTimeOfAnomalyPhase != null && new Date(ts).getTime() > endTimeOfAnomalyPhase.getTime()) {
-                // Outside of anomaly interval
-                break;
-            }
-
-            const inputValue = reconstruction[1];
-            const reconstructedValue = reconstruction[2];
-            reconstrucedPoints.push({
-                x: new Date(ts).getTime(),
-                y: parseFloat(reconstructedValue)
-            });
-            reconstructionInputPoints.push({
-                x: new Date(ts).getTime(),
-                y: parseFloat(inputValue)
-            });
+        });
+        points.sort((a, b) => a.x - b.x).forEach((p) => {
+            reconstructed.push({ x: p.x, y: p.reconstructed });
+            inputs.push({ x: p.x, y: p.input });
+        });
+        if (groupIndex < groups.length - 1 && points.length > 0) {
+            reconstructed.push({ x: group.end, y: null });
+            inputs.push({ x: group.end, y: null });
         }
     });
-
-    return [reconstrucedPoints, reconstructionInputPoints];
+    return [reconstructed, inputs];
 }
 
-/** Splits the anomalies of a device into outlier points and curve anomaly intervals. Merging overlaps rewrites end_time of the given anomalies. */
+/** Splits the anomalies of a device into outlier points and curve anomaly intervals, without changing them. */
 export function chartAnomalies(deviceAnomalies: AnomalyResultModel[]): ChartAnomalies {
     const outlierPoints: XYPoint[] = [];
     const curveAnomalies: AnomalyResultModel[] = [];
     const extremeOutliers: AnomalyResultModel[] = [];
     deviceAnomalies.forEach(anomaly => {
-        const ts = new Date(anomaly.timestamp).getTime();
         if (anomaly.type === 'extreme_value') {
             extremeOutliers.push(anomaly);
             outlierPoints.push({
-                x: ts,
+                x: new Date(anomaly.timestamp).getTime(),
                 y: parseFloat(anomaly.value)
             });
         } else if (anomaly.type === 'curve') {
             curveAnomalies.push(anomaly);
         }
     });
-
-    const result = combineCurveAnomalies(curveAnomalies);
-    const points = result[1];
+    const groups = anomalyGroups(curveAnomalies);
+    const [reconstructedPoints, reconstructionInputPoints] = reconstructionPoints(groups);
     return {
         outlierPoints,
-        reconstructedPoints: points[0],
-        reconstructionInputPoints: points[1],
-        intervals: result[0],
+        reconstructedPoints,
+        reconstructionInputPoints,
+        intervals: groups.map((group) => ({ from: group.start, to: group.end, color: intervalColor, opacity: intervalOpacity })),
         extremeOutliers,
     };
 }
@@ -187,22 +133,22 @@ export function valueChartSeries(deviceValues: DeviceValue[], anomalies: ChartAn
     return series;
 }
 
-/** The tooltip text of the value chart, by series: device output, extreme outlier with its bounds, prediction, preprocessed value. */
-export function valueTooltipMessage(seriesIndex: number, dataPointIndex: number, value: number, extremeOutliers: AnomalyResultModel[]): string {
+/** The tooltip line of the value chart, by series: device output, extreme outlier with its bounds, prediction, preprocessed value. */
+export function valueTooltipMessage(seriesIndex: number, dataPointIndex: number, value: number, extremeOutliers: AnomalyResultModel[]): { label: string; value: string } {
     const formatted = value.toFixed(2);
     switch (seriesIndex) {
     case 0:
-        return '<b>Device Output:</b> ' + formatted;
+        return { label: 'Device Output:', value: formatted };
     case 1: {
         const anomaly = extremeOutliers[dataPointIndex];
-        return '<b>Extreme Outlier:</b> ' + anomaly.value + ' [' + anomaly.lower_bound + '-' + anomaly.upper_bound + ']';
+        return { label: 'Extreme Outlier:', value: anomaly.value + ' [' + anomaly.lower_bound + '-' + anomaly.upper_bound + ']' };
     }
     case 2:
-        return '<b>Predicted Value:</b> ' + formatted;
+        return { label: 'Predicted Value:', value: formatted };
     case 3:
-        return '<b>Preprocessed Value:</b> ' + formatted;
+        return { label: 'Preprocessed Value:', value: formatted };
     default:
-        return formatted;
+        return { label: '', value: formatted };
     }
 }
 
@@ -262,6 +208,8 @@ export function roundMilliseconds(miliseconds: number, to: string): number {
         return miliseconds / 1000 / 60 / 60;
     case 'days':
         return miliseconds / 1000 / 60 / 60 / 24;
+    case 'Months':
+        return miliseconds / 1000 / 60 / 60 / 24 / 30;
     }
 
     return miliseconds;
@@ -282,66 +230,4 @@ export function timeChartSeries(data: DeviceValue[], deviceAnomalies: AnomalyRes
             { name: 'Outlier', type: 'scatter', data: outliers, color: anomalyPointColor, markerSize: anomalyPointSize },
         ],
     };
-}
-
-export function apexAnomalyChartOptions(chartType: ChartType): ApexChartOptions {
-    return {
-        series: [],
-        chart: {
-            redrawOnParentResize: true,
-            redrawOnWindowResize: true,
-            width: '100%',
-            height: 'auto',
-            animations: {
-                enabled: false
-            },
-            type: chartType,
-            toolbar: {
-                show: true
-            },
-            events: {}
-        },
-        title: {},
-        plotOptions: {},
-        xaxis: {
-            type: 'datetime' as 'datetime' | 'category',
-            labels: {
-                datetimeUTC: false,
-            },
-            title: {
-                text: ''
-            }
-        },
-        yaxis: {
-            title: {
-                text: ''
-            },
-            decimalsInFloat: 3
-        },
-        colors: [],
-        legend: {
-            show: true
-        },
-        annotations: {
-            points: [],
-            xaxis: []
-        },
-        tooltip: {
-            enabled: true,
-            x: {
-                format: 'dd.MM HH:mm:ss.fff',
-            }
-        },
-        markers: {
-        },
-    };
-}
-
-/** Apex series, colours and marker sizes from the neutral series. */
-export function applyApexSeries(chartData: ApexChartOptions, series: AnomalyLineSeries[]) {
-    series.forEach((s) => chartData.series.push(s.type === undefined ? { data: s.data, name: s.name } : { data: s.data, name: s.name, type: s.type }));
-    const colors = series.map((s) => s.color);
-    chartData.markers.colors = colors;
-    chartData.colors = colors;
-    chartData.markers.size = series.map((s) => s.markerSize);
 }

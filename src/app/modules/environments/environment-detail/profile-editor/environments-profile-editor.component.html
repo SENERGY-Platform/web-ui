@@ -16,9 +16,9 @@
 
 @if (chart) {
   <div class="profile-chart">
-    <apx-chart [series]="chart.series" [chart]="chart.chart" [xaxis]="chart.xaxis" [yaxis]="chart.yaxis"
-      [dataLabels]="chart.dataLabels" [stroke]="chart.stroke" [legend]="chart.legend" [colors]="chart.colors">
-    </apx-chart>
+    <div class="preview-canvas">
+      <canvas baseChart type="line" [data]="chart.data" [options]="chart.options" [plugins]="chartPlugins"></canvas>
+    </div>
     <p class="section-hint">24-hour preview for today ({{weekdayLabels[todayWeekday]}}): base &times; hour factor &times; weekday factor.</p>
   </div>
 }

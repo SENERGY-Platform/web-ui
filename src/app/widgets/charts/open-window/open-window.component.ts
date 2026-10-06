@@ -178,8 +178,6 @@ export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
         if (this.timelineChart) {
             this.getTimelineData().subscribe({
                 next: (_) => {
-                    this.timelineChart.rebuildChart();      // in single cases, apx chart is build incorrectly
-                    this.timelineChart.rebuildChart(false); // building the chart twice resets the bug, no need to load data twice though
                     this.ready = true;
                     this.refreshing = false;
                 },

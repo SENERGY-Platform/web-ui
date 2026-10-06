@@ -16,35 +16,60 @@
 
 import { ChartsExportVAxesModel } from '../../../export/shared/charts-export-properties.model';
 
-/** One bar of a timeline row: x is the row label, y the [start, end] time in ms. */
+/** One bar of a timeline row, from start to end in ms. */
 export interface TimelineBar {
-    x: string;
-    y: [number, number];
+    row: string;
+    start: number;
+    end: number;
 }
 
+/** The bars of one state (conversion alias) across all rows, in its colour. */
 export interface TimelineSeries {
     name: string;
-    data: TimelineBar[];
+    color: string;
+    bars: TimelineBar[];
 }
+
+/** Used for a state whose conversion has no colour. */
+const fallbackColors = ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0'];
 
 /*
  * Input data is shaped [NUMBER_TIMELINE_ROWS, NUMBER_COLUMNS, NUMBER_TIMESTAMPS, 2]; the row index
  * matches the vAxes index, the last dimension is [timestamp, value], sorted descending by timestamp.
  */
 
-/** One series per conversion alias that matched at least once, coloured by the first conversion carrying that alias. */
-export function timelineSeries(data: any[], vAxes: ChartsExportVAxesModel[]): { data: TimelineSeries[]; colors: string[] } {
-    const chartData = setupTimelineChart(vAxes);
-    data.forEach((dataForOneEntity: any, i: any) => {
+/** The name a conversion's bars are collected under: its alias, else its target value. */
+function seriesName(conversion: { alias?: string; to: any }): string {
+    return conversion.alias || String(conversion.to);
+}
+
+/** One series per state that matched at least once, coloured by the first conversion of that name. */
+export function timelineSeries(data: any[], vAxes: ChartsExportVAxesModel[]): TimelineSeries[] {
+    const bars: Record<string, TimelineBar[]> = {};
+    vAxes.forEach((vAxis) => (vAxis?.conversions || []).forEach((conversion) => (bars[seriesName(conversion)] = [])));
+    data.forEach((dataForOneEntity: any, i: number) => {
         if (dataForOneEntity.length > 0) { // only when requested entitity has any data
-            processDataForOneEntity(dataForOneEntity, chartData, vAxes[i]);
+            processDataForOneEntity(dataForOneEntity, bars, vAxes[i]);
         }
     });
-    const convertedCartData = convertTimelineChartData(chartData);
-    return {
-        data: convertedCartData,
-        colors: setupTimelineColors(convertedCartData, vAxes)
-    };
+    const series: TimelineSeries[] = [];
+    Object.entries(bars).forEach(([name, barsOfState]) => {
+        if (barsOfState.length > 0) {
+            series.push({ name, color: seriesColor(name, vAxes) || fallbackColors[series.length % fallbackColors.length], bars: barsOfState });
+        }
+    });
+    return series;
+}
+
+/** Every row label in order of its first bar. */
+export function timelineRows(series: TimelineSeries[]): string[] {
+    const rows: string[] = [];
+    series.forEach((s) => s.bars.forEach((bar) => {
+        if (!rows.includes(bar.row)) {
+            rows.push(bar.row);
+        }
+    }));
+    return rows;
 }
 
 /** [earliest, latest] timestamp in ms over all rows, from the first column of each row. */
@@ -77,53 +102,14 @@ export function timelineXRange(data: any[]): [number, number] | [undefined, unde
     }
 }
 
-function setupTimelineColors(chartData: any, vAxes: ChartsExportVAxesModel[]) {
-    const colors: string[] = [];
-    chartData.forEach((serie: any) => {
-        let aliasFound = false;
-        vAxes.forEach((vAxis: any) => {
-            vAxis.conversions.forEach((conversion: any) => {
-                if (aliasFound) {
-                    return;
-                }
-                if (conversion.alias === serie.name || conversion.alias === serie.to) {
-                    colors.push(conversion.color);
-                    aliasFound = true;
-                }
-            });
-            if (aliasFound) {
-                return;
-            }
-        });
-    });
-    return colors;
-}
-
-function convertTimelineChartData(chartData: any): TimelineSeries[] {
-    const convertedChartData = [];
-    for (const [key, value] of Object.entries(chartData)) {
-        const data = (value as any)['data'];
-        if (data.length === 0) {
-            continue;
+function seriesColor(name: string, vAxes: ChartsExportVAxesModel[]): string | undefined {
+    for (const vAxis of vAxes) {
+        const conversion = (vAxis?.conversions || []).find((c) => seriesName(c) === name);
+        if (conversion !== undefined) {
+            return conversion.color;
         }
-        convertedChartData.push({
-            name: key,
-            data
-        });
     }
-    return convertedChartData;
-}
-
-function setupTimelineChart(vAxes: ChartsExportVAxesModel[]) {
-    const chartData: any = {};
-    vAxes.forEach(vAxis => {
-        (vAxis?.conversions || []).forEach(conversion => {
-            chartData[conversion.alias || conversion.to] = {
-                data: []
-            };
-        });
-    });
-    return chartData;
+    return undefined;
 }
 
 /** Merges consecutive rows of the first column with the same value into their first and last row. */
@@ -156,47 +142,25 @@ export function mergeTimelineData(data: any) {
     return mergedData;
 }
 
-/** The alias of the last conversion from firstValue to lastValue, compared as strings; undefined without match. */
+/** The series name of the first conversion from firstValue to lastValue, compared as strings; undefined without match. */
 export function aliasOfMatchingRule(vAxis: ChartsExportVAxesModel, firstValue: any, lastValue: any): string | undefined {
-    let alias: string | undefined;
-    (vAxis?.conversions || []).forEach(conversion => {
-        // convert everything to string, as there are problems with booleans in the conversion that are sometimes strings or bool
-        if (String(conversion.to) === String(lastValue) && String(conversion.from) === String(firstValue)) {
-            alias = conversion.alias || String(conversion.to);
-            return;
-        }
-    });
-    return alias;
+    // compared as strings, as booleans in the conversions are sometimes strings and sometimes bool
+    const conversion = (vAxis?.conversions || []).find((c) => String(c.to) === String(lastValue) && String(c.from) === String(firstValue));
+    return conversion === undefined ? undefined : seriesName(conversion);
 }
 
-function processDataForOneEntity(data: any, chartData: any, vAxis: ChartsExportVAxesModel) {
+function processDataForOneEntity(data: any, bars: Record<string, TimelineBar[]>, vAxis: ChartsExportVAxesModel) {
     const mergedData = mergeTimelineData(data);
     mergedData.forEach((row: any, i: any) => {
         if (i === mergedData.length - 1) {
             return;
         }
         const nextRow = mergedData[i + 1];
-        const firstValue = nextRow[1];
-        const lastValue = row[1];
-        const ruleAlias = aliasOfMatchingRule(vAxis, firstValue, lastValue);
+        const ruleAlias = aliasOfMatchingRule(vAxis, nextRow[1], row[1]);
         if (ruleAlias != null) {
-            const startDate = new Date(nextRow[0]);
-            let endDate;
-            if (i === 0) {
-                endDate = new Date(row[0]);
-            } else {
-                // the previous row gives the end, this assumes that the operator output is valid until the next input
-                const prevRow = mergedData[i - 1];
-                endDate = new Date(prevRow[0]);
-            }
-
-            chartData[ruleAlias]['data'].push({
-                x: vAxis.valueAlias || vAxis.exportName,
-                y: [
-                    startDate.getTime(),
-                    endDate.getTime()
-                ]
-            });
+            // the newest bar ends at its own row, every other one at the previous (newer) row, the operator output being valid until the next input
+            const end = i === 0 ? row[0] : mergedData[i - 1][0];
+            bars[ruleAlias].push({ row: vAxis.valueAlias || vAxis.exportName, start: new Date(nextRow[0]).getTime(), end: new Date(end).getTime() });
         }
     });
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { apexRangeAnnotation, humidityPoints, ventilationRanges } from './bad-ventilation-chart';
+import { humidityPoints, ventilationRanges } from './bad-ventilation-chart';
 import { VentilationResult } from './model';
 
 const minute = 60000;
@@ -61,16 +61,5 @@ describe('ventilationRanges', () => {
     it('needs an older result to mark anything', () => {
         expect(ventilationRanges([])).toEqual([]);
         expect(ventilationRanges([result(30, false, 28)])).toEqual([]);
-    });
-});
-
-describe('apexRangeAnnotation (Apex)', () => {
-    it('fills and labels the range in its colour with white text', () => {
-        expect(apexRangeAnnotation({ from: 1, to: 2, color: '#097969', label: 'Open Window' })).toEqual({
-            x: 1,
-            x2: 2,
-            fillColor: '#097969',
-            label: { text: 'Open Window', borderColor: '#097969', style: { background: '#097969', color: '#fff' } },
-        });
     });
 });

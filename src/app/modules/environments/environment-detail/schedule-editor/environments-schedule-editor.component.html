@@ -16,9 +16,9 @@
 
 @if (chart) {
   <div class="schedule-chart">
-    <apx-chart [series]="chart.series" [chart]="chart.chart" [plotOptions]="chart.plotOptions" [xaxis]="chart.xaxis"
-      [yaxis]="chart.yaxis" [dataLabels]="chart.dataLabels" [colors]="chart.colors">
-    </apx-chart>
+    <div class="preview-canvas">
+      <canvas baseChart type="bar" [data]="chart.data" [options]="chart.options"></canvas>
+    </div>
     <p class="section-hint">Timeline over up to 3 cycles; runtime values vary by the spread, the preview does not.</p>
   </div>
 }

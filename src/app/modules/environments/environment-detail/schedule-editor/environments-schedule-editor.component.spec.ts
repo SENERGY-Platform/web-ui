@@ -242,7 +242,7 @@ describe('EnvironmentsScheduleEditorComponent + the real key-value editor (state
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            // mtx-select and apx-chart are still unresolved here (irrelevant to this suite);
+            // mtx-select and the baseChart canvas are still unresolved here (irrelevant to this suite);
             // only the schedule editor and the key-value editor need to be the real thing.
             schemas: [NO_ERRORS_SCHEMA],
             declarations: [EnvironmentsScheduleEditorComponent, EnvironmentsKeyValueEditorComponent],

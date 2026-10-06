@@ -18,11 +18,16 @@
   <senergy-widget-header [widget]="widget"></senergy-widget-header>
   <mat-card-content>
     <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
+      @if (errorMessage !== '') {
+        <div class="text-container">
+          <h2>{{errorMessage}}</h2>
+        </div>
+      }
       @if (style === 'timeline') {
         <div>
           @if (chartDataReady) {
-            <timeline-chart chartId="fake" [data]="timelineChartData" [hAxisLabel]="'Zeit'" [vAxisLabel]="'c163d155'"
-              [enableToolbar]="false" [vAxes]="properties.vAxes" [width]="timelineWidth" [height]="timelineHeight">
+            <timeline-chart [data]="timelineChartData" [hAxisLabel]="'Zeit'" [vAxisLabel]="'c163d155'"
+              [vAxes]="properties.vAxes" [width]="timelineWidth" [height]="timelineHeight">
             </timeline-chart>
           }
         </div>

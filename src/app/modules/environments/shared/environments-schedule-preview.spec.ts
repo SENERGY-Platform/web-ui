@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { formatElapsed, schedulePreviewBlocks, scheduleChartOptions } from './environments-schedule-preview';
+import { formatElapsed, schedulePreview, schedulePreviewBlocks } from './environments-schedule-preview';
 import { ScheduleSource } from './environments.model';
 
 describe('schedulePreviewBlocks', () => {
@@ -88,41 +88,28 @@ describe('schedulePreviewBlocks', () => {
     });
 });
 
-describe('scheduleChartOptions', () => {
-    it('builds a rangeBar series with one entry per laid-out block', () => {
+describe('schedulePreview', () => {
+    it('has one row per state name in order of first appearance and every laid-out block', () => {
         const schedule: ScheduleSource = {
             states: [
                 { name: 'idle', duration_seconds: 600, value: 0 },
                 { name: 'run', duration_seconds: 300, value: 15 },
+                { name: 'idle', duration_seconds: 60, value: 0 },
             ],
         };
-        const options = scheduleChartOptions(schedule);
-        expect(options).toBeDefined();
-        expect(options!.chart.type).toBe('rangeBar');
-        const data = options!.series[0].data as { x: string; y: number[] }[];
-        expect(data.length).toBe(6); // 3 cycles x 2 states
-        expect(data[0]).toEqual({ x: 'idle', y: [0, 600000] });
-        expect(data[1]).toEqual({ x: 'run', y: [600000, 900000] });
+        const preview = schedulePreview(schedule)!;
+        expect(preview.rows).toEqual(['idle', 'run']);
+        expect(preview.blocks.length).toBe(9); // 3 cycles x 3 states
+        expect(preview.blocks[1]).toEqual({ name: 'run', startSeconds: 600, endSeconds: 900, value: 15 });
     });
 
     it('is undefined when there is nothing to lay out', () => {
-        expect(scheduleChartOptions({})).toBeUndefined();
-        expect(scheduleChartOptions({ states: [{ name: 'stuck', duration_seconds: 0, value: 1 }] })).toBeUndefined();
-    });
-});
-
-describe('schedule preview look', () => {
-    it('draws every block in one blue series named Schedule', () => {
-        const options = scheduleChartOptions({ states: [{ name: 'run', duration_seconds: 60, value: 1 }] })!;
-        expect(options.series.map((s) => s.name)).toEqual(['Schedule']);
-        expect(options.colors).toEqual(['#008FFB']);
+        expect(schedulePreview({})).toBeUndefined();
+        expect(schedulePreview({ states: [{ name: 'stuck', duration_seconds: 0, value: 1 }] })).toBeUndefined();
     });
 
-    it('labels the time axis with the elapsed time of the millisecond tick value', () => {
-        const options = scheduleChartOptions({ states: [{ name: 'run', duration_seconds: 60, value: 1 }] })!;
-        const formatter = (options.xaxis.labels as any).formatter;
-        expect(formatter('5400000')).toBe('1:30');
-        expect(formatter('0')).toBe('0:00');
+    it('draws every block blue', () => {
+        expect(schedulePreview({ states: [{ name: 'run', duration_seconds: 60, value: 1 }] })!.color).toBe('#008FFB');
     });
 });
 

@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { TimelineComponent } from './timeline.component';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, SimpleChange } from '@angular/core';
 
 describe('TimelineComponent', () => {
   let component: TimelineComponent;
@@ -40,5 +40,19 @@ describe('TimelineComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('hands a clicked bar to the click function', () => {
+    const t = Date.UTC(2026, 9, 5, 8);
+    const clicked: any[] = [];
+    component.OnClickFnc = (bar) => clicked.push(bar);
+    component.vAxes = [{ exportName: 'e', valueName: 'v', valueAlias: 'Pump', valueType: 'int', math: '', color: '', conversions: [{ from: 1, to: 1, alias: 'An', color: '#4caf50' }] }];
+    component.data = [[[[new Date(t + 3600000).toISOString(), 1], [new Date(t).toISOString(), 1]]]];
+    component.ngOnChanges({ data: new SimpleChange(undefined, component.data, false) });
+
+    component.onChartClick([{ datasetIndex: 0, index: 0 }]);
+    component.onChartClick([]);
+
+    expect(clicked).toEqual([{ seriesName: 'An', row: 'Pump', start: t, end: t + 3600000 }]);
   });
 });

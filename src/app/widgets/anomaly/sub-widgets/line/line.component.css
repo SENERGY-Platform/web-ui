@@ -14,3 +14,13 @@
  * limitations under the License.
  */
 
+.chart-frame {
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-box {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+}

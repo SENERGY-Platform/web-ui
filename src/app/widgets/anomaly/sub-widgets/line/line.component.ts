@@ -20,7 +20,9 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
 import { AnomaliesPerDevice, AnomalyResultModel, DeviceValue } from '../../shared/anomaly.model';
 import { AnomalyService } from '../../shared/anomaly.service';
 import { ChangeDetectorRef } from '@angular/core';
-import { apexAnomalyChartOptions, applyApexSeries, chartAnomalies, timeChartSeries, valueChartSeries, valueTooltipMessage, waitingTimes } from './anomaly-line-chart';
+import { chartAnomalies, timeChartSeries, valueChartSeries, waitingTimes } from './anomaly-line-chart';
+import { AnomalyChartConfig, timeChartConfig, valueChartConfig } from './anomaly-line-chartjs';
+import { crosshairPlugin } from 'src/app/core/charts/chart-look';
 
 @Component({
     selector: 'anomaly-line',
@@ -31,7 +33,8 @@ import { apexAnomalyChartOptions, applyApexSeries, chartAnomalies, timeChartSeri
 })
 export class LineComponent implements OnInit, OnChanges {
     chartsReady = false;
-    timeChartData?: any;
+    timeChartData?: AnomalyChartConfig;
+    readonly chartPlugins = [crosshairPlugin];
     @Input() widget?: WidgetModel;
     @Input() anomalies?: AnomaliesPerDevice;
     @Input() widgetHeight = 0;
@@ -45,7 +48,7 @@ export class LineComponent implements OnInit, OnChanges {
 
     extremeOutliers: AnomalyResultModel[] = [];
 
-    valueChartData: any;
+    valueChartData?: AnomalyChartConfig;
     constructor(
       private anomalyService: AnomalyService,
       private cdr: ChangeDetectorRef
@@ -72,12 +75,7 @@ export class LineComponent implements OnInit, OnChanges {
 
         if(this.showFrequencyAnomalies === true) {
             this.chartHeight = this.widgetHeight * 0.45;
-
-            this.timeChartData.chart.width = this.chartWidth;
-            this.timeChartData.chart.height = this.chartHeight;
         }
-        this.valueChartData.chart.width = this.chartWidth;
-        this.valueChartData.chart.height = this.chartHeight;
 
         this.cdr.detectChanges();
         this.render = true;
@@ -142,24 +140,9 @@ export class LineComponent implements OnInit, OnChanges {
         // Anomaly Operator works on 1 minute sampling for curve anomalies
         return this.anomalyService.getDeviceCurve(deviceId, serviceId, pathToColumn, lastTimeRange, '1m').pipe(
             map(data => {
-                const chartData = apexAnomalyChartOptions('line');
                 const anomalies = chartAnomalies(this.getDeviceAnomalies(deviceId));
                 this.extremeOutliers.push(...anomalies.extremeOutliers);
-                applyApexSeries(chartData, valueChartSeries(data, anomalies, this.showDebug));
-                chartData.annotations.xaxis = anomalies.intervals;
-
-                if(chartData.yaxis.title != null) {
-                    chartData.yaxis.title.text = 'Device Output';
-                }
-                const extremeOutliers = this.extremeOutliers;
-
-                chartData.tooltip.custom = function({series, seriesIndex, dataPointIndex}) {
-                    const tooltipMsg = valueTooltipMessage(seriesIndex, dataPointIndex, series[seriesIndex][dataPointIndex], extremeOutliers);
-                    return '<div class="arrow_box">' +
-                      '<span>' + tooltipMsg + '</span>' +
-                      '</div>';
-                };
-                return chartData;
+                return valueChartConfig(valueChartSeries(data, anomalies, this.showDebug), anomalies.intervals, anomalies.extremeOutliers);
             })
         );
     }
@@ -349,13 +332,8 @@ export class LineComponent implements OnInit, OnChanges {
     private createTimeChartModel(deviceId: string, serviceId: string, pathToColumn: string, _: string) {
         return this.anomalyService.getDeviceCurve(deviceId, serviceId, pathToColumn, '10m').pipe(
             map(data => {
-                const chartData = apexAnomalyChartOptions('scatter');
                 const timeChart = timeChartSeries(data, this.getDeviceAnomalies(deviceId));
-                if(chartData.yaxis.title != null) {
-                    chartData.yaxis.title.text = timeChart.yTitle;
-                }
-                applyApexSeries(chartData, timeChart.series);
-                return chartData;
+                return timeChartConfig(timeChart.series, timeChart.yTitle);
             })
         );
     }

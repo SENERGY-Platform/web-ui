@@ -46,11 +46,11 @@
                   <div>
                     <p>{{message}}: <b>{{timeWindow}}</b></p>
                     <div fxLayoutAlign="center center">
-                      <apx-chart #apexChart [tooltip]="chartData.tooltip!" [legend]="chartData.legend!"
-                        [colors]="chartData.colors!" [series]="chartData.series!" [chart]="chartData.chart!"
-                        [plotOptions]="chartData.plotOptions!" [xaxis]="chartData.xaxis!" [yaxis]="chartData.yaxis!"
-                        [annotations]="chartData.annotations!" [markers]="chartData.markers!">
-                      </apx-chart>
+                      @if (chart) {
+                        <div class="chart-box">
+                          <canvas baseChart type="scatter" [data]="chart.data" [options]="chart.options" [plugins]="chartPlugins"></canvas>
+                        </div>
+                      }
                     </div>
                   </div>
                 }

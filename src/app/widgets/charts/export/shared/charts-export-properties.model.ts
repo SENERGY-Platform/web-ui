@@ -18,18 +18,6 @@ import { ExportValueModel } from '../../../../modules/exports/shared/export.mode
 import { ChartsExportRequestPayloadGroupModel, ChartsExportRequestPayloadTimeModel } from './charts-export-request-payload.model';
 import {DeviceInstanceModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
-import {
-    ApexAxisChartSeries,
-    ApexChart,
-    ApexXAxis,
-    ApexTitleSubtitle,
-    ApexYAxis,
-    ApexPlotOptions,
-    ApexLegend,
-    ApexTooltip,
-    ApexAnnotations,
-    ApexMarkers
-} from 'ng-apexcharts';
 
 export interface ChartsExportPropertiesModel {
     chartType?: string;
@@ -102,18 +90,4 @@ export interface ChartsExportVAxesModel {
     deviceGroupMergingStrategy?: ChartsExportDeviceGroupMergingStrategy;
     locationId?: string;
     subAxes?: ChartsExportVAxesModel[];
-}
-
-export interface ApexChartOptions {
-    series: ApexAxisChartSeries;
-    chart: ApexChart;
-    xaxis: ApexXAxis;
-    yaxis: ApexYAxis;
-    title: ApexTitleSubtitle;
-    colors: any;
-    plotOptions: ApexPlotOptions;
-    legend: ApexLegend;
-    tooltip: ApexTooltip;
-    annotations: ApexAnnotations;
-    markers: ApexMarkers;
 }

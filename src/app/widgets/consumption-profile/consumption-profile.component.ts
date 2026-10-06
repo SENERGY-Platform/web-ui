@@ -17,11 +17,12 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { map, Subscription } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
-import { ApexChartOptions } from '../charts/export/shared/charts-export-properties.model';
 import { ConsumptionProfileProperties, ConsumptionProfileResponse } from './shared/consumption-profile.model';
 import { ConsumptionProfileService } from './shared/consumption-profile.service';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
-import { consumptionColors, consumptionSeries } from '../shared/consumption-series';
+import { consumptionSeries } from '../shared/consumption-series';
+import { consumptionChartConfig, ConsumptionChartConfig } from '../shared/consumption-chartjs';
+import { crosshairPlugin } from 'src/app/core/charts/chart-look';
 
 @Component({
     selector: 'senergy-consumption-profile-widget',
@@ -45,56 +46,8 @@ export class ConsumptionProfileComponent implements OnInit, OnDestroy {
     ready = false;
     timeWindow = '';
     message = '';
-    chartData: ApexChartOptions = {
-        series: [],
-        chart: {
-            redrawOnParentResize: true,
-            redrawOnWindowResize: true,
-            width: '100%',
-            animations: {
-                enabled: false
-            },
-            type: 'scatter',
-            toolbar: {
-                show: false
-            },
-            events: {},
-        },
-        title: {},
-        plotOptions: {},
-        xaxis: {
-            type: 'datetime' as 'datetime' | 'category',
-            labels: {
-                datetimeUTC: false,
-            },
-            title: {
-                text: ''
-            }
-        },
-        yaxis: {
-            title: {
-                text: ''
-            },
-            decimalsInFloat: 3
-        },
-        colors: [],
-        legend: {
-            show: true
-        },
-        annotations: {
-            points: [],
-            xaxis: []
-        },
-        tooltip: {
-            enabled: true,
-            x: {
-                format: 'dd.MM',
-            }
-        },
-        markers: {
-            size: 4
-        },
-    };
+    chart?: ConsumptionChartConfig;
+    readonly chartPlugins = [crosshairPlugin];
     operatorIsInitPhase = false;
     initialPhaseMsg = '';
     destroy: Subscription | undefined;
@@ -168,13 +121,7 @@ export class ConsumptionProfileComponent implements OnInit, OnDestroy {
             this.message = 'Ungewöhnlicher ' + anomalyType + ' Verbrauch im Zeitfenster';
         }
 
-        if (this.chartData !== undefined) {
-            this.chartData.series = [];
-            this.chartData.colors = [];
-        }
-
-        consumptionSeries(data.last_consumptions).forEach((series) => this.chartData?.series.push(series));
-        this.chartData.colors = [...consumptionColors];
+        this.chart = consumptionChartConfig(consumptionSeries(data.last_consumptions), 'dd.MM');
     }
 
     edit() {

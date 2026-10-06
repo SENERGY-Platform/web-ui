@@ -1,0 +1,62 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.toolbar {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 2px;
+    height: 24px;
+    padding-right: 10px;
+}
+
+.toolbar mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    color: #6E8192;
+    cursor: pointer;
+}
+
+.toolbar mat-icon:hover,
+.toolbar mat-icon.selected {
+    color: #008FFB;
+}
+
+.menu {
+    position: absolute;
+    top: 24px;
+    right: 3px;
+    z-index: 13;
+    padding: 3px;
+    min-width: 110px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12px;
+}
+
+.menu-item {
+    padding: 6px 7px;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background: #eee;
+}

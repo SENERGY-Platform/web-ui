@@ -16,7 +16,7 @@
 
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { _adapters, Chart } from 'chart.js';
+import { _adapters, BarController, Chart, TimeScale } from 'chart.js';
 import { de } from 'date-fns/locale';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import zoomPlugin from 'chartjs-plugin-zoom';
@@ -31,7 +31,7 @@ import { provideAppCharts } from './provide-app-charts';
 class ChartHostComponent {}
 
 describe('provideAppCharts', () => {
-    afterEach(() => Chart.register(zoomPlugin, annotationPlugin));
+    afterEach(() => Chart.register(zoomPlugin, annotationPlugin, BarController, TimeScale));
 
     // the floorplan draws without the charts export widget, which used to be the only one registering them
     it('registers the zoom and annotation plugins with the first chart drawn', () => {
@@ -43,6 +43,18 @@ describe('provideAppCharts', () => {
 
         expect(Chart.registry.getPlugin('zoom')?.id).toBe('zoom');
         expect(Chart.registry.getPlugin('annotation')?.id).toBe('annotation');
+    });
+
+    // the timeline is a bar chart over a time scale
+    it('registers the bar controller and the time scale with the first chart drawn', () => {
+        Chart.unregister(BarController, TimeScale);
+        expect(() => Chart.registry.getController('bar')).toThrow();
+
+        TestBed.configureTestingModule({ imports: [ChartHostComponent], providers: [provideAppCharts()] });
+        TestBed.createComponent(ChartHostComponent).detectChanges();
+
+        expect(Chart.registry.getController('bar')).toBe(BarController as any);
+        expect(Chart.registry.getScale('time')).toBe(TimeScale as any);
     });
 
     // without a date adapter every time-scale chart throws when it draws

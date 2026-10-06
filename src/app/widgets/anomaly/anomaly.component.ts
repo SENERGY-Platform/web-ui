@@ -231,19 +231,22 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
             map(anomaly => {
                 if(anomaly != null) {
                     this.lastAnomaly = anomaly;
+                } else {
+                    // without a last anomaly there is no init phase to report
+                    this.operatorIsInitPhase = false;
                 }
                 return anomaly;
             })
         );
     }
 
+    /** Follows the init phase of the latest result, so that the widget shows data again once it is over. */
     private checkForInit(anomaly: AnomalyResultModel) {
-        if(anomaly.initial_phase !== '' && anomaly.initial_phase !== null) {
-            this.operatorIsInitPhase = true;
+        this.operatorIsInitPhase = anomaly.initial_phase !== '' && anomaly.initial_phase !== null;
+        if (this.operatorIsInitPhase) {
             this.initialPhaseMsg = anomaly.initial_phase;
-            return true;
         }
-        return false;
+        return this.operatorIsInitPhase;
     }
 
     private update() {

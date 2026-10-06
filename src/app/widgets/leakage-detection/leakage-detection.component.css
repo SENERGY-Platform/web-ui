@@ -25,3 +25,9 @@
     margin: 0;
     overflow-y: auto;
 }
+
+/* the width the chart used to get in its centred row */
+.chart-box {
+    position: relative;
+    width: 300px;
+}

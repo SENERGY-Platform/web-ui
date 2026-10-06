@@ -43,7 +43,8 @@ import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansi
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MtxSelect, MtxSelectModule } from '@ng-matero/extensions/select';
-import { NgApexchartsModule } from 'ng-apexcharts';
+import { BaseChartDirective } from 'ng2-charts';
+import { provideAppCharts } from '../../../core/charts/provide-app-charts';
 import { CoreModule } from '../../../core/core.module';
 import { EnvironmentDetailComponent } from './environment-detail.component';
 import { EnvironmentsKeyValueEditorComponent } from '../key-value-editor/environments-key-value-editor.component';
@@ -270,7 +271,7 @@ describe('EnvironmentDetailComponent', () => {
                 MatProgressBarModule,
                 MatPaginatorModule,
                 MtxSelectModule,
-                NgApexchartsModule,
+                BaseChartDirective,
             ],
             providers: [
                 EnvironmentsService,
@@ -283,6 +284,7 @@ describe('EnvironmentDetailComponent', () => {
                 { provide: ExportService, useValue: exportServiceSpy },
                 provideHttpClient(withXhr(), withInterceptorsFromDi()),
                 provideHttpClientTesting(),
+                provideAppCharts(),
             ],
         }).compileComponents();
 

@@ -50,3 +50,11 @@ export function thresholdTimeline(data: any, threshold: any): any[] {
 
     return chartData;
 }
+
+/**
+ * The timeline input from the answer to the widget's two exports, temperature (above 100) and pressure
+ * (above 3); every export is its own request, so the second one's rows are the first column of request 1.
+ */
+export function fakeTimelineData(resp: any[][][][]): any[] {
+    return [[thresholdTimeline(resp[0][0], 100)], [thresholdTimeline(resp[1][0], 3)]];
+}

@@ -101,8 +101,8 @@
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
           @if (connectionHistory !== null) {
-            <timeline-chart chartId='deviceHistory' class="timeline"
-              [data]="connectionHistory" [enableToolbar]="false" [vAxes]="timelineAxes"
+            <timeline-chart class="timeline"
+              [data]="connectionHistory" [vAxes]="timelineAxes"
             [width]="connectionHistoryPanelWidth" [height]="200"></timeline-chart>
           }
         </ng-template>

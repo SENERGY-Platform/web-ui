@@ -18,7 +18,9 @@ import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/cor
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Source } from '../../shared/environments.model';
 import { clonePresetSource, CONTEXT_PRESETS, ContextPreset } from '../../shared/environments-context-presets';
-import { mondayStartWeekday, profileChartOptions, ProfileChartOptions } from '../../shared/environments-profile-preview';
+import { mondayStartWeekday, profilePreview } from '../../shared/environments-profile-preview';
+import { profileChartConfig, ProfileChartConfig } from '../../shared/environments-profile-chartjs';
+import { crosshairPlugin } from 'src/app/core/charts/chart-look';
 
 export interface AddContextDialogData {
     /** Every context key already in use, static and driven alike -- a duplicate key would silently shadow one of them. */
@@ -47,7 +49,8 @@ export class EnvironmentsAddContextDialogComponent implements OnInit {
     selected: ContextPreset = CONTEXT_PRESETS[0];
     key = '';
     readonly todayWeekday = mondayStartWeekday(new Date());
-    chart: ProfileChartOptions | undefined;
+    chart: ProfileChartConfig | undefined;
+    readonly chartPlugins = [crosshairPlugin];
 
     constructor(
         private dialogRef: MatDialogRef<EnvironmentsAddContextDialogComponent>,
@@ -61,7 +64,7 @@ export class EnvironmentsAddContextDialogComponent implements OnInit {
     selectPreset(preset: ContextPreset): void {
         this.selected = preset;
         this.key = preset.key;
-        this.chart = preset.source.kind === 'profile' && preset.source.profile ? profileChartOptions(preset.source.profile, this.todayWeekday) : undefined;
+        this.chart = preset.source.kind === 'profile' && preset.source.profile ? profileChartConfig(profilePreview(preset.source.profile, this.todayWeekday)) : undefined;
     }
 
     /** undefined = valid; shown as the key field's error otherwise. */

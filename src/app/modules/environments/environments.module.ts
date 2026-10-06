@@ -38,7 +38,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
-import { NgApexchartsModule } from 'ng-apexcharts';
+import { BaseChartDirective } from 'ng2-charts';
+import { provideAppCharts } from '../../core/charts/provide-app-charts';
 import { CoreModule } from '../../core/core.module';
 import { EnvironmentsComponent } from './environments.component';
 import { EnvironmentDetailComponent } from './environment-detail/environment-detail.component';
@@ -91,7 +92,7 @@ const formFieldDefaults = {
 };
 
 @NgModule({
-    providers: [{ provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: formFieldDefaults }],
+    providers: [{ provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: formFieldDefaults }, provideAppCharts()],
     declarations: [
         EnvironmentsComponent,
         EnvironmentDetailComponent,
@@ -139,7 +140,7 @@ const formFieldDefaults = {
         MatSlideToggleModule,
         MatPaginatorModule,
         MtxSelectModule,
-        NgApexchartsModule,
+        BaseChartDirective,
     ],
 })
 export class EnvironmentsModule { }

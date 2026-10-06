@@ -25,3 +25,7 @@
     margin: 0;
     overflow-y: auto;
 }
+
+.chart-box {
+    position: relative;
+}

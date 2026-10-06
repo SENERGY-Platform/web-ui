@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexPlotOptions, ApexXAxis, ApexYAxis } from 'ng-apexcharts';
 import { ScheduleSource } from './environments.model';
 
 /** One state's slot in the preview timeline, in seconds elapsed since the programme started. */
@@ -25,15 +24,11 @@ export interface ScheduleBlock {
     value: number;
 }
 
-/** Just the apx-chart inputs the schedule preview binds; ApexOptions itself has no single narrower type for a partial config. */
-export interface ScheduleChartOptions {
-    series: ApexAxisChartSeries;
-    chart: ApexChart;
-    plotOptions: ApexPlotOptions;
-    xaxis: ApexXAxis;
-    yaxis: ApexYAxis;
-    dataLabels: ApexDataLabels;
-    colors: string[];
+/** The schedule preview as drawn: one row per state name, every block in one colour. */
+export interface SchedulePreview {
+    rows: string[];
+    blocks: ScheduleBlock[];
+    color: string;
 }
 
 const MAX_PREVIEW_SECONDS = 24 * 3600;
@@ -87,30 +82,20 @@ export function formatElapsed(totalSeconds: number): string {
 }
 
 /**
- * Builds the apx-chart config for a schedule's timeline preview: one rangeBar row per
- * state name, spanning every occurrence across the laid-out cycles (rangeBarGroupRows
- * groups same-named blocks into one row, the same way the platform's own timeline chart
- * renders a state history). Returns undefined when there is nothing to lay out, so the
- * editor can fall back to its empty-state hint instead of rendering an empty chart.
+ * The schedule's timeline preview: one row per state name in order of first appearance, spanning every
+ * occurrence across the laid-out cycles, the same way the platform's own timeline chart renders a state
+ * history. Undefined when there is nothing to lay out, so the editor can show its empty-state hint instead.
  */
-export function scheduleChartOptions(schedule: ScheduleSource): ScheduleChartOptions | undefined {
+export function schedulePreview(schedule: ScheduleSource): SchedulePreview | undefined {
     const blocks = schedulePreviewBlocks(schedule);
     if (blocks.length === 0) {
         return undefined;
     }
-    const series: ApexAxisChartSeries = [
-        {
-            name: 'Schedule',
-            data: blocks.map((b) => ({ x: b.name, y: [b.startSeconds * 1000, b.endSeconds * 1000] })),
-        },
-    ];
-    return {
-        series,
-        chart: { type: 'rangeBar', height: 220, toolbar: { show: false }, animations: { enabled: false } },
-        plotOptions: { bar: { horizontal: true, rangeBarGroupRows: true, barHeight: '70%' } },
-        xaxis: { type: 'numeric', labels: { formatter: (value: string) => formatElapsed(Number(value) / 1000) } },
-        yaxis: { labels: {} },
-        dataLabels: { enabled: false },
-        colors: ['#008FFB'],
-    };
+    const rows: string[] = [];
+    blocks.forEach((b) => {
+        if (!rows.includes(b.name)) {
+            rows.push(b.name);
+        }
+    });
+    return { rows, blocks, color: '#008FFB' };
 }

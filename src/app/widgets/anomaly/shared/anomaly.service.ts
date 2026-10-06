@@ -158,7 +158,7 @@ export class AnomalyService {
 
         return this.exportDataService.getLastValuesTimescale(requestPayload).pipe(
             map((pairs) => {
-                if (pairs.length !== 8) {
+                if (pairs.length !== requestPayload.length) {
                     return null;
                 }
 

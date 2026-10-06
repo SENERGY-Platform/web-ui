@@ -93,3 +93,11 @@
     color: rgba(0, 0, 0, 0.5);
     cursor: help;
 }
+
+/* the chart used to be 220px high, axis labels included */
+.preview-canvas {
+    position: relative;
+    height: 220px;
+    /* the chart used to keep 15px free below itself */
+    margin-bottom: 15px;
+}

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexLegend, ApexStroke, ApexXAxis, ApexYAxis } from 'ng-apexcharts';
 import { ProfileSource } from './environments.model';
 
 export interface ProfilePreviewPoint {
@@ -24,16 +23,19 @@ export interface ProfilePreviewPoint {
     high: number;
 }
 
-/** Just the apx-chart inputs the profile preview binds; ApexOptions itself has no single narrower type for a partial config. */
-export interface ProfileChartOptions {
-    series: ApexAxisChartSeries;
-    chart: ApexChart;
-    xaxis: ApexXAxis;
-    yaxis: ApexYAxis;
-    dataLabels: ApexDataLabels;
-    stroke: ApexStroke;
-    legend: ApexLegend;
-    colors: string[];
+export interface ProfilePreviewSeries {
+    name: string;
+    values: number[];
+    color: string;
+    width: number;
+    dashed: boolean;
+}
+
+/** The profile preview as drawn: one curve per series over the hours of the day. */
+export interface ProfilePreview {
+    hourLabels: string[];
+    series: ProfilePreviewSeries[];
+    showLegend: boolean;
 }
 
 /**
@@ -66,25 +68,19 @@ export function profileValueLabel(value: number): string {
 }
 
 /**
- * Builds the apx-chart config for a profile's 24-hour preview, shared by every place that
- * shows this curve (the channel/context source editor, the "add context" preset picker) so
- * they cannot drift into slightly different renderings of the same data.
+ * The 24-hour preview of a profile, shared by every place that shows this curve (the channel/context
+ * source editor, the "add context" preset picker) so they cannot drift into different renderings.
+ * The value is a solid blue line; with a spread, low and high follow as thin dashed grey lines.
  */
-export function profileChartOptions(profile: ProfileSource, weekday: number): ProfileChartOptions {
+export function profilePreview(profile: ProfileSource, weekday: number): ProfilePreview {
     const points = profilePreviewPoints(profile, weekday);
     const hasSpread = (profile.spread_percent ?? 0) > 0;
-    const series: ApexAxisChartSeries = [{ name: 'Value', data: points.map((p) => p.value) }];
+    const series: ProfilePreviewSeries[] = [{ name: 'Value', values: points.map((p) => p.value), color: '#008FFB', width: 3, dashed: false }];
     if (hasSpread) {
-        series.push({ name: 'Low', data: points.map((p) => p.low) }, { name: 'High', data: points.map((p) => p.high) });
+        series.push(
+            { name: 'Low', values: points.map((p) => p.low), color: '#999999', width: 1, dashed: true },
+            { name: 'High', values: points.map((p) => p.high), color: '#999999', width: 1, dashed: true },
+        );
     }
-    return {
-        series,
-        chart: { type: 'line', height: 220, toolbar: { show: false }, animations: { enabled: false } },
-        xaxis: { categories: points.map((p) => p.hour + ':00') },
-        yaxis: { labels: { formatter: profileValueLabel } },
-        dataLabels: { enabled: false },
-        stroke: { width: hasSpread ? [3, 1, 1] : [3], dashArray: hasSpread ? [0, 4, 4] : [0], curve: 'smooth' },
-        legend: { show: hasSpread },
-        colors: hasSpread ? ['#008FFB', '#999999', '#999999'] : ['#008FFB'],
-    };
+    return { hourLabels: points.map((p) => p.hour + ':00'), series, showLegend: hasSpread };
 }

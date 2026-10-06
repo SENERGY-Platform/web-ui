@@ -22,7 +22,8 @@ import { AnomalyReconstructionComponent } from '../../reconstruction/reconstruct
 import { AnomalyService } from '../../shared/anomaly.service';
 import { subtractDuration } from '../../../../core/time/iso-duration';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
-import { curveAnomaliesPerDevice, phaseTimelineData, phaseVAxes } from '../../shared/anomaly-phases';
+import { anomalyOfBar, curveAnomaliesPerDevice, phaseTimelineData, phaseVAxes } from '../../shared/anomaly-phases';
+import { TimelineSelection } from 'src/app/widgets/charts/shared/chart-types/timeline/timeline-chartjs';
 
 @Component({
     selector: 'anomaly-phases',
@@ -93,33 +94,16 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
         this.vAxes.push(...phaseVAxes(this.deviceIDs));
     }
 
-    // I have to use arrow function, so that `this` is accesible from within the timeline apex chart code
-    onClick = (_: any, config: any) => {
-        // console.log(chartContext, config);
-        const selection = config.w.config.series[config.seriesIndex].data[config.dataPointIndex];
-        const deviceID = selection['x'];
-        const timestamp = selection['y'];
-        const startTime = new Date(timestamp[0]);
-        const endTime = new Date(timestamp[1]);
+    // an arrow function, so that `this` is accessible when the timeline calls it
+    onClick = (bar: TimelineSelection) => {
+        const anomaly = anomalyOfBar(this.curveAnomaliesPerDevice[bar.row] || [], bar);
+        if (anomaly === undefined) {
+            return;
+        }
         const dialogConfig = new MatDialogConfig();
         dialogConfig.minWidth = '1000px';
         dialogConfig.minHeight = '500px';
-        dialogConfig.data = {
-            anomaly: this.findAnomaly(deviceID, startTime, endTime)
-        };
+        dialogConfig.data = { anomaly };
         this.dialog.open(AnomalyReconstructionComponent, dialogConfig);
     };
-
-    private findAnomaly(deviceID: string, _ /* selectedStartTime*/: Date, _2 /* selectedEndTime*/: Date) {
-        return this.anomalies?.[deviceID][0];
-        /* Find the corresponding anomaly based on device id and start/end time
-        (this.anomalies?.[deviceID] || []).forEach(anomaly => {
-            const startTime = new Date(anomaly.start_time);
-            const endTime = new Date(anomaly.end_time);
-            if(selectedStartTime === startTime && selectedEndTime === endTime) {
-                return anomaly;
-            }
-            return;
-        }); */
-    }
 }

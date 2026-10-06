@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, ViewChild } from '@angular/core';
 import { subMinutes } from 'date-fns';
-import { concatMap, map, of, Subscription, throwError } from 'rxjs';
+import { concatMap, filter, map, Subscription, throwError } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
-import { ApexChartOptions } from '../charts/export/shared/charts-export-properties.model';
 import { BadVentilationService } from './shared/bad-ventilation.service';
 import { VentilationResult } from './shared/model';
-import { apexRangeAnnotation, humidityPoints, ventilationRanges } from './shared/bad-ventilation-chart';
+import { humidityPoints, VentilationRange, ventilationRanges } from './shared/bad-ventilation-chart';
+import { badVentilationChartConfig, BadVentilationChartConfig, refreshBadVentilationChart } from './shared/bad-ventilation-chartjs';
+import { BaseChartDirective } from 'ng2-charts';
+import { Chart } from 'chart.js';
+import { crosshairPlugin } from 'src/app/core/charts/chart-look';
 
 @Component({
     selector: 'senergy-bad-ventilation',
@@ -44,56 +47,11 @@ export class BadVentilationComponent implements OnInit {
     configured = false;
     ventilationResults: VentilationResult[] = [];
 
-    chartData: ApexChartOptions = {
-        series: [],
-        chart: {
-            redrawOnParentResize: true,
-            redrawOnWindowResize: true,
-            width: '100%',
-            height: 'auto',
-            animations: {
-                enabled: false
-            },
-            type: 'line',
-            toolbar: {
-                show: true
-            },
-            events: {}
-        },
-        title: {},
-        plotOptions: {},
-        xaxis: {
-            type: 'datetime' as 'datetime' | 'category',
-            labels: {
-                datetimeUTC: false,
-            },
-            title: {
-                text: ''
-            }
-        },
-        yaxis: {
-            title: {
-                text: ''
-            },
-            decimalsInFloat: 3
-        },
-        colors: [],
-        legend: {
-            show: true
-        },
-        annotations: {
-            points: [],
-            xaxis: []
-        },
-        tooltip:{
-            enabled: true,
-            x: {
-                format: 'dd.MM HH:mm:ss.fff',
-            }
-        },
-        markers: {
-        },
-    };
+    humidity: { x: number; y: number }[] = [];
+    ranges: VentilationRange[] = [];
+    chart?: BadVentilationChartConfig;
+    readonly chartPlugins = [crosshairPlugin];
+    @ViewChild('humidityChart') humidityChart?: BaseChartDirective;
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -116,17 +74,16 @@ export class BadVentilationComponent implements OnInit {
 
     private update() {
         this.destroy = this.dashboardService.initWidgetObservable.pipe(
-            concatMap((event: string) => {
-                if (event === 'reloadAll' || event === this.widget.id) {
-                    this.configured = this.widget.properties.badVentilation !== undefined;
-                    this.refreshing = true;
-                    const exportConfig = this.widget.properties.badVentilation?.exportConfig;
-                    if(exportConfig == null || exportConfig.exports.length === 0) {
-                        return throwError(() => new Error('Export Config missing'));
-                    }
-                    return this.loadVentilationResult(exportConfig?.exports[0].id);
+            // other widgets' reloads used to refetch and redraw the curve of this one, too
+            filter((event: string) => event === 'reloadAll' || event === this.widget.id),
+            concatMap(() => {
+                this.configured = this.widget.properties.badVentilation !== undefined;
+                this.refreshing = true;
+                const exportConfig = this.widget.properties.badVentilation?.exportConfig;
+                if(exportConfig == null || exportConfig.exports.length === 0) {
+                    return throwError(() => new Error('Export Config missing'));
                 }
-                return of(null);
+                return this.loadVentilationResult(exportConfig?.exports[0].id);
             }),
             concatMap(_ => this.addDeviceCurve()),
             map(_ => this.addRangeAnnotations())
@@ -183,8 +140,14 @@ export class BadVentilationComponent implements OnInit {
         );
     }
 
+    /** Replaces the ranges and redraws, so that a reload does not stack them onto the previous ones. */
     addRangeAnnotations() {
-        ventilationRanges(this.ventilationResults).forEach((range) => this.chartData.annotations.xaxis?.push(apexRangeAnnotation(range)));
+        this.ranges = ventilationRanges(this.ventilationResults);
+        if (this.chart === undefined) {
+            this.chart = badVentilationChartConfig(this.humidity, this.ranges);
+        } else {
+            refreshBadVentilationChart(this.chart, this.humidityChart?.chart as Chart | undefined, this.humidity, this.ranges);
+        }
     }
 
     getTimeRange() {
@@ -218,7 +181,7 @@ export class BadVentilationComponent implements OnInit {
 
         return this.ventilationService.getDeviceCurve(deviceId, serviceId, pathToColumn, timeRange, '1m').pipe(
             map(data => {
-                this.chartData.series?.push({data: humidityPoints(data), name: 'Humidity'});
+                this.humidity = humidityPoints(data);
             })
         );
     }

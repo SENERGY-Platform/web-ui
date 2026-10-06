@@ -57,7 +57,7 @@ describe('EnvironmentsProfileEditorComponent', () => {
     it('builds a preview chart once a profile is bound', () => {
         setProfile({ base: 10 });
         expect(component.chart).toBeDefined();
-        expect((component.chart!.series[0].data as number[]).length).toBe(24);
+        expect(component.chart!.data.datasets[0].data.length).toBe(24);
     });
 
     it('rebuilds the chart and emits on a field change', () => {
@@ -69,7 +69,7 @@ describe('EnvironmentsProfileEditorComponent', () => {
         component.onFieldChange();
 
         expect(emitted).toBe(true);
-        expect((component.chart!.series[0].data as number[])[0]).toBe(20);
+        expect(component.chart!.data.datasets[0].data[0]).toBe(20);
     });
 
     it('writes the factor-bars output straight onto profile.hour_factors and marks the change dirty', () => {

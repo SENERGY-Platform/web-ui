@@ -21,3 +21,7 @@
     height: 99%;
     width: 99%;
 }
+
+.canvas-box {
+    position: relative;
+}

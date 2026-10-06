@@ -17,11 +17,12 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { map, Subscription } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
-import { ApexChartOptions } from '../charts/export/shared/charts-export-properties.model';
 import { LeackageDetectionProperties, LeakageDetectionResponse } from './shared/leakage-detction.model';
 import { LeakageDetectionService } from './shared/leakage-detection.service';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
-import { consumptionColors, consumptionSeries } from '../shared/consumption-series';
+import { consumptionSeries } from '../shared/consumption-series';
+import { consumptionChartConfig, ConsumptionChartConfig } from '../shared/consumption-chartjs';
+import { crosshairPlugin } from 'src/app/core/charts/chart-look';
 
 @Component({
     selector: 'senergy-leakage-detection-widget',
@@ -48,57 +49,8 @@ export class LeakageDetectionComponent implements OnInit, OnDestroy {
     timeWindow = '';
     destroy: Subscription | undefined;
 
-    chartData: ApexChartOptions = {
-        series: [],
-        chart: {
-            redrawOnParentResize: true,
-            redrawOnWindowResize: true,
-            width: '100%',
-            height: 'auto',
-            animations: {
-                enabled: false
-            },
-            type: 'scatter',
-            toolbar: {
-                show: false
-            },
-            events: {}
-        },
-        markers: {
-            size: 4
-        },
-        title: {},
-        plotOptions: {},
-        xaxis: {
-            type: 'datetime' as 'datetime' | 'category',
-            labels: {
-                datetimeUTC: false,
-            },
-            title: {
-                text: ''
-            }
-        },
-        yaxis: {
-            title: {
-                text: ''
-            },
-            decimalsInFloat: 3
-        },
-        colors: [],
-        legend: {
-            show: true
-        },
-        annotations: {
-            points: [],
-            xaxis: []
-        },
-        tooltip: {
-            enabled: true,
-            x: {
-                format: 'dd.MM HH:mm:ss.fff',
-            }
-        },
-    };
+    chart?: ConsumptionChartConfig;
+    readonly chartPlugins = [crosshairPlugin];
     operatorIsInitPhase = false;
     initialPhaseMsg = '';
 
@@ -167,13 +119,7 @@ export class LeakageDetectionComponent implements OnInit, OnDestroy {
         }
         this.timeWindow = data.time_window;
 
-        if (this.chartData !== undefined) {
-            this.chartData.series = [];
-            this.chartData.colors = [];
-        }
-
-        consumptionSeries(data.last_consumptions).forEach((series) => this.chartData?.series.push(series));
-        this.chartData.colors = [...consumptionColors];
+        this.chart = consumptionChartConfig(consumptionSeries(data.last_consumptions), 'dd.MM HH:mm:ss.SSS');
     }
 
     edit() {
