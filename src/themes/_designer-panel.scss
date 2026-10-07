@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@use 'sass:color';
-@use '@angular/material' as mat;
 
 // The process and smart-service designers' properties panel takes its accent from the app theme.
-@mixin colors($accent) {
-  $primary: mat.m2-get-color-from-palette($accent);
-
+@mixin colors() {
   .bio-theme-parent {
-    --bio-primary: #{$primary};
-    --bio-primary-hover: #{mat.m2-get-color-from-palette($accent, 700)};
-    --bio-primary-surface: #{mat.m2-get-color-from-palette($accent, 50)};
-    --bio-primary-surface-strong: #{mat.m2-get-color-from-palette($accent, 100)};
-    --bio-info: #{$primary};
-    --bio-focus: #{$primary};
-    --bio-focus-ring: #{color.change($primary, $alpha: 0.35)};
+    --bio-primary: var(--mat-sys-primary);
+    --bio-primary-hover: color-mix(in srgb, var(--mat-sys-primary) 85%, var(--mat-sys-scrim));
+    --bio-primary-surface: color-mix(in srgb, var(--mat-sys-primary) 8%, var(--mat-sys-surface));
+    --bio-primary-surface-strong: var(--mat-sys-primary-container);
+    --bio-text-on-primary: var(--mat-sys-on-primary);
+    --bio-info: var(--mat-sys-primary);
+    --bio-focus: var(--mat-sys-primary);
+    --bio-focus-ring: color-mix(in srgb, var(--mat-sys-primary) 35%, transparent);
   }
 }

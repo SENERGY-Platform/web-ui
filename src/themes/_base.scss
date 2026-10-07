@@ -1,0 +1,178 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@use 'sass:map';
+@use '@angular/material' as mat;
+@use '@angular/material/core/style/elevation';
+@use '@ng-matero/extensions' as mtx;
+@use 'designer-panel';
+
+// The theme shared by all tenants. A tenant passes its tonal palettes: the brand colour is the
+// primary palette (templates still say color="accent"), the sidenav colour the tertiary one.
+// $brand, $sidenav and $warn pin the exact old hex values over the generated tone 40 of those palettes.
+// $theme-type is light, dark or color-scheme (follows the system); only light is used so far.
+@mixin theme($primary, $tertiary, $brand, $sidenav, $on-brand: #ffffff, $warn: #ce612e,
+             $utility-text-important: true, $theme-type: light) {
+  html {
+    @if $theme-type == color-scheme {
+      color-scheme: light dark;
+    } @else {
+      color-scheme: $theme-type;
+    }
+
+    @include mat.theme((
+      color: (
+        primary: $primary,
+        tertiary: $tertiary,
+        theme-type: $theme-type,
+      ),
+      typography: Roboto,
+      density: 0,
+    ));
+
+    --mat-sys-primary: #{$brand};
+    --mat-sys-on-primary: #{$on-brand};
+    --mat-sys-tertiary: #{$sidenav};
+    --mat-sys-error: #{$warn};
+    --mat-sys-on-error: #ffffff;
+    --mat-sys-background: #ffffff;
+    --mat-sys-surface: #ffffff;
+
+    // Buttons without color= had dark text in the old theme; M3 gives them the primary colour.
+    @include mat.button-overrides((
+      text-label-text-color: var(--mat-sys-on-surface),
+      text-state-layer-color: var(--mat-sys-on-surface),
+      protected-label-text-color: var(--mat-sys-on-surface),
+      protected-state-layer-color: var(--mat-sys-on-surface),
+      outlined-label-text-color: var(--mat-sys-on-surface),
+      outlined-state-layer-color: var(--mat-sys-on-surface),
+    ));
+    // Icon buttons took the surrounding text colour, e.g. white on the designer toolbars.
+    @include mat.icon-button-overrides((icon-color: currentColor));
+
+    // mat.theme() omits the app-level shadow tokens that the mat-elevation-z* classes read.
+    @for $z from 0 through 24 {
+      --mat-app-elevation-shadow-level-#{$z}: #{elevation.get-box-shadow($z, rgba(0, 0, 0, 1))};
+    }
+  }
+
+  body {
+    background-color: var(--mat-sys-background);
+    color: var(--mat-sys-on-background);
+  }
+
+  @include mat.elevation-classes();
+
+  // <body class="mat-typography"> carries the old M2 type scale (font, headings, paragraph margins);
+  // the M3 hierarchy would change every heading size.
+  @include mat.typography-hierarchy(mat.m2-define-typography-config());
+
+  // color="accent" is the brand colour, so the compatibility theme maps its tertiary slot to the
+  // primary palette. Its colours are baked in (no system variables), which keeps the mapping local
+  // to the .mat-accent, .mat-primary and .mat-warn classes.
+  $pinned: map.merge($primary, (
+    40: $brand,
+    100: $on-brand,
+    error: map.merge(map.get($primary, error), (40: $warn)),
+  ));
+  $variants: mat.define-theme((
+    color: (
+      theme-type: $theme-type,
+      primary: $pinned,
+      tertiary: $pinned,
+    ),
+  ));
+  @include mat.color-variants-backwards-compatibility($variants);
+  @include mtx.color-variants-backwards-compatibility($variants);
+
+  // color="primary" meant a neutral surface in the old theme (white buttons with dark text).
+  .mat-mdc-raised-button.mat-primary:not(:disabled) {
+    --mat-button-protected-label-text-color: var(--mat-sys-on-surface);
+    --mat-button-protected-state-layer-color: var(--mat-sys-on-surface);
+  }
+
+  // color="accent" and color="warn" raised buttons are filled with the brand/warn colour.
+  .mat-mdc-raised-button.mat-accent:not(:disabled) {
+    --mat-button-protected-container-color: var(--mat-sys-primary);
+    --mat-button-protected-label-text-color: var(--mat-sys-on-primary);
+    --mat-button-protected-state-layer-color: var(--mat-sys-on-primary);
+  }
+
+  .mat-mdc-raised-button.mat-warn:not(:disabled) {
+    --mat-button-protected-container-color: var(--mat-sys-error);
+    --mat-button-protected-label-text-color: var(--mat-sys-on-error);
+    --mat-button-protected-state-layer-color: var(--mat-sys-on-error);
+  }
+
+  // M3 has no filled tab header; backgroundColor="accent" fills it with the brand colour.
+  .mat-mdc-tab-group.mat-background-accent,
+  .mat-mdc-tab-nav-bar.mat-background-accent {
+    --mat-tab-background-color: var(--mat-sys-primary);
+    --mat-tab-foreground-color: var(--mat-sys-on-primary);
+  }
+
+  // optimise set this text colour without !important, so its sidenav buttons kept their dark label.
+  .background-color-accent {
+    @if $utility-text-important {
+      color: #ffffff !important;
+    } @else {
+      color: #ffffff;
+    }
+    background-color: var(--mat-sys-primary) !important;
+  }
+
+  .background-color-sidenav {
+    @if $utility-text-important {
+      color: #ffffff !important;
+    } @else {
+      color: #ffffff;
+    }
+    background-color: var(--mat-sys-tertiary) !important;
+  }
+
+  .color-accent {
+    color: var(--mat-sys-primary) !important;
+  }
+
+  .color-warn {
+    color: var(--mat-sys-error) !important;
+  }
+
+  .color-sidenav {
+    color: var(--mat-sys-tertiary) !important;
+  }
+
+  .snack-bar-error {
+    --mat-snack-bar-container-color: darkred;
+    --mat-snack-bar-supporting-text-color: #ffffff;
+    --mat-snack-bar-button-color: #ffffff;
+
+    .mdc-snackbar__surface {
+      font-weight: bold !important;
+    }
+
+    .mat-mdc-snack-bar-actions .mdc-button__label {
+      font-family: "Material Icons", sans-serif !important;
+      font-weight: bold !important;
+    }
+  }
+
+  .mdc-list-item--selected .mdc-list-item__primary-text,
+  .mdc-list-item--activated .mdc-list-item__primary-text {
+    color: var(--mat-sys-primary) !important;
+  }
+
+  @include designer-panel.colors();
+}

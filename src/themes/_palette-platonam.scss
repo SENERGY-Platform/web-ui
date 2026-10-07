@@ -1,0 +1,149 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@use "sass:map";
+
+// Tonal palettes generated with `ng generate @angular/material:m3-theme` from primary: #68a8de, tertiary: #e7b040, error: #ce612e
+$_palettes: (
+  primary: (
+    0: #000000,
+    10: #001d32,
+    20: #003352,
+    25: #003f63,
+    30: #004b74,
+    35: #005786,
+    40: #136395,
+    50: #387cb0,
+    60: #5596cb,
+    70: #71b1e7,
+    80: #94ccff,
+    90: #cde5ff,
+    95: #e7f2ff,
+    98: #f7f9ff,
+    99: #fcfcff,
+    100: #ffffff,
+  ),
+  secondary: (
+    0: #000000,
+    10: #041d30,
+    20: #1c3245,
+    25: #273d51,
+    30: #33495d,
+    35: #3e5569,
+    40: #4a6176,
+    50: #63798f,
+    60: #7d93aa,
+    70: #97aec5,
+    80: #b2c9e1,
+    90: #cee5fe,
+    95: #e7f2ff,
+    98: #f7f9ff,
+    99: #fcfcff,
+    100: #ffffff,
+  ),
+  tertiary: (
+    0: #000000,
+    10: #271900,
+    20: #412d00,
+    25: #4f3700,
+    30: #5e4200,
+    35: #6d4d00,
+    40: #7c5800,
+    50: #9b6f00,
+    60: #ba8817,
+    70: #d8a233,
+    80: #f6bd4c,
+    90: #ffdea7,
+    95: #ffeed7,
+    98: #fff8f3,
+    99: #fffbff,
+    100: #ffffff,
+  ),
+  neutral: (
+    0: #000000,
+    10: #191c1f,
+    20: #2e3134,
+    25: #393c3f,
+    30: #44474b,
+    35: #505357,
+    40: #5c5f63,
+    50: #75777b,
+    60: #8e9195,
+    70: #a9abb0,
+    80: #c5c6cb,
+    90: #e1e2e7,
+    95: #eff1f5,
+    98: #f8f9fe,
+    99: #fcfcff,
+    100: #ffffff,
+    4: #0b0e12,
+    6: #111417,
+    12: #1d2023,
+    17: #272a2e,
+    22: #323539,
+    24: #36393d,
+    87: #d8dade,
+    92: #e6e8ed,
+    94: #eceef2,
+    96: #f2f3f8,
+  ),
+  neutral-variant: (
+    0: #000000,
+    10: #151c23,
+    20: #2a3138,
+    25: #353c43,
+    30: #41474f,
+    35: #4c535b,
+    40: #585f67,
+    50: #717880,
+    60: #8b919a,
+    70: #a5acb5,
+    80: #c0c7d0,
+    90: #dce3ec,
+    95: #ebf1fb,
+    98: #f7f9ff,
+    99: #fcfcff,
+    100: #ffffff,
+  ),
+  error: (
+    0: #000000,
+    10: #360f00,
+    20: #591d00,
+    25: #6b2500,
+    30: #7e2c00,
+    35: #913500,
+    40: #a1400d,
+    50: #c15825,
+    60: #e2703c,
+    70: #ff8c59,
+    80: #ffb597,
+    90: #ffdbcd,
+    95: #ffede7,
+    98: #fff8f6,
+    99: #fffbff,
+    100: #ffffff,
+  ),
+);
+
+$_rest: (
+  secondary: map.get($_palettes, secondary),
+  neutral: map.get($_palettes, neutral),
+  neutral-variant: map.get($_palettes, neutral-variant),
+  error: map.get($_palettes, error),
+);
+
+$primary-palette: map.merge(map.get($_palettes, primary), $_rest);
+$tertiary-palette: map.merge(map.get($_palettes, tertiary), $_rest);
