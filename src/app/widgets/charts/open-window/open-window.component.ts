@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Subscription, map, Observable, concatMap, of, forkJoin, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
@@ -67,6 +67,7 @@ export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
         private errorHandlerService: ErrorHandlerService,
         private dialog: MatDialog,
         private el: ElementRef,
+        private zone: NgZone,
     ) { }
 
     resizeTimeout: any;
@@ -75,9 +76,9 @@ export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
         const ro = new ResizeObserver((_ => {
             // debouncing redraws due to many resize calls
             clearTimeout(this.resizeTimeout);
+            // zone.js does not patch ResizeObserver, so the redraw re-enters the zone to be change detected
             this.resizeTimeout = setTimeout(() => {
-                this.resize();
-
+                this.zone.run(() => this.resize());
             }, 30);
         }));
         ro.observe(this.el.nativeElement);

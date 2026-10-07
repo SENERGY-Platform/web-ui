@@ -19,10 +19,13 @@
   <mat-card-content>
     <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
       <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-      @if (ready && deviceTotalDowntime !== undefined && deviceTotalDowntime.dataTable[0].length !== 0) {
-        <google-chart #deviceTotalDowntimeChart [data]="deviceTotalDowntime"></google-chart>
+      @if (ready && chart !== undefined) {
+        <div class="framed-chart" [style.width.px]="chart.frame.width" [style.height.px]="chart.frame.height">
+          <canvas #canvas baseChart type="line" [data]="chart.data" [options]="chart.options" [plugins]="plugins"
+            (contextmenu)="resetZoom($event, canvas)"></canvas>
+        </div>
       }
-      <senergy-no-data [showIf]="ready && deviceTotalDowntime === undefined"></senergy-no-data>
+      <senergy-no-data [showIf]="ready && chart === undefined"></senergy-no-data>
     </div>
   </mat-card-content>
   <senergy-widget-footer [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refeshing" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()"></senergy-widget-footer>

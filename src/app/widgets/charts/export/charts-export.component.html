@@ -50,8 +50,20 @@
               @if (widget.properties.chartType !== 'Timeline' && widget.properties.chartType !== 'ColumnChart') {
                 <div
                   class="maximized">
-                  <google-chart [hidden]="configureWidget && chartExportData.dataTable !== undefined && chartExportData.dataTable[0].length !== 0"
-                  #chartExport [data]="chartExportData"></google-chart>
+                  @if (configureWidget === false && framedChart !== undefined) {
+                    <div class="framed-chart" [style.width.px]="framedChart.config.frame.width" [style.height.px]="framedChart.config.frame.height">
+                      @if (framedChart.kind === 'pie') {
+                        <canvas baseChart type="pie" [data]="framedChart.config.data" [options]="framedChart.config.options" [plugins]="piePlugins"></canvas>
+                      } @else {
+                        <canvas #lineCanvas baseChart type="line" [data]="framedChart.config.data" [options]="framedChart.config.options" [plugins]="linePlugins"
+                        (contextmenu)="resetGoogleZoom($event, lineCanvas)"></canvas>
+                      }
+                    </div>
+                  }
+                  @if (configureWidget === false && annotation !== undefined) {
+                    <senergy-annotation-chart [series]="annotation.series" [width]="annotation.width" [height]="annotation.height"
+                    [zoomStart]="annotation.zoomStart"></senergy-annotation-chart>
+                  }
                   <senergy-no-data
                   [showIf]="configureWidget === false && (chartExportData.dataTable === undefined || chartExportData.dataTable[0].length === 0)"></senergy-no-data>
                 </div>

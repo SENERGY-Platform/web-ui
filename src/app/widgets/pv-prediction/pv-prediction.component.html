@@ -44,9 +44,10 @@
                 }
                 @if (widget.properties.pvPrediction?.displayTimeline === true) {
                   <div>
-                    @if (chartExportData.dataTable[0].length !== 0) {
-                      <google-chart #chartExport [data]="chartExportData"
-                      (chartSelect)="onChartSelect($event)"></google-chart>
+                    @if (chart !== undefined) {
+                      <div class="framed-chart" [style.width.px]="chart.frame.width" [style.height.px]="chart.frame.height">
+                        <canvas baseChart type="line" [data]="chart.data" [options]="chart.options" [plugins]="plugins"></canvas>
+                      </div>
                     }
                   </div>
                 }

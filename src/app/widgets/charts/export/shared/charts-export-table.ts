@@ -18,7 +18,6 @@ import Color from 'color';
 import { ChartDataTableModel } from '../../../../core/model/chart/chart-data-table.model';
 import { WidgetModel, WidgetPropertiesModels } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeviceInstanceWithDeviceTypeModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
-import { ChartElementSize, ChartsModel } from '../../shared/charts.model';
 import { ChartsExportVAxesModel } from './charts-export-properties.model';
 
 export const chartsExportDefaultColor = '#4484ce';
@@ -256,7 +255,7 @@ export function chartsExportTable(data: any[][][][], properties: WidgetPropertie
                     value = matchingRule.to;
                     // this is fine, we just need to ensure correct data types for primitives
                 }
-            } else if (resp.type === 'string' || resp.type === 'boolean' && resp.conversionDefault !== undefined) {
+            } else if ((resp.type === 'string' || resp.type === 'boolean') && resp.conversionDefault !== undefined) {
                 value = resp.conversionDefault;
             }
             dataPoint.push(value);
@@ -266,9 +265,10 @@ export function chartsExportTable(data: any[][][][], properties: WidgetPropertie
 
     if (properties.chartType === 'PieChart') {
         if (properties.calculateIntervals !== true) {
+            // one slice per series with its first (newest) value; series sharing a timestamp share a row
             const transposed: any[] = [['', '']];
-            dataTable.data.slice(1).forEach((row, i) => {
-                transposed.push([header[i + 1], row.slice(1).find(x => x != null)]);
+            header.slice(1).forEach((title, i) => {
+                transposed.push([title, dataTable.data.slice(1).map((row) => row[i + 1]).find((x) => x !== null && x !== undefined)]);
             });
             dataTable.data = transposed;
         } else {
@@ -328,12 +328,33 @@ export function chartsExportTable(data: any[][][][], properties: WidgetPropertie
     return { table: dataTable, colors };
 }
 
-/** The Google chart model of a charts export widget. */
-export function chartsExportModel(widget: WidgetModel, dataTable: ChartDataTableModel, element: ChartElementSize, colorOverride?: string[], hAxisFormat?: string): ChartsModel {
+/** What a charts export widget draws, independent of the chart library. */
+export interface ChartsExportChart {
+    chartType: string;
+    /** header ['time', series...] (pie: ['', '']), then the rows */
+    dataTable: (Date | string | number | null)[][];
+    /** one per table column after the first */
+    colors: string[];
+    hAxisLabel?: string;
+    vAxisLabel?: string;
+    secondVAxisLabel?: string;
+    /** the stored or zoom level axis format, as stored */
+    hAxisFormat?: string;
+    curved: boolean;
+    stacked?: boolean;
+    /** per series: drawn against the second value axis; indexed like the widget's vAxes */
+    secondAxis: boolean[];
+    /** pie: the share below which slices are grouped; undefined for Google's default */
+    sliceThreshold?: number;
+}
+
+/** The chart of a charts export widget: the colours of the series present in the table and the axis settings. */
+export function chartsExportChart(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[], hAxisFormat?: string): ChartsExportChart {
+    const chartType = widget.properties.chartType === undefined || widget.properties.chartType === '' ? 'LineChart' : widget.properties.chartType;
 
     // Remove all elements from color array that are missing in the dataTable
     const colors = colorOverride || getColorArray(widget.properties.vAxes || []);
-    if (widget.properties.vAxes && dataTable.data.length > 0 && widget.properties.chartType !== 'PieChart' && dataTable.data[0].length !== colors.length + 1) {
+    if (widget.properties.vAxes && dataTable.data.length > 0 && chartType !== 'PieChart' && dataTable.data[0].length !== colors.length + 1) {
         const deleteColorIndices: number[] = [];
         widget.properties.vAxes.forEach((vAxes, index) => {
             if (dataTable.data[0].indexOf(vAxes.valueAlias || vAxes.valueName) === -1) {
@@ -345,66 +366,20 @@ export function chartsExportModel(widget: WidgetModel, dataTable: ChartDataTable
             colors.splice(deleteColorIndices[i], 1);
         }
     }
-    const chartModel = new ChartsModel(
-        widget.properties.chartType === undefined || widget.properties.chartType === '' ? 'LineChart' : widget.properties.chartType,
-        dataTable.data,
-        {
-            chartArea: { width: element.widthPercentage, height: element.heightPercentage },
-            colors: colors.length > 0 ? colors : undefined,
-            hAxis: {
-                title: widget.properties.hAxisLabel,
-                gridlines: { count: -1 },
-                format: hAxisFormat || widget.properties.hAxisFormat,
-                ticks: widget.properties.chartType === 'ColumnChart' ? dataTable.data.slice(1).map((x) => x[0] as Date) : undefined,
-            },
-            height: element.height,
-            width: element.width,
-            curveType: widget.properties.curvedFunction ? 'function' : '',
-            vAxis: {
-                viewWindowMode:
-                    widget.properties.chartType !== 'ColumnChart' ? (element.height > 200 ? 'pretty' : 'maximized') : undefined,
-                viewWindow: {},
-            },
-            vAxes: {
-                0: { title: widget.properties.vAxisLabel },
-            },
-            explorer: widget.properties.chartType === 'PieChart' ? undefined : {
-                actions: ['dragToZoom', 'rightClickToReset'],
-                axis: 'horizontal',
-                keepInBounds: true,
-                maxZoomIn: 0.001,
-            },
-            interpolateNulls: true,
-            legend: widget.properties.chartType !== 'PieChart' ? 'none' : {
-                position: 'labeled',
-            },
-            timeline: { groupByRowLabel: false },
-            pieSliceText: widget.properties.chartType !== 'PieChart' ? undefined : 'none',
-            sliceVisibilityThreshold: widget.properties.chartType !== 'PieChart' || dataTable.data.length > 5 ? undefined : 0,
-            isStacked: widget.properties.chartType !== 'ColumnChart' ? undefined : widget.properties.stacked,
-        },
-    );
-    if (
-        widget.properties.chartType === 'ColumnChart' &&
-        dataTable.data.slice(1).findIndex((column) => column.slice(1).findIndex((val) => Number(val) < 0) !== -1) === -1 && // all values >= 0 ?
-        chartModel.options?.vAxis?.viewWindow !== undefined
-    ) {
-        chartModel.options.vAxis.viewWindow.min = 0;
-    }
-    const firstAxesSeries: number[] = [];
-    const secondAxisSeries: number[] = [];
-    widget.properties.vAxes?.forEach((v, idx) =>
-        v.displayOnSecondVAxis === true ? secondAxisSeries.push(idx) : firstAxesSeries.push(idx),
-    );
-    if (chartModel.options?.vAxes !== undefined && secondAxisSeries.length > 0) {
-        chartModel.options.vAxes['1'] = { title: widget.properties.secondVAxisLabel };
-        chartModel.options.series = {};
-
-        firstAxesSeries.forEach((i) => (chartModel.options!.series[i] = { targetAxisIndex: 0 }));
-
-        secondAxisSeries.forEach((i) => (chartModel.options!.series[i] = { targetAxisIndex: 1 }));
-    }
-    return chartModel;
+    const secondAxis = (widget.properties.vAxes || []).map((v) => v.displayOnSecondVAxis === true);
+    return {
+        chartType,
+        dataTable: dataTable.data,
+        colors,
+        hAxisLabel: widget.properties.hAxisLabel,
+        vAxisLabel: widget.properties.vAxisLabel,
+        secondVAxisLabel: secondAxis.includes(true) ? widget.properties.secondVAxisLabel : undefined,
+        hAxisFormat: hAxisFormat || widget.properties.hAxisFormat,
+        curved: widget.properties.curvedFunction === true,
+        stacked: chartType === 'ColumnChart' ? widget.properties.stacked : undefined,
+        secondAxis: secondAxis.includes(true) ? secondAxis : secondAxis.map(() => false),
+        sliceThreshold: chartType !== 'PieChart' || dataTable.data.length > 5 ? undefined : 0,
+    };
 }
 
 export function getColorArray(vAxes?: ChartsExportVAxesModel[]): string[] {

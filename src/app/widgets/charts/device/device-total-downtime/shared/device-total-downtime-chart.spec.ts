@@ -15,7 +15,7 @@
  */
 
 import { ResourceHistoricalConnectionStatesModelV2 } from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
-import { ConnectionTimeline, failureRatioIntervals, failureRatioTable, failureRatioTooltip, toConnectionTimelines } from './device-total-downtime-chart';
+import { ConnectionTimeline, failureRatioIntervals, failureRatioPoints, failureRatioTooltip, toConnectionTimelines } from './device-total-downtime-chart';
 
 // local wall-clock times, so the interval layout does not depend on the time zone the suite runs in
 function today(h: number, m: number, s = 0): Date {
@@ -65,10 +65,11 @@ describe('failureRatioIntervals', () => {
         ]);
     });
 
-    it('keeps the seconds of now in the start of the oldest interval', () => {
-        const intervals = failureRatioIntervals([[[secs(midnight), true]]], today(1, 0, 30));
-        expect(intervals[0].from).toEqual(today(0, 0, 30));
-        expect(intervals[intervals.length - 1].to).toEqual(today(1, 0, 30));
+    // SNRGY-4848 item 3: the oldest interval used to start at midnight plus the seconds of now.
+    it('starts the oldest interval at midnight exactly', () => {
+        const intervals = failureRatioIntervals([[[secs(midnight), true]]], new Date(2026, 9, 5, 1, 0, 30, 250));
+        expect(intervals[0].from).toEqual(today(0, 0));
+        expect(intervals[intervals.length - 1].to).toEqual(new Date(2026, 9, 5, 1, 0, 30, 250));
     });
 
     it('averages over all devices', () => {
@@ -77,10 +78,11 @@ describe('failureRatioIntervals', () => {
         expect(intervals.map((i) => i.failureRatio)).toEqual([0.5, 0.5]);
     });
 
-    it('has no ratio (NaN) for an interval no device reported anything for', () => {
+    // SNRGY-4848 item 3: an interval without data used to get the ratio NaN.
+    it('has no ratio for an interval no device reported anything for', () => {
         const timelines: ConnectionTimeline[] = [[[secs(today(0, 20)), false]]];
         const intervals = failureRatioIntervals(timelines, today(0, 30));
-        expect(intervals[0].failureRatio).toBeNaN();
+        expect(intervals[0].failureRatio).toBeNull();
         expect(intervals[1].failureRatio).toBe(1);
     });
 
@@ -91,9 +93,29 @@ describe('failureRatioIntervals', () => {
         expect(intervals[0].failureRatio).toBeCloseTo(10 / 15, 12);
     });
 
-    // In the first minute after midnight there is no interval to fill.
-    it('throws in the first minute of the day', () => {
-        expect(() => failureRatioIntervals([[[secs(midnight), true]]], today(0, 0, 30))).toThrowError(TypeError);
+    // SNRGY-4848 item 3: in the first minute after midnight the widget used to throw a TypeError.
+    it('has one interval from midnight in the first minute of the day', () => {
+        const intervals = failureRatioIntervals([[[secs(midnight), false]]], today(0, 0, 30));
+        expect(intervals).toEqual([{ from: today(0, 0), to: today(0, 0, 30), failureRatio: 1 }]);
+    });
+
+    it('has no interval right at midnight', () => {
+        expect(failureRatioIntervals([[[secs(midnight), true]]], today(0, 0))).toEqual([]);
+    });
+
+    it('keeps every interval within the day when the clocks change', () => {
+        // spring forward in central Europe: the clock jumps from 02:00 to 03:00
+        const now = new Date(2026, 2, 29, 3, 30);
+        const dayStart = new Date(2026, 2, 29);
+        const intervals = failureRatioIntervals([[[secs(dayStart), true]]], now);
+        expect(intervals.length).toBe(Math.ceil((now.getTime() - dayStart.getTime()) / 900000));
+        expect(intervals[0].from).toEqual(dayStart);
+        expect(intervals.every((i) => i.from.getTime() <= i.to.getTime())).toBeTrue();
+    });
+
+    it('never counts negative time for changes stamped after now', () => {
+        const intervals = failureRatioIntervals([[[secs(midnight), true], [secs(today(0, 40)), false]]], today(0, 30));
+        expect(intervals.map((i) => i.failureRatio)).toEqual([0, 0]);
     });
 });
 
@@ -109,18 +131,16 @@ describe('failureRatioTooltip', () => {
         expect(failureRatioTooltip(today(9, 45), 0.5)).toBe(expected + '\nfailure ratio: 50%');
     });
 
-    it('labels an interval without ratio as NaN%', () => {
-        expect(failureRatioTooltip(today(9, 45), NaN, 'de-DE')).toBe('09:45\nfailure ratio: NaN%');
-    });
 });
 
-describe('failureRatioTable (Google)', () => {
-    it('draws each interval as a flat step with a tooltip on both ends', () => {
-        const table = failureRatioTable([{ from: today(0, 0), to: today(0, 15), failureRatio: 0.25 }]);
-        expect(table.data).toEqual([
-            ['Date', 'Percentage', { role: 'tooltip' }],
-            [today(0, 0), 0.25, failureRatioTooltip(today(0, 0), 0.25)],
-            [today(0, 15), 0.25, failureRatioTooltip(today(0, 15), 0.25)],
+describe('failureRatioPoints', () => {
+    it('draws each interval as a flat step, a gap where it has no ratio', () => {
+        expect(failureRatioPoints([
+            { from: today(0, 0), to: today(0, 15), failureRatio: 0.25 },
+            { from: today(0, 15), to: today(0, 30), failureRatio: null },
+        ])).toEqual([
+            { x: today(0, 0).getTime(), y: 0.25 }, { x: today(0, 15).getTime(), y: 0.25 },
+            { x: today(0, 15).getTime(), y: null }, { x: today(0, 30).getTime(), y: null },
         ]);
     });
 });

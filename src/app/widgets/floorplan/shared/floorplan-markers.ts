@@ -28,7 +28,8 @@ export interface PlacementMarker {
 /**
  * Icon, colour and value label of a placement. A numeric value takes the first colouring whose value it
  * does not exceed (the last one above all), any other value the first colouring whose value matches it
- * as a regular expression (the last one without match). Without colouring the marker is a grey circle.
+ * as a regular expression (the last one without match); a colouring value that is no valid regular expression matches
+ * nothing. Without colouring the marker is a grey circle.
  */
 export function placementMarker(placement: FloorplanWidgetCapabilityModel, unit: string | undefined): PlacementMarker {
     let color = 'grey';
@@ -65,7 +66,7 @@ export function placementMarker(placement: FloorplanWidgetCapabilityModel, unit:
             notZoom = coloring[l - 1].showValue;
 
             for (let j = 0; j < l; j++) {
-                if (('' + value).match(new RegExp('' + coloring[j].value)) !== null) {
+                if (matchesPattern('' + value, '' + coloring[j].value)) {
                     icon = coloring[j].icon;
                     color = coloring[j].color;
                     zoom = coloring[j].showValueWhenZoomed;
@@ -80,6 +81,14 @@ export function placementMarker(placement: FloorplanWidgetCapabilityModel, unit:
         label += ' ' + unit;
     }
     return { icon, color, showValue: notZoom, showValueWhenZoomed: zoom, label };
+}
+
+function matchesPattern(value: string, pattern: string): boolean {
+    try {
+        return value.match(new RegExp(pattern)) !== null;
+    } catch {
+        return false;
+    }
 }
 
 /** Canvas position of a placement, its relative position scaled onto the drawn image. */

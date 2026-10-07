@@ -16,9 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ChartsModel } from '../../../shared/charts.model';
 import { MonitorProcessModel } from '../../../../../modules/processes/monitor/shared/monitor-process.model';
-import { ChartsDataTableModel } from '../../../shared/charts-data-table.model';
 import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
 import { ElementSizeService } from '../../../../../core/services/element-size.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -26,7 +24,8 @@ import { ChartsProcessInstancesEditDialogComponent } from '../dialogs/charts-pro
 import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { processStatusChart, processStatusCounts, processStatusTable } from './charts-process-instances-chart';
+import { map } from 'rxjs/operators';
+import { processStatusCounts, ProcessStatusCount } from './charts-process-instances-chart';
 
 @Injectable({
     providedIn: 'root',
@@ -57,24 +56,10 @@ export class ChartsProcessInstancesService {
         });
     }
 
-    getProcessInstancesStatus(widgetId: string): Observable<ChartsModel> {
-        return new Observable<ChartsModel>((observer) => {
-            this.monitorService.getAllHistoryInstances().subscribe((processes: MonitorProcessModel[]) => {
-                if (processes.length === 0) {
-                    observer.next(this.setProcessInstancesStatusValues(widgetId, new ChartsDataTableModel([[]])));
-                } else {
-                    observer.next(this.setProcessInstancesStatusValues(widgetId, this.sumUpProcessStatuses(processes)));
-                }
-                observer.complete();
-            });
-        });
-    }
-
-    private sumUpProcessStatuses(processes: MonitorProcessModel[]): ChartsDataTableModel {
-        return processStatusTable(processStatusCounts(processes));
-    }
-
-    private setProcessInstancesStatusValues(widgetId: string, dataTable: ChartsDataTableModel): ChartsModel {
-        return processStatusChart(dataTable, this.elementSizeService.getHeightAndWidthByElementId(widgetId));
+    /** The instance count per state; undefined without instances. */
+    getProcessInstancesStatus(): Observable<ProcessStatusCount[] | undefined> {
+        return this.monitorService.getAllHistoryInstances().pipe(
+            map((processes: MonitorProcessModel[]) => (processes.length === 0 ? undefined : processStatusCounts(processes))),
+        );
     }
 }

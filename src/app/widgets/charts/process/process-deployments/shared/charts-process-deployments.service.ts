@@ -16,7 +16,6 @@
 
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ChartsModel } from '../../../shared/charts.model';
 import { MonitorProcessModel } from '../../../../../modules/processes/monitor/shared/monitor-process.model';
 import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
 import { ElementSizeService } from '../../../../../core/services/element-size.service';
@@ -25,9 +24,8 @@ import { DashboardService } from '../../../../../modules/dashboard/shared/dashbo
 import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { ChartsProcessDeploymentsEditDialogComponent } from '../dialogs/charts-process-deployments-edit-dialog.component';
-import { ChartDataTableModel } from '../../../../../core/model/chart/chart-data-table.model';
-import { ChartsDataTableModel } from '../../../shared/charts-data-table.model';
-import { deploymentsChart, deploymentsPerDay, deploymentsTable } from './charts-process-deployments-chart';
+import { map } from 'rxjs/operators';
+import { DeploymentsPerDay, deploymentsPerDay } from './charts-process-deployments-chart';
 
 @Injectable({
     providedIn: 'root',
@@ -58,24 +56,10 @@ export class ChartsProcessDeploymentsService {
         });
     }
 
-    getProcessDeploymentHistory(widgetId: string): Observable<ChartsModel> {
-        return new Observable<ChartsModel>((observer) => {
-            this.monitorService.getAllHistoryInstances().subscribe((processes: MonitorProcessModel[]) => {
-                if (processes.length === 0) {
-                    observer.next(this.setProcessDeploymentValues(widgetId, new ChartsDataTableModel([[]])));
-                } else {
-                    observer.next(this.setProcessDeploymentValues(widgetId, this.sumUpProcessDeployments(processes)));
-                }
-                observer.complete();
-            });
-        });
-    }
-
-    private sumUpProcessDeployments(processes: MonitorProcessModel[]): ChartDataTableModel {
-        return deploymentsTable(deploymentsPerDay(processes));
-    }
-
-    private setProcessDeploymentValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
-        return deploymentsChart(dataTable, this.elementSizeService.getHeightAndWidthByElementId(widgetId));
+    /** The instances per start day; undefined without instances. */
+    getProcessDeploymentHistory(): Observable<DeploymentsPerDay[] | undefined> {
+        return this.monitorService.getAllHistoryInstances().pipe(
+            map((processes: MonitorProcessModel[]) => (processes.length === 0 ? undefined : deploymentsPerDay(processes))),
+        );
     }
 }

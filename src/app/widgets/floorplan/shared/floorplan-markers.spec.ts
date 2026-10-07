@@ -79,9 +79,10 @@ describe('placementMarker', () => {
         expect(placementMarker(placement(null, thresholds), '°C').label).toBe('');
     });
 
-    // The band value is used as a pattern unescaped, so a value that is no valid pattern breaks drawing.
-    it('throws for a band value that is no valid regular expression', () => {
-        expect(() => placementMarker(placement('x', [band('(', 'red')]), undefined)).toThrowError(SyntaxError);
+    // SNRGY-4848 item 14: a band value that is no valid regular expression threw a SyntaxError and stopped the drawing.
+    it('lets a band value that is no valid regular expression match nothing', () => {
+        expect(placementMarker(placement('x', [band('(', 'red'), band('x', 'green'), band('.*', 'blue')]), undefined).color).toBe('green');
+        expect(placementMarker(placement('(', [band('(', 'red'), band('y', 'green')]), undefined).color).toBe('green');
     });
 });
 

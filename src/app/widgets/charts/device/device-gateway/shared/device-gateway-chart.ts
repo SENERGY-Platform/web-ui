@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { ChartDataTableModel } from '../../../../../core/model/chart/chart-data-table.model';
 import { ExtendedHubModel } from '../../../../../modules/devices/networks/shared/networks.model';
-import { ChartElementSize, ChartsModel } from '../../../shared/charts.model';
 
 export const deviceGatewayColumnColor = '#4484ce';
 
@@ -28,22 +26,4 @@ export interface GatewayDeviceCount {
 /** One column per gateway, in listing order; a gateway without a device list counts 0 devices. */
 export function devicesPerGateway(gateways: ExtendedHubModel[]): GatewayDeviceCount[] {
     return gateways.map((gateway) => ({ name: gateway.name, count: gateway.device_local_ids === null ? 0 : gateway.device_local_ids.length }));
-}
-
-/** Google data table: the count is both the column value and the label above the column. */
-export function devicesPerGatewayTable(counts: GatewayDeviceCount[]): ChartDataTableModel {
-    const dataTable = new ChartDataTableModel([['Name', 'Count', { role: 'annotation' }, { role: 'style' }]]);
-    counts.forEach(({ name, count }) => dataTable.data.push([name, count, count, deviceGatewayColumnColor]));
-    return dataTable;
-}
-
-export function devicesPerGatewayChart(dataTable: ChartDataTableModel, element: ChartElementSize): ChartsModel {
-    return new ChartsModel('ColumnChart', dataTable.data, {
-        chartArea: { width: element.widthPercentage, height: element.heightPercentage },
-        width: element.width,
-        height: element.height,
-        legend: 'none',
-        tooltip: { trigger: 'focus' },
-        vAxis: { format: 'decimal', gridlines: { count: -1 }, viewWindow: { min: 0 } },
-    });
 }

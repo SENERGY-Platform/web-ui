@@ -15,15 +15,13 @@
  */
 
 import { MonitorProcessModel } from '../../../../../modules/processes/monitor/shared/monitor-process.model';
-import { ChartsDataTableModel } from '../../../shared/charts-data-table.model';
-import { ChartElementSize, ChartsModel } from '../../../shared/charts.model';
 
 export interface ProcessStatusCount {
     label: string;
     count: number;
 }
 
-/** One slice per instance state, always all five and in this order; an unknown state throws. */
+/** One slice per instance state, always all five and in this order; instances in a state not among them are not counted. */
 export function processStatusCounts(processes: MonitorProcessModel[]): ProcessStatusCount[] {
     const status = { active: 0, suspended: 0, completed: 0, externallyTerminated: 0, internallyTerminated: 0 };
     processes.forEach((process) => {
@@ -48,9 +46,6 @@ export function processStatusCounts(processes: MonitorProcessModel[]): ProcessSt
             status.internallyTerminated++;
             break;
         }
-        default: {
-            throw new Error('Unknown process state.');
-        }
         }
     });
     return [
@@ -60,23 +55,4 @@ export function processStatusCounts(processes: MonitorProcessModel[]): ProcessSt
         { label: 'ExternallyTerminated', count: status.externallyTerminated },
         { label: 'InternallyTerminated', count: status.internallyTerminated },
     ];
-}
-
-/** Google data table: one row per slice. */
-export function processStatusTable(counts: ProcessStatusCount[]): ChartsDataTableModel {
-    const dataTable = new ChartsDataTableModel([['Status', 'Count']]);
-    counts.forEach(({ label, count }) => dataTable.data.push([label, count]));
-    return dataTable;
-}
-
-export function processStatusChart(dataTable: ChartsDataTableModel, element: ChartElementSize): ChartsModel {
-    return new ChartsModel('PieChart', dataTable.data, {
-        chartArea: { width: element.widthPercentage, height: element.heightPercentage },
-        height: element.height,
-        width: element.width,
-        pieSliceText: 'none',
-        legend: {
-            position: 'labeled',
-        }
-    });
 }

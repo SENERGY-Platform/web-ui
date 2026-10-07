@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { ChartSelectEvent, GoogleChartComponent } from 'ng2-google-charts';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { concatMap, of, Subscription, map } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { PvPredictionService } from './shared/pv-load.service';
 import { PVPredictionResult } from './shared/prediction.model';
-import { nextPvPredictionText, pvPredictionChart, pvPredictionPoints } from './shared/pv-prediction-chart';
+import { nextPvPredictionText, pvPredictionPoints } from './shared/pv-prediction-chart';
+import { pvPredictionChart } from './shared/pv-prediction-chartjs';
+import { FramedChartConfig } from '../../core/charts/google-columns';
+import { googlePlugins } from '../../core/charts/google-chartjs';
 import { SingleValueModel } from '../single-value/shared/single-value.model';
 
 @Component({
@@ -36,7 +38,8 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
     refreshing = false;
     destroy = new Subscription();
     error?: string;
-    chartExportData: any;
+    chart?: FramedChartConfig<'line'>;
+    readonly plugins = googlePlugins;
     nextPrediction?: SingleValueModel;
 
     @Input() dashboardId = '';
@@ -51,15 +54,6 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
         private dashboardService: DashboardService,
         private pvService: PvPredictionService
     ) { }
-
-    // Use a setter for the chart which will get called when then ngif from ready evaluates to true
-    // This is needed so the element is not undefined when called later to draw
-    private chartExport!: GoogleChartComponent;
-    @ViewChild('chartExport', { static: false }) set content(content: GoogleChartComponent) {
-        if (content) { // initially setter gets called with undefined
-            this.chartExport = content;
-        }
-    }
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
@@ -107,13 +101,12 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
     }
 
     setupChartData(data: PVPredictionResult) {
-        this.chartExportData = pvPredictionChart(pvPredictionPoints(data));
-        this.chartExport?.draw();
+        this.chart = pvPredictionChart(pvPredictionPoints(data));
     }
 
     calcNextPVPrediction(data: PVPredictionResult, level: string, time: number) {
         this.nextPrediction = {
-            value: nextPvPredictionText(data, level, time),
+            value: nextPvPredictionText(data, level, time, new Date()),
             type: 'String',
             date: new Date()
         };
@@ -121,8 +114,5 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
 
     edit() {
         this.pvService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
-    }
-
-    onChartSelect(_: ChartSelectEvent) {
     }
 }

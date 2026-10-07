@@ -1,0 +1,48 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+@if (layout !== undefined && main !== undefined && navigator !== undefined) {
+  <div class="annotation-chart" [style.width.px]="layout.width + 2" [style.height.px]="layout.height + 2" (mouseleave)="legend = { entries: legend.entries }">
+    <div class="legend">
+      @for (entry of legend.entries; track $index) {
+        <span [style.color]="entry.color"><span class="legend-dot" [style.background-color]="entry.color"></span>{{entry.label}}&nbsp;&nbsp;</span>@if (entry.value !== undefined) {<span>: {{entry.value}}</span>}&nbsp;&nbsp;
+      }
+      @if (legend.date !== undefined) {
+        <span>|&nbsp;{{legend.date}}</span>
+      }
+    </div>
+    <div class="main" [style.height.px]="layout.chartHeight">
+      <canvas baseChart type="line" [data]="main.data" [options]="main.options" [plugins]="mainPlugins"></canvas>
+    </div>
+    <div class="navigator">
+      <canvas baseChart type="line" [data]="navigator.data" [options]="navigator.options" [plugins]="navigatorPlugins"></canvas>
+      <div class="outside" [style.left.px]="layout.navigator.left" [style.width.px]="position(window.from) - layout.navigator.left"></div>
+      <div class="outside" [style.left.px]="position(window.to)" [style.width.px]="layout.navigator.right - position(window.to)"></div>
+      <div class="selection" [style.left.px]="position(window.from)" [style.width.px]="position(window.to) - position(window.from)"
+        (pointerdown)="startDrag($event, 'both')"></div>
+      <svg class="handle" [style.left.px]="position(window.from) - 5" width="11" height="40" (pointerdown)="startDrag($event, 'from')">
+        <path d="M5.5,0L5.5,40" stroke="#000" stroke-width="1"></path>
+        <path d="M3.5,12.5L7.5,12.5L10.5,15.5L10.5,25.5L7.5,28.5L3.5,28.5L0.5,25.5L0.5,15.5Z" stroke="#000" stroke-width="1" fill="#fff"></path>
+        <path d="M4.5,16L4.5,24M6.5,16L6.5,24" stroke="#000" stroke-width="1"></path>
+      </svg>
+      <svg class="handle" [style.left.px]="position(window.to) - 5" width="11" height="40" (pointerdown)="startDrag($event, 'to')">
+        <path d="M5.5,0L5.5,40" stroke="#000" stroke-width="1"></path>
+        <path d="M3.5,12.5L7.5,12.5L10.5,15.5L10.5,25.5L7.5,28.5L3.5,28.5L0.5,25.5L0.5,15.5Z" stroke="#000" stroke-width="1" fill="#fff"></path>
+        <path d="M4.5,16L4.5,24M6.5,16L6.5,24" stroke="#000" stroke-width="1"></path>
+      </svg>
+    </div>
+  </div>
+}

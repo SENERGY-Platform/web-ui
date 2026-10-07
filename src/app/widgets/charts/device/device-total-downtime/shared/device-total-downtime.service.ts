@@ -16,21 +16,19 @@
 
 import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
-import {ChartsModel} from '../../../shared/charts.model';
 import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
 import {ElementSizeService} from '../../../../../core/services/element-size.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {ChartDataTableModel} from '../../../../../core/model/chart/chart-data-table.model';
 import {DeviceTotalDowntimeEditDialogComponent} from '../dialogs/device-total-downtime-edit-dialog.component';
 import {DeviceInstancesService} from '../../../../../modules/devices/device-instances/shared/device-instances.service';
 import {
     ResourceHistoricalConnectionStatesModelV2
 } from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
 import {catchError, concatMap, map} from 'rxjs/operators';
-import {ConnectionTimeline, failureRatioIntervals, failureRatioTable, toConnectionTimelines, totalDowntimeChart} from './device-total-downtime-chart';
+import {FailureRatioInterval, failureRatioIntervals, toConnectionTimelines} from './device-total-downtime-chart';
 
 @Injectable({
     providedIn: 'root',
@@ -62,7 +60,8 @@ export class DeviceTotalDowntimeService {
         });
     }
 
-    getTotalDowntime(widgetId: string): Observable<ChartsModel> {
+    /** The failure ratio intervals of today up to now; undefined when no device has a history. */
+    getTotalDowntime(): Observable<FailureRatioInterval[] | undefined> {
         const midnight = new Date();
         midnight.setHours(0, 0, 0, 0);
         return this.deviceInstancesService.getDeviceInstances({limit: 9999, offset: 0}).pipe(
@@ -76,20 +75,8 @@ export class DeviceTotalDowntimeService {
             catchError(() => of(new Map<string, ResourceHistoricalConnectionStatesModelV2[]>())),
             map((histories) => {
                 const timelines = toConnectionTimelines(histories, midnight);
-                if (timelines.length === 0) {
-                    return this.setDevicesTotalDowntimeChartValues(widgetId, new ChartDataTableModel([[]]));
-                } else {
-                    return this.setDevicesTotalDowntimeChartValues(widgetId, this.processTimelineFailureRatio(timelines));
-                }
+                return timelines.length === 0 ? undefined : failureRatioIntervals(timelines, new Date());
             })
         );
-    }
-
-    private setDevicesTotalDowntimeChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
-        return totalDowntimeChart(dataTable, this.elementSizeService.getHeightAndWidthByElementId(widgetId));
-    }
-
-    private processTimelineFailureRatio(timelines: ConnectionTimeline[]): ChartDataTableModel {
-        return failureRatioTable(failureRatioIntervals(timelines, new Date()));
     }
 }

@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import { GoogleChartComponent } from 'ng2-google-charts';
-import { ChartsModel } from '../../shared/charts.model';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
 import { DeviceTotalDowntimeService } from './shared/device-total-downtime.service';
-import { ChartsService } from '../../shared/charts.service';
+import { FailureRatioInterval } from './shared/device-total-downtime-chart';
+import { totalDowntimeChart } from './shared/device-total-downtime-chartjs';
+import { FramedChartConfig } from '../../../../core/charts/google-columns';
+import { googleFrame, googlePlugins } from '../../../../core/charts/google-chartjs';
+import { Chart } from 'chart.js';
 
 @Component({
     selector: 'senergy-device-total-downtime',
@@ -32,14 +34,17 @@ import { ChartsService } from '../../shared/charts.service';
     standalone: false
 })
 export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy, AfterViewInit {
-    deviceTotalDowntime: ChartsModel | undefined;
+    /** undefined when no device has a history or loading failed */
+    chart?: FramedChartConfig<'line'>;
+    readonly plugins = googlePlugins;
     ready = false;
     refeshing = false;
     destroy = new Subscription();
 
+    private intervals?: FailureRatioInterval[];
     private resizeTimeout: any;
+    private resizeObserver?: ResizeObserver;
 
-    @ViewChild('deviceTotalDowntimeChart', { static: false }) deviceTotalDowntimeChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -48,22 +53,21 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy, AfterVie
     @Input() userHasUpdateNameAuthorization = false;
 
     ngAfterViewInit() {
-        const ro = new ResizeObserver((_ => {
+        this.resizeObserver = new ResizeObserver((_ => {
             // debouncing redraws due to many resize calls
             clearTimeout(this.resizeTimeout);
-            this.resizeTimeout = setTimeout(() => {
-                this.resizeProcessInstancesStatusChart();
-            }, 30);
+            // zone.js does not patch ResizeObserver, so the redraw re-enters the zone to be change detected
+            this.resizeTimeout = setTimeout(() => this.zone.run(() => this.draw()), 30);
         }));
-        ro.observe(this.el.nativeElement);
+        this.resizeObserver.observe(this.el.nativeElement);
     }
 
     constructor(
-        private chartsService: ChartsService,
         private deviceDowntimeGatewayService: DeviceTotalDowntimeService,
         private elementSizeService: ElementSizeService,
         private dashboardService: DashboardService,
         private el: ElementRef,
+        private zone: NgZone,
     ) {
     }
 
@@ -73,42 +77,50 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy, AfterVie
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
-        this.chartsService.releaseResources(this.deviceTotalDowntimeChart);
+        this.resizeObserver?.disconnect();
+        clearTimeout(this.resizeTimeout);
     }
 
     edit() {
         this.deviceDowntimeGatewayService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization);
     }
 
+    /** Google's explorer reset the zoom on a right click. */
+    resetZoom(event: MouseEvent, canvas: HTMLCanvasElement) {
+        event.preventDefault();
+        Chart.getChart(canvas)?.resetZoom();
+    }
+
     private getProcessInstances() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refeshing = true;
-                this.deviceDowntimeGatewayService.getTotalDowntime(this.widget.id).subscribe((processDeploymentsHistory: ChartsModel) => {
-                    this.deviceTotalDowntime = processDeploymentsHistory;
-                    setTimeout(() => this.deviceTotalDowntimeChart?.draw(), 500);
-                    this.ready = true;
-                }, () => {
-                }, () => {
-                    this.ready = true;
-                    this.refeshing = false;
+                this.deviceDowntimeGatewayService.getTotalDowntime().subscribe({
+                    next: (intervals: FailureRatioInterval[] | undefined) => {
+                        this.intervals = intervals;
+                        this.draw();
+                    },
+                    error: () => {
+                        this.intervals = undefined;
+                        this.draw();
+                        this.ready = true;
+                        this.refeshing = false;
+                    },
+                    complete: () => {
+                        this.ready = true;
+                        this.refeshing = false;
+                    },
                 });
             }
         });
     }
 
-    private resizeProcessInstancesStatusChart() {
-        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id);
-        if (this.deviceTotalDowntime?.options !== undefined) {
-            this.deviceTotalDowntime.options.height = element.height;
-            this.deviceTotalDowntime.options.width = element.width;
-            if (this.deviceTotalDowntime.options.chartArea) {
-                this.deviceTotalDowntime.options.chartArea.height = element.heightPercentage;
-                this.deviceTotalDowntime.options.chartArea.width = element.widthPercentage;
-            }
-            if (this.deviceTotalDowntime.dataTable[0].length > 0) {
-                this.deviceTotalDowntimeChart.draw();
-            }
+    private draw() {
+        if (this.intervals === undefined) {
+            this.chart = undefined;
+            return;
         }
+        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id);
+        this.chart = totalDowntimeChart(this.intervals, googleFrame(element.width, element.height, element.widthPercentage, element.heightPercentage));
     }
 }

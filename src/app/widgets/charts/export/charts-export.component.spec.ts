@@ -24,7 +24,7 @@ describe('ChartsExportComponent timeline', () => {
         const chartsExportService = jasmine.createSpyObj('ChartsExportService', ['getData']);
         chartsExportService.getData.and.returnValue(of({ data: null, metadata: [] }));
         const elementSizeService = { getHeightAndWidthByElementId: () => ({ height: 100, width: 100, heightPercentage: '90%', widthPercentage: '90%' }) };
-        const component = new ChartsExportComponent({} as any, chartsExportService, elementSizeService as any, {} as any, {} as any, {} as any, {} as any, {} as any);
+        const component = new ChartsExportComponent(chartsExportService, elementSizeService as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any);
         component.widget = { id: 'w', name: 'w', type: 'charts_export', properties: { chartType: 'Timeline', hAxisFormat: 'HH:mm', time: { last: '6h' } } } as WidgetModel;
         (component as any).hAxisFormat = 'HH:mm';
 

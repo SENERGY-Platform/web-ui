@@ -16,7 +16,6 @@
 
 import { Injectable } from '@angular/core';
 import { forkJoin, Observable, of } from 'rxjs';
-import { ChartsModel } from '../../shared/charts.model';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ChartDataTableModel } from '../../../../core/model/chart/chart-data-table.model';
@@ -47,7 +46,7 @@ import { environment } from '../../../../../environments/environment';
 import { DeviceInstancesWithDeviceTypeTotalModel, DeviceInstanceWithDeviceTypeModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import Color from 'color';
-import { chartsExportDefaultColor, chartsExportModel, chartsExportTable, getRgbDistance, themeColorsForTitles } from './charts-export-table';
+import { ChartsExportChart, chartsExportChart, chartsExportDefaultColor, chartsExportTable, getRgbDistance, themeColorsForTitles } from './charts-export-table';
 
 @Injectable({
     providedIn: 'root',
@@ -331,7 +330,7 @@ export class ChartsExportService {
     }
 
 
-    getChartData(widget: WidgetModel, _from?: string, to?: string, groupInterval?: string, hAxisFormat?: string, lastOverride?: string, chooseColors = false, disableBreaking = false): Observable<ChartsModel | ErrorModel> {
+    getChartData(widget: WidgetModel, _from?: string, to?: string, groupInterval?: string, hAxisFormat?: string, lastOverride?: string, chooseColors = false, disableBreaking = false): Observable<ChartsExportChart | ErrorModel> {
         return this.getData(widget.properties, _from, to, groupInterval, lastOverride).pipe(concatMap(r => {
             let obs: Observable<DeviceInstancesWithDeviceTypeTotalModel> = of({ result: [], total: 0 });
             const deviceIds: string[] = [];
@@ -437,8 +436,8 @@ export class ChartsExportService {
         return unique.length > 0 ? unique : [chartsExportDefaultColor];
     }
 
-    private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[], hAxisFormat?: string): ChartsModel {
-        return chartsExportModel(widget, dataTable, this.elementSizeService.getHeightAndWidthByElementId(widget.id, 5), colorOverride, hAxisFormat);
+    private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[], hAxisFormat?: string): ChartsExportChart {
+        return chartsExportChart(widget, dataTable, colorOverride, hAxisFormat);
     }
 
     private getComputedThemeColor(className: string, property: 'color' | 'backgroundColor'): string | undefined {

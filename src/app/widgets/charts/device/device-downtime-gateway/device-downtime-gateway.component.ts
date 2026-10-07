@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import { GoogleChartComponent } from 'ng2-google-charts';
-import { ChartsModel } from '../../shared/charts.model';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
 import { DeviceDowntimeGatewayService } from './shared/device-downtime-gateway.service';
-import { ChartsService } from '../../shared/charts.service';
+import { GatewayDowntime } from './shared/device-downtime-gateway-chart';
+import { downtimePerGatewayChart } from './shared/device-downtime-gateway-chartjs';
+import { FramedChartConfig } from '../../../../core/charts/google-columns';
+import { googleFrame, googlePlugins } from '../../../../core/charts/google-chartjs';
 
 @Component({
     selector: 'senergy-device-downtime-gateway',
@@ -32,14 +33,17 @@ import { ChartsService } from '../../shared/charts.service';
     standalone: false
 })
 export class DeviceDowntimeGatewayComponent implements OnInit, AfterViewInit, OnDestroy {
-    deviceDowntimeGateway = {} as ChartsModel;
+    /** undefined without gateways */
+    chart?: FramedChartConfig<'bar'>;
+    readonly plugins = googlePlugins;
     ready = false;
     refreshing = false;
     destroy = new Subscription();
 
+    private rows?: GatewayDowntime[];
     private resizeTimeout: any;
+    private resizeObserver?: ResizeObserver;
 
-    @ViewChild('deviceDowntimeGatewayChart', { static: false }) deviceDowntimeGatewayChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -48,23 +52,22 @@ export class DeviceDowntimeGatewayComponent implements OnInit, AfterViewInit, On
     @Input() userHasUpdateNameAuthorization = false;
 
     ngAfterViewInit() {
-        const ro = new ResizeObserver((_ => {
+        this.resizeObserver = new ResizeObserver((_ => {
             // debouncing redraws due to many resize calls
             clearTimeout(this.resizeTimeout);
-            this.resizeTimeout = setTimeout(() => {
-                this.resizeProcessInstancesStatusChart();
-            }, 30);
+            // zone.js does not patch ResizeObserver, so the redraw re-enters the zone to be change detected
+            this.resizeTimeout = setTimeout(() => this.zone.run(() => this.draw()), 30);
         }));
-        ro.observe(this.el.nativeElement);
+        this.resizeObserver.observe(this.el.nativeElement);
     }
 
 
     constructor(
-        private chartsService: ChartsService,
         private deviceDowntimeGatewayService: DeviceDowntimeGatewayService,
         private elementSizeService: ElementSizeService,
         private dashboardService: DashboardService,
         private el: ElementRef,
+        private zone: NgZone,
     ) { }
 
     ngOnInit() {
@@ -73,7 +76,8 @@ export class DeviceDowntimeGatewayComponent implements OnInit, AfterViewInit, On
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
-        this.chartsService.releaseResources(this.deviceDowntimeGatewayChart);
+        this.resizeObserver?.disconnect();
+        clearTimeout(this.resizeTimeout);
     }
 
     edit() {
@@ -86,28 +90,22 @@ export class DeviceDowntimeGatewayComponent implements OnInit, AfterViewInit, On
                 this.refreshing = true;
                 this.deviceDowntimeGatewayService
                     .getDevicesDowntimePerGateway(this.widget)
-                    .subscribe((processDeploymentsHistory: ChartsModel) => {
-                        this.deviceDowntimeGateway = processDeploymentsHistory;
-                        setTimeout(() => this.deviceDowntimeGatewayChart?.draw(), 500);
+                    .subscribe((rows: GatewayDowntime[] | undefined) => {
+                        this.rows = rows;
                         this.ready = true;
                         this.refreshing = false;
+                        this.draw();
                     });
             }
         });
     }
 
-    private resizeProcessInstancesStatusChart() {
-        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 10);
-        if (this.deviceDowntimeGateway.options !== undefined) {
-            this.deviceDowntimeGateway.options.height = element.height;
-            this.deviceDowntimeGateway.options.width = element.width;
-            if (this.deviceDowntimeGateway.options.chartArea) {
-                this.deviceDowntimeGateway.options.chartArea.height = element.heightPercentage;
-                this.deviceDowntimeGateway.options.chartArea.width = element.widthPercentage;
-            }
-            if (this.deviceDowntimeGateway.dataTable[0].length > 0) {
-                this.deviceDowntimeGatewayChart.draw();
-            }
+    private draw() {
+        if (this.rows === undefined) {
+            this.chart = undefined;
+            return;
         }
+        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 10);
+        this.chart = downtimePerGatewayChart(this.rows, googleFrame(element.width, element.height, element.widthPercentage, element.heightPercentage));
     }
 }

@@ -15,7 +15,7 @@
  */
 
 import { MonitorProcessModel } from '../../../../../modules/processes/monitor/shared/monitor-process.model';
-import { deploymentsPerDay, deploymentsTable, deploymentsTooltip } from './charts-process-deployments-chart';
+import { deploymentsPerDay, deploymentsTooltip } from './charts-process-deployments-chart';
 
 function started(startTime: string): MonitorProcessModel {
     return { startTime } as MonitorProcessModel;
@@ -29,14 +29,21 @@ describe('deploymentsPerDay', () => {
             started('2026-10-05T07:00:00.000+0200'),
         ]);
         expect(days).toEqual([
-            { date: new Date(Date.UTC(2026, 9, 3)), count: 1 },
-            { date: new Date(Date.UTC(2026, 9, 5)), count: 2 },
+            { date: new Date(2026, 9, 3), count: 1 },
+            { date: new Date(2026, 9, 5), count: 2 },
         ]);
     });
 
     it('takes the day from the start time text, not from the instant it denotes', () => {
         const days = deploymentsPerDay([started('2026-10-05T23:30:00.000-0500')]);
-        expect(days).toEqual([{ date: new Date(Date.UTC(2026, 9, 5)), count: 1 }]);
+        expect(days).toEqual([{ date: new Date(2026, 9, 5), count: 1 }]);
+    });
+
+    // SNRGY-4848 item 5: the day was UTC midnight, which west of UTC is still the day before in local time.
+    it('dates each day at local midnight, so the tooltip shows the day of the start time in any time zone', () => {
+        const [day] = deploymentsPerDay([started('2026-10-05T08:00:00Z')]);
+        expect([day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), day.date.getHours(), day.date.getMinutes()]).toEqual([2026, 9, 5, 0, 0]);
+        expect(deploymentsTooltip(day.date, day.count, 'de-DE')).toBe('5.10.2026\ncount: 1');
     });
 
     it('leaves days without instances out', () => {
@@ -44,10 +51,11 @@ describe('deploymentsPerDay', () => {
         expect(days.map((d) => d.count)).toEqual([1, 1]);
     });
 
-    it('sorts the given array in place', () => {
+    // SNRGY-4848 item 5: the array shared with the other process widgets used to be sorted in place.
+    it('leaves the given array as it is', () => {
         const processes = [started('2026-10-05T00:00:00Z'), started('2026-10-01T00:00:00Z')];
         deploymentsPerDay(processes);
-        expect(processes.map((p) => p.startTime)).toEqual(['2026-10-01T00:00:00Z', '2026-10-05T00:00:00Z']);
+        expect(processes.map((p) => p.startTime)).toEqual(['2026-10-05T00:00:00Z', '2026-10-01T00:00:00Z']);
     });
 });
 
@@ -59,15 +67,5 @@ describe('deploymentsTooltip', () => {
 
     it('formats the date in the browser locale by default', () => {
         expect(deploymentsTooltip(new Date(2026, 9, 5), 2)).toBe(new Date(2026, 9, 5).toLocaleDateString() + '\ncount: 2');
-    });
-});
-
-describe('deploymentsTable (Google)', () => {
-    it('has one column per day with the count and its tooltip', () => {
-        const date = new Date(Date.UTC(2026, 9, 5));
-        expect(deploymentsTable([{ date, count: 2 }]).data).toEqual([
-            ['Date', 'Count', { role: 'tooltip' }],
-            [date, 2, deploymentsTooltip(date, 2)],
-        ]);
     });
 });

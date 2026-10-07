@@ -14,3 +14,8 @@
  * limitations under the License.
  */
 
+
+/* positions the tooltip drawn over the canvas */
+.framed-chart {
+    position: relative;
+}

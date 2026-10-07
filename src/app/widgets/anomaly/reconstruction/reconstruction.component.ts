@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { GoogleChartComponent } from 'ng2-google-charts';
-import { reconstructionChart, reconstructionPoints } from './reconstruction-chart';
+import { reconstructionPoints } from './reconstruction-chart';
+import { reconstructionChart } from './reconstruction-chartjs';
+import { FramedChartConfig } from '../../../core/charts/google-columns';
+import { googlePlugins } from '../../../core/charts/google-chartjs';
 import { AnomalyResultModel } from '../shared/anomaly.model';
 
 @Component({
@@ -28,7 +30,8 @@ import { AnomalyResultModel } from '../shared/anomaly.model';
     standalone: false
 })
 export class AnomalyReconstructionComponent implements OnInit {
-    chartData: any;
+    chart?: FramedChartConfig<'line'>;
+    readonly plugins = googlePlugins;
     ready = false;
     values = [
       [
@@ -49,15 +52,6 @@ export class AnomalyReconstructionComponent implements OnInit {
     ];
   
 
-    // Use a setter for the chart which will get called when then ngif from ready evaluates to true
-    // This is needed so the element is not undefined when called later to draw
-    private chartExport!: GoogleChartComponent;
-    @ViewChild('chartExport', {static: false}) set content(content: GoogleChartComponent) {
-        if(content) { // initially setter gets called with undefined
-            this.chartExport = content;
-        }
-    }
-
     constructor(
         private dialogRef: MatDialogRef<AnomalyReconstructionComponent>,
         @Inject(MAT_DIALOG_DATA) public data: {anomaly: AnomalyResultModel}
@@ -65,17 +59,12 @@ export class AnomalyReconstructionComponent implements OnInit {
         this.values = data.anomaly.original_reconstructed_curves;
     }
 
-    onChartSelect(_: any) {
-
-    }
-
     ngOnInit(): void {
         this.setupChartData();
     }
 
     setupChartData() {
-        this.chartData = reconstructionChart(reconstructionPoints(this.values));
-        this.chartExport?.draw();
+        this.chart = reconstructionChart(reconstructionPoints(this.values));
         this.ready = true;
     }
 

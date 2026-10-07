@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { ChartDataTableModel } from '../../../../../core/model/chart/chart-data-table.model';
 import { NetworksHistoryModel } from '../../../../../modules/devices/networks/shared/networks-history.model';
-import { ChartElementSize, ChartsModel } from '../../../shared/charts.model';
 import { DeviceDowntimeGatewayModel } from './device-downtime-gateway.model';
 
 export const deviceDowntimeGatewayColumnColor = '#4484ce';
@@ -25,9 +23,9 @@ export const deviceDowntimeGatewayWindowMs = 86400000 * 7;
 
 export interface GatewayDowntime {
     name: string;
-    /** disconnected share of the window, rounded to 4 decimals */
-    failureRatio: number;
-    /** the label above the column, e.g. "12.34%" */
+    /** disconnected share of the window, rounded to 4 decimals; null when nothing is known about the gateway */
+    failureRatio: number | null;
+    /** the label above the column, e.g. "12.34%"; empty without a ratio */
     label: string;
 }
 
@@ -59,11 +57,12 @@ export function gatewayDowntime(item: NetworksHistoryModel, now: Date): DeviceDo
     } else {
         /** calculate delta from last index time till now*/
         const lastIndex: number = timeline.length - 1;
-        const diffToday = now.getTime() - timeline[lastIndex][0];
+        const diffToday = Math.max(0, now.getTime() - timeline[lastIndex][0]);
         addTimeToConnectionStatus(timeline[lastIndex][1], diffToday);
 
         for (let x = lastIndex; x >= 1; x--) {
-            const diff = timeline[x][0] - timeline[x - 1][0];
+            // a change stamped after the next one (clocks out of step) adds no time instead of a negative one
+            const diff = Math.max(0, timeline[x][0] - timeline[x - 1][0]);
             addTimeToConnectionStatus(timeline[x - 1][1], diff);
         }
     }
@@ -99,33 +98,20 @@ export function gatewayDowntime(item: NetworksHistoryModel, now: Date): DeviceDo
     }
 }
 
-/** One column per gateway in listing order; hideZeroPercentage drops the gateways without any downtime. */
+/**
+ * One column per gateway in listing order; hideZeroPercentage drops the gateways without any downtime. now is the end
+ * of the window, the time of the call; a gateway without any known time has no ratio and no label.
+ */
 export function downtimePerGateway(gateways: NetworksHistoryModel[], hideZeroPercentage: boolean, now: Date): GatewayDowntime[] {
     const result: GatewayDowntime[] = [];
     gateways.forEach((gateway) => {
-        const failureRatio = Math.round(gatewayDowntime(gateway, now).failureRatio * 10000) / 10000;
-        const label = Math.round(failureRatio * 10000) / 100 + '%';
-        if (!hideZeroPercentage || failureRatio > 0) {
+        const ratio = gatewayDowntime(gateway, now).failureRatio;
+        const failureRatio = Number.isFinite(ratio) ? Math.round(ratio * 10000) / 10000 : null;
+        const label = failureRatio === null ? '' : Math.round(failureRatio * 10000) / 100 + '%';
+        if (!hideZeroPercentage || (failureRatio !== null && failureRatio > 0)) {
             result.push({ name: gateway.network.name, failureRatio, label });
         }
     });
     return result;
 }
 
-/** Google data table: the ratio as column value, the percentage text as label above the column. */
-export function downtimePerGatewayTable(rows: GatewayDowntime[]): ChartDataTableModel {
-    const dataTable = new ChartDataTableModel([['Name', 'Percentage', { role: 'annotation' }, { role: 'style' }]]);
-    rows.forEach((row) => dataTable.data.push([row.name, row.failureRatio, row.label, deviceDowntimeGatewayColumnColor]));
-    return dataTable;
-}
-
-export function downtimePerGatewayChart(dataTable: ChartDataTableModel, element: ChartElementSize): ChartsModel {
-    return new ChartsModel('ColumnChart', dataTable.data, {
-        chartArea: { width: element.widthPercentage, height: element.heightPercentage },
-        width: element.width,
-        height: element.height,
-        legend: 'none',
-        vAxis: { format: '#.## %' },
-        tooltip: { trigger: 'none' },
-    });
-}

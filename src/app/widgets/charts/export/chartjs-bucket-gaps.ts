@@ -34,7 +34,7 @@ const scanLimit = 10000;
 /**
  * Timestamps of the buckets in a chart dataTable, oldest first. The first row is the header.
  */
-export function bucketTimes(dataTable: (Date | string | number | { role: string } | null)[][]): number[] {
+export function bucketTimes(dataTable: (Date | string | number | null)[][]): number[] {
     return dataTable
         .slice(1)
         .map((row) => (row[0] as Date)?.valueOf())

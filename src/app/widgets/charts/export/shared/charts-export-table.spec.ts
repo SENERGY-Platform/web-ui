@@ -19,7 +19,7 @@ import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widg
 import { DeviceInstanceWithDeviceTypeModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { ChartsExportPropertiesModel, ChartsExportVAxesModel } from './charts-export-properties.model';
 import {
-    chartsExportModel,
+    chartsExportChart,
     chartsExportTable,
     createThemeColorVariation,
     getStableStringHash,
@@ -105,10 +105,12 @@ describe('chartsExportTable', () => {
             expect(without.table.data[1] as any[]).toEqual([d(t1), true]);
         });
 
-        // `type === 'string' || type === 'boolean' && default !== undefined` binds as string || (boolean && default).
-        it('replaces an unmatched string by conversionDefault even when there is none', () => {
-            const result = table([[[[t1, 'on']]]], { chartType: 'LineChart', vAxes: [axis('state', { valueType: 'string', conversions: [] })] });
-            expect(result.table.data[1] as any[]).toEqual([d(t1), undefined]);
+        // SNRGY-4848 item 12: by operator precedence an unmatched string without default used to become undefined.
+        it('keeps an unmatched string without conversionDefault, replaces it with one', () => {
+            const without = table([[[[t1, 'on']]]], { chartType: 'LineChart', vAxes: [axis('state', { valueType: 'string', conversions: [] })] });
+            const withDefault = table([[[[t1, 'on']]]], { chartType: 'LineChart', vAxes: [axis('state', { valueType: 'string', conversions: [], conversionDefault: 'x' as any })] });
+            expect(without.table.data[1] as any[]).toEqual([d(t1), 'on']);
+            expect(withDefault.table.data[1] as any[]).toEqual([d(t1), 'x']);
         });
     });
 
@@ -118,10 +120,10 @@ describe('chartsExportTable', () => {
             expect(result.table.data).toEqual([['', ''], ['a', 3], ['b', 7]]);
         });
 
-        // Slices are taken per row, so series sharing their last timestamp collapse into the first one.
-        it('shows only the first series when all last values share a timestamp', () => {
+        // SNRGY-4848 item 12: slices were taken per row, so series sharing their last timestamp collapsed into the first one.
+        it('keeps a slice per series when all last values share a timestamp', () => {
             const result = table([[[[t1, 3]]], [[[t1, 7]]]], { chartType: 'PieChart', vAxes: [axis('a'), axis('b')] });
-            expect(result.table.data).toEqual([['', ''], ['a', 3]]);
+            expect(result.table.data).toEqual([['', ''], ['a', 3], ['b', 7]]);
         });
 
         it('sums the duration of every value with calculateIntervals', () => {
@@ -173,49 +175,38 @@ describe('chartsExportTable', () => {
     });
 });
 
-describe('chartsExportModel (Google)', () => {
-    const element = { width: 400, height: 300, widthPercentage: '90%', heightPercentage: '90%' };
-
+describe('chartsExportChart', () => {
     function widget(properties: ChartsExportPropertiesModel): WidgetModel {
         return { id: 'w', name: '', type: '', properties } as WidgetModel;
     }
 
     it('defaults to a line chart and passes axis titles and format through', () => {
-        const model = chartsExportModel(widget({ vAxes: [axis('a')], hAxisLabel: 'Zeit', vAxisLabel: 'kWh', hAxisFormat: 'dd.MM.' }), new ChartDataTableModel([['time', 'a']]), element);
-        expect(model.chartType).toBe('LineChart');
-        expect(model.options?.hAxis?.title).toBe('Zeit');
-        expect(model.options?.hAxis?.format).toBe('dd.MM.');
-        expect(model.options?.vAxes?.[0]?.title).toBe('kWh');
-        expect(model.options?.colors).toEqual(['#4484ce']);
+        const chart = chartsExportChart(widget({ vAxes: [axis('a')], hAxisLabel: 'Zeit', vAxisLabel: 'kWh', hAxisFormat: 'dd.MM.' }), new ChartDataTableModel([['time', 'a']]));
+        expect(chart.chartType).toBe('LineChart');
+        expect([chart.hAxisLabel, chart.vAxisLabel, chart.hAxisFormat]).toEqual(['Zeit', 'kWh', 'dd.MM.']);
+        expect(chart.colors).toEqual(['#4484ce']);
     });
 
     it('prefers the zoomed axis format over the configured one', () => {
-        const model = chartsExportModel(widget({ vAxes: [axis('a')], hAxisFormat: 'dd.MM.' }), new ChartDataTableModel([['time', 'a']]), element, undefined, 'HH');
-        expect(model.options?.hAxis?.format).toBe('HH');
+        expect(chartsExportChart(widget({ vAxes: [axis('a')], hAxisFormat: 'dd.MM.' }), new ChartDataTableModel([['time', 'a']]), undefined, 'HH').hAxisFormat).toBe('HH');
     });
 
     it('drops the colours of series missing from the table', () => {
-        const model = chartsExportModel(
-            widget({ chartType: 'LineChart', vAxes: [axis('a', { color: '#111111' }), axis('b', { color: '#222222' })] }),
-            new ChartDataTableModel([['time', 'b']]), element,
-        );
-        expect(model.options?.colors).toEqual(['#222222']);
+        const chart = chartsExportChart(widget({ chartType: 'LineChart', vAxes: [axis('a', { color: '#111111' }), axis('b', { color: '#222222' })] }), new ChartDataTableModel([['time', 'b']]));
+        expect(chart.colors).toEqual(['#222222']);
     });
 
-    it('puts series marked for it on the second axis', () => {
-        const model = chartsExportModel(
-            widget({ vAxes: [axis('a'), axis('b', { displayOnSecondVAxis: true })], secondVAxisLabel: '%' }),
-            new ChartDataTableModel([['time', 'a', 'b']]), element,
-        );
-        expect(model.options?.vAxes?.[1]?.title).toBe('%');
-        expect(model.options?.series).toEqual({ 0: { targetAxisIndex: 0 }, 1: { targetAxisIndex: 1 } });
+    it('puts series marked for it on the second axis with its title', () => {
+        const chart = chartsExportChart(widget({ vAxes: [axis('a'), axis('b', { displayOnSecondVAxis: true })], secondVAxisLabel: '%' }), new ChartDataTableModel([['time', 'a', 'b']]));
+        expect(chart.secondVAxisLabel).toBe('%');
+        expect(chart.secondAxis).toEqual([false, true]);
     });
 
-    it('starts the value axis of a column chart at 0 only without negative values', () => {
-        const positive = chartsExportModel(widget({ chartType: 'ColumnChart', vAxes: [axis('a')] }), new ChartDataTableModel([['time', 'a'], [d(t1), 2]]), element);
-        const negative = chartsExportModel(widget({ chartType: 'ColumnChart', vAxes: [axis('a')] }), new ChartDataTableModel([['time', 'a'], [d(t1), -2]]), element);
-        expect(positive.options?.vAxis?.viewWindow?.min).toBe(0);
-        expect(negative.options?.vAxis?.viewWindow?.min).toBeUndefined();
+    it('shows every slice of a pie with up to four, else hides those under half a degree', () => {
+        const small = chartsExportChart(widget({ chartType: 'PieChart', vAxes: [axis('a')] }), new ChartDataTableModel([['', ''], ['a', 1], ['b', 2], ['c', 3], ['d', 4]]));
+        const large = chartsExportChart(widget({ chartType: 'PieChart', vAxes: [axis('a')] }), new ChartDataTableModel([['', ''], ['a', 1], ['b', 2], ['c', 3], ['d', 4], ['e', 5]]));
+        expect(small.sliceThreshold).toBe(0);
+        expect(large.sliceThreshold).toBeUndefined();
     });
 });
 

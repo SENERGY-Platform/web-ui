@@ -25,8 +25,8 @@ import { DevicesStateEditDialogComponent } from './devices-state/dialog/devices-
 import { EventListComponent } from './event-list/event-list.component';
 import { EventListEditDialogComponent } from './event-list/dialogs/event-list-edit-dialog.component';
 import { ChartsExportComponent } from './charts/export/charts-export.component';
+import { AnnotationChartComponent } from './charts/export/annotation-chart/annotation-chart.component';
 import { ChartsProcessInstancesComponent } from './charts/process/process-instances/charts-process-instances.component';
-import { Ng2GoogleChartsModule } from 'ng2-google-charts';
 import { ChartsProcessInstancesEditDialogComponent } from './charts/process/process-instances/dialogs/charts-process-instances-edit-dialog.component';
 import { ChartsExportEditDialogComponent } from './charts/export/dialog/charts-export-edit-dialog.component';
 import localeDe from '@angular/common/locales/de';
@@ -162,7 +162,6 @@ registerLocaleData(localeDe, 'de');
         MatTableModule,
         MatSelectModule,
         MatListModule,
-        Ng2GoogleChartsModule,
         CoreModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
@@ -186,6 +185,7 @@ registerLocaleData(localeDe, 'de');
         ImageCropperComponent, 
     ],
     declarations: [
+        AnnotationChartComponent,
         RangeSliderComponent,
         RangeSliderEditDialogComponent,
         SwitchComponent,

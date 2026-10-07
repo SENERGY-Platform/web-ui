@@ -26,7 +26,9 @@ import {
     chartDateLabel,
     periodAnnotations,
     withOpacityPercent,
+    storedDateFormat,
     xAxisFormat,
+    zoomOutRange,
     zoomStartTime,
 } from './charts-export-chartjs';
 import { ChartsExportVAxesModel } from './shared/charts-export-properties.model';
@@ -247,5 +249,49 @@ describe('zoomStartTime', () => {
         const table = [['time', 'a'], [local(10, 5, 0), 1], [local(10, 5, 4), 1], [local(10, 5, 8), 1]];
         expect(zoomStartTime(table, undefined)).toEqual(local(10, 5, 4));
         expect(zoomStartTime(table, 4)).toEqual(local(10, 5, 6));
+    });
+});
+
+describe('zoomOutRange', () => {
+    const from = new Date(2026, 4, 17, 13, 42, 27, 500);
+
+    // SNRGY-4848 item 13: setMonth(0, 0) and setDate(0) landed a day early, on the last day of the period before.
+    it('zooms out of days to the whole year from 1 January', () => {
+        expect(zoomOutRange('1d', from)).toEqual({ from: new Date(2026, 0, 1), to: new Date(2027, 0, 1), groupTime: '1months', hAxisFormat: 'MMM' });
+        expect(zoomOutRange('1w', from)?.from).toEqual(new Date(2026, 0, 1));
+    });
+
+    it('zooms out of hours to the whole month from its first day', () => {
+        expect(zoomOutRange('1h', from)).toEqual({ from: new Date(2026, 4, 1), to: new Date(2026, 5, 1), groupTime: '1d', hAxisFormat: 'dd.MM.' });
+    });
+
+    it('zooms out of minutes, seconds and milliseconds to the day, hour and minute', () => {
+        expect(zoomOutRange('1m', from)).toEqual({ from: new Date(2026, 4, 17), to: new Date(2026, 4, 18), groupTime: '1h', hAxisFormat: 'HH' });
+        expect(zoomOutRange('1s', from)).toEqual({ from: new Date(2026, 4, 17, 13), to: new Date(2026, 4, 17, 14), groupTime: '1m', hAxisFormat: 'mm' });
+        expect(zoomOutRange('1ms', from)).toEqual({ from: new Date(2026, 4, 17, 13, 42), to: new Date(2026, 4, 17, 13, 43), groupTime: '1s', hAxisFormat: 'ss' });
+    });
+
+    it('zooms out of months to all years, not out of years', () => {
+        expect(zoomOutRange('1months', from)).toEqual({ from: new Date(0), to: new Date('2999-01-01T00:00:00Z'), groupTime: '1y', hAxisFormat: 'yyyy' });
+        expect(zoomOutRange('1y', from)).toBeUndefined();
+        expect(zoomOutRange(null, from)).toBeUndefined();
+    });
+
+    it('leaves the given date as it is', () => {
+        zoomOutRange('1d', from);
+        expect(from).toEqual(new Date(2026, 4, 17, 13, 42, 27, 500));
+    });
+});
+
+describe('storedDateFormat', () => {
+    it('reads a stored format in Unicode tokens as it is, moment tokens translated', () => {
+        expect(storedDateFormat('dd.MM.yyyy HH:mm')).toBe('dd.MM.yyyy HH:mm');
+        expect(storedDateFormat('LT')).toBe('HH:mm');
+    });
+
+    it('has no format for an empty or unusable one', () => {
+        expect(storedDateFormat('')).toBeUndefined();
+        expect(storedDateFormat(undefined)).toBeUndefined();
+        expect(storedDateFormat('jjj')).toBeUndefined();
     });
 });

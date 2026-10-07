@@ -25,3 +25,9 @@
     margin: 0;
     overflow: hidden;
 }
+
+/* positions the tooltip drawn over the canvas */
+.framed-chart {
+    position: relative;
+    flex: none;
+}

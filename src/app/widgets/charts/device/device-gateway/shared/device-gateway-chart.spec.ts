@@ -15,7 +15,7 @@
  */
 
 import { ExtendedHubModel } from '../../../../../modules/devices/networks/shared/networks.model';
-import { devicesPerGateway, devicesPerGatewayTable } from './device-gateway-chart';
+import { devicesPerGateway } from './device-gateway-chart';
 
 function hub(name: string, deviceLocalIds: string[] | null): ExtendedHubModel {
     return { id: name, name, hash: '', owner_id: '', device_local_ids: deviceLocalIds, device_ids: null, connection_state: 'online', shared: false } as ExtendedHubModel;
@@ -33,16 +33,6 @@ describe('devicesPerGateway', () => {
         expect(devicesPerGateway([hub('Empty', null), hub('None', [])])).toEqual([
             { name: 'Empty', count: 0 },
             { name: 'None', count: 0 },
-        ]);
-    });
-});
-
-describe('devicesPerGatewayTable (Google)', () => {
-    it('labels each column with its count and paints every column #4484ce', () => {
-        expect(devicesPerGatewayTable([{ name: 'Hub A', count: 3 }, { name: 'Hub B', count: 0 }]).data).toEqual([
-            ['Name', 'Count', { role: 'annotation' }, { role: 'style' }],
-            ['Hub A', 3, 3, '#4484ce'],
-            ['Hub B', 0, 0, '#4484ce'],
         ]);
     });
 });

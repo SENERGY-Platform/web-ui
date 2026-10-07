@@ -25,12 +25,9 @@ import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shar
 import { ErrorHandlerService } from '../../../../../core/services/error-handler.service';
 import { DeviceGatewayEditDialogComponent } from '../dialogs/device-gateway-edit-dialog.component';
 import { Observable } from 'rxjs';
-import { ChartDataTableModel } from '../../../../../core/model/chart/chart-data-table.model';
-import { ChartsModel } from '../../../shared/charts.model';
+import { map } from 'rxjs/operators';
 import { NetworksService } from '../../../../../modules/devices/networks/shared/networks.service';
-import { ExtendedHubModel } from '../../../../../modules/devices/networks/shared/networks.model';
-import { ChartsDataTableModel } from '../../../shared/charts-data-table.model';
-import { devicesPerGateway, devicesPerGatewayChart, devicesPerGatewayTable } from './device-gateway-chart';
+import { devicesPerGateway, GatewayDeviceCount } from './device-gateway-chart';
 
 @Injectable({
     providedIn: 'root',
@@ -63,25 +60,8 @@ export class DeviceGatewayService {
         });
     }
 
-    getDevicesPerGateway(widgetId: string): Observable<ChartsModel> {
-        return new Observable<ChartsModel>((observer) => {
-            this.networksService.listExtendedHubs({ limit: 10000, offset: 0 }).subscribe((hubs) => {
-                const gateways = hubs.result || [];
-                if (gateways.length === 0) {
-                    observer.next(this.setDevicesPerGatewayChartValues(widgetId, new ChartsDataTableModel([[]])));
-                } else {
-                    observer.next(this.setDevicesPerGatewayChartValues(widgetId, this.getGatewayDataTableArray(gateways)));
-                }
-                observer.complete();
-            });
-        });
-    }
-
-    private setDevicesPerGatewayChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
-        return devicesPerGatewayChart(dataTable, this.elementSizeService.getHeightAndWidthByElementId(widgetId, 10));
-    }
-
-    private getGatewayDataTableArray(gateways: ExtendedHubModel[]): ChartDataTableModel {
-        return devicesPerGatewayTable(devicesPerGateway(gateways));
+    /** The device count of every gateway, in listing order; empty without gateways. */
+    getDevicesPerGateway(): Observable<GatewayDeviceCount[]> {
+        return this.networksService.listExtendedHubs({ limit: 10000, offset: 0 }).pipe(map((hubs) => devicesPerGateway(hubs.result || [])));
     }
 }

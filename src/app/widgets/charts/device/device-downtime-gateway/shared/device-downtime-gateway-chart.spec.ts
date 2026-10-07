@@ -16,7 +16,7 @@
 
 import { NetworksHistoryModel } from '../../../../../modules/devices/networks/shared/networks-history.model';
 import { ConnectionStateModelV2 } from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
-import { downtimePerGateway, downtimePerGatewayTable, gatewayDowntime } from './device-downtime-gateway-chart';
+import { downtimePerGateway, gatewayDowntime } from './device-downtime-gateway-chart';
 
 const hour = 3600000;
 const day = 24 * hour;
@@ -89,27 +89,23 @@ describe('downtimePerGateway', () => {
         expect(rows.map((r) => r.name)).toEqual(['Down']);
     });
 
-    // A gateway with neither history nor a known state divides 0 by 0.
-    it('labels a gateway without history and without connection state as NaN%', () => {
+    // SNRGY-4848 item 2: a gateway with neither history nor a known state used to show "NaN%".
+    it('has no ratio and no label for a gateway without history and without connection state', () => {
         const rows = downtimePerGateway([gateway('Unknown', '')], false, now);
-        expect(rows.length).toBe(1);
-        expect(rows[0].failureRatio).toBeNaN();
-        expect(rows[0].label).toBe('NaN%');
+        expect(rows).toEqual([{ name: 'Unknown', failureRatio: null, label: '' }]);
         expect(downtimePerGateway([gateway('Unknown', '')], true, now)).toEqual([]);
     });
 
-    // The service passes the time its module was loaded as now, so a change after that yields a negative share.
-    it('yields a negative share for a change after now', () => {
+    // SNRGY-4848 item 1: a change after the window end (clocks out of step) used to yield a negative share.
+    it('never yields a negative share for a change stamped after now', () => {
         const rows = downtimePerGateway([gateway('Hub', 'online', true, [{ connected: false, time: at(hour) }])], false, now);
-        expect(rows).toEqual([{ name: 'Hub', failureRatio: -0.006, label: '-0.6%' }]);
+        expect(rows).toEqual([{ name: 'Hub', failureRatio: 0, label: '0%' }]);
     });
-});
 
-describe('downtimePerGatewayTable (Google)', () => {
-    it('uses the ratio as value, the percentage text as column label and #4484ce as colour', () => {
-        expect(downtimePerGatewayTable([{ name: 'Hub', failureRatio: 0.1429, label: '14.29%' }]).data).toEqual([
-            ['Name', 'Percentage', { role: 'annotation' }, { role: 'style' }],
-            ['Hub', 0.1429, '14.29%', '#4484ce'],
-        ]);
+    it('measures the window back from the given now', () => {
+        const states = [{ connected: false, time: at(-day) }];
+        expect(downtimePerGateway([gateway('Hub', 'online', true, states)], false, now)[0].failureRatio).toBe(0.1429);
+        const later = new Date(now.getTime() + day);
+        expect(downtimePerGateway([gateway('Hub', 'online', true, states)], false, later)[0].failureRatio).toBe(0.2857);
     });
 });

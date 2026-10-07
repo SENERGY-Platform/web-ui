@@ -15,7 +15,7 @@
  */
 
 import { MonitorProcessModel } from '../../../../../modules/processes/monitor/shared/monitor-process.model';
-import { processStatusCounts, processStatusTable } from './charts-process-instances-chart';
+import { processStatusCounts } from './charts-process-instances-chart';
 
 function inState(state: string): MonitorProcessModel {
     return { state } as MonitorProcessModel;
@@ -40,17 +40,8 @@ describe('processStatusCounts', () => {
         expect(counts.map((c) => c.count)).toEqual([0, 1, 0, 2, 0]);
     });
 
-    it('throws on a state it does not know', () => {
-        expect(() => processStatusCounts([inState('ACTIVE'), inState('TERMINATED')])).toThrowError('Unknown process state.');
-    });
-});
-
-describe('processStatusTable (Google)', () => {
-    it('has one row per slice', () => {
-        expect(processStatusTable([{ label: 'Active', count: 4 }, { label: 'Suspended', count: 0 }]).data).toEqual([
-            ['Status', 'Count'],
-            ['Active', 4],
-            ['Suspended', 0],
-        ]);
+    // SNRGY-4848 item 4: an unknown state used to throw inside subscribe, and no chart appeared.
+    it('does not count an instance in a state it does not know', () => {
+        expect(processStatusCounts([inState('ACTIVE'), inState('TERMINATED')]).map((c) => c.count)).toEqual([1, 0, 0, 0, 0]);
     });
 });

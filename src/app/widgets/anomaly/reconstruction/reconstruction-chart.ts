@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import { ChartsModel } from 'src/app/widgets/charts/shared/charts.model';
-
 export const reconstructionAxisTitle = 'Expected Value';
 
-/** Series names as the chart shows them: value[1] is named "expected", value[2] "true". */
-export const reconstructionSeriesNames = ['expected', 'true'];
+/** Series names as the chart shows them: value[1] is the true value, value[2] the expected (reconstructed) one, as the model documents. */
+export const reconstructionSeriesNames = ['true', 'expected'];
 
 export interface ReconstructionPoint {
     time: Date;
@@ -29,21 +27,7 @@ export interface ReconstructionPoint {
 
 /** One point per curve value, newest first. */
 export function reconstructionPoints(values: any[][]): ReconstructionPoint[] {
-    const points = values.map((value) => ({ time: new Date(value[0]), expected: value[1], true: value[2] }));
+    const points = values.map((value) => ({ time: new Date(value[0]), true: value[1], expected: value[2] }));
     points.sort((a, b) => b.time.getTime() - a.time.getTime());
     return points;
-}
-
-/** Google line chart, 1000x500 without legend. */
-export function reconstructionChart(points: ReconstructionPoint[]): ChartsModel {
-    const dataTable: any[] = [['time', ...reconstructionSeriesNames]];
-    points.forEach((point) => dataTable.push([point.time, point.expected, point.true]));
-    return new ChartsModel('LineChart', dataTable, {
-        legend: { position: 'none' },
-        vAxis: {
-            title: reconstructionAxisTitle
-        },
-        width: 1000,
-        height: 500
-    });
 }

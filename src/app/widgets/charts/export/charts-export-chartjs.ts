@@ -152,12 +152,20 @@ export function columnDateFormat(hAxisFormat: string | null | undefined, groupTi
             dateFormat = fallbackDateFormat;
         }
     }
-    const unicode = unicodeFormat(dateFormat || fallbackDateFormat);
+    return storedDateFormat(dateFormat) || fallbackDateFormat;
+}
+
+/** A stored axis format as date-fns format, the way the column and the line chart read it; undefined if empty or unusable. */
+export function storedDateFormat(hAxisFormat: string | null | undefined): string | undefined {
+    if (hAxisFormat === null || hAxisFormat === undefined || hAxisFormat.trim() === '') {
+        return undefined;
+    }
+    const unicode = unicodeFormat(hAxisFormat);
     try {
         format(0, unicode, { locale: chartDateLocale });
         return unicode;
     } catch {
-        return fallbackDateFormat;
+        return undefined;
     }
 }
 
@@ -168,7 +176,7 @@ export function chartDateLabel(ms: number, dateFormat: string): string {
 
 /** One bar dataset per table column, on the second y axis where its axis says so; missing (null) values are left out. */
 export function columnDatasets(
-    dataTable: (Date | string | number | { role: string } | null)[][],
+    dataTable: (Date | string | number | null)[][],
     colors: string[] | undefined,
     axes: ChartsExportVAxesModel[] | undefined,
     fallbackColor: () => string,
@@ -380,4 +388,58 @@ export function zoomStartTime(dataTable: any[][], zoomTimeFactor: number | undef
     const end = (dataTable[dataTable.length - 1][0] as Date).valueOf();
     const range = end - start;
     return new Date(end - (range / (zoomTimeFactor || 2)));
+}
+
+/**
+ * Zooming out of a column chart one detail level: the period of the next coarser unit around from (a whole year for
+ * days and weeks, a month for hours, a day for minutes, ...), the new group time and axis format; undefined for years.
+ */
+export function zoomOutRange(groupTime: string | null, from: Date): { from: Date; to: Date; groupTime: string; hAxisFormat: string } | undefined {
+    const rgxRes = timeRgx.exec(groupTime || '');
+    if (rgxRes === null) {
+        return undefined;
+    }
+    const start = new Date(from);
+    let end: Date;
+    let unit: string;
+    let level: DetailLevel;
+    switch (rgxRes[2]) {
+    case 'y':
+        return undefined;
+    case 'months':
+        return { from: new Date(0), to: new Date('2999-01-01T00:00:00Z'), groupTime: '1y', hAxisFormat: xAxisFormat(DetailLevel.y) };
+    case 'w':
+    case 'd':
+        unit = 'months'; level = DetailLevel.months;
+        start.setMonth(0, 1);
+        start.setHours(0, 0, 0, 0);
+        end = new Date(start);
+        end.setFullYear(end.getFullYear() + 1);
+        break;
+    case 'h':
+        unit = 'd'; level = DetailLevel.d;
+        start.setDate(1);
+        start.setHours(0, 0, 0, 0);
+        end = new Date(start);
+        end.setMonth(end.getMonth() + 1);
+        break;
+    case 'm':
+        unit = 'h'; level = DetailLevel.h;
+        start.setHours(0, 0, 0, 0);
+        end = new Date(start);
+        end.setDate(end.getDate() + 1);
+        break;
+    case 's':
+        unit = 'm'; level = DetailLevel.m;
+        start.setMinutes(0, 0, 0);
+        end = new Date(start);
+        end.setHours(end.getHours() + 1);
+        break;
+    default:
+        unit = 's'; level = DetailLevel.ms;
+        start.setSeconds(0, 0);
+        end = new Date(start);
+        end.setMinutes(end.getMinutes() + 1);
+    }
+    return { from: start, to: end, groupTime: '1' + unit, hAxisFormat: xAxisFormat(level) };
 }

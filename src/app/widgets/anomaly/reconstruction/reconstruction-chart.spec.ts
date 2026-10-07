@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { reconstructionAxisTitle, reconstructionChart, reconstructionPoints, reconstructionSeriesNames } from './reconstruction-chart';
+import { reconstructionAxisTitle, reconstructionPoints, reconstructionSeriesNames } from './reconstruction-chart';
+import { reconstructionChart } from './reconstruction-chartjs';
 
 describe('reconstructionPoints', () => {
     it('orders the curve newest first and keeps both values of every point', () => {
@@ -24,27 +25,33 @@ describe('reconstructionPoints', () => {
             ['2024-04-29T13:01:54.288Z', 2, 2],
         ]);
         expect(points).toEqual([
-            { time: new Date('2024-04-29T14:01:54.288Z'), expected: 2, true: 3 },
-            { time: new Date('2024-04-29T13:01:54.288Z'), expected: 2, true: 2 },
-            { time: new Date('2024-04-29T12:01:54.288Z'), expected: 1, true: 2 },
+            { time: new Date('2024-04-29T14:01:54.288Z'), true: 2, expected: 3 },
+            { time: new Date('2024-04-29T13:01:54.288Z'), true: 2, expected: 2 },
+            { time: new Date('2024-04-29T12:01:54.288Z'), true: 1, expected: 2 },
         ]);
     });
 
     it('accepts epoch milliseconds as time', () => {
         const ms = Date.UTC(2024, 3, 29, 12);
-        expect(reconstructionPoints([[ms, 5, 6]])).toEqual([{ time: new Date(ms), expected: 5, true: 6 }]);
+        expect(reconstructionPoints([[ms, 5, 6]])).toEqual([{ time: new Date(ms), true: 5, expected: 6 }]);
     });
 
-    // The model documents value[1] as the true and value[2] as the reconstructed value; the chart names them the other way round.
-    it('names value[1] "expected" and value[2] "true"', () => {
-        expect(reconstructionSeriesNames).toEqual(['expected', 'true']);
+    // SNRGY-4848 item 7: value[1] was named "expected" and value[2] "true", the other way round to the model's documentation.
+    it('names value[1] "true" and value[2] "expected"', () => {
+        expect(reconstructionPoints([['2024-04-29T12:00:00Z', 70, 62]])[0]).toEqual(jasmine.objectContaining({ true: 70, expected: 62 }));
+        expect(reconstructionSeriesNames).toEqual(['true', 'expected']);
         expect(reconstructionAxisTitle).toBe('Expected Value');
     });
 });
 
-describe('reconstructionChart (Google)', () => {
-    it('puts the points under the time/expected/true header', () => {
-        const points = reconstructionPoints([['2024-04-29T12:00:00Z', 1, 2]]);
-        expect(reconstructionChart(points).dataTable).toEqual([['time', 'expected', 'true'], [points[0].time, 1, 2]]);
+describe('reconstructionChart', () => {
+    const points = reconstructionPoints([['2024-04-29T12:05:00Z', 70, 62], ['2024-04-29T12:00:00Z', 71, 63]]);
+    const chart = reconstructionChart(points);
+
+    it('draws the true value in #3366cc and the expected one in #dc3912, oldest first', () => {
+        expect(chart.data.datasets.map((d) => [d.label, d.borderColor])).toEqual([['true', '#3366cc'], ['expected', '#dc3912']]);
+        expect(chart.data.datasets[0].data).toEqual([{ x: Date.parse('2024-04-29T12:00:00Z'), y: 71 }, { x: Date.parse('2024-04-29T12:05:00Z'), y: 70 }]);
+        expect(chart.data.datasets[1].data.map((p: any) => p.y)).toEqual([63, 62]);
+        expect([chart.frame.width, chart.frame.height]).toEqual([1000, 500]);
     });
 });

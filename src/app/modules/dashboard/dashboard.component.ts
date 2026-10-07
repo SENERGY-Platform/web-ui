@@ -31,7 +31,7 @@ import { DataTableService } from '../../widgets/data-table/shared/data-table.ser
 import { AirQualityService } from '../../widgets/air-quality/shared/air-quality.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTabGroup } from '@angular/material/tabs';
-import { ChartsService } from '../../widgets/charts/shared/charts.service';
+import { removeWidgetStorage } from '../../widgets/charts/shared/widget-storage';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { elementCB, GridstackComponent } from 'gridstack/dist/angular';
 import { GridStack, GridStackOptions, Responsive } from 'gridstack';
@@ -122,7 +122,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private dataTableService: DataTableService,
         private airQualityService: AirQualityService,
         private deviceStatusService: DeviceStatusService,
-        private chartsService: ChartsService,
         private route: ActivatedRoute,
         private router: Router,
         private errorHandlerService: ErrorHandlerService,
@@ -560,7 +559,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 break;
             case DashboardTypesEnum.AcControl:
             case DashboardTypesEnum.ChartExport:
-                this.chartsService.cleanup(widget);
+                removeWidgetStorage(widget);
                 break;
         }
     }

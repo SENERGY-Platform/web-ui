@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { concatMap, of, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
@@ -117,6 +117,7 @@ export class FakeAnomalyComponent implements AfterViewInit, AfterViewChecked {
         private errorHandlerService: ErrorHandlerService,
         private elementSizeService: ElementSizeService,
         private el: ElementRef,
+        private zone: NgZone,
     ) { }
 
     resizeTimeout: any = undefined;
@@ -124,9 +125,9 @@ export class FakeAnomalyComponent implements AfterViewInit, AfterViewChecked {
         const ro = new ResizeObserver((_ => {
             // debouncing redraws due to many resize calls
             clearTimeout(this.resizeTimeout);
+            // zone.js does not patch ResizeObserver, so the redraw re-enters the zone to be change detected
             this.resizeTimeout = setTimeout(() => {
-                this.resize();
-
+                this.zone.run(() => this.resize());
             }, 30);
         }));
         ro.observe(this.el.nativeElement);

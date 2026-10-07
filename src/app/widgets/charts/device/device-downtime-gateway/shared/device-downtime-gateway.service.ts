@@ -16,20 +16,16 @@
 
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ChartsModel } from '../../../shared/charts.model';
+import { map } from 'rxjs/operators';
 import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
 import { ElementSizeService } from '../../../../../core/services/element-size.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { ChartDataTableModel } from '../../../../../core/model/chart/chart-data-table.model';
 import { DeviceDowntimeGatewayEditDialogComponent } from '../dialogs/device-downtime-gateway-edit-dialog.component';
 import { NetworksService } from '../../../../../modules/devices/networks/shared/networks.service';
-import { NetworksHistoryModel } from '../../../../../modules/devices/networks/shared/networks-history.model';
-import { downtimePerGateway, downtimePerGatewayChart, downtimePerGatewayTable } from './device-downtime-gateway-chart';
-
-const today = new Date();
+import { downtimePerGateway, GatewayDowntime } from './device-downtime-gateway-chart';
 
 @Injectable({
     providedIn: 'root',
@@ -61,29 +57,10 @@ export class DeviceDowntimeGatewayService {
         });
     }
 
-    getDevicesDowntimePerGateway(widget: WidgetModel): Observable<ChartsModel> {
-        return new Observable<ChartsModel>((observer) => {
-            this.networksService.getNetworksHistory('168h').subscribe((gateways) => {
-                if (gateways.length === 0) {
-                    observer.next(this.setDevicesDowntimePerGatewayChartValues(widget.id, new ChartDataTableModel([[]])));
-                } else {
-                    observer.next(
-                        this.setDevicesDowntimePerGatewayChartValues(
-                            widget.id,
-                            this.getGatewayDowntimeDataTableArray(widget.properties.hideZeroPercentage || false, gateways),
-                        ),
-                    );
-                }
-                observer.complete();
-            });
-        });
-    }
-
-    private setDevicesDowntimePerGatewayChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
-        return downtimePerGatewayChart(dataTable, this.elementSizeService.getHeightAndWidthByElementId(widgetId, 10));
-    }
-
-    private getGatewayDowntimeDataTableArray(hideZeroPercentage: boolean, gateways: NetworksHistoryModel[]): ChartDataTableModel {
-        return downtimePerGatewayTable(downtimePerGateway(gateways, hideZeroPercentage, today));
+    /** The downtime share of every gateway over the week up to now; undefined without gateways. */
+    getDevicesDowntimePerGateway(widget: WidgetModel): Observable<GatewayDowntime[] | undefined> {
+        return this.networksService.getNetworksHistory('168h').pipe(
+            map((gateways) => (gateways.length === 0 ? undefined : downtimePerGateway(gateways, widget.properties.hideZeroPercentage || false, new Date()))),
+        );
     }
 }

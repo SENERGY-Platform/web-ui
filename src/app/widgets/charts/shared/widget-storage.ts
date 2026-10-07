@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 InfAI (CC SES)
+ * Copyright 2026 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-export class ChartsDataTableModel {
-    constructor(public data: (Date | string | number | { role: string })[][]) {}
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+
+/** Removes everything a chart widget keeps in localStorage under keys starting with its id (zoom, drill-down state). */
+export function removeWidgetStorage(widget: WidgetModel) {
+    for (let i = localStorage.length; i >= 0; i--) { // reverse order, since deleting messes with index
+        const key = localStorage.key(i);
+        if (key?.startsWith(widget.id)) {
+            localStorage.removeItem(key);
+        }
+    }
 }

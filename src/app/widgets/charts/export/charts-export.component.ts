@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { GoogleChartComponent, } from 'ng2-google-charts';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../core/services/element-size.service';
-import { ChartsModel } from '../shared/charts.model';
+import { ChartsExportChart } from './shared/charts-export-table';
 import { ChartsExportService } from './shared/charts-export.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
 import { ErrorModel } from '../../../core/model/error.model';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import { ChartsService } from '../shared/charts.service';
+import { removeWidgetStorage } from '../shared/widget-storage';
+import { googleFrame, googlePlugins } from '../../../core/charts/google-chartjs';
+import { googlePiePlugin } from '../../../core/charts/google-pie';
+import { FramedChartConfig } from '../../../core/charts/google-columns';
+import { GoogleSeries } from '../../../core/charts/google-lines';
+import { chartsExportLineConfig, chartsExportPieConfig, chartsExportSeries } from './charts-export-line-chartjs';
 import { ChartsExportDeviceGroupMergingStrategy, ChartsExportVAxesModel } from './shared/charts-export-properties.model';
 import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartTypeRegistry, Point, TooltipModel, Plugin, LegendElement, LegendItem, ChartEvent } from 'chart.js';
 import { DatePipe } from '@angular/common';
@@ -41,6 +45,7 @@ import {
     periodAnnotations,
     withOpacityPercent,
     xAxisFormat,
+    zoomOutRange,
     zoomStartTime,
 } from './charts-export-chartjs';
 import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
@@ -55,7 +60,14 @@ import { bucketTimes } from './chartjs-bucket-gaps';
     standalone: false
 })
 export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
-    chartExportData = {} as ChartsModel;
+    chartExportData = {} as ChartsExportChart;
+    /** Line, Scatter and Pie in the widget */
+    framedChart?: { kind: 'line'; config: FramedChartConfig<'line'> } | { kind: 'pie'; config: FramedChartConfig<'pie'> };
+    /** the zoomed line chart */
+    annotation?: { series: GoogleSeries[]; width: number; height: number; zoomStart?: number };
+    readonly linePlugins = googlePlugins;
+    readonly piePlugins = [...googlePlugins, googlePiePlugin];
+    private annotationZoomStart?: number;
     timelineChartData: any;
     timelineWidth = 0;
     timelineHeight = 0;
@@ -136,6 +148,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         };
 
     private resizeTimeout: any;
+    private resizeObserver?: ResizeObserver;
     private timeRgx = /(\d+)(ms|s|months|m|h|d|w|y)/;
     private hoveredDatasetIndex: number | null = null;
 
@@ -147,17 +160,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     @Input() userHasUpdateNameAuthorization = false;
     @Input() initialWidgetData: any;
 
-    // Use a setter for the chart which will get called when then ngif from ready evaluates to true
-    // This is needed so the element is not undefined when called later to draw
-    private chartExport?: GoogleChartComponent;
-    @ViewChild('chartExport', { static: false }) set content(content: GoogleChartComponent) {
-        if (content) { // initially setter gets called with undefined
-            this.chartExport = content;
-        }
-    }
-
     constructor(
-        private chartsService: ChartsService,
         private chartsExportService: ChartsExportService,
         private elementSizeService: ElementSizeService,
         private dashboardService: DashboardService,
@@ -165,14 +168,14 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         private datePipe: DatePipe,
         private cd: ChangeDetectorRef,
         private el: ElementRef,
+        private zone: NgZone,
     ) {
     }
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
-        if (this.chartExport !== undefined) {
-            this.chartsService.releaseResources(this.chartExport);
-        }
+        this.resizeObserver?.disconnect();
+        clearTimeout(this.resizeTimeout);
     }
 
     ngOnInit(): void {
@@ -182,17 +185,13 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     ngAfterViewInit(): void {
         // use this hook, to get the resize sizes from the correct widget
         this.setupInitialChartData();
-        const ro = new ResizeObserver((_ => {
+        this.resizeObserver = new ResizeObserver((_ => {
             // debouncing redraws due to many resize calls
             clearTimeout(this.resizeTimeout);
-            this.resizeTimeout = setTimeout(() => {
-                this.resizeChart();
-                if (this.chartExportData.dataTable != null && this.chartExportData.dataTable.length > 0 && this.chartExportData.dataTable[0].length > 0 && this.chartExport !== undefined) {
-                    this.chartExport.draw();
-                }
-            }, 30);
+            // zone.js does not patch ResizeObserver, so the redraw re-enters the zone to be change detected
+            this.resizeTimeout = setTimeout(() => this.zone.run(() => this.resizeChart()), 30);
         }));
-        ro.observe(this.el.nativeElement);
+        this.resizeObserver.observe(this.el.nativeElement);
     }
 
     setupInitialChartData() {
@@ -269,14 +268,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private resizeChart() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5, 10);
-        if (this.chartExportData.options !== undefined) {
-            this.chartExportData.options.height = element.height;
-            this.chartExportData.options.width = element.width;
-            if (this.chartExportData.options.chartArea) {
-                this.chartExportData.options.chartArea.height = element.heightPercentage;
-                this.chartExportData.options.chartArea.width = element.widthPercentage;
-            }
-        }
+        this.drawFramedChart(element);
 
         this.timelineHeight = element.height;
         this.timelineWidth = element.width;
@@ -401,6 +393,32 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
+    /** Line, Scatter and Pie as Google drew them, a zoomed line chart as its AnnotationChart; nothing without data. */
+    private drawFramedChart(element: { width: number; height: number; widthPercentage: string; heightPercentage: string }) {
+        const chart = this.chartExportData;
+        const type = chart.chartType;
+        const hasData = chart.dataTable !== undefined && chart.dataTable.length > 0 && chart.dataTable[0].length > 0;
+        this.framedChart = undefined;
+        this.annotation = undefined;
+        if (!hasData || (type !== 'LineChart' && type !== 'ScatterChart' && type !== 'PieChart')) {
+            return;
+        }
+        if (this.zoom && type === 'LineChart') {
+            this.annotation = { series: chartsExportSeries(chart), width: element.width, height: element.height, zoomStart: this.annotationZoomStart };
+            return;
+        }
+        const frame = googleFrame(element.width, element.height, element.widthPercentage, element.heightPercentage);
+        this.framedChart = type === 'PieChart'
+            ? { kind: 'pie', config: chartsExportPieConfig(chart, frame) }
+            : { kind: 'line', config: chartsExportLineConfig(chart, frame) };
+    }
+
+    /** Google's explorer reset the zoom on a right click. */
+    resetGoogleZoom(event: MouseEvent, canvas: HTMLCanvasElement) {
+        event.preventDefault();
+        Chart.getChart(canvas)?.resetZoom();
+    }
+
     get chartjsChart(): Chart | undefined {
         return Chart.getChart('chartjs-' + this.widget.id);
     }
@@ -463,7 +481,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
             const chooseColors = this.chooseColors || (widget.properties.vAxes?.length === 1 && (widget.properties.vAxes[0].deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Separate || widget.properties.vAxes[0].deviceGroupMergingStrategy === undefined) && (widget.properties.vAxes[0].deviceGroupId !== undefined || widget.properties.vAxes[0].locationId !== undefined));
 
-            this.chartsExportService.getChartData(widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride, chooseColors, this.disableBreaking).subscribe((resp: ChartsModel | ErrorModel) => {
+            this.chartsExportService.getChartData(widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride, chooseColors, this.disableBreaking).subscribe((resp: ChartsExportChart | ErrorModel) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     this.errorHasOccured = true;
                     this.errorMessage = 'No data';
@@ -471,12 +489,16 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 } else {
                     this.errorHasOccured = false;
                     this.chartExportData = resp;
-                    this.chartExportData.dataTable.sort((a, b) => (a[0] as Date).valueOf() - (b[0] as Date).valueOf());
+                    if (resp.chartType !== 'PieChart' && resp.dataTable.length > 1) {
+                        // rows by time, the header stays first
+                        const [header, ...rows] = resp.dataTable;
+                        rows.sort((a, b) => (a[0] as Date).valueOf() - (b[0] as Date).valueOf());
+                        this.chartExportData.dataTable = [header, ...rows];
+                    }
 
                     this.setupZoomChartSettings(lastOverride);
                     this.resizeChart();
                     this.cd.detectChanges();
-                    this.chartExport?.draw();
                 }
                 this.size = (this.chartExportData?.dataTable?.length || 0) * ((this.chartExportData?.dataTable?.[0]?.length || 0) - 1);
                 if (this.size > this.sizeLimit) {
@@ -492,7 +514,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         return;
                     }
                     this.hoveredDatasetIndex = null;
-                    const columns = columnDatasets(this.chartExportData.dataTable, this.chartExportData.options?.colors, this.modifiedVaxes || this.widget.properties.vAxes,
+                    const columns = columnDatasets(this.chartExportData.dataTable, this.chartExportData.colors.length > 0 ? this.chartExportData.colors : undefined, this.modifiedVaxes || this.widget.properties.vAxes,
                         () => window.getComputedStyle(document.getElementsByClassName('color-lookup-accent')[0], null).getPropertyValue('color'));
                     const datasets = columns.datasets;
                     this.chartjs.datasetColors = columns.datasetColors;
@@ -516,7 +538,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         () => window.getComputedStyle(document.getElementsByClassName('color-lookup-warn')[0], null).getPropertyValue('color'),
                         Chart.defaults.color as string).forEach(a => this.chartjs.annotations?.push(a));
                     this.resizeChart();
-                    this.chartExport?.draw();
                     this.cd.detectChanges();
                 }
                 this.ready = true;
@@ -530,76 +551,25 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
     }
 
+    /** The zoomed line chart starts showing the last 1/zoomTimeFactor of the range fetched with lastOverride. */
     setupZoomChartSettings(lastOverride?: string) {
-        if (this.zoom && this.chartExportData.chartType === 'LineChart' && this.chartExportData.options !== undefined) {
-            this.chartExportData.chartType = 'AnnotationChart';
-            this.chartExportData.options.dateFormat = 'dd.MM.yyyy HH:mm:ss';
-            this.chartExportData.options.displayExactValues = true;
-            this.chartExportData.options.thickness = 2;
-            this.chartExportData.options.displayZoomButtons = false;
-            this.chartExportData.options.displayAnnotations = false;
-            this.chartExportData.options.displayLegendValues = true;
-            if (lastOverride !== undefined && !this.ready) {
-                this.chartExportData.options.zoomStartTime = zoomStartTime(this.chartExportData.dataTable, this.widget.properties.zoomTimeFactor);
-            }
+        this.annotationZoomStart = undefined;
+        if (this.zoom && this.chartExportData.chartType === 'LineChart' && lastOverride !== undefined && !this.ready && this.chartExportData.dataTable?.length > 1) {
+            this.annotationZoomStart = zoomStartTime(this.chartExportData.dataTable, this.widget.properties.zoomTimeFactor).getTime();
         }
     }
 
     zoomOutTime() {
-        const rgxRes = this.timeRgx.exec(this.groupTime || '');
-        if (rgxRes === null) {
+        const from = this.from === null ? this.chartExportData.dataTable[1][0] as Date : this.from;
+        const range = zoomOutRange(this.groupTime, from);
+        if (range === undefined) {
             return;
         }
         this.ready = false;
-        if (this.from === null) {
-            this.from = this.chartExportData.dataTable[1][0] as Date;
-        }
-        let timeUnit = rgxRes[2];
-        switch (timeUnit) {
-            case 'y':
-                return;
-            case 'months':
-                timeUnit = 'y';
-                this.hAxisFormat = this.xAxisFormat(DetailLevel.y);
-                this.from = new Date(0);
-                this.to = new Date('2999-01-01T00:00:00Z');
-                break;
-            case 'w':
-            case 'd':
-                timeUnit = 'months';
-                this.hAxisFormat = this.xAxisFormat(DetailLevel.months);
-                this.from = new Date(this.from.setMonth(0, 0));
-                this.from = new Date(this.from.setHours(0, 0, 0, 0));
-                this.to = new Date(this.from.setFullYear(this.from.getFullYear() + 1));
-                break;
-            case 'h':
-                timeUnit = 'd';
-                this.hAxisFormat = this.xAxisFormat(DetailLevel.d);
-                this.from = new Date(this.from.setDate(0));
-                this.from = new Date(this.from.setHours(0, 0, 0, 0));
-                this.to = new Date(this.from.setMonth(this.from.getMonth() + 1));
-                break;
-            case 'm':
-                timeUnit = 'h';
-                this.hAxisFormat = this.xAxisFormat(DetailLevel.h);
-                this.from = new Date(this.from.setHours(0, 0, 0, 0));
-                this.to = new Date(this.from.setDate(this.from.getDate() + 1));
-                break;
-            case 's':
-                timeUnit = 'm';
-                this.hAxisFormat = this.xAxisFormat(DetailLevel.m);
-                this.from = new Date(this.from.setMinutes(0, 0, 0));
-                this.to = new Date(this.from.setHours(this.from.getHours() + 1));
-                break;
-            case 'ms':
-                timeUnit = 's';
-                this.hAxisFormat = this.xAxisFormat(DetailLevel.ms);
-                this.from = new Date(this.from.setSeconds(0, 0));
-                this.to = new Date(this.from.setMinutes(this.from.getMinutes() + 1));
-        }
-
-        this.groupTime = '1' + timeUnit;
-
+        this.hAxisFormat = range.hAxisFormat;
+        this.from = range.from;
+        this.to = range.to;
+        this.groupTime = range.groupTime;
         this.refresh();
     }
 
@@ -849,7 +819,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 return;
             case 'undo':
                 this.ready = false;
-                this.chartsService.cleanup(this.widget);
+                removeWidgetStorage(this.widget);
                 setTimeout(() => this.refresh(), 1000);
                 return;
             case 'arrow_upward':

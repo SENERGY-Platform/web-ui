@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { ChartsModel } from '../../charts/shared/charts.model';
 import { PVPredictionResult } from './prediction.model';
 
 export const pvPredictionAxisTitle = 'Average Power in W';
@@ -28,24 +27,19 @@ export function pvPredictionPoints(data: PVPredictionResult): PvPredictionPoint[
     return data.predictions.map((row) => ({ time: new Date(row.timestamp), value: row.value }));
 }
 
-/** The summed prediction of the last `time` hours (or days for level 'd') of the hourly predictions, e.g. "12.35 Wh". */
-export function nextPvPredictionText(data: PVPredictionResult, level: string, time: number): string {
-    if (level === 'd') {
-        time = time * 24;
-    }
-    const filteredData = data.predictions.slice(-time);
-    const aggregatedPrediction = filteredData.reduce((accumulator, current) => accumulator + current.value, 0);
+/**
+ * The summed prediction of the next `time` hours (or days for level 'd'): that many slots starting with the one that
+ * contains now, e.g. "12.35 Wh"; 0 hours sum nothing. A slot is as long as the shortest distance between two
+ * prediction timestamps (one hour if there is only one) and starts at its timestamp.
+ */
+export function nextPvPredictionText(data: PVPredictionResult, level: string, time: number, now: Date): string {
+    const hours = level === 'd' ? time * 24 : time;
+    const sorted = data.predictions
+        .map((p) => ({ start: new Date(p.timestamp).getTime(), value: p.value }))
+        .sort((a, b) => a.start - b.start);
+    const distances = sorted.slice(1).map((p, i) => p.start - sorted[i].start).filter((d) => d > 0);
+    const slot = distances.length === 0 ? 3600000 : Math.min(...distances);
+    const upcoming = sorted.filter((p) => p.start + slot > now.getTime()).slice(0, Math.max(0, hours));
+    const aggregatedPrediction = upcoming.reduce((accumulator, current) => accumulator + current.value, 0);
     return Math.round(aggregatedPrediction * 100) / 100 + ' Wh';
-}
-
-/** Google line chart of the predictions, without legend. */
-export function pvPredictionChart(points: PvPredictionPoint[]): ChartsModel {
-    const dataTable: any = [['time', 'energy']];
-    points.forEach((point) => dataTable.push([point.time, point.value]));
-    return new ChartsModel('LineChart', dataTable, {
-        legend: { position: 'none' },
-        vAxis: {
-            title: pvPredictionAxisTitle
-        }
-    });
 }
