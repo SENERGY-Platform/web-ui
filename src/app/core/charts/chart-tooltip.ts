@@ -16,6 +16,7 @@
 
 import { Chart, ChartType, Tooltip, TooltipItem, TooltipModel, TooltipPositionerFunction } from 'chart.js';
 import { chartFontFamily, chartTextColor } from './chart-look';
+import { themeVar } from './theme-color';
 
 export interface TooltipRow {
     color: string;
@@ -77,7 +78,7 @@ function div(style: Partial<CSSStyleDeclaration>, ...children: Node[]): HTMLDivE
 export function renderTooltipView(box: HTMLElement, view: TooltipView) {
     box.replaceChildren();
     if (view.title !== undefined) {
-        box.appendChild(div({ padding: '6px', background: '#ECEFF1', borderBottom: '1px solid #ddd', marginBottom: '4px' }, span(view.title)));
+        box.appendChild(div({ padding: '6px', background: themeVar('--mat-sys-surface-container', '#ECEFF1'), borderBottom: '1px solid ' + themeVar('--mat-sys-outline-variant', '#ddd'), marginBottom: '4px' }, span(view.title)));
     }
     (view.rows || []).forEach((row) => {
         const marker = span('', { display: 'inline-block', width: '12px', height: '12px', borderRadius: '50%', background: row.color, marginRight: '10px' });
@@ -91,7 +92,7 @@ export function renderTooltipView(box: HTMLElement, view: TooltipView) {
         const range = view.range;
         box.appendChild(div({ padding: '5px 8px' },
             div({}, span(range.name + ':', { fontWeight: '700', color: range.color, display: 'block', marginBottom: '5px' })),
-            div({}, span(range.category + ': ', { fontWeight: '600', color: '#777' }), span(range.start, { fontWeight: '700' }), span(' - '),
+            div({}, span(range.category + ': ', { fontWeight: '600', color: themeVar('--mat-sys-on-surface-variant', '#777') }), span(range.start, { fontWeight: '700' }), span(' - '),
                 span(range.end, { fontWeight: '700' }))));
     }
 }
@@ -109,12 +110,12 @@ export function htmlTooltip(view: (items: TooltipItem<any>[]) => TooltipView | u
             return;
         }
         const box = child(parent, boxClass, {
-            position: 'absolute', pointerEvents: 'none', zIndex: '12', whiteSpace: 'nowrap', borderRadius: '5px', border: '1px solid #e3e3e3',
-            background: 'rgba(255, 255, 255, 0.96)', boxShadow: '2px 2px 6px -4px #999', fontFamily: chartFontFamily, fontSize: '12px', color: chartTextColor,
+            position: 'absolute', pointerEvents: 'none', zIndex: '12', whiteSpace: 'nowrap', borderRadius: '5px', border: '1px solid ' + themeVar('--mat-sys-outline-variant', '#e3e3e3'),
+            background: 'color-mix(in srgb, ' + themeVar('--mat-sys-surface', '#fff') + ' 96%, transparent)', boxShadow: '2px 2px 6px -4px #999', fontFamily: chartFontFamily, fontSize: '12px', color: chartTextColor(),
         });
         const bubble = child(parent, bubbleClass, {
-            position: 'absolute', pointerEvents: 'none', zIndex: '12', whiteSpace: 'nowrap', borderRadius: '2px', border: '1px solid #90A4AE',
-            background: '#ECEFF1', padding: '9px 10px', fontFamily: chartFontFamily, fontSize: '13px', color: chartTextColor,
+            position: 'absolute', pointerEvents: 'none', zIndex: '12', whiteSpace: 'nowrap', borderRadius: '2px', border: '1px solid ' + themeVar('--mat-sys-outline', '#90A4AE'),
+            background: themeVar('--mat-sys-surface-container', '#ECEFF1'), padding: '9px 10px', fontFamily: chartFontFamily, fontSize: '13px', color: chartTextColor(),
         });
         const content = tooltip.opacity === 0 ? undefined : view(tooltip.dataPoints || []);
         if (content === undefined) {
@@ -149,8 +150,8 @@ export function htmlTooltip(view: (items: TooltipItem<any>[]) => TooltipView | u
         }
         bubble.replaceChildren(
             span(content.axisLabel),
-            span('', { position: 'absolute', left: '50%', top: '-12px', marginLeft: '-6px', border: '6px solid transparent', borderBottomColor: '#90A4AE' }),
-            span('', { position: 'absolute', left: '50%', top: '-11px', marginLeft: '-6px', border: '6px solid transparent', borderBottomColor: '#ECEFF1' }),
+            span('', { position: 'absolute', left: '50%', top: '-12px', marginLeft: '-6px', border: '6px solid transparent', borderBottomColor: themeVar('--mat-sys-outline', '#90A4AE') }),
+            span('', { position: 'absolute', left: '50%', top: '-11px', marginLeft: '-6px', border: '6px solid transparent', borderBottomColor: themeVar('--mat-sys-surface-container', '#ECEFF1') }),
         );
         bubble.style.display = 'block';
         bubble.style.left = offsetX + tooltip.caretX - bubble.offsetWidth / 2 + 'px';

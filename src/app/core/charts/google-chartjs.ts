@@ -19,6 +19,7 @@ import {
     DateTick, googleDateMarks, ValueTicks, googleCategoryLabelColor, googlePlotArea, GoogleArea, googleBaselineColor, googleDateTicks, googleFont, googleFontSize, googleLabelGap,
     googleMajorGridColor, googleMinorGridColor, googleTitleColor, googleValueLabelColor,
 } from './google-look';
+import { themeColor } from './theme-color';
 
 /*
  * chart.js draws only the series of the former Google charts; the chart area is pinned by layout padding, and the
@@ -190,7 +191,7 @@ function drawBaseline(chart: Chart, options: GoogleAxesOptions) {
         return;
     }
     const area = frameArea(options.frame);
-    hLine(chart.ctx, scale.getPixelForValue(0), area.left, area.right, googleBaselineColor);
+    hLine(chart.ctx, scale.getPixelForValue(0), area.left, area.right, googleBaselineColor());
 }
 
 function drawText(ctx: CanvasRenderingContext2D, value: string, x: number, y: number, align: CanvasTextAlign, color: string, font: string) {
@@ -226,7 +227,7 @@ export const googleAxesPlugin: Plugin = {
         const yScale = gridAxis === undefined ? undefined : chart.scales[gridAxis.scaleId];
         if (gridAxis !== undefined && yScale !== undefined) {
             [false, true].forEach((major) => gridAxis.ticks.filter((t) => t.major === major).forEach((t) => {
-                hLine(ctx, yScale.getPixelForValue(t.value), area.left, area.right, major ? googleMajorGridColor : googleMinorGridColor);
+                hLine(ctx, yScale.getPixelForValue(t.value), area.left, area.right, major ? googleMajorGridColor() : googleMinorGridColor());
             }));
         }
         const x = options.x;
@@ -237,13 +238,13 @@ export const googleAxesPlugin: Plugin = {
             googleDateMarks(xScale.min, xScale.max, area.right - area.left, fs, x.dateFormat !== undefined).forEach((value) => {
                 const px = xScale.getPixelForValue(value);
                 if (px >= area.left - 0.5 && px <= area.right + 0.5) {
-                    vLine(ctx, px, area.bottom - 5, area.bottom, googleMajorGridColor);
+                    vLine(ctx, px, area.bottom - 5, area.bottom, googleMajorGridColor());
                 }
             });
             [false, true].forEach((major) => xTicks.filter((t) => t.major === major).forEach((t) => {
                 const px = xScale.getPixelForValue(t.value);
                 if (px >= area.left - 0.5 && px <= area.right + 0.5) {
-                    vLine(ctx, px, area.top, area.bottom, major ? googleMajorGridColor : googleMinorGridColor);
+                    vLine(ctx, px, area.top, area.bottom, major ? googleMajorGridColor() : googleMinorGridColor());
                 }
             }));
         }
@@ -289,7 +290,7 @@ export const googleAxesPlugin: Plugin = {
                 const y0 = scale.getPixelForValue(t.value) + 0.35 * fs - ((lines.length - 1) * lineHeight) / 2;
                 lines.forEach((line, i) => {
                     const x = axis.side === 'left' ? area.left - gap : area.right + gap;
-                    drawText(ctx, line, x, y0 + i * lineHeight, axis.side === 'left' ? 'right' : 'left', googleValueLabelColor, font);
+                    drawText(ctx, line, x, y0 + i * lineHeight, axis.side === 'left' ? 'right' : 'left', googleValueLabelColor(), font);
                     outer = Math.min(outer, gap + textWidth(line, fs));
                 });
                 outer = Math.min(outer, margin);
@@ -302,7 +303,7 @@ export const googleAxesPlugin: Plugin = {
                 ctx.translate(cx, (area.top + area.bottom) / 2);
                 ctx.rotate(-Math.PI / 2);
                 ctx.font = cssFont(fs, false, true);
-                ctx.fillStyle = googleTitleColor;
+                ctx.fillStyle = googleTitleColor();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(axis.title, 0, 0);
@@ -315,7 +316,7 @@ export const googleAxesPlugin: Plugin = {
             const layout = xAxisLayout(frame, (x.title || '') !== '');
             if (layout.labels) {
                 const xTicks = (chart as unknown as { $googleAxes?: DrawnAxes }).$googleAxes?.xTicks || xTicksFor(chart, options);
-                const color = x.kind === 'category' ? googleCategoryLabelColor : googleValueLabelColor;
+                const color = x.kind === 'category' ? googleCategoryLabelColor() : googleValueLabelColor();
                 xTicks.filter((t) => t.label !== '').forEach((t) => {
                     const px = xScale.getPixelForValue(t.value);
                     if (px < area.left - 0.5 || px > area.right + 0.5) {
@@ -325,7 +326,7 @@ export const googleAxesPlugin: Plugin = {
                 });
             }
             if (x.title && layout.titleBaseline !== undefined) {
-                drawText(ctx, x.title, (area.left + area.right) / 2, layout.titleBaseline, 'center', googleTitleColor, cssFont(fs, false, true));
+                drawText(ctx, x.title, (area.left + area.right) / 2, layout.titleBaseline, 'center', googleTitleColor(), cssFont(fs, false, true));
             }
         }
         ctx.restore();
@@ -492,11 +493,11 @@ export const googleBarLabelsPlugin: Plugin = {
                 ctx.fillText(label, x, top + fs + 0.2);
                 return;
             }
-            ctx.fillStyle = '#999999';
+            ctx.fillStyle = themeColor('--mat-sys-outline', '#999999');
             ctx.fillRect(x, top - 12, 1, 12);
             ctx.lineWidth = 3;
             ctx.lineJoin = 'round';
-            ctx.strokeStyle = '#ffffff';
+            ctx.strokeStyle = themeColor('--mat-sys-surface', '#ffffff');
             ctx.strokeText(label, x, top - 13.8);
             ctx.fillStyle = darkened(String(bar.options.backgroundColor));
             ctx.fillText(label, x, top - 13.8);

@@ -20,21 +20,21 @@
     height: 18px;
     width: 18px;
     vertical-align: middle;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--mat-sys-on-surface-variant);
     cursor: help;
 }
 
 .meter-parent-row {
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--mat-sys-outline-variant);
     border-radius: 4px;
     padding: 8px 8px 0;
     margin-bottom: 8px;
 }
 
 .meter-parent-row.problem-row {
-    border-color: rgba(244, 67, 54, 0.6);
+    border-color: color-mix(in srgb, var(--app-status-error) 60%, transparent);
 }
 
 .meter-parent-row-fields {
@@ -70,14 +70,14 @@
 }
 
 .list-problem {
-    background: rgba(244, 67, 54, 0.08);
+    background: color-mix(in srgb, var(--app-status-error) 8%, transparent);
     border-radius: 4px;
     padding: 8px 12px;
     margin-bottom: 12px;
 }
 
 .weight-hint {
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--mat-sys-on-surface-variant);
     font-size: 12px;
 }
 

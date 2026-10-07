@@ -17,6 +17,7 @@
 import { Chart, ChartOptions, LegendOptions, Plugin, Scale } from 'chart.js';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
 import Color from 'color';
+import { themeColor, themeColorMix } from './theme-color';
 import { timeTickLabel, timeTicks, withoutOverlaps } from './time-ticks';
 
 /*
@@ -25,8 +26,10 @@ import { timeTickLabel, timeTicks, withoutOverlaps } from './time-ticks';
  */
 
 export const chartFontFamily = 'Helvetica, Arial, sans-serif';
-export const chartTextColor = '#373d3f';
-export const chartGridColor = '#e0e0e0';
+/** Axis labels and titles; follows the theme, the old fixed colour is the fallback. */
+export const chartTextColor = () => themeColor('--mat-sys-on-surface-variant', '#373d3f');
+/** Grid lines and axis borders. */
+export const chartGridColor = () => themeColorMix('--mat-sys-on-surface', 12, '#e0e0e0');
 /** Every series used to be drawn with this opacity, lines and markers included. */
 export const seriesOpacity = 0.85;
 export const defaultSeriesColor = '#008FFB';
@@ -69,16 +72,16 @@ export function valueAxisLabel(value: number, dataDecimals: number, decimalsInFl
 }
 
 export function axisTitle(text: string) {
-    return { display: text !== '', text, color: chartTextColor, font: { family: chartFontFamily, size: 11, weight: 900 } };
+    return { display: text !== '', text, color: chartTextColor(), font: { family: chartFontFamily, size: 11, weight: 900 } };
 }
 
 /** The category or time axis at the bottom: border and short ticks, no vertical grid lines. */
 export function xAxisLook(title = '') {
     return {
         title: axisTitle(title),
-        grid: { display: true, drawOnChartArea: false, drawTicks: true, tickLength: 6, color: chartGridColor },
-        border: { display: true, color: chartGridColor },
-        ticks: { color: chartTextColor, font: { family: chartFontFamily, size: 12 }, maxRotation: 45 },
+        grid: { display: true, drawOnChartArea: false, drawTicks: true, tickLength: 6, color: chartGridColor() },
+        border: { display: true, color: chartGridColor() },
+        ticks: { color: chartTextColor(), font: { family: chartFontFamily, size: 12 }, maxRotation: 45 },
     };
 }
 
@@ -86,9 +89,9 @@ export function xAxisLook(title = '') {
 export function yAxisLook(title = '') {
     return {
         title: axisTitle(title),
-        grid: { display: true, drawTicks: false, color: chartGridColor },
+        grid: { display: true, drawTicks: false, color: chartGridColor() },
         border: { display: false },
-        ticks: { color: chartTextColor, font: { family: chartFontFamily, size: 11 }, padding: 8, maxTicksLimit: 6 },
+        ticks: { color: chartTextColor(), font: { family: chartFontFamily, size: 11 }, padding: 8, maxTicksLimit: 6 },
     };
 }
 
@@ -134,7 +137,7 @@ export function legendLook(display: boolean, position: 'top' | 'bottom' = 'botto
             // the point radius is boxHeight / sqrt(2), so 9 draws the former 12px dots
             boxWidth: 9,
             boxHeight: 9,
-            color: chartTextColor,
+            color: chartTextColor(),
             font: { family: chartFontFamily, size: 12 },
             sort: (a: { datasetIndex?: number }, b: { datasetIndex?: number }) => (a.datasetIndex ?? 0) - (b.datasetIndex ?? 0),
         } as any,
@@ -213,7 +216,7 @@ export const crosshairPlugin: Plugin = {
         ctx.beginPath();
         ctx.setLineDash([3, 3]);
         ctx.lineWidth = 1;
-        ctx.strokeStyle = '#b6b6b6';
+        ctx.strokeStyle = themeColor('--mat-sys-outline-variant', '#b6b6b6');
         ctx.moveTo(x, chart.chartArea.top);
         ctx.lineTo(x, chart.chartArea.bottom);
         ctx.stroke();

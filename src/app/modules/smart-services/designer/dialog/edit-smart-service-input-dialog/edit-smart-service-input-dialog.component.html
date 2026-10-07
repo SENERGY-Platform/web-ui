@@ -25,7 +25,7 @@
               {{input.label || input.id || "new-input"}}
             </mat-panel-title>
             @if (inputHasAspectClassCollision(input)) {
-              <mat-panel-description style="color: var(--warn-color, #f44336)">Aspect class collision</mat-panel-description>
+              <mat-panel-description style="color: var(--app-status-error)">Aspect class collision</mat-panel-description>
             }
           </mat-expansion-panel-header>
           <div>
@@ -111,7 +111,7 @@
                         {{criteriaToLabel(criteria)}}
                       </mat-panel-title>
                       @if (hasAspectClassCollision(criteria)) {
-                        <mat-panel-description style="color: var(--warn-color, #f44336)">Aspect class collision</mat-panel-description>
+                        <mat-panel-description style="color: var(--app-status-error)">Aspect class collision</mat-panel-description>
                       }
                     </mat-expansion-panel-header>
                     <div>
@@ -270,7 +270,7 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
   @if (aspectClassCollisionHint(); as hint) {
-    <span style="color: var(--warn-color, #f44336); margin-right: 16px">{{hint}}</span>
+    <span style="color: var(--app-status-error); margin-right: 16px">{{hint}}</span>
   }
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   <button mat-raised-button color="accent" (click)="ok()" [disabled]="!isValid()">Save</button>

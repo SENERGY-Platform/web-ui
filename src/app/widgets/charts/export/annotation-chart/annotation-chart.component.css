@@ -16,10 +16,10 @@
 
 .annotation-chart {
     box-sizing: border-box;
-    border: 1px solid #808080;
-    background: #ffffff;
+    border: 1px solid var(--mat-sys-outline);
+    background: var(--mat-sys-surface);
     font-size: 14px;
-    color: #000000;
+    color: var(--mat-sys-on-surface);
 }
 
 .legend {
@@ -52,7 +52,7 @@
     position: absolute;
     top: 0;
     height: 40px;
-    background: rgba(242, 242, 242, 0.75);
+    background: color-mix(in srgb, var(--mat-sys-surface-container) 75%, transparent);
     pointer-events: none;
 }
 

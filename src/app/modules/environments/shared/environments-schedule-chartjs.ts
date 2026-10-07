@@ -71,9 +71,9 @@ export function scheduleChartConfig(preview: SchedulePreview): ScheduleChartConf
                     ticks: { ...x.ticks, maxTicksLimit: 6, callback: (value) => formatElapsed(Number(value) / 1000) },
                 },
                 y: {
-                    grid: { display: true, offset: true, drawTicks: false, color: chartGridColor },
+                    grid: { display: true, offset: true, drawTicks: false, color: chartGridColor() },
                     border: { display: false },
-                    ticks: { color: chartTextColor, font: { family: chartFontFamily, size: 11 }, padding: 8 },
+                    ticks: { color: chartTextColor(), font: { family: chartFontFamily, size: 11 }, padding: 8 },
                 },
             },
             plugins: {

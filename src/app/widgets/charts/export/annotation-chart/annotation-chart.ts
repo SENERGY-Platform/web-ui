@@ -22,6 +22,7 @@ import {
 } from 'src/app/core/charts/google-look';
 import { GoogleSeries } from 'src/app/core/charts/google-lines';
 import { withOpacity } from 'src/app/core/charts/chart-look';
+import { themeColor } from 'src/app/core/charts/theme-color';
 import { addDays, addHours, addMinutes, addMonths, addSeconds, addYears, startOfDay, startOfHour, startOfMinute, startOfMonth, startOfSecond, startOfYear } from 'date-fns';
 
 /*
@@ -234,9 +235,9 @@ interface AxesOptions {
 function haloText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number) {
     ctx.lineWidth = 3;
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = themeColor('--mat-sys-surface', '#ffffff');
     ctx.strokeText(text, x, y);
-    ctx.fillStyle = googleValueLabelColor;
+    ctx.fillStyle = googleValueLabelColor();
     ctx.fillText(text, x, y);
 }
 
@@ -257,17 +258,17 @@ export const annotationAxesPlugin: Plugin = {
         if (!options.navigator) {
             const y = chart.scales['y'];
             [false, true].forEach((major) => (major ? options.ticks.major : options.ticks.minor).forEach((v) => {
-                ctx.fillStyle = major ? '#ececf7' : '#f7f7fc';
+                ctx.fillStyle = major ? themeColor('--mat-sys-surface-container', '#ececf7') : themeColor('--mat-sys-surface-container-low', '#f7f7fc');
                 ctx.fillRect(options.layout.area.left, Math.floor(y.getPixelForValue(v)), options.layout.area.right - options.layout.area.left, 1);
             }));
         }
         const ticks = annotationTimeTicks(x.min, x.max, area.right - area.left, !options.navigator);
         ticks.forEach((t) => {
             const px = Math.floor(x.getPixelForValue(t.value));
-            ctx.fillStyle = googleMinorGridColor;
+            ctx.fillStyle = googleMinorGridColor();
             ctx.fillRect(px, top, 1, bottom - top);
             if (t.major) {
-                ctx.fillStyle = googleMajorGridColor;
+                ctx.fillStyle = googleMajorGridColor();
                 ctx.fillRect(px, top, 1, bottom - top);
             }
         });
@@ -286,7 +287,7 @@ export const annotationAxesPlugin: Plugin = {
         ctx.textBaseline = 'alphabetic';
         const ticks = annotationTimeTicks(x.min, x.max, area.right - area.left, !options.navigator).filter((t) => t.label !== '');
         if (options.navigator) {
-            ctx.strokeStyle = '#ababab';
+            ctx.strokeStyle = themeColor('--mat-sys-outline', '#ababab');
             ctx.lineWidth = 0.5;
             ctx.strokeRect(options.layout.navigator.left, 0, options.layout.navigator.right - options.layout.navigator.left, navigatorHeight);
             ctx.textAlign = 'right';
@@ -310,7 +311,7 @@ export const annotationAxesPlugin: Plugin = {
                     return;
                 }
                 placed.push({ left: px - half, right: px + half });
-                ctx.fillStyle = googleValueLabelColor;
+                ctx.fillStyle = googleValueLabelColor();
                 ctx.fillText(label, px, options.layout.area.bottom + 13.15);
             });
             const y = chart.scales['y'];

@@ -24,7 +24,7 @@ mat-dialog-content {
 }
 
 .control+.control {
-    border-top: 1px solid rgba(0, 0, 0, .12);
+    border-top: 1px solid var(--mat-sys-outline-variant);
 }
 
 .control-label {

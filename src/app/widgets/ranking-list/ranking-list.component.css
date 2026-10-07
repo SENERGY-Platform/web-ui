@@ -27,5 +27,5 @@
 }
 
 .mat-mdc-list-item-icon {
-    color: black!important;
+    color: var(--mat-sys-on-surface) !important;
 }

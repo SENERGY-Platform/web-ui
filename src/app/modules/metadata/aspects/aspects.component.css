@@ -98,5 +98,5 @@ ul {
    below it: the same form field for the name, and the icon in a button-sized slot so the field starts
    at the same offset as the aspects' name fields do. */
 .name-taken {
-    color: var(--warn-color, #f44336);
+    color: var(--app-status-error);
 }

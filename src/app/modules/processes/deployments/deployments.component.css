@@ -33,15 +33,15 @@
 }
 
 mat-grid-tile {
-    background: whitesmoke !important;
+    background: var(--mat-sys-surface-container-low) !important;
     transition: box-shadow 280ms cubic-bezier(.4,0,.2,1);
     border-radius: 4px;
 }
 
 mat-grid-tile-footer {
     height: 110px !important;
-    background-color: white !important;
-    color: black !important;
+    background-color: var(--mat-sys-surface) !important;
+    color: var(--mat-sys-on-surface) !important;
     padding: 8px !important;
 }
 
@@ -84,7 +84,7 @@ mat-grid-list {
 .widget-image {
     height: 156px;
     width: 100%;
-    background-color: whitesmoke;
+    background-color: var(--mat-sys-surface-container-low);
 }
 
 .icon-spin {
@@ -114,7 +114,7 @@ mat-grid-list {
 }
 
 .hub-selected {
-    background: rgba(0,0,0,.06);
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
 }
 
 .metadata-warning-icon {

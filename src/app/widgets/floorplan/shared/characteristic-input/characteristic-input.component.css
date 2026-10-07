@@ -55,7 +55,7 @@
 
 /* the picked option of a button row, mat-stroked-button keeps the layout stable while it is highlighted */
 .selected-value {
-    background: var(--mat-sys-secondary-container, rgba(0, 0, 0, .12));
+    background: var(--mat-sys-secondary-container, color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent));
     font-weight: bold;
 }
 
@@ -64,7 +64,7 @@
     flex-direction: column;
     gap: 0.25rem;
     padding-left: 0.5rem;
-    border-left: 1px solid rgba(0, 0, 0, .12);
+    border-left: 1px solid var(--mat-sys-outline-variant);
 }
 
 .list-entry {

@@ -36,7 +36,7 @@
 
 a {
     text-decoration: none;
-    color: #4484ce;
+    color: var(--mat-sys-primary);
 }
 
 .attribute-chips {
@@ -80,9 +80,9 @@ button.attribute-chip:hover {
 }
 
 .inactive {
-    background-color: rgb(237, 237, 237);
+    background-color: var(--mat-sys-surface-container-high);
 }
 
 .inactive:hover {
-    background-color: rgb(213, 211, 211)!important;
+    background-color: var(--mat-sys-surface-container-highest) !important;
 }

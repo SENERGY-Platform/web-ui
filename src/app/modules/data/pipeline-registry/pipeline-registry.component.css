@@ -16,9 +16,9 @@
 
 
 mat-grid-tile-footer {
-    background-color: white !important;
+    background-color: var(--mat-sys-surface) !important;
     height: 68px !important;
-    color: black !important;
+    color: var(--mat-sys-on-surface) !important;
 }
 
 mat-grid-list {
@@ -50,19 +50,19 @@ mat-grid-list {
 }
 
 .green {
-    background: #008700;
+    background: var(--app-status-ok);
 }
 
 .red {
-    background: #db0000;
+    background: var(--app-status-failed);
 }
 
 .grey {
-    background: grey;
+    background: var(--app-status-unknown);
 }
 
 .yellow {
-    background: yellow;
+    background: var(--app-status-warning);
 }
 
 .circle {

@@ -39,5 +39,5 @@
 
 
 .schedule-disabled {
-    color: lightgrey;
+    color: var(--mat-sys-outline-variant);
 }

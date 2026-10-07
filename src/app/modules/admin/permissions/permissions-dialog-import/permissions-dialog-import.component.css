@@ -30,7 +30,7 @@
 }
 
 .warn-text {
-    color: #F19F4D;
+    color: var(--mat-sys-tertiary);
     font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 

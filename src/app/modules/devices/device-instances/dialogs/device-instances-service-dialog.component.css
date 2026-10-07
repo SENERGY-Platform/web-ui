@@ -23,7 +23,7 @@
 }
 
 ::ng-deep .example-custom-date-class {
-    background: rgba(0, 0, 0, .38) !important;
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 38%, transparent) !important;
 }
 
 #id-container {
@@ -44,6 +44,6 @@
 }
 
 .clipboard {
-    color: rgba(0, 0, 0, .38)
+    color: color-mix(in srgb, var(--mat-sys-on-surface) 38%, transparent)
 }
 

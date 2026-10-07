@@ -33,15 +33,15 @@
 }
 
 mat-grid-tile {
-    background: whitesmoke !important;
+    background: var(--mat-sys-surface-container-low) !important;
     transition: box-shadow 280ms cubic-bezier(.4,0,.2,1);
     border-radius: 4px;
 }
 
 mat-grid-tile-footer {
     height: 110px !important;
-    background-color: white !important;
-    color: black !important;
+    background-color: var(--mat-sys-surface) !important;
+    color: var(--mat-sys-on-surface) !important;
     padding: 8px !important;
 }
 
@@ -102,7 +102,7 @@ mat-grid-list {
 .widget-image {
     height: 156px;
     width: 100%;
-    background-color: whitesmoke;
+    background-color: var(--mat-sys-surface-container-low);
 }
 
 .info-icon {
@@ -111,7 +111,7 @@ mat-grid-list {
 }
 
 .info-icon-color {
-    color: darkgray;
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .metadata-warning-icon {

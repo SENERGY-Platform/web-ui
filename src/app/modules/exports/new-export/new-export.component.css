@@ -52,13 +52,13 @@
 }
 
 .operator-accordion {
-    border: 1px solid rgba(0, 0, 0, .12);
+    border: 1px solid var(--mat-sys-outline-variant);
     border-radius: 6px;
     margin-bottom: 1.34375em;
 }
 
 .operator-accordion-error {
-    border: 2px solid #ce612e;
+    border: 2px solid var(--mat-sys-error);
     margin-bottom: 0;
 }
 
@@ -67,7 +67,7 @@
 }
 
 .operator-titel-error {
-    color: #ce612e;
+    color: var(--mat-sys-error);
 }
 
 .operator-accordion .mat-expansion-panel {
@@ -86,7 +86,7 @@
     margin-top: 0.6666666667em;
     margin-bottom: 0.3333333em;
     line-height: 1.125;
-    color: #ce612e;
+    color: var(--mat-sys-error);
 }
 
 .button-header {

@@ -58,7 +58,7 @@
 .image-svg-wrapper {
     height: 300px;
     width: 720px;
-    background-color: #f5f5f5;
+    background-color: var(--mat-sys-surface-container-low);
     margin: 0 auto;
 }
 

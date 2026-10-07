@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-/* Diagram editor paper: white background, cursors, a hover strip along each link, link tools shown only on hover. */
+/* Diagram editor paper: surface background, cursors, a hover strip along each link, link tools shown only on hover. */
 
 .joint-paper {
-    background-color: #ffffff;
+    background-color: var(--mat-sys-surface);
 }
 
 /* operators are dragged, their ports start links */
@@ -41,7 +41,7 @@
 
 .joint-link .connection-wrap {
     fill: none;
-    stroke: #000000;
+    stroke: var(--mat-sys-on-surface);
     stroke-width: 15px;
     stroke-linecap: round;
     stroke-linejoin: round;

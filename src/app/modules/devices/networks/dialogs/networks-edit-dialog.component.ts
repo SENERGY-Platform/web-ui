@@ -275,7 +275,7 @@ export class NetworksEditDialogComponent implements OnInit {
         container.style.flexDirection = 'column';
         container.style.gap = '6px';
 
-        const btnStyle = 'width:32px;height:32px;border-radius:4px;border:1px solid rgba(0,0,0,0.2);background:#fff;cursor:pointer;font-size:18px;line-height:28px;text-align:center;padding:0;';
+        const btnStyle = 'width:32px;height:32px;border-radius:4px;border:1px solid color-mix(in srgb, var(--mat-sys-on-surface, #000) 20%, transparent);background:var(--mat-sys-surface, #fff);cursor:pointer;font-size:18px;line-height:28px;text-align:center;padding:0;';
 
         const btnIn = document.createElement('button');
         btnIn.type = 'button';

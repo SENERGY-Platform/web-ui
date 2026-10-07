@@ -29,7 +29,7 @@ tr.second th, tr.second td {
     top: 56px;
     background: inherit;
     z-index: 99;
-    border-left: 1px solid rgba(0, 0, 0, 0.12);
+    border-left: 1px solid var(--mat-sys-outline-variant);
     padding: 0 8px;
 }
 
@@ -49,7 +49,7 @@ tr.second th, tr.second td {
 }
 
 table td {
-    border-left: 1px solid rgba(0, 0, 0, 0.12);
+    border-left: 1px solid var(--mat-sys-outline-variant);
 }
 
 .mat-mdc-cell {
@@ -57,7 +57,7 @@ table td {
 }
 
 th.mat-mdc-header-cell {
-    border-left: 1px solid rgba(0, 0, 0, 0.12);
+    border-left: 1px solid var(--mat-sys-outline-variant);
     padding: 0 8px;
     position: sticky;
     top: 0;

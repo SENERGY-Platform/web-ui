@@ -35,7 +35,7 @@
     height: 140px;
     gap: 2px;
     padding: 20px 0 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.24);
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
     cursor: pointer;
     /* dragging must not scroll the page (touch) or select surrounding text */
     touch-action: none;
@@ -54,12 +54,12 @@
     width: 100%;
     min-height: 1px;
     border-radius: 2px 2px 0 0;
-    background: rgba(68, 132, 206, 0.85); /* cc accent */
+    background: color-mix(in srgb, var(--mat-sys-primary) 85%, transparent);
     transition: height 0.05s linear;
 }
 
 .factor-bar.neutral {
-    background: rgba(68, 132, 206, 0.28);
+    background: color-mix(in srgb, var(--mat-sys-primary) 28%, transparent);
 }
 
 .factor-bar-value {
@@ -68,7 +68,7 @@
     left: 50%;
     transform: translateX(-50%);
     font-size: 11px;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--mat-sys-on-surface);
     white-space: nowrap;
     pointer-events: none;
 }
@@ -77,7 +77,7 @@
     position: absolute;
     left: 0;
     right: 0;
-    border-top: 1px dashed rgba(0, 0, 0, 0.4);
+    border-top: 1px dashed var(--mat-sys-outline);
     pointer-events: none;
 }
 
@@ -86,7 +86,7 @@
     right: 0;
     top: -14px;
     font-size: 10px;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .factor-bars-labels {
@@ -99,7 +99,7 @@
     flex: 1 1 0;
     text-align: center;
     font-size: 10px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .factor-bars-precise-field {

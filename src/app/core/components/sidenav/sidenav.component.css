@@ -39,7 +39,7 @@ mat-sidenav {
 }
 
 .side-menu > li {
-    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    border-top: 1px solid var(--mat-sys-outline-variant);
 }
 
 .md-button-toggle .md-toggle-icon.toggled {

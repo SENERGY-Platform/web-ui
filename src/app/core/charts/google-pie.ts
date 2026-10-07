@@ -171,7 +171,7 @@ export const googlePiePlugin: Plugin = {
             ctx.textAlign = l.side === 'right' ? 'right' : 'left';
             ctx.textBaseline = 'alphabetic';
             const x = l.side === 'right' ? l.edgeX - 0.5 : l.edgeX - 0.5;
-            ctx.fillStyle = googleCategoryLabelColor;
+            ctx.fillStyle = googleCategoryLabelColor();
             ctx.fillText(l.name, x, l.lineY - 0.5 * fs);
             ctx.fillStyle = '#9e9e9e';
             ctx.fillText(l.share, x, l.lineY + 1.12 * fs);

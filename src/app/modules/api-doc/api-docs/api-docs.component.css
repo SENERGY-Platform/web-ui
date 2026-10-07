@@ -32,7 +32,7 @@
     align-items: center;
     font-size: 1.3rem;
     margin-bottom: 20px;
-    background: white;
+    background: var(--mat-sys-surface);
 }
 
 .search mat-form-field {
@@ -42,7 +42,7 @@
 .search i {
     font-size: 1.5rem;
     margin-right: 20px;
-    color: grey;
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .api-card:hover {

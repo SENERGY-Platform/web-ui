@@ -38,7 +38,7 @@
 
 #chartjs-tooltip {
     text-align: left;
-    background: white;
+    background: var(--mat-sys-surface);
     position: absolute;
     padding: 3px;
     border-radius: 3px;

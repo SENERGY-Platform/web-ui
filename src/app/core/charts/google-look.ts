@@ -19,6 +19,7 @@ import {
     startOfYear,
 } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { themeColor, themeColorMix } from './theme-color';
 
 /*
  * The look of the charts that used to be drawn by Google Charts (loader version 50, language de), measured from the
@@ -26,12 +27,13 @@ import { de } from 'date-fns/locale';
  */
 
 export const googleFont = 'Arial';
-export const googleValueLabelColor = '#444444';
-export const googleCategoryLabelColor = '#222222';
-export const googleTitleColor = '#222222';
-export const googleMajorGridColor = '#cccccc';
-export const googleMinorGridColor = '#ebebeb';
-export const googleBaselineColor = '#333333';
+/** Axis chrome follows the theme; the colours Google drew are the fallback. */
+export const googleValueLabelColor = () => themeColor('--mat-sys-on-surface-variant', '#444444');
+export const googleCategoryLabelColor = () => themeColor('--mat-sys-on-surface', '#222222');
+export const googleTitleColor = () => themeColor('--mat-sys-on-surface', '#222222');
+export const googleMajorGridColor = () => themeColorMix('--mat-sys-on-surface', 20, '#cccccc');
+export const googleMinorGridColor = () => themeColorMix('--mat-sys-on-surface', 8, '#ebebeb');
+export const googleBaselineColor = () => themeColor('--mat-sys-on-surface-variant', '#333333');
 
 /** Google's default series colours. */
 export const googlePalette = [

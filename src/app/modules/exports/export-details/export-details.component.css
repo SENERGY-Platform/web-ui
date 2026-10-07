@@ -20,9 +20,9 @@ table {
 }
 
 mat-grid-tile-footer {
-    background-color: white !important;
+    background-color: var(--mat-sys-surface) !important;
     height: 68px !important;
-    color: black !important;
+    color: var(--mat-sys-on-surface) !important;
 }
 
 mat-grid-list {
@@ -96,7 +96,7 @@ mat-grid-list {
 
 p, h4 {
     margin: 0;
-    color: black;
+    color: var(--mat-sys-on-surface);
 }
 
 h4 {
@@ -104,5 +104,5 @@ h4 {
 }
 
 .icon {
-    color: black!important;
+    color: var(--mat-sys-on-surface) !important;
 }

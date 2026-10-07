@@ -28,7 +28,7 @@
     width: 20px;
     height: 20px;
     font-size: 20px;
-    color: #6E8192;
+    color: var(--mat-sys-on-surface-variant);
     cursor: pointer;
 }
 
@@ -44,9 +44,9 @@
     z-index: 13;
     padding: 3px;
     min-width: 110px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--mat-sys-outline-variant);
     border-radius: 3px;
-    background: #fff;
+    background: var(--mat-sys-surface);
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     font-family: Helvetica, Arial, sans-serif;
     font-size: 12px;
@@ -58,5 +58,5 @@
 }
 
 .menu-item:hover {
-    background: #eee;
+    background: var(--mat-sys-surface-container-high);
 }

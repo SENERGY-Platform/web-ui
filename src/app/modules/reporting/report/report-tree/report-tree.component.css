@@ -30,11 +30,11 @@
 }
 
 .tree-row:hover {
-    background: rgba(128, 128, 128, 0.12);
+    background: color-mix(in srgb, var(--mat-sys-outline) 12%, transparent);
 }
 
 .tree-row.selected {
-    background: rgba(128, 128, 128, 0.22);
+    background: color-mix(in srgb, var(--mat-sys-outline) 22%, transparent);
     font-weight: 500;
 }
 

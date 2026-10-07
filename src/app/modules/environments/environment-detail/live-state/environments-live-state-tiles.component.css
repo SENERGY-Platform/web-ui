@@ -16,7 +16,7 @@
 
 .empty-hint {
     margin: 0 0 8px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--mat-sys-on-surface-variant);
     font-size: 13px;
     font-style: italic;
 }
@@ -32,17 +32,17 @@
     flex: 1 1 160px;
     min-width: 150px;
     max-width: 240px;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--mat-sys-outline-variant);
     border-radius: 8px;
     padding: 10px 12px 12px;
-    background: rgba(0, 0, 0, 0.02);
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 2%, transparent);
 }
 
 /* a value that differs from where it started (initial_states/context) is what
    "nudging" the simulation actually means -- worth a visible highlight */
 .live-tile.changed {
-    border-color: rgba(68, 132, 206, 0.6); /* cc accent */
-    background: rgba(68, 132, 206, 0.06);
+    border-color: color-mix(in srgb, var(--mat-sys-primary) 60%, transparent);
+    background: color-mix(in srgb, var(--mat-sys-primary) 6%, transparent);
 }
 
 /* the edit row (type toggle + value field + save/cancel) needs more room than the
@@ -64,7 +64,7 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--mat-sys-on-surface-variant);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -74,7 +74,7 @@
     font-size: 15px;
     height: 15px;
     width: 15px;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--mat-sys-on-surface-variant);
     cursor: help;
 }
 
@@ -118,7 +118,7 @@
 .live-tile-baseline {
     margin-top: 2px;
     font-size: 11px;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .live-tile-edit-row {
@@ -152,12 +152,12 @@
     gap: 4px;
     min-height: 64px;
     border-style: dashed;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--mat-sys-on-surface-variant);
     cursor: pointer;
 }
 
 .live-tile-add:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 4%, transparent);
 }
 
 .live-tile-add-editing {

@@ -34,7 +34,7 @@
     height: 18px;
     width: 18px;
     vertical-align: middle;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--mat-sys-on-surface-variant);
     cursor: help;
 }
 

@@ -22,7 +22,7 @@
     min-height: 80px;
     overflow: hidden;
     resize: vertical;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--mat-sys-outline-variant);
 }
 
 .code-editor-host {
@@ -93,5 +93,5 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #fafafa;
+    background-color: var(--mat-sys-surface-container-low);
 }

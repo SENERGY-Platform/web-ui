@@ -17,6 +17,7 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import type { Core, StylesheetJsonBlock } from 'cytoscape';
 import type { DagreLayoutOptions } from 'cytoscape-dagre';
+import { themeColor } from 'src/app/core/charts/theme-color';
 import type { CytoscapeFactory } from './environments-effects-cytoscape-loader';
 import { EffectsEdge, EffectsGraph, EffectsNode, EffectsResult, EffectsUnresolved } from '../../shared/environments.model';
 import {
@@ -42,7 +43,8 @@ import {
  * Node/edge look by kind, applied once per (re)built graph (see renderGraph) -- filtering
  * and search then only toggle the classes/display these rules key off, never rebuild this.
  */
-const EFFECTS_STYLESHEET: StylesheetJsonBlock[] = [
+// A function because the edge and label colours are read from the theme when the graph is created; node colours by type stay fixed.
+const effectsStylesheet = (): StylesheetJsonBlock[] => [
     {
         selector: 'node',
         style: {
@@ -82,14 +84,15 @@ const EFFECTS_STYLESHEET: StylesheetJsonBlock[] = [
         selector: 'edge',
         style: {
             width: 1.5,
-            'line-color': '#90a4ae',
-            'target-arrow-color': '#90a4ae',
+            'line-color': themeColor('--mat-sys-outline', '#90a4ae'),
+            'target-arrow-color': themeColor('--mat-sys-outline', '#90a4ae'),
             'target-arrow-shape': 'triangle',
             'arrow-scale': 0.8,
             'curve-style': 'bezier',
             label: '',
             'font-size': 8,
-            'text-background-color': '#ffffff',
+            color: themeColor('--mat-sys-on-surface', '#000000'),
+            'text-background-color': themeColor('--mat-sys-surface', '#ffffff'),
             'text-background-opacity': 1,
             'text-rotation': 'autorotate',
         },
@@ -98,8 +101,8 @@ const EFFECTS_STYLESHEET: StylesheetJsonBlock[] = [
     { selector: 'edge.effects-edge-writes', style: { 'line-color': '#66bb6a', 'target-arrow-color': '#66bb6a' } },
     { selector: 'edge.effects-edge-gates', style: { 'line-style': 'dashed', 'line-color': '#ab47bc', 'target-arrow-color': '#ab47bc' } },
     { selector: 'edge.effects-edge-scales', style: { 'line-style': 'dashed', 'line-color': '#ffa726', 'target-arrow-color': '#ffa726' } },
-    { selector: 'edge.effects-edge-submeters', style: { width: 1, 'line-color': '#bdbdbd', 'target-arrow-color': '#bdbdbd' } },
-    { selector: 'edge.effects-edge-aggregates', style: { width: 1, 'line-style': 'dotted', 'line-color': '#bdbdbd', 'target-arrow-color': '#bdbdbd' } },
+    { selector: 'edge.effects-edge-submeters', style: { width: 1, 'line-color': themeColor('--mat-sys-outline-variant', '#bdbdbd'), 'target-arrow-color': themeColor('--mat-sys-outline-variant', '#bdbdbd') } },
+    { selector: 'edge.effects-edge-aggregates', style: { width: 1, 'line-style': 'dotted', 'line-color': themeColor('--mat-sys-outline-variant', '#bdbdbd'), 'target-arrow-color': themeColor('--mat-sys-outline-variant', '#bdbdbd') } },
     { selector: 'edge.effects-edge-dated_change', style: { 'line-style': 'dashed', 'line-color': '#8d6e63', 'target-arrow-color': '#8d6e63' } },
     { selector: 'edge.effects-hover', style: { label: 'data(label)' } },
     { selector: 'edge.effects-dim', style: { opacity: 0.15 } },
@@ -289,7 +292,7 @@ export class EnvironmentsEffectsComponent implements OnChanges, AfterViewInit, O
             const cy = factory({
                 container: this.host.nativeElement,
                 elements: [...elements.nodes, ...elements.edges],
-                style: EFFECTS_STYLESHEET,
+                style: effectsStylesheet(),
                 layout,
                 minZoom: 0.05,
                 maxZoom: 3,

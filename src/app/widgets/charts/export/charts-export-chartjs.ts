@@ -18,6 +18,8 @@ import { ChartDataset } from 'chart.js';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
 import { format, Locale } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
+import { withOpacity } from 'src/app/core/charts/chart-look';
+import { themeColor } from 'src/app/core/charts/theme-color';
 import { ChartsExportVAxesModel } from './shared/charts-export-properties.model';
 import { describeBucketGap, findBucketGaps } from './chartjs-bucket-gaps';
 
@@ -304,7 +306,7 @@ export function periodAnnotations(
             annotations.push(
                 {
                     type: 'line',
-                    borderColor: 'rgba(0,0,0,0.5)',
+                    borderColor: withOpacity(themeColor('--mat-sys-on-surface', '#000000'), 0.5),
                     borderWidth: 1,
                     scaleID: 'x',
                     value: v,
@@ -343,7 +345,7 @@ export function gapAnnotations(times: number[], groupTime: string | null, marker
             rotation: 90,
             // the dashed line carries the signal; the text stays in the ink the axis labels use
             color: labelColor,
-            backgroundColor: 'rgba(255,255,255,0.8)',
+            backgroundColor: withOpacity(themeColor('--mat-sys-surface', '#ffffff'), 0.8),
             font: { size: 11, weight: 'normal' },
             padding: 4,
         },

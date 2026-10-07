@@ -24,11 +24,11 @@
 }
 
 .instance-row:not(.instance-row-expanded):hover {
-    background: rgba(0, 0, 0, 0.06);
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
 }
 
 .instance-row-expanded {
-    background: rgba(0, 0, 0, 0.03);
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 3%, transparent);
 }
 
 .instance-row-expanded td {
@@ -54,12 +54,12 @@
 .instance-detail-row.instance-detail-row-expanded td {
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    border-bottom-color: rgba(0, 0, 0, 0.12);
+    border-bottom-color: var(--mat-sys-outline-variant);
 }
 
 .instance-detail {
     overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.03);
+    background-color: color-mix(in srgb, var(--mat-sys-on-surface) 3%, transparent);
 }
 
 .instance-detail-content {

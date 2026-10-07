@@ -46,6 +46,6 @@
     font-size: 18px;
     height: 18px;
     width: 18px;
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--mat-sys-on-surface-variant);
     cursor: help;
 }

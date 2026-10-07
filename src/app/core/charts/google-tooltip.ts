@@ -17,6 +17,7 @@
 import { Chart, TooltipItem, TooltipModel } from 'chart.js';
 import { googleFont } from './google-look';
 import { textWidth } from './google-chartjs';
+import { themeColor } from './theme-color';
 
 /** One text run of a tooltip line. */
 export interface TooltipRun {
@@ -142,9 +143,9 @@ export function renderGoogleTooltip(parent: HTMLElement, offsetX: number, offset
     filter.appendChild(svgElement('feDropShadow', { dx: 1, dy: 1, stdDeviation: 1, 'flood-color': '#000', 'flood-opacity': 0.25 }));
     defs.appendChild(filter);
     svg.appendChild(defs);
-    svg.appendChild(svgElement('path', { d: box.path, stroke: '#cccccc', 'stroke-width': 1, fill: '#ffffff', filter: 'url(#' + shadowId + ')' }));
+    svg.appendChild(svgElement('path', { d: box.path, stroke: themeColor('--mat-sys-outline-variant', '#cccccc'), 'stroke-width': 1, fill: themeColor('--mat-sys-surface', '#ffffff'), filter: 'url(#' + shadowId + ')' }));
     view.lines.forEach((line, i) => {
-        const t = svgElement('text', { x: box.padding, y: box.baselines[i], 'font-family': googleFont, 'font-size': fontSize, fill: '#000000' });
+        const t = svgElement('text', { x: box.padding, y: box.baselines[i], 'font-family': googleFont, 'font-size': fontSize, fill: themeColor('--mat-sys-on-surface', '#000000') });
         line.forEach((run) => {
             const span = svgElement('tspan', run.bold ? { 'font-weight': 'bold' } : {});
             // spaces at run ends would collapse in SVG

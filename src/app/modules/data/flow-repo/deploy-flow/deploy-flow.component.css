@@ -19,9 +19,9 @@
 }
 
 mat-grid-tile-footer {
-    background-color: white !important;
+    background-color: var(--mat-sys-surface) !important;
     height: 68px !important;
-    color: black !important;
+    color: var(--mat-sys-on-surface) !important;
 }
 
 mat-grid-list {
@@ -113,7 +113,7 @@ mat-grid-list {
 }
 
 .operator-accordion {
-    border: 1px solid rgba(0,0,0,.12);
+    border: 1px solid var(--mat-sys-outline-variant);
     margin-bottom: 1em;
 }
 

@@ -19,7 +19,7 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  border: 2px dashed #ccc;
+  border: 2px dashed var(--mat-sys-outline-variant);
   padding: 1rem;
   margin-bottom: 1rem;
   border-radius: 10px;
@@ -57,7 +57,7 @@
 }
 
 .dot {
-  background-color: #bbb;
+  background-color: var(--mat-sys-outline-variant);
   border-radius: 50%;
   display: inline-block;
   position: absolute;

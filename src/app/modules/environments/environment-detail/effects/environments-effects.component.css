@@ -33,16 +33,16 @@
     flex: 1 1 auto;
     min-width: 0;
     height: 520px;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--mat-sys-outline-variant);
     border-radius: 4px;
-    background-color: #fafafa;
+    background-color: var(--mat-sys-surface-container-low);
 }
 
 .effects-side-panel {
     flex: 0 0 280px;
     max-height: 520px;
     overflow-y: auto;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--mat-sys-outline-variant);
     border-radius: 4px;
     padding: 12px;
     display: flex;
@@ -57,12 +57,12 @@
 
 .effects-side-panel-kind {
     margin: 0;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--mat-sys-on-surface-variant);
     text-transform: capitalize;
 }
 
 .effects-side-panel-empty {
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .effects-edge-groups h4 {
@@ -74,7 +74,7 @@
     margin-top: 8px;
     font-weight: 500;
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .effects-edge-neighbor {
@@ -86,14 +86,14 @@
     text-align: left;
     background: none;
     border: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
     padding: 4px 0;
     cursor: pointer;
     font: inherit;
 }
 
 .effects-edge-neighbor:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: color-mix(in srgb, var(--mat-sys-on-surface) 4%, transparent);
 }
 
 .effects-edge-neighbor-label {
@@ -102,12 +102,12 @@
 
 .effects-edge-detail {
     font-size: 11px;
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .effects-unresolved-panel {
     box-shadow: none;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--mat-sys-outline-variant);
 }
 
 .effects-unresolved-row {
@@ -116,7 +116,7 @@
     align-items: center;
     gap: 8px;
     padding: 4px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
 }
 
 .effects-unresolved-expression {
@@ -125,15 +125,15 @@
 
 .effects-unresolved-channel {
     font-size: 11px;
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .effects-unresolved-reason {
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .effects-hint {
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .effects-hint-error {

@@ -34,7 +34,7 @@ table {
 }
 
 .hub-selected {
-    background: rgba(0,0,0,.06);
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
 }
 
 .filter-chip-row {

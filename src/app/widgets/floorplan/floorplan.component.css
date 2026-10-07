@@ -42,7 +42,7 @@
 }
 
 .dot {
-    background-color: #bbb;
+    background-color: var(--mat-sys-outline-variant);
     border-radius: 50%;
     display: inline-block;
     position: absolute;
@@ -64,7 +64,7 @@
     max-width: 60%;
     overflow-y: auto;
     display: block;
-    background: white;
+    background: var(--mat-sys-surface);
     border-radius: 3px;
     padding: 3px;
     font-size: small;
@@ -102,7 +102,7 @@
 
 #chartjs-tooltip {
     text-align: left;
-    background: white;
+    background: var(--mat-sys-surface);
     position: absolute;
     padding: 3px;
     border-radius: 3px;
@@ -117,7 +117,7 @@
 
 /* a measurement that operates a control reads as a link, because that is what its value does */
 .value-link {
-    color: var(--mat-sys-primary, #3f51b5);
+    color: var(--mat-sys-primary);
     text-decoration: underline;
     cursor: pointer;
 }

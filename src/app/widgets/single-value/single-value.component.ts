@@ -118,7 +118,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     marginLeft = '0';
     private _svListIndex = 0;
     animationState = false;
-    highlightColor = 'black';
+    highlightColor = 'var(--mat-sys-on-surface)';
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;

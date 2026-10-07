@@ -45,7 +45,7 @@
 }
 
 .no-age {
-    color: grey;
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .age-okay {
@@ -78,18 +78,18 @@
 .arrow-left {
     position: fixed;
     top: 65%;
-    color: grey;
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .arrow-right {
     position: fixed;
     top: 65%;
     right: 32px;
-    color: grey;
+    color: var(--mat-sys-on-surface-variant);
 }
 
 
 
 .side-value {
-    color: grey;
+    color: var(--mat-sys-on-surface-variant);
 }

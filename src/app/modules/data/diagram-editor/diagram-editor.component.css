@@ -20,7 +20,7 @@
 }
 
 .diagramDiv {
-  border: 1px solid black;
+  border: 1px solid var(--mat-sys-on-surface);
   display: inline-block;
   vertical-align: top;
   width: 80%;
@@ -28,7 +28,7 @@
 }
 
 .paletteDiv {
-  border: 1px solid black;
+  border: 1px solid var(--mat-sys-on-surface);
   display: inline-block;
   vertical-align: top;
   width: 19%;

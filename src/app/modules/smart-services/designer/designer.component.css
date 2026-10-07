@@ -31,7 +31,7 @@
     bottom: 0;
     right: 0;
     z-index: 10;
-    border-left: 1px solid #ccc;
+    border-left: 1px solid var(--mat-sys-outline-variant);
     overflow: auto;
 }
 
@@ -61,8 +61,8 @@
     font-size: 12px;
     line-height: 15px;
     color: inherit;
-    background-color: #f8f8f8;
-    border: 1px solid #ccc;
+    background-color: var(--mat-sys-surface-container-low);
+    border: 1px solid var(--mat-sys-outline-variant);
     border-radius: 0;
 }
 

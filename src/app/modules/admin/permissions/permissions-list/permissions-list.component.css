@@ -52,15 +52,15 @@ mat-form-field {
 .search i {
     font-size: 1.5rem;
     margin-right: 20px;
-    color: grey;
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .search mat-card:hover {
-    background: white;
+    background: var(--mat-sys-surface);
 }
 
 .mat-mdc-raised-button {
-    color: white;
+    color: var(--mat-sys-on-primary);
 }
 
 .add div {
@@ -69,7 +69,7 @@ mat-form-field {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgb(68, 132, 206);
+    background: var(--mat-sys-primary);
     border-radius: 50%;
 }
 
@@ -78,7 +78,7 @@ mat-form-field {
     bottom: 30px;
     right: 40px;
     text-decoration: none;
-    color: white;
+    color: var(--mat-sys-on-primary);
 }
 
 .add {

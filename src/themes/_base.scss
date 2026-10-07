@@ -18,6 +18,7 @@
 @use '@angular/material/core/style/elevation';
 @use '@ng-matero/extensions' as mtx;
 @use 'designer-panel';
+@use 'palette-neutral';
 
 // The theme shared by all tenants. A tenant passes its tonal palettes: the brand colour is the
 // primary palette (templates still say color="accent"), the sidenav colour the tertiary one.
@@ -25,6 +26,11 @@
 // $theme-type is light, dark or color-scheme (follows the system); only light is used so far.
 @mixin theme($primary, $tertiary, $brand, $sidenav, $on-brand: #ffffff, $warn: #ce612e,
              $utility-text-important: true, $theme-type: light) {
+  // Grey neutrals instead of the brand-tinted ones the schematic generates.
+  $greys: (neutral: palette-neutral.$neutral, neutral-variant: palette-neutral.$neutral-variant);
+  $primary: map.merge($primary, $greys);
+  $tertiary: map.merge($tertiary, $greys);
+
   html {
     @if $theme-type == color-scheme {
       color-scheme: light dark;
@@ -49,6 +55,13 @@
     --mat-sys-on-error: #ffffff;
     --mat-sys-background: #ffffff;
     --mat-sys-surface: #ffffff;
+
+    // State colours stay the same in every theme; used by pipeline and import status chips, fault highlights and validation hints.
+    --app-status-ok: #008700;
+    --app-status-failed: #db0000;
+    --app-status-warning: yellow;
+    --app-status-unknown: grey;
+    --app-status-error: #f44336;
 
     // Buttons without color= had dark text in the old theme; M3 gives them the primary colour.
     @include mat.button-overrides((

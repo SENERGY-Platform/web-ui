@@ -51,6 +51,6 @@ mat-form-field {
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    color: #f44336;
+    color: var(--app-status-error);
     margin-top: 12px;
 }

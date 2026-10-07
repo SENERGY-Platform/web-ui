@@ -30,8 +30,8 @@
     margin-top: -10px;
     margin-left: -10px;
     border-radius: 50%;
-    border: 2px solid #ffffff;
-    border-top-color: #000000;
+    border: 2px solid var(--mat-sys-surface);
+    border-top-color: var(--mat-sys-on-surface);
     animation: spinner .8s linear infinite;
 }
 
@@ -85,12 +85,12 @@
 }
 
 .location-edit-container ::ng-deep .mat-step-header .mat-step-icon-selected {
-    background-color: #4484ce; /* cc */
-    color: white;
+    background-color: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
 }
 
 .location-edit-container ::ng-deep .mat-stepper-horizontal, .mat-stepper-vertical {
-    background-color: #fafafa;
+    background-color: var(--mat-sys-surface-container-low);
 }
 
 .form {

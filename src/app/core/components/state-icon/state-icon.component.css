@@ -28,5 +28,5 @@
 }
 
 .inactive {
-    color: grey
+    color: var(--mat-sys-on-surface-variant)
 }
